@@ -1,0 +1,154 @@
+{
+    "type": "pushdown",
+    "pushdownRequest": {
+        "type" : "select",
+        "aggregationType" : "group_by",
+        "from" :
+        {
+            "type" : "table",
+            "name" : "CLICKS"
+        },
+        "selectList" :
+        [
+            {
+                "type" : "column",
+                "name" : "USER_ID",
+                "columnNr" : 1,
+                "tableName" : "CLICKS"
+            },
+            {
+                "type" : "function_aggregate",
+                "name" : "count",
+                "arguments" :
+                [
+                    {
+                        "type" : "column",
+                        "name" : "URL",
+                        "columnNr" : 2,
+                        "tableName" : "CLICKS"
+                    }
+                ]
+            }
+        ],
+        "filter" :
+        {
+            "type" : "predicate_less",
+            "left" :
+            {
+                "type" : "literal_exactnumeric",
+                "value" : "1"
+            },
+            "right" :
+            {
+                "type" : "column",
+                "name" : "USER_ID",
+                "columnNr" : 1,
+                "tableName" : "CLICKS"
+            }
+        },
+        "groupBy" :
+        [
+            {
+                "type" : "column",
+                "name" : "USER_ID",
+                "columnNr" : 1,
+                "tableName" : "CLICKS"
+            }
+        ],
+        "having" :
+        {
+            "type" : "predicate_less",
+            "left" :
+            {
+                "type" : "literal_exactnumeric",
+                "value" : "1"
+            },
+            "right" :
+            {
+                "type" : "function_aggregate",
+                "name" : "count",
+                "arguments" :
+                [
+                    {
+                        "type" : "column",
+                        "name" : "URL",
+                        "columnNr" : 2,
+                        "tableName" : "CLICKS"
+                    }
+                ]
+            }
+        },
+        "orderBy" :
+        [
+            {
+                "type" : "order_by_element",
+                "expression" :
+                {
+                    "columnNr" : 1,
+                    "name" : "USER_ID",
+                    "tableName" : "CLICKS",
+                    "type" : "column"
+                },
+                "isAscending" : true,
+                "nullsLast" : true
+            }
+        ],
+        "limit" :
+        {
+            "numElements" : 10
+        }
+    },
+    "involvedTables": [
+    {
+        "name" : "CLICKS",
+        "columns" :
+        [
+            {
+                "name" : "ID",
+                "dataType" :
+                {
+                    "precision" : 22,
+                    "scale" : 0,
+                    "type" : "DECIMAL"
+                }
+            },
+            {
+                "name" : "USER_ID",
+                "dataType" :
+                {
+                    "precision" : 18,
+                    "scale" : 0,
+                    "type" : "DECIMAL"
+                }
+            },
+            {
+                "name" : "URL",
+                "dataType" :
+                {
+                    "size" : 1000,
+                    "type" : "VARCHAR"
+                }
+            },
+            {
+                "name" : "REQUEST_TIME",
+                "dataType" :
+                {
+                    "type" : "TIMESTAMP"
+                }
+            }
+        ]
+    }
+    ],
+    "schemaMetadataInfo": {
+        "name": "MY_HIVE_VSCHEMA",
+        "adapterNotes": {
+            "lastRefreshed": "2015-03-01 12:10:01",
+            "key": "Any custom schema state here"
+        },
+        "properties": {
+            "HIVE_SERVER": "my-hive-server",
+            "HIVE_DB": "my-hive-db",
+            "HIVE_USER": "my-hive-user"
+        }
+    }
+}

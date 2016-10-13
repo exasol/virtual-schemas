@@ -1,0 +1,14 @@
+/target/
+
+# Eclipse and Maven
+.classpath
+.project
+.settings
+target
+.cache
+
+# Intellij
+.idea
+# Intellij recommends to share iml files, however, better don't share files which might be outdated
+*.iml
+ 

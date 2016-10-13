@@ -1,0 +1,154 @@
+{
+    "type": "pushdown",
+    "pushdownRequest": {
+        "type" : "select",
+        "from" :
+        {
+            "type" : "table",
+            "name" : "T1"
+        }
+    },
+    "involvedTables": [
+    {
+        "name": "T1",
+        "columns": [
+        {
+            "name": "C_DECIMAL",
+            "dataType": {
+                "type": "DECIMAL",
+                "precision": 18,
+                "scale": 2
+            }
+        },
+        {
+            "name": "C_DOUBLE",
+            "dataType": {
+                "type": "DOUBLE"
+            }
+        },
+        {
+            "name": "C_VARCHAR_UTF8_1",
+            "dataType": {
+                "type": "VARCHAR",
+                "size": 10000,
+                "characterSet": "UTF8"
+            }
+        },
+        {
+            "name": "C_VARCHAR_UTF8_2",
+            "dataType": {
+                "type": "VARCHAR",
+                "size": 10000
+            }
+        },
+        {
+            "name": "C_VARCHAR_ASCII",
+            "dataType": {
+                "type": "VARCHAR",
+                "size": 10000,
+                "characterSet": "ASCII"
+            }
+        },
+        {
+            "name": "C_CHAR_UTF8_1",
+            "dataType": {
+                "type": "CHAR",
+                "size": 3
+            }
+        },
+        {
+            "name": "C_CHAR_UTF8_2",
+            "dataType": {
+                "type": "CHAR",
+                "size": 3,
+                "characterSet": "UTF8"
+            }
+        },
+        {
+            "name": "C_CHAR_ASCII",
+            "dataType": {
+                "type": "CHAR",
+                "size": 3,
+                "characterSet": "ASCII"
+            }
+        },
+        {
+            "name": "C_DATE",
+            "dataType": {
+                "type": "DATE"
+            }
+        },
+        {
+            "name": "C_TIMESTAMP_1",
+            "dataType": {
+                "type": "TIMESTAMP"
+            }
+        },
+        {
+            "name": "C_TIMESTAMP_2",
+            "dataType": {
+                "type": "TIMESTAMP",
+                "withLocalTimeZone": false
+            }
+        },
+        {
+            "name": "C_TIMESTAMP_3",
+            "dataType": {
+                "type": "TIMESTAMP",
+                "withLocalTimeZone": true
+            }
+        },
+        {
+            "name": "C_BOOLEAN",
+            "dataType": {
+                "type": "BOOLEAN"
+            }
+        },
+        {
+            "name": "C_GEOMETRY",
+            "dataType": {
+                "type": "GEOMETRY",
+                "srid": 1
+            }
+        },
+        {
+            "name": "C_INTERVAL_DS_1",
+            "dataType": {
+                "type": "INTERVAL",
+                "fromTo": "DAY TO SECONDS"
+            }
+        },
+        {
+            "name": "C_INTERVAL_DS_2",
+            "dataType": {
+                "type": "INTERVAL",
+                "fromTo": "DAY TO SECONDS",
+                "precision": 3,
+                "fraction": 4
+            }
+        },
+        {
+            "name": "C_INTERVAL_YM_1",
+            "dataType": {
+                "type": "INTERVAL",
+                "fromTo": "YEAR TO MONTH"
+            }
+        },
+        {
+            "name": "C_INTERVAL_YM_2",
+            "dataType": {
+                "type": "INTERVAL",
+                "fromTo": "YEAR TO MONTH",
+                "precision": 3
+            }
+        }
+        ]
+    }
+    ],
+    "schemaMetadataInfo": {
+        "name": "VS",
+        "adapterNotes": "",
+        "properties": {
+        }
+    }
+}

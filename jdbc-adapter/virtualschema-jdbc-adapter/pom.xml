@@ -1,0 +1,124 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.exasol</groupId>
+		<artifactId>virtualschema-jdbc-adapter-main</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+	<artifactId>virtualschema-jdbc-adapter</artifactId>
+    
+    <properties>
+        <surefire.and.failsafe.plugin.version>2.19.1</surefire.and.failsafe.plugin.version>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>it</id>
+            <dependencies>
+            </dependencies>
+            <!--
+            <properties>
+                <skip.integration.tests>false</skip.integration.tests>
+            </properties>
+            -->
+            <properties>
+                <!-- This property has to be overwritten from user -->
+                <integrationtest.configfile></integrationtest.configfile>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${surefire.and.failsafe.plugin.version}</version>
+                        <configuration>
+                            <includes>
+                                <include>**/*IT.java</include>
+                            </includes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>failsafe-integration-tests</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                            <!-- verify phase verifies the results. Must be added so 
+                                that failing integration tests are not ignored. -->
+                            <execution>
+                                <id>verify</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.5.0</version>
+                        <executions>
+                            <execution>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>   <!-- Setting "java" here would make it run in the same JVM as Maven -->
+                                </goals>
+                                <configuration>
+                                    <classpathScope>test</classpathScope> <!-- The class we want to load is in the test folder, so we need to set this to have test classes in the classpath -->
+                                    <executable>java</executable>
+                                    <arguments>
+                                        <argument>-classpath</argument>
+                                        <!-- automatically creates the classpath using all project dependencies,
+                                             also adding the project build directory -->
+                                        <classpath/>
+                                        <argument>com.exasol.adapter.dialects.IntegrationTestSetup</argument>
+                                        <argument>${project.version}</argument>
+                                        <argument>${integrationtest.configfile}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.exasol</groupId>
+			<artifactId>virtualschema-common</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+        <!-- We need this only for the integration test profile, however without adding it here you would have to enable the profile in the IDE to have the dependency -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.17</version>
+            <scope>integration-test</scope>
+        </dependency>
+        <!-- The EXASOL jdbc driver is only needed for verify scope, however we add it always so that you can always create virtual schemas to an EXASOL -->
+        <dependency>
+            <!-- <scope>verify</scope> -->
+            <groupId>com.exasol</groupId>
+            <artifactId>exasol-jdbc</artifactId>
+            <version>6.0-SNAPSHOT</version>
+        </dependency>
+	</dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.and.failsafe.plugin.version}</version>
+            </plugin>
+        </plugins>
+    </build>
+    
+</project>

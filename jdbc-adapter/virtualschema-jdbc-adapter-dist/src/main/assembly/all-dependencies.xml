@@ -1,0 +1,39 @@
+<assembly
+	xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0
+http://maven.apache.org/xsd/assembly-1.1.0.xsd">
+	<id>all-dependencies</id>
+	<formats>
+		<format>jar</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<!-- There is a bug caused by maven assembly. See http://stackoverflow.com/questions/17265002/hadoop-no-filesystem-for-scheme-file 
+		and https://jira.codehaus.org/browse/MASSEMBLY-209 -->
+	<containerDescriptorHandlers>
+		<containerDescriptorHandler>
+			<handlerName>metaInf-services</handlerName>
+		</containerDescriptorHandler>
+	</containerDescriptorHandlers>
+	<!-- For documentation see http://maven.apache.org/plugins/maven-assembly-plugin/assembly.html#class_dependencySet -->
+	<dependencySets>
+		<dependencySet>
+			<unpack>true</unpack>
+			<scope>runtime</scope>
+			<outputDirectory>/</outputDirectory>
+			<!-- Maybe useProjectArtifact also excludes the classes of this project 
+				(no need to exclude then) -->
+			<!-- <useProjectArtifact>false</useProjectArtifact> -->
+			<!-- Does not support wildcards according to http://maven.apache.org/plugins/maven-assembly-plugin/examples/single/including-and-excluding-artifacts.html -->
+			<!-- 
+			<excludes>
+				<exclude>com.exasol:jdbc-adapter</exclude>
+			</excludes>
+			-->
+		</dependencySet>
+	</dependencySets>
+	<!-- Here we don't include anything except the dependencies (above) -->
+	<!-- <fileSets> <fileSet> <directory>${basedir}/target/classes</directory> 
+		<outputDirectory>/</outputDirectory> <excludes> <exclude>*.jar</exclude> 
+		</excludes> </fileSet> </fileSets> -->
+</assembly>

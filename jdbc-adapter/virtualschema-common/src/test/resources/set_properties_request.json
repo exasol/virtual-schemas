@@ -1,0 +1,16 @@
+{
+    "properties": {
+        "EXISTING_PROP_1": "New Value",
+        "EXISTING_PROP_2": null,
+        "NEW_PROP": "VAL2",
+        "DELETED_PROP_NON_EXISTING": null
+    },
+    "type": "setProperties",
+    "schemaMetadataInfo": {
+        "name": "VS",
+        "properties": {
+            "EXISTING_PROP_1": "Old Value 1",
+            "EXISTING_PROP_2": "Old Value 2"
+        }
+    }
+}
