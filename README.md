@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/EXASOL/virtual-schemas.svg?branch=master)](https://travis-ci.org/EXASOL/virtual-schemas)
 
+###### Please note that this is an open source project which is officially supported by EXASOL. For any question, you can contact our support team.
+
 Virtual schemas provide a powerful abstraction to conveniently access arbitrary data sources. Virtual schemas are a kind of read-only link to an external source and contain virtual tables which look like regular tables except that the actual data are not stored locally.
 
 After creating a virtual schema, its included tables can be used in SQL queries and even combined with persistent tables stored directly in EXASOL, or with other virtual tables from other virtual schemas. The SQL optimizer internally translates the virtual objects into connections to the underlying systems and implicitly transfers the necessary data. SQL conditions are tried to be pushed down to the data sources to ensure minimal data transfer and optimal performance.
