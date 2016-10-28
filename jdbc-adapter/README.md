@@ -52,7 +52,9 @@ CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
 
 
 ## Using the Adapter
-Create a virtual schema:
+The following statements demonstrate how you can use the JDBC adapter and virtual schemas. Please scroll down to see a list of all properties supported by the JDBC adapter. Please also consult the user manual for a in-depth introduction to virtual schemas.
+
+Create a virtual schema using the JDBC adapter. This will retrieve and cache the metadata via JDBC.
 ```sql
 CREATE CONNECTION hive_conn TO 'jdbc:hive2://localhost:10000/default' USER 'hive-usr' IDENTIFIED BY 'hive-pwd';
 
@@ -62,20 +64,25 @@ CREATE VIRTUAL SCHEMA hive USING adapter.jdbc_adapter WITH
   SCHEMA_NAME     = 'default';
 ```
 
-Explore the virtual schema:
+Explore the tables in the virtual schema:
 ```sql
 OPEN SCHEMA hive;
 SELECT * FROM cat;
 DESCRIBE clicks;
 ```
 
-Run queries:
+Run queries on the virtual tables:
 ```sql
 SELECT count(*) FROM clicks;
 SELECT DISTINCT USER_ID FROM clicks;
 ```
 
-Or refresh the schemas metadata, e.g. if tables were added in the remote system:
+Combine virtual and native tables in a query:
+```
+SELECT * from clicks JOIN native_schema.users on clicks.userid = users.id;
+```
+
+You can refresh the schemas metadata, e.g. if tables were added in the remote system:
 ```sql
 ALTER VIRTUAL SCHEMA hive REFRESH;
 ALTER VIRTUAL SCHEMA hive REFRESH TABLES t1 t2; -- refresh only these tables
