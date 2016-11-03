@@ -2,12 +2,15 @@ package com.exasol.adapter.sql;
 
 import com.exasol.adapter.metadata.DataType;
 
+import java.util.List;
+
 public class SqlFunctionScalarCast extends SqlNode {
     private DataType dataType;
-    private SqlNode expression;
+    private List<SqlNode> arguments;
 
-    public SqlFunctionScalarCast(DataType dataType, SqlNode expression) {
-        this.expression = expression;
+    public SqlFunctionScalarCast(DataType dataType, List<SqlNode> arguments) {
+        assert(arguments.size() == 1);
+        this.arguments = arguments;
         this.dataType = dataType;
     }
 
@@ -16,13 +19,14 @@ public class SqlFunctionScalarCast extends SqlNode {
     }
 
 
-    public SqlNode getExpression() {
-        return expression;
+    public List<SqlNode> getArguments() {
+        return arguments;
     }
     
     @Override
     public String toSimpleSql() {
-        return "CAST (" + expression.toSimpleSql() + " AS " + getDataType().toString() + ")";
+        assert(arguments.size() == 1 && arguments.get(0) != null);
+        return "CAST (" + arguments.get(0).toSimpleSql() + " AS " + getDataType().toString() + ")";
     }
 
     @Override

@@ -201,7 +201,7 @@ public class AbstractIntegrationTest {
     public static void matchSingleRowExplain(Connection conn, String query, String expectedExplain) throws SQLException {
         ResultSet result = conn.createStatement().executeQuery("EXPLAIN VIRTUAL " + query);
         result.next();
-        assertEquals(expectedExplain, extractStatementFromImport(result.getString("PUSHDOWN_SQL")));
+        assertEquals(expectedExplain, result.getString("PUSHDOWN_SQL"));
         assertEquals(false, result.next());
     }
 

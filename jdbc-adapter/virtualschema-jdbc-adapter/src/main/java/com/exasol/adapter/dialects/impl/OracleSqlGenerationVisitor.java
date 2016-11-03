@@ -216,7 +216,8 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         StringBuilder builder = new StringBuilder();
         builder.append("LISTAGG");
         builder.append("(");
-        String expression = function.getConcatExpression().accept(this);
+        assert(function.getArguments().size() == 1 && function.getArguments().get(0) != null);
+        String expression = function.getArguments().get(0).accept(this);
         builder.append(expression);
         builder.append(", ");
         String separator = ",";
@@ -227,16 +228,18 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         builder.append(separator);
         builder.append("') ");
         builder.append("WITHIN GROUP(ORDER BY ");
-        if (function.getOrderByExpressions().size() > 0) {
-            for (int i = 0; i < function.getOrderByExpressions().size(); i++) {
+        if (function.getOrderBy() != null
+                && function.getOrderBy().getExpressions() != null
+                && function.getOrderBy().getExpressions().size() > 0) {
+            for (int i = 0; i < function.getOrderBy().getExpressions().size(); i++) {
                 if (i > 0) {
                     builder.append(", ");
                 }
-                builder.append(function.getOrderByExpressions().get(i).accept(this));
-                if (!function.getAscendingOrderList().get(i)) {
+                builder.append(function.getOrderBy().getExpressions().get(i).accept(this));
+                if (!function.getOrderBy().isAscending().get(i)) {
                     builder.append(" DESC");
                 }
-                if (function.getNullsFirstOrderList().get(i)) {
+                if (!function.getOrderBy().nullsLast().get(i)) {
                     builder.append(" NULLS FIRST");
                 }
             }

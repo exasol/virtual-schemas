@@ -160,24 +160,14 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         if (function.hasDistinct()) {
             builder.append("DISTINCT ");
         }
-        builder.append(function.getConcatExpression().accept(this));
-        if (function.getOrderByExpressions().size() > 0) {
-            builder.append(" ORDER BY ");
-            for (int i = 0; i < function.getOrderByExpressions().size(); i++) {
-                if (i > 0) {
-                    builder.append(", ");
-                }
-                builder.append(function.getOrderByExpressions().get(i).accept(this));
-                boolean shallNullsBeAtTheEnd = !function.getNullsFirstOrderList().get(i);
-                boolean isAscending = function.getAscendingOrderList().get(i);
-                if (isAscending == false) {
-                    builder.append(" DESC");
-                }
-                if (shallNullsBeAtTheEnd != nullsAreAtEndByDefault(isAscending, dialect.getDefaultNullSorting())) {
-                    // we have to specify null positioning explicitly, otherwise it would be wrong
-                    builder.append(shallNullsBeAtTheEnd ? " NULLS LAST" : " NULLS FIRST");
-                }
-            }
+        assert(function.getArguments().size() == 1 && function.getArguments().get(0) != null);
+        builder.append(function.getArguments().get(0).accept(this));
+        if (function.getOrderBy() != null
+                && function.getOrderBy().getExpressions() != null
+                && function.getOrderBy().getExpressions().size() > 0) {
+            builder.append(" ");
+            String orderByString = function.getOrderBy().accept(this);
+            builder.append(orderByString);
         }
         if (function.getSeparator() != null) {
             builder.append(" SEPARATOR ");
@@ -251,10 +241,12 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
 
     @Override
     public String visit(SqlFunctionScalarCast function) {
+
         StringBuilder builder = new StringBuilder();
         builder.append("CAST");
         builder.append("(");
-        builder.append(function.getExpression().accept(this));
+        assert(function.getArguments().size() == 1 && function.getArguments().get(0) != null);
+        builder.append(function.getArguments().get(0).accept(this));
         builder.append(" AS ");
         builder.append(function.getDataType());
         builder.append(")");
@@ -263,7 +255,8 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
 
     @Override
     public String visit(SqlFunctionScalarExtract function) {
-        String expression = function.getExpression().accept(this);
+        assert(function.getArguments().size() == 1 && function.getArguments().get(0) != null);
+        String expression = function.getArguments().get(0).accept(this);
         return function.getFunctionName() + "(" + function.getDateTime() + " FROM "+ expression + ")";
     }
 

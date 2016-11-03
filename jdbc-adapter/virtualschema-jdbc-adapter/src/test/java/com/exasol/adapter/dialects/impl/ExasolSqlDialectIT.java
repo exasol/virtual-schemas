@@ -114,6 +114,15 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
                 " (3, 'b')," +
                 " (1, null)," +
                 " (null, 'c')");
+        stmt.execute("CREATE TABLE SIMPLE_VALUES (a int, b varchar(100), c double)");
+        stmt.execute("INSERT INTO SIMPLE_VALUES VALUES " +
+                " (1, 'a', 1.1)," +
+                " (2, 'b', 2.2)," +
+                " (3, 'c', 3.3)," +
+                " (1, 'd', 4.4)," +
+                " (2, 'e', 5.5)," +
+                " (3, 'f', 6.6)," +
+                " (null, null, null)");
 
         // Create schema, table and column with mixed case identifiers (to test correct mapping, and correct sql generation of adapter)
         stmt.execute("DROP SCHEMA IF EXISTS \"" + testSchemaMixedCase + "\" CASCADE");
@@ -183,6 +192,106 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         thrown.expect(SQLException.class);
         thrown.expectMessage("object COLUMN1 not found");
         executeQuery("SELECT Column1, column2, COLUMN3 FROM \"Table_Mixed_Case\"");
+    }
+
+    @Test
+    public void testGroupConcat() throws SQLException, FileNotFoundException {
+        String query = "SELECT GROUP_CONCAT(A) FROM " + virtualSchema + ".SIMPLE_VALUES";
+        ResultSet result = executeQuery(query);
+        matchLastRow(result, "1,1,2,2,3,3");
+        matchSingleRowExplain(query, "SELECT GROUP_CONCAT(A) FROM " + testSchema + ".SIMPLE_VALUES");
+        query = "SELECT GROUP_CONCAT(DISTINCT A) FROM " + virtualSchema + ".SIMPLE_VALUES";
+        result = executeQuery(query);
+        matchLastRow(result, "1,2,3");
+        matchSingleRowExplain(query, "SELECT GROUP_CONCAT(DISTINCT A) FROM " + testSchema + ".SIMPLE_VALUES");
+        query = "SELECT GROUP_CONCAT(A ORDER BY C) FROM " + virtualSchema + ".SIMPLE_VALUES";
+        result = executeQuery(query);
+        matchLastRow(result, "1,2,3,1,2,3");
+        matchSingleRowExplain(query, "SELECT GROUP_CONCAT(A ORDER BY C) FROM " + testSchema + ".SIMPLE_VALUES");
+        query = "SELECT GROUP_CONCAT(A ORDER BY C DESC) FROM " + virtualSchema + ".SIMPLE_VALUES";
+        result = executeQuery(query);
+        matchLastRow(result, "3,2,1,3,2,1");
+        matchSingleRowExplain(query, "SELECT GROUP_CONCAT(A ORDER BY C DESC) FROM " + testSchema + ".SIMPLE_VALUES");
+        query = "SELECT GROUP_CONCAT(A ORDER BY C DESC NULLS LAST) FROM " + virtualSchema + ".SIMPLE_VALUES";
+        result = executeQuery(query);
+        matchLastRow(result, "3,2,1,3,2,1");
+        matchSingleRowExplain(query, "SELECT GROUP_CONCAT(A ORDER BY C DESC NULLS LAST) FROM " + testSchema + ".SIMPLE_VALUES");
+        query = "SELECT GROUP_CONCAT(A SEPARATOR ';'||' ')  FROM " + virtualSchema + ".SIMPLE_VALUES";
+        result = executeQuery(query);
+        matchLastRow(result, "1; 1; 2; 2; 3; 3");
+        matchSingleRowExplain(query, "SELECT GROUP_CONCAT(A SEPARATOR '; ') FROM " + testSchema + ".SIMPLE_VALUES");
+    }
+
+    @Test
+    public void testExtract() throws SQLException, FileNotFoundException {
+        String query = "SELECT EXTRACT(MONTH FROM C9) FROM " + virtualSchema + ".ALL_EXA_TYPES";
+        ResultSet result = executeQuery(query);
+        matchLastRow(result, (short)8);
+        matchSingleRowExplain(query, "SELECT EXTRACT(MONTH FROM C9) FROM " + testSchema + ".ALL_EXA_TYPES");
+        query = "SELECT EXTRACT(MONTH FROM C12) FROM " + virtualSchema + ".ALL_EXA_TYPES";
+        result = executeQuery(query);
+        matchLastRow(result, (short)6);
+        matchSingleRowExplain(query, "SELECT EXTRACT(MONTH FROM C12) FROM " + testSchema + ".ALL_EXA_TYPES");
+    }
+
+    @Test
+    public void testCast() throws SQLException, FileNotFoundException {
+        String query = "SELECT CAST(A AS CHAR(15)) FROM " + virtualSchema + ".SIMPLE_VALUES";
+        ResultSet result = executeQuery(query);
+        matchNextRow(result, "1              ");
+        matchSingleRowExplain(query, "SELECT CAST(A AS CHAR(15) UTF8) FROM " + testSchema + ".SIMPLE_VALUES");
+        query = "SELECT CAST(CAST(A > 0 AS VARCHAR(15)) AS BOOLEAN) FROM " + virtualSchema + ".SIMPLE_VALUES";
+        result = executeQuery(query);
+        matchNextRow(result, true);
+        matchSingleRowExplain(query, "SELECT CAST(CAST(0 < A AS VARCHAR(15) UTF8) AS BOOLEAN) FROM " + testSchema + ".SIMPLE_VALUES");
+        query = "SELECT CAST(CAST(C9 AS VARCHAR(30)) AS DATE) FROM " + virtualSchema + ".ALL_EXA_TYPES";
+        result = executeQuery(query);
+        matchNextRow(result, getSqlDate(2016, 8, 1));
+        matchSingleRowExplain(query, "SELECT CAST(CAST(C9 AS VARCHAR(30) UTF8) AS DATE) FROM " + testSchema + ".ALL_EXA_TYPES");
+        query = "SELECT CAST(CAST(A AS VARCHAR(15)) AS DECIMAL(8, 1)) FROM " + virtualSchema + ".SIMPLE_VALUES";
+        result = executeQuery(query);
+        matchNextRow(result, new BigDecimal("1.0"));
+        matchSingleRowExplain(query, "SELECT CAST(CAST(A AS VARCHAR(15) UTF8) AS DECIMAL(8, 1)) FROM " + testSchema + ".SIMPLE_VALUES");
+        query = "SELECT CAST(CAST(C AS VARCHAR(15)) AS DOUBLE) FROM " + virtualSchema + ".SIMPLE_VALUES";
+        result = executeQuery(query);
+        matchNextRow(result, 1.1d);
+        matchSingleRowExplain(query, "SELECT CAST(CAST(C AS VARCHAR(15) UTF8) AS DOUBLE) FROM " + testSchema + ".SIMPLE_VALUES");
+        query = "SELECT CAST(CAST(C14 AS VARCHAR(100)) AS GEOMETRY(5)) FROM " + virtualSchema + ".ALL_EXA_TYPES";
+        result = executeQuery(query);
+        matchNextRow(result, "POINT (2 5)");
+        matchSingleRowExplain(query, "SELECT CAST(CAST(C14 AS VARCHAR(100) UTF8) AS GEOMETRY(5)) FROM " + testSchema + ".ALL_EXA_TYPES");
+        query = "SELECT CAST(CAST(C13 AS VARCHAR(100)) AS INTERVAL DAY (5) TO SECOND (2)) FROM " + virtualSchema + ".ALL_EXA_TYPES";
+        result = executeQuery(query);
+        matchNextRow(result, "+00003 12:50:10.12");
+        matchSingleRowExplain(query, "SELECT CAST(CAST(C13 AS VARCHAR(100) UTF8) AS INTERVAL DAY (5) TO SECOND (2)) FROM " + testSchema + ".ALL_EXA_TYPES");
+        query = "SELECT CAST(CAST(C12 AS VARCHAR(100)) AS INTERVAL YEAR (5) TO MONTH) FROM " + virtualSchema + ".ALL_EXA_TYPES";
+        result = executeQuery(query);
+        matchNextRow(result, "+00004-06");
+        matchSingleRowExplain(query, "SELECT CAST(CAST(C12 AS VARCHAR(100) UTF8) AS INTERVAL YEAR (5) TO MONTH) FROM " + testSchema + ".ALL_EXA_TYPES");
+        query = "SELECT CAST(CAST(C10 AS VARCHAR(100)) AS TIMESTAMP) FROM " + virtualSchema + ".ALL_EXA_TYPES";
+        result = executeQuery(query);
+        matchNextRow(result, getSqlTimestamp(2016,8,1,0,0,1,0));
+        matchSingleRowExplain(query, "SELECT CAST(CAST(C10 AS VARCHAR(100) UTF8) AS TIMESTAMP) FROM " + testSchema + ".ALL_EXA_TYPES");
+        query = "SELECT CAST(CAST(C11 AS VARCHAR(100)) AS TIMESTAMP WITH LOCAL TIME ZONE) FROM " + virtualSchema + ".ALL_EXA_TYPES";
+        result = executeQuery(query);
+        matchNextRow(result,getSqlTimestamp(2016,8,1,0,0,2,0));
+        matchSingleRowExplain(query, "SELECT CAST(CAST(C11 AS VARCHAR(100) UTF8) AS TIMESTAMP WITH LOCAL TIME ZONE) FROM " + testSchema + ".ALL_EXA_TYPES");
+        query = "SELECT CAST(A AS VARCHAR(15)) FROM " + virtualSchema + ".SIMPLE_VALUES";
+        result = executeQuery(query);
+        matchNextRow(result, "1");
+        matchSingleRowExplain(query, "SELECT CAST(A AS VARCHAR(15) UTF8) FROM " + testSchema + ".SIMPLE_VALUES");
+    }
+
+    @Test
+    public void testCase() throws SQLException, FileNotFoundException {
+        String query = "SELECT CASE A WHEN 1 THEN 'YES' WHEN 2 THEN 'PERHAPS' ELSE 'NO' END FROM " + virtualSchema + ".SIMPLE_VALUES";
+        ResultSet result = executeQuery(query);
+        matchNextRow(result, "YES");
+        matchSingleRowExplain(query, "SELECT CASE A WHEN 1 THEN 'YES' WHEN 2 THEN 'PERHAPS' ELSE 'NO' END FROM " + testSchema + ".SIMPLE_VALUES");
+        query = "SELECT CASE WHEN A > 1 THEN 'YES' ELSE 'NO' END FROM " + virtualSchema + ".SIMPLE_VALUES";
+        result = executeQuery(query);
+        matchNextRow(result, "NO");
+        matchSingleRowExplain(query, "SELECT CASE WHEN 1 < A THEN 'YES' ELSE 'NO' END FROM " + testSchema + ".SIMPLE_VALUES");
     }
 
     /**

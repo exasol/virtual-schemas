@@ -1,11 +1,14 @@
 package com.exasol.adapter.sql;
 
+import java.util.List;
+
 public class SqlFunctionScalarExtract extends SqlNode {
     private String dateTime;
-    private SqlNode expression;
+    private List<SqlNode> arguments;
 
-    public SqlFunctionScalarExtract(String dateTime, SqlNode expression) {
-        this.expression = expression;
+    public SqlFunctionScalarExtract(String dateTime, List<SqlNode> arguments) {
+        assert(arguments.size() == 1);
+        this.arguments = arguments;
         this.dateTime = dateTime;
     }
 
@@ -14,13 +17,14 @@ public class SqlFunctionScalarExtract extends SqlNode {
     }
 
 
-    public SqlNode getExpression() {
-        return expression;
+    public List<SqlNode> getArguments() {
+        return arguments;
     }
     
     @Override
     public String toSimpleSql() {
-        return "EXTRACT (" + dateTime + " FROM " + expression.toSimpleSql() + ")";
+        assert(arguments.size() == 1 && arguments.get(0) != null);
+        return "EXTRACT (" + dateTime + " FROM " + arguments.get(0).toSimpleSql() + ")";
     }
 
     @Override
