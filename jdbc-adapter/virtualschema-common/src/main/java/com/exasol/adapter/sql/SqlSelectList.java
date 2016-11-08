@@ -17,7 +17,7 @@ public class SqlSelectList extends SqlExpressionList {
     /**
      * Call this if all columns are required, i.e. SELECT * FROM ...
      */
-    public SqlSelectList() { }
+    public SqlSelectList() {super(null);}
 
     /**
      * This is required in two cases<br>
@@ -39,7 +39,7 @@ public class SqlSelectList extends SqlExpressionList {
      * @return true if this is "SELECT *", false otherwise
      */
     public boolean isSelectStar() {
-        return getSons().isEmpty();
+        return getExpressions() == null || getExpressions().isEmpty();
     }
 
     @Override
@@ -53,11 +53,11 @@ public class SqlSelectList extends SqlExpressionList {
             // The system requested any column
             return "true";
         }
-        if (getSons().isEmpty()) {
+        if (getExpressions() == null || getExpressions().isEmpty()) {
             return "*";
         }
         List<String> selectElement = new ArrayList<>();
-        for (SqlNode node : getSons()) {
+        for (SqlNode node : getExpressions()) {
             selectElement.add(node.toSimpleSql());
         }
         return Joiner.on(", ").join(selectElement);

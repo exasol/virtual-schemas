@@ -438,14 +438,14 @@ public class RequestJsonParser {
             return new SqlFunctionScalar(fromScalarFunctionName(functionName), arguments, isInfix, isPrefix);
         }
         case FUNCTION_SCALAR_EXTRACT: {
-            String dateTime = exp.getString("toExtract");
+            String toExtract = exp.getString("toExtract");
             List<SqlNode> extractArguments = new ArrayList<>();
             if (exp.containsKey("arguments")) {
                 for (JsonObject argument : exp.getJsonArray("arguments").getValuesAs(JsonObject.class)) {
                     extractArguments.add(parseExpression(argument));
                 }
             }
-            return new SqlFunctionScalarExtract(dateTime, extractArguments);
+            return new SqlFunctionScalarExtract(toExtract, extractArguments);
         }
         case FUNCTION_SCALAR_CASE: {
             List<SqlNode> caseArguments = new ArrayList<>();

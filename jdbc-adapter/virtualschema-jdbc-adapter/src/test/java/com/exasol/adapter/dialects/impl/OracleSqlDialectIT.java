@@ -7,10 +7,8 @@ import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,8 +22,9 @@ import static org.junit.Assert.assertEquals;
  */
 public class OracleSqlDialectIT extends AbstractIntegrationTest {
 
-    private static final String virtualSchema = "VS_ORACLE";
-    private static final String oracleSchema = "C##LOADER";
+    private static final String VIRTUAL_SCHEMA = "VS_ORACLE";
+    private static final String ORACLE_SCHEMA = "C##LOADER";
+    private static final boolean IS_LOCAL = false;
 
     @Before
     public void beforeMethod() throws FileNotFoundException, SQLException, ClassNotFoundException {
@@ -33,15 +32,15 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
         setConnection(connectToExa());
         createOracleJDBCAdapter();
         createVirtualSchema(
-                virtualSchema,
+                VIRTUAL_SCHEMA,
                 OracleSqlDialect.NAME,
-                "", oracleSchema,
+                "", ORACLE_SCHEMA,
                 "",
                 "C##LOADER",
                 "loader",
                 "ADAPTER.JDBC_ADAPTER",
                 getConfig().getOracleJdbcConnectionString(),
-                false,
+                IS_LOCAL,
                 getConfig().debugAddress(),
                 "ALL_TYPES");
     }

@@ -198,11 +198,25 @@ public class AbstractIntegrationTest {
         return builder.toString();
     }
 
-    public static void matchSingleRowExplain(Connection conn, String query, String expectedExplain) throws SQLException {
+    public static void matchSingleRowExplain(Connection conn, String query, String expectedExplain, boolean isLocal) throws SQLException {
         ResultSet result = conn.createStatement().executeQuery("EXPLAIN VIRTUAL " + query);
         result.next();
-        assertEquals(expectedExplain, result.getString("PUSHDOWN_SQL"));
+        if (isLocal) {
+            assertEquals(expectedExplain, result.getString("PUSHDOWN_SQL"));
+        } else {
+            assertEquals(expectedExplain, extractStatementFromImport(result.getString("PUSHDOWN_SQL")));
+        }
         assertEquals(false, result.next());
+    }
+
+    public static void matchSingleRowExplain(Connection conn, String query, String expectedExplain) throws SQLException {
+        checkConnection();
+        matchSingleRowExplain(connection, query, expectedExplain, false);
+    }
+
+    public static void matchSingleRowExplain(String query, String expectedExplain, boolean isLocal) throws SQLException {
+        checkConnection();
+        matchSingleRowExplain(connection, query, expectedExplain, isLocal);
     }
 
     public static void matchSingleRowExplain(String query, String expectedExplain) throws SQLException {

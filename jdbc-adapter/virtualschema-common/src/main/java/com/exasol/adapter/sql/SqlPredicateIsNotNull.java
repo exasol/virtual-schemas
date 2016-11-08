@@ -1,15 +1,16 @@
 package com.exasol.adapter.sql;
 
 
-import com.google.common.collect.ImmutableList;
-
 public class SqlPredicateIsNotNull extends SqlPredicate {
 
     private SqlNode expression;
 
     public SqlPredicateIsNotNull(SqlNode expression) {
-        super(ImmutableList.of(expression), Predicate.IS_NULL);
+        super(Predicate.IS_NULL);
         this.expression = expression;
+        if (this.expression != null) {
+            this.expression.setParent(this);
+        }
     }
 
     public SqlNode getExpression() {

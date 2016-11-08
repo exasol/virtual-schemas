@@ -3,6 +3,7 @@ package com.exasol.adapter.sql;
 import com.google.common.base.Joiner;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -15,12 +16,27 @@ public class SqlFunctionAggregate extends SqlNode {
 
     private AggregateFunction function;
     private boolean distinct;
-    
+    private List<SqlNode> arguments;
+
     public SqlFunctionAggregate(AggregateFunction function, List<SqlNode> arguments, boolean distinct) {
-        setSons(arguments);
+        this.arguments = arguments;
         this.function = function;
         this.distinct = distinct;
+        if (this.arguments != null) {
+            for (SqlNode node : this.arguments) {
+                node.setParent(this);
+            }
+        }
     }
+
+    public List<SqlNode> getArguments() {
+        if (arguments == null) {
+            return null;
+        } else {
+            return Collections.unmodifiableList(arguments);
+        }
+    }
+
 
     public AggregateFunction getFunction() {
         return function;
@@ -37,7 +53,7 @@ public class SqlFunctionAggregate extends SqlNode {
     @Override
     public String toSimpleSql() {
         List<String> argumentsSql = new ArrayList<>();
-        for (SqlNode node : getSons()) {
+        for (SqlNode node : arguments) {
             argumentsSql.add(node.toSimpleSql());
         }
         if (argumentsSql.size() == 0) {

@@ -8,8 +8,11 @@ public class SqlPredicateNot extends SqlPredicate {
     private SqlNode expression;
     
     public SqlPredicateNot(SqlNode expression) {
-        super(ImmutableList.of(expression), Predicate.NOT);
+        super(Predicate.NOT);
         this.expression = expression;
+        if (this.expression != null) {
+            this.expression.setParent(this);
+        }
     }
     
     public SqlNode getExpression() {

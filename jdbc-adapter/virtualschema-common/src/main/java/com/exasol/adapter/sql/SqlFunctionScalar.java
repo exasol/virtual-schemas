@@ -1,9 +1,6 @@
 package com.exasol.adapter.sql;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.google.common.base.Joiner;
 
@@ -15,15 +12,29 @@ import com.google.common.base.Joiner;
  */
 public class SqlFunctionScalar extends SqlNode {
 
+    private List<SqlNode> arguments;
     private ScalarFunction function;
     private boolean isInfix;
     private boolean isPrefix;
 
     public SqlFunctionScalar(ScalarFunction function, List<SqlNode> arguments, boolean isInfix, boolean isPrefix) {
-        setSons(arguments);
+        this.arguments = arguments;
         this.function = function;
         this.isInfix = isInfix;
         this.isPrefix = isPrefix;
+        if (this.arguments != null) {
+            for (SqlNode node : this.arguments) {
+                node.setParent(this);
+            }
+        }
+    }
+
+    public List<SqlNode> getArguments() {
+        if (arguments == null) {
+            return null;
+        } else {
+            return Collections.unmodifiableList(arguments);
+        }
     }
 
     public ScalarFunction getFunction() {
@@ -35,7 +46,7 @@ public class SqlFunctionScalar extends SqlNode {
     }
     
     public int getNumArgs() {
-        return getSons().size();
+        return getArguments().size();
     }
     
     public boolean isInfix() {
@@ -50,7 +61,7 @@ public class SqlFunctionScalar extends SqlNode {
     @Override
     public String toSimpleSql() {
         List<String> argumentsSql = new ArrayList<>();
-        for (SqlNode node : getSons()) {
+        for (SqlNode node : arguments) {
             argumentsSql.add(node.toSimpleSql());
         }
         if (isInfix) {

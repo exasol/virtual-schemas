@@ -1,17 +1,21 @@
 package com.exasol.adapter.sql;
 
 
-import com.google.common.collect.ImmutableList;
-
 public class SqlPredicateEqual extends SqlPredicate {
 
     private SqlNode left;
     private SqlNode right;
     
     public SqlPredicateEqual(SqlNode left, SqlNode right) {
-        super(ImmutableList.of(left, right), Predicate.EQUAL);
+        super(Predicate.EQUAL);
         this.left = left;
         this.right = right;
+        if (this.left != null) {
+            this.left.setParent(this);
+        }
+        if (this.right != null) {
+            this.right.setParent(this);
+        }
     }
     
     public SqlNode getLeft() {

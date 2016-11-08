@@ -10,20 +10,20 @@ import java.nio.charset.Charset;
  */
 public class KerberosUtils {
 
-    private static final String krbKey = "ExaAuthType=Kerberos;";
+    private static final String KRB_KEY = "ExaAuthType=Kerberos;";
 
     public static boolean isKerberosAuth(String pass) {
         if (pass==null) {
             return false;
         }
-        return pass.indexOf(krbKey) == 0;
+        return pass.indexOf(KRB_KEY) == 0;
     }
 
     public static void configKerberos(String user, String pass) throws Exception {
         try {
-            pass = pass.replaceFirst(krbKey, "");
+            pass = pass.replaceFirst(KRB_KEY, "");
         } catch (Exception e) {
-            throw new RuntimeException("Could not find " + krbKey + " in password: " + e.getMessage());
+            throw new RuntimeException("Could not find " + KRB_KEY + " in password: " + e.getMessage());
         }
         String[] confKeytab = pass.split(";");
         if (confKeytab.length != 2)

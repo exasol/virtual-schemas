@@ -1,21 +1,38 @@
 package com.exasol.adapter.sql;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.common.base.Joiner;
 
 
 public class SqlPredicateAnd extends SqlPredicate {
-    
+
+    List<SqlNode> andedPredicates;
+
     public SqlPredicateAnd(List<SqlNode> andedPredicates) {
-        super(andedPredicates, Predicate.AND);
+        super(Predicate.AND);
+        this.andedPredicates = andedPredicates;
+        if (this.andedPredicates != null) {
+            for (SqlNode node : this.andedPredicates) {
+                node.setParent(this);
+            }
+        }
     }
-    
+
+    public List<SqlNode> getAndedPredicates() {
+        if (andedPredicates == null) {
+            return null;
+        } else {
+            return Collections.unmodifiableList(andedPredicates);
+        }
+    }
+
     @Override
     public String toSimpleSql() {
         List<String> operandsSql = new ArrayList<>();
-        for (SqlNode node : getSons()) {
+        for (SqlNode node : andedPredicates) {
             operandsSql.add(node.toSimpleSql());
         }
         return "(" + Joiner.on(" AND ").join(operandsSql) + ")";

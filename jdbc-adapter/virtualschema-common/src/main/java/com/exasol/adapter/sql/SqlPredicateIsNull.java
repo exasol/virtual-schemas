@@ -8,8 +8,11 @@ public class SqlPredicateIsNull extends SqlPredicate {
     private SqlNode expression;
 
     public SqlPredicateIsNull(SqlNode expression) {
-        super(ImmutableList.of(expression), Predicate.IS_NULL);
+        super(Predicate.IS_NULL);
         this.expression = expression;
+        if (this.expression != null) {
+            this.expression.setParent(this);
+        }
     }
     
     public SqlNode getExpression() {

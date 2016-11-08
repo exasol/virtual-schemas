@@ -8,38 +8,10 @@ import java.util.List;
  */
 public abstract class SqlNode {
     
-    private List<SqlNode> sons;
     private SqlNode parent;
 
-    public SqlNode() {
-        this.sons = new ArrayList<>();
-    }
-    
-    public SqlNode(List<SqlNode> sons) {
-        this.sons = sons;
-        // set parents
-        for (SqlNode son : sons) {
-            son.setParent(this);
-        }
-    }
-    
     public abstract SqlNodeType getType();
-    
-    public SqlNode getSon(int i) {
-        return sons.get(i);
-    }
-    
-    public List<SqlNode> getSons() {
-        return sons;
-    }
-    
-    public void setSons(List<SqlNode> sons) {
-        this.sons = sons;
-        // set parents
-        for (SqlNode son : sons) {
-            son.setParent(this);
-        }
-    }
+
 
     public void setParent(SqlNode parent) {
         this.parent = parent;

@@ -1,10 +1,10 @@
 package com.exasol.adapter.sql;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
 
 
 public class SqlPredicateInConstList extends SqlPredicate {
@@ -15,9 +15,17 @@ public class SqlPredicateInConstList extends SqlPredicate {
     List<SqlNode> inArguments;
     
     public SqlPredicateInConstList(SqlNode expression, List<SqlNode> inArguments) {
-        super(ImmutableList.<SqlNode>builder().add(expression).addAll(inArguments).build(), Predicate.IN_CONSTLIST);
+        super(Predicate.IN_CONSTLIST);
         this.expression = expression;
         this.inArguments = inArguments;
+        if (this.expression != null) {
+            this.expression.setParent(this);
+        }
+        if (this.inArguments != null) {
+            for (SqlNode node : this.inArguments) {
+                node.setParent(this);
+            }
+        }
     }
     
     public SqlNode getExpression() {
@@ -25,7 +33,11 @@ public class SqlPredicateInConstList extends SqlPredicate {
     }
     
     public List<SqlNode> getInArguments() {
-        return inArguments;
+        if (inArguments == null) {
+            return null;
+        } else {
+            return Collections.unmodifiableList(inArguments);
+        }
     }
     
     @Override
