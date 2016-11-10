@@ -9,9 +9,15 @@ public class SqlPredicateLess extends SqlPredicate {
     private SqlNode right;
     
     public SqlPredicateLess(SqlNode left, SqlNode right) {
-        super(ImmutableList.of(left, right), Predicate.LESS);
+        super(Predicate.LESS);
         this.left = left;
         this.right = right;
+        if (this.left != null) {
+            this.left.setParent(this);
+        }
+        if (this.right != null) {
+            this.right.setParent(this);
+        }
     }
     
     public SqlNode getLeft() {

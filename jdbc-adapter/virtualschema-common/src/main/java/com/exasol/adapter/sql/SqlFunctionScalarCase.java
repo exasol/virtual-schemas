@@ -1,6 +1,7 @@
 package com.exasol.adapter.sql;
 
 
+import java.util.Collections;
 import java.util.List;
 
 public class SqlFunctionScalarCase extends SqlNode {
@@ -12,14 +13,35 @@ public class SqlFunctionScalarCase extends SqlNode {
         this.arguments = arguments;
         this.results = results;
         this.basis = basis;
+        if (this.arguments != null) {
+            for (SqlNode node : this.arguments) {
+                node.setParent(this);
+            }
+        }
+        if (this.results != null) {
+            for (SqlNode node : this.results) {
+                node.setParent(this);
+            }
+        }
+        if (basis != null) {
+            basis.setParent(this);
+        }
     }
 
     public List<SqlNode> getArguments() {
-        return arguments;
+        if (arguments == null) {
+            return null;
+        } else {
+            return Collections.unmodifiableList(arguments);
+        }
     }
 
     public List<SqlNode> getResults() {
-        return results;
+        if (results == null) {
+            return null;
+        } else {
+            return Collections.unmodifiableList(results);
+        }
     }
 
     public SqlNode getBasis() {

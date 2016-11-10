@@ -15,6 +15,9 @@ import static org.junit.Assert.assertEquals;
 
 public class GenericSqlDialectIT extends AbstractIntegrationTest {
 
+    private static final boolean IS_LOCAL = false;
+
+
     @BeforeClass
     public static void setUpClass() throws FileNotFoundException, SQLException, ClassNotFoundException {
         Assume.assumeTrue(getConfig().genericTestsRequested());
@@ -33,7 +36,7 @@ public class GenericSqlDialectIT extends AbstractIntegrationTest {
                 getConfig().getGenericPassword(),
                 "ADAPTER.JDBC_ADAPTER",
                 connectionString,
-                false,
+                IS_LOCAL,
                 getConfig().debugAddress(),
                 "");
     }

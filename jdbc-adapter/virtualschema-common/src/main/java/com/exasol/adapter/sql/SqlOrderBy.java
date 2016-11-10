@@ -1,6 +1,7 @@
 package com.exasol.adapter.sql;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.common.base.Joiner;
@@ -15,22 +16,38 @@ public class SqlOrderBy extends SqlNode {
     List<Boolean> nullsLast;
     
     public SqlOrderBy(List<SqlNode> expressions, List<Boolean> isAsc, List<Boolean> nullsFirst) {
-        super(expressions);
         this.expressions = expressions;
         this.isAsc = isAsc;
         this.nullsLast = nullsFirst;
+        if (this.expressions != null) {
+            for (SqlNode node : this.expressions) {
+                node.setParent(this);
+            }
+        }
     }
     
     public List<SqlNode> getExpressions() {
-        return expressions;
+        if (expressions == null) {
+            return null;
+        } else {
+            return Collections.unmodifiableList(expressions);
+        }
     }
     
     public List<Boolean> isAscending() {
-        return isAsc;
+        if (isAsc == null) {
+            return null;
+        } else {
+            return Collections.unmodifiableList(isAsc);
+        }
     }
     
     public List<Boolean> nullsLast() {
-        return nullsLast;
+        if (nullsLast == null) {
+            return null;
+        } else {
+            return Collections.unmodifiableList(nullsLast);
+        }
     }
     
     @Override
@@ -38,8 +55,8 @@ public class SqlOrderBy extends SqlNode {
         // ORDER BY <expr> [ASC/DESC] [NULLS FIRST/LAST]
         // ASC and NULLS LAST are default
         List<String> sqlOrderElement = new ArrayList<>();
-        for (int i=0; i<getSons().size(); ++i) {
-            String elementSql = getSon(i).toSimpleSql();
+        for (int i = 0; i < expressions.size(); ++i) {
+            String elementSql = expressions.get(i).toSimpleSql();
             if (isAsc.get(i) == false) {
                 elementSql += " DESC";
             }

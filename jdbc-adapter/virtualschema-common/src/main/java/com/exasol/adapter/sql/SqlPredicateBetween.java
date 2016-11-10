@@ -1,9 +1,6 @@
 package com.exasol.adapter.sql;
 
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-
 import java.util.List;
 
 public class SqlPredicateBetween extends SqlPredicate {
@@ -13,10 +10,19 @@ public class SqlPredicateBetween extends SqlPredicate {
     private SqlNode betweenRight;
     
     public SqlPredicateBetween(SqlNode expression, SqlNode betweenLeft, SqlNode betweenRight) {
-        super(ImmutableList.of(expression, betweenLeft, betweenRight), Predicate.BETWEEN);
+        super(Predicate.BETWEEN);
         this.expression = expression;
         this.betweenLeft = betweenLeft;
         this.betweenRight = betweenRight;
+        if (this.expression != null) {
+            this.expression.setParent(this);
+        }
+        if (this.betweenLeft != null) {
+            this.betweenLeft.setParent(this);
+        }
+        if (this.betweenRight != null) {
+            this.betweenRight.setParent(this);
+        }
     }
     
     public SqlNode getExpression() {

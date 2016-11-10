@@ -18,16 +18,6 @@ public class SqlStatementSelect extends SqlStatement {
     private SqlLimit limit;
     
     public SqlStatementSelect(SqlTable fromClause, SqlSelectList selectList, SqlNode whereClause, SqlExpressionList groupBy, SqlNode having, SqlOrderBy orderBy, SqlLimit limit) {
-        List<SqlNode> sons = new ArrayList<>();
-        sons.add(fromClause);
-        sons.add(selectList);
-        sons.add(whereClause);
-        sons.add(groupBy);
-        sons.add(having);
-        sons.add(orderBy);
-        sons.add(limit);
-        sons.removeAll(Collections.singleton(null));
-        this.setSons(sons);
         this.fromClause = fromClause;
         this.selectList = selectList;
         this.whereClause = whereClause;
@@ -37,6 +27,24 @@ public class SqlStatementSelect extends SqlStatement {
         this.limit = limit;
         assert(this.fromClause != null);
         assert(this.selectList != null);
+        this.fromClause.setParent(this);
+        this.selectList.setParent(this);
+
+        if (this.whereClause != null) {
+            this.whereClause.setParent(this);
+        }
+        if (this.groupBy != null) {
+            this.groupBy.setParent(this);
+        }
+        if (this.having != null) {
+            this.having.setParent(this);
+        }
+        if (this.orderBy != null) {
+            this.orderBy.setParent(this);
+        }
+        if (this.limit != null) {
+            this.limit.setParent(this);
+        }
     }
     
     public boolean hasProjection() {

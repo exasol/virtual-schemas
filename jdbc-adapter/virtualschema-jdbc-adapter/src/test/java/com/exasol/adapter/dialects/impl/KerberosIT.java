@@ -20,8 +20,9 @@ import static org.junit.Assert.assertEquals;
  */
 public class KerberosIT extends AbstractIntegrationTest {
 
-    private static final String virtualSchema = "VS_KERBEROS_IT";
-    private static final String connectionName = "krb_conn";
+    private static final String VIRTUAL_SCHEMA = "VS_KERBEROS_IT";
+    private static final String CONNECTION_NAME = "krb_conn";
+    private static final boolean IS_LOCAL = false;
 
     @BeforeClass
     public static void setUpClass() throws FileNotFoundException, SQLException, ClassNotFoundException {
@@ -38,15 +39,15 @@ public class KerberosIT extends AbstractIntegrationTest {
     @Test
     public void testKerberosVirtualSchema() throws SQLException, ClassNotFoundException, FileNotFoundException {
         createVirtualSchema(
-                virtualSchema,
+                VIRTUAL_SCHEMA,
                 ExasolSqlDialect.NAME,
                 "",
                 "default",
-                connectionName,
+                CONNECTION_NAME,
                 "",
                 "",
                 "ADAPTER.JDBC_ADAPTER",
-                "", false,
+                "", IS_LOCAL,
                 getConfig().debugAddress(),
                 "");
         Statement stmt = getConnection().createStatement();
@@ -67,18 +68,18 @@ public class KerberosIT extends AbstractIntegrationTest {
         stmt.execute("GRANT DROP ANY VIRTUAL SCHEMA TO " + userName);
         final String adapterName = "ADAPTER.JDBC_ADAPTER";
         stmt.execute("GRANT EXECUTE ON " + adapterName + " TO " + userName);
-        stmt.execute("GRANT ACCESS ON CONNECTION " + connectionName + " TO " + userName);
-        stmt.execute("GRANT CONNECTION " + connectionName + " TO " + userName);
+        stmt.execute("GRANT ACCESS ON CONNECTION " + CONNECTION_NAME + " TO " + userName);
+        stmt.execute("GRANT CONNECTION " + CONNECTION_NAME + " TO " + userName);
         stmt.execute("COMMIT");
         Connection conn2 = connectToExa(userName, userName);
         Statement stmt2 = conn2.createStatement();
         createVirtualSchema(
                 conn2,
-                virtualSchema,
+                VIRTUAL_SCHEMA,
                 ExasolSqlDialect.NAME,
                 "",
                 "default",
-                connectionName,
+                CONNECTION_NAME,
                 "",
                 "",
                 adapterName,

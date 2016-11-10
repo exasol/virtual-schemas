@@ -19,8 +19,9 @@ import java.util.List;
  */
 public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
 
-    private static final String virtualSchema = "VS_IMPALA";
-    private static final String impalaSchema = "default";
+    private static final String VIRTUAL_SCHEMA = "VS_IMPALA";
+    private static final String IMPALA_SCHEMA = "default";
+    private static final boolean IS_LOCAL = false;
 
     @BeforeClass
     public static void setUpClass() throws FileNotFoundException, SQLException, ClassNotFoundException {
@@ -29,15 +30,15 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
 
         createImpalaJDBCAdapter();
         createVirtualSchema(
-                virtualSchema,
+                VIRTUAL_SCHEMA,
                 ImpalaSqlDialect.NAME,
-                "", impalaSchema,
+                "", IMPALA_SCHEMA,
                 "",
                 "no-user",
                 "no-password",
                 "ADAPTER.JDBC_ADAPTER",
                 getConfig().getImpalaJdbcConnectionString(),
-                false,
+                IS_LOCAL,
                 getConfig().debugAddress(),
                 "SAMPLE_07,ALL_HIVE_IMPALA_TYPES,SIMPLE,SIMPLE_WITH_NULLS");
     }
@@ -45,7 +46,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
     @Test
     public void testTypeMapping() throws SQLException, ClassNotFoundException, FileNotFoundException {
         // TODO Test type mapping for tables with invalid Impala Types
-        ResultSet result = executeQuery("SELECT COLUMN_NAME, COLUMN_TYPE, COLUMN_MAXSIZE, COLUMN_NUM_PREC, COLUMN_NUM_SCALE, COLUMN_DEFAULT FROM EXA_DBA_COLUMNS WHERE COLUMN_SCHEMA = '" + virtualSchema + "' AND COLUMN_TABLE='ALL_HIVE_IMPALA_TYPES' ORDER BY COLUMN_ORDINAL_POSITION");
+        ResultSet result = executeQuery("SELECT COLUMN_NAME, COLUMN_TYPE, COLUMN_MAXSIZE, COLUMN_NUM_PREC, COLUMN_NUM_SCALE, COLUMN_DEFAULT FROM EXA_DBA_COLUMNS WHERE COLUMN_SCHEMA = '" + VIRTUAL_SCHEMA + "' AND COLUMN_TABLE='ALL_HIVE_IMPALA_TYPES' ORDER BY COLUMN_ORDINAL_POSITION");
         matchNextRow(result, "C1", "DECIMAL(3,0)", 3L, 3L, 0L, null);
         matchNextRow(result, "C2", "DECIMAL(5,0)", 5L, 5L, 0L, null);
         matchNextRow(result, "C3", "DECIMAL(10,0)", (long)10, (long)10, (long)0, null);
@@ -66,7 +67,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
 
     @Test
     public void testSelectWithAllTypes() throws SQLException {
-        ResultSet result = executeQuery("SELECT * from " + virtualSchema + ".ALL_HIVE_IMPALA_TYPES");
+        ResultSet result = executeQuery("SELECT * from " + VIRTUAL_SCHEMA + ".ALL_HIVE_IMPALA_TYPES");
         matchLastRow(result,
                 (short)123,
                 12345,
@@ -74,8 +75,8 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
                 new BigDecimal(1234567890123456789L),
                 12.199999809265137,
                 12.2,
-                "12345",    // TODO Why is this string?
-                "12345.12", // TODO Why is this string?
+                12345,
+                new BigDecimal("12345.12"),
                 "12345.12",getSqlTimestamp(1985, 9, 25, 17, 45, 30, 5),
                 "abc",
                 "varchar 茶",
@@ -92,7 +93,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
 
     @Test
     public void testProjection() throws SQLException {
-        String query = "SELECT c2 FROM " + virtualSchema + ".ALL_HIVE_IMPALA_TYPES";
+        String query = "SELECT c2 FROM " + VIRTUAL_SCHEMA + ".ALL_HIVE_IMPALA_TYPES";
         ResultSet result = executeQuery(query);
         matchLastRow(result, 12345);
         matchSingleRowExplain(query, "SELECT `C2` FROM `default`.`ALL_HIVE_IMPALA_TYPES`");
@@ -101,7 +102,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
     @Test
     public void testComparisonPredicates() throws SQLException {
         // =, !=, <, <=, >, >=
-        String query = "select salary, salary=33880, salary!=33880, salary<33880, salary<=33880, salary>33880, salary>=33880 from " + virtualSchema + ".sample_07 where code = '11-1031'";
+        String query = "select salary, salary=33880, salary!=33880, salary<33880, salary<=33880, salary>33880, salary>=33880 from " + VIRTUAL_SCHEMA + ".sample_07 where code = '11-1031'";
         ResultSet result = executeQuery(query);
         matchLastRow(result, 33880L, true, false, false, true, false, true);
         matchSingleRowExplain(query, "SELECT `SALARY`, `SALARY` = 33880, `SALARY` != 33880, `SALARY` < 33880, `SALARY` <= 33880, 33880 < `SALARY`, 33880 <= `SALARY` FROM `default`.`SAMPLE_07` WHERE `CODE` = '11-1031'");
@@ -120,7 +121,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
     @Test
     public void testLikePredicates() throws SQLException {
         // LIKE, LIKE ESCAPE (not pushed down), REGEXP_LIKE
-        String query = "select code, code like 'x%1' escape 'x' from " + virtualSchema + ".sample_07 where (code like '15%' and not code regexp_like '.*1$')";
+        String query = "select code, code like 'x%1' escape 'x' from " + VIRTUAL_SCHEMA + ".sample_07 where (code like '15%' and not code regexp_like '.*1$')";
         ResultSet result = executeQuery(query);
         matchNextRow(result, "15-0000", false);
         matchNextRow(result, "15-1032", false);

@@ -1,6 +1,8 @@
 package com.exasol.adapter.sql;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -8,46 +10,50 @@ public class SqlFunctionAggregateGroupConcat extends SqlNode {
 
     private AggregateFunction function;
     private boolean distinct;
-    private SqlNode concatExpression;
+    private List<SqlNode> arguments;
     private String separator;
-    // Lists describing the ORDER BY expressions (must all have same length)
-    private List<SqlNode> orderByExpressions;
-    private List<Boolean> ascendingOrder;
-    private List<Boolean> nullsFirstOrder;
+    private SqlOrderBy orderBy;
 
-    public SqlFunctionAggregateGroupConcat(AggregateFunction function, SqlNode concatExpression,
-                                           List<SqlNode> orderByExpressions, boolean distinct,
-                                           List<Boolean> ascendingOrder, List<Boolean> nullsFirstOrder,
+
+
+    public SqlFunctionAggregateGroupConcat(AggregateFunction function, List<SqlNode> arguments,
+                                           SqlOrderBy orderBy, boolean distinct,
                                            String separator) {
-        assert(orderByExpressions.size() == ascendingOrder.size());
-        assert(ascendingOrder.size() == nullsFirstOrder.size());
-        List<SqlNode> sons = new ArrayList<>();
-        sons.add(concatExpression);
-        sons.addAll(orderByExpressions);
-        setSons(sons);
+        assert(arguments != null); // currently the adapter supports only one expression as argument
+        assert(arguments.size() == 1 && arguments.get(0) != null);
         this.function = function;
         this.distinct = distinct;
-        this.concatExpression = concatExpression;
-        this.orderByExpressions = orderByExpressions;
-        this.ascendingOrder = ascendingOrder;
-        this.nullsFirstOrder = nullsFirstOrder;
+        this.arguments = arguments;
+        this.orderBy = orderBy;
         this.separator = separator;
+        if (this.arguments != null) {
+            for (SqlNode node : this.arguments) {
+                node.setParent(this);
+            }
+        }
+        if (orderBy != null) {
+            orderBy.setParent(this);
+        }
     }
 
     public AggregateFunction getFunction() {
         return function;
     }
 
-    public SqlNode getConcatExpression() {
-        return concatExpression;
+    public List<SqlNode> getArguments() {
+        if (arguments == null) {
+            return null;
+        } else {
+            return Collections.unmodifiableList(arguments);
+        }
     }
 
-    public List<Boolean> getAscendingOrderList() {
-        return ascendingOrder;
+    public boolean hasOrderBy() {
+        return orderBy != null && orderBy.getExpressions() != null && orderBy.getExpressions().size() > 0;
     }
 
-    public List<Boolean> getNullsFirstOrderList() {
-        return nullsFirstOrder;
+    public SqlOrderBy getOrderBy() {
+        return orderBy;
     }
 
     public String getFunctionName() {
@@ -58,24 +64,12 @@ public class SqlFunctionAggregateGroupConcat extends SqlNode {
         return separator;
     }
 
-    public List<SqlNode> getOrderByExpressions() {
-        return orderByExpressions;
-    }
-
     public boolean hasDistinct() {
         return distinct;
     }
     
     @Override
     public String toSimpleSql() {
-        List<String> argumentsSql = new ArrayList<>();
-        for (SqlNode node : getSons()) {
-            argumentsSql.add(node.toSimpleSql());
-        }
-        if (argumentsSql.size() == 0) {
-            assert(getFunctionName().equalsIgnoreCase("count"));
-            argumentsSql.add("*");
-        }
         String distinctSql = "";
         if (distinct) {
             distinctSql = "DISTINCT ";
@@ -84,21 +78,12 @@ public class SqlFunctionAggregateGroupConcat extends SqlNode {
         builder.append(getFunctionName());
         builder.append("(");
         builder.append(distinctSql);
-        builder.append(concatExpression.toSimpleSql());
-        if (getOrderByExpressions().size() > 0) {
-            builder.append(" ORDER BY ");
-            for (int i = 0; i < getSons().size(); i++) {
-                if (i > 0) {
-                    builder.append(", ");
-                }
-                builder.append(getSon(i).toSimpleSql());
-                if (!getAscendingOrderList().get(i)) {
-                    builder.append(" DESC");
-                }
-                if (getNullsFirstOrderList().get(i)) {
-                    builder.append(" NULLS FIRST");
-                }
-            }
+        assert(arguments != null);
+        assert(arguments.size() == 1 && arguments.get(0) != null);
+        builder.append(arguments.get(0).toSimpleSql());
+        if (orderBy != null) {
+            builder.append(" ");
+            builder.append(orderBy.toSimpleSql());
         }
         if (separator != null) {
             builder.append(" SEPARATOR ");

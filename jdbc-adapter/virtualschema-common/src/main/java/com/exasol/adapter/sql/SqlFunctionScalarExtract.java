@@ -1,26 +1,40 @@
 package com.exasol.adapter.sql;
 
+import java.util.Collections;
+import java.util.List;
+
 public class SqlFunctionScalarExtract extends SqlNode {
-    private String dateTime;
-    private SqlNode expression;
+    private String toExtract;
+    private List<SqlNode> arguments;
 
-    public SqlFunctionScalarExtract(String dateTime, SqlNode expression) {
-        this.expression = expression;
-        this.dateTime = dateTime;
+    public SqlFunctionScalarExtract(String toExtract, List<SqlNode> arguments) {
+        assert(arguments.size() == 1);
+        this.arguments = arguments;
+        this.toExtract = toExtract;
+        if (this.arguments != null) {
+            for (SqlNode node : this.arguments) {
+                node.setParent(this);
+            }
+        }
     }
 
-    public String getDateTime() {
-        return dateTime;
+    public String getToExtract() {
+        return toExtract;
     }
 
 
-    public SqlNode getExpression() {
-        return expression;
+    public List<SqlNode> getArguments() {
+        if (arguments == null) {
+            return null;
+        } else {
+            return Collections.unmodifiableList(arguments);
+        }
     }
     
     @Override
     public String toSimpleSql() {
-        return "EXTRACT (" + dateTime + " FROM " + expression.toSimpleSql() + ")";
+        assert(arguments.size() == 1 && arguments.get(0) != null);
+        return "EXTRACT (" + toExtract + " FROM " + arguments.get(0).toSimpleSql() + ")";
     }
 
     @Override

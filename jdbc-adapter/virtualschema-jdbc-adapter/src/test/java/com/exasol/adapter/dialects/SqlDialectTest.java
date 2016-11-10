@@ -26,7 +26,7 @@ public class SqlDialectTest {
         TableMetadata clicksMeta = getTestTableMetadata();
         SqlTable fromClause = new SqlTable("TEST", clicksMeta);
         SqlColumn col1 = new SqlColumn(1, clicksMeta.getColumns().get(0));
-        SqlSelectList selectList = new SqlSelectList( ImmutableList.<SqlNode>of(
+        SqlSelectList selectList = SqlSelectList.createRegularSelectList( ImmutableList.<SqlNode>of(
                 new SqlFunctionAggregate(AggregateFunction.APPROXIMATE_COUNT_DISTINCT, ImmutableList.<SqlNode>of(col1), false),
                 new SqlFunctionAggregate(AggregateFunction.AVG, ImmutableList.<SqlNode>of(col1), false),
                 new SqlFunctionAggregate(AggregateFunction.COUNT, new ArrayList<SqlNode>(), true),
@@ -58,7 +58,7 @@ public class SqlDialectTest {
         TableMetadata clicksMeta = getTestTableMetadata();
         SqlTable fromClause = new SqlTable("TEST", clicksMeta);
         SqlColumn col1 = new SqlColumn(1, clicksMeta.getColumns().get(0));
-        SqlSelectList selectList = new SqlSelectList( ImmutableList.<SqlNode>of(
+        SqlSelectList selectList = SqlSelectList.createRegularSelectList( ImmutableList.<SqlNode>of(
                 new SqlFunctionScalar(ScalarFunction.ABS, ImmutableList.<SqlNode>of(col1), false, false),
                 new SqlFunctionScalar(ScalarFunction.ADD, ImmutableList.of(col1, new SqlLiteralExactnumeric(new BigDecimal(100))), true, false),
                 new SqlFunctionScalar(ScalarFunction.SUB, ImmutableList.of(col1, new SqlLiteralExactnumeric(new BigDecimal(100))), true, false),
@@ -87,7 +87,7 @@ public class SqlDialectTest {
     public void testInvalidAliases() throws Exception {
         TableMetadata clicksMeta = getTestTableMetadata();
         SqlTable fromClause = new SqlTable("TEST", clicksMeta);
-        SqlSelectList selectList = new SqlSelectList();
+        SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
         SqlNode node = new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
 
         SqlGenerationContext context = new SqlGenerationContext("", "schema", false);

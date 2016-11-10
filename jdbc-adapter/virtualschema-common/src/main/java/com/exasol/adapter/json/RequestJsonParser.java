@@ -223,10 +223,14 @@ public class RequestJsonParser {
     private SqlSelectList parseSelectList(JsonArray selectList) {
         if (selectList == null) {
             // this is like SELECT *
-            return new SqlSelectList();
+            return SqlSelectList.createSelectStarSelectList();
         }
         List<SqlNode> selectListElements = parseExpressionList(selectList);
-        return new SqlSelectList(selectListElements);
+        if (selectListElements.size() == 0) {
+            return SqlSelectList.createAnyValueSelectList();
+        } else {
+            return SqlSelectList.createRegularSelectList(selectListElements);
+        }
     }
     
     private SqlOrderBy parseOrderBy(JsonArray orderByList) {
@@ -438,9 +442,14 @@ public class RequestJsonParser {
             return new SqlFunctionScalar(fromScalarFunctionName(functionName), arguments, isInfix, isPrefix);
         }
         case FUNCTION_SCALAR_EXTRACT: {
-            SqlNode extractExpr = parseExpression(exp.getJsonObject("expression"));
-            String dateTime = exp.getString("dateTime");
-            return new SqlFunctionScalarExtract(dateTime, extractExpr);
+            String toExtract = exp.getString("toExtract");
+            List<SqlNode> extractArguments = new ArrayList<>();
+            if (exp.containsKey("arguments")) {
+                for (JsonObject argument : exp.getJsonArray("arguments").getValuesAs(JsonObject.class)) {
+                    extractArguments.add(parseExpression(argument));
+                }
+            }
+            return new SqlFunctionScalarExtract(toExtract, extractArguments);
         }
         case FUNCTION_SCALAR_CASE: {
             List<SqlNode> caseArguments = new ArrayList<>();
@@ -463,9 +472,13 @@ public class RequestJsonParser {
         }
         case FUNCTION_SCALAR_CAST: {
             DataType castDataType = getDataType(exp.getJsonObject("dataType"));
-            SqlNode castExpr = parseExpression(exp.getJsonObject("expression"));
-
-            return new SqlFunctionScalarCast(castDataType, castExpr);
+            List<SqlNode> castArguments = new ArrayList<>();
+            if (exp.containsKey("arguments")) {
+                for (JsonObject argument : exp.getJsonArray("arguments").getValuesAs(JsonObject.class)) {
+                    castArguments.add(parseExpression(argument));
+                }
+            }
+            return new SqlFunctionScalarCast(castDataType, castArguments);
         }
         case FUNCTION_AGGREGATE: {
             String setFunctionName = exp.getString("name");
@@ -483,39 +496,26 @@ public class RequestJsonParser {
         }
         case FUNCTION_AGGREGATE_GROUP_CONCAT: {
             String functionName = exp.getString("name");
-            List<SqlNode> groupConcatOrderByExpressions = new ArrayList<>();
-            List<Boolean> groupConcatAscending = new ArrayList<>();
-            List<Boolean> groupConcatNullsFirst = new ArrayList<>();
-
-            boolean distinctGroupConcat = false;
+            List<SqlNode> setArguments = new ArrayList<>();
+            boolean distinct = false;
             if (exp.containsKey("distinct")) {
-                distinctGroupConcat = exp.getBoolean("distinct");
+                distinct = exp.getBoolean("distinct");
             }
-            SqlNode concatExpression = parseExpression(exp.getJsonObject("concatExpression"));
             if (exp.containsKey("arguments")) {
                 for (JsonObject argument : exp.getJsonArray("arguments").getValuesAs(JsonObject.class)) {
-                    groupConcatOrderByExpressions.add(parseExpression(argument));
+                    setArguments.add(parseExpression(argument));
                 }
             }
-            if (exp.containsKey("ascendingOrder")) {
-                JsonArray array = exp.getJsonArray("ascendingOrder");
-                for (int i = 0; i < array.size(); i++) {
-                    groupConcatAscending.add(array.getBoolean(i));
-                }
-            }
-            if (exp.containsKey("nullsFirstOrder")) {
-                JsonArray array = exp.getJsonArray("nullsFirstOrder");
-                for (int i = 0; i < array.size(); i++) {
-                    groupConcatNullsFirst.add(array.getBoolean(i));
-                }
+            SqlOrderBy orderBy = null;
+            if (exp.containsKey("orderBy")) {
+                orderBy = parseOrderBy(exp.getJsonArray("orderBy"));
             }
             String separator = null;
             if (exp.containsKey("separator")) {
                 separator = exp.getString("separator");
             }
             return new SqlFunctionAggregateGroupConcat(fromAggregationFunctionName(functionName),
-                    concatExpression, groupConcatOrderByExpressions, distinctGroupConcat, groupConcatAscending,
-                    groupConcatNullsFirst, separator);
+                    setArguments, orderBy, distinct, separator);
         }
         default:
             throw new RuntimeException("Unknown node type: " + typeName);

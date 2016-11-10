@@ -17,10 +17,19 @@ public class SqlPredicateLike extends SqlPredicate {
     }
 
     public SqlPredicateLike(SqlNode left, SqlNode pattern, SqlNode escapeChar) {
-        super(ImmutableList.of(left, pattern), Predicate.LIKE);
+        super(Predicate.LIKE);
         this.left = left;
         this.pattern = pattern;
         this.escapeChar = escapeChar;
+        if (this.left != null) {
+            this.left.setParent(this);
+        }
+        if (this.pattern != null) {
+            this.pattern.setParent(this);
+        }
+        if (this.escapeChar != null) {
+            this.escapeChar.setParent(this);
+        }
     }
     
     public SqlNode getLeft() {

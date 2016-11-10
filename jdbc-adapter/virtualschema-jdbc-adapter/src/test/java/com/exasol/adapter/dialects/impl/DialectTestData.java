@@ -24,7 +24,7 @@ public class DialectTestData {
         // LIMIT 10;
         TableMetadata clicksMeta = getClicksTableMetadata();
         SqlTable fromClause = new SqlTable("CLICKS", clicksMeta);
-        SqlSelectList selectList = new SqlSelectList(ImmutableList.of(
+        SqlSelectList selectList = SqlSelectList.createRegularSelectList(ImmutableList.of(
                 new SqlColumn(0, clicksMeta.getColumns().get(0)),
                 new SqlFunctionAggregate(AggregateFunction.COUNT, ImmutableList.<SqlNode>of(new SqlColumn(1, clicksMeta.getColumns().get(1))), false)));
         SqlNode whereClause = new SqlPredicateLess(new SqlLiteralExactnumeric(BigDecimal.ONE), new SqlColumn(0, clicksMeta.getColumns().get(0)));

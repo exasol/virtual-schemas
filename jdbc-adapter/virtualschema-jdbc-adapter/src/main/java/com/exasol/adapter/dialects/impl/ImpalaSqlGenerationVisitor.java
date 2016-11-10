@@ -32,7 +32,9 @@ public class ImpalaSqlGenerationVisitor extends SqlGenerationVisitor {
         builder.append("(");
         // To use it group_concat with numeric values we would need to sync group_concat(cast(x as string)). Since we cannot compute the type, we always cast
         builder.append("CAST(");
-        builder.append(function.getConcatExpression().accept(this));
+        assert(function.getArguments() != null);
+        assert(function.getArguments().size() == 1 && function.getArguments().get(0) != null);
+        builder.append(function.getArguments().get(0).accept(this));
         builder.append(" AS STRING)");
         if (function.getSeparator() != null) {
             builder.append(", ");
@@ -54,7 +56,7 @@ public class ImpalaSqlGenerationVisitor extends SqlGenerationVisitor {
             // query returns DECIMAL in ResultSetMetadata, so that IMPORT fails. Casting to DOUBLE
             // solves the problem.
             List<String> argumentsSql = new ArrayList<>();
-            for (SqlNode node : function.getSons()) {
+            for (SqlNode node : function.getArguments()) {
                 argumentsSql.add(node.accept(this));
             }
             String distinctSql = "";

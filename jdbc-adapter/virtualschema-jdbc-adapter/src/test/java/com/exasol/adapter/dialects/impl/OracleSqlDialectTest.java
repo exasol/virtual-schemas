@@ -64,7 +64,7 @@ public class OracleSqlDialectTest {
     public void testSqlGeneratorWithSelectStarAndOffset() {
         SqlStatementSelect node = (SqlStatementSelect) DialectTestData.getTestSqlNode();
         node.getLimit().setOffset(5);
-        node = new SqlStatementSelect(node.getFromClause(), new SqlSelectList(), node.getWhereClause(), node.getGroupBy(), node.getHaving(), node.getOrderBy(), node.getLimit());
+        node = new SqlStatementSelect(node.getFromClause(), SqlSelectList.createSelectStarSelectList(), node.getWhereClause(), node.getGroupBy(), node.getHaving(), node.getOrderBy(), node.getLimit());
         String schemaName = "SCHEMA";
         String expectedSql = "SELECT c0, c1 FROM (" +
                 "  SELECT LIMIT_SUBSELECT.*, ROWNUM ROWNUM_SUB FROM ( " +

@@ -92,7 +92,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         } else if (selectList.isSelectStar()) {
             selectElement.add("*");
         } else {
-            for (SqlNode node : selectList.getSons()) {
+            for (SqlNode node : selectList.getExpressions()) {
                 selectElement.add(node.accept(this));
             }
         }
@@ -120,12 +120,12 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
 
     @Override
     public String visit(SqlGroupBy groupBy) {
-        if (groupBy.getSons().isEmpty()) {
+        if (groupBy.getExpressions() == null || groupBy.getExpressions().isEmpty()) {
             throw new RuntimeException(
                     "Unexpected internal state (empty group by)");
         }
         List<String> selectElement = new ArrayList<>();
-        for (SqlNode node : groupBy.getSons()) {
+        for (SqlNode node : groupBy.getExpressions()) {
             selectElement.add(node.accept(this));
         }
         return Joiner.on(", ").join(selectElement);
@@ -134,7 +134,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     @Override
     public String visit(SqlFunctionAggregate function) {
         List<String> argumentsSql = new ArrayList<>();
-        for (SqlNode node : function.getSons()) {
+        for (SqlNode node : function.getArguments()) {
             argumentsSql.add(node.accept(this));
         }
         if (function.getFunctionName().equalsIgnoreCase("count") && argumentsSql.size() == 0) {
@@ -160,24 +160,12 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         if (function.hasDistinct()) {
             builder.append("DISTINCT ");
         }
-        builder.append(function.getConcatExpression().accept(this));
-        if (function.getOrderByExpressions().size() > 0) {
-            builder.append(" ORDER BY ");
-            for (int i = 0; i < function.getOrderByExpressions().size(); i++) {
-                if (i > 0) {
-                    builder.append(", ");
-                }
-                builder.append(function.getOrderByExpressions().get(i).accept(this));
-                boolean shallNullsBeAtTheEnd = !function.getNullsFirstOrderList().get(i);
-                boolean isAscending = function.getAscendingOrderList().get(i);
-                if (isAscending == false) {
-                    builder.append(" DESC");
-                }
-                if (shallNullsBeAtTheEnd != nullsAreAtEndByDefault(isAscending, dialect.getDefaultNullSorting())) {
-                    // we have to specify null positioning explicitly, otherwise it would be wrong
-                    builder.append(shallNullsBeAtTheEnd ? " NULLS LAST" : " NULLS FIRST");
-                }
-            }
+        assert(function.getArguments().size() == 1 && function.getArguments().get(0) != null);
+        builder.append(function.getArguments().get(0).accept(this));
+        if (function.hasOrderBy()) {
+            builder.append(" ");
+            String orderByString = function.getOrderBy().accept(this);
+            builder.append(orderByString);
         }
         if (function.getSeparator() != null) {
             builder.append(" SEPARATOR ");
@@ -192,7 +180,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     @Override
     public String visit(SqlFunctionScalar function) {
         List<String> argumentsSql = new ArrayList<>();
-        for (SqlNode node : function.getSons()) {
+        for (SqlNode node : function.getArguments()) {
             argumentsSql.add(node.accept(this));
         }
         String functionNameInSourceSystem = function.getFunctionName();
@@ -251,10 +239,12 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
 
     @Override
     public String visit(SqlFunctionScalarCast function) {
+
         StringBuilder builder = new StringBuilder();
         builder.append("CAST");
         builder.append("(");
-        builder.append(function.getExpression().accept(this));
+        assert(function.getArguments().size() == 1 && function.getArguments().get(0) != null);
+        builder.append(function.getArguments().get(0).accept(this));
         builder.append(" AS ");
         builder.append(function.getDataType());
         builder.append(")");
@@ -263,8 +253,9 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
 
     @Override
     public String visit(SqlFunctionScalarExtract function) {
-        String expression = function.getExpression().accept(this);
-        return function.getFunctionName() + "(" + function.getDateTime() + " FROM "+ expression + ")";
+        assert(function.getArguments().size() == 1 && function.getArguments().get(0) != null);
+        String expression = function.getArguments().get(0).accept(this);
+        return function.getFunctionName() + "(" + function.getToExtract() + " FROM "+ expression + ")";
     }
 
     @Override
@@ -341,8 +332,8 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         // ORDER BY <expr> [ASC/DESC] [NULLS FIRST/LAST]
         // ASC and NULLS LAST are default in EXASOL
         List<String> sqlOrderElement = new ArrayList<>();
-        for (int i = 0; i < orderBy.getSons().size(); ++i) {
-            String elementSql = orderBy.getSon(i).accept(this);
+        for (int i = 0; i < orderBy.getExpressions().size(); ++i) {
+            String elementSql = orderBy.getExpressions().get(i).accept(this);
             boolean shallNullsBeAtTheEnd = orderBy.nullsLast().get(i);
             boolean isAscending = orderBy.isAscending().get(i);
             if (isAscending == false) {
@@ -379,7 +370,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     @Override
     public String visit(SqlPredicateAnd predicate) {
         List<String> operandsSql = new ArrayList<>();
-        for (SqlNode node : predicate.getSons()) {
+        for (SqlNode node : predicate.getAndedPredicates()) {
             operandsSql.add(node.accept(this));
         }
         return "(" + Joiner.on(" AND ").join(operandsSql) + ")";
@@ -451,7 +442,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     @Override
     public String visit(SqlPredicateOr predicate) {
         List<String> operandsSql = new ArrayList<>();
-        for (SqlNode node : predicate.getSons()) {
+        for (SqlNode node : predicate.getOrPredicates()) {
             operandsSql.add(node.accept(this));
         }
         return "(" + Joiner.on(" OR ").join(operandsSql) + ")";

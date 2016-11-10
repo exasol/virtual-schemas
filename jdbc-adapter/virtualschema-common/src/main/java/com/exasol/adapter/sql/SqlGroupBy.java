@@ -6,13 +6,14 @@ import java.util.List;
 import com.google.common.base.Joiner;
 
 public class SqlGroupBy extends SqlExpressionList {
-    
-    public SqlGroupBy() {
-        
-    }
-    
+
     public SqlGroupBy(List<SqlNode> groupByList) {
         super(groupByList);
+        if (this.getExpressions() != null) {
+            for (SqlNode node : this.getExpressions()) {
+                node.setParent(this);
+            }
+        }
     }
 
     @Override
@@ -22,11 +23,11 @@ public class SqlGroupBy extends SqlExpressionList {
     
     @Override
     public String toSimpleSql() {
-        if (getSons().isEmpty()) {
+        if (getExpressions().isEmpty()) {
             return "*";
         }
         List<String> selectElement = new ArrayList<>();
-        for (SqlNode node : getSons()) {
+        for (SqlNode node : getExpressions()) {
             selectElement.add(node.toSimpleSql());
         }
         return Joiner.on(", ").join(selectElement);

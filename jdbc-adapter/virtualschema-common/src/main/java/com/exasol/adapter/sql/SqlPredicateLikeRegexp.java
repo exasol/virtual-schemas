@@ -9,9 +9,15 @@ public class SqlPredicateLikeRegexp extends SqlPredicate {
     private SqlNode pattern;
     
     public SqlPredicateLikeRegexp(SqlNode left, SqlNode pattern) {
-        super(ImmutableList.of(left, pattern), Predicate.REGEXP_LIKE);
+        super(Predicate.REGEXP_LIKE);
         this.left = left;
         this.pattern = pattern;
+        if (this.left != null) {
+            this.left.setParent(this);
+        }
+        if (this.pattern != null) {
+            this.pattern.setParent(this);
+        }
     }
     
     public SqlNode getLeft() {
