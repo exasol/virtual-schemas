@@ -993,7 +993,7 @@ EXTRACT(toExtract FROM exp1) (requires scalar-function capability EXTRACT)
 {
     "type": "function_scalar_extract",
     "name": "EXTRACT",
-    "toExtract": "Minute",
+    "toExtract": "MINUTE",
     "arguments": [
     {
         ...
