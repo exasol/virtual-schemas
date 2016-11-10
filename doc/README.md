@@ -985,6 +985,92 @@ Arithmetic operators have following names: ADD, SUB, MULT, FLOAT_DIV. They are d
 }
 ```
 
+**Special cases**
+
+EXTRACT(toExtract FROM exp1) (requires scalar-function capability EXTRACT) 
+
+```json
+{
+    "type": "function_scalar_extract",
+    "name": "EXTRACT",
+    "toExtract": "Minute",
+    "arguments": [
+    {
+        ...
+    }
+    ],
+}
+```
+CAST(exp1 AS dataType) (requires scalar-function capability CAST) 
+
+```json
+{
+    "type": "function_scalar_cast",
+    "name": "CAST",
+    "dataType": 
+    {
+        "size" : 10000,
+        "type" : "VARCHAR"
+    },
+    "arguments": [
+    {
+        ...
+    }
+    ],
+}
+```
+
+CASE (requires scalar-function capability CAST)
+
+```sql
+CASE basis WHEN exp1 THEN result1
+           WHEN exp2 THEN result2
+           ELSE result3
+           END
+```
+
+```json
+{
+    "type": "function_scalar_case",
+    "name": "CASE",
+    "basis" :
+    {
+        "columnNr" : 0,
+        "name" : "NUMERIC_GRADES",
+        "tableName" : "GRADES",
+        "type" : "column"
+    },
+    "arguments": [
+    {        
+        "type" : "literal_exactnumeric",
+        "value" : "1"
+    },       
+    {        
+        "type" : "literal_exactnumeric",
+        "value" : "2"
+    }
+    ],
+    "results": [
+    {        
+        "type" : "literal_string",
+        "value" : "VERY GOOD"
+    },       
+    {        
+        "type" : "literal_string",
+        "value" : "GOOD"
+    },
+    {        
+        "type" : "literal_string",
+        "value" : "INVALID"
+    }
+    ]
+}
+```
+Notes:
+* ```arguments```: The different cases.
+* ```results```: The different results in the same order as the arguments. If present, the ELSE result
+is the last entry in the ```results``` array.
+
 ### Aggregate Functions
 
 Consistent with scalar functions. To be detailed: star-operator, distinct, ...
@@ -1137,88 +1223,3 @@ Notes:
 * ```orderBy```: Optional. The requested order-by clause, a list of ```order_by_element``` elements. The field ```expression``` contains the expression to order by.
 Requires set-function capability GROUP_CONCAT_ORDER_BY.
 * ```separator```: Optional. Requires set-function capability GROUP_CONCAT_SEPARATOR.
-
-
-EXTRACT(toExtract FROM exp1) (requires scalar-function capability EXTRACT) 
-
-```json
-{
-    "type": "function_scalar_extract",
-    "name": "EXTRACT",
-    "toExtract": "Minute",
-    "arguments": [
-    {
-        ...
-    }
-    ],
-}
-```
-CAST(exp1 AS dataType) (requires scalar-function capability CAST) 
-
-```json
-{
-    "type": "function_scalar_cast",
-    "name": "CAST",
-    "dataType": 
-    {
-        "size" : 10000,
-        "type" : "VARCHAR"
-    },
-    "arguments": [
-    {
-        ...
-    }
-    ],
-}
-```
-
-CASE (requires scalar-function capability CAST)
-
-```sql
-CASE basis WHEN exp1 THEN result1
-           WHEN exp2 THEN result2
-           ELSE result3
-           END
-```
-
-```json
-{
-    "type": "function_scalar_case",
-    "name": "CASE",
-    "basis" :
-    {
-        "columnNr" : 0,
-        "name" : "NUMERIC_GRADES",
-        "tableName" : "GRADES",
-        "type" : "column"
-    },
-    "arguments": [
-    {        
-        "type" : "literal_exactnumeric",
-        "value" : "1"
-    },       
-    {        
-        "type" : "literal_exactnumeric",
-        "value" : "2"
-    }
-    ],
-    "results": [
-    {        
-        "type" : "literal_string",
-        "value" : "VERY GOOD"
-    },       
-    {        
-        "type" : "literal_string",
-        "value" : "GOOD"
-    },
-    {        
-        "type" : "literal_string",
-        "value" : "INVALID"
-    }
-    ]
-}
-```
-Notes:
-* ```arguments```: The different cases.
-* ```results```: The different results in the same order as the arguments. If present, the ELSE result
-is the last entry in the ```results``` array.
