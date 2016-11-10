@@ -1193,31 +1193,27 @@ CASE basis WHEN exp1 THEN result1
         "type" : "column"
     },
     "arguments": [
-    {
-        {        
-            "type" : "literal_exactnumeric",
-            "value" : "1"
-        },       
-        {        
-            "type" : "literal_exactnumeric",
-            "value" : "2"
-        }
+    {        
+        "type" : "literal_exactnumeric",
+        "value" : "1"
+    },       
+    {        
+        "type" : "literal_exactnumeric",
+        "value" : "2"
     }
     ],
     "results": [
-    {
-        {        
-            "type" : "literal_string",
-            "value" : "VERY GOOD"
-        },       
-        {        
-            "type" : "literal_string",
-            "value" : "GOOD"
-        },
-        {        
-            "type" : "literal_string",
-            "value" : "INVALID"
-        }
+    {        
+        "type" : "literal_string",
+        "value" : "VERY GOOD"
+    },       
+    {        
+        "type" : "literal_string",
+        "value" : "GOOD"
+    },
+    {        
+        "type" : "literal_string",
+        "value" : "INVALID"
     }
     ]
 }
