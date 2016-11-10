@@ -1171,6 +1171,9 @@ CAST(exp1 AS dataType) (requires scalar-function capability CAST)
     ],
 }
 ```
+
+CASE (requires scalar-function capability CAST)
+
 ```sql
 CASE basis WHEN exp1 THEN result1
            WHEN exp2 THEN result2
@@ -1223,6 +1226,3 @@ Notes:
 * ```arguments```: The different cases.
 * ```results```: The different results in the same order as the arguments. If present, the ELSE result
 is the last entry in the ```results``` array.
-
-  
-AVG is analogous (with distinct option)
