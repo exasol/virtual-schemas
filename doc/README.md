@@ -336,10 +336,10 @@ will produce the following Request, assuming that the Adapter has all required c
                 "type" : "order_by_element",
                 "expression" :
                 {
+                    "type" : "column",
                     "columnNr" : 1,
                     "name" : "USER_ID",
-                    "tableName" : "CLICKS",
-                    "type" : "column"
+                    "tableName" : "CLICKS"
                 },
                 "isAscending" : true,
                 "nullsLast" : true
@@ -359,26 +359,26 @@ will produce the following Request, assuming that the Adapter has all required c
                 "name" : "ID",
                 "dataType" :
                 {
+                    "type" : "DECIMAL",
                     "precision" : 18,
-                    "scale" : 0,
-                    "type" : "DECIMAL"
+                    "scale" : 0
                 }
             },
             {
                 "name" : "USER_ID",
                 "dataType" :
                 {
-                    "precision" : 18,
-                    "scale" : 0,
-                    "type" : "DECIMAL"
+                   "type" : "DECIMAL",
+                   "precision" : 18,
+                    "scale" : 0
                 }
             },
             {
                 "name" : "URL",
                 "dataType" :
                 {
-                    "size" : 1000,
-                    "type" : "VARCHAR"
+                   "type" : "VARCHAR",
+                   "size" : 1000
                 }
             },
             {
@@ -1009,8 +1009,8 @@ CAST(exp1 AS dataType) (requires scalar-function capability CAST)
     "name": "CAST",
     "dataType": 
     {
-        "size" : 10000,
-        "type" : "VARCHAR"
+        "type" : "VARCHAR",
+        "size" : 10000
     },
     "arguments": [
     {
@@ -1035,10 +1035,10 @@ CASE basis WHEN exp1 THEN result1
     "name": "CASE",
     "basis" :
     {
+        "type" : "column",
         "columnNr" : 0,
         "name" : "NUMERIC_GRADES",
-        "tableName" : "GRADES",
-        "type" : "column"
+        "tableName" : "GRADES"
     },
     "arguments": [
     {        
@@ -1205,10 +1205,10 @@ GROUP_CONCAT(DISTINCT exp1 orderBy SEPARATOR ', ') (requires set-function capabi
             "type" : "order_by_element",
             "expression" :
             {
-                "columnNr" : 1,
+              "type" : "column",
+               "columnNr" : 1,
                 "name" : "USER_ID",
-                "tableName" : "CLICKS",
-                "type" : "column"
+                "tableName" : "CLICKS"
             },
             "isAscending" : true,
             "nullsLast" : true
@@ -1220,6 +1220,5 @@ GROUP_CONCAT(DISTINCT exp1 orderBy SEPARATOR ', ') (requires set-function capabi
 
 Notes:
 * ```distinct```: Optional. Requires set-function capability GROUP_CONCAT_DISTINCT.
-* ```orderBy```: Optional. The requested order-by clause, a list of ```order_by_element``` elements. The field ```expression``` contains the expression to order by.
-Requires set-function capability GROUP_CONCAT_ORDER_BY.
+* ```orderBy```: Optional. The requested order-by clause, a list of ```order_by_element``` elements. The field ```expression``` contains the expression to order by. The group-by clause of a SELECT query uses the same ```order_by_element``` element type. The clause requires the set-function capability GROUP_CONCAT_ORDER_BY.
 * ```separator```: Optional. Requires set-function capability GROUP_CONCAT_SEPARATOR.

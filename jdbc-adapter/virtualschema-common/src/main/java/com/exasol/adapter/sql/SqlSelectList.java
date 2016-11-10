@@ -7,39 +7,51 @@ import com.google.common.base.Joiner;
 
 public class SqlSelectList extends SqlExpressionList {
 
-    /**
-     * If true, we just need one arbitrary value for each row. Example: If user
-     * runs COUNT (*) and COUNT cannot be pushed down, we need to return any
-     * value for each row (e.g. constant TRUE) and then EXASOL can do the COUNT.
-     */
-    boolean requestedAnyColumn = false;
+    SqlSelectListType type;
 
-    /**
-     * Call this if all columns are required, i.e. SELECT * FROM ...
-     */
-    public SqlSelectList() {super(null);}
-
-    /**
-     * This is required in two cases<br>
-     * 1. If selectList has > 1 elements: This is a regular select list 2. If
-     * selectList has no element: This means that any column is required
-     */
-    public SqlSelectList(List<SqlNode> selectList) {
+    private SqlSelectList(SqlSelectListType type, List<SqlNode> selectList) {
         super(selectList);
-        if (selectList.size() == 0) {
-            requestedAnyColumn = true;
-        }
+        this.type = type;
     }
 
+    /**
+     * Creates a SqlSelectList for SELECT *. See {@link SqlSelectListType#SelectStar}.
+     * @return the new SqlSelectList.
+     */
+    public static SqlSelectList createSelectStarSelectList() {
+        return new SqlSelectList(SqlSelectListType.SelectStar, null);
+    }
+
+    /**
+     * Creates a SqlSelectList that uses an arbitrary value. See {@link SqlSelectListType#AnyValue}.
+     * @return the new SqlSelectList.
+     */
+    public static SqlSelectList createAnyValueSelectList() {
+        return new SqlSelectList(SqlSelectListType.AnyValue, null);
+    }
+
+    /**
+     * Creates a regular SqlSelectList. See {@link SqlSelectListType#Regular}.
+     * @param selectList The selectList needs at least one element.
+     * @return the new SqlSelectList.
+     */
+    public static SqlSelectList createRegularSelectList(List<SqlNode> selectList) {
+        assert (selectList != null);
+        assert (selectList.size() > 0);
+        return new SqlSelectList(SqlSelectListType.Regular, selectList);
+    }
+
+
+
     public boolean isRequestAnyColumn() {
-        return requestedAnyColumn;
+        return type == SqlSelectListType.AnyValue;
     }
 
     /**
      * @return true if this is "SELECT *", false otherwise
      */
     public boolean isSelectStar() {
-        return getExpressions() == null || getExpressions().isEmpty();
+        return type == SqlSelectListType.SelectStar;
     }
 
     @Override
@@ -49,11 +61,11 @@ public class SqlSelectList extends SqlExpressionList {
 
     @Override
     public String toSimpleSql() {
-        if (requestedAnyColumn) {
+        if (isRequestAnyColumn()) {
             // The system requested any column
             return "true";
         }
-        if (getExpressions() == null || getExpressions().isEmpty()) {
+        if (isSelectStar()) {
             return "*";
         }
         List<String> selectElement = new ArrayList<>();

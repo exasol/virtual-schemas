@@ -223,10 +223,14 @@ public class RequestJsonParser {
     private SqlSelectList parseSelectList(JsonArray selectList) {
         if (selectList == null) {
             // this is like SELECT *
-            return new SqlSelectList();
+            return SqlSelectList.createSelectStarSelectList();
         }
         List<SqlNode> selectListElements = parseExpressionList(selectList);
-        return new SqlSelectList(selectListElements);
+        if (selectListElements.size() == 0) {
+            return SqlSelectList.createAnyValueSelectList();
+        } else {
+            return SqlSelectList.createRegularSelectList(selectListElements);
+        }
     }
     
     private SqlOrderBy parseOrderBy(JsonArray orderByList) {

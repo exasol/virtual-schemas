@@ -52,7 +52,7 @@ public class CustomSqlGenerationVisitorTest {
     private SqlNode getTestSqlNode() {
         TableMetadata clicksMeta = getTestTableMetadata();
         SqlTable fromClause = new SqlTable("TEST", clicksMeta);
-        SqlSelectList selectList = new SqlSelectList(
+        SqlSelectList selectList = SqlSelectList.createRegularSelectList(
                 ImmutableList.<SqlNode>of(new SqlPredicateNot(
                         new SqlPredicateNot(new SqlColumn(1, clicksMeta
                                 .getColumns().get(0))))));
