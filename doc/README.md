@@ -1073,15 +1073,12 @@ COUNT((exp1, exp2))   (requires set-function capability COUNT and COUNT_TUPLE)
     ]
 }
 ```
-
-GROUP_CONCAT(DISTINCT exp1 SEPARATOR ', ')
+AVG(exp)     (requires set-function capability AVG)
 
 ```json
 {
-    "type": "function_aggregate_group_concat",
-    "name": "GROUP_CONCAT",
-    "distinct": true,
-    "separator": ", ",
+    "type": "function_aggregate",
+    "name": "AVG",
     "arguments": [
     {
         ...
@@ -1090,4 +1087,142 @@ GROUP_CONCAT(DISTINCT exp1 SEPARATOR ', ')
 }
 ```
 
+AVG(DISTINCT exp)    (requires set-function capability AVG and AVG_DISTINCT)
+
+```json
+{
+    "type": "function_aggregate",
+    "name": "AVG",
+    "distinct": true,
+    "arguments": [
+    {
+        ...
+    }
+    ]
+}
+```
+
+GROUP_CONCAT(DISTINCT exp1 orderBy SEPARATOR ', ') (requires set-function capability GROUP_CONCAT)
+
+```json
+{
+    "type": "function_aggregate_group_concat",
+    "name": "GROUP_CONCAT",
+    "distinct": true,
+    "arguments": [
+    {
+        ...
+    }
+    ],
+    "orderBy" : [
+        {
+            "type" : "order_by_element",
+            "expression" :
+            {
+                "columnNr" : 1,
+                "name" : "USER_ID",
+                "tableName" : "CLICKS",
+                "type" : "column"
+            },
+            "isAscending" : true,
+            "nullsLast" : true
+        }
+    ],
+    "separator": ", "
+}
+```
+
+Notes:
+* ```distinct```: Optional. Requires set-function capability GROUP_CONCAT_DISTINCT.
+* ```orderBy```: Optional. The requested order-by clause, a list of ```order_by_element``` elements. The field ```expression``` contains the expression to order by.
+Requires set-function capability GROUP_CONCAT_ORDER_BY.
+* ```separator```: Optional. Requires set-function capability GROUP_CONCAT_SEPARATOR.
+
+
+EXTRACT(toExtract FROM exp1) (requires scalar-function capability EXTRACT) 
+
+```json
+{
+    "type": "function_scalar_extract",
+    "name": "EXTRACT",
+    "toExtract": "Minute",
+    "arguments": [
+    {
+        ...
+    }
+    ],
+}
+```
+CAST(exp1 AS dataType) (requires scalar-function capability CAST) 
+
+```json
+{
+    "type": "function_scalar_cast",
+    "name": "CAST",
+    "dataType": 
+    {
+        "size" : 10000,
+        "type" : "VARCHAR"
+    },
+    "arguments": [
+    {
+        ...
+    }
+    ],
+}
+```
+```sql
+CASE basis WHEN exp1 THEN result1
+           WHEN exp2 THEN result2
+           ELSE result3
+           END
+```
+
+```json
+{
+    "type": "function_scalar_case",
+    "name": "CASE",
+    "basis" :
+    {
+        "columnNr" : 0,
+        "name" : "NUMERIC_GRADES",
+        "tableName" : "GRADES",
+        "type" : "column"
+    },
+    "arguments": [
+    {
+        {        
+            "type" : "literal_exactnumeric",
+            "value" : "1"
+        },       
+        {        
+            "type" : "literal_exactnumeric",
+            "value" : "2"
+        }
+    }
+    ],
+    "results": [
+    {
+        {        
+            "type" : "literal_string",
+            "value" : "VERY GOOD"
+        },       
+        {        
+            "type" : "literal_string",
+            "value" : "GOOD"
+        },
+        {        
+            "type" : "literal_string",
+            "value" : "INVALID"
+        }
+    }
+    ]
+}
+```
+Notes:
+* ```arguments```: The different cases.
+* ```results```: The different results in the same order as the arguments. If present, the ELSE result
+is the last entry in the ```results``` array.
+
+  
 AVG is analogous (with distinct option)
