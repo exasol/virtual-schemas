@@ -25,7 +25,7 @@ The resulting fat jar is stored in ```virtualschema-jdbc-adapter-dist/target/vir
 
 ### Upload Adapter jar
 
-You have to upload the jar of the adapter to a bucket of your choice. This will allow using the jar in the adapter script. See https://github.com/EXASOL/script-language-plugins#authentication-uploading-and-deleting-files for how to use BucketFS.
+You have to upload the jar of the adapter to a bucket of your choice. This will allow using the jar in the adapter script. See chapter 3.6.4. "The synchronous cluster file system BucketFS" in the EXASolution User Manual for how to use BucketFS.
 
 ### Upload JDBC Driver files
 
