@@ -91,8 +91,9 @@ public class JdbcMetadataReader {
         String curCatalog = "";
         int numCatalogs = 0;
         List<String> allCatalogs = new ArrayList<>();
+        ResultSet res = null;
         try {
-            ResultSet res = dbMeta.getCatalogs();
+            res = dbMeta.getCatalogs();
             while (res.next()) {
                 curCatalog = res.getString("TABLE_CAT");   // EXA_DB in case of EXASOL
                 allCatalogs.add(curCatalog);
@@ -117,6 +118,9 @@ public class JdbcMetadataReader {
                     return null;
                 }
             }
+        } finally {
+        	if(res != null)
+        		res.close();
         }
         if (dialect.supportsJdbcCatalogs() == SqlDialect.SchemaOrCatalogSupport.SUPPORTED
                 || dialect.supportsJdbcCatalogs() == SqlDialect.SchemaOrCatalogSupport.UNKNOWN) {
@@ -160,8 +164,10 @@ public class JdbcMetadataReader {
         List<String> allSchemas = new ArrayList<>();
         int numSchemas = 0;
         String curSchema = "";
+        ResultSet schemas = null;
+        
         try {
-            ResultSet schemas = dbMeta.getSchemas();
+            schemas = dbMeta.getSchemas();
             while (schemas.next()) {
                 curSchema = schemas.getString("TABLE_SCHEM");
                 allSchemas.add(curSchema);
@@ -186,7 +192,11 @@ public class JdbcMetadataReader {
                     return null;
                 }
             }
+        } finally {
+        	if (schemas != null)
+        		schemas.close();
         }
+        
         if (dialect.supportsJdbcSchemas() == SqlDialect.SchemaOrCatalogSupport.SUPPORTED
                 || dialect.supportsJdbcSchemas() == SqlDialect.SchemaOrCatalogSupport.UNKNOWN) {
             if (foundSchema) {
@@ -235,6 +245,8 @@ public class JdbcMetadataReader {
                 tableComments.add(mappedTable.getTableComment());
             }
         }
+        
+        resTables.close();
 
         // Columns
         for (int i=0; i<tableNames.size(); ++i) {
@@ -278,6 +290,7 @@ public class JdbcMetadataReader {
             columns.add(dialect.mapColumn(cols));
         }
         if (columns.isEmpty()) { System.out.println("Warning: Found a table without columns: " + table); }
+        cols.close();
         return columns;
     }
 }
