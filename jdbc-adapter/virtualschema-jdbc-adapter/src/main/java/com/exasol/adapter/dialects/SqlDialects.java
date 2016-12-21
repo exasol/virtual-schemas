@@ -39,7 +39,12 @@ public class SqlDialects {
             return new MysqlSqlDialect(context);
         } else if (name.equalsIgnoreCase(OracleSqlDialect.NAME)) {
             return new OracleSqlDialect(context);
-        } else {
+        } else if (name.equalsIgnoreCase(TeradataSqlDialect.NAME)) {
+            return new TeradataSqlDialect(context);
+        } else if (name.equalsIgnoreCase(RedshiftSqlDialect.NAME)) {
+            return new RedshiftSqlDialect(context);
+        } 
+        else {
             return null;
         }
     }
