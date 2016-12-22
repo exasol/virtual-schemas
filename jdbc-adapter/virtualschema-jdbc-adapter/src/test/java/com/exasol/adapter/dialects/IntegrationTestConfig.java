@@ -139,6 +139,14 @@ public class IntegrationTestConfig {
     public String getGenericPassword() {
         return getProperty("generic", "password");
     }
+    
+    public String getBucketFSPassword(){
+        return getProperty("general", "bucketFsPassword");
+    }
+    
+    public String getBucketFSURL(){
+        return getProperty("general", "bucketFsUrl");
+    }
 
     private Map loadConfig(String configFile) throws FileNotFoundException {
         Yaml yaml = new Yaml();

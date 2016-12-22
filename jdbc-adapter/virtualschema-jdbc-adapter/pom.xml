@@ -102,6 +102,34 @@
             <version>1.17</version>
             <scope>integration-test</scope>
         </dependency>
+        
+        
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient Needed to upload jar to BucketFS-->
+		<dependency>
+		    <groupId>org.apache.httpcomponents</groupId>
+		    <artifactId>httpclient</artifactId>
+		    <version>4.5.2</version>
+		    <scope>integration-test</scope>
+		</dependency>
+		        
+		        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/fluent-hc -->
+		<dependency>
+		    <groupId>org.apache.httpcomponents</groupId>
+		    <artifactId>fluent-hc</artifactId>
+		    <version>4.5.2</version>
+		    <scope>integration-test</scope>
+		</dependency>
+		
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
+		<dependency>
+		    <groupId>org.apache.httpcomponents</groupId>
+		    <artifactId>httpmime</artifactId>
+		    <version>4.5.2</version>
+		    <scope>integration-test</scope>
+		</dependency>		
+		        
+        
         <!-- The EXASOL jdbc driver is only needed for verify scope, however we add it always so that you can always create virtual schemas to an EXASOL -->
         <dependency>
             <!-- <scope>verify</scope> -->
