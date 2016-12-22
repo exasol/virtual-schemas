@@ -45,6 +45,8 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
         cap.supportMainCapability(MainCapability.AGGREGATE_HAVING);
         cap.supportMainCapability(MainCapability.ORDER_BY_COLUMN);
         cap.supportMainCapability(MainCapability.ORDER_BY_EXPRESSION);
+        cap.supportMainCapability(MainCapability.LIMIT);
+        
         
         // Predicates
         cap.supportPredicate(PredicateCapability.AND);

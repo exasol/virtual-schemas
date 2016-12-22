@@ -9,6 +9,7 @@ import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.sql.SqlColumn;
+import com.exasol.adapter.sql.SqlLimit;
 import com.exasol.adapter.sql.SqlNode;
 import com.exasol.adapter.sql.SqlNodeType;
 import com.exasol.adapter.sql.SqlSelectList;
@@ -54,6 +55,42 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
        
         return Joiner.on(", ").join(selectListElements);
     }
+    
+    
+    @Override
+    public String visit(SqlStatementSelect select) {
+        if (!select.hasLimit()) {
+            return super.visit(select);
+        } else {
+            SqlLimit limit = select.getLimit();
+         
+            StringBuilder sql = new StringBuilder();
+            sql.append("SELECT TOP "+limit.getLimit()+ " ");
+            
+            sql.append(select.getSelectList().accept(this));
+            sql.append(" FROM ");
+            sql.append(select.getFromClause().accept(this));
+            if (select.hasFilter()) {
+                sql.append(" WHERE ");
+                sql.append(select.getWhereClause().accept(this));
+            }
+            if (select.hasGroupBy()) {
+                sql.append(" GROUP BY ");
+                sql.append(select.getGroupBy().accept(this));
+            }
+            if (select.hasHaving()) {
+                sql.append(" HAVING ");
+                sql.append(select.getHaving().accept(this));
+            }
+            if (select.hasOrderBy()) {
+                sql.append(" ");
+                sql.append(select.getOrderBy().accept(this));
+            }
+
+            return sql.toString();   
+        }
+    }
+    
     
     @Override
     public String visit(SqlColumn column) {
