@@ -2,16 +2,19 @@
 
 general:
   debug:           false
-  jdbcAdapterPath: /buckets/mybucketfs/mybucket/jdbc-adapter/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar
-  scpTargetPath:   'ws64-2.dev.exasol.com:/x/u/ah1597/jdbc-adapter/integrationtest/'
   debugAddress:    '192.168.0.12:3000'  # Address which will be defined as DEBUG_ADDRESS in the virtual schemas
+  bucketFsUrl: http://exasol-host:2580/bucket1
+  bucketFsPassword: bucket1
+  jdbcAdapterPath:  /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar
 
 exasol:
   runIntegrationTests: true
-  address:  exasol-host:1234
+  address:  exasol-host:8563
   user:     sys
   password: exasol
 
+
+  
 # Generic sql dialect is tested via MySQL
 generic:
   runIntegrationTests: false

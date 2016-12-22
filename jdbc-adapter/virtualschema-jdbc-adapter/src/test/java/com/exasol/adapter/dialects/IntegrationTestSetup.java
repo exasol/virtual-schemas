@@ -1,9 +1,20 @@
 package com.exasol.adapter.dialects;
 
-import com.google.common.collect.ImmutableList;
-
+import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.FileEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
+
 
 /**
  * The main method of this class will be called in the pre-integration-test maven phase before the actual integration-test phase starst.
@@ -13,7 +24,7 @@ import java.util.List;
  */
 public class IntegrationTestSetup {
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException {
 
         System.out.println("Start setup of the integration test environment");
         String projectVersion = args[0];
@@ -21,23 +32,48 @@ public class IntegrationTestSetup {
 
         IntegrationTestConfig config = new IntegrationTestConfig(configFile);
 
+        String bucketFSurl = config.getBucketFSURL();  
+        String bucketFSpassword = config.getBucketFSPassword();
+        		
+        
         // The local path look like "virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar"
         String artifactDistName = "virtualschema-jdbc-adapter-dist";
-        String scpLocalPath = "../" + artifactDistName + "/target/" + artifactDistName + "-" + projectVersion + ".jar";
-        String scpTargetPath = config.getScpTargetPath();
-        ImmutableList<String> commands = ImmutableList.of("scp", scpLocalPath, scpTargetPath);
-        runBashCommand(commands);
+        
+        String jarName = artifactDistName + "-" + projectVersion + ".jar";
+        
+        String jarLocalPath = "../" + artifactDistName + "/target/" + jarName;
+     
+        
+        uploadFileToBucketFS(bucketFSurl+"/"+jarName, jarLocalPath, bucketFSpassword);
+        
+        //uploadFileToBucketFS("http://192.168.106.131:2580/bucket1/original-virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar", "C:\\Users\\tb\\Desktop\\github-repos\\virtual-schemas\\jdbc-adapter\\virtualschema-jdbc-adapter-dist\\target\\original-virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar","bucket1");
+                   
     }
 
-    private static void runBashCommand(List<String> commands) throws IOException, InterruptedException {
-        System.out.println("EXECUTE command: " + commands);
-        ProcessBuilder pb = new ProcessBuilder(commands).inheritIO();
-        Process process = pb.start();
-        process.waitFor();
-        System.out.println("Process ended with exit value " + process.exitValue());
-        if (process.exitValue() != 0) {
-            throw new RuntimeException("SCP failed.");
-        }
-    }
+  
+    private static void uploadFileToBucketFS(String url, String filePath, String password) throws ClientProtocolException, IOException, URISyntaxException {
+    	
+    	HttpClient httpClient = HttpClientBuilder.create().build();
+        URIBuilder uriBuilder = new URIBuilder(url);
+        HttpPut request = new HttpPut(uriBuilder.build());
+                
+        String auth = "w:"+password;
+        byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(Charset.forName("UTF-8")));
+        String authHeader = "Basic " + new String(encodedAuth);
+        request.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+         
+        FileEntity fileEntity = new FileEntity(new File(filePath));
+        
+        request.setEntity(fileEntity);
+        
+        HttpResponse response = httpClient.execute(request);
 
+        if ( response.getStatusLine().getStatusCode() != 200 ) 
+        	throw new IOException( response.toString() );
+        
+        System.out.println (response);
+        
+    }
+    
+    
 }
