@@ -12,3 +12,4 @@ target
 # Intellij recommends to share iml files, however, better don't share files which might be outdated
 *.iml
  
+jdbc-adapter/integration-test-teradata.yaml

@@ -30,8 +30,6 @@ public class IntegrationTestSetup {
         String projectVersion = args[0];
         String configFile = args[1];
 
-        System.out.println("###########"+args[1]);
-        
         IntegrationTestConfig config = new IntegrationTestConfig(configFile);
 
         String bucketFSurl = config.getBucketFSURL();  

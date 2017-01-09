@@ -25,7 +25,7 @@
             -->
             <properties>
                 <!-- This property has to be overwritten from user -->
-                 <integrationtest.configfile></integrationtest.configfile>  
+                <integrationtest.configfile></integrationtest.configfile>
             </properties>
             <build>
                 <plugins>
