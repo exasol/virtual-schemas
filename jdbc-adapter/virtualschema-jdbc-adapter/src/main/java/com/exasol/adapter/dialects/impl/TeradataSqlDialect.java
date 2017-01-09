@@ -47,6 +47,7 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
         cap.supportMainCapability(MainCapability.ORDER_BY_EXPRESSION);
         cap.supportMainCapability(MainCapability.LIMIT);
         
+       
         
         // Predicates
         cap.supportPredicate(PredicateCapability.AND);
@@ -189,7 +190,6 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_TIMESTAMP);
         
         cap.supportScalarFunction(ScalarFunctionCapability.NULLIFZERO);
-        // SYS_GUID is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.ZEROIFNULL);
         
         return cap;
@@ -201,7 +201,22 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
         DataType colType = null;
         int jdbcType = cols.getInt("DATA_TYPE");
         switch (jdbcType) {
-            
+        	case Types.TIME:
+        		colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
+        		break;
+        	case Types.TIME_WITH_TIMEZONE:
+        		colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
+        		break;
+        	case Types.NUMERIC:
+        		int decimalPrec = cols.getInt("COLUMN_SIZE");
+                int decimalScale = cols.getInt("DECIMAL_DIGITS");
+
+                if (decimalPrec <= DataType.maxExasolDecimalPrecision) {
+                    colType = DataType.createDecimal(decimalPrec, decimalScale);
+                } else {
+                    colType = DataType.createDouble();
+                }
+                break;
             case Types.OTHER:
             case Types.SQLXML:
                 // Teradata JDBC uses OTHER as GEOMETRY type

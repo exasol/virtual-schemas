@@ -1,5 +1,8 @@
 package com.exasol.adapter.dialects.impl;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -12,6 +15,8 @@ import com.exasol.adapter.capabilities.ScalarFunctionCapability;
 import com.exasol.adapter.dialects.AbstractSqlDialect;
 import com.exasol.adapter.dialects.SqlDialectContext;
 import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
@@ -95,16 +100,18 @@ public class RedshiftSqlDialect extends AbstractSqlDialect{
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV);
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_POP);
-        // STDDEV_POP_DISTINCT
+        cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_POP_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_SAMP);
-        // STDDEV_SAMP_DISTINCT
-        //cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE);
-        //cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE_DISTINCT);
+        cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_SAMP_DISTINCT);
+        cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE);
+        cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_POP);
-        // VAR_POP_DISTINCT
+        cap.supportAggregateFunction(AggregateFunctionCapability.VAR_POP_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_SAMP);
-        // VAR_SAMP_DISTINCT
+        cap.supportAggregateFunction(AggregateFunctionCapability.VAR_SAMP_DISTINCT)	;
         
+        
+        //math functions
         cap.supportScalarFunction(ScalarFunctionCapability.CEIL);
         cap.supportScalarFunction(ScalarFunctionCapability.DIV);
         cap.supportScalarFunction(ScalarFunctionCapability.FLOOR);
@@ -122,7 +129,6 @@ public class RedshiftSqlDialect extends AbstractSqlDialect{
         cap.supportScalarFunction(ScalarFunctionCapability.ATAN);
         cap.supportScalarFunction(ScalarFunctionCapability.ATAN2);
         cap.supportScalarFunction(ScalarFunctionCapability.COS);
-        cap.supportScalarFunction(ScalarFunctionCapability.COSH);
         cap.supportScalarFunction(ScalarFunctionCapability.COT);
         cap.supportScalarFunction(ScalarFunctionCapability.DEGREES);
         cap.supportScalarFunction(ScalarFunctionCapability.EXP);
@@ -138,13 +144,14 @@ public class RedshiftSqlDialect extends AbstractSqlDialect{
         cap.supportScalarFunction(ScalarFunctionCapability.SQRT);
         cap.supportScalarFunction(ScalarFunctionCapability.TAN);
         cap.supportScalarFunction(ScalarFunctionCapability.TANH);
-        
-       
         cap.supportScalarFunction(ScalarFunctionCapability.ASCII); 
         cap.supportScalarFunction(ScalarFunctionCapability.CHR);
-
         cap.supportScalarFunction(ScalarFunctionCapability.INSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.LENGTH);
+        cap.supportScalarFunction(ScalarFunctionCapability.SIGN);
+        
+        
+        cap.supportScalarFunction(ScalarFunctionCapability.CONCAT);
         cap.supportScalarFunction(ScalarFunctionCapability.LOCATE);
         cap.supportScalarFunction(ScalarFunctionCapability.LOWER);
         cap.supportScalarFunction(ScalarFunctionCapability.LPAD);
@@ -162,45 +169,74 @@ public class RedshiftSqlDialect extends AbstractSqlDialect{
         cap.supportScalarFunction(ScalarFunctionCapability.TRANSLATE);
         cap.supportScalarFunction(ScalarFunctionCapability.TRIM);
         cap.supportScalarFunction(ScalarFunctionCapability.UPPER);
+
         
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD_MONTHS);
-        cap.supportScalarFunction(ScalarFunctionCapability.MONTHS_BETWEEN);
-
-        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_DATE);
-        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_TIMESTAMP);
-        
-        cap.supportScalarFunction(ScalarFunctionCapability.CONVERT_TZ);
-        
-        cap.supportScalarFunction(ScalarFunctionCapability.CAST);
-
-        cap.supportScalarFunction(ScalarFunctionCapability.SYSDATE);
-        cap.supportScalarFunction(ScalarFunctionCapability.SYSTIMESTAMP);
-        
-        cap.supportScalarFunction(ScalarFunctionCapability.TO_TIMESTAMP);
-        cap.supportScalarFunction(ScalarFunctionCapability.TO_NUMBER);
-
-        cap.supportScalarFunction(ScalarFunctionCapability.HASH_MD5);
-        cap.supportScalarFunction(ScalarFunctionCapability.HASH_SHA1);
-
-        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_SCHEMA);
-        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_USER);
-
+        //Bit functions
         cap.supportScalarFunction(ScalarFunctionCapability.BIT_AND);
         cap.supportScalarFunction(ScalarFunctionCapability.BIT_OR);
 
-               
+        //Date and Time Functions
+        cap.supportScalarFunction(ScalarFunctionCapability.ADD_MONTHS);
+        cap.supportScalarFunction(ScalarFunctionCapability.MONTHS_BETWEEN);
+        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_DATE);
+        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_TIMESTAMP);
+        cap.supportScalarFunction(ScalarFunctionCapability.CONVERT_TZ);
+        cap.supportScalarFunction(ScalarFunctionCapability.SYSDATE);
+        
+        cap.supportScalarFunction(ScalarFunctionCapability.YEAR); 
+        cap.supportScalarFunction(ScalarFunctionCapability.EXTRACT);
+        
+        
+        //Convertion functions
+        cap.supportScalarFunction(ScalarFunctionCapability.CAST);
+        cap.supportScalarFunction(ScalarFunctionCapability.TO_NUMBER);
+        cap.supportScalarFunction(ScalarFunctionCapability.TO_TIMESTAMP);
+        cap.supportScalarFunction(ScalarFunctionCapability.TO_DATE);
+        
+        
+        //hash functions
+        cap.supportScalarFunction(ScalarFunctionCapability.HASH_MD5);
+        cap.supportScalarFunction(ScalarFunctionCapability.HASH_SHA1);
+        
+        
+        //system information functions
+        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_SCHEMA);
+        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_USER);
+        
         return cap;
 	}
 	
+	 @Override
+    public DataType mapJdbcType(ResultSet cols) throws SQLException {
+        DataType colType = null;
+        int jdbcType = cols.getInt("DATA_TYPE");
+        switch (jdbcType) {
+        	case Types.NUMERIC:
+        		int decimalPrec = cols.getInt("COLUMN_SIZE");
+                int decimalScale = cols.getInt("DECIMAL_DIGITS");
+
+                if (decimalPrec <= DataType.maxExasolDecimalPrecision) {
+                    colType = DataType.createDecimal(decimalPrec, decimalScale);
+                } else {
+                    colType = DataType.createDouble();
+                }
+                break;
+            
+        }
+        return colType;
+    }
 	
 	@Override
     public Map<ScalarFunction, String> getScalarFunctionAliases() {
 		
 		Map<ScalarFunction,String> scalarAliases = new EnumMap<>(ScalarFunction.class); 
 		
+		scalarAliases.put(ScalarFunction.YEAR, "DATE_PART_YEAR");
 		scalarAliases.put(ScalarFunction.CONVERT_TZ, "CONVERT_TIMEZONE");
 		scalarAliases.put(ScalarFunction.HASH_MD5, "MD5");
 		scalarAliases.put(ScalarFunction.HASH_SHA1, "FUNC_SHA1");
+		
+		scalarAliases.put(ScalarFunction.SUBSTR,"SUBSTRING");
 		
 		return scalarAliases;
 		
@@ -211,8 +247,6 @@ public class RedshiftSqlDialect extends AbstractSqlDialect{
     public Map<AggregateFunction, String> getAggregateFunctionAliases() {
         Map<AggregateFunction, String> aggregationAliases = new EnumMap<>(AggregateFunction.class);
         
-        //aggregationAliases.put(AggregateFunction.GROUP_CONCAT, "LISTAGG");
-
         return aggregationAliases;
     }
 
@@ -234,7 +268,7 @@ public class RedshiftSqlDialect extends AbstractSqlDialect{
 
 	@Override
 	public IdentifierCaseHandling getQuotedIdentifierHandling() {
-        return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
+        return IdentifierCaseHandling.INTERPRET_AS_UPPER;
 	}
 
 	@Override
@@ -275,5 +309,10 @@ public class RedshiftSqlDialect extends AbstractSqlDialect{
 	public String getStringLiteral(String value) {
 		 return "'" + value.replace("'", "''") + "'";
 	}
+	
+	 @Override
+    public SqlGenerationVisitor getSqlGenerationVisitor(SqlGenerationContext context) {
+        return new RedshiftSqlGenerationVisitor(this, context);
+    }
 
 }

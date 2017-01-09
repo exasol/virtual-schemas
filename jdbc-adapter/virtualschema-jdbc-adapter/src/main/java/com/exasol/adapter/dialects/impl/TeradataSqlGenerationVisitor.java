@@ -8,6 +8,7 @@ import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
+import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.SqlColumn;
 import com.exasol.adapter.sql.SqlLimit;
 import com.exasol.adapter.sql.SqlNode;
@@ -34,6 +35,7 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
         List<String> selectListElements = new ArrayList<>();
         if (selectList.isSelectStar()) {
             if (selectListRequiresCasts(selectList)) {
+
                 // Do as if the user has all columns in select list
                 SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
                 
@@ -105,7 +107,7 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
        
         String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
         
-        return getColumnProjectionStringNoCheckImpl(typeName, projString);
+        return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
        
     }
 
@@ -114,12 +116,14 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
 
         String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
         
-        return getColumnProjectionStringNoCheckImpl(typeName, projString);
+        return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
         
     }
     
     
-    private String getColumnProjectionStringNoCheckImpl(String typeName,String projString) {
+    private String getColumnProjectionStringNoCheckImpl(String typeName, SqlColumn column, String projString) {
+    	
+    	
     	if ( typeName.startsWith("SYSUDTLIB.ST_GEOMETRY") ||typeName.startsWith("JSON")  )
         {
         	
@@ -131,19 +135,37 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
         	
             projString = "XMLSERIALIZE(DOCUMENT " + projString + " as VARCHAR(64000) INCLUDING XMLDECLARATION) ";
 	
-        }         
+        }
+        else if (typeName.startsWith("NUMBER")  &&  column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.DOUBLE  ){
         	
+        	projString = "CAST(" + projString + "  as DOUBLE PRECISION)";
+        	
+        }
+        else if (typeName == "TIME" || typeName == "TIME WITH TIME ZONE" ) {
+        	projString = "CAST(" + projString + "  as VARCHAR(21) )";
+        }
+        else if (TYPE_NAME_NOT_SUPPORTED.contains(typeName)){
+        	
+        	projString = "'"+typeName+" NOT SUPPORTED'"; //returning a string constant for unsupported data types
+        	
+        } 
+        	
+    	
         return projString;
     }
     
     
-    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("SYSUDTLIB.ST_GEOMETRY","XML");
+    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("SYSUDTLIB.ST_GEOMETRY","XML","JSON","TIME","TIME WITH TIME ZONE");
+    
+    private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("BYTE"); 
 
     private boolean nodeRequiresCast(SqlNode node) {
         if (node.getType() == SqlNodeType.COLUMN) {
             SqlColumn column = (SqlColumn)node;
             String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-            return TYPE_NAMES_REQUIRING_CAST.contains(typeName);
+            return TYPE_NAMES_REQUIRING_CAST.contains(typeName) || 
+            		TYPE_NAME_NOT_SUPPORTED.contains(typeName) ||  
+            		(typeName.startsWith("NUMBER")  &&  column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.DOUBLE  );
         }
         return false;
     }
@@ -155,9 +177,11 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
         SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
         int columnId = 0;
         for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
+        	
+        	
         	if (nodeRequiresCast(new SqlColumn(columnId, columnMeta))) {
                 requiresCasts = true;
-                        	}
+        	}
         }
 
         return requiresCasts;

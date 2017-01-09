@@ -19,9 +19,8 @@ import java.util.List;
  */
 public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
 
-    private static final String VIRTUAL_SCHEMA = "VS_IMPALA";
-    private static final String IMPALA_SCHEMA = "default";
-    private static final boolean IS_LOCAL = false;
+    private static final String VIRTUAL_SCHEMA = "VS_TERADATA";
+    private static final String TERADATA_SCHEMA = "default";
 
     @BeforeClass
     public static void setUpClass() throws FileNotFoundException, SQLException, ClassNotFoundException {
@@ -31,14 +30,14 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
         createImpalaJDBCAdapter();
         createVirtualSchema(
                 VIRTUAL_SCHEMA,
-                ImpalaSqlDialect.NAME,
-                "", IMPALA_SCHEMA,
+                TeradataSqlDialect.NAME,
+                "", TERADATA_SCHEMA,
                 "",
                 "no-user",
                 "no-password",
                 "ADAPTER.JDBC_ADAPTER",
                 getConfig().getImpalaJdbcConnectionString(),
-                IS_LOCAL,
+                false,
                 getConfig().debugAddress(),
                 "SAMPLE_07,ALL_HIVE_IMPALA_TYPES,SIMPLE,SIMPLE_WITH_NULLS");
     }

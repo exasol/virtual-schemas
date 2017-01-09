@@ -120,6 +120,30 @@ public class IntegrationTestConfig {
         return getProperty("oracle", "password");
     }
 
+    public String getTeradataJdbcConnectionString() {
+        return getProperty("teradata", "connectionString");
+    }
+
+    public String getTeradataUser() {
+        return getProperty("teradata", "user");
+    }
+
+    public String getTeradataPassword() {
+        return getProperty("teradata", "password");
+    }
+
+    public String getTeradataJdbcPrefixPath() {
+        return getProperty("teradata", "jdbcDriverPath");
+    }
+
+    public List<String> getTeradataJdbcJars() {
+        return getProperty("teradata", "jdbcDriverJars");
+    }
+    
+    public boolean teradataTestsRequested() {
+        return getProperty("teradata", "runIntegrationTests", false);
+    }
+    
     public boolean genericTestsRequested() {
         return getProperty("generic", "runIntegrationTests", false);
     }
