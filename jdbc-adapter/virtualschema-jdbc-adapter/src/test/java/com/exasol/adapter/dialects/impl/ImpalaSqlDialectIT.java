@@ -22,6 +22,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
     private static final String VIRTUAL_SCHEMA = "VS_IMPALA";
     private static final String IMPALA_SCHEMA = "default";
     private static final boolean IS_LOCAL = false;
+    
     @BeforeClass
     public static void setUpClass() throws FileNotFoundException, SQLException, ClassNotFoundException {
         Assume.assumeTrue(getConfig().impalaTestsRequested());
@@ -30,7 +31,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
         createImpalaJDBCAdapter();
         createVirtualSchema(
                 VIRTUAL_SCHEMA,
-                TeradataSqlDialect.NAME,
+                ImpalaSqlDialect.NAME,
                 "", IMPALA_SCHEMA,
                 "",
                 "no-user",
