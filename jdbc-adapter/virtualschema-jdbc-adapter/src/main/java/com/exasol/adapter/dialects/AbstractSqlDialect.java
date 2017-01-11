@@ -41,7 +41,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
             commentString = "";
         }
         String tableName = changeIdentifierCaseIfNeeded(tables.getString("TABLE_NAME"));
-        return MappedTable.createMappedTable(tableName, commentString);
+        return MappedTable.createMappedTable(tableName,tables.getString("TABLE_NAME"), commentString);
     }
 
     @Override

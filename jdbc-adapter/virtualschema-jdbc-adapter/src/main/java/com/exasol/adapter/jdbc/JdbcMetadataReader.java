@@ -236,41 +236,41 @@ public class JdbcMetadataReader {
     private static List<TableMetadata> findTables(String catalog, String schema, List<String> tableFilter, DatabaseMetaData dbMeta, SqlDialect dialect) throws SQLException {
         List<TableMetadata> tables = new ArrayList<>();
         ResultSet resTables = dbMeta.getTables(catalog, schema, null, null);
-        List<String> tableNames = new ArrayList<>();
-        List<String> tableComments = new ArrayList<>();
+        List< SqlDialect.MappedTable> tablesMapped = new ArrayList<>();
+        //List<String> tableComments = new ArrayList<>();
         while (resTables.next()) {
             SqlDialect.MappedTable mappedTable = dialect.mapTable(resTables);
             if (!mappedTable.isIgnored()) {
-                tableNames.add(mappedTable.getTableName());
-                tableComments.add(mappedTable.getTableComment());
+            	tablesMapped.add(mappedTable);
+                //tableComments.add(mappedTable.getTableComment());
             }
         }
         
         resTables.close();
 
         // Columns
-        for (int i=0; i<tableNames.size(); ++i) {
-            String table = tableNames.get(i);
+        for (int i=0; i<tablesMapped.size(); ++i) {
+        	SqlDialect.MappedTable table = tablesMapped.get(i);
             System.out.println("Process columns for table: " + table);
             try {
                 if (!tableFilter.isEmpty()) {
                     boolean isInFilter = false;
                     if (identifiersAreCaseInsensitive(dialect)) {
                         for (String curTable : tableFilter) {
-                            if (curTable.equalsIgnoreCase(table)) {
+                            if (curTable.equalsIgnoreCase(table.getTableName())) {
                                 isInFilter = true;
                             }
                         }
                     } else {
-                        isInFilter = tableFilter.contains(table);
+                        isInFilter = tableFilter.contains(table.getTableName());
                     }
                     if (!isInFilter) {
                         System.out.println("Skip table: " + table);
                         continue;
                     }
                 }
-                List<ColumnMetadata> columns = readColumns(dbMeta, catalog, schema, table, dialect);
-                tables.add(new TableMetadata(table, "", columns, tableComments.get(i)));
+                List<ColumnMetadata> columns = readColumns(dbMeta, catalog, schema, table.getOriginalTableName(), dialect);
+                tables.add(new TableMetadata(table.getTableName(), "", columns, table.getTableComment()));
             } catch (Exception ex) {
                 throw new RuntimeException("Exception for table " + table, ex);
             }

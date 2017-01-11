@@ -91,11 +91,13 @@ public interface SqlDialect {
     class MappedTable {
         private boolean isIgnored = false;
         private String tableName = "";
+        private String originalName = "";
         private String tableComment = "";
-        public static MappedTable createMappedTable(String tableName, String tableComment) {
+        public static MappedTable createMappedTable(String tableName, String originalName, String tableComment) {
             MappedTable t = new MappedTable();
             t.isIgnored = false;
             t.tableName = tableName;
+            t.originalName = originalName;
             t.tableComment = tableComment;
             return t;
         }
@@ -106,6 +108,7 @@ public interface SqlDialect {
         }
         public boolean isIgnored() { return isIgnored; }
         public String getTableName() { return tableName; }
+        public String getOriginalTableName () { return originalName;}
         public String getTableComment() { return tableComment; }
     }
 
