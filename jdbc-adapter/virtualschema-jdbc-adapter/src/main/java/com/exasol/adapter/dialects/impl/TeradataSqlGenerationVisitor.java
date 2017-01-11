@@ -141,16 +141,21 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
         	projString = "CAST(" + projString + "  as DOUBLE PRECISION)";
         	
         }
-        else if (typeName == "TIME" || typeName == "TIME WITH TIME ZONE" ) {
+        else if (typeName.equals("TIME") || typeName.equals("TIME WITH TIME ZONE") ) {
         	projString = "CAST(" + projString + "  as VARCHAR(21) )";
+        }
+        else if ( typeName.startsWith("INTERVAL") ) {
+        	projString = "CAST(" + projString + "  as VARCHAR(30) )";
+        }
+        else if ( typeName.startsWith("PERIOD") ) {
+        	projString = "CAST(" + projString + "  as VARCHAR(100) )";
         }
         else if (TYPE_NAME_NOT_SUPPORTED.contains(typeName)){
         	
         	projString = "'"+typeName+" NOT SUPPORTED'"; //returning a string constant for unsupported data types
         	
-        } 
+        }
         	
-    	
         return projString;
     }
     
@@ -165,7 +170,10 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
             String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
             return TYPE_NAMES_REQUIRING_CAST.contains(typeName) || 
             		TYPE_NAME_NOT_SUPPORTED.contains(typeName) ||  
-            		(typeName.startsWith("NUMBER")  &&  column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.DOUBLE  );
+            		(typeName.startsWith("NUMBER")  &&  column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.DOUBLE ||
+            		typeName.startsWith("INTERVAL")	|| 
+            		typeName.startsWith("PERIOD")
+            		);
         }
         return false;
     }

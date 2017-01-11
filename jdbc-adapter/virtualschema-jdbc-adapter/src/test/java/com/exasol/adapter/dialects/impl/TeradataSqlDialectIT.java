@@ -1,12 +1,14 @@
 package com.exasol.adapter.dialects.impl;
 
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
+
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -38,7 +40,7 @@ public class TeradataSqlDialectIT extends AbstractIntegrationTest {
                 getConfig().getTeradataJdbcConnectionString(),
                 false,
                 getConfig().debugAddress(),
-                "numeric_data_types, REGION, DateTime_and_Interval_Data_Types");
+                "numeric_data_types, REGION, DateTime_and_Interval_Data_Types, Period_Data_Types");
     }
 
 //    @Test
@@ -105,6 +107,43 @@ public class TeradataSqlDialectIT extends AbstractIntegrationTest {
         		);
         matchSingleRowExplain(query, "SELECT \"mybyteint\", \"mysmallint\", \"myinteger\", \"myBIGINT\", \"myDecimal\", \"myFloat\", \"myReal\", \"myDouble\", CAST(\"n1\"  as DOUBLE PRECISION), CAST(\"n2\"  as DOUBLE PRECISION), CAST(\"n3\"  as DOUBLE PRECISION), \"n4\", \"n5\" FROM \"retail\".\"numeric_data_types\"");
     }
+    
+    @Test
+    public void testSelectDateTime_and_Interval_Data_Types() throws SQLException, ClassNotFoundException, FileNotFoundException {
+        String query = "SELECT * FROM  "+ VIRTUAL_SCHEMA + ".\"DateTime_and_Interval_Data_Types\"";
+        ResultSet result = executeQuery(query);
+        matchNextRow(
+        		result,
+        		getSqlDate(2017, 1 , 11), 
+        		"13:09:52.000000", 
+        		getSqlTimestamp(2017, 01, 11, 13, 9, 52, 430), 
+        		"13:09:52.000000+00:00", 
+        		getSqlTimestamp(2017, 01, 11, 13, 9, 52, 430), 
+        		(java.lang.String) " -2                           ", 
+        		(java.lang.String)   "   30 12:30:30.5000           ", 
+        		(java.lang.String) " 6:15.24                      "
+        		);
+        matchSingleRowExplain(query, "SELECT \"myDate\", CAST(\"myTime\"  as VARCHAR(21) ), \"myTimestamp\", CAST(\"myTimeWithTimezone\"  as VARCHAR(21) ), \"myTimestampWithTimezone\", CAST(\"myIntervalYear\"  as VARCHAR(30) ), CAST(\"myIntervalYearToMonth\"  as VARCHAR(30) ), CAST(\"myIntervalDayToSecond\"  as VARCHAR(30) ), CAST(\"myIntervalMinuteToSecond\"  as VARCHAR(30) ) FROM \"retail\".\"DateTime_and_Interval_Data_Types\"");
+    }
+    
+    @Test
+    public void testSelectPeriod_Data_Types() throws SQLException, ClassNotFoundException, FileNotFoundException {
+        String query = "SELECT * FROM  "+ VIRTUAL_SCHEMA + ".\"Period_Data_Types\"";
+        ResultSet result = executeQuery(query);
+        matchNextRow(
+        		result,
+        		(long)1,
+        		"hans           ", 
+        		"('05/02/03', '06/02/04')", 
+        		"('10:00:00.123456', '11:00:00.123456')", 
+        		"('10:37:58.123456+08:00', '11:37:58.123456+08:00')", 
+        		"('2005-02-03 10:00:00.123', '2005-02-03 11:00:00.123')", 
+        		"('2005-02-03 10:37:58.123+08:00', '2005-02-03 11:37:58.123+08:00')"
+        		
+        		);
+        matchSingleRowExplain(query, "SELECT \"employee_id\", \"employee_name\", CAST(\"myPeriodDate\"  as VARCHAR(100) ), CAST(\"myPeriodTime\"  as VARCHAR(100) ), CAST(\"myPeriodTimeWithTimeZone\"  as VARCHAR(100) ), CAST(\"myPeriodTimestamp\"  as VARCHAR(100) ), CAST(\"myPeriodTimestampTimezone\"  as VARCHAR(100) ) FROM \"retail\".\"Period_Data_Types\"");
+    } 
+    
     
     @Test
     public void testProjection() throws SQLException, ClassNotFoundException, FileNotFoundException {

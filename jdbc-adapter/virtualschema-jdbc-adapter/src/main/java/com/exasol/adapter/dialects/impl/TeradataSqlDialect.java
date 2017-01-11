@@ -115,7 +115,6 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
         cap.supportScalarFunction(ScalarFunctionCapability.SIGN);
         cap.supportScalarFunction(ScalarFunctionCapability.TRUNC);
         
-        
         cap.supportScalarFunction(ScalarFunctionCapability.ADD);
         cap.supportScalarFunction(ScalarFunctionCapability.SUB);
         cap.supportScalarFunction(ScalarFunctionCapability.MULT);
@@ -204,7 +203,7 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
         	case Types.TIME:
         		colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
         		break;
-        	case Types.TIME_WITH_TIMEZONE:
+        	case 2013: //Types.TIME_WITH_TIMEZONE is Java 1.8 specific
         		colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
         		break;
         	case Types.NUMERIC:
@@ -217,10 +216,23 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
                     colType = DataType.createDouble();
                 }
                 break;
-            case Types.OTHER:
+            case Types.OTHER: // Teradata JDBC uses OTHER for several data types GEOMETRY, INTERVALetc...  
+            	String columnTypeName = cols.getString("TYPE_NAME");
+            	
+            	 if ( columnTypeName.equals("GEOMETRY") )
+            		 colType = DataType.createVarChar(cols.getInt("COLUMN_SIZE"), DataType.ExaCharset.UTF8);
+            	 else if (columnTypeName.startsWith("INTERVAL") )
+            		 colType = DataType.createVarChar(30, DataType.ExaCharset.UTF8); //TODO verify that varchar 30 is sufficient in all cases
+            	 else if (columnTypeName.startsWith("PERIOD") )
+            		 colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8); 
+            	 else
+            		 colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);     
+
+            	 break;
+            	 
             case Types.SQLXML:
-                // Teradata JDBC uses OTHER as GEOMETRY type
-                colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+                
+           	 	colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
             	break;
             
         }
