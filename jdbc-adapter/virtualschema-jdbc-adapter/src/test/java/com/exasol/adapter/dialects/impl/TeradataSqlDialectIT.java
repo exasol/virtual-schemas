@@ -120,6 +120,7 @@ public class TeradataSqlDialectIT extends AbstractIntegrationTest {
         		"13:09:52.000000+00:00", 
         		getSqlTimestamp(2017, 01, 11, 13, 9, 52, 430), 
         		(java.lang.String) " -2                           ", 
+        		(java.lang.String) " 10-10                        ", 
         		(java.lang.String)   "   30 12:30:30.5000           ", 
         		(java.lang.String) " 6:15.24                      "
         		);
