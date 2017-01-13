@@ -120,20 +120,16 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
         
     }
     
-    
     private String getColumnProjectionStringNoCheckImpl(String typeName, SqlColumn column, String projString) {
     	
-    	
-    	if ( typeName.startsWith("SYSUDTLIB.ST_GEOMETRY") ||typeName.startsWith("JSON")  )
-        {
-        	
-            projString = "CAST(" + projString + "  as VARCHAR(64000) )";
+    	if ( typeName.startsWith("SYSUDTLIB.ST_GEOMETRY") ||typeName.startsWith("JSON")  ) {
+    		
+            projString = "CAST(" + projString + "  as VARCHAR("+TeradataSqlDialect.maxTeradataVarcharSize+") )";
             
-        } 
-        
+        }
         else if (typeName.startsWith("XML") ) {
         	
-            projString = "XMLSERIALIZE(DOCUMENT " + projString + " as VARCHAR(64000) INCLUDING XMLDECLARATION) ";
+            projString = "XMLSERIALIZE(DOCUMENT " + projString + " as VARCHAR("+TeradataSqlDialect.maxTeradataVarcharSize+") INCLUDING XMLDECLARATION) ";
 	
         }
         else if (typeName.startsWith("NUMBER")  &&  column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.DOUBLE  ){
@@ -142,27 +138,40 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
         	
         }
         else if (typeName.equals("TIME") || typeName.equals("TIME WITH TIME ZONE") ) {
+        	
         	projString = "CAST(" + projString + "  as VARCHAR(21) )";
+        	
         }
         else if ( typeName.startsWith("INTERVAL") ) {
+        	
         	projString = "CAST(" + projString + "  as VARCHAR(30) )";
+        	
         }
         else if ( typeName.startsWith("PERIOD") ) {
+        	
         	projString = "CAST(" + projString + "  as VARCHAR(100) )";
+        	
+        }
+        else if ( typeName.startsWith("CLOB") ) {
+        	
+        	projString = "CAST(" + projString + "  as VARCHAR("+TeradataSqlDialect.maxTeradataVarcharSize+") )";
+        	
         }
         else if (TYPE_NAME_NOT_SUPPORTED.contains(typeName)){
         	
         	projString = "'"+typeName+" NOT SUPPORTED'"; //returning a string constant for unsupported data types
         	
+        }else if (typeName.startsWith("SYSUDTLIB")){
+        	
+        	projString = "'"+typeName+" NOT SUPPORTED'"; //returning a string constant for unsupported data types
         }
         	
         return projString;
     }
     
+    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("SYSUDTLIB.ST_GEOMETRY","XML","JSON","TIME","TIME WITH TIME ZONE","CLOB");
     
-    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("SYSUDTLIB.ST_GEOMETRY","XML","JSON","TIME","TIME WITH TIME ZONE");
-    
-    private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("BYTE"); 
+    private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("BYTE","VARBYTE","BLOB"); 
 
     private boolean nodeRequiresCast(SqlNode node) {
         if (node.getType() == SqlNodeType.COLUMN) {
@@ -172,7 +181,8 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
             		TYPE_NAME_NOT_SUPPORTED.contains(typeName) ||  
             		(typeName.startsWith("NUMBER")  &&  column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.DOUBLE ||
             		typeName.startsWith("INTERVAL")	|| 
-            		typeName.startsWith("PERIOD")
+            		typeName.startsWith("PERIOD") || 
+            		typeName.startsWith("SYSUDTLIB")  //user defined type
             		);
         }
         return false;
