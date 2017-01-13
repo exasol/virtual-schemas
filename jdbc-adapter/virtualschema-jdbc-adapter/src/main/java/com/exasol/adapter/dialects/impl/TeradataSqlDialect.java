@@ -49,7 +49,7 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
         cap.supportMainCapability(MainCapability.ORDER_BY_EXPRESSION);
         cap.supportMainCapability(MainCapability.LIMIT);
         
-       
+
         // Predicates
         cap.supportPredicate(PredicateCapability.AND);
         cap.supportPredicate(PredicateCapability.OR);
@@ -228,7 +228,6 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
             		 colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8); 
             	 else
             		 colType = DataType.createVarChar(TeradataSqlDialect.maxTeradataVarcharSize, DataType.ExaCharset.UTF8);     
-
             	 break;
             	 
             case Types.SQLXML:
