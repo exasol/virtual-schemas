@@ -64,6 +64,10 @@ public class IntegrationTestConfig {
         return getProperty("impala", "runIntegrationTests", false);
     }
 
+    public boolean hiveTestsRequested() {
+        return getProperty("hive", "runIntegrationTests", false);
+    }
+
     public String getImpalaJdbcConnectionString() {
         return getProperty("impala", "connectionString");
     }
@@ -71,9 +75,20 @@ public class IntegrationTestConfig {
     public String getImpalaJdbcPrefixPath() {
         return getProperty("impala", "jdbcDriverPath");
     }
+    public String getHiveJdbcPrefixPath() {
+        return getProperty("hive", "jdbcDriverPath");
+    }
 
     public List<String> getImpalaJdbcJars() {
         return getProperty("impala", "jdbcDriverJars");
+    }
+
+    public List<String> getHiveJdbcJars() {
+        return getProperty("hive", "jdbcDriverJars");
+    }
+
+    public String getHiveJdbcConnectionString() {
+        return getProperty("hive", "connectionString");
     }
 
     public boolean kerberosTestsRequested() {

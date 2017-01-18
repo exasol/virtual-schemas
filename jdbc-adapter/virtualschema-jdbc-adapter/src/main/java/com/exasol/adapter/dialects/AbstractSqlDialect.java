@@ -4,6 +4,7 @@ import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
+import com.exasol.adapter.sql.Predicate;
 import com.exasol.adapter.sql.ScalarFunction;
 
 import java.sql.ResultSet;

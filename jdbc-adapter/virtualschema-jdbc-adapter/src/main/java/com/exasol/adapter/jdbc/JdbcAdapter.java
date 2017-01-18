@@ -29,7 +29,8 @@ public class JdbcAdapter {
                         ImpalaSqlDialect.NAME,
                         OracleSqlDialect.NAME,
                         TeradataSqlDialect.NAME,
-                        RedshiftSqlDialect.NAME));
+                        RedshiftSqlDialect.NAME,
+                        HiveSqlDialect.NAME));
     }
 
     /**
