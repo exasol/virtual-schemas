@@ -3,6 +3,7 @@ package com.exasol.adapter.dialects.impl;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.sql.*;
 import com.google.common.base.Joiner;
@@ -44,7 +45,6 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
                 }
 
         } else {
-           // this if is added because of the RAND function(otherwise if you select only rand... you will get an exception
             if(selectList.isRequestAnyColumn()){
                 return "1";
             }
@@ -52,7 +52,8 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
             int columnId = 0;
             for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
                 SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-                if(columnMeta.getType().toString().equals("VARCHAR(2000000) UTF8")  ){
+                String typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
+                if(typeName.equals("BINARY")  ){
                     binaryElements.add(super.visit(sqlColumn));
                 }
                 ++columnId;
@@ -241,10 +242,14 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
 
         // Do as if the user has all columns in select list
         SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
+        int columnId = 0;
         for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
-            if (columnMeta.getType().toString().equals("VARCHAR(2000000) UTF8")) {
+            SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
+            String typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
+            if(typeName.equals("BINARY")  ){
                 return true;
             }
+            ++columnId;
         }
 
         return false;
