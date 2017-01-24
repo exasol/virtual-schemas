@@ -4,7 +4,6 @@ package com.exasol.adapter.dialects.impl;
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
 import org.junit.Assume;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.FileNotFoundException;

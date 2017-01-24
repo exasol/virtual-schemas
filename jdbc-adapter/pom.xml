@@ -53,22 +53,16 @@
         </dependency>
 
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.2</version>
-
-<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
-					<fork>true</fork>
-					<executable>C:\Program Files\Java\jdk1.8.0_102\bin\javac</executable>
-  <encoding>UTF8</encoding>
-				</configuration>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
             </plugin>
-        </plugins>
-    </build>
+        </plugins
 </project>

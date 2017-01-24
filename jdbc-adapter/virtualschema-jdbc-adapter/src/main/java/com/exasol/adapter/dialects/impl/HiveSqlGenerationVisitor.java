@@ -3,13 +3,10 @@ package com.exasol.adapter.dialects.impl;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
-import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.*;
 import com.google.common.base.Joiner;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +45,7 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
 
         } else {
            // this if is added because of the RAND function(otherwise if you select only rand... you will get an exception
-            if(selectList.getExpressions()==null){
+            if(selectList.isRequestAnyColumn()){
                 return "1";
             }
             List<String> binaryElements = new ArrayList<>();
