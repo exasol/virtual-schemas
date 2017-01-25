@@ -298,6 +298,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
     /**
      * This was replaced by integration test {@link #testDataTypeMapping()}. It can be enabled temporarily for debugging.
      */
+    @Ignore
     @Test
     public void testDifferentDataTypes() throws SQLException, ClassNotFoundException, FileNotFoundException {
         Statement stmt = getConnection().createStatement();

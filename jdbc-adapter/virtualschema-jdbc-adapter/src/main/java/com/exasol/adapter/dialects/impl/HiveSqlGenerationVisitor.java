@@ -32,7 +32,8 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
                 int columnId = 0;
                 for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
                     SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-                    if (columnMeta.getType().toString().equals("VARCHAR(2000000) UTF8")) {
+                    String typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
+                    if (typeName.equals("BINARY")) {
                         selectListElements.add("base64(" + super.visit(sqlColumn) + ")");
                     } else {
                         selectListElements.add(super.visit(sqlColumn));
@@ -48,22 +49,18 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
             if(selectList.isRequestAnyColumn()){
                 return "1";
             }
-            List<String> binaryElements = new ArrayList<>();
-            int columnId = 0;
-            for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
-                SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-                String typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
-                if(typeName.equals("BINARY")  ){
-                    binaryElements.add(super.visit(sqlColumn));
-                }
-                ++columnId;
-            }
                 for (SqlNode node : selectList.getExpressions()) {
-                    if (binaryElements.contains(node.accept(this))) {
+                if(node.getType().equals(SqlNodeType.COLUMN)){
+                    SqlColumn sqlColumn = (SqlColumn) node;
+                    String typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
+                    if(typeName.equals("BINARY")  ){
                         selectListElements.add("base64(" + node.accept(this) + ")");
-                    } else {
+                    }
+                    else {
                         selectListElements.add(node.accept(this));
                     }
+                }
+
                 }
             }
 
