@@ -14,10 +14,12 @@ Run the following steps to deploy your adapter:
 * EXASOL >= 6.0
 * Advanced edition (which includes the ability to execute adapter scripts)
 
-### Build:
+### Clone and Build:
 
-To build a fat jar (including all dependencies) run:
+First you have to clone the repository and build a fat jar (including all dependencies):
 ```
+git clone https://github.com/EXASOL/virtual-schemas.git
+cd virtual-schemas/jdbc-adapter/
 mvn clean -DskipTests package
 ```
 
@@ -27,9 +29,15 @@ The resulting fat jar is stored in ```virtualschema-jdbc-adapter-dist/target/vir
 
 You have to upload the jar of the adapter to a bucket of your choice. This will allow using the jar in the adapter script. See chapter 3.6.4. "The synchronous cluster file system BucketFS" in the EXASolution User Manual for how to use BucketFS.
 
+```
+curl -X PUT -T virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar http://w:write-password@your.exasol.host.com:2580/bucket1/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar
+```
+
 ### Upload JDBC Driver files
 
-You have to upload the JDBC driver files of your remote database two times: First into a bucket of your choice, so that they can be accessed from the adapter script. Second you have to upload the files as a JDBC driver in EXAOperation (under Software -> JDBC Drivers).
+You have to upload the JDBC driver files of your remote database two times:
+* Upload all JDBC driver files into a bucket of your choice, so that they can be accessed from the adapter script
+* Upload all JDBC driver files as a JDBC driver in EXAOperation (under Software -> JDBC Drivers)
 
 ### Deploy Adapter Script
 Then run the following SQL commands to deploy the adapter in the database:
