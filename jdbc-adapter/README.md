@@ -13,7 +13,7 @@ Please follow the [step-by-step deployment guide](deploy_adapter.md).
 
 
 ## Using the Adapter
-The following statements demonstrate how you can use the JDBC adapter and virtual schemas. Please scroll down to see a list of all properties supported by the JDBC adapter. Please also consult the user manual for a in-depth introduction to virtual schemas.
+The following statements demonstrate how you can use the JDBC adapter and virtual schemas. Please scroll down to see a list of all properties supported by the JDBC adapter. Please also consult the user manual for an in-depth introduction to virtual schemas.
 
 Create a virtual schema using the JDBC adapter. This will retrieve and cache the metadata via JDBC.
 ```sql
