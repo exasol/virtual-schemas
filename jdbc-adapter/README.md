@@ -67,7 +67,7 @@ DROP VIRTUAL SCHEMA hive CASCADE;
 
 
 ### Adapter Properties
-Note that properties are always strings, like `TABLE_FILTER='T1,T2'`.
+The following properties can be used to control the behavior of the JDBC adapter. As you see above, these properties can be defined in ```CREATE VIRTUAL SCHEMA``` or changed afterwards via ```ALTER VIRTUAL SCHEMA SET```. Note that properties are always strings, like `TABLE_FILTER='T1,T2'`.
 
 **Mandatory Properties:**
 
