@@ -36,7 +36,7 @@ See chapter 3.6.4. "The synchronous cluster file system BucketFS" in the EXASolu
 
 ### 4. Upload JDBC Driver Files
 
-You have to upload the JDBC driver files of your remote database **two times**.
+You have to upload the JDBC driver files of your remote database **two times**:
 * Upload all files of the JDBC driver into a bucket of your choice, so that they can be accessed from the adapter script. This happens the same way as described above for the adapter jar. You can use the same bucket.
 * Upload all files of the JDBC driver as a JDBC driver in EXAOperation
   - In EXAOperation go to Software -> JDBC Drivers
