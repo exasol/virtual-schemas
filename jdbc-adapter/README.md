@@ -86,13 +86,13 @@ Parameter                   | Value
 **SCHEMA_NAME**             | The name of the remote jdbc schema. This is usually case-sensitive, depending on the dialect.  It depends on the dialect whether you have to specify this or not.  Usually you have to specify it if the data source JDBC driver supports the concepts of schemas.
 **USERNAME**                | Username for authentication. Can only be set if CONNECTION_NAME is not set.
 **PASSWORD**                | Password for authentication. Can only be set if CONNECTION_NAME is not set.
+**TABLE_FILTER**            | A comma-separated list of tablenames (case sensitive). Only these tables will be available, other tables are ignored. Use this if you don't want to have all remote tables in your virtual schema.
 
 
 **Advanced Optional Properties:**
 
 Parameter                   | Value
 --------------------------- | -----------
-**TABLE_FILTER**            | A comma-separated list of tablenames (case sensitive). Only these tables will be available, other tables are ignored. Use this if you don't want to have all remote tables in your virtual schema.
 **IMPORT_FROM_EXA**         | Either 'TRUE' or 'FALSE' (default). If true, IMPORT FROM EXA will be used for the pushdown instead of IMPORT FROM JDBC. You have to define EXA_CONNECTION_STRING if this property is true.
 **EXA_CONNECTION_STRING**   | The connection string used for IMPORT FROM EXA in the format 'hostname:port'.
 **DEBUG_ADDRESS**           | The IP address/hostname and port of the UDF debugging service, e.g. 'myhost:3000'. Debug output from the UDFs will be sent to this address. See the section on debugging below.
