@@ -6,67 +6,10 @@ This is an adapter for virtual schemas to connect to JDBC data sources, like Hiv
 If you are interested in a introduction to virtual schemas please refer to our [virtual schemas documentation](../doc).
 
 
-## Deploying the Adapter
+## Getting Started
 
-Run the following steps to deploy your adapter:
-
-### Prerequisites:
-* EXASOL >= 6.0
-* Advanced edition (which includes the ability to execute adapter scripts)
-
-### Clone and Build:
-
-First you have to clone the repository and build a fat jar (including all dependencies):
-```
-git clone https://github.com/EXASOL/virtual-schemas.git
-cd virtual-schemas/jdbc-adapter/
-mvn clean -DskipTests package
-```
-
-The resulting fat jar is stored in ```virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar```.
-
-### Upload Adapter jar
-
-You have to upload the jar of the adapter to a bucket of your choice in the EXASOL bucket file system (BucketFS). This will allow using the jar in the adapter script.
-
-Following steps are required to upload a file to a bucket:
-* Make sure you have a bucket file system (BucketFS) and you know the port for either http or https. This can be done in EXAOperation under "EXABuckets". E.g. the id could be ```bucketfs1``` and the http port 2580.
-* Check if you have a bucket in the BucketFS. Simply click on the name of the BucketFS in EXAOperation and add a bucket there, e.g. ```bucket1```. Also make sure you know the write password.
-* Now upload the file into this bucket using curl (adapt the hostname, BucketFS port, bucket name and bucket write password).
-```
-curl -X PUT -T virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar \
- http://w:write-password@your.exasol.host.com:2580/bucket1/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar
-```
-
-See chapter 3.6.4. "The synchronous cluster file system BucketFS" in the EXASolution User Manual for more details about BucketFS.
-
-### Upload JDBC Driver files
-
-You have to upload the JDBC driver files of your remote database two times:
-* Upload all JDBC driver files into a bucket of your choice, so that they can be accessed from the adapter script. This happens the same way as described above for the adapter jar. You can use the same bucket.
-* Upload all JDBC driver files as a JDBC driver in EXAOperation
-  - In EXAOperation go to Software -> JDBC Drivers
-  - Add the JDBC driver by specifying the jdbc main class and the prefix of the JDBC connection string
-  - Upload all files (one by one) to the specific JDBC to the newly added JDBC driver.
-
-### Deploy Adapter Script
-Then run the following SQL commands to deploy the adapter in the database:
-```sql
--- The adapter is simply a script. It has to be stored in any regular schema.
-CREATE SCHEMA adapter;
-CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
-
-  // This is the class implementing the callback method of the adapter script
-  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
-
-  // This will add the adapter jar to the classpath so that it can be used inside the adapter script
-  // Replace the names of the bucketfs and the bucket with the ones you used.
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar;
-
-  // You have to add all files of the data source jdbc driver here (e.g. MySQL or Hive)
-  %jar /buckets/your-bucket-fs/your-bucket/name-of-data-source-jdbc-driver.jar;
-/
-```
+Before you can start using the JDBC adapter for virtual schemas, you have to deploy the adapter and the JDBC driver of your data source in your EXASOL database.
+Please follow the [step-by-step deployment guide](deploy_adapter.md).
 
 
 ## Using the Adapter
