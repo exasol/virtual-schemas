@@ -109,9 +109,10 @@ python tools/udf_debug.py -s myhost -p 3000
 ```
 And set the DEBUG_ADDRESS properties so that the adapter will send debug output to the specified address.
 ```sql
-ALTER VIRTUAL SCHEMA vs SET DEBUG_ADDRESS='myhost:3000'
+ALTER VIRTUAL SCHEMA vs SET DEBUG_ADDRESS='host-where-udf-debug-script-runs:3000'
 ```
 
+You have to make sure that EXASOL can connect to the host running the udf_debug.py script.
 
 
 
