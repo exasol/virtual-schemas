@@ -1,6 +1,4 @@
-# Getting Started
-
-## Deploying the Adapter
+## Deploying the Adapter Step By Step
 
 Run the following steps to deploy your adapter:
 
