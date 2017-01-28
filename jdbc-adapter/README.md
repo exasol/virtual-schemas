@@ -3,7 +3,7 @@
 ## Overview
 This is an adapter for virtual schemas to connect to JDBC data sources, like Hive or Oracle or any other. It serves as the reference adapter for the virtual schema framework.
 
-If you are interested in a introduction to virtual schemas please refer to our [virtual schemas documentation](../doc).
+If you are interested in a introduction to virtual schemas please refer to the EXASOL user manual. You can find it in the  [user portal download area](https://www.exasol.com/portal/display/DOWNLOAD/6.0).
 
 
 ## Getting Started
