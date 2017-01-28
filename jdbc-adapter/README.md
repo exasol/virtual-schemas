@@ -28,9 +28,9 @@ Please follow the [step-by-step deployment guide](deploy-adapter.md).
 
 
 ## Using the Adapter
-The following statements demonstrate how you can use the JDBC adapter and virtual schemas to connect to a Hive system. Please scroll down to see a list of all properties supported by the JDBC adapter. Please also consult the user manual for an in-depth introduction to virtual schemas.
+The following statements demonstrate how you can use the JDBC adapter and virtual schemas to connect to a Hive system. Please scroll down to see a list of all properties supported by the JDBC adapter.
 
-First we create a virtual schema using the JDBC adapter. The adapter will retrieve the metadata via JDBC and map them to virtual tables. The virtual table metadata (tables, columns and data types) are then cached in EXASOL.
+First we create a virtual schema using the JDBC adapter. The adapter will retrieve the metadata via JDBC and map them to virtual tables. The metadata (virtual tables, columns and data types) are then cached in EXASOL.
 ```sql
 CREATE CONNECTION hive_conn TO 'jdbc:hive2://localhost:10000/default' USER 'hive-usr' IDENTIFIED BY 'hive-pwd';
 
@@ -40,20 +40,20 @@ CREATE VIRTUAL SCHEMA hive USING adapter.jdbc_adapter WITH
   SCHEMA_NAME     = 'default';
 ```
 
-Now we can explore the tables in the virtual schema, just like for a regular schema:
+We can now explore the tables in the virtual schema, just like for a regular schema:
 ```sql
 OPEN SCHEMA hive;
 SELECT * FROM cat;
 DESCRIBE clicks;
 ```
 
-You can run arbitrary queries on the virtual tables.
+And we can run arbitrary queries on the virtual tables:
 ```sql
 SELECT count(*) FROM clicks;
 SELECT DISTINCT USER_ID FROM clicks;
 ```
 
-Behind the scenes, an ```IMPORT FROM JDBC``` statement will be executed which obtains the data needed from the data source to fulfil the query. The EXASOL database interacts with the adapter to pushdown as much as possible (e.g. filters, aggregations or order by/limit), while considering the capabilities of the data source.
+Behind the scenes the EXASOL command ```IMPORT FROM JDBC``` will be executed to obtain the data needed from the data source to fulfil the query. The EXASOL database interacts with the adapter to pushdown as much as possible to the data source (e.g. filters, aggregations or order by/limit), while considering the capabilities of the data source.
 
 Let's combine a virtual and a native tables in a query:
 ```
@@ -76,7 +76,7 @@ Or unset properties:
 ALTER VIRTUAL SCHEMA hive SET TABLE_FILTER=null;
 ```
 
-Or drop the schema
+Or drop the virtual schema
 ```sql
 DROP VIRTUAL SCHEMA hive CASCADE;
 ```
