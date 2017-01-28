@@ -1,9 +1,24 @@
 # JDBC Adapter for Virtual Schemas
 
 ## Overview
-This is an adapter for virtual schemas to connect to JDBC data sources, like Hive or Oracle or any other. It serves as the reference adapter for the virtual schema framework.
+The JDBC adapter for virtual schemas allows you to connect to JDBC data sources like Hive, Oracle, Teradata, EXASOL or any other data source supporting JDBC. It serves as the reference adapter for the EXASOL virtual schema framework.
 
-If you are interested in a introduction to virtual schemas please refer to the EXASOL user manual. You can find it in the  [user portal download area](https://www.exasol.com/portal/display/DOWNLOAD/6.0).
+The JDBC adapter currently supports the following set of SQL dialects and data sources, which will be continuously extended based on feedback from our users:
+* EXASOL
+* Hive
+* Impala
+* Oracle
+* Teradata
+* Redshift
+
+Each such implementation of a dialect handles three major aspects:
+* How to **map the tables** in the source systems to virtual tables in EXASOL, including how to **map the source data types** to EXASOL data types
+* How is the **SQL syntax** of the data source, including identifier quoting, case-sensitivity, function names, or special syntax like LIMIT/TOP.
+* Which **capabilities** are supported by the data source. E.g. is it supported to run filters, to specify select list expressions, to run aggregation or scalar functions or to order or limit the result.
+
+In adition, there is the so called ```GENERIC``` dialect, which derives the SQL dialect from the JDBC driver metadata and is designed to work with any JDBC driver. However, it does not support any capabilities and should only be used for evaluation purposes.
+
+If you are interested in a introduction to virtual schemas please refer to the EXASOL user manual. You can find it in the [download area of the EXASOL user portal](https://www.exasol.com/portal/display/DOWNLOAD/6.0).
 
 
 ## Getting Started
@@ -13,9 +28,9 @@ Please follow the [step-by-step deployment guide](deploy-adapter.md).
 
 
 ## Using the Adapter
-The following statements demonstrate how you can use the JDBC adapter and virtual schemas. Please scroll down to see a list of all properties supported by the JDBC adapter. Please also consult the user manual for an in-depth introduction to virtual schemas.
+The following statements demonstrate how you can use the JDBC adapter and virtual schemas to connect to a Hive system. Please scroll down to see a list of all properties supported by the JDBC adapter. Please also consult the user manual for an in-depth introduction to virtual schemas.
 
-Create a virtual schema using the JDBC adapter. This will retrieve and cache the metadata via JDBC.
+First we create a virtual schema using the JDBC adapter. The adapter will retrieve the metadata via JDBC and map them to virtual tables. The virtual table metadata are then cached in EXASOL.
 ```sql
 CREATE CONNECTION hive_conn TO 'jdbc:hive2://localhost:10000/default' USER 'hive-usr' IDENTIFIED BY 'hive-pwd';
 
@@ -25,20 +40,22 @@ CREATE VIRTUAL SCHEMA hive USING adapter.jdbc_adapter WITH
   SCHEMA_NAME     = 'default';
 ```
 
-Explore the tables in the virtual schema:
+Now we can explore the tables in the virtual schema, just like for a regular schema:
 ```sql
 OPEN SCHEMA hive;
 SELECT * FROM cat;
 DESCRIBE clicks;
 ```
 
-Run queries on the virtual tables:
+You can run arbitrary queries on the virtual tables.
 ```sql
 SELECT count(*) FROM clicks;
 SELECT DISTINCT USER_ID FROM clicks;
 ```
 
-Combine virtual and native tables in a query:
+Behind the scenes, an ```IMPORT FROM JDBC``` statement will be executed which obtains the data needed from the data source to fulfil the query. The EXASOL database interacts with the adapter to pushdown as much as possible (e.g. filters, aggregations or order by/limit), while considering the capabilities of the data source.
+
+Let's combine a virtual and a native tables in a query:
 ```
 SELECT * from clicks JOIN native_schema.users on clicks.userid = users.id;
 ```
@@ -65,7 +82,6 @@ DROP VIRTUAL SCHEMA hive CASCADE;
 ```
 
 
-
 ### Adapter Properties
 The following properties can be used to control the behavior of the JDBC adapter. As you see above, these properties can be defined in ```CREATE VIRTUAL SCHEMA``` or changed afterwards via ```ALTER VIRTUAL SCHEMA SET```. Note that properties are always strings, like `TABLE_FILTER='T1,T2'`.
 
@@ -73,7 +89,7 @@ The following properties can be used to control the behavior of the JDBC adapter
 
 Parameter                   | Value
 --------------------------- | -----------
-**SQL_DIALECT**             | Name of the SQL dialect, e.g. EXASOL, IMPALA, ORACLE or GENERIC (case insensitive). For some SQL dialects we have presets which are used for the pushdown SQL query generation. If you try to generate a virtual schema without specifying this property you will see all available dialects in the error message.
+**SQL_DIALECT**             | Name of the SQL dialect, e.g. EXASOL, HIVE, IMPALA, ORACLE, TERADATA, REDSHIFT or GENERIC (case insensitive). If you try generating a virtual schema without specifying this property you will see all available dialects in the error message.
 **CONNECTION_NAME**         | Name of the connection created with ```CREATE CONNECTION``` which contains the jdbc connection string, the username and password. You don't need to set CONNECTION_STRING, USERNAME and PASSWORD if you define this property. We recommend this to ensure that passwords are not shown in the logfiles.
 **CONNECTION_STRING**       | The jdbc connection string. Only required if CONNECTION_NAME is not set.
 
