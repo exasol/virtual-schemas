@@ -9,7 +9,7 @@ If you are interested in a introduction to virtual schemas please refer to our [
 ## Getting Started
 
 Before you can start using the JDBC adapter for virtual schemas, you have to deploy the adapter and the JDBC driver of your data source in your EXASOL database.
-Please follow the [step-by-step deployment guide](deploy_adapter.md).
+Please follow the [step-by-step deployment guide](deploy-dapter.md).
 
 
 ## Using the Adapter
