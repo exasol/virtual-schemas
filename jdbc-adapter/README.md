@@ -30,7 +30,7 @@ Please follow the [step-by-step deployment guide](deploy-adapter.md).
 ## Using the Adapter
 The following statements demonstrate how you can use the JDBC adapter and virtual schemas to connect to a Hive system. Please scroll down to see a list of all properties supported by the JDBC adapter. Please also consult the user manual for an in-depth introduction to virtual schemas.
 
-First we create a virtual schema using the JDBC adapter. The adapter will retrieve the metadata via JDBC and map them to virtual tables. The virtual table metadata are then cached in EXASOL.
+First we create a virtual schema using the JDBC adapter. The adapter will retrieve the metadata via JDBC and map them to virtual tables. The virtual table metadata (tables, columns and data types) are then cached in EXASOL.
 ```sql
 CREATE CONNECTION hive_conn TO 'jdbc:hive2://localhost:10000/default' USER 'hive-usr' IDENTIFIED BY 'hive-pwd';
 
