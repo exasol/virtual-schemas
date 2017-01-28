@@ -23,8 +23,8 @@ You have to upload the jar of the adapter to a bucket of your choice in the EXAS
 
 Following steps are required to upload a file to a bucket:
 * Make sure you have a bucket file system (BucketFS) and you know the port for either http or https. This can be done in EXAOperation under "EXABuckets". E.g. the id could be ```bucketfs1``` and the http port 2580.
-* Check if you have a bucket in the BucketFS. Simply click on the name of the BucketFS in EXAOperation and add a bucket there, e.g. ```bucket1```. Also make sure you know the write password.
-* Now upload the file into this bucket using curl (adapt the hostname, BucketFS port, bucket name and bucket write password).
+* Check if you have a bucket in the BucketFS. Simply click on the name of the BucketFS in EXAOperation and add a bucket there, e.g. ```bucket1```. Also make sure you know the write password. For simplicity we assume that the bucket is defined as a public bucket, i.e. it can be read by any script.
+* Now upload the file into this bucket, e.g. using curl (adapt the hostname, BucketFS port, bucket name and bucket write password).
 ```
 curl -X PUT -T virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar \
  http://w:write-password@your.exasol.host.com:2580/bucket1/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar
