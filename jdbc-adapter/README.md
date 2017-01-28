@@ -66,17 +66,17 @@ ALTER VIRTUAL SCHEMA hive REFRESH;
 ALTER VIRTUAL SCHEMA hive REFRESH TABLES t1 t2; -- refresh only these tables
 ```
 
-Or set properties. This might update the metadata (if you change the remote database) or not.
+Or set properties. Depending on the adapter and the property you set this might update the metadata or not. In our example the metadata are affected, because afterwards the virtual schema will only expose two virtul tables.
 ```sql
 ALTER VIRTUAL SCHEMA hive SET TABLE_FILTER='CUSTOMERS, CLICKS';
 ```
 
-Or unset properties:
+Finally you can unset properties:
 ```sql
 ALTER VIRTUAL SCHEMA hive SET TABLE_FILTER=null;
 ```
 
-Or drop the virtual schema
+Or drop the virtual schema:
 ```sql
 DROP VIRTUAL SCHEMA hive CASCADE;
 ```
@@ -89,8 +89,8 @@ The following properties can be used to control the behavior of the JDBC adapter
 
 Parameter                   | Value
 --------------------------- | -----------
-**SQL_DIALECT**             | Name of the SQL dialect, e.g. EXASOL, HIVE, IMPALA, ORACLE, TERADATA, REDSHIFT or GENERIC (case insensitive). If you try generating a virtual schema without specifying this property you will see all available dialects in the error message.
-**CONNECTION_NAME**         | Name of the connection created with ```CREATE CONNECTION``` which contains the jdbc connection string, the username and password. You don't need to set CONNECTION_STRING, USERNAME and PASSWORD if you define this property. We recommend this to ensure that passwords are not shown in the logfiles.
+**SQL_DIALECT**             | Name of the SQL dialect: EXASOL, HIVE, IMPALA, ORACLE, TERADATA, REDSHIFT or GENERIC (case insensitive). If you try generating a virtual schema without specifying this property you will see all available dialects in the error message.
+**CONNECTION_NAME**         | Name of the connection created with ```CREATE CONNECTION``` which contains the jdbc connection string, the username and password. If you defined this property then it is not allowed to set CONNECTION_STRING, USERNAME and PASSWORD. We recommend using this property to ensure that the password will not be shown in the logfiles.
 **CONNECTION_STRING**       | The jdbc connection string. Only required if CONNECTION_NAME is not set.
 
 
@@ -99,10 +99,10 @@ Parameter                   | Value
 Parameter                   | Value
 --------------------------- | -----------
 **CATALOG_NAME**            | The name of the remote jdbc catalog. This is usually case-sensitive, depending on the dialect. It depends on the dialect whether you have to specify this or not. Usually you have to specify it if the data source JDBC driver supports the concepts of catalogs.
-**SCHEMA_NAME**             | The name of the remote jdbc schema. This is usually case-sensitive, depending on the dialect.  It depends on the dialect whether you have to specify this or not.  Usually you have to specify it if the data source JDBC driver supports the concepts of schemas.
+**SCHEMA_NAME**             | The name of the remote jdbc schema. This is usually case-sensitive, depending on the dialect. It depends on the dialect whether you have to specify this or not. Usually you have to specify it if the data source JDBC driver supports the concepts of schemas.
 **USERNAME**                | Username for authentication. Can only be set if CONNECTION_NAME is not set.
 **PASSWORD**                | Password for authentication. Can only be set if CONNECTION_NAME is not set.
-**TABLE_FILTER**            | A comma-separated list of tablenames (case sensitive). Only these tables will be available, other tables are ignored. Use this if you don't want to have all remote tables in your virtual schema.
+**TABLE_FILTER**            | A comma-separated list of tablenames (case sensitive). Only these tables will be available as virtual tables, other tables are ignored. Use this if you don't want to have all remote tables in your virtual schema.
 
 
 **Advanced Optional Properties:**
