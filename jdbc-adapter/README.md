@@ -16,19 +16,19 @@ Each such implementation of a dialect handles three major aspects:
 * How is the **SQL syntax** of the data source, including identifier quoting, case-sensitivity, function names, or special syntax like LIMIT/TOP.
 * Which **capabilities** are supported by the data source. E.g. is it supported to run filters, to specify select list expressions, to run aggregation or scalar functions or to order or limit the result.
 
-In adition, there is the so called ```GENERIC``` dialect, which derives the SQL dialect from the JDBC driver metadata and is designed to work with any JDBC driver. However, it does not support any capabilities and should only be used for evaluation purposes.
+In adition to the aforementioned dialects there is the so called ```GENERIC``` dialect, which is designed to work with any JDBC driver. It derives the SQL dialect from the JDBC driver metadata. However, it does not support any capabilities and might fail if the data source has special syntax or data types, so it should only be used for evaluation purposes.
 
 If you are interested in a introduction to virtual schemas please refer to the EXASOL user manual. You can find it in the [download area of the EXASOL user portal](https://www.exasol.com/portal/display/DOWNLOAD/6.0).
 
 
 ## Getting Started
 
-Before you can start using the JDBC adapter for virtual schemas, you have to deploy the adapter and the JDBC driver of your data source in your EXASOL database.
+Before you can start using the JDBC adapter for virtual schemas you have to deploy the adapter and the JDBC driver of your data source in your EXASOL database.
 Please follow the [step-by-step deployment guide](deploy-adapter.md).
 
 
 ## Using the Adapter
-The following statements demonstrate how you can use the JDBC adapter and virtual schemas to connect to a Hive system. Please scroll down to see a list of all properties supported by the JDBC adapter.
+The following statements demonstrate how you can use virtual schemas with the JDBC adapter to connect to a Hive system. Please scroll down to see a list of all properties supported by the JDBC adapter.
 
 First we create a virtual schema using the JDBC adapter. The adapter will retrieve the metadata via JDBC and map them to virtual tables. The metadata (virtual tables, columns and data types) are then cached in EXASOL.
 ```sql
