@@ -57,7 +57,7 @@ CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
   // Replace the names of the bucketfs and the bucket with the ones you used.
   %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar;
 
-  // You have to add all files of the data source jdbc driver here (e.g. MySQL or Hive)
+  // You have to add all files of the data source jdbc driver here (e.g. Hive JDBC driver files)
   %jar /buckets/your-bucket-fs/your-bucket/name-of-data-source-jdbc-driver.jar;
 /
 ```
