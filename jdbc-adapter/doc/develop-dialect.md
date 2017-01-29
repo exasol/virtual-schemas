@@ -1,12 +1,12 @@
-# How to develop and test a dialect
+# How To Develop and Test a Dialect
 This page describes how you can develop and semi-automatically test an dialect for the JDBC adapter. The integration tests are work in progress.
 
-## How to develop a dialect
+## How To Develop a Dialect
 We recommend the following steps for the development of a dialect.
 Please look up in the sourcecode of the ```com.exasol.adapter.dialects.SqlDialect``` for the methods you can override.
 You can also have a look at the implementation of an existing dialect for inspiration.
 
-### Setup data source
+### Setup Data Source
 * Setup and start the database
 * Testdata: Create a test schema with a simple table (simple data types)
 
@@ -56,7 +56,7 @@ You can also have a look at the implementation of an existing dialect for inspir
 * Testdata: Create a simple view, e.g. joining two existing tables
 * Automatic test: Query the view, optionally e.g. with a filter.
 
-## How to start integration tests
+## How To Start Integration Tests
 We assume that you have a running EXASOL and data source database with all required test tables.
 
 We use following Maven phases for our integration tests:
@@ -71,6 +71,5 @@ mvn clean package && mvn verify -Pit -Dintegrationtest.configfile=/path/to/your/
 ```
 
 This will run all integration tests, i.e. all junit tests with the suffix "IT" in the filename. The yaml configuration file stores the information for your test environment like jdbc connection strings, paths and credentials.
-
 
 
