@@ -5,10 +5,11 @@
 1. [EXASOL](#exasol)
 2. [Hive](#hive)
 3. [Impala](#impala)
-4. [Oracle](#oracle)
-5. [Teradata](#teradata)
-6. [Redshirt](#redshift)
-7. [Generic](#generic)
+4. [Kerberos (Hive or Impala)](#kerberos)
+5. [Oracle](#oracle)
+6. [Teradata](#teradata)
+7. [Redshirt](#redshift)
+8. [Generic](#generic)
 
 ## EXASOL
 
@@ -54,6 +55,8 @@ CREATE VIRTUAL SCHEMA hive USING adapter.jdbc_adapter WITH
 ```
 
 ## Impala
+
+## Kerberos (Hive or Impala)
 
 ## Oracle
 
