@@ -1,5 +1,7 @@
 # Supported Dialects
 
+The purpose of this page is to provide detailed instructions 
+
 ## Table of Contents
 
 1. [EXASOL](#exasol)
@@ -12,15 +14,51 @@
 
 ## EXASOL
 
+**Supported Capabilities**
+The EXASOL SQL dialect supports all capabilities that are supported by the virtual schema framework.
+
+**JDBC Driver**
+Connecting to an EXASOL database is the simplest way to start with virtual schemas.
+You don't have to install any JDBC driver, because it is already installed in the EXASOL database and also included in the jar of the adapter.
+
+**Get Started**
+All you have to do is uploading the adapter jar to a bucket and create the adapter script:
+```sql
+CREATE SCHEMA adapter;
+CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
+  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
+  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar;
+/
+```
+Then you can create a virtual schema
+```sql
+CREATE CONNECTION exasol_conn TO 'jdbc:exa:localhost:5555' USER 'user' IDENTIFIED BY 'pwd';
+
+CREATE VIRTUAL SCHEMA virtual_exasol USING adapter.jdbc_adapter WITH
+  SQL_DIALECT     = 'EXASOL'
+  CONNECTION_NAME = 'EXASOL_CONN'
+  SCHEMA_NAME     = 'default';
+```
+
+EXASOL provides the faster ```IMPORT FROM EXA``` command for loading data from EXASOL. You can tell the adapter to use this command instead of ```IMPORT FROM JDBC``` by setting the ```IMPORT_FROM_EXA``` property:
+```sql
+CREATE VIRTUAL SCHEMA virtual_exasol USING adapter.jdbc_adapter WITH
+  SQL_DIALECT     = 'EXASOL'
+  CONNECTION_NAME = 'EXASOL_CONN'
+  SCHEMA_NAME     = 'default'
+  IMPORT_FROM_EXA = 'true'
+  EXA_CONNECTION_STRING = 'exa-host:1234';
+```
+
 ## Hive
 
-**Which JDBC driver?**
-The dialect was tested with the Cloudera Hive JDBC driver available on the [Cloudera downloads page](http://www.cloudera.com/downloads). The driver is also available from [Simba technologies](http://www.simba.com/), the developers of the JDBC driver.
+**JDBC Driver**
+The dialect was tested with the Cloudera Hive JDBC driver available on the [Cloudera downloads page](http://www.cloudera.com/downloads). The driver is also available directly from [Simba technologies](http://www.simba.com/), who developed the driver.
 
-**JDBC Driver Settings for EXAOperation**
+You have to specify the following settings when adding the JDBC driver via EXAOperation:
 * Name: Hive
 * Main: com.cloudera.hive.jdbc41.HS2Driver
-* Prefix: jdbc:hive2:
+* Prefix: ```jdbc:hive2:```
 
 **Create Adapter script**
 You have to add all files of the JDBC driver to the classpath using %jar as follows:
