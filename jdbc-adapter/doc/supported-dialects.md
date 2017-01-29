@@ -127,6 +127,7 @@ CREATE VIRTUAL SCHEMA impala_default USING adapter.jdbc_adapter WITH
   SCHEMA_NAME     = 'default';
 ```
 
+Connecting to a Kerberos secured Impala works similar as in Hive (see above).
 
 ## Oracle
 
