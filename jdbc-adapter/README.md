@@ -135,3 +135,7 @@ You have to make sure that EXASOL can connect to the host running the udf_debug.
 ## Frequent Issues
 * **Error: No suitable driver found for jdbc...**: The jdbc driver class was not discovered automatically. Either you have to add a META-INF/services/java.sql.Driver file with the classname to your jar, or you have to load the driver manually (see JdbcMetadataReader.readRemoteMetadata()).
 See https://docs.oracle.com/javase/7/docs/api/java/sql/DriverManager.html
+
+## Develop a Dialect
+
+If you are interested in contributing a new dialect please to the guide [how to develop and test a dialect](doc/develop-dialect.md)
