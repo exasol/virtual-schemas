@@ -1,9 +1,9 @@
 # JDBC Adapter for Virtual Schemas
 
 ## Overview
-The JDBC adapter for virtual schemas allows you to connect to JDBC data sources like Hive, Oracle, Teradata, EXASOL or any other data source supporting JDBC. It serves as the reference adapter for the EXASOL virtual schema framework.
+The JDBC adapter for virtual schemas allows you to connect to JDBC data sources like Hive, Oracle, Teradata, EXASOL or any other data source supporting JDBC. It uses the well proven ```IMPORT FROM JDBC``` EXASOL statement behind the scenes to obtain the data. The JDBC adapter serves as the reference adapter for the EXASOL virtual schema framework.
 
-The JDBC adapter currently supports the following set of SQL dialects and data sources, which will be continuously extended based on feedback from our users:
+The JDBC adapter currently supports the following SQL dialects and data sources. This list will be continuously extended based on the feedback from our users:
 * EXASOL
 * Hive
 * Impala
@@ -16,7 +16,7 @@ Each such implementation of a dialect handles three major aspects:
 * How is the **SQL syntax** of the data source, including identifier quoting, case-sensitivity, function names, or special syntax like LIMIT/TOP.
 * Which **capabilities** are supported by the data source. E.g. is it supported to run filters, to specify select list expressions, to run aggregation or scalar functions or to order or limit the result.
 
-In adition to the aforementioned dialects there is the so called ```GENERIC``` dialect, which is designed to work with any JDBC driver. It derives the SQL dialect from the JDBC driver metadata. However, it does not support any capabilities and might fail if the data source has special syntax or data types, so it should only be used for evaluation purposes.
+In addition to the aforementioned dialects there is the so called ```GENERIC``` dialect, which is designed to work with any JDBC driver. It derives the SQL dialect from the JDBC driver metadata. However, it does not support any capabilities and might fail if the data source has special syntax or data types, so it should only be used for evaluation purposes.
 
 If you are interested in a introduction to virtual schemas please refer to the EXASOL user manual. You can find it in the [download area of the EXASOL user portal](https://www.exasol.com/portal/display/DOWNLOAD/6.0).
 
@@ -102,7 +102,7 @@ Parameter                   | Value
 **SCHEMA_NAME**             | The name of the remote jdbc schema. This is usually case-sensitive, depending on the dialect. It depends on the dialect whether you have to specify this or not. Usually you have to specify it if the data source JDBC driver supports the concepts of schemas.
 **USERNAME**                | Username for authentication. Can only be set if CONNECTION_NAME is not set.
 **PASSWORD**                | Password for authentication. Can only be set if CONNECTION_NAME is not set.
-**TABLE_FILTER**            | A comma-separated list of tablenames (case sensitive). Only these tables will be available as virtual tables, other tables are ignored. Use this if you don't want to have all remote tables in your virtual schema.
+**TABLE_FILTER**            | A comma-separated list of table names (case sensitive). Only these tables will be available as virtual tables, other tables are ignored. Use this if you don't want to have all remote tables in your virtual schema.
 
 
 **Advanced Optional Properties:**
