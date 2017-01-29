@@ -1,5 +1,5 @@
 # How To Develop and Test a Dialect
-This page describes how you can develop and semi-automatically test an dialect for the JDBC adapter. The integration tests are work in progress.
+This page describes how you can develop and semi-automatically test a dialect for the JDBC adapter. The framework for testing a dialect is still work in progress.
 
 ## How To Develop a Dialect
 We recommend the following steps for the development of a dialect.
