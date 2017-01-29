@@ -1,6 +1,10 @@
 # How To Develop and Test a Dialect
 This page describes how you can develop and semi-automatically test a dialect for the JDBC adapter. The framework for testing a dialect is still work in progress.
 
+# Content
+* [How To Develop a Dialect](#how-to-develop-a-dialect)
+* [How To Start Integration Tests](#how-to-start-integration-tests)
+
 ## How To Develop a Dialect
 You can implement a dialect by implementing the interface ```com.exasol.adapter.dialects.SqlDialect```.
 We recommend to look at the following ressources to get started:
@@ -58,6 +62,7 @@ You can also have a look at the implementation of an existing dialect for inspir
 ### Views
 * Testdata: Create a simple view, e.g. joining two existing tables
 * Automatic test: Query the view, optionally e.g. with a filter.
+
 
 ## How To Start Integration Tests
 We assume that you have a running EXASOL and data source database with all required test tables.
