@@ -14,12 +14,16 @@
 
 ## Hive
 
-**JDBC Driver Settings**
+**Which JDBC driver?**
+The dialect was tested with the Cloudera Hive JDBC driver available on the [Cloudera downloads page](http://www.cloudera.com/downloads). The driver is also available from [Simba technologies](http://www.simba.com/), the developers of the JDBC driver.
+
+**JDBC Driver Settings for EXAOperation**
 * Name: Hive
 * Main: com.cloudera.hive.jdbc41.HS2Driver
 * Prefix: jdbc:hive2:
 
 **Create Adapter script**
+You have to add all files of the JDBC driver to the classpath using %jar as follows:
 ```sql
 CREATE SCHEMA adapter;
 CREATE  JAVA  ADAPTER SCRIPT jdbc_adapter AS
@@ -40,7 +44,14 @@ CREATE  JAVA  ADAPTER SCRIPT jdbc_adapter AS
 ```
 
 **Create Virtual Schema**
+```sql
+CREATE CONNECTION hive_conn TO 'jdbc:hive2://localhost:10000/default' USER 'hive-usr' IDENTIFIED BY 'hive-pwd';
 
+CREATE VIRTUAL SCHEMA hive USING adapter.jdbc_adapter WITH
+  SQL_DIALECT     = 'HIVE'
+  CONNECTION_NAME = 'HIVE_CONN'
+  SCHEMA_NAME     = 'default';
+```
 
 ## Impala
 
