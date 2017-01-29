@@ -12,7 +12,7 @@ The JDBC adapter currently supports the following set of SQL dialects and data s
 * Redshift
 
 Each such implementation of a dialect handles three major aspects:
-* How to **map the tables** in the source systems to virtual tables in EXASOL, including how to **map the source data types** to EXASOL data types
+* How to **map the tables** in the source systems to virtual tables in EXASOL, including how to **map the data types** to EXASOL data types.
 * How is the **SQL syntax** of the data source, including identifier quoting, case-sensitivity, function names, or special syntax like LIMIT/TOP.
 * Which **capabilities** are supported by the data source. E.g. is it supported to run filters, to specify select list expressions, to run aggregation or scalar functions or to order or limit the result.
 
@@ -24,7 +24,7 @@ If you are interested in a introduction to virtual schemas please refer to the E
 ## Getting Started
 
 Before you can start using the JDBC adapter for virtual schemas you have to deploy the adapter and the JDBC driver of your data source in your EXASOL database.
-Please follow the [step-by-step deployment guide](deploy-adapter.md).
+Please follow the [step-by-step deployment guide](doc/deploy-adapter.md).
 
 
 ## Using the Adapter
