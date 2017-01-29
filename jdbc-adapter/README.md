@@ -1,7 +1,7 @@
 # JDBC Adapter for Virtual Schemas
 
 ## Overview
-The JDBC adapter for virtual schemas allows you to connect to JDBC data sources like Hive, Oracle, Teradata, EXASOL or any other data source supporting JDBC. It uses the well proven ```IMPORT FROM JDBC``` EXASOL statement behind the scenes to obtain the data. The JDBC adapter serves as the reference adapter for the EXASOL virtual schema framework.
+The JDBC adapter for virtual schemas allows you to connect to JDBC data sources like Hive, Oracle, Teradata, EXASOL or any other data source supporting JDBC. It uses the well proven ```IMPORT FROM JDBC``` EXASOL statement behind the scenes to obtain the requested data when running a query on a virtual table. The JDBC adapter also serves as the reference adapter for the EXASOL virtual schema framework.
 
 The JDBC adapter currently supports the following SQL dialects and data sources. This list will be continuously extended based on the feedback from our users:
 * EXASOL
