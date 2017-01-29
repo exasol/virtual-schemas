@@ -2,7 +2,10 @@
 This page describes how you can develop and semi-automatically test a dialect for the JDBC adapter. The framework for testing a dialect is still work in progress.
 
 ## How To Develop a Dialect
-We recommend the following steps for the development of a dialect.
+You can implement a dialect by implementing the interface ```com.exasol.adapter.dialects.SqlDialect```.
+We recommend to look at the following ressources to get started:
+* first have a look at the [SqlDialect interface source code](../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/SqlDialect.java). You can start with the comments of the interface and have a look at the methods you can override.
+* second you can review the source code of one of the [dialect implementations](../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/impl).
 Please look up in the sourcecode of the ```com.exasol.adapter.dialects.SqlDialect``` for the methods you can override.
 You can also have a look at the implementation of an existing dialect for inspiration.
 
