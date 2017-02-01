@@ -3,7 +3,7 @@
 general:
   debug:           false
   debugAddress:    '192.168.0.12:3000'  # Address which will be defined as DEBUG_ADDRESS in the virtual schemas
-  bucketFsUrl: http://exasol-host:2580/bucket1
+  bucketFsUrl:  http://exasol-host:2580/bucket1
   bucketFsPassword: bucket1
   jdbcAdapterPath:  /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar
 
@@ -67,4 +67,23 @@ kerberos:
   connectionString:    jdbc:hive2://hadoop-host.yourcompany.com:10000/;AuthMech=1;KrbRealm=YOURCOMPANY.COM;KrbHostFQDN=hadoop-host.yourcompany.com;KrbServiceName=hive
   user:                testuser@YOURCOMPANY.COM
   password:            ExaAuthType=Kerberos;X3xpYmRlZmF1bHRzXQpkZWZhdWx0X3JlYWxtID0gT01HLkRFVi5FWEFTT0wuQ09NCmRuc19jYW5vbmljYWxpemVfaG9zdG5hbWUgPSBmYWxzZQpkbnNfbG9va3VwX2tkYyA9IGZhbHNlCmRuc19sb29rdXBfcmVhbG0gPSBmYWxzZQp0aWNrZXRfbGlmZXRpbWUgPSA4NjQwMApyZW5ld19saWZldGltZSA9IDYwNDgwMApmb3J3YXJkYWJsZSA9IHRydWUKZGVmYXVsdF90Z3NfZW5jdHlwZXMgPSBhcmNmb3VyLWhtYWMKZGVmYXVsdF90a3RfZW5jdHlwZXMgPSBhcmNmb3VyLWhtYWMKcGVybWl0dGVkX2VuY3R5cGVzID0gYXJjZm91ci1obWFjCnVkcF9wcmVmZXJlbmNlX2xpbWl0ID0gMQpbcmVhbG1zXQpPTUcuREVWLkVYQVNPTC5DT00gPSB7CmtkYyA9IGhhZG9vcDAxLm9tZy5kZXYuZXhhc29sLmNvbQphZG1pbl9zZXJ2ZXIgPSBoYWRvb3AwMS5vbWcuZGV2LmV4YXNvbC5jb20KfQo=;BQIAAABBAAEAEk9NRy5ERVYuRVhBU09MLkNPTQAMaGFkb29wdGVzdGVyAAAAAVYo0X0BABcAEGuPtGr6sYdhUEbTqhYQ3E0=
+
+hive:
+  runIntegrationTests: false
+  jdbcDriverPath:      /buckets/mybucketfs/mybucket/cloudera-hive-jdbc-driver/
+  jdbcDriverJars:
+    - HiveJDBC41.jar
+    - hive_metastore.jar
+    - hive_service.jar
+    - libfb303-0.9.0.jar
+    - libthrift-0.9.0.jar
+    - log4j-1.2.14.jar
+    - ql.jar
+    - slf4j-api-1.5.11.jar
+    - slf4j-log4j12-1.5.11.jar
+    - TCLIServiceClient.jar
+    - zookeeper-3.4.6.jar
+  connectionString: jdbc:hive2://hive-host:10000
+  user: user
+  password: pass
 
