@@ -1,60 +1,36 @@
 # JDBC Adapter for Virtual Schemas
 
 ## Overview
-This is an adapter for virtual schemas to connect to JDBC data sources, like Hive or Oracle or any other. It serves as the reference adapter for the virtual schema framework.
+The JDBC adapter for virtual schemas allows you to connect to JDBC data sources like Hive, Oracle, Teradata, EXASOL or any other data source supporting JDBC. It uses the well proven ```IMPORT FROM JDBC``` EXASOL statement behind the scenes to obtain the requested data, when running a query on a virtual table. The JDBC adapter also serves as the reference adapter for the EXASOL virtual schema framework.
 
-If you are interested in a introduction to virtual schemas please refer to our [virtual schemas documentation](../doc).
+The JDBC adapter currently supports the following SQL dialects and data sources. This list will be continuously extended based on the feedback from our users:
+* EXASOL
+* Hive
+* Impala
+* Oracle
+* Teradata
+* Redshift
+
+Each such implementation of a dialect handles three major aspects:
+* How to **map the tables** in the source systems to virtual tables in EXASOL, including how to **map the data types** to EXASOL data types.
+* How is the **SQL syntax** of the data source, including identifier quoting, case-sensitivity, function names, or special syntax like LIMIT/TOP.
+* Which **capabilities** are supported by the data source. E.g. is it supported to run filters, to specify select list expressions, to run aggregation or scalar functions or to order or limit the result.
+
+In addition to the aforementioned dialects there is the so called ```GENERIC``` dialect, which is designed to work with any JDBC driver. It derives the SQL dialect from the JDBC driver metadata. However, it does not support any capabilities and might fail if the data source has special syntax or data types, so it should only be used for evaluation purposes.
+
+If you are interested in a introduction to virtual schemas please refer to the EXASOL user manual. You can find it in the [download area of the EXASOL user portal](https://www.exasol.com/portal/display/DOWNLOAD/6.0).
 
 
-## Deploying the Adapter
+## Getting Started
 
-Run the following steps to deploy your adapter:
-
-### Prerequisites:
-* EXASOL >= 6.0
-* Advanced edition (which includes the ability to execute adapter scripts)
-
-### Build:
-
-To build a fat jar (including all dependencies) run:
-```
-mvn clean -DskipTests package
-```
-
-The resulting fat jar is stored in ```virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar```.
-
-### Upload Adapter jar
-
-You have to upload the jar of the adapter to a bucket of your choice. This will allow using the jar in the adapter script. See chapter 3.6.4. "The synchronous cluster file system BucketFS" in the EXASolution User Manual for how to use BucketFS.
-
-### Upload JDBC Driver files
-
-You have to upload the JDBC driver files of your remote database two times: First into a bucket of your choice, so that they can be accessed from the adapter script. Second you have to upload the files as a JDBC driver in EXAOperation (under Software -> JDBC Drivers).
-
-### Deploy Adapter Script
-Then run the following SQL commands to deploy the adapter in the database:
-```sql
--- The adapter is simply a script. It has to be stored in any regular schema.
-CREATE SCHEMA adapter;
-CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
-
-  // This is the class implementing the callback method of the adapter script
-  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
-
-  // This will add the adapter jar to the classpath so that it can be used inside the adapter script
-  // Replace the names of the bucketfs and the bucket with the ones you used.
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar;
-
-  // You have to add all files of the data source jdbc driver here (e.g. MySQL or Hive)
-  %jar /buckets/your-bucket-fs/your-bucket/name-of-data-source-jdbc-driver.jar;
-/
-```
+Before you can start using the JDBC adapter for virtual schemas you have to deploy the adapter and the JDBC driver of your data source in your EXASOL database.
+Please follow the [step-by-step deployment guide](doc/deploy-adapter.md).
 
 
 ## Using the Adapter
-The following statements demonstrate how you can use the JDBC adapter and virtual schemas. Please scroll down to see a list of all properties supported by the JDBC adapter. Please also consult the user manual for a in-depth introduction to virtual schemas.
+The following statements demonstrate how you can use virtual schemas with the JDBC adapter to connect to a Hive system. Please scroll down to see a list of all properties supported by the JDBC adapter.
 
-Create a virtual schema using the JDBC adapter. This will retrieve and cache the metadata via JDBC.
+First we create a virtual schema using the JDBC adapter. The adapter will retrieve the metadata via JDBC and map them to virtual tables. The metadata (virtual tables, columns and data types) are then cached in EXASOL.
 ```sql
 CREATE CONNECTION hive_conn TO 'jdbc:hive2://localhost:10000/default' USER 'hive-usr' IDENTIFIED BY 'hive-pwd';
 
@@ -64,20 +40,22 @@ CREATE VIRTUAL SCHEMA hive USING adapter.jdbc_adapter WITH
   SCHEMA_NAME     = 'default';
 ```
 
-Explore the tables in the virtual schema:
+We can now explore the tables in the virtual schema, just like for a regular schema:
 ```sql
 OPEN SCHEMA hive;
 SELECT * FROM cat;
 DESCRIBE clicks;
 ```
 
-Run queries on the virtual tables:
+And we can run arbitrary queries on the virtual tables:
 ```sql
 SELECT count(*) FROM clicks;
 SELECT DISTINCT USER_ID FROM clicks;
 ```
 
-Combine virtual and native tables in a query:
+Behind the scenes the EXASOL command ```IMPORT FROM JDBC``` will be executed to obtain the data needed from the data source to fulfil the query. The EXASOL database interacts with the adapter to pushdown as much as possible to the data source (e.g. filters, aggregations or order by/limit), while considering the capabilities of the data source.
+
+Let's combine a virtual and a native tables in a query:
 ```
 SELECT * from clicks JOIN native_schema.users on clicks.userid = users.id;
 ```
@@ -88,32 +66,31 @@ ALTER VIRTUAL SCHEMA hive REFRESH;
 ALTER VIRTUAL SCHEMA hive REFRESH TABLES t1 t2; -- refresh only these tables
 ```
 
-Or set properties. This might update the metadata (if you change the remote database) or not.
+Or set properties. Depending on the adapter and the property you set this might update the metadata or not. In our example the metadata are affected, because afterwards the virtual schema will only expose two virtul tables.
 ```sql
 ALTER VIRTUAL SCHEMA hive SET TABLE_FILTER='CUSTOMERS, CLICKS';
 ```
 
-Or unset properties:
+Finally you can unset properties:
 ```sql
 ALTER VIRTUAL SCHEMA hive SET TABLE_FILTER=null;
 ```
 
-Or drop the schema
+Or drop the virtual schema:
 ```sql
 DROP VIRTUAL SCHEMA hive CASCADE;
 ```
 
 
-
 ### Adapter Properties
-Note that properties are always strings, like `TABLE_FILTER='T1,T2'`.
+The following properties can be used to control the behavior of the JDBC adapter. As you see above, these properties can be defined in ```CREATE VIRTUAL SCHEMA``` or changed afterwards via ```ALTER VIRTUAL SCHEMA SET```. Note that properties are always strings, like `TABLE_FILTER='T1,T2'`.
 
 **Mandatory Properties:**
 
 Parameter                   | Value
 --------------------------- | -----------
-**SQL_DIALECT**             | Name of the SQL dialect, e.g. EXASOL, IMPALA, ORACLE or GENERIC (case insensitive). For some SQL dialects we have presets which are used for the pushdown SQL query generation. If you try to generate a virtual schema without specifying this property you will see all available dialects in the error message.
-**CONNECTION_NAME**         | Name of the connection created with ```CREATE CONNECTION``` which contains the jdbc connection string, the username and password. You don't need to set CONNECTION_STRING, USERNAME and PASSWORD if you define this property. We recommend this to ensure that passwords are not shown in the logfiles.
+**SQL_DIALECT**             | Name of the SQL dialect: EXASOL, HIVE, IMPALA, ORACLE, TERADATA, REDSHIFT or GENERIC (case insensitive). If you try generating a virtual schema without specifying this property you will see all available dialects in the error message.
+**CONNECTION_NAME**         | Name of the connection created with ```CREATE CONNECTION``` which contains the jdbc connection string, the username and password. If you defined this property then it is not allowed to set CONNECTION_STRING, USERNAME and PASSWORD. We recommend using this property to ensure that the password will not be shown in the logfiles.
 **CONNECTION_STRING**       | The jdbc connection string. Only required if CONNECTION_NAME is not set.
 
 
@@ -122,20 +99,20 @@ Parameter                   | Value
 Parameter                   | Value
 --------------------------- | -----------
 **CATALOG_NAME**            | The name of the remote jdbc catalog. This is usually case-sensitive, depending on the dialect. It depends on the dialect whether you have to specify this or not. Usually you have to specify it if the data source JDBC driver supports the concepts of catalogs.
-**SCHEMA_NAME**             | The name of the remote jdbc schema. This is usually case-sensitive, depending on the dialect.  It depends on the dialect whether you have to specify this or not.  Usually you have to specify it if the data source JDBC driver supports the concepts of schemas.
+**SCHEMA_NAME**             | The name of the remote jdbc schema. This is usually case-sensitive, depending on the dialect. It depends on the dialect whether you have to specify this or not. Usually you have to specify it if the data source JDBC driver supports the concepts of schemas.
 **USERNAME**                | Username for authentication. Can only be set if CONNECTION_NAME is not set.
 **PASSWORD**                | Password for authentication. Can only be set if CONNECTION_NAME is not set.
+**TABLE_FILTER**            | A comma-separated list of table names (case sensitive). Only these tables will be available as virtual tables, other tables are ignored. Use this if you don't want to have all remote tables in your virtual schema.
 
 
 **Advanced Optional Properties:**
 
 Parameter                   | Value
 --------------------------- | -----------
-**TABLE_FILTER**            | A comma-separated list of tablenames (case sensitive). Only these tables will be available, other tables are ignored. Use this if you don't want to have all remote tables in your virtual schema.
-**IMPORT_FROM_EXA**         | Either 'TRUE' or 'FALSE' (default). If true, IMPORT FROM EXA will be used for the pushdown instead of IMPORT FROM JDBC. You have to define EXA_CONNECTION_STRING if this property is true.
-**EXA_CONNECTION_STRING**   | The connection string used for IMPORT FROM EXA in the format 'hostname:port'.
 **DEBUG_ADDRESS**           | The IP address/hostname and port of the UDF debugging service, e.g. 'myhost:3000'. Debug output from the UDFs will be sent to this address. See the section on debugging below.
-**IS_LOCAL**                | Either 'TRUE' or 'FALSE' (default). If true, you are connecting to the local EXASOL database (e.g. for testing purposes). In this case, the adapter can avoid the IMPORT FROM JDBC overhead.
+**IMPORT_FROM_EXA**         | Only relevant if your data source is EXASOL. Either 'TRUE' or 'FALSE' (default). If true, IMPORT FROM EXA will be used for the pushdown instead of IMPORT FROM JDBC. You have to define EXA_CONNECTION_STRING if this property is true.
+**EXA_CONNECTION_STRING**   | The connection string used for IMPORT FROM EXA in the format 'hostname:port'.
+**IS_LOCAL**                | Only relevant if your data source is the same EXASOL database where you create the virtual schema. Either 'TRUE' or 'FALSE' (default). If true, you are connecting to the local EXASOL database (e.g. for testing purposes). In this case, the adapter can avoid the IMPORT FROM JDBC overhead.
 
 
 
@@ -148,12 +125,17 @@ python tools/udf_debug.py -s myhost -p 3000
 ```
 And set the DEBUG_ADDRESS properties so that the adapter will send debug output to the specified address.
 ```sql
-ALTER VIRTUAL SCHEMA vs SET DEBUG_ADDRESS='myhost:3000'
+ALTER VIRTUAL SCHEMA vs SET DEBUG_ADDRESS='host-where-udf-debug-script-runs:3000'
 ```
 
-
+You have to make sure that EXASOL can connect to the host running the udf_debug.py script.
 
 
 ## Frequent Issues
 * **Error: No suitable driver found for jdbc...**: The jdbc driver class was not discovered automatically. Either you have to add a META-INF/services/java.sql.Driver file with the classname to your jar, or you have to load the driver manually (see JdbcMetadataReader.readRemoteMetadata()).
 See https://docs.oracle.com/javase/7/docs/api/java/sql/DriverManager.html
+
+
+## Developing New Dialects
+
+If you want to contribute a new dialect please visit the guide [how to develop and test a dialect](doc/develop-dialect.md).
