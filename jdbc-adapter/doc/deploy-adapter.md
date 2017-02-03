@@ -41,7 +41,7 @@ You have to upload the JDBC driver files of your remote database **two times**:
   - Add the JDBC driver by specifying the jdbc main class and the prefix of the JDBC connection string
   - Upload all files (one by one) to the specific JDBC to the newly added JDBC driver.
 
-Note that some JDBC drivers consist of several files and that you have to upload all of them. To find out which jar you need, consult the [supported dialects page](doc/supported_dialects.md).
+Note that some JDBC drivers consist of several files and that you have to upload all of them. To find out which jar you need, consult the [supported dialects page](supported-dialects.md).
 
 ### 5. Deploy Adapter Script
 Then run the following SQL commands to deploy the adapter in the database:
@@ -62,4 +62,4 @@ CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
 /
 ```
 
-The [supported dialects page](doc/supported_dialects.md) has example statements for the individual dialects.
+The [supported dialects page](supported-dialects.md) has example statements for the individual dialects.
