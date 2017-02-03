@@ -1,6 +1,11 @@
 # Supported Dialects
 
-The purpose of this page is to provide detailed instructions on the individual dialects.
+The purpose of this page is to provide detailed instructions for each of the supported dialects on how to get started. Typical questions are
+* Which **JDBC driver** is used, which files have to be uploaded and included when creating the adapter script.
+* How does the **CREATE VIRTUAL SCHEMA** statement look like, i.e. which parameters are required.
+* **Data source specific notes**, like authentication with Kerberos, supported capabilities or things to consider regarding the data type mapping.
+
+As an entry point we recommend to follow the [step-by-step deployment guide](doc/deploy-adapter.md) which will link to this page whenever needed.
 
 ## Table of Contents
 
@@ -20,10 +25,10 @@ The EXASOL SQL dialect supports all capabilities that are supported by the virtu
 
 **JDBC driver**:
 Connecting to an EXASOL database is the simplest way to start with virtual schemas.
-You don't have to install any JDBC driver, because it is already installed in the EXASOL database and also included in the jar of the adapter.
+You don't have to install any JDBC driver, because it is already installed in the EXASOL database and also included in the jar of the JDBC adapter.
 
-**Get started**:
-All you have to do is uploading the adapter jar to a bucket and create the adapter script:
+**Adapter script**:
+After uploading the adapter jar, the adapter script can be created as follows:
 ```sql
 CREATE SCHEMA adapter;
 CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
@@ -31,7 +36,7 @@ CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
   %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar;
 /
 ```
-Then you can create a virtual schema:
+**Create a virtual schema:**
 ```sql
 CREATE CONNECTION exasol_conn TO 'jdbc:exa:exasol-host:1234' USER 'user' IDENTIFIED BY 'pwd';
 
@@ -41,7 +46,7 @@ CREATE VIRTUAL SCHEMA virtual_exasol USING adapter.jdbc_adapter WITH
   SCHEMA_NAME     = 'default';
 ```
 
-EXASOL provides the faster ```IMPORT FROM EXA``` command for loading data from EXASOL. You can tell the adapter to use this command instead of ```IMPORT FROM JDBC``` by setting the ```IMPORT_FROM_EXA``` property:
+EXASOL provides the faster and parallel ```IMPORT FROM EXA``` command for loading data from EXASOL. You can tell the adapter to use this command instead of ```IMPORT FROM JDBC``` by setting the ```IMPORT_FROM_EXA``` property. In this case you have to provide the additional ```EXA_CONNECTION_STING``` which is the connection string used for the internally used ```IMPORT FROM EXA``` command (it also supports ranges like ```192.168.6.11..14:8563```).
 ```sql
 CREATE VIRTUAL SCHEMA virtual_exasol USING adapter.jdbc_adapter WITH
   SQL_DIALECT     = 'EXASOL'
@@ -63,9 +68,9 @@ You have to specify the following settings when adding the JDBC driver via EXAOp
 * Main: ```com.cloudera.hive.jdbc41.HS2Driver```
 * Prefix: ```jdbc:hive2:```
 
-Make sure you upload **all files** of the JDBC driver (over 10 at the time of writing) in EXAOperation and to the bucket.
+Make sure you upload **all files** of the JDBC driver (over 10 at the time of writing) in EXAOperation **and** to the bucket.
 
-**Get started**:
+**Adapter script**:
 You have to add all files of the JDBC driver to the classpath using %jar as follows (filenames may vary):
 ```sql
 CREATE SCHEMA adapter;
@@ -87,7 +92,7 @@ CREATE  JAVA  ADAPTER SCRIPT jdbc_adapter AS
   %jar /buckets/bucketfs1/bucket1/zookeeper-3.4.6.jar;
 /
 ```
-Then you can create a virtual schema:
+**Create a virtual schema:**
 ```sql
 CREATE CONNECTION hive_conn TO 'jdbc:hive2://hive-host:10000' USER 'hive-usr' IDENTIFIED BY 'hive-pwd';
 
@@ -99,24 +104,22 @@ CREATE VIRTUAL SCHEMA hive_default USING adapter.jdbc_adapter WITH
 
 ### Connecting To a Kerberos Secured Hadoop:
 
-Connecting to a Kerberos secured Impala or Hive service works
+Connecting to a Kerberos secured Impala or Hive service only differs in one aspect: You have to a ```CONNECTION``` object which contains all the relevant information for the Kerberos authentication. This section describes how Kerberos authentication works and how to create such a ```CONNECTION```.
 
-The JDBC adapter, as well as the internally used ```IMPORT FROM JDBC``` statement both support connecting to Kerberos-secured Hadoop clusters (Hive or Impala).
+#### 0. Understand how it works (optional)
+Both the adapter script and the internally used ```IMPORT FROM JDBC``` statement support Kerberos authentication. They detect, that the connection is a Kerberos connection by a special prefix in the ```IDENTIFIED BY``` field. In such case, the authentication will happen using a Kerberos keytab and Kerberos config file (using the JAAS Java API).
 
-You will need following information:
-* Kerberos principal for Hadoop (i.e., Hadoop user)
-* Kerberos configuration file (e.g., krb5.conf)
-* Kerberos keytab file which contains keys for the Kerberos principal
-* Kerberos principal for the Hadoop NameNode (value of ```dfs.namenode.kerberos.principal``` in hdfs-site.xml)
-* JDBC connection string
+The ```CONNECTION``` object stores all relevant information and files in its fields:
+* The ```TO``` field contains the JDBC connection string
+* The ```USER``` field contains the Kerberos principal
+* The ```IDENTIFIED BY``` field contains the Kerberos configuration file and keytab file (base64 encoded) along with an internal prefix ```ExaAuthType=Kerberos;``` to identify the CONNECTION as a Kerberos CONNECTION.
 
-In order for the adapter to have access to the necessary Kerberos information, a CONNECTION object must be created in EXASOL. Storing the Kerberos information in CONNECTION objects provides the ability to set the accessibility of the Kerberos authentication data (especially the keytab) for different EXASOL database users. It also makes sure that the credentials will never show up in any logfile. The ```TO``` field contains the JDBC connection string, the Kerberos principal is stored in the ```USER``` field, and the Kerberos configuration and keytab are stored in the ```IDENTIFIED BY``` field (base64 format) along with an internal prefix to identify the CONNECTION as a Kerberos CONNECTION.
-
+#### 1. Generate the CREATE CONNECTION statement
 In order to simplify the creation of Kerberos CONNECTION objects, the [create_kerberos_conn.py](tools/create_kerberos_conn.py) Python script has been provided. The script requires 5 arguments:
-* CONNECTION name
-* Kerberos principal
-* Kerberos configuration file path
-* Kerberos keytab path
+* CONNECTION name (arbitrary name for the new CONNECTION)
+* Kerberos principal for Hadoop (i.e., Hadoop user)
+* Kerberos configuration file path (e.g., krb5.conf)
+* Kerberos keytab file path, which contains keys for the Kerberos principal
 * JDBC connection string
 
 Example command:
@@ -129,11 +132,20 @@ Output:
 CREATE CONNECTION krb_conn TO 'jdbc:hive2://hive-host.example.com:10000;AuthMech=1;KrbRealm=EXAMPLE.COM;KrbHostFQDN=hive-host.example.com;KrbServiceName=hive' USER 'krbuser@EXAMPLE.COM' IDENTIFIED BY 'ExaAuthType=Kerberos;enp6Cg==;YWFhCg=='
 ```
 
-The generated CREATE CONNECTION statement can be executed directly in EXASOL to create the Kerberos CONNECTION object. For more detailed information about the script, use the help option:
+#### 2. Create the CONNECTION
+You have to execute the generated CREATE CONNECTION statement directly in EXASOL to actually create the Kerberos CONNECTION object. For more detailed information about the script, use the help option:
 ```
 python tools/create_kerberos_conn.py -h
 ```
 
+#### 3. Use the connection when creating a virtual schema
+You can now create a virtual schema using the Kerberos connection created before.
+```sql
+CREATE VIRTUAL SCHEMA hive_default USING adapter.jdbc_adapter WITH
+  SQL_DIALECT     = 'HIVE'
+  CONNECTION_NAME = 'KRB_CONN'
+  SCHEMA_NAME     = 'default';
+```
 
 ## Impala
 
@@ -148,7 +160,7 @@ You have to specify the following settings when adding the JDBC driver via EXAOp
 
 Make sure you upload **all files** of the JDBC driver (over 10 at the time of writing) in EXAOperation and to the bucket.
 
-**Getting started**:
+**Adapter script**:
 The adapter can be created similar to Hive:
 ```sql
 
@@ -172,6 +184,7 @@ CREATE  JAVA  ADAPTER SCRIPT jdbc_adapter AS
 /
 ```
 
+**Create a virtual schema:**
 You can now create a virtual schema as follows:
 ```sql
 CREATE CONNECTION impala_conn TO 'jdbc:impala://impala-host:21050' USER 'impala-usr' IDENTIFIED BY 'impala-pwd';
@@ -182,7 +195,7 @@ CREATE VIRTUAL SCHEMA impala_default USING adapter.jdbc_adapter WITH
   SCHEMA_NAME     = 'default';
 ```
 
-Connecting to a Kerberos secured Impala works similar as in Hive (see above).
+Connecting to a Kerberos secured Impala works similar as for Hive and is described in the section [Connecting To a Kerberos Secured Hadoop](#connecting-to-a-kerberos-secured-hadoop).
 
 ## Oracle
 
