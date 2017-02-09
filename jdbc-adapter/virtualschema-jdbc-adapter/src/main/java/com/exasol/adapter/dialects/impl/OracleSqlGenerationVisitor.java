@@ -528,9 +528,12 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
 
     private boolean selectListRequiresCasts(SqlSelectList selectList) {
         boolean requiresCasts = false;
-        for (SqlNode expression : selectList.getExpressions()) {
-            if (nodeRequiresCast(expression)) {
-                requiresCasts = true;
+        List<SqlNode> expressionList = selectList.getExpressions();
+        if (expressionList != null) {
+            for (SqlNode expression : expressionList) {
+                if (nodeRequiresCast(expression)) {
+                    requiresCasts = true;
+                }
             }
         }
         return requiresCasts;
