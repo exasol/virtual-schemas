@@ -147,16 +147,19 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         }
         List<String> selectListElements = new ArrayList<>();
         if (selectList.isSelectStar()) {
-            if (requiresSelectListAliasesForLimit || selectListRequiresCasts(selectList)) {
-                // Do as if the user has all columns in select list
-                SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
-                int columnId = 0;
-                for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
-                    SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-                    selectListElements.add(sqlColumn.accept(this));
-                    ++columnId;
-                }
-            } else {
+            // Do as if the user has all columns in select list
+            SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
+            boolean selectListRequiresCasts = false;
+            int columnId = 0;
+            for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
+                SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
+                sqlColumn.setParent(selectList);
+                selectListRequiresCasts |= nodeRequiresCast(sqlColumn);
+                selectListElements.add(sqlColumn.accept(this));
+                ++columnId;
+            }
+            if (!requiresSelectListAliasesForLimit && !selectListRequiresCasts) {
+                selectListElements.clear();
                 selectListElements.add("*");
             }
         } else {
@@ -521,21 +524,12 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         if (node.getType() == SqlNodeType.COLUMN) {
             SqlColumn column = (SqlColumn)node;
             String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-            return TYPE_NAMES_REQUIRING_CAST.contains(typeName);
-        }
-        return false;
-    }
-
-    private boolean selectListRequiresCasts(SqlSelectList selectList) {
-        boolean requiresCasts = false;
-        List<SqlNode> expressionList = selectList.getExpressions();
-        if (expressionList != null) {
-            for (SqlNode expression : expressionList) {
-                if (nodeRequiresCast(expression)) {
-                    requiresCasts = true;
-                }
+            if (typeName.equals("NUMBER") && column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.VARCHAR) {
+                return true;
+            } else {
+                return TYPE_NAMES_REQUIRING_CAST.contains(typeName);
             }
         }
-        return requiresCasts;
+        return false;
     }
 }
