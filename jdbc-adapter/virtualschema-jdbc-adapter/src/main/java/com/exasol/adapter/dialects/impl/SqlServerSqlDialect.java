@@ -288,23 +288,23 @@ public class SqlServerSqlDialect extends AbstractSqlDialect{
         cap.supportScalarFunction(ScalarFunctionCapability.ST_DISTANCE);
         cap.supportScalarFunction(ScalarFunctionCapability.ST_ENVELOPE);
         cap.supportScalarFunction(ScalarFunctionCapability.ST_EQUALS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_FORCE2D);
+        //cap.supportScalarFunction(ScalarFunctionCapability.ST_FORCE2D);
         cap.supportScalarFunction(ScalarFunctionCapability.ST_GEOMETRYTYPE);
         cap.supportScalarFunction(ScalarFunctionCapability.ST_INTERSECTION);
         cap.supportScalarFunction(ScalarFunctionCapability.ST_INTERSECTS);
         cap.supportScalarFunction(ScalarFunctionCapability.ST_ISEMPTY);
         cap.supportScalarFunction(ScalarFunctionCapability.ST_ISSIMPLE);
         cap.supportScalarFunction(ScalarFunctionCapability.ST_OVERLAPS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_SETSRID);
+        //cap.supportScalarFunction(ScalarFunctionCapability.ST_SETSRID);
         cap.supportScalarFunction(ScalarFunctionCapability.ST_SYMDIFFERENCE);
         cap.supportScalarFunction(ScalarFunctionCapability.ST_TOUCHES);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_TRANSFORM);
+        //cap.supportScalarFunction(ScalarFunctionCapability.ST_TRANSFORM);
         cap.supportScalarFunction(ScalarFunctionCapability.ST_UNION);
         cap.supportScalarFunction(ScalarFunctionCapability.ST_WITHIN);
         
         // Conversion functions
 //        CAST,  // Has alias CONVERT
-//        IS_NUMBER,
+//		  IS_NUMBER
 //        IS_BOOLEAN,
 //        IS_DATE,
 //        IS_DSINTERVAL,
@@ -318,29 +318,28 @@ public class SqlServerSqlDialect extends AbstractSqlDialect{
 //        TO_TIMESTAMP,
         
         // Bitwise functions
-//        BIT_AND,
+        cap.supportScalarFunction(ScalarFunctionCapability.BIT_AND);
 //        BIT_CHECK,
-//        BIT_NOT,
-//        BIT_OR,
+        cap.supportScalarFunction(ScalarFunctionCapability.BIT_NOT);
+        cap.supportScalarFunction(ScalarFunctionCapability.BIT_OR);
 //        BIT_SET,
 //        BIT_TO_NUM,
-//        BIT_XOR,
+        cap.supportScalarFunction(ScalarFunctionCapability.BIT_XOR);
 
         // Other functions
-//        CASE,
+        cap.supportScalarFunction(ScalarFunctionCapability.CASE);
 //        CURRENT_SCHEMA,
 //        CURRENT_SESSION,
 //        CURRENT_STATEMENT,
 //        CURRENT_USER,
-//        HASH_MD5,
-//        HASH_SHA,
-//        HASH_SHA1,
-//        HASH_TIGER,
-//        NULLIFZERO,
+        cap.supportScalarFunction(ScalarFunctionCapability.HASH_MD5); //translated to HASHBYTES
+        cap.supportScalarFunction(ScalarFunctionCapability.HASH_SHA); //translated to HASHBYTES
+        cap.supportScalarFunction(ScalarFunctionCapability.HASH_SHA1); //translated to HASHBYTES
+//        HASH_TIGER, 
+        cap.supportScalarFunction(ScalarFunctionCapability.NULLIFZERO); //alias NULLIF
 //        SYS_GUID,
-//        ZEROIFNULL
-           
-        
+        cap.supportScalarFunction(ScalarFunctionCapability.ZEROIFNULL); //translated to ISNULL(exp1, exp2) in Visitor
+
         return cap;
 	}
 
@@ -431,26 +430,9 @@ public class SqlServerSqlDialect extends AbstractSqlDialect{
 		scalarAliases.put(ScalarFunction.LENGTH, 	"LEN");
 		scalarAliases.put(ScalarFunction.LOCATE, 	"CHARINDEX");
 		scalarAliases.put(ScalarFunction.REPEAT, 	"REPLICATE");
-		scalarAliases.put(ScalarFunction.SUBSTR, 	"SUBSTRING");
+		scalarAliases.put(ScalarFunction.SUBSTR, 	"SUBSTRING");	
+		scalarAliases.put(ScalarFunction.NULLIFZERO, "NULLIF");
 		
-		
-		//aliases for geo functions
-		
-		scalarAliases.put(ScalarFunction.ST_AREA, "STAREA");
-		scalarAliases.put(ScalarFunction.ST_BOUNDARY, "STBOUNDARY");
-		scalarAliases.put(ScalarFunction.ST_BUFFER, "STBUFFER");
-		scalarAliases.put(ScalarFunction.ST_CENTROID, "STCENTROID");
-		scalarAliases.put(ScalarFunction.ST_CONTAINS, "STCONTAINS");
-		scalarAliases.put(ScalarFunction.ST_CONVEXHULL, "STCONVEXHULL");
-		scalarAliases.put(ScalarFunction.ST_CROSSES, "STCROSSES");
-		scalarAliases.put(ScalarFunction.ST_DIFFERENCE, "STDIFFERENCE");
-
-		
-
-		scalarAliases.put(ScalarFunction.ST_X, 	"STX");
-		scalarAliases.put(ScalarFunction.ST_Y, "STY");
-		
-
 		return scalarAliases;
 		
 	}

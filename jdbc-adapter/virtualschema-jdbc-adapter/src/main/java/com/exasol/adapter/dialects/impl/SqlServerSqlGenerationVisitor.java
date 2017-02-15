@@ -179,13 +179,17 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
     @Override
     public String visit(SqlFunctionScalar function) {
         String sql = super.visit(function);
+        
+        
+		List<String> argumentsSql = new ArrayList<>();
+        for (SqlNode node : function.getArguments()) {
+            argumentsSql.add(node.accept(this));
+        }
+        StringBuilder builder = new StringBuilder();
+        
         switch (function.getFunction()) {
         case INSTR: {
-            List<String> argumentsSql = new ArrayList<>();
-            for (SqlNode node : function.getArguments()) {
-                argumentsSql.add(node.accept(this));
-            }
-            StringBuilder builder = new StringBuilder();
+
             builder.append("CHARINDEX(");
             builder.append(argumentsSql.get(1));
             builder.append(", ");
@@ -202,11 +206,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
         
         
         case LPAD: {  //RIGHT(REPLICATE(pad_char, length) + LEFT(string, length), length)
-            List<String> argumentsSql = new ArrayList<>();
-            for (SqlNode node : function.getArguments()) {
-                argumentsSql.add(node.accept(this));
-            }
-            
+
             String padChar = "' '";
             
             if (argumentsSql.size() > 2) {
@@ -219,7 +219,6 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
             String length = argumentsSql.get(1);
 
             
-            StringBuilder builder = new StringBuilder();
             builder.append("RIGHT ( REPLICATE(");
             builder.append(padChar);
             builder.append(",");
@@ -237,11 +236,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
         
         
         case RPAD: {   //LEFT(RIGHT(string, length) + REPLICATE(pad_char, length) , length);
-        	List<String> argumentsSql = new ArrayList<>();
-            for (SqlNode node : function.getArguments()) {
-                argumentsSql.add(node.accept(this));
-            }
-            
+
             String padChar = "' '";
             
             if (argumentsSql.size() > 2) {
@@ -252,7 +247,6 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
             
             String length = argumentsSql.get(1);
 
-            StringBuilder builder = new StringBuilder();
             builder.append("LEFT(RIGHT(");
             builder.append(string);
             builder.append(",");
@@ -274,11 +268,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
         case ADD_SECONDS:
         case ADD_WEEKS:
         case ADD_YEARS: { //DATEADD(datepart,number,date)
-            List<String> argumentsSql = new ArrayList<>();
-            for (SqlNode node : function.getArguments()) {
-                argumentsSql.add(node.accept(this));
-            }
-            StringBuilder builder = new StringBuilder();
+
             builder.append("DATEADD(");
 
             switch (function.getFunction()) {
@@ -318,11 +308,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
         case DAYS_BETWEEN:
         case MONTHS_BETWEEN:
         case YEARS_BETWEEN: {
-        	 List<String> argumentsSql = new ArrayList<>();
-             for (SqlNode node : function.getArguments()) {
-                 argumentsSql.add(node.accept(this));
-             }
-             StringBuilder builder = new StringBuilder();
+
              builder.append("DATEDIFF(");
 
              switch (function.getFunction()) {
@@ -372,6 +358,263 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
             sql = "SYSDATETIME()";
             break;
             
+ 
+        case ST_X:
+	    		builder.append(argumentsSql.get(0)+".STX") ;
+	    		sql = builder.toString();
+	    		break;
+
+	    case ST_Y:
+	    		builder.append(argumentsSql.get(0)+".STY") ;
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_ENDPOINT:
+            	builder.append("CAST(");
+	    		builder.append(argumentsSql.get(0)+".STEndPoint()") ;
+            	builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_ISCLOSED:
+	    		builder.append(argumentsSql.get(0)+".STIsClosed()") ;
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_ISRING:
+	    		builder.append(argumentsSql.get(0)+".STIsRing()") ;
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_LENGTH:
+	    		builder.append(argumentsSql.get(0)+".STLength()") ;
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_NUMPOINTS:
+	    		builder.append(argumentsSql.get(0)+".STNumPoints()") ;
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_POINTN:
+        		builder.append("CAST(");
+	    		builder.append(argumentsSql.get(0)+".STPointN("+argumentsSql.get(1)+")") ;
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_STARTPOINT:
+    			builder.append("CAST(");
+	    		builder.append(argumentsSql.get(0)+".STStartPoint()") ;
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_AREA:
+	    		builder.append(argumentsSql.get(0)+".STArea()") ;
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_EXTERIORRING:
+				builder.append("CAST(");
+	    		builder.append(argumentsSql.get(0)+".STExteriorRing()") ;
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_INTERIORRINGN:
+				builder.append("CAST(");
+	    		builder.append(argumentsSql.get(0)+".STInteriorRingN ("+argumentsSql.get(1)+")") ;
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_NUMINTERIORRINGS:
+	    		builder.append(argumentsSql.get(0)+".STNumInteriorRing()") ;
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_GEOMETRYN:
+				builder.append("CAST(");
+	    		builder.append(argumentsSql.get(0)+".STGeometryN("+argumentsSql.get(1)+")") ;
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_NUMGEOMETRIES:
+	    		builder.append(argumentsSql.get(0)+".STNumGeometries()") ;
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_BOUNDARY:
+				builder.append("CAST(");
+	    		builder.append(argumentsSql.get(0)+".STBoundary()") ;
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_BUFFER:
+				builder.append("CAST(");
+	    		builder.append(argumentsSql.get(0)+".STBuffer("+argumentsSql.get(1)+")") ;
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_CENTROID:
+				builder.append("CAST(");
+	    		builder.append(argumentsSql.get(0)+".STCentroid()") ;
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_CONTAINS:
+	    		builder.append(argumentsSql.get(0)+".STContains("+argumentsSql.get(1)+")") ;
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_CONVEXHULL:
+				builder.append("CAST(");
+	    		builder.append(argumentsSql.get(0)+".STConvexHull()") ;
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_CROSSES:
+	    		builder.append(argumentsSql.get(0)+".STCrosses("+argumentsSql.get(1)+")") ;
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_DIFFERENCE:
+				builder.append("CAST(");
+	    		builder.append(argumentsSql.get(0)+".STDifference("+argumentsSql.get(1)+")") ;
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_DIMENSION:
+	    		builder.append(argumentsSql.get(0)+".STDimension()") ;
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_DISJOINT:
+				builder.append("CAST(");
+	    		builder.append(argumentsSql.get(0)+".STDisjoint("+argumentsSql.get(1)+")") ;
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_DISTANCE:
+	    		builder.append(argumentsSql.get(0)+".STDistance("+argumentsSql.get(1)+")") ;
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_ENVELOPE:
+				builder.append("CAST(");
+	    		builder.append(argumentsSql.get(0)+".STEnvelope()") ;
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_EQUALS:
+	    		builder.append(argumentsSql.get(0)+".STEquals("+argumentsSql.get(1)+")") ;
+	    		sql = builder.toString();
+	    		break;
+	
+	
+	    case ST_GEOMETRYTYPE:
+	    		builder.append(argumentsSql.get(0)+".STGeometryType()") ;
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_INTERSECTION:
+				builder.append("CAST(");
+	    		builder.append(argumentsSql.get(0)+".STIntersection("+argumentsSql.get(1)+")") ;
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_INTERSECTS:
+	    		builder.append(argumentsSql.get(0)+".STIntersects("+argumentsSql.get(1)+")") ;
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_ISEMPTY:
+	    		builder.append(argumentsSql.get(0)+".STIsEmpty()") ;
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_ISSIMPLE:
+	    		builder.append(argumentsSql.get(0)+".STIsSimple()") ;
+	    		sql = builder.toString();
+	    		break;
+	    case ST_OVERLAPS:
+	    		builder.append(argumentsSql.get(0)+".STOverlaps("+argumentsSql.get(1)+")") ;
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_SYMDIFFERENCE:
+				builder.append("CAST(");
+	    		builder.append(argumentsSql.get(0)+".STSymDifference ("+argumentsSql.get(1)+")") ;
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_TOUCHES:
+	    		builder.append(argumentsSql.get(0)+".STTouches("+argumentsSql.get(1)+")") ;
+	    		sql = builder.toString();
+	    		break;
+		
+	    case ST_UNION:
+				builder.append("CAST(");
+	    		builder.append(argumentsSql.get(0)+".STUnion("+argumentsSql.get(1)+")") ;
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+	    		sql = builder.toString();
+	    		break;
+	
+	    case ST_WITHIN:
+	    		builder.append(argumentsSql.get(0)+".STWithin("+argumentsSql.get(1)+")") ;
+	    		sql = builder.toString();
+	    		break;
+	    		
+	    case BIT_AND:
+	    	   builder.append(argumentsSql.get(0)+" & "+argumentsSql.get(1));
+	    	   sql = builder.toString();
+	    	   break;
+	   
+	    case BIT_OR:
+	    	   builder.append(argumentsSql.get(0)+" | "+argumentsSql.get(1));
+	    	   sql = builder.toString();
+	    	   break;
+	    	   
+	    case BIT_XOR:
+	    	   builder.append(argumentsSql.get(0)+" ^ "+argumentsSql.get(1));
+	    	   sql = builder.toString();
+	    	   break;
+	    	   
+	    case BIT_NOT:
+	    	   builder.append("~ "+argumentsSql.get(0));
+	    	   sql = builder.toString();
+	    	   break;
+	    	   
+	    case HASH_MD5:
+	    		builder.append("CONVERT(Char, HASHBYTES('MD5',"+argumentsSql.get(0)+"), 2)");
+	    		sql = builder.toString();
+	    		break;
+	    case HASH_SHA1:
+	    		builder.append("CONVERT(Char, HASHBYTES('SHA1',"+argumentsSql.get(0)+"), 2)");
+	    		sql = builder.toString();
+	    		break;
+    		
+	    case HASH_SHA:
+	    		builder.append("CONVERT(Char, HASHBYTES('SHA',"+argumentsSql.get(0)+"), 2)");
+	    		sql = builder.toString();
+	    		break;
+    		
+	    case ZEROIFNULL:
+    		builder.append("ISNULL("+argumentsSql.get(0)+",0)");
+    		sql = builder.toString();
+    		break;
+		
         default:
             break;
         }
