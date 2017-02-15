@@ -22,7 +22,7 @@ The subdirectory [doc](doc) contains the API specification for virtual schema ad
 
 ## JDBC Adapter
 
-The subdirectory [jdbc-adapter](jdbc-adapter) contains the JDBC adapter which allows to integrate any kind of JDBC data source which provides a Linux JDBC driver.
+The subdirectory [jdbc-adapter](jdbc-adapter) contains the JDBC adapter which allows to integrate any kind of JDBC data source which provides a JDBC driver.
 
 ## Python Redis Demo Adapter
 

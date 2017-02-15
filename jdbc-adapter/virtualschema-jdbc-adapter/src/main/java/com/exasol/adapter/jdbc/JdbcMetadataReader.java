@@ -272,7 +272,7 @@ public class JdbcMetadataReader {
                 List<ColumnMetadata> columns = readColumns(dbMeta, catalog, schema, table.getOriginalTableName(), dialect);
                 tables.add(new TableMetadata(table.getTableName(), "", columns, table.getTableComment()));
             } catch (Exception ex) {
-                throw new RuntimeException("Exception for table " + table, ex);
+                throw new RuntimeException("Exception for table " + table.getOriginalTableName(), ex);
             }
         }
         return tables;
