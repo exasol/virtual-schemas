@@ -19,6 +19,8 @@ import com.exasol.adapter.metadata.DataType;
 
 public class TeradataSqlDialect extends AbstractSqlDialect{
 
+	public final static int maxTeradataVarcharSize = 32000;  
+	
     public TeradataSqlDialect(SqlDialectContext context) {
 		super(context);
 	}
@@ -47,8 +49,7 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
         cap.supportMainCapability(MainCapability.ORDER_BY_EXPRESSION);
         cap.supportMainCapability(MainCapability.LIMIT);
         
-       
-        
+
         // Predicates
         cap.supportPredicate(PredicateCapability.AND);
         cap.supportPredicate(PredicateCapability.OR);
@@ -216,7 +217,7 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
                     colType = DataType.createDouble();
                 }
                 break;
-            case Types.OTHER: // Teradata JDBC uses OTHER for several data types GEOMETRY, INTERVALetc...  
+            case Types.OTHER: // Teradata JDBC uses OTHER for several data types GEOMETRY, INTERVAL etc...  
             	String columnTypeName = cols.getString("TYPE_NAME");
             	
             	 if ( columnTypeName.equals("GEOMETRY") )
@@ -226,15 +227,25 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
             	 else if (columnTypeName.startsWith("PERIOD") )
             		 colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8); 
             	 else
-            		 colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);     
-
+            		 colType = DataType.createVarChar(TeradataSqlDialect.maxTeradataVarcharSize, DataType.ExaCharset.UTF8);     
             	 break;
             	 
             case Types.SQLXML:
-                
-           	 	colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+           	 	colType = DataType.createVarChar(TeradataSqlDialect.maxTeradataVarcharSize, DataType.ExaCharset.UTF8);
             	break;
-            
+            	
+            case Types.CLOB:
+            	colType = DataType.createVarChar(TeradataSqlDialect.maxTeradataVarcharSize, DataType.ExaCharset.UTF8);
+            	break;
+            	
+            case Types.BLOB:
+            case Types.VARBINARY:
+            case Types.BINARY:
+	       		 colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8); 
+	       		 break;
+            case Types.DISTINCT:
+            	colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8);
+            	break;
         }
         return colType;
     }
