@@ -30,7 +30,8 @@ public class JdbcAdapter {
                         OracleSqlDialect.NAME,
                         TeradataSqlDialect.NAME,
                         RedshiftSqlDialect.NAME,
-                        HiveSqlDialect.NAME));
+                        HiveSqlDialect.NAME,
+                        DB2SqlDialect.NAME));
     }
 
     /**
