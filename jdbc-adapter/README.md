@@ -10,6 +10,8 @@ The JDBC adapter currently supports the following SQL dialects and data sources.
 * Oracle
 * Teradata
 * Redshift
+* [DB2](doc/db2-dialect.md)
+
 
 Each such implementation of a dialect handles three major aspects:
 * How to **map the tables** in the source systems to virtual tables in EXASOL, including how to **map the data types** to EXASOL data types.
