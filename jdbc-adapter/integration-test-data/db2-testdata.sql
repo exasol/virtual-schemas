@@ -7,7 +7,7 @@
 -- db2 -svtf db2-testdata.sql
 
 --force create database sample
---!db2sampl -force -verbose;
+!db2sampl -force -verbose;
 connect to sample;
 
 --create additional table for bit data, large timestamp and unicode tests

@@ -5,11 +5,7 @@ sudo: false
 
 matrix:
   include:
-    - jdk: "openjdk7"
-      env: MVN_ARGS=""
     - jdk: "oraclejdk8"
-      env: MVN_ARGS=""
-    - jdk: "openjdk7"
       env: MVN_ARGS=""
 
 # build a jar with all dependencies. Will also run tests.
