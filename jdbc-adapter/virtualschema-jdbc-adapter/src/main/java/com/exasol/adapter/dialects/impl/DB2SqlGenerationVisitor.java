@@ -32,11 +32,11 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
 
     private Set<ScalarFunction> scalarFunctionsCast = new HashSet<>();
 
-	public DB2SqlGenerationVisitor(SqlDialect dialect, SqlGenerationContext context) {
-		super(dialect, context);
-		
-	}
-	
+        public DB2SqlGenerationVisitor(SqlDialect dialect, SqlGenerationContext context) {
+                super(dialect, context);
+                
+        }
+        
     @Override
     public String visit(SqlColumn column) {
         return getColumnProjectionString(column, super.visit(column));
@@ -65,44 +65,44 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
     
     
     private String getColumnProjectionStringNoCheckImpl(String typeName, SqlColumn column, String projString) {
-    	
-    	switch (typeName) {
-		case "XML":
+            
+            switch (typeName) {
+                case "XML":
             projString = "XMLSERIALIZE(" + projString + " as VARCHAR(32000) INCLUDING XMLDECLARATION)";
-			break;
-		//db2 does not support cast of clobs to varchar in full length  -> max 32672
-		case "CLOB":
-			projString = "CAST(SUBSTRING(" + projString + ",32672) AS VARCHAR(32672))";
-			break;
-		case "CHAR () FOR BIT DATA":
-		case "VARCHAR () FOR BIT DATA":
-			projString = "HEX(" + projString + ")";
-			break;
-		case "TIME":
-		// cast timestamp to not lose precision
-		case "TIMESTAMP":
-			projString = "VARCHAR("+ projString + ")";
-			break;
-		default:
-			break;
-		}
-    	
+                        break;
+                //db2 does not support cast of clobs to varchar in full length  -> max 32672
+                case "CLOB":
+                        projString = "CAST(SUBSTRING(" + projString + ",32672) AS VARCHAR(32672))";
+                        break;
+                case "CHAR () FOR BIT DATA":
+                case "VARCHAR () FOR BIT DATA":
+                        projString = "HEX(" + projString + ")";
+                        break;
+                case "TIME":
+                // cast timestamp to not lose precision
+                case "TIMESTAMP":
+                        projString = "VARCHAR("+ projString + ")";
+                        break;
+                default:
+                        break;
+                }
+            
         if (TYPE_NAME_NOT_SUPPORTED.contains(typeName)){
-        	
-        	projString = "'"+typeName+" NOT SUPPORTED'"; //returning a string constant for unsupported data types
-        	
+                
+                projString = "'"+typeName+" NOT SUPPORTED'"; //returning a string constant for unsupported data types
+                
         }
-        	
+                
         return projString;
     }
-	
+        
     @Override
     public String visit(SqlStatementSelect select) {
         if (!select.hasLimit()) {
             return super.visit(select);
         } else {
-        	SqlLimit limit = select.getLimit();
-        	
+                SqlLimit limit = select.getLimit();
+                
             StringBuilder sql = new StringBuilder();
             sql.append("SELECT ");
             
@@ -130,7 +130,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         }
     }
 
-	
+        
     @Override
     public String visit(SqlSelectList selectList) {
         if (selectList.isRequestAnyColumn()) {
@@ -162,12 +162,12 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
        
         return Joiner.on(", ").join(selectListElements);
     }
-	
-	@Override
-	public String visit(SqlFunctionScalar function) {
+        
+        @Override
+        public String visit(SqlFunctionScalar function) {
         String sql = super.visit(function);
-		
-		switch (function.getFunction()) {
+                
+                switch (function.getFunction()) {
         case TRIM: {
             List<String> argumentsSql = new ArrayList<>();
             for (SqlNode node : function.getArguments()) {
@@ -185,7 +185,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
             builder.append(")");
             sql = builder.toString();
             break;
-        	}
+                }
         case ADD_DAYS:
         case ADD_HOURS:
         case ADD_MINUTES:
@@ -204,11 +204,11 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
             String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
             System.out.println("!DB2 : " + typeName);
             if (typeName.contains("TIMESTAMP")) 
-			{
-            	isTimestamp = true;
+                        {
+                    isTimestamp = true;
                 System.out.println("!DB2 : we got a timestamp");
-            	builder.append("VARCHAR(");
-			}
+                    builder.append("VARCHAR(");
+                        }
 
             builder.append(argumentsSql.get(0));
             builder.append(" + ");
@@ -236,11 +236,11 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
             }
             if (isTimestamp)
             {
-            	builder.append(")");
+                    builder.append(")");
             }
             sql = builder.toString();
             break;
-        	}
+                }
         case CURRENT_DATE:
             sql = "CURRENT DATE";
             break;
@@ -260,52 +260,52 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
             sql = "CURRENT DATE";
             break;
         case SYSTIMESTAMP:
-	            sql = "VARCHAR(CURRENT TIMESTAMP)";
-	            break;
+                    sql = "VARCHAR(CURRENT TIMESTAMP)";
+                    break;
         case BIT_AND:
-	            sql = sql.replaceFirst("^BIT_AND", "BITAND");
-	            break;
+                    sql = sql.replaceFirst("^BIT_AND", "BITAND");
+                    break;
         case BIT_TO_NUM:
-	            sql = sql.replaceFirst("^BIT_TO_NUM", "BIN_TO_NUM");
-	            break;
+                    sql = sql.replaceFirst("^BIT_TO_NUM", "BIN_TO_NUM");
+                    break;
         case NULLIFZERO: {
-	            List<String> argumentsSql = new ArrayList<>();
-	            for (SqlNode node : function.getArguments()) {
-	                argumentsSql.add(node.accept(this));
-	            }
-	            StringBuilder builder = new StringBuilder();
-	            builder.append("NULLIF(");
-	            builder.append(argumentsSql.get(0));
-	            builder.append(", 0)");
-	            sql = builder.toString();
-	            break;
-	        }
+                    List<String> argumentsSql = new ArrayList<>();
+                    for (SqlNode node : function.getArguments()) {
+                        argumentsSql.add(node.accept(this));
+                    }
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("NULLIF(");
+                    builder.append(argumentsSql.get(0));
+                    builder.append(", 0)");
+                    sql = builder.toString();
+                    break;
+                }
         case ZEROIFNULL: {
-	            List<String> argumentsSql = new ArrayList<>();
-	            for (SqlNode node : function.getArguments()) {
-	                argumentsSql.add(node.accept(this));
-	            }
-	            StringBuilder builder = new StringBuilder();
-	            builder.append("IFNULL(");
-	            builder.append(argumentsSql.get(0));
-	            builder.append(", 0)");
-	            sql = builder.toString();
-	            break;
-	        }
+                    List<String> argumentsSql = new ArrayList<>();
+                    for (SqlNode node : function.getArguments()) {
+                        argumentsSql.add(node.accept(this));
+                    }
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("IFNULL(");
+                    builder.append(argumentsSql.get(0));
+                    builder.append(", 0)");
+                    sql = builder.toString();
+                    break;
+                }
         case DIV: {
-	            List<String> argumentsSql = new ArrayList<>();
-	            for (SqlNode node : function.getArguments()) {
-	                argumentsSql.add(node.accept(this));
-	            }
-	            StringBuilder builder = new StringBuilder();
-	            builder.append("CAST(FLOOR(");
-	            builder.append(argumentsSql.get(0));
-	            builder.append(" / FLOOR(");
-	            builder.append(argumentsSql.get(1));
-	            builder.append(")) AS DECIMAL(36, 0))");
-	            sql = builder.toString();
-	            break;
-	        }
+                    List<String> argumentsSql = new ArrayList<>();
+                    for (SqlNode node : function.getArguments()) {
+                        argumentsSql.add(node.accept(this));
+                    }
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("CAST(FLOOR(");
+                    builder.append(argumentsSql.get(0));
+                    builder.append(" / FLOOR(");
+                    builder.append(argumentsSql.get(1));
+                    builder.append(")) AS DECIMAL(36, 0))");
+                    sql = builder.toString();
+                    break;
+                }
         default:
             break;
         }
@@ -318,24 +318,24 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
 
         return sql;
     }
-		
-	
-	@Override
-	public String visit(SqlFunctionAggregate function) {
-		String sql = super.visit(function);
-		
-		switch (function.getFunction()) {
-		case VAR_SAMP:
-			sql = sql.replaceFirst("^VAR_SAMP", "VARIANCE_SAMP");
-			break;
-		default:
-			break;
-		}
-		
-		return sql;
-	}
-	
-	
+                
+        
+        @Override
+        public String visit(SqlFunctionAggregate function) {
+                String sql = super.visit(function);
+                
+                switch (function.getFunction()) {
+                case VAR_SAMP:
+                        sql = sql.replaceFirst("^VAR_SAMP", "VARIANCE_SAMP");
+                        break;
+                default:
+                        break;
+                }
+                
+                return sql;
+        }
+        
+        
     @Override
     public String visit(SqlFunctionAggregateGroupConcat function) {
         StringBuilder builder = new StringBuilder();
@@ -392,11 +392,11 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
         int columnId = 0;
         for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
-        	
-        	
-        	if (nodeRequiresCast(new SqlColumn(columnId, columnMeta))) {
+                
+                
+                if (nodeRequiresCast(new SqlColumn(columnId, columnMeta))) {
                 requiresCasts = true;
-        	}
+                }
         }
 
         return requiresCasts;

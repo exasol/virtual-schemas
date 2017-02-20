@@ -20,7 +20,7 @@ import java.util.List;
 public class DB2SqlDialectIT extends AbstractIntegrationTest {
 
 
-	private static final String VIRTUAL_SCHEMA = "DB2";
+    private static final String VIRTUAL_SCHEMA = "DB2";
     private static final String DB2_SCHEMA = "DB2TEST";
     private static final boolean IS_LOCAL = false;
     
@@ -51,10 +51,10 @@ public class DB2SqlDialectIT extends AbstractIntegrationTest {
         String query = "SELECT PRICE,PROMOPRICE FROM " + VIRTUAL_SCHEMA + ".PRODUCT WHERE pid = '100-100-01'";
         ResultSet result = executeQuery(query);
         matchNextRow(
-        		result,
-        		new BigDecimal("9.99"),
-        		new BigDecimal("7.25") 
-        		);
+                result,
+                new BigDecimal("9.99"),
+                new BigDecimal("7.25") 
+                );
         matchSingleRowExplain(query, "SELECT PRICE, PROMOPRICE FROM " + DB2_SCHEMA + ".PRODUCT WHERE PID = '100-100-01'");
     }
     
@@ -63,10 +63,10 @@ public class DB2SqlDialectIT extends AbstractIntegrationTest {
         String query = "SELECT * FROM (SELECT price,PROMOPRICE FROM DB2.PRODUCT) AS A LIMIT 1 ";
         ResultSet result = executeQuery(query);
         matchNextRow(
-        		result,
-        		new BigDecimal("9.99"),
-        		new BigDecimal("7.25") 
-        		);
+                result,
+                new BigDecimal("9.99"),
+                new BigDecimal("7.25") 
+                );
         matchSingleRowExplain(query, "SELECT PRICE, PROMOPRICE FROM " + DB2_SCHEMA + ".PRODUCT FETCH FIRST 1 ROWS ONLY");
     }
     
@@ -75,12 +75,12 @@ public class DB2SqlDialectIT extends AbstractIntegrationTest {
         String query = "SELECT DETAIL_TIMESTAMP,UHRZEIT FROM " + VIRTUAL_SCHEMA + ".\"Additional_Datatypes\"  WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'";
         ResultSet result = executeQuery(query);
         matchNextRow(
-        		result,
-        		"2020-01-01-00.00.00.123456789123",
-        		"12.05.11" 
-        		);
+                result,
+                "2020-01-01-00.00.00.123456789123",
+                "12.05.11" 
+                );
         matchSingleRowExplain(query, "SELECT VARCHAR(DETAIL_TIMESTAMP), VARCHAR(UHRZEIT) FROM " + DB2_SCHEMA + ".\"Additional_Datatypes\" WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'");
-    	
+        
     }
     
     @Test
@@ -88,12 +88,12 @@ public class DB2SqlDialectIT extends AbstractIntegrationTest {
         String query = "SELECT BIDATAVARCHAR,BIDATACHAR FROM " + VIRTUAL_SCHEMA + ".\"Additional_Datatypes\"  WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'";
         ResultSet result = executeQuery(query);
         matchNextRow(
-        		result,
-        		"30303031", 
-        		"41414242202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020" 
-        		);
+                result,
+                "30303031", 
+                "41414242202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020" 
+                );
         matchSingleRowExplain(query, "SELECT HEX(BIDATAVARCHAR), HEX(BIDATACHAR) FROM "+ DB2_SCHEMA + ".\"Additional_Datatypes\" WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'");
-    	
+        
     }
     
     @Test
@@ -101,11 +101,11 @@ public class DB2SqlDialectIT extends AbstractIntegrationTest {
         String query = "SELECT UNICODECOL FROM " + VIRTUAL_SCHEMA + ".\"Additional_Datatypes\"  WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'";
         ResultSet result = executeQuery(query);
         matchNextRow(
-        		result,
-        		"CHAR 茶"
-        		);
+                result,
+                "CHAR 茶"
+                );
         matchSingleRowExplain(query, "SELECT UNICODECOL FROM " + DB2_SCHEMA + ".\"Additional_Datatypes\" WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'");
-    	
+        
     }
     
     
@@ -114,11 +114,11 @@ public class DB2SqlDialectIT extends AbstractIntegrationTest {
         String query = "SELECT ADD_DAYS(DETAIL_TIMESTAMP,2),ADD_YEARS(DETAIL_TIMESTAMP,-2),SUBSTR(UNICODECOL,1,4) FROM " + VIRTUAL_SCHEMA + ".\"Additional_Datatypes\"  WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'";
         ResultSet result = executeQuery(query);
         matchNextRow(
-        		result,
-        		"2020-01-03-00.00.00.123456789123",
-        		"2018-01-01-00.00.00.123456789123",
-        		"CHAR"
-        		);
+                result,
+                "2020-01-03-00.00.00.123456789123",
+                "2018-01-01-00.00.00.123456789123",
+                "CHAR"
+                );
         matchSingleRowExplain(query, "SELECT VARCHAR(DETAIL_TIMESTAMP + 2 DAYS), VARCHAR(DETAIL_TIMESTAMP + -2 YEARS), SUBSTR(UNICODECOL, 1, 4) FROM " + DB2_SCHEMA + ".\"Additional_Datatypes\" WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'");
     }
     

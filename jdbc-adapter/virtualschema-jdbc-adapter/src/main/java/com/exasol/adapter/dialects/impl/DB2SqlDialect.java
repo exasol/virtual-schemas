@@ -25,23 +25,23 @@ import com.exasol.adapter.metadata.DataType;
 
 public class DB2SqlDialect extends AbstractSqlDialect {
 
-	public DB2SqlDialect(SqlDialectContext context)
-	{
-		super(context);
-	}
+    public DB2SqlDialect(SqlDialectContext context)
+    {
+        super(context);
+    }
 
-	public static final String NAME = "DB2";
-	
-	@Override
-	public String getPublicName()
-	{
-		return NAME;
-	}
+    public static final String NAME = "DB2";
+    
+    @Override
+    public String getPublicName()
+    {
+        return NAME;
+    }
 
-	@Override
-	public Capabilities getCapabilities()
-	{
-		Capabilities cap = new Capabilities();
+    @Override
+    public Capabilities getCapabilities()
+    {
+        Capabilities cap = new Capabilities();
         // Capabilities
         cap.supportMainCapability(MainCapability.SELECTLIST_PROJECTION);
         cap.supportMainCapability(MainCapability.SELECTLIST_EXPRESSIONS);
@@ -278,42 +278,42 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.ZEROIFNULL);
 
         return cap;
-	}
+    }
 
-	@Override
-	public SchemaOrCatalogSupport supportsJdbcCatalogs()
-	{
-		return SchemaOrCatalogSupport.UNSUPPORTED;
-	}
+    @Override
+    public SchemaOrCatalogSupport supportsJdbcCatalogs()
+    {
+        return SchemaOrCatalogSupport.UNSUPPORTED;
+    }
 
-	@Override
-	public SchemaOrCatalogSupport supportsJdbcSchemas()
-	{
-		return SchemaOrCatalogSupport.SUPPORTED;
-	}
+    @Override
+    public SchemaOrCatalogSupport supportsJdbcSchemas()
+    {
+        return SchemaOrCatalogSupport.SUPPORTED;
+    }
 
-	@Override
-	public IdentifierCaseHandling getUnquotedIdentifierHandling()
-	{
-		return IdentifierCaseHandling.INTERPRET_AS_UPPER;
-	}
+    @Override
+    public IdentifierCaseHandling getUnquotedIdentifierHandling()
+    {
+        return IdentifierCaseHandling.INTERPRET_AS_UPPER;
+    }
 
-	@Override
-	public IdentifierCaseHandling getQuotedIdentifierHandling()
-	{
-		return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
-	}
+    @Override
+    public IdentifierCaseHandling getQuotedIdentifierHandling()
+    {
+        return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
+    }
 
-	@Override
-	public String applyQuote(String identifier)
-	{
+    @Override
+    public String applyQuote(String identifier)
+    {
         // If identifier contains double quotation marks ", it needs to be espaced by another double quotation mark. E.g. "a""b" is the identifier a"b in the db.
         return "\"" + identifier.replace("\"", "\"\"") + "\"";
-	}
+    }
 
-	@Override
-	public String applyQuoteIfNeeded(String identifier)
-	{
+    @Override
+    public String applyQuoteIfNeeded(String identifier)
+    {
         // Quoted identifiers can contain any unicode char except dot (.).
         // This is a simplified rule, which might cause that some identifiers are quoted although not needed
         boolean isSimpleIdentifier = identifier.matches("^[A-Z][0-9A-Z_]*");
@@ -322,61 +322,61 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         } else {
             return applyQuote(identifier);
         }
-	}
+    }
 
-	@Override
-	public boolean requiresCatalogQualifiedTableNames(
-			SqlGenerationContext context)
-	{
-		//DB2 does not know catalogs
-		return false;
-	}
+    @Override
+    public boolean requiresCatalogQualifiedTableNames(
+            SqlGenerationContext context)
+    {
+        //DB2 does not know catalogs
+        return false;
+    }
 
-	@Override
-	public boolean requiresSchemaQualifiedTableNames(
-			SqlGenerationContext context)
-	{
-		return true;
-	}
-	
-	@Override
-	public SqlGenerationVisitor getSqlGenerationVisitor(SqlGenerationContext context) {
-		return new DB2SqlGenerationVisitor(this, context);
-	}
+    @Override
+    public boolean requiresSchemaQualifiedTableNames(
+            SqlGenerationContext context)
+    {
+        return true;
+    }
+    
+    @Override
+    public SqlGenerationVisitor getSqlGenerationVisitor(SqlGenerationContext context) {
+        return new DB2SqlGenerationVisitor(this, context);
+    }
 
-	@Override
-	public NullSorting getDefaultNullSorting()
-	{
-		//default db2 behaviour is to set nulls to the end of the result
-		return NullSorting.NULLS_SORTED_AT_END;
-	}
+    @Override
+    public NullSorting getDefaultNullSorting()
+    {
+        //default db2 behaviour is to set nulls to the end of the result
+        return NullSorting.NULLS_SORTED_AT_END;
+    }
 
-	@Override
-	public String getStringLiteral(String value)
-	{
+    @Override
+    public String getStringLiteral(String value)
+    {
         // Don't forget to escape single quote
         return "'" + value.replace("'", "''") + "'";
-	}
-	
-	@Override
-	public DataType mapJdbcType(ResultSet cols) throws SQLException {
-		DataType colType = null;
-		int jdbcType = cols.getInt("DATA_TYPE");
-		
-		switch (jdbcType) {
-		case Types.CLOB:
-			colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
-			break;
-		case 1111:
-			colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
-			break;
-		// set timestamp to varchar as db2 offers a much higher precision than exasol
-		// however java timestamp only supports nanoseconds -> varchar(32)
-		case Types.TIMESTAMP:
-			colType = DataType.createVarChar(32, DataType.ExaCharset.UTF8);
-			break;
-			
-		// db2 driver always delivers UTF8 Characters no matter what encoding is specified for var + char data
+    }
+    
+    @Override
+    public DataType mapJdbcType(ResultSet cols) throws SQLException {
+        DataType colType = null;
+        int jdbcType = cols.getInt("DATA_TYPE");
+        
+        switch (jdbcType) {
+        case Types.CLOB:
+            colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+            break;
+        case 1111:
+            colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+            break;
+        // set timestamp to varchar as db2 offers a much higher precision than exasol
+        // however java timestamp only supports nanoseconds -> varchar(32)
+        case Types.TIMESTAMP:
+            colType = DataType.createVarChar(32, DataType.ExaCharset.UTF8);
+            break;
+            
+        // db2 driver always delivers UTF8 Characters no matter what encoding is specified for var + char data
         case Types.VARCHAR:
         case Types.NVARCHAR:
         case Types.LONGVARCHAR:
@@ -392,15 +392,15 @@ public class DB2SqlDialect extends AbstractSqlDialect {
             }
             break;
         }
-			
-		// VARCHAR  and CHAR for bit data -> will be converted to hex string so we have to double the size
-		case -2:
-			colType = DataType.createChar(cols.getInt("COLUMN_SIZE")*2, DataType.ExaCharset.ASCII);
-		case -3:
-			colType = DataType.createVarChar(cols.getInt("COLUMN_SIZE")*2, DataType.ExaCharset.ASCII);
-			break;
-		}
-		return colType;
-	}
+            
+        // VARCHAR  and CHAR for bit data -> will be converted to hex string so we have to double the size
+        case -2:
+            colType = DataType.createChar(cols.getInt("COLUMN_SIZE")*2, DataType.ExaCharset.ASCII);
+        case -3:
+            colType = DataType.createVarChar(cols.getInt("COLUMN_SIZE")*2, DataType.ExaCharset.ASCII);
+            break;
+        }
+        return colType;
+    }
 
 }
