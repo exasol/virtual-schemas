@@ -16,7 +16,7 @@ exasol:
 
   
 db2:
-  runIntegrationTests: false
+  runIntegrationTests: true
   connectionString:    jdbc:db2://db2-host:50000/SAMPLE
   jdbcDriverPath:      /buckets/mybucketfs/mybucket/DB2_Driver/
   jdbcDriverJars:
