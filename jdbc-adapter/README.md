@@ -10,7 +10,7 @@ The JDBC adapter currently supports the following SQL dialects and data sources.
 * Oracle
 * Teradata
 * Redshift
-* [DB2](doc/db2-dialect.md)
+* DB2
 
 
 Each such implementation of a dialect handles three major aspects:
