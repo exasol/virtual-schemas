@@ -1,0 +1,29 @@
+# Configuration file for integration tests
+
+general:
+  debug:           false
+  debugAddress:    '192.168.0.12:3000'  # Address which will be defined as DEBUG_ADDRESS in the virtual schemas
+  bucketFsUrl:  http://exasol-host:2580/bucket1
+  bucketFsPassword: bucket1
+  jdbcAdapterPath:  /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-0.0.1-SNAPSHOT.jar
+
+exasol:
+  runIntegrationTests: true
+  address:  exasol-host:8563
+  user:     sys
+  password: exasol
+
+
+  
+db2:
+  runIntegrationTests: true
+  connectionString:    jdbc:db2://db2-host:50000/SAMPLE
+  jdbcDriverPath:      /buckets/mybucketfs/mybucket/DB2_Driver/
+  jdbcDriverJars:
+    - db2jcc4.jar
+    - db2jcc_license_cu.jar
+  user: db2inst1
+  password: password
+
+
+
