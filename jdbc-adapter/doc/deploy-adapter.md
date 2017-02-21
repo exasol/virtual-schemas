@@ -5,6 +5,7 @@ Run the following steps to deploy your adapter:
 ### 1. Prerequisites:
 * EXASOL >= 6.0
 * Advanced edition (which includes the ability to execute adapter scripts)
+* EXASOL must be able to connect to the host and port specified in the JDBC connection string. In case of problems you can use a [UDF to test the connectivity](https://www.exasol.com/support/browse/SOL-307).
 
 ### 2. Clone and Build:
 
