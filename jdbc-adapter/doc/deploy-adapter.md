@@ -4,8 +4,9 @@ Run the following steps to deploy your adapter:
 
 ### 1. Prerequisites:
 * EXASOL >= 6.0
-* Advanced edition (which includes the ability to execute adapter scripts)
+* Advanced edition (which includes the ability to execute adapter scripts), or Free Small Business Edition
 * EXASOL must be able to connect to the host and port specified in the JDBC connection string. In case of problems you can use a [UDF to test the connectivity](https://www.exasol.com/support/browse/SOL-307).
+* If the JDBC driver requires Kerberos authentication (e.g. for Hive or Impala), the EXASOL database will authenticate using a keytab file. Each EXASOL node needs access to port 88 of the the Kerberos KDC (key distribution center).
 
 ### 2. Clone and Build:
 
