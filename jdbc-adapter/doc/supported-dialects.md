@@ -16,8 +16,9 @@ As an entry point we recommend to follow the [step-by-step deployment guide](doc
 4. [DB2](#db2)
 5. [Oracle](#oracle)
 6. [Teradata](#teradata)
-7. [Redshirt](#redshift)
-8. [Generic](#generic)
+7. [Redshift](#redshift)
+8. [SQL Server](#sqlserver)
+9. [Generic](#generic)
 
 ## EXASOL
 
@@ -270,6 +271,120 @@ A how to has been included in the [setup sql file](../integration-test-data/db2-
 
 ## Teradata
 
+**JDBC driver:**
+You have to specify the following settings when adding the JDBC driver via EXAOperation:
+* Name: ```TERADATA```
+* Main: ```com.teradata.jdbc.TeraDriver```
+* Prefix: ```jdbc:teradata:```
+* Files: terajdbc4.jar, tdgssconfig.jar
+
+Please also upload the jar files to a bucket for the adapter script.
+
+**Adapter script**
+```sql
+CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter 
+  AS
+  
+  // This is the class implementing the callback method of the adapter script
+  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
+
+  // This will add the adapter jar to the classpath so that it can be used inside the adapter script
+  // Replace the names of the bucketfs and the bucket with the ones you used.
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-0.0.1-SNAPSHOT.jar;
+									 
+  // You have to add all files of the data source jdbc driver here (e.g. MySQL or Hive)
+  %jar /buckets/bucketfs1/bucket1/terajdbc4.jar;
+  %jar /buckets/bucketfs1/bucket1/tdgssconfig.jar;
+
+/
+```
+
+**Create a virtual schema**
+```sql
+CREATE VIRTUAL SCHEMA TERADATA_financial USING adapter.jdbc_adapter 
+WITH
+  SQL_DIALECT     = 'TERADATA'
+  CONNECTION_NAME = 'TERADATA_CONNECTION'
+  SCHEMA_NAME     = 'financial'
+;
+```
+
 ## Redshift
+
+**JDBC driver:**
+
+You have to specify the following settings when adding the JDBC driver via EXAOperation:
+* Name: ```REDSHIFT```
+* Main: ```com.amazon.redshift.jdbc.Driver```
+* Prefix: ```jdbc:redshift:```
+* Files: RedshiftJDBC42-1.2.1.1001.jar
+
+Please also upload the driver jar into a bucket for the adapter script.
+
+**Adapter script**
+```sql
+CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter 
+  AS
+  
+  // This is the class implementing the callback method of the adapter script
+  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
+
+  // This will add the adapter jar to the classpath so that it can be used inside the adapter script
+  // Replace the names of the bucketfs and the bucket with the ones you used.
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-0.0.1-SNAPSHOT.jar;
+									 
+  // You have to add all files of the data source jdbc driver here (e.g. MySQL or Hive)
+
+  %jar /buckets/bucketfs1/bucket1/RedshiftJDBC42-1.2.1.1001.jar;
+
+/
+```
+
+**Create a virtual schema**
+```sql
+CREATE VIRTUAL SCHEMA redshift_tickit
+	USING adapter.jdbc_adapter 
+	WITH
+	SQL_DIALECT = 'REDSHIFT'
+	CONNECTION_NAME = 'REDSHIFT_CONNECTION'
+	CATALOG_NAME = 'database_name'
+	SCHEMA_NAME = 'public'
+	;
+```
+
+## Sql Server
+
+**JDBC driver:**
+The Sql Server Dialect was tested with the jdts 1.3.1 JDBC driver and Sql Server 2014.
+As the jdts driver is already preinstalled for the IMPORT command itself you only need
+to upload the jdts.jar to a bucket for the adapter script.
+
+**Adapter script**
+```sql
+CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.sql_server_jdbc_adapter 
+  AS
+  
+  // This is the class implementing the callback method of the adapter script
+  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
+
+  // This will add the adapter jar to the classpath so that it can be used inside the adapter script
+  // Replace the names of the bucketfs and the bucket with the ones you used.
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-0.0.1-SNAPSHOT.jar;
+									 
+  // You have to add all files of the data source jdbc driver here 
+  %jar /buckets/bucketfs1/bucket1/jtds.jar;
+/
+```
+
+**Create a virtual schema**
+```sql
+CREATE VIRTUAL SCHEMA VS_SQLSERVER USING adapter.sql_server_jdbc_adapter
+WITH
+  SQL_DIALECT     = 'SQLSERVER'
+  CONNECTION_NAME = 'SQLSERVER_CONNECTION'
+  CATALOG_NAME	  =  'MyDatabase'
+  SCHEMA_NAME     = 'dbo'
+;
+```
 
 ## Generic
