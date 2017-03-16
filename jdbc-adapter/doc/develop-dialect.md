@@ -80,4 +80,32 @@ mvn clean package && mvn verify -Pit -Dintegrationtest.configfile=/path/to/your/
 
 This will run all integration tests, i.e. all junit tests with the suffix "IT" in the filename. The yaml configuration file stores the information for your test environment like jdbc connection strings, paths and credentials.
 
+## Java Remote Debugging of Adapter script
+
+When developing a new dialect it's sometimes really helpful to debug the deployed adapter script inside the database.
+In a one node EXASOL environment setting up remote debugging is straight forward.
+First define the following env directive in your adapter script:
+
+```sql
+CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter 
+  AS
+  
+  %env JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,server=y,address=8000,suspend=y";
+
+  // This is the class implementing the callback method of the adapter script
+  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
+
+  // This will add the adapter jar to the classpath so that it can be used inside the adapter script
+  // Replace the names of the bucketfs and the bucket with the ones you used.
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-0.0.1-SNAPSHOT.jar;
+									 
+  // You have to add all files of the data source jdbc driver here (e.g. MySQL or Hive)
+
+  %jar /buckets/bucketfs1/bucket1/RedshiftJDBC42-1.2.1.1001.jar;
+
+/
+```
+
+In eclipse (or any other Java IDE) you can then attach remotely to the Java Adapter using the IP of your one node EXASOL environment and the port 8000.
+With suspend=y the Java-process will wait until the debugger connects to the Java UDF.
 
