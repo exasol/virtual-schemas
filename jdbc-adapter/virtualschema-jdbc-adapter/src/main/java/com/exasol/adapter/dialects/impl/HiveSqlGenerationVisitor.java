@@ -43,26 +43,26 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
                 }    }
             else {
                     selectListElements.add("*");
-                }
-
+            }
         } else {
             if(selectList.isRequestAnyColumn()){
                 return "1";
             }
-                for (SqlNode node : selectList.getExpressions()) {
-                if(node.getType().equals(SqlNodeType.COLUMN)){
+            for (SqlNode node : selectList.getExpressions()) {
+                if(node.getType().equals(SqlNodeType.COLUMN)) {
                     SqlColumn sqlColumn = (SqlColumn) node;
                     String typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
-                    if(typeName.equals("BINARY")  ){
+                    if (typeName.equals("BINARY")) {
                         selectListElements.add("base64(" + node.accept(this) + ")");
-                    }
-                    else {
+                    } else {
                         selectListElements.add(node.accept(this));
                     }
                 }
-
+                else{
+                    selectListElements.add(node.accept(this));
                 }
             }
+        }
 
         return Joiner.on(", ").join(selectListElements);
     }
