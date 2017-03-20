@@ -1,12 +1,19 @@
-# How to develop and test a dialect
-This page describes how you can develop and semi-automatically test an dialect for the JDBC adapter. The integration tests are work in progress.
+# How To Develop and Test a Dialect
+This page describes how you can develop and semi-automatically test a dialect for the JDBC adapter. The framework for testing a dialect is still work in progress.
 
-## How to develop a dialect
-We recommend the following steps for the development of a dialect.
-Please look up in the sourcecode of the ```com.exasol.adapter.dialects.SqlDialect``` for the methods you can override.
-You can also have a look at the implementation of an existing dialect for inspiration.
+# Content
+* [How To Develop a Dialect](#how-to-develop-a-dialect)
+* [How To Start Integration Tests](#how-to-start-integration-tests)
 
-### Setup data source
+## How To Develop a Dialect
+You can implement a dialect by implementing the interface ```com.exasol.adapter.dialects.SqlDialect```.
+We recommend to look at the following ressources to get started:
+* First have a look at the [SqlDialect interface source code](../virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/SqlDialect.java). You can start with the comments of the interface and have a look at the methods you can override.
+* Second you can review the source code of one of the [dialect implementations](../virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/impl) as an inspiration. Ideally you should look at the dialect which is closest to your data source.
+
+To implement a full dialect for a typical data source you have to run all of the following steps. We recommend to follow the order proposed here.
+
+### Setup Data Source
 * Setup and start the database
 * Testdata: Create a test schema with a simple table (simple data types)
 
@@ -56,7 +63,8 @@ You can also have a look at the implementation of an existing dialect for inspir
 * Testdata: Create a simple view, e.g. joining two existing tables
 * Automatic test: Query the view, optionally e.g. with a filter.
 
-## How to start integration tests
+
+## How To Start Integration Tests
 We assume that you have a running EXASOL and data source database with all required test tables.
 
 We use following Maven phases for our integration tests:
@@ -72,5 +80,32 @@ mvn clean package && mvn verify -Pit -Dintegrationtest.configfile=/path/to/your/
 
 This will run all integration tests, i.e. all junit tests with the suffix "IT" in the filename. The yaml configuration file stores the information for your test environment like jdbc connection strings, paths and credentials.
 
+## Java Remote Debugging of Adapter script
 
+When developing a new dialect it's sometimes really helpful to debug the deployed adapter script inside the database.
+In a one node EXASOL environment setting up remote debugging is straight forward.
+First define the following env directive in your adapter script:
+
+```sql
+CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter 
+  AS
+  
+  %env JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,server=y,address=8000,suspend=y";
+
+  // This is the class implementing the callback method of the adapter script
+  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
+
+  // This will add the adapter jar to the classpath so that it can be used inside the adapter script
+  // Replace the names of the bucketfs and the bucket with the ones you used.
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-0.0.1-SNAPSHOT.jar;
+									 
+  // You have to add all files of the data source jdbc driver here (e.g. MySQL or Hive)
+
+  %jar /buckets/bucketfs1/bucket1/RedshiftJDBC42-1.2.1.1001.jar;
+
+/
+```
+
+In eclipse (or any other Java IDE) you can then attach remotely to the Java Adapter using the IP of your one node EXASOL environment and the port 8000.
+With suspend=y the Java-process will wait until the debugger connects to the Java UDF.
 

@@ -135,6 +135,56 @@ public class IntegrationTestConfig {
         return getProperty("oracle", "password");
     }
 
+    public String getTeradataJdbcConnectionString() {
+        return getProperty("teradata", "connectionString");
+    }
+    
+    public String getTeradataUser() {
+        return getProperty("teradata", "user");
+    }
+
+    public String getTeradataPassword() {
+        return getProperty("teradata", "password");
+    }
+
+    public String getTeradataJdbcPrefixPath() {
+        return getProperty("teradata", "jdbcDriverPath");
+    }
+
+    public List<String> getTeradataJdbcJars() {
+        return getProperty("teradata", "jdbcDriverJars");
+    }
+    
+    public boolean teradataTestsRequested() {
+        return getProperty("teradata", "runIntegrationTests", false);
+    }
+
+    
+    public String getDB2JdbcConnectionString() {
+    	return getProperty("db2", "connectionString");
+    }
+
+    public String getDB2User() {
+        return getProperty("db2", "user");
+    }
+
+    public String getDB2Password() {
+        return getProperty("db2", "password");
+    }
+
+    public String getDB2JdbcPrefixPath() {
+        return getProperty("db2", "jdbcDriverPath");
+    }
+
+    public List<String> getDB2JdbcJars() {
+        return getProperty("db2", "jdbcDriverJars");
+    }
+    
+    public boolean DB2TestsRequested() {
+        return getProperty("db2", "runIntegrationTests", false);
+    }
+    
+    
     public boolean genericTestsRequested() {
         return getProperty("generic", "runIntegrationTests", false);
     }

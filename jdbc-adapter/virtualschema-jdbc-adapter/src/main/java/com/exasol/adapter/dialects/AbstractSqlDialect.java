@@ -41,7 +41,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
             commentString = "";
         }
         String tableName = changeIdentifierCaseIfNeeded(tables.getString("TABLE_NAME"));
-        return MappedTable.createMappedTable(tableName, commentString);
+        return MappedTable.createMappedTable(tableName,tables.getString("TABLE_NAME"), commentString);
     }
 
     @Override
@@ -56,9 +56,13 @@ public abstract class AbstractSqlDialect implements SqlDialect {
 
         // Nullable
         boolean isNullable = true;
-        String nullable = columns.getString("IS_NULLABLE");
-        if (nullable != null && nullable.toLowerCase().equals("no")) {
-            isNullable = false;
+        try {
+            String nullable = columns.getString("IS_NULLABLE");
+            if (nullable != null && nullable.toLowerCase().equals("no")) {
+                isNullable = false;
+            }
+        } catch (SQLException ex) {
+            // ignore me
         }
 
         // Identity
@@ -69,27 +73,36 @@ public abstract class AbstractSqlDialect implements SqlDialect {
                 isIdentity = true;
             }
         } catch (SQLException ex) {
-            //ignore me --some older JDBC drivers (Java 1.5) don't support IS_AUTOINCREMENT
+            // ignore me --some older JDBC drivers (Java 1.5) don't support IS_AUTOINCREMENT
         }
 
         // Default
-        String defaultString = columns.getString("COLUMN_DEF");
         String defaultValue = "";
-        if (defaultString != null) {
-            defaultValue = defaultString;
+        try {
+            String defaultString = columns.getString("COLUMN_DEF");
+            if (defaultString != null) {
+                defaultValue = defaultString;
+            }
+        } catch (SQLException ex) {
+            // ignore me
         }
 
         // Comment
         String comment = "";
-        String commentString = columns.getString("REMARKS");
-        if (commentString != null && !commentString.isEmpty()) {
-            comment = commentString;
+        try {
+            String commentString = columns.getString("REMARKS");
+            if (commentString != null && !commentString.isEmpty()) {
+                comment = commentString;
+            }
+        } catch (SQLException ex) {
+            // ignore me
         }
 
         // Column type
         String columnTypeName = columns.getString("TYPE_NAME");
-        if (columnTypeName == null)
+        if (columnTypeName == null) {
             columnTypeName = "";
+        }
         String adapterNotes = ColumnAdapterNotes.serialize(new ColumnAdapterNotes(jdbcType, columnTypeName));;
         return new ColumnMetadata(colName, adapterNotes, colType, isNullable, isIdentity, defaultValue, comment);
     }
