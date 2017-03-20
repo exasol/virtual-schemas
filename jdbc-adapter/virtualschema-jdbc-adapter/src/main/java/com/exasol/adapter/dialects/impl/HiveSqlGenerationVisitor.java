@@ -60,6 +60,9 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
                         selectListElements.add(node.accept(this));
                     }
                 }
+                else{
+                    selectListElements.add(node.accept(this));
+                }
 
                 }
             }
