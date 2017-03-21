@@ -1,22 +1,18 @@
 package com.exasol.adapter.dialects.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.sql.SqlColumn;
-import com.exasol.adapter.sql.SqlLimit;
-import com.exasol.adapter.sql.SqlNode;
-import com.exasol.adapter.sql.SqlNodeType;
-import com.exasol.adapter.sql.SqlSelectList;
-import com.exasol.adapter.sql.SqlStatementSelect;
+import com.exasol.adapter.sql.*;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
@@ -104,9 +100,14 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
         if (!isDirectlyInSelectList) {
             return projString;
         }
-       
-        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        
+
+        String typeName = null;
+        try {
+            typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+        } catch (AdapterException e) {
+            e.getMessage();
+        }
+
         return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
        
     }
@@ -114,8 +115,13 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
     
     private String getColumnProjectionStringNoCheck(SqlColumn column, String projString) {
 
-        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        
+        String typeName = null;
+        try {
+            typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+        } catch (AdapterException e) {
+            e.getMessage();
+        }
+
         return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
         
     }
@@ -181,7 +187,12 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
     private boolean nodeRequiresCast(SqlNode node) {
         if (node.getType() == SqlNodeType.COLUMN) {
             SqlColumn column = (SqlColumn)node;
-            String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+            String typeName = null;
+            try {
+                typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+            } catch (AdapterException e) {
+                e.getMessage();
+            }
             return TYPE_NAMES_REQUIRING_CAST.contains(typeName) || 
             		TYPE_NAME_NOT_SUPPORTED.contains(typeName) ||  
             		(typeName.startsWith("NUMBER")  &&  column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.DOUBLE ||

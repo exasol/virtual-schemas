@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.impl;
 
+import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
@@ -32,18 +33,25 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
                 int columnId = 0;
                 for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
                     SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-                    String typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
-                    if (typeName.equals("BINARY")) {
-                        selectListElements.add("base64(" + super.visit(sqlColumn) + ")");
-                    } else {
-                        selectListElements.add(super.visit(sqlColumn));
+                    String typeName = null;
+                    try {
+                        typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
+                        if (typeName.equals("BINARY")) {
+                            selectListElements.add("base64(" + super.visit(sqlColumn) + ")");
+                        } else {
+                             selectListElements.add(super.visit(sqlColumn));
+                        }
+                    }
+                    catch (AdapterException e) {
+                        e.getMessage();
                     }
                     ++columnId;
 
                 }    }
             else {
                     selectListElements.add("*");
-            }
+                }
+
         } else {
             if(selectList.isRequestAnyColumn()){
                 return "1";
@@ -51,12 +59,18 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
             for (SqlNode node : selectList.getExpressions()) {
                 if(node.getType().equals(SqlNodeType.COLUMN)) {
                     SqlColumn sqlColumn = (SqlColumn) node;
-                    String typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
-                    if (typeName.equals("BINARY")) {
-                        selectListElements.add("base64(" + node.accept(this) + ")");
-                    } else {
-                        selectListElements.add(node.accept(this));
+                    String typeName = null;
+                    try {
+                        typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
+                        if (typeName.equals("BINARY")) {
+                            selectListElements.add("base64(" + node.accept(this) + ")");
+                        } else {
+                            selectListElements.add(node.accept(this));
+                        }
+                    } catch (AdapterException e) {
+                        e.getMessage();
                     }
+
                 }
                 else{
                     selectListElements.add(node.accept(this));
@@ -235,14 +249,19 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
 
-    private boolean selectListRequiresCasts(SqlSelectList selectList) {
+    private boolean selectListRequiresCasts(SqlSelectList selectList){
 
         // Do as if the user has all columns in select list
         SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
         int columnId = 0;
         for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
             SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-            String typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
+            String typeName = null;
+            try {
+                typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
+            } catch (AdapterException e) {
+                e.getMessage();
+            }
             if(typeName.equals("BINARY")  ){
                 return true;
             }

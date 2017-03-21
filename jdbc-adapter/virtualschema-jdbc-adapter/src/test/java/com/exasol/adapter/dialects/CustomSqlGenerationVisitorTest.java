@@ -1,31 +1,21 @@
 package com.exasol.adapter.dialects;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import com.exasol.adapter.jdbc.SchemaAdapterNotes;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import org.junit.Test;
-
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.dialects.impl.ExasolSqlDialect;
+import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.MetadataException;
 import com.exasol.adapter.metadata.TableMetadata;
-import com.exasol.adapter.sql.SqlColumn;
-import com.exasol.adapter.sql.SqlNode;
-import com.exasol.adapter.sql.SqlPredicateNot;
-import com.exasol.adapter.sql.SqlSelectList;
-import com.exasol.adapter.sql.SqlStatementSelect;
-import com.exasol.adapter.sql.SqlTable;
+import com.exasol.adapter.sql.*;
 import com.exasol.utils.SqlTestUtil;
+import com.google.common.collect.ImmutableList;
+import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 public class CustomSqlGenerationVisitorTest {
 
@@ -34,7 +24,7 @@ public class CustomSqlGenerationVisitorTest {
      * the custom sql generation visitor is used for all levels of recursion.
      */
     @Test
-    public void testSqlGenerator() {
+    public void testSqlGenerator() throws MetadataException {
         SqlNode node = getTestSqlNode();
         String schemaName = "SCHEMA";
         String expectedSql = "SELECT NOT_CUSTOM (NOT_CUSTOM (C1)) FROM " + schemaName
@@ -49,7 +39,7 @@ public class CustomSqlGenerationVisitorTest {
                 SqlTestUtil.normalizeSql(actualSql));
     }
 
-    private SqlNode getTestSqlNode() {
+    private SqlNode getTestSqlNode() throws MetadataException {
         TableMetadata clicksMeta = getTestTableMetadata();
         SqlTable fromClause = new SqlTable("TEST", clicksMeta);
         SqlSelectList selectList = SqlSelectList.createRegularSelectList(
@@ -60,7 +50,7 @@ public class CustomSqlGenerationVisitorTest {
                 null, null);
     }
 
-    private TableMetadata getTestTableMetadata() {
+    private TableMetadata getTestTableMetadata() throws MetadataException {
         List<ColumnMetadata> columns = new ArrayList<>();
         columns.add(new ColumnMetadata("C1", "", DataType.createBool(), true,
                 false, "", ""));

@@ -1,9 +1,11 @@
 package com.exasol.adapter.dialects;
 
+import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.MetadataException;
 import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.sql.*;
 import com.exasol.utils.SqlTestUtil;
@@ -22,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 public class SqlDialectTest {
 
     @Test
-    public void testAggregateFunctionAliases() {
+    public void testAggregateFunctionAliases() throws AdapterException, MetadataException {
         TableMetadata clicksMeta = getTestTableMetadata();
         SqlTable fromClause = new SqlTable("TEST", clicksMeta);
         SqlColumn col1 = new SqlColumn(1, clicksMeta.getColumns().get(0));
@@ -54,7 +56,7 @@ public class SqlDialectTest {
     }
 
     @Test
-    public void testScalarFunctionAliases() {
+    public void testScalarFunctionAliases() throws AdapterException, MetadataException {
         TableMetadata clicksMeta = getTestTableMetadata();
         SqlTable fromClause = new SqlTable("TEST", clicksMeta);
         SqlColumn col1 = new SqlColumn(1, clicksMeta.getColumns().get(0));
@@ -121,7 +123,7 @@ public class SqlDialectTest {
         }
     }
 
-    private TableMetadata getTestTableMetadata() {
+    private TableMetadata getTestTableMetadata() throws MetadataException {
         List<ColumnMetadata> columns = new ArrayList<>();
         columns.add(new ColumnMetadata("C1", "", DataType.createBool(), true,
                 false, "", ""));

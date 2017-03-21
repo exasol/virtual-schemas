@@ -1,6 +1,6 @@
 package com.exasol.adapter.jdbc;
 
-import com.exasol.adapter.metadata.ColumnMetadata;
+import com.exasol.adapter.AdapterException;
 import com.exasol.utils.JsonHelper;
 
 import javax.json.JsonBuilderFactory;
@@ -36,15 +36,15 @@ public class ColumnAdapterNotes {
         return builder.build().toString();
     }
 
-    public static ColumnAdapterNotes deserialize(String columnAdapterNotes, String columnName) {
+    public static ColumnAdapterNotes deserialize(String columnAdapterNotes, String columnName) throws AdapterException {
         if (columnAdapterNotes == null || columnAdapterNotes.isEmpty()) {
-            throw new RuntimeException(getException(columnName));
+            throw new AdapterException("The adapternotes field of column " + columnName + " are empty or null.Please refresh the virtual schema. ");
         }
         JsonObject root;
         try {
             root = JsonHelper.getJsonObject(columnAdapterNotes);
         } catch (Exception ex) {
-            throw new RuntimeException(getException(columnName));
+            throw new AdapterException("Can not get the json object for column notes of column "+columnName+". Please refresh the virtual schema");
         }
         checkKey(root, "jdbcDataType", columnName);
         checkKey(root, "typeName", columnName);
@@ -53,9 +53,9 @@ public class ColumnAdapterNotes {
                 root.getString("typeName"));
     }
 
-    private static void checkKey(JsonObject root, String key, String columnName) {
+    private static void checkKey(JsonObject root, String key, String columnName) throws AdapterException {
         if (!root.containsKey(key)) {
-            throw new RuntimeException(getException(columnName));
+            throw new AdapterException("Adapter notes of column " + columnName + " don't have the key " + key +". Please refresh the virtual schema");
         }
     }
 

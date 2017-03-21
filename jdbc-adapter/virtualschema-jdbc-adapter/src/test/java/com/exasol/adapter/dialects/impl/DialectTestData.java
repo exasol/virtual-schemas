@@ -5,6 +5,7 @@ import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.MetadataException;
 import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.sql.*;
 import com.google.common.collect.ImmutableList;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class DialectTestData {
 
-    public static SqlNode getTestSqlNode() {
+    public static SqlNode getTestSqlNode() throws MetadataException {
         // SELECT USER_ID, count(URL) FROM CLICKS
         // WHERE 1 < USER_ID
         // GROUP BY USER_ID
@@ -36,7 +37,7 @@ public class DialectTestData {
         return new SqlStatementSelect(fromClause, selectList, whereClause, groupBy, having, orderBy, limit);
     }
 
-    public static TableMetadata getClicksTableMetadata() {
+    public static TableMetadata getClicksTableMetadata() throws MetadataException {
         List<ColumnMetadata> columns = new ArrayList<>();
         columns.add(new ColumnMetadata("USER_ID", ColumnAdapterNotes.serialize(new ColumnAdapterNotes(3, "DECIMAL")), DataType.createDecimal(18, 0), true, false, "", ""));
         columns.add(new ColumnMetadata("URL", ColumnAdapterNotes.serialize(new ColumnAdapterNotes(12, "VARCHAR")), DataType.createVarChar(10000, DataType.ExaCharset.UTF8), true, false, "", ""));

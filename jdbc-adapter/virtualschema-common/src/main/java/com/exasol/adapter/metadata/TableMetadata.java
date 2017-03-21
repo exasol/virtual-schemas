@@ -1,8 +1,8 @@
 package com.exasol.adapter.metadata;
 
-import java.util.List;
-
 import com.google.common.base.MoreObjects;
+
+import java.util.List;
 
 /**
  * Represents the metadata of an EXASOL table.
@@ -14,13 +14,13 @@ public class TableMetadata {
     private List<ColumnMetadata> columns;
     private String comment;
     
-    public TableMetadata(String name, String adapterNotes, List<ColumnMetadata> columns, String comment) {
+    public TableMetadata(String name, String adapterNotes, List<ColumnMetadata> columns, String comment) throws MetadataException {
         this.name = name;
         this.adapterNotes = adapterNotes;
         this.columns = columns;
         this.comment = comment;
         if (this.columns.isEmpty()) {
-            throw new RuntimeException("Error: Adapter tried to return a table without columns: " + this.name);
+            throw new MetadataException("Error: Adapter tried to return a table without columns: " + this.name + ". Please check if this table has columns");
         }
     }
     
