@@ -21,7 +21,7 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
 
 
     @Override
-    public String visit(SqlSelectList selectList) {
+    public String visit(SqlSelectList selectList) throws AdapterException {
         List<String> selectListElements = new ArrayList<>();
         SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
         if (selectList.isSelectStar()) {
@@ -31,20 +31,15 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
                 for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
                     SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
                     String typeName = null;
-                    try {
-                        typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
-                        if (typeName.equals("BINARY")) {
-                            selectListElements.add("base64(" + super.visit(sqlColumn) + ")");
-                        } else {
-                            selectListElements.add(super.visit(sqlColumn));
-                        }
-                    }
-                    catch (AdapterException e) {
-                        e.getMessage();
+                    typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
+                    if (typeName.equals("BINARY")) {
+                        selectListElements.add("base64(" + super.visit(sqlColumn) + ")");
+                    } else {
+                        selectListElements.add(super.visit(sqlColumn));
                     }
                     ++columnId;
-
-                }    }
+                }
+            }
             else {
                 selectListElements.add("*");
             }
@@ -77,7 +72,7 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     @Override
-    public String visit(SqlPredicateEqual function) {
+    public String visit(SqlPredicateEqual function) throws AdapterException {
         String sql = super.visit(function);
         if(function.getLeft().accept(this).toUpperCase().equals("NULL")){
             StringBuilder builder = new StringBuilder();
@@ -95,7 +90,7 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     @Override
-    public String visit(SqlPredicateNotEqual function) {
+    public String visit(SqlPredicateNotEqual function) throws AdapterException {
         String sql = super.visit(function);
         if(function.getLeft().accept(this).toUpperCase().equals("NULL")){
             StringBuilder builder = new StringBuilder();
@@ -113,12 +108,12 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     @Override
-    public String visit(SqlPredicateLikeRegexp function){
+    public String visit(SqlPredicateLikeRegexp function) throws AdapterException {
         return function.getLeft().accept(this) + "REGEXP" + function.getPattern().accept(this);
     }
 
     @Override
-    public String visit(SqlFunctionScalar function) {
+    public String visit(SqlFunctionScalar function) throws AdapterException {
         String sql = super.visit(function);
         switch (function.getFunction()) {
             case CONCAT: {
@@ -176,7 +171,7 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
         return sql;
     }
 
-    private String getCastedFunction(String functionName,SqlFunctionScalar function){
+    private String getCastedFunction(String functionName,SqlFunctionScalar function) throws AdapterException {
         List<String> argumentsSql = new ArrayList<>();
         for (SqlNode node : function.getArguments()) {
             argumentsSql.add(node.accept(this));
@@ -195,7 +190,7 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
         return builder.toString();
     }
 
-    private String getChangedFunction(SqlFunctionScalar function,String replacement){
+    private String getChangedFunction(SqlFunctionScalar function,String replacement) throws AdapterException {
         List<String> argumentsSql = new ArrayList<>();
         for (SqlNode node : function.getArguments()) {
             argumentsSql.add(node.accept(this));
@@ -209,7 +204,7 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
         return builder.toString();
     }
 
-    private String getChangedSubstringFunction(SqlFunctionScalar function){
+    private String getChangedSubstringFunction(SqlFunctionScalar function) throws AdapterException {
         List<String> argumentsSql = new ArrayList<>();
         for (SqlNode node : function.getArguments()) {
             argumentsSql.add(node.accept(this));
@@ -229,7 +224,7 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     //change name to "TRUNC" and change the place of the arguments
-    private String changeDateTrunc(SqlFunctionScalar function){
+    private String changeDateTrunc(SqlFunctionScalar function) throws AdapterException {
         List<String> argumentsSql = new ArrayList<>();
         for (SqlNode node : function.getArguments()) {
             argumentsSql.add(node.accept(this));

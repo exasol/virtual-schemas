@@ -99,7 +99,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
      * The rownum filter is evaluated before ORDER BY, which is why we need subselects
      */
     @Override
-    public String visit(SqlStatementSelect select) {
+    public String visit(SqlStatementSelect select) throws AdapterException {
         if (!select.hasLimit()) {
             return super.visit(select);
         } else {
@@ -141,7 +141,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     @Override
-    public String visit(SqlSelectList selectList) {
+    public String visit(SqlSelectList selectList) throws AdapterException {
         if (selectList.isRequestAnyColumn()) {
             // The system requested any column
             return "true";
@@ -185,13 +185,13 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     @Override
-    public String visit(SqlPredicateLikeRegexp predicate) {
+    public String visit(SqlPredicateLikeRegexp predicate) throws AdapterException {
         return "REGEXP_LIKE(" + predicate.getLeft().accept(this) + ", "
                 + predicate.getPattern().accept(this) + ")";
     }
 
     @Override
-    public String visit(SqlColumn column) {
+    public String visit(SqlColumn column) throws AdapterException {
         return getColumnProjectionString(column, super.visit(column));
     }
 
@@ -216,7 +216,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     @Override
-    public String visit(SqlFunctionAggregateGroupConcat function) {
+    public String visit(SqlFunctionAggregateGroupConcat function) throws AdapterException {
         StringBuilder builder = new StringBuilder();
         builder.append("LISTAGG");
         builder.append("(");
@@ -254,7 +254,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     @Override
-    public String visit(SqlFunctionAggregate function) {
+    public String visit(SqlFunctionAggregate function) throws AdapterException {
         String sql = super.visit(function);
         boolean isDirectlyInSelectList = (function.hasParent() && function.getParent().getType() == SqlNodeType.SELECT_LIST);
         if (isDirectlyInSelectList && aggregateFunctionsCast.contains(function.getFunction())) {
@@ -265,7 +265,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     @Override
-    public String visit(SqlFunctionScalar function) {
+    public String visit(SqlFunctionScalar function) throws AdapterException {
         String sql = super.visit(function);
         switch (function.getFunction()) {
         case LOCATE: {
@@ -494,17 +494,12 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         return sql;
     }
 
-    private String getColumnProjectionString(SqlColumn column, String projString) {
+    private String getColumnProjectionString(SqlColumn column, String projString) throws AdapterException {
         boolean isDirectlyInSelectList = (column.hasParent() && column.getParent().getType() == SqlNodeType.SELECT_LIST);
         if (!isDirectlyInSelectList) {
             return projString;
         }
-        String typeName = null;
-        try {
-            typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        } catch (AdapterException e) {
-            e.getMessage();
-        }
+        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
         if (typeName.startsWith("TIMESTAMP") ||
             typeName.startsWith("INTERVAL") ||
             typeName.equals("BINARY_FLOAT") ||
@@ -526,15 +521,10 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
 
     private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("TIMESTAMP","INTERVAL","BINARY_FLOAT","BINARY_DOUBLE","CLOB","NCLOB","ROWID", "UROWID", "BLOB");
 
-    private boolean nodeRequiresCast(SqlNode node) {
+    private boolean nodeRequiresCast(SqlNode node) throws AdapterException {
         if (node.getType() == SqlNodeType.COLUMN) {
             SqlColumn column = (SqlColumn)node;
-            String typeName = null;
-            try {
-                typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-            } catch (AdapterException e) {
-                e.getMessage();
-            }
+            String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
             if (typeName.equals("NUMBER") && column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.VARCHAR) {
                 return true;
             } else {

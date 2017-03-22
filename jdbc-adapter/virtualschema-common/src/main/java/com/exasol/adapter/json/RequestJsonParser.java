@@ -139,7 +139,7 @@ public class RequestJsonParser {
             int srid = dataType.getInt("srid");
             type = DataType.createGeometry(srid);
         } else {
-            throw new MetadataException("parseColumnMetadata: Unsupported Data Type: " + typeName);
+            throw new MetadataException("Unsupported data type encountered: " + typeName);
         }
         return type;
     }
@@ -150,7 +150,7 @@ public class RequestJsonParser {
         } else if (intervalType.equals("YEAR TO MONTH")) {
             return IntervalType.YEAR_TO_MONTH;
         } else {
-            throw new MetadataException("Unexpected interval type: " + intervalType);
+            throw new MetadataException("Unsupported interval data type encountered: " + intervalType);
         }
     }
     
@@ -160,7 +160,7 @@ public class RequestJsonParser {
         } else if (charset.equals("ASCII")) {
             return ExaCharset.ASCII;
         } else {
-            throw new MetadataException("Unexpected Charset: " + charset);
+            throw new MetadataException("Unsupported charset encountered: " + charset);
         }
     }
 

@@ -1,11 +1,11 @@
 package com.exasol.adapter.dialects.impl;
 
+import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.capabilities.PredicateCapability;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
-import com.exasol.adapter.metadata.MetadataException;
 import com.exasol.adapter.sql.SqlNode;
 import com.exasol.utils.SqlTestUtil;
 import org.junit.Test;
@@ -38,7 +38,7 @@ public class ExasolSqlDialectTest {
     }
     
     @Test
-    public void testSqlGenerator() throws MetadataException {
+    public void testSqlGenerator() throws AdapterException {
         SqlNode node = DialectTestData.getTestSqlNode();
         String schemaName = "SCHEMA";
         String expectedSql = "SELECT USER_ID, COUNT(URL) FROM " + schemaName + ".CLICKS" +

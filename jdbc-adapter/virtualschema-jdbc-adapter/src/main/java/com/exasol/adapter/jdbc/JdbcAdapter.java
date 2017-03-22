@@ -8,7 +8,6 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.dialects.impl.*;
 import com.exasol.adapter.json.RequestJsonParser;
 import com.exasol.adapter.json.ResponseJsonSerializer;
-import com.exasol.adapter.metadata.MetadataException;
 import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.metadata.SchemaMetadataInfo;
 import com.exasol.adapter.request.*;
@@ -79,12 +78,12 @@ public class JdbcAdapter {
             assert(result.isEmpty());
             System.out.println("----------\nResponse:\n----------\n" + JsonHelper.prettyJson(JsonHelper.getJsonObject(result)));
             return result;
-        } catch (AdapterException|MetadataException ex) {
-            throw new AdapterException(ex.getMessage());
+        } catch (AdapterException ex) {
+            throw ex;
         }
         catch (Exception ex) {
             String stacktrace = UdfUtils.traceToString(ex);
-            throw new Exception("Error in Adapter: " + ex.getMessage() + "\nStacktrace: " + stacktrace + "\nFor following request: " + input + "\nResponse: " + result);
+            throw new Exception("Unexpected error in adapter: " + ex.getMessage() + "\nStacktrace: " + stacktrace + "\nFor following request: " + input + "\nResponse: " + result);
         }
     }
 

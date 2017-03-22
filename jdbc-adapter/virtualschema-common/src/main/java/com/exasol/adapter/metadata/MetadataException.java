@@ -1,6 +1,8 @@
 package com.exasol.adapter.metadata;
 
-public class MetadataException extends Exception{
+import com.exasol.adapter.AdapterException;
+
+public class MetadataException extends AdapterException{
 
     public MetadataException(String message) {
         super(message);

@@ -151,7 +151,7 @@ public class JdbcMetadataReader {
                     // Take the one and only catalog (in case of EXASOL this is always EXA_DB). Returning null would probably also work fine.
                     return curCatalog;
                 } else {
-                    throw new AdapterException("Error: The data source is not expected to support catalogs, but has " + numCatalogs + " catalogs: " + Joiner.on(", ").join(allCatalogs));
+                    throw new AdapterException("The data source is not expected to support catalogs, but has " + numCatalogs + " catalogs: " + Joiner.on(", ").join(allCatalogs));
                 }
             } else {
                 throw new AdapterException("You specified a catalog, however the data source does not support the concept of catalogs.");
@@ -226,7 +226,7 @@ public class JdbcMetadataReader {
                     // Take the one and only schema. Returning null would probably also work fine.
                     return curSchema;
                 } else {
-                    throw new AdapterException("Error: The data source is not expected to support schemas, but has " + numSchemas + " schemas: " + Joiner.on(", ").join(allSchemas));
+                    throw new AdapterException("The data source is not expected to support schemas, but has " + numSchemas + " schemas: " + Joiner.on(", ").join(allSchemas));
                 }
             } else {
                 throw new AdapterException("You specified a schema, however the data source does not support the concept of schemas.");

@@ -171,7 +171,7 @@ public class SchemaAdapterNotes {
         try {
             root = JsonHelper.getJsonObject(adapterNotes);
         } catch (Exception ex) {
-            throw new AdapterException("Can not get the json object for adapter notes of schema "+schemaName+". Please refresh the virtual schema");
+            throw new AdapterException("Could not parse the json which is expected to be stored in the adapter notes of schema "+schemaName+". Please refresh the virtual schema");
         }
         checkKey(root, "catalogSeparator", schemaName);
         checkKey(root, "identifierQuoteString", schemaName);

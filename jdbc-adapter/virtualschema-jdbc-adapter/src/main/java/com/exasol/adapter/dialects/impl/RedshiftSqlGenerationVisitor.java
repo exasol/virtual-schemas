@@ -1,19 +1,10 @@
 package com.exasol.adapter.dialects.impl;
 
+import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
-import com.exasol.adapter.jdbc.ColumnAdapterNotes;
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.sql.*;
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.exasol.adapter.sql.SqlFunctionAggregateGroupConcat;
 
 public class RedshiftSqlGenerationVisitor extends SqlGenerationVisitor {
 
@@ -23,7 +14,7 @@ public class RedshiftSqlGenerationVisitor extends SqlGenerationVisitor {
     }
  
     @Override
-    public String visit(SqlFunctionAggregateGroupConcat function) {
+    public String visit(SqlFunctionAggregateGroupConcat function) throws AdapterException {
         StringBuilder builder = new StringBuilder();
         builder.append("LISTAGG");
         builder.append("(");

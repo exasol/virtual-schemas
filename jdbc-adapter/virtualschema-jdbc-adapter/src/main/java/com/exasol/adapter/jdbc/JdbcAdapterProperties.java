@@ -88,11 +88,11 @@ public class JdbcAdapterProperties {
         
         if (isImportFromExa(properties)) {
             if (getExaConnectionString(properties).isEmpty()) {
-                throw new AdapterException("You defined the property " + PROP_IMPORT_FROM_EXA + ", please also define " + PROP_EXA_CONNECTION_STRING);
+                throw new InvalidPropertyException("You defined the property " + PROP_IMPORT_FROM_EXA + ", please also define " + PROP_EXA_CONNECTION_STRING);
             }
         } else {
             if (!getExaConnectionString(properties).isEmpty()) {
-                throw new AdapterException("You defined the property " + PROP_EXA_CONNECTION_STRING + " without setting " + PROP_IMPORT_FROM_EXA + " to 'TRUE'. This is not allowed");
+                throw new InvalidPropertyException("You defined the property " + PROP_EXA_CONNECTION_STRING + " without setting " + PROP_IMPORT_FROM_EXA + " to 'TRUE'. This is not allowed");
             }
         }
     }
@@ -108,7 +108,7 @@ public class JdbcAdapterProperties {
     private static void validateBooleanProperty(Map<String, String> properties, String property) throws AdapterException {
         if (properties.containsKey(property)) {
             if (!properties.get(property).toUpperCase().matches("^TRUE$|^FALSE$")) {
-                throw new AdapterException("The value '" + properties.get(property) + "' for the property " + property + " is invalid. It has to be either 'true' or 'false' (case insensitive).");
+                throw new InvalidPropertyException("The value '" + properties.get(property) + "' for the property " + property + " is invalid. It has to be either 'true' or 'false' (case insensitive).");
             }
         }
     }
@@ -130,20 +130,18 @@ public class JdbcAdapterProperties {
 
     private static void checkMandatoryProperties(Map<String, String> properties, SqlDialects supportedDialects) throws AdapterException {
         if (!properties.containsKey(PROP_SQL_DIALECT)) {
-            throw new AdapterException("You have to specify the SQL dialect (" + PROP_SQL_DIALECT + "). Available dialects: " + supportedDialects.getDialectsString());
+            throw new InvalidPropertyException("You have to specify the SQL dialect (" + PROP_SQL_DIALECT + "). Available dialects: " + supportedDialects.getDialectsString());
         }
         if (!supportedDialects.isSupported(properties.get(PROP_SQL_DIALECT))) {
-            throw new AdapterException("SQL Dialect not supported: " + properties.get(PROP_SQL_DIALECT) + ". Available dialects: " + supportedDialects.getDialectsString());
+            throw new InvalidPropertyException("SQL Dialect not supported: " + properties.get(PROP_SQL_DIALECT) + ". Available dialects: " + supportedDialects.getDialectsString());
         }
         if (properties.containsKey(PROP_CONNECTION_NAME)) {
-            if (properties.containsKey(PROP_CONNECTION_STRING) ||
-                    properties.containsKey(PROP_USERNAME) ||
-                    properties.containsKey(PROP_PASSWORD) ) {
-                throw new AdapterException("You specified a connection (" + PROP_CONNECTION_NAME + ") and therefore may not specify the properties " + PROP_CONNECTION_STRING + ", " + PROP_USERNAME + " and " + PROP_PASSWORD);
+            if (properties.containsKey(PROP_CONNECTION_STRING) || properties.containsKey(PROP_USERNAME) || properties.containsKey(PROP_PASSWORD) ) {
+                throw new InvalidPropertyException("You specified a connection (" + PROP_CONNECTION_NAME + ") and therefore may not specify the properties " + PROP_CONNECTION_STRING + ", " + PROP_USERNAME + " and " + PROP_PASSWORD);
             }
         } else {
             if (!properties.containsKey(PROP_CONNECTION_STRING)) {
-                throw new AdapterException("You did not specify a connection (" + PROP_CONNECTION_NAME + ") and therefore have to specify the property " + PROP_CONNECTION_STRING);
+                throw new InvalidPropertyException("You did not specify a connection (" + PROP_CONNECTION_NAME + ") and therefore have to specify the property " + PROP_CONNECTION_STRING);
             }
         }
     }
@@ -185,7 +183,7 @@ public class JdbcAdapterProperties {
         String dialectName = getProperty(properties, PROP_SQL_DIALECT, "");
         SqlDialect dialect = supportedDialects.getDialectByName(dialectName, dialectContext);
         if (dialect == null) {
-            throw new AdapterException("SQL Dialect not supported: " + dialectName + " - all dialects: " + supportedDialects.getDialectsString());
+            throw new InvalidPropertyException("SQL Dialect not supported: " + dialectName + " - all dialects: " + supportedDialects.getDialectsString());
         }
         return dialect;
     }

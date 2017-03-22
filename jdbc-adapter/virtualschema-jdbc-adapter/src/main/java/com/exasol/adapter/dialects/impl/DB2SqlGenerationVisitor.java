@@ -30,39 +30,24 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         }
         
     @Override
-    public String visit(SqlColumn column) {
+    public String visit(SqlColumn column) throws AdapterException {
         return getColumnProjectionString(column, super.visit(column));
     }
 
-    private String getColumnProjectionString(SqlColumn column, String projString) {
+    private String getColumnProjectionString(SqlColumn column, String projString) throws AdapterException {
         boolean isDirectlyInSelectList = (column.hasParent() && column.getParent().getType() == SqlNodeType.SELECT_LIST);
         if (!isDirectlyInSelectList) {
             return projString;
         }
-
-        String typeName = null;
-        try {
-            typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        } catch (AdapterException e) {
-            e.getMessage();
-        }
-
+        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
         return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
-       
     }
 
     
-    private String getColumnProjectionStringNoCheck(SqlColumn column, String projString) {
+    private String getColumnProjectionStringNoCheck(SqlColumn column, String projString) throws AdapterException {
 
-        String typeName = null;
-        try {
-            typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        } catch (AdapterException e) {
-            e.getMessage();
-        }
-
+        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
         return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
-        
     }
     
     
@@ -99,7 +84,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
     }
         
     @Override
-    public String visit(SqlStatementSelect select) {
+    public String visit(SqlStatementSelect select) throws AdapterException {
         if (!select.hasLimit()) {
             return super.visit(select);
         } else {
@@ -134,7 +119,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
 
         
     @Override
-    public String visit(SqlSelectList selectList) {
+    public String visit(SqlSelectList selectList) throws AdapterException {
         if (selectList.isRequestAnyColumn()) {
             // The system requested any column
             return "1";
@@ -166,7 +151,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
     }
         
         @Override
-        public String visit(SqlFunctionScalar function) {
+        public String visit(SqlFunctionScalar function) throws AdapterException {
         String sql = super.visit(function);
                 
                 switch (function.getFunction()) {
@@ -201,21 +186,15 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
                 argumentsSql.add(node.accept(this));
             }
             StringBuilder builder = new StringBuilder();
-            
             SqlColumn column = (SqlColumn) function.getArguments().get(0);
-            String typeName = null;
-            try {
-                typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-            } catch (AdapterException e) {
-                e.getMessage();
-            }
+            String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
             System.out.println("!DB2 : " + typeName);
             if (typeName.contains("TIMESTAMP")) 
-                        {
+                {
                     isTimestamp = true;
-                System.out.println("!DB2 : we got a timestamp");
+                    System.out.println("!DB2 : we got a timestamp");
                     builder.append("VARCHAR(");
-                        }
+                }
 
             builder.append(argumentsSql.get(0));
             builder.append(" + ");
@@ -328,7 +307,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
                 
         
         @Override
-        public String visit(SqlFunctionAggregate function) {
+        public String visit(SqlFunctionAggregate function) throws AdapterException {
                 String sql = super.visit(function);
                 
                 switch (function.getFunction()) {
@@ -344,7 +323,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         
         
     @Override
-    public String visit(SqlFunctionAggregateGroupConcat function) {
+    public String visit(SqlFunctionAggregateGroupConcat function) throws AdapterException {
         StringBuilder builder = new StringBuilder();
         builder.append("LISTAGG");
         builder.append("(");
@@ -383,29 +362,22 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
     private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("BLOB"); 
 
 
-    private boolean nodeRequiresCast(SqlNode node) {
+    private boolean nodeRequiresCast(SqlNode node) throws AdapterException {
         if (node.getType() == SqlNodeType.COLUMN) {
             SqlColumn column = (SqlColumn)node;
-            String typeName = null;
-            try {
-                typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-            } catch (AdapterException e) {
-                e.getMessage();
-            }
+            String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
             return TYPE_NAMES_REQUIRING_CAST.contains(typeName);
         }
         return false;
     }
 
-    private boolean selectListRequiresCasts(SqlSelectList selectList) {
+    private boolean selectListRequiresCasts(SqlSelectList selectList) throws AdapterException {
         boolean requiresCasts = false;
 
         // Do as if the user has all columns in select list
         SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
         int columnId = 0;
         for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
-                
-                
                 if (nodeRequiresCast(new SqlColumn(columnId, columnMeta))) {
                 requiresCasts = true;
                 }

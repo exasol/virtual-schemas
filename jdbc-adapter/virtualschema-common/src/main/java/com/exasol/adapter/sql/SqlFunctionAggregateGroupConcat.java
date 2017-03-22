@@ -1,7 +1,7 @@
 package com.exasol.adapter.sql;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import com.exasol.adapter.AdapterException;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -101,7 +101,7 @@ public class SqlFunctionAggregateGroupConcat extends SqlNode {
     }
 
     @Override
-    public <R> R accept(SqlNodeVisitor<R> visitor) {
+    public <R> R accept(SqlNodeVisitor<R> visitor) throws AdapterException {
         return visitor.visit(this);
     }
 

@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects;
 
+import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.impl.ExasolSqlDialect;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
@@ -24,7 +25,7 @@ public class CustomSqlGenerationVisitorTest {
      * the custom sql generation visitor is used for all levels of recursion.
      */
     @Test
-    public void testSqlGenerator() throws MetadataException {
+    public void testSqlGenerator() throws AdapterException {
         SqlNode node = getTestSqlNode();
         String schemaName = "SCHEMA";
         String expectedSql = "SELECT NOT_CUSTOM (NOT_CUSTOM (C1)) FROM " + schemaName
@@ -65,7 +66,7 @@ public class CustomSqlGenerationVisitorTest {
         }
 
         @Override
-        public String visit(SqlPredicateNot predicate) {
+        public String visit(SqlPredicateNot predicate) throws AdapterException {
             return "NOT_CUSTOM (" + predicate.getExpression().accept(this) + ")";
         }
 

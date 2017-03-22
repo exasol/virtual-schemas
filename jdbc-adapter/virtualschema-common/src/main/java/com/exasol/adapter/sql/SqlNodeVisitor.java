@@ -1,5 +1,7 @@
 package com.exasol.adapter.sql;
 
+import com.exasol.adapter.AdapterException;
+
 /**
  * Implementation of the Visitor pattern for the SqlNode.
  * 
@@ -12,25 +14,25 @@ package com.exasol.adapter.sql;
  */
 public interface SqlNodeVisitor<R> {
 
-    public R visit(SqlStatementSelect select);
+    public R visit(SqlStatementSelect select) throws AdapterException;
 
-    public R visit(SqlSelectList selectList);
+    public R visit(SqlSelectList selectList) throws AdapterException, AdapterException;
 
-    public R visit(SqlGroupBy groupBy);
+    public R visit(SqlGroupBy groupBy) throws AdapterException;
 
-    public R visit(SqlColumn sqlColumn);
+    public R visit(SqlColumn sqlColumn) throws AdapterException;
 
-    public R visit(SqlFunctionAggregate sqlFunctionAggregate);
+    public R visit(SqlFunctionAggregate sqlFunctionAggregate) throws AdapterException;
 
-    public R visit(SqlFunctionAggregateGroupConcat sqlFunctionAggregateGroupConcat);
+    public R visit(SqlFunctionAggregateGroupConcat sqlFunctionAggregateGroupConcat) throws AdapterException;
 
-    public R visit(SqlFunctionScalar sqlFunctionScalar);
+    public R visit(SqlFunctionScalar sqlFunctionScalar) throws AdapterException;
 
-    public R visit(SqlFunctionScalarCase sqlFunctionScalarCase);
+    public R visit(SqlFunctionScalarCase sqlFunctionScalarCase) throws AdapterException;
 
-    public R visit(SqlFunctionScalarCast sqlFunctionScalarCast);
+    public R visit(SqlFunctionScalarCast sqlFunctionScalarCast) throws AdapterException;
 
-    public R visit(SqlFunctionScalarExtract sqlFunctionScalarExtract);
+    public R visit(SqlFunctionScalarExtract sqlFunctionScalarExtract) throws AdapterException;
 
     public R visit(SqlLimit sqlLimit);
 
@@ -52,33 +54,33 @@ public interface SqlNodeVisitor<R> {
 
     public R visit(SqlLiteralInterval sqlLiteralInterval);
 
-    public R visit(SqlOrderBy sqlOrderBy);
+    public R visit(SqlOrderBy sqlOrderBy) throws AdapterException;
 
-    public R visit(SqlPredicateAnd sqlPredicateAnd);
+    public R visit(SqlPredicateAnd sqlPredicateAnd) throws AdapterException;
 
-    public R visit(SqlPredicateBetween sqlPredicateBetween);
+    public R visit(SqlPredicateBetween sqlPredicateBetween) throws AdapterException;
 
-    public R visit(SqlPredicateEqual sqlPredicateEqual);
+    public R visit(SqlPredicateEqual sqlPredicateEqual) throws AdapterException;
 
-    public R visit(SqlPredicateInConstList sqlPredicateInConstList);
+    public R visit(SqlPredicateInConstList sqlPredicateInConstList) throws AdapterException;
 
-    public R visit(SqlPredicateLess sqlPredicateLess);
+    public R visit(SqlPredicateLess sqlPredicateLess) throws AdapterException;
 
-    public R visit(SqlPredicateLessEqual sqlPredicateLessEqual);
+    public R visit(SqlPredicateLessEqual sqlPredicateLessEqual) throws AdapterException;
 
-    public R visit(SqlPredicateLike sqlPredicateLike);
+    public R visit(SqlPredicateLike sqlPredicateLike) throws AdapterException;
 
-    public R visit(SqlPredicateLikeRegexp sqlPredicateLikeRegexp);
+    public R visit(SqlPredicateLikeRegexp sqlPredicateLikeRegexp) throws AdapterException;
 
-    public R visit(SqlPredicateNot sqlPredicateNot);
+    public R visit(SqlPredicateNot sqlPredicateNot) throws AdapterException;
 
-    public R visit(SqlPredicateNotEqual sqlPredicateNotEqual);
+    public R visit(SqlPredicateNotEqual sqlPredicateNotEqual) throws AdapterException;
 
-    public R visit(SqlPredicateOr sqlPredicateOr);
+    public R visit(SqlPredicateOr sqlPredicateOr) throws AdapterException;
 
-    public R visit(SqlPredicateIsNotNull sqlPredicateOr);
+    public R visit(SqlPredicateIsNotNull sqlPredicateOr) throws AdapterException;
 
-    public R visit(SqlPredicateIsNull sqlPredicateOr);
+    public R visit(SqlPredicateIsNull sqlPredicateOr) throws AdapterException;
 
     public R visit(SqlTable sqlTable);
 
