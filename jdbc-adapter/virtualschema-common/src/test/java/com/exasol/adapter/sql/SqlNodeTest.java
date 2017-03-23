@@ -3,6 +3,7 @@ package com.exasol.adapter.sql;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.metadata.DataType.ExaCharset;
+import com.exasol.adapter.metadata.MetadataException;
 import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.utils.SqlTestUtil;
 import com.google.common.collect.ImmutableList;
@@ -17,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 public class SqlNodeTest {
     
     @Test
-    public void testToSimpleSql() {
+    public void testToSimpleSql() throws MetadataException {
         SqlNode node = getTestSqlNode();
         String expectedSql = "SELECT \"USER_ID\", COUNT(\"URL\") FROM \"CLICKS\"" +
         " WHERE 1 < \"USER_ID\"" +
@@ -29,7 +30,7 @@ public class SqlNodeTest {
         assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
     }
 
-    private SqlNode getTestSqlNode() {
+    private SqlNode getTestSqlNode() throws MetadataException {
         // SELECT USER_ID, count(URL) FROM CLICKS
         // WHERE 1 < USER_ID
         // GROUP BY USER_ID
@@ -50,7 +51,7 @@ public class SqlNodeTest {
         return new SqlStatementSelect(fromClause, selectList, whereClause, groupBy, having, orderBy, limit);
     }
     
-    private TableMetadata getClicksTableMetadata() {
+    private TableMetadata getClicksTableMetadata() throws MetadataException {
         List<ColumnMetadata> columns = new ArrayList<>();
         columns.add(new ColumnMetadata("USER_ID", "", DataType.createDecimal(18, 0), true, false, "", ""));
         columns.add(new ColumnMetadata("URL", "", DataType.createVarChar(10000, ExaCharset.UTF8), true, false, "", ""));

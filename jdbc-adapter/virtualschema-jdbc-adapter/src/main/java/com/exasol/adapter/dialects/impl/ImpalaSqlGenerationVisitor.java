@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.impl;
 
+import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
@@ -19,13 +20,13 @@ public class ImpalaSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     @Override
-    public String visit(SqlPredicateLikeRegexp predicate) {
+    public String visit(SqlPredicateLikeRegexp predicate) throws AdapterException {
         return predicate.getLeft().accept(this) + " REGEXP "
                 + predicate.getPattern().accept(this);
     }
 
     @Override
-    public String visit(SqlFunctionAggregateGroupConcat function) {
+    public String visit(SqlFunctionAggregateGroupConcat function) throws AdapterException {
         // Note that GROUP_CONCAT with DISTINCT is not supported by Impala
         StringBuilder builder = new StringBuilder();
         builder.append(function.getFunctionName());
@@ -47,7 +48,7 @@ public class ImpalaSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     @Override
-    public String visit(SqlFunctionAggregate function) {
+    public String visit(SqlFunctionAggregate function) throws AdapterException {
         boolean isDirectlyInSelectList = (function.hasParent() && function.getParent().getType() == SqlNodeType.SELECT_LIST);
         if (function.getFunction() != AggregateFunction.SUM || !isDirectlyInSelectList) {
             return super.visit(function);

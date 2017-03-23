@@ -2,6 +2,7 @@ package com.exasol.adapter.jdbc;
 
 import com.exasol.ExaConnectionInformation;
 import com.exasol.ExaMetadata;
+import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.dialects.impl.*;
@@ -77,24 +78,27 @@ public class JdbcAdapter {
             assert(result.isEmpty());
             System.out.println("----------\nResponse:\n----------\n" + JsonHelper.prettyJson(JsonHelper.getJsonObject(result)));
             return result;
-        } catch (Exception ex) {
+        } catch (AdapterException ex) {
+            throw ex;
+        }
+        catch (Exception ex) {
             String stacktrace = UdfUtils.traceToString(ex);
-            throw new Exception("Error in Adapter: " + ex.getMessage() + "\nStacktrace: " + stacktrace + "\nFor following request: " + input + "\nResponse: " + result);
+            throw new Exception("Unexpected error in adapter: " + ex.getMessage() + "\nStacktrace: " + stacktrace + "\nFor following request: " + input + "\nResponse: " + result);
         }
     }
 
-    private static String handleCreateVirtualSchema(CreateVirtualSchemaRequest request, ExaMetadata meta) throws SQLException {
+    private static String handleCreateVirtualSchema(CreateVirtualSchemaRequest request, ExaMetadata meta) throws SQLException, AdapterException {
         JdbcAdapterProperties.checkPropertyConsistency(request.getSchemaMetadataInfo().getProperties(), supportedDialects);
         SchemaMetadata remoteMeta = readMetadata(request.getSchemaMetadataInfo(), meta);
         return ResponseJsonSerializer.makeCreateVirtualSchemaResponse(remoteMeta);
     }
     
-    private static SchemaMetadata readMetadata(SchemaMetadataInfo schemaMeta, ExaMetadata meta) throws SQLException {
+    private static SchemaMetadata readMetadata(SchemaMetadataInfo schemaMeta, ExaMetadata meta) throws SQLException, AdapterException {
         List<String> tables = JdbcAdapterProperties.getTableFilter(schemaMeta.getProperties());
         return readMetadata(schemaMeta, tables, meta);
     }
 
-    private static SchemaMetadata readMetadata(SchemaMetadataInfo meta, List<String> tables, ExaMetadata exaMeta) throws SQLException {
+    private static SchemaMetadata readMetadata(SchemaMetadataInfo meta, List<String> tables, ExaMetadata exaMeta) throws SQLException, AdapterException {
         // Connect via JDBC and read metadata
         ExaConnectionInformation connection = JdbcAdapterProperties.getConnectionInformation(meta.getProperties(), exaMeta);
         String catalog = JdbcAdapterProperties.getCatalog(meta.getProperties());
@@ -110,7 +114,7 @@ public class JdbcAdapter {
                 JdbcAdapterProperties.getSqlDialectName(meta.getProperties(), supportedDialects));
     }
     
-    private static String handleRefresh(RefreshRequest request, ExaMetadata meta) throws SQLException {
+    private static String handleRefresh(RefreshRequest request, ExaMetadata meta) throws SQLException, AdapterException {
         SchemaMetadata remoteMeta;
         JdbcAdapterProperties.checkPropertyConsistency(request.getSchemaMetadataInfo().getProperties(), supportedDialects);
         if (request.isRefreshForTables()) {
@@ -122,7 +126,7 @@ public class JdbcAdapter {
         return ResponseJsonSerializer.makeRefreshResponse(remoteMeta);
     }
 
-    private static String handleSetProperty(SetPropertiesRequest request, ExaMetadata exaMeta) throws SQLException {
+    private static String handleSetProperty(SetPropertiesRequest request, ExaMetadata exaMeta) throws SQLException, AdapterException {
         Map<String, String> changedProperties = request.getProperties();
         Map<String, String> newSchemaMeta = JdbcAdapterProperties.getNewProperties(
                 request.getSchemaMetadataInfo().getProperties(), changedProperties);
@@ -148,7 +152,7 @@ public class JdbcAdapter {
         return ResponseJsonSerializer.makeDropVirtualSchemaResponse();
     }
     
-    public static String handleGetCapabilities(GetCapabilitiesRequest request) {
+    public static String handleGetCapabilities(GetCapabilitiesRequest request) throws AdapterException {
         SqlDialectContext dialectContext = new SqlDialectContext(SchemaAdapterNotes.deserialize(request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()));
         SqlDialect dialect = JdbcAdapterProperties.getSqlDialect(request.getSchemaMetadataInfo().getProperties(), supportedDialects, dialectContext);
         Capabilities capabilities = dialect.getCapabilities();
@@ -183,7 +187,7 @@ public class JdbcAdapter {
         return excludedCapabilities;
     }
 
-    private static String handlePushdownRequest(PushdownRequest request, ExaMetadata exaMeta) {
+    private static String handlePushdownRequest(PushdownRequest request, ExaMetadata exaMeta) throws AdapterException {
         // Generate SQL pushdown query
         SchemaMetadataInfo meta = request.getSchemaMetadataInfo();
         SqlDialectContext dialectContext = new SqlDialectContext(SchemaAdapterNotes.deserialize(request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()));
@@ -222,7 +226,7 @@ public class JdbcAdapter {
     }
 
     // Forward stdout to an external output service
-    private static void tryAttachToOutputService(SchemaMetadataInfo meta) {
+    private static void tryAttachToOutputService(SchemaMetadataInfo meta) throws AdapterException {
         String debugAddress = JdbcAdapterProperties.getDebugAddress(meta.getProperties());
         if (!debugAddress.isEmpty()) {
             try {
@@ -230,7 +234,7 @@ public class JdbcAdapter {
                 int debugPort = Integer.parseInt(debugAddress.split(":")[1]);
                 UdfUtils.tryAttachToOutputService(debugHost, debugPort);
             } catch (Exception ex) {
-                throw new RuntimeException("You have to specify a valid hostname and port for the udf debug service, e.g. 'hostname:3000'");
+                throw new AdapterException("You have to specify a valid hostname and port for the udf debug service, e.g. 'hostname:3000'");
             }
         }
     }

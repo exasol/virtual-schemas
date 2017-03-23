@@ -3,6 +3,7 @@ package com.exasol.adapter.jdbc;
 import com.exasol.ExaConnectionAccessException;
 import com.exasol.ExaConnectionInformation;
 import com.exasol.ExaMetadata;
+import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectContext;
 import com.exasol.adapter.dialects.SqlDialects;
@@ -80,23 +81,23 @@ public class JdbcAdapterProperties {
         }
     }
     
-    public static void checkPropertyConsistency(Map<String, String> properties, SqlDialects supportedDialects) {
+    public static void checkPropertyConsistency(Map<String, String> properties, SqlDialects supportedDialects) throws AdapterException {
         validatePropertyValues(properties);
         
         checkMandatoryProperties(properties, supportedDialects);
         
         if (isImportFromExa(properties)) {
             if (getExaConnectionString(properties).isEmpty()) {
-                throw new RuntimeException("You defined the property " + PROP_IMPORT_FROM_EXA + ", please also define " + PROP_EXA_CONNECTION_STRING);
+                throw new InvalidPropertyException("You defined the property " + PROP_IMPORT_FROM_EXA + ", please also define " + PROP_EXA_CONNECTION_STRING);
             }
         } else {
             if (!getExaConnectionString(properties).isEmpty()) {
-                throw new RuntimeException("You defined the property " + PROP_EXA_CONNECTION_STRING + " without setting " + PROP_IMPORT_FROM_EXA + " to 'TRUE'. This is not allowed");
+                throw new InvalidPropertyException("You defined the property " + PROP_EXA_CONNECTION_STRING + " without setting " + PROP_IMPORT_FROM_EXA + " to 'TRUE'. This is not allowed");
             }
         }
     }
 
-    private static void validatePropertyValues(Map<String, String> properties) {
+    private static void validatePropertyValues(Map<String, String> properties) throws AdapterException {
         validateBooleanProperty(properties, PROP_IS_LOCAL);
         validateBooleanProperty(properties, PROP_IMPORT_FROM_EXA);
         if (properties.containsKey(PROP_DEBUG_ADDRESS)) {
@@ -104,45 +105,43 @@ public class JdbcAdapterProperties {
         }
     }
     
-    private static void validateBooleanProperty(Map<String, String> properties, String property) {
+    private static void validateBooleanProperty(Map<String, String> properties, String property) throws AdapterException {
         if (properties.containsKey(property)) {
             if (!properties.get(property).toUpperCase().matches("^TRUE$|^FALSE$")) {
-                throw new RuntimeException("The value '" + properties.get(property) + "' for the property " + property + " is invalid. It has to be either 'true' or 'false' (case insensitive).");
+                throw new InvalidPropertyException("The value '" + properties.get(property) + "' for the property " + property + " is invalid. It has to be either 'true' or 'false' (case insensitive).");
             }
         }
     }
 
-    private static void validateDebugOutputAddress(String debugAddress) {
+    private static void validateDebugOutputAddress(String debugAddress) throws AdapterException {
         if (!debugAddress.isEmpty()) {
             String error = "You specified an invalid hostname and port for the udf debug service (" + PROP_DEBUG_ADDRESS + "). Please provide a valid value, e.g. 'hostname:3000'";
             try {
                 String debugHost = debugAddress.split(":")[0];
                 int debugPort = Integer.parseInt(debugAddress.split(":")[1]);
             } catch (Exception ex) {
-                throw new RuntimeException(error);
+                throw new AdapterException(error);
             }
             if (debugAddress.split(":").length != 2) {
-                throw new RuntimeException(error);
+                throw new AdapterException(error);
             }
         }
     }
 
-    private static void checkMandatoryProperties(Map<String, String> properties, SqlDialects supportedDialects) {
+    private static void checkMandatoryProperties(Map<String, String> properties, SqlDialects supportedDialects) throws AdapterException {
         if (!properties.containsKey(PROP_SQL_DIALECT)) {
-            throw new RuntimeException("You have to specify the SQL dialect (" + PROP_SQL_DIALECT + "). Available dialects: " + supportedDialects.getDialectsString());
+            throw new InvalidPropertyException("You have to specify the SQL dialect (" + PROP_SQL_DIALECT + "). Available dialects: " + supportedDialects.getDialectsString());
         }
         if (!supportedDialects.isSupported(properties.get(PROP_SQL_DIALECT))) {
-            throw new RuntimeException("SQL Dialect not supported: " + properties.get(PROP_SQL_DIALECT) + ". Available dialects: " + supportedDialects.getDialectsString());
+            throw new InvalidPropertyException("SQL Dialect not supported: " + properties.get(PROP_SQL_DIALECT) + ". Available dialects: " + supportedDialects.getDialectsString());
         }
         if (properties.containsKey(PROP_CONNECTION_NAME)) {
-            if (properties.containsKey(PROP_CONNECTION_STRING) ||
-                    properties.containsKey(PROP_USERNAME) ||
-                    properties.containsKey(PROP_PASSWORD) ) {
-                throw new RuntimeException("You specified a connection (" + PROP_CONNECTION_NAME + ") and therefore may not specify the properties " + PROP_CONNECTION_STRING + ", " + PROP_USERNAME + " and " + PROP_PASSWORD);
+            if (properties.containsKey(PROP_CONNECTION_STRING) || properties.containsKey(PROP_USERNAME) || properties.containsKey(PROP_PASSWORD) ) {
+                throw new InvalidPropertyException("You specified a connection (" + PROP_CONNECTION_NAME + ") and therefore may not specify the properties " + PROP_CONNECTION_STRING + ", " + PROP_USERNAME + " and " + PROP_PASSWORD);
             }
         } else {
             if (!properties.containsKey(PROP_CONNECTION_STRING)) {
-                throw new RuntimeException("You did not specify a connection (" + PROP_CONNECTION_NAME + ") and therefore have to specify the property " + PROP_CONNECTION_STRING);
+                throw new InvalidPropertyException("You did not specify a connection (" + PROP_CONNECTION_NAME + ") and therefore have to specify the property " + PROP_CONNECTION_STRING);
             }
         }
     }
@@ -180,11 +179,11 @@ public class JdbcAdapterProperties {
         return getProperty(properties, PROP_SQL_DIALECT, "");
     }
 
-    public static SqlDialect getSqlDialect(Map<String, String> properties, SqlDialects supportedDialects, SqlDialectContext dialectContext) {
+    public static SqlDialect getSqlDialect(Map<String, String> properties, SqlDialects supportedDialects, SqlDialectContext dialectContext) throws AdapterException {
         String dialectName = getProperty(properties, PROP_SQL_DIALECT, "");
         SqlDialect dialect = supportedDialects.getDialectByName(dialectName, dialectContext);
         if (dialect == null) {
-            throw new RuntimeException("SQL Dialect not supported: " + dialectName + " - all dialects: " + supportedDialects.getDialectsString());
+            throw new InvalidPropertyException("SQL Dialect not supported: " + dialectName + " - all dialects: " + supportedDialects.getDialectsString());
         }
         return dialect;
     }

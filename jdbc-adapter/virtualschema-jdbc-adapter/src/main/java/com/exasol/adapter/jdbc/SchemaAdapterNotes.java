@@ -1,6 +1,6 @@
 package com.exasol.adapter.jdbc;
 
-import com.exasol.adapter.metadata.SchemaMetadataInfo;
+import com.exasol.adapter.AdapterException;
 import com.exasol.utils.JsonHelper;
 
 import javax.json.JsonBuilderFactory;
@@ -163,15 +163,15 @@ public class SchemaAdapterNotes {
         return builder.build().toString();
     }
 
-    public static SchemaAdapterNotes deserialize(String adapterNotes, String schemaName) {
+    public static SchemaAdapterNotes deserialize(String adapterNotes, String schemaName) throws AdapterException {
         if (adapterNotes == null || adapterNotes.isEmpty()) {
-            throw new RuntimeException(getException(schemaName));
+            throw new AdapterException("Adapter notes for schema "+schemaName+" are empty or null. Please refresh the virtual schema");
         }
         JsonObject root;
         try {
             root = JsonHelper.getJsonObject(adapterNotes);
         } catch (Exception ex) {
-            throw new RuntimeException(getException(schemaName));
+            throw new AdapterException("Could not parse the json which is expected to be stored in the adapter notes of schema "+schemaName+". Please refresh the virtual schema");
         }
         checkKey(root, "catalogSeparator", schemaName);
         checkKey(root, "identifierQuoteString", schemaName);
@@ -204,13 +204,9 @@ public class SchemaAdapterNotes {
                 root.getBoolean("nullsAreSortedLow"));
     }
 
-    private static void checkKey(JsonObject root, String key, String schemaName) {
+    private static void checkKey(JsonObject root, String key, String schemaName) throws AdapterException {
         if (!root.containsKey(key)) {
-            throw new RuntimeException(getException(schemaName));
+            throw new AdapterException("Adapter notes of schema " + schemaName + " don't have the key " + key +". Please refresh the virtual schema");
         }
-    }
-
-    private static String getException(String schemaName) {
-        return "The adapternotes field of schema " + schemaName + " could not be parsed. Please refresh the virtual schema.";
     }
 }

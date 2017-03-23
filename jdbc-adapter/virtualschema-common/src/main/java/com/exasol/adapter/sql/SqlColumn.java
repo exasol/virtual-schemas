@@ -1,5 +1,6 @@
 package com.exasol.adapter.sql;
 
+import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.metadata.ColumnMetadata;
 
 public class SqlColumn extends SqlNode {
@@ -35,7 +36,7 @@ public class SqlColumn extends SqlNode {
     }
 
     @Override
-    public <R> R accept(SqlNodeVisitor<R> visitor) {
+    public <R> R accept(SqlNodeVisitor<R> visitor) throws AdapterException {
         return visitor.visit(this);
     }
 

@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.impl;
 
+import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectContext;
 import com.exasol.adapter.dialects.SqlGenerationContext;
@@ -18,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 public class OracleSqlDialectTest {
 
     @Test
-    public void testSqlGeneratorWithLimit() {
+    public void testSqlGeneratorWithLimit() throws AdapterException {
         SqlNode node = DialectTestData.getTestSqlNode();
         String schemaName = "SCHEMA";
         String expectedSql = "SELECT LIMIT_SUBSELECT.* FROM ( " +
@@ -38,7 +39,7 @@ public class OracleSqlDialectTest {
     }
 
     @Test
-    public void testSqlGeneratorWithLimitOffset() {
+    public void testSqlGeneratorWithLimitOffset() throws AdapterException {
         SqlNode node = DialectTestData.getTestSqlNode();
         ((SqlStatementSelect)node).getLimit().setOffset(5);
         String schemaName = "SCHEMA";
@@ -61,7 +62,7 @@ public class OracleSqlDialectTest {
     }
 
     @Test
-    public void testSqlGeneratorWithSelectStarAndOffset() {
+    public void testSqlGeneratorWithSelectStarAndOffset() throws AdapterException {
         SqlStatementSelect node = (SqlStatementSelect) DialectTestData.getTestSqlNode();
         node.getLimit().setOffset(5);
         node = new SqlStatementSelect(node.getFromClause(), SqlSelectList.createSelectStarSelectList(), node.getWhereClause(), node.getGroupBy(), node.getHaving(), node.getOrderBy(), node.getLimit());

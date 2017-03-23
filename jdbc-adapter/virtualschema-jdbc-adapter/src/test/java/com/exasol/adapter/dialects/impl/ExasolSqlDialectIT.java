@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.impl;
 
+import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
 import com.exasol.adapter.dialects.SqlDialects;
 import com.exasol.adapter.jdbc.JdbcMetadataReader;
@@ -300,7 +301,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
      */
     @Ignore
     @Test
-    public void testDifferentDataTypes() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    public void testDifferentDataTypes() throws SQLException, ClassNotFoundException, FileNotFoundException, AdapterException {
         Statement stmt = getConnection().createStatement();
         String jdbc_adapter_test_schema = "JDBC_ADAPTER_TEST_SCHEMA";
         String sql = "DROP SCHEMA IF EXISTS " + jdbc_adapter_test_schema + " CASCADE";

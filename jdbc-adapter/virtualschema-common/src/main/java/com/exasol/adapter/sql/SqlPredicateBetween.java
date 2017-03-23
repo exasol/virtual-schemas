@@ -1,7 +1,7 @@
 package com.exasol.adapter.sql;
 
 
-import java.util.List;
+import com.exasol.adapter.AdapterException;
 
 public class SqlPredicateBetween extends SqlPredicate {
 
@@ -48,7 +48,7 @@ public class SqlPredicateBetween extends SqlPredicate {
     }
 
     @Override
-    public <R> R accept(SqlNodeVisitor<R> visitor) {
+    public <R> R accept(SqlNodeVisitor<R> visitor) throws AdapterException {
         return visitor.visit(this);
     }
 

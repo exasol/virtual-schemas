@@ -1,11 +1,8 @@
 package com.exasol.adapter.json;
 
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.metadata.DataType.ExaCharset;
 import com.exasol.adapter.metadata.DataType.IntervalType;
-import com.exasol.adapter.metadata.SchemaMetadataInfo;
-import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.request.*;
 import com.exasol.adapter.sql.*;
 import com.exasol.utils.JsonHelper;
@@ -75,7 +72,7 @@ public class RequestJsonParser {
         }
     }
     
-    private List<TableMetadata> parseInvolvedTableMetadata(JsonArray involvedTables) {
+    private List<TableMetadata> parseInvolvedTableMetadata(JsonArray involvedTables) throws MetadataException {
         List<TableMetadata> tables = new ArrayList<>();
         for (JsonObject table : involvedTables.getValuesAs(JsonObject.class)) {
             String tableName = table.getString("name","");
@@ -90,7 +87,7 @@ public class RequestJsonParser {
         return tables;
     }
     
-    private ColumnMetadata parseColumnMetadata(JsonObject column) {
+    private ColumnMetadata parseColumnMetadata(JsonObject column) throws MetadataException {
         String columnName = column.getString("name");
         String adapterNotes = readAdapterNotes(column);
         String comment = column.getString("comment", "");
@@ -108,7 +105,7 @@ public class RequestJsonParser {
         return new ColumnMetadata(columnName, adapterNotes, type, isNullable, isIdentity, defaultValue, comment);
     }
 
-    private DataType getDataType(JsonObject dataType) {
+    private DataType getDataType(JsonObject dataType) throws MetadataException {
         String typeName = dataType.getString("type").toUpperCase();
         DataType type = null;
         if (typeName.equals("DECIMAL")) {
@@ -142,32 +139,32 @@ public class RequestJsonParser {
             int srid = dataType.getInt("srid");
             type = DataType.createGeometry(srid);
         } else {
-            throw new RuntimeException("parseColumnMetadata: Unsupported Data Type: " + typeName);
+            throw new MetadataException("Unsupported data type encountered: " + typeName);
         }
         return type;
     }
 
-    private static IntervalType intervalTypeFromString(String intervalType) {
+    private static IntervalType intervalTypeFromString(String intervalType) throws MetadataException {
         if (intervalType.equals("DAY TO SECONDS")) {
             return IntervalType.DAY_TO_SECOND;
         } else if (intervalType.equals("YEAR TO MONTH")) {
             return IntervalType.YEAR_TO_MONTH;
         } else {
-            throw new RuntimeException("Unexpected interval type: " + intervalType);
+            throw new MetadataException("Unsupported interval data type encountered: " + intervalType);
         }
     }
     
-    private static ExaCharset charSetFromString(String charset) {
+    private static ExaCharset charSetFromString(String charset) throws MetadataException {
         if (charset.equals("UTF8")) {
             return ExaCharset.UTF8;
         } else if (charset.equals("ASCII")) {
             return ExaCharset.ASCII;
         } else {
-            throw new RuntimeException("Unexpected Charset: " + charset);
+            throw new MetadataException("Unsupported charset encountered: " + charset);
         }
     }
 
-    private SqlStatementSelect parseSelect(JsonObject select) {
+    private SqlStatementSelect parseSelect(JsonObject select) throws MetadataException {
         // FROM clause
         SqlNode table = parseExpression(select.getJsonObject("from"));
         assert(table.getType() == SqlNodeType.TABLE);
@@ -202,7 +199,7 @@ public class RequestJsonParser {
         return new SqlStatementSelect((SqlTable)table, selectList, whereClause, groupByClause, having, orderBy, limit);
     }
     
-    private List<SqlNode> parseExpressionList(JsonArray array) {
+    private List<SqlNode> parseExpressionList(JsonArray array) throws MetadataException {
         assert(array != null);
         List<SqlNode> sqlNodes = new ArrayList<>();
         for (JsonObject expr : array.getValuesAs(JsonObject.class)) {
@@ -212,7 +209,7 @@ public class RequestJsonParser {
         return sqlNodes;
     }
 
-    private SqlGroupBy parseGroupBy(JsonArray groupBy) {
+    private SqlGroupBy parseGroupBy(JsonArray groupBy) throws MetadataException {
         if (groupBy == null) {
             return null;
         }
@@ -220,7 +217,7 @@ public class RequestJsonParser {
         return new SqlGroupBy(groupByElements);
     }
 
-    private SqlSelectList parseSelectList(JsonArray selectList) {
+    private SqlSelectList parseSelectList(JsonArray selectList) throws MetadataException {
         if (selectList == null) {
             // this is like SELECT *
             return SqlSelectList.createSelectStarSelectList();
@@ -233,7 +230,7 @@ public class RequestJsonParser {
         }
     }
     
-    private SqlOrderBy parseOrderBy(JsonArray orderByList) {
+    private SqlOrderBy parseOrderBy(JsonArray orderByList) throws MetadataException {
         List<SqlNode> orderByExpressions = new ArrayList<>();
         List<Boolean> isAsc = new ArrayList<>();
         List<Boolean> nullsLast = new ArrayList<>();
@@ -282,7 +279,7 @@ public class RequestJsonParser {
         return "";
     }
 
-    private SqlNode parseExpression(JsonObject exp) {
+    private SqlNode parseExpression(JsonObject exp) throws MetadataException {
         String typeName = exp.getString("type", "");
         SqlNodeType type = fromTypeName(typeName);
         switch (type) {
@@ -543,23 +540,23 @@ public class RequestJsonParser {
         return Enum.valueOf(SqlNodeType.class, typeName.toUpperCase());
     }
 
-    private TableMetadata findInvolvedTableMetadata(String tableName) {
+    private TableMetadata findInvolvedTableMetadata(String tableName) throws MetadataException {
         assert(involvedTablesMetadata != null);
         for (TableMetadata tableMetadata : involvedTablesMetadata) {
             if (tableMetadata.getName().equals(tableName)) {
                 return tableMetadata;
             }
         }
-        throw new RuntimeException("Could not find table metadata for involved table " + tableName + ". All involved tables: " + involvedTablesMetadata.toString());
+        throw new MetadataException("Could not find table metadata for involved table " + tableName + ". All involved tables: " + involvedTablesMetadata.toString());
     }
 
-    private ColumnMetadata findColumnMetadata(String tableName, String columnName) {
+    private ColumnMetadata findColumnMetadata(String tableName, String columnName) throws MetadataException {
         TableMetadata tableMetadata = findInvolvedTableMetadata(tableName);
         for (ColumnMetadata columnMetadata : tableMetadata.getColumns()) {
             if (columnMetadata.getName().equals(columnName)) {
                 return columnMetadata;
             }
         }
-        throw new RuntimeException("Could not find column metadata for involved table " + tableName + " and column + " + columnName + ". All involved tables: " + involvedTablesMetadata.toString());
+        throw new MetadataException("Could not find column metadata for involved table " + tableName + " and column + " + columnName + ". All involved tables: " + involvedTablesMetadata.toString());
     }
 }

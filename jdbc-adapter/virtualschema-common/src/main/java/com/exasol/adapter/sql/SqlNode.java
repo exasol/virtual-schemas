@@ -1,5 +1,7 @@
 package com.exasol.adapter.sql;
 
+import com.exasol.adapter.AdapterException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +31,7 @@ public abstract class SqlNode {
      * See {@link SqlNodeVisitor}
      * @param visitor The visitor object on which the appropriate visit(sqlNode) method is called
      */
-    public abstract <R> R accept(SqlNodeVisitor<R> visitor);
+    public abstract <R> R accept(SqlNodeVisitor<R> visitor) throws AdapterException;
 
     /**
      * @return A SQL representation of the current graph, using EXASOL SQL syntax. It is called "SIMPLE" because it is not guaranteed to be 100 % correct SQL (e.g. might be ambiguous).
