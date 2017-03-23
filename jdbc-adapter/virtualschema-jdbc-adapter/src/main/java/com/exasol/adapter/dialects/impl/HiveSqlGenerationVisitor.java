@@ -30,8 +30,7 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
                 int columnId = 0;
                 for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
                     SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-                    String typeName = null;
-                    typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
+                    String typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
                     if (typeName.equals("BINARY")) {
                         selectListElements.add("base64(" + super.visit(sqlColumn) + ")");
                     } else {
@@ -50,16 +49,11 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
             for (SqlNode node : selectList.getExpressions()) {
                 if(node.getType().equals(SqlNodeType.COLUMN)) {
                     SqlColumn sqlColumn = (SqlColumn) node;
-                    String typeName = null;
-                    try {
-                        typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
-                        if (typeName.equals("BINARY")) {
-                            selectListElements.add("base64(" + node.accept(this) + ")");
-                        } else {
-                            selectListElements.add(node.accept(this));
-                        }
-                    } catch (AdapterException e) {
-                        e.getMessage();
+                    String typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
+                    if (typeName.equals("BINARY")) {
+                        selectListElements.add("base64(" + node.accept(this) + ")");
+                    } else {
+                        selectListElements.add(node.accept(this));
                     }
                 }
                 else{
@@ -239,19 +233,14 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
 
-    private boolean selectListRequiresCasts(SqlSelectList selectList){
+    private boolean selectListRequiresCasts(SqlSelectList selectList) throws AdapterException {
 
         // Do as if the user has all columns in select list
         SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
         int columnId = 0;
         for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
             SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-            String typeName = null;
-            try {
-                typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
-            } catch (AdapterException e) {
-                e.getMessage();
-            }
+            String typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
             if(typeName.equals("BINARY")  ){
                 return true;
             }

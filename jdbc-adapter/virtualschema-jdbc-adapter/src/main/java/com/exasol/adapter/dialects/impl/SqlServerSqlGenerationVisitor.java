@@ -142,8 +142,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
         if (node.getType() == SqlNodeType.COLUMN) {
             SqlColumn column = (SqlColumn)node;
 			String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-			return TYPE_NAMES_REQUIRING_CAST.contains(typeName) ||
-            		TYPE_NAME_NOT_SUPPORTED.contains(typeName) ;
+			return TYPE_NAMES_REQUIRING_CAST.contains(typeName) || TYPE_NAME_NOT_SUPPORTED.contains(typeName) ;
         }
         return false;
     }
@@ -166,9 +165,8 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
     
     @Override
     public String visit(SqlFunctionScalar function) throws AdapterException {
+
         String sql = super.visit(function);
-        
-        
 		List<String> argumentsSql = new ArrayList<>();
         for (SqlNode node : function.getArguments()) {
             argumentsSql.add(node.accept(this));

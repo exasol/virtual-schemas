@@ -16,7 +16,7 @@ public interface SqlNodeVisitor<R> {
 
     public R visit(SqlStatementSelect select) throws AdapterException;
 
-    public R visit(SqlSelectList selectList) throws AdapterException, AdapterException;
+    public R visit(SqlSelectList selectList) throws AdapterException;
 
     public R visit(SqlGroupBy groupBy) throws AdapterException;
 
@@ -34,25 +34,25 @@ public interface SqlNodeVisitor<R> {
 
     public R visit(SqlFunctionScalarExtract sqlFunctionScalarExtract) throws AdapterException;
 
-    public R visit(SqlLimit sqlLimit);
+    public R visit(SqlLimit sqlLimit) throws AdapterException;
 
-    public R visit(SqlLiteralBool sqlLiteralBool);
+    public R visit(SqlLiteralBool sqlLiteralBool) throws AdapterException;
 
-    public R visit(SqlLiteralDate sqlLiteralDate);
+    public R visit(SqlLiteralDate sqlLiteralDate) throws AdapterException;
 
-    public R visit(SqlLiteralDouble sqlLiteralDouble);
+    public R visit(SqlLiteralDouble sqlLiteralDouble) throws AdapterException;
 
-    public R visit(SqlLiteralExactnumeric sqlLiteralExactnumeric);
+    public R visit(SqlLiteralExactnumeric sqlLiteralExactnumeric) throws AdapterException;
 
-    public R visit(SqlLiteralNull sqlLiteralNull);
+    public R visit(SqlLiteralNull sqlLiteralNull) throws AdapterException;
 
-    public R visit(SqlLiteralString sqlLiteralString);
+    public R visit(SqlLiteralString sqlLiteralString) throws AdapterException;
 
-    public R visit(SqlLiteralTimestamp sqlLiteralTimestamp);
+    public R visit(SqlLiteralTimestamp sqlLiteralTimestamp) throws AdapterException;
 
-    public R visit(SqlLiteralTimestampUtc sqlLiteralTimestampUtc);
+    public R visit(SqlLiteralTimestampUtc sqlLiteralTimestampUtc) throws AdapterException;
 
-    public R visit(SqlLiteralInterval sqlLiteralInterval);
+    public R visit(SqlLiteralInterval sqlLiteralInterval) throws AdapterException;
 
     public R visit(SqlOrderBy sqlOrderBy) throws AdapterException;
 
@@ -82,6 +82,6 @@ public interface SqlNodeVisitor<R> {
 
     public R visit(SqlPredicateIsNull sqlPredicateOr) throws AdapterException;
 
-    public R visit(SqlTable sqlTable);
+    public R visit(SqlTable sqlTable) throws AdapterException;
 
 }

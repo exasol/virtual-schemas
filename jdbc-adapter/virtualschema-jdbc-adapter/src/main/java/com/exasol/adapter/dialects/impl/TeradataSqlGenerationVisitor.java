@@ -100,9 +100,7 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
         if (!isDirectlyInSelectList) {
             return projString;
         }
-
-        String typeName = null;
-        typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
         return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
        
     }
