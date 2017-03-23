@@ -1,16 +1,16 @@
 package com.exasol.adapter.json;
 
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
+
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.metadata.DataType.ExaCharset;
 import com.exasol.adapter.metadata.DataType.ExaDataType;
 import com.exasol.adapter.metadata.DataType.IntervalType;
 
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
-
 public class SqlDataTypeJsonSerializer {
 
-    public static JsonObjectBuilder serialize(DataType dataType){
+    public static JsonObjectBuilder serialize(DataType dataType) {
         JsonObjectBuilder root = Json.createObjectBuilder()
                 .add("type", exaTypeAsString(dataType.getExaDataType()));
         
