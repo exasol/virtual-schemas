@@ -66,6 +66,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         }
 
         // Identity
+        
         boolean isIdentity = false;
         try {
             String identity = columns.getString("IS_AUTOINCREMENT");
@@ -205,7 +206,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         return colType;
     }
 
-    private String changeIdentifierCaseIfNeeded(String identifier) {
+    public String changeIdentifierCaseIfNeeded(String identifier) {
         if (getQuotedIdentifierHandling() == getUnquotedIdentifierHandling()) {
             if (getQuotedIdentifierHandling() != IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE) {
                 // Completely case-insensitive. We can store everything uppercase to allow working with unquoted identifiers in EXASOL

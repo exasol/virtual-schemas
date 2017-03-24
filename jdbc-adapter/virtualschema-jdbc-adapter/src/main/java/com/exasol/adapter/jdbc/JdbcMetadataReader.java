@@ -235,7 +235,10 @@ public class JdbcMetadataReader {
 
     private static List<TableMetadata> findTables(String catalog, String schema, List<String> tableFilter, DatabaseMetaData dbMeta, SqlDialect dialect) throws SQLException {
         List<TableMetadata> tables = new ArrayList<>();
-        ResultSet resTables = dbMeta.getTables(catalog, schema, null, null);
+        
+        String[] supportedTableTypes = {"TABLE", "VIEW", "SYSTEM TABLE"};
+        
+        ResultSet resTables = dbMeta.getTables(catalog, schema, null, supportedTableTypes);
         List< SqlDialect.MappedTable> tablesMapped = new ArrayList<>();
         //List<String> tableComments = new ArrayList<>();
         while (resTables.next()) {
