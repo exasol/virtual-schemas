@@ -1,19 +1,23 @@
 package com.exasol.adapter.dialects.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.sql.*;
+import com.exasol.adapter.sql.SqlColumn;
+import com.exasol.adapter.sql.SqlFunctionAggregateGroupConcat;
+import com.exasol.adapter.sql.SqlFunctionScalar;
+import com.exasol.adapter.sql.SqlNode;
+import com.exasol.adapter.sql.SqlNodeType;
+import com.exasol.adapter.sql.SqlSelectList;
+import com.exasol.adapter.sql.SqlStatementSelect;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
 
@@ -23,7 +27,7 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
     }
     
     @Override
-    public String visit(SqlFunctionScalar function) {
+    public String visit(SqlFunctionScalar function) throws AdapterException {
         String sql = super.visit(function);
         
         
@@ -156,6 +160,8 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
         }
         	
         break;
+		default:
+			break;
         
         
         }
@@ -163,7 +169,7 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
     }
     
     @Override
-    public String visit(SqlSelectList selectList) {
+    public String visit(SqlSelectList selectList) throws AdapterException {
         if (selectList.isRequestAnyColumn()) {
             // The system requested any column
             return "1";
@@ -196,11 +202,11 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
 
     
     @Override
-    public String visit(SqlColumn column) {
+    public String visit(SqlColumn column) throws AdapterException {
         return getColumnProjectionString(column, super.visit(column));
     }
 
-    private String getColumnProjectionString(SqlColumn column, String projString) {
+    private String getColumnProjectionString(SqlColumn column, String projString) throws AdapterException {
         boolean isDirectlyInSelectList = (column.hasParent() && column.getParent().getType() == SqlNodeType.SELECT_LIST);
         if (!isDirectlyInSelectList) {
             return projString;
@@ -213,7 +219,7 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     
-    private String getColumnProjectionStringNoCheck(SqlColumn column, String projString) {
+    private String getColumnProjectionStringNoCheck(SqlColumn column, String projString) throws AdapterException {
 
         String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
         
@@ -260,7 +266,7 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
     }
     
     
-    private boolean selectListRequiresCasts(SqlSelectList selectList) {
+    private boolean selectListRequiresCasts(SqlSelectList selectList) throws AdapterException {
         boolean requiresCasts = false;
 
         // Do as if the user has all columns in select list
@@ -282,7 +288,7 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
     private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("bytea"); 
 
 
-    private boolean nodeRequiresCast(SqlNode node) {
+    private boolean nodeRequiresCast(SqlNode node) throws AdapterException {
         if (node.getType() == SqlNodeType.COLUMN) {
             SqlColumn column = (SqlColumn)node;
             String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
@@ -295,7 +301,7 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
 
     
     @Override
-    public String visit(SqlFunctionAggregateGroupConcat function) {
+    public String visit(SqlFunctionAggregateGroupConcat function) throws AdapterException {
         StringBuilder builder = new StringBuilder();
         builder.append("STRING_AGG");
         builder.append("(");
