@@ -1,7 +1,7 @@
 package com.exasol.adapter.sql;
 
 
-import com.google.common.collect.ImmutableList;
+import com.exasol.adapter.AdapterException;
 
 public class SqlPredicateLikeRegexp extends SqlPredicate {
 
@@ -39,7 +39,7 @@ public class SqlPredicateLikeRegexp extends SqlPredicate {
     }
 
     @Override
-    public <R> R accept(SqlNodeVisitor<R> visitor) {
+    public <R> R accept(SqlNodeVisitor<R> visitor) throws AdapterException {
         return visitor.visit(this);
     }
 

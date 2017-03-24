@@ -1,10 +1,11 @@
 package com.exasol.adapter.sql;
 
+import com.exasol.adapter.AdapterException;
+import com.google.common.base.Joiner;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.google.common.base.Joiner;
 
 
 public class SqlPredicateInConstList extends SqlPredicate {
@@ -55,7 +56,7 @@ public class SqlPredicateInConstList extends SqlPredicate {
     }
 
     @Override
-    public <R> R accept(SqlNodeVisitor<R> visitor) {
+    public <R> R accept(SqlNodeVisitor<R> visitor) throws AdapterException {
         return visitor.visit(this);
     }
 

@@ -1,8 +1,6 @@
 package com.exasol.adapter.sql;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.exasol.adapter.AdapterException;
 
 /**
  * We could consider to apply builder pattern here (if time)
@@ -131,7 +129,7 @@ public class SqlStatementSelect extends SqlStatement {
     }
 
     @Override
-    public <R> R accept(SqlNodeVisitor<R> visitor) {
+    public <R> R accept(SqlNodeVisitor<R> visitor) throws AdapterException {
         return visitor.visit(this);
     }
 

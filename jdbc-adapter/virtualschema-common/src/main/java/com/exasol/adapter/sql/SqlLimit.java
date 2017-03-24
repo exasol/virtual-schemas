@@ -1,6 +1,8 @@
 package com.exasol.adapter.sql;
 
 
+import com.exasol.adapter.AdapterException;
+
 public class SqlLimit extends SqlNode {
     
     int limit;
@@ -52,7 +54,7 @@ public class SqlLimit extends SqlNode {
     }
 
     @Override
-    public <R> R accept(SqlNodeVisitor<R> visitor) {
+    public <R> R accept(SqlNodeVisitor<R> visitor) throws AdapterException {
         return visitor.visit(this);
     }
 

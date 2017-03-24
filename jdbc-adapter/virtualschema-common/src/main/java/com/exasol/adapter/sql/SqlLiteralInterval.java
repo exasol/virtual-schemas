@@ -1,6 +1,7 @@
 package com.exasol.adapter.sql;
 
 
+import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.metadata.DataType;
 
 public class SqlLiteralInterval extends SqlNode {
@@ -37,7 +38,7 @@ public class SqlLiteralInterval extends SqlNode {
     }
 
     @Override
-    public <R> R accept(SqlNodeVisitor<R> visitor) {
+    public <R> R accept(SqlNodeVisitor<R> visitor) throws AdapterException {
         return visitor.visit(this);
     }
 

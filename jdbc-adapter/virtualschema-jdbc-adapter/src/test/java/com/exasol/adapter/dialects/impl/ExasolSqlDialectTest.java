@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.impl;
 
+import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.capabilities.PredicateCapability;
 import com.exasol.adapter.dialects.SqlDialect;
@@ -37,7 +38,7 @@ public class ExasolSqlDialectTest {
     }
     
     @Test
-    public void testSqlGenerator() {
+    public void testSqlGenerator() throws AdapterException {
         SqlNode node = DialectTestData.getTestSqlNode();
         String schemaName = "SCHEMA";
         String expectedSql = "SELECT USER_ID, COUNT(URL) FROM " + schemaName + ".CLICKS" +
