@@ -33,7 +33,8 @@ public class JdbcAdapter {
                         RedshiftSqlDialect.NAME,
                         HiveSqlDialect.NAME,
                         DB2SqlDialect.NAME,
-                        SqlServerSqlDialect.NAME));
+                        SqlServerSqlDialect.NAME,
+                        PostgreSQLSqlDialect.NAME));
     }
 
     /**

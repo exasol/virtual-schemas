@@ -17,8 +17,9 @@ As an entry point we recommend to follow the [step-by-step deployment guide](doc
 5. [Oracle](#oracle)
 6. [Teradata](#teradata)
 7. [Redshift](#redshift)
-8. [SQL Server](#sqlserver)
-9. [Generic](#generic)
+8. [SQL Server](#sql-server)
+8. [PostgresSQL](#postgresql)
+10. [Generic](#generic)
 
 ## EXASOL
 
@@ -385,6 +386,41 @@ WITH
   CATALOG_NAME	  =  'MyDatabase'
   SCHEMA_NAME     = 'dbo'
 ;
+```
+
+## PostgreSQL
+
+**JDBC driver:**
+The PostgreSQL dialect was tested with JDBC driver version 42.0.0 and PostgreSQL 9.6.2 .
+
+**Adapter script**
+```sql
+CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter 
+  AS
+  
+  // This is the class implementing the callback method of the adapter script
+  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
+
+  // This will add the adapter jar to the classpath so that it can be used inside the adapter script
+  // Replace the names of the bucketfs and the bucket with the ones you used.
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-0.0.1-SNAPSHOT.jar;
+									 
+  // You have to add all files of the data source jdbc driver here (e.g. MySQL or Hive)
+  %jar /buckets/bucketfs1/bucket1/postgresql-42.0.0.jar;
+
+/
+```
+
+**Create a virtual schema**
+```sql
+CREATE VIRTUAL SCHEMA postgres
+	USING adapter.jdbc_adapter 
+	WITH
+	SQL_DIALECT = 'POSTGRESQL'
+	CATALOG_NAME = 'postgres'
+	SCHEMA_NAME = 'public'
+	CONNECTION_NAME = 'POSTGRES_DOCKER'
+	;
 ```
 
 ## Generic
