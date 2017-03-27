@@ -288,9 +288,8 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect{
 	            	String columnTypeName = cols.getString("TYPE_NAME");
 	
 	            	if(columnTypeName.equals("varbit")){
-	            			int n = cols.getInt("COLUMN_SIZE");
-	            		
-	           		 		colType = DataType.createVarChar(n, DataType.ExaCharset.UTF8);
+	            		int n = cols.getInt("COLUMN_SIZE");
+	            		colType = DataType.createVarChar(n, DataType.ExaCharset.UTF8);
 	            	}
 	            	else
 	            		colType = DataType.createVarChar(PostgreSQLSqlDialect.maxPostgresSQLVarcharSize, DataType.ExaCharset.UTF8);     
@@ -316,14 +315,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect{
 	}
 
 	
-	@Override
-    public Map<AggregateFunction, String> getAggregateFunctionAliases() {
-        Map<AggregateFunction, String> aggregationAliases = new EnumMap<>(AggregateFunction.class);
-        
-        return aggregationAliases;
-    }
-
-
 	@Override
 	public SchemaOrCatalogSupport supportsJdbcCatalogs() {
         return SchemaOrCatalogSupport.SUPPORTED;
