@@ -20,13 +20,13 @@ import java.util.Map;
  *
  * <p>
  * <b>1. Capabilities:</b><br>
- * The dialect defines the set of supported capabilities. See {@link #getCapabilities(Capabilities)} for details.
+ * The dialect defines the set of supported capabilities. See {@link #getCapabilities()} for details.
  * </p>
  *
  * <p>
  * <b>2. Data Type Mapping:</b><br>
  * The dialect defines, how the tables in the data source are mapped to EXASOL virtual tables.
- * In particular the data types have to be mapped to EXASOL data types. See {@link #mapJdbcType(ResultSet)} for details.
+ * In particular the data types have to be mapped to EXASOL data types. See {@link #mapJdbcType(JdbcTypeDescription)} for details.
  * </p>
  *
  * <p>
@@ -125,17 +125,31 @@ public interface SqlDialect {
      */
     ColumnMetadata mapColumn(ResultSet columns) throws SQLException;
 
+
     /**
      * Maps the jdbc datatype information of a column to the EXASOL datatype of the column.
      * The dialect can also return null, so that the default mapping occurs.
-     * This method will be called by {@link #mapColumn(ResultSet)} in the default implementation.
+     * This method will be called by {@link #mapJdbcType(JdbcTypeDescription)} in the default implementation.
      *
-     * @param cols A jdbc Resultset for the {@link DatabaseMetaData#getColumns(String, String, String, String)} call, pointing to the current column.
+     * @param jdbcType A jdbc type description
      * @return Either null, if the default datatype mapping shall be applied,
      *         or the datatype which the current column shall be mapped to.
-     *         This datatype will be used as the datatype in the virtual table.
+     *         This datatype will be used as the datatype in the virtual table and in the pushdown sql.
+     *
      */
-    DataType mapJdbcType(ResultSet cols) throws SQLException;
+    DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcType) throws SQLException;
+
+    /**
+     * Maps the jdbc datatype information of a column to the EXASOL datatype of the column.
+     * This method will be called by {@link #mapColumn(ResultSet)} in the default implementation.
+     *
+     * @param jdbcType A jdbc type description
+     * @return Either null, if the default datatype mapping shall be applied,
+     *         or the datatype which the current column shall be mapped to.
+     *         This datatype will be used as the datatype in the virtual table and in the pushdown sql.
+     *
+     */
+    DataType mapJdbcType(JdbcTypeDescription jdbcType) throws SQLException;
 
     //
     // SQL GENERATION

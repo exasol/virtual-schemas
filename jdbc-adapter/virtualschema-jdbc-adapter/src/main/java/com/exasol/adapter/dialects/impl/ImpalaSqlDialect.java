@@ -1,10 +1,10 @@
 package com.exasol.adapter.dialects.impl;
 
 import com.exasol.adapter.capabilities.*;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.metadata.DataType;
+
+import java.sql.SQLException;
 
 /**
  * Dialect for Impala, using the Cloudera Impala JDBC Driver/Connector (developed by Simba).
@@ -159,4 +159,8 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
         return "'" + value.replace("'", "''") + "'";
     }
 
+    @Override
+    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcType) throws SQLException {
+        return null;
+    }
 }

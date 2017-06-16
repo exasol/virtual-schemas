@@ -2,8 +2,12 @@ package com.exasol.adapter.dialects.impl;
 
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.AbstractSqlDialect;
+import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.dialects.SqlDialectContext;
 import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.metadata.DataType;
+
+import java.sql.SQLException;
 
 /**
  * Dialect for MySQL using the MySQL Connector jdbc driver.
@@ -83,4 +87,8 @@ public class MysqlSqlDialect extends AbstractSqlDialect {
         return "'" + value.replace("'", "''") + "'";
     }
 
+    @Override
+    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcType) throws SQLException {
+        return null;
+    }
 }

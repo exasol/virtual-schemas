@@ -10,10 +10,7 @@ import com.exasol.adapter.capabilities.LiteralCapability;
 import com.exasol.adapter.capabilities.MainCapability;
 import com.exasol.adapter.capabilities.PredicateCapability;
 import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.metadata.DataType;
 
 
@@ -197,9 +194,9 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
 
 	
     @Override
-    public DataType mapJdbcType(ResultSet cols) throws SQLException {
+    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcTypeDescription) throws SQLException {
         DataType colType = null;
-        int jdbcType = cols.getInt("DATA_TYPE");
+        int jdbcType = jdbcTypeDescription.getJdbcType();
         switch (jdbcType) {
         	case Types.TIME:
         		colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
@@ -208,8 +205,8 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
         		colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
         		break;
         	case Types.NUMERIC:
-        		int decimalPrec = cols.getInt("COLUMN_SIZE");
-                int decimalScale = cols.getInt("DECIMAL_DIGITS");
+        		int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
+                int decimalScale = jdbcTypeDescription.getDecimalScale();
 
                 if (decimalPrec <= DataType.maxExasolDecimalPrecision) {
                     colType = DataType.createDecimal(decimalPrec, decimalScale);
@@ -218,10 +215,10 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
                 }
                 break;
             case Types.OTHER: // Teradata JDBC uses OTHER for several data types GEOMETRY, INTERVAL etc...  
-            	String columnTypeName = cols.getString("TYPE_NAME");
+            	String columnTypeName = jdbcTypeDescription.getTypeName();
             	
             	 if ( columnTypeName.equals("GEOMETRY") )
-            		 colType = DataType.createVarChar(cols.getInt("COLUMN_SIZE"), DataType.ExaCharset.UTF8);
+            		 colType = DataType.createVarChar(jdbcTypeDescription.getPrecisionOrSize(), DataType.ExaCharset.UTF8);
             	 else if (columnTypeName.startsWith("INTERVAL") )
             		 colType = DataType.createVarChar(30, DataType.ExaCharset.UTF8); //TODO verify that varchar 30 is sufficient in all cases
             	 else if (columnTypeName.startsWith("PERIOD") )

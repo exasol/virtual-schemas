@@ -1,10 +1,7 @@
 package com.exasol.adapter.dialects.impl;
 
 import com.exasol.adapter.capabilities.*;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
@@ -333,13 +330,13 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public DataType mapJdbcType(ResultSet cols) throws SQLException {
+    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcTypeDescription) throws SQLException {
         DataType colType = null;
-        int jdbcType = cols.getInt("DATA_TYPE");
+        int jdbcType = jdbcTypeDescription.getJdbcType();
         switch (jdbcType) {
             case Types.DECIMAL:
-                int decimalPrec = cols.getInt("COLUMN_SIZE");
-                int decimalScale = cols.getInt("DECIMAL_DIGITS");
+                int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
+                int decimalScale = jdbcTypeDescription.getDecimalScale();
                 if (decimalScale == -127) {
                     // Oracle JDBC driver returns scale -127 if NUMBER data type was specified without scale and precision. Convert to VARCHAR.
                     // See http://docs.oracle.com/cd/B28359_01/server.111/b28318/datatype.htm#i16209
