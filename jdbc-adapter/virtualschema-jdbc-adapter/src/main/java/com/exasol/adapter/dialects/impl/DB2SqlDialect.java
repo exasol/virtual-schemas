@@ -1,6 +1,6 @@
 package com.exasol.adapter.dialects.impl;
 
-import com.exasol.adapter.dialects.AbstractSqlDialect;
+import com.exasol.adapter.dialects.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,9 +12,6 @@ import com.exasol.adapter.capabilities.LiteralCapability;
 import com.exasol.adapter.capabilities.MainCapability;
 import com.exasol.adapter.capabilities.PredicateCapability;
 import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.metadata.DataType;
 
 /**
@@ -359,9 +356,9 @@ public class DB2SqlDialect extends AbstractSqlDialect {
     }
     
     @Override
-    public DataType mapJdbcType(ResultSet cols) throws SQLException {
+    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcTypeDescription) throws SQLException {
         DataType colType = null;
-        int jdbcType = cols.getInt("DATA_TYPE");
+        int jdbcType = jdbcTypeDescription.getJdbcType();
         
         switch (jdbcType) {
         case Types.CLOB:
@@ -383,7 +380,7 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         case Types.CHAR:
         case Types.NCHAR:
         case Types.LONGNVARCHAR: {
-            int size = cols.getInt("COLUMN_SIZE");
+            int size = jdbcTypeDescription.getPrecisionOrSize();
             DataType.ExaCharset charset =  DataType.ExaCharset.UTF8;
             if (size <= DataType.maxExasolVarcharSize) {
                 colType = DataType.createVarChar(size, charset);
@@ -395,9 +392,9 @@ public class DB2SqlDialect extends AbstractSqlDialect {
             
         // VARCHAR  and CHAR for bit data -> will be converted to hex string so we have to double the size
         case -2:
-            colType = DataType.createChar(cols.getInt("COLUMN_SIZE")*2, DataType.ExaCharset.ASCII);
+            colType = DataType.createChar(jdbcTypeDescription.getPrecisionOrSize()*2, DataType.ExaCharset.ASCII);
         case -3:
-            colType = DataType.createVarChar(cols.getInt("COLUMN_SIZE")*2, DataType.ExaCharset.ASCII);
+            colType = DataType.createVarChar(jdbcTypeDescription.getPrecisionOrSize()*2, DataType.ExaCharset.ASCII);
             break;
         }
         return colType;

@@ -8,6 +8,7 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.dialects.impl.*;
 import com.exasol.adapter.json.RequestJsonParser;
 import com.exasol.adapter.json.ResponseJsonSerializer;
+import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.metadata.SchemaMetadataInfo;
 import com.exasol.adapter.request.*;
@@ -15,11 +16,13 @@ import com.exasol.utils.JsonHelper;
 import com.exasol.utils.UdfUtils;
 import com.google.common.collect.ImmutableList;
 
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
 public class JdbcAdapter {
+
+    public static final int MAX_STRING_CHAR_LENGTH = 2000000;
 
     final static SqlDialects supportedDialects;
     static {
@@ -216,14 +219,96 @@ public class JdbcAdapter {
         if (isLocal) {
             importSql = pushdownQuery;
         } else if (importFromExa) {
+
             importSql =  "IMPORT FROM EXA " + credentialsAndConn
                     + " STATEMENT '" + pushdownQuery.replace("'", "''") + "'";
         } else {
-            importSql =  "IMPORT FROM JDBC " + credentialsAndConn
-                    + " STATEMENT '" + pushdownQuery.replace("'", "''") + "'";
+                String columnDescription = createColumnDescription(exaMeta, meta, pushdownQuery, dialect);
+                if (columnDescription == null) {
+                    importSql = "IMPORT" + " FROM JDBC " + credentialsAndConn
+                            + " STATEMENT '" + pushdownQuery.replace("'", "''") + "'";
+                } else {
+                    importSql = "IMPORT INTO " + columnDescription + " FROM JDBC " + credentialsAndConn
+                            + " STATEMENT '" + pushdownQuery.replace("'", "''") + "'";
+                }
         }
         
         return ResponseJsonSerializer.makePushdownResponse(importSql);
+    }
+
+    private static String createColumnDescription(ExaMetadata exaMeta,
+                                                SchemaMetadataInfo meta,
+                                                String pushdownQuery,
+                                                SqlDialect dialect) throws AdapterException {
+        PreparedStatement ps = null;
+        ExaConnectionInformation connectionInformation = JdbcAdapterProperties.getConnectionInformation(meta.getProperties(), exaMeta);
+
+        Connection connection = null;
+        int val = -1;
+        try {
+            connection = establishConnection(connectionInformation);
+            ps = connection.prepareStatement(pushdownQuery);
+            ResultSetMetaData metadata=ps.getMetaData();
+            if (metadata==null){
+                ps.execute();
+                metadata=ps.getMetaData();
+                if (metadata==null) {
+                    throw new SQLException("getMetaData() failed");
+                }
+            }
+            DataType[] internalTypes = new DataType[metadata.getColumnCount()];
+            for(int col=1; col <= metadata.getColumnCount(); ++col) {
+                int jdbcType = metadata.getColumnType(col);
+                int jdbcPrecisions = metadata.getPrecision(col);
+                int jdbcScales = metadata.getScale(col);
+                JdbcTypeDescription description = new JdbcTypeDescription(jdbcType,
+                        jdbcScales, jdbcPrecisions, 0,
+                        metadata.getColumnTypeName(col));
+                internalTypes[col - 1] = dialect.mapJdbcType(description);
+            }
+            StringBuffer buffer = new StringBuffer();
+            buffer.append('(');
+            for (int i = 0; i < internalTypes.length; i++) {
+                buffer.append("c");
+                buffer.append(i);
+                buffer.append(" ");
+                buffer.append(internalTypes[i].toString());
+                if (i < internalTypes.length - 1) {
+                    buffer.append(",");
+                }
+            }
+
+            buffer.append(')');
+            return buffer.toString();
+        } catch (SQLException e) {
+            throw new RuntimeException("Cannot resolve column types." + e.getMessage());
+
+        }
+    }
+
+    private static Connection establishConnection(ExaConnectionInformation connection) throws SQLException {
+        final String connectionString = connection.getAddress();
+        final String user = connection.getUser();
+        final String password = connection.getPassword();
+        System.out.println("conn: " + connectionString);
+
+        java.util.Properties info = new java.util.Properties();
+        if (user != null) {
+            info.put("user", user);
+        }
+        if (password != null) {
+            info.put("password", password);
+        }
+        if (KerberosUtils.isKerberosAuth(password)) {
+            try {
+                KerberosUtils.configKerberos(user, password);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException("Error configuring Kerberos: " + e.getMessage(), e);
+            }
+        }
+        return DriverManager.getConnection(connectionString, info);
     }
 
     // Forward stdout to an external output service

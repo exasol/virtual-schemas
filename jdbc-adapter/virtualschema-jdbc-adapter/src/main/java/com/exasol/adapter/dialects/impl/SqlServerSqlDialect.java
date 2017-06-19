@@ -12,10 +12,7 @@ import com.exasol.adapter.capabilities.LiteralCapability;
 import com.exasol.adapter.capabilities.MainCapability;
 import com.exasol.adapter.capabilities.PredicateCapability;
 import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
@@ -345,10 +342,10 @@ public class SqlServerSqlDialect extends AbstractSqlDialect{
 
 	
     @Override
-    public DataType mapJdbcType(ResultSet cols) throws SQLException {
+    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcTypeDescription) throws SQLException {
         DataType colType = null;
-        int jdbcType = cols.getInt("DATA_TYPE");
-        String columnTypeName = cols.getString("TYPE_NAME");
+        int jdbcType = jdbcTypeDescription.getJdbcType();
+        String columnTypeName = jdbcTypeDescription.getTypeName();
         
         switch (jdbcType) {
         
@@ -370,8 +367,8 @@ public class SqlServerSqlDialect extends AbstractSqlDialect{
         		colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
         		break;
         	case Types.NUMERIC:
-        		int decimalPrec = cols.getInt("COLUMN_SIZE");
-                int decimalScale = cols.getInt("DECIMAL_DIGITS");
+        		int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
+                int decimalScale = jdbcTypeDescription.getDecimalScale();
 
                 if (decimalPrec <= DataType.maxExasolDecimalPrecision) {
                     colType = DataType.createDecimal(decimalPrec, decimalScale);

@@ -2,6 +2,7 @@ package com.exasol.adapter.dialects.impl;
 
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.AbstractSqlDialect;
+import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.dialects.SqlDialectContext;
 import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.metadata.DataType;
@@ -45,9 +46,10 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public DataType mapJdbcType(ResultSet cols) throws SQLException {
+    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcTypeDescription) throws SQLException {
         DataType colType = null;
-        int jdbcType = cols.getInt("DATA_TYPE");
+        int jdbcType = jdbcTypeDescription.getJdbcType();
+
         switch (jdbcType) {
             case -104:
                 // Currently precision is hardcoded, because we cannot retrieve it via EXASOL jdbc driver.

@@ -48,11 +48,14 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     public ColumnMetadata mapColumn(ResultSet columns) throws SQLException {
         String colName = changeIdentifierCaseIfNeeded(columns.getString("COLUMN_NAME"));
         int jdbcType = columns.getInt("DATA_TYPE");
+        int decimalScale = columns.getInt("DECIMAL_DIGITS");
+        int precisionOrSize = columns.getInt("COLUMN_SIZE");
+        int charOctedLength = columns.getInt("CHAR_OCTET_LENGTH");
+        String typeName = columns.getString("TYPE_NAME");
+        JdbcTypeDescription jdbcTypeDescription = new JdbcTypeDescription(jdbcType,
+                decimalScale, precisionOrSize, charOctedLength, typeName);
         // Check if dialect want's to handle this row
-        DataType colType = mapJdbcType(columns);
-        if (colType == null) {
-            colType = defaultJdbcTypeMapping(columns);
-        }
+        DataType colType = mapJdbcType(jdbcTypeDescription);
 
         // Nullable
         boolean isNullable = true;
@@ -108,27 +111,38 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         return new ColumnMetadata(colName, adapterNotes, colType, isNullable, isIdentity, defaultValue, comment);
     }
 
-    private static DataType defaultJdbcTypeMapping(ResultSet cols) throws SQLException {
-
+    private static DataType getExaTypeFromJdbcType(JdbcTypeDescription jdbcTypeDescription) throws SQLException {
         DataType colType;
-        int jdbcType = cols.getInt("DATA_TYPE");
-        switch (jdbcType) {
+        switch (jdbcTypeDescription.getJdbcType()) {
             case Types.TINYINT:
             case Types.SMALLINT:
+                if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.maxExasolDecimalPrecision) {
+                    int precision = jdbcTypeDescription.getPrecisionOrSize() == 0 ? 9 : jdbcTypeDescription.getPrecisionOrSize();
+                    colType = DataType.createDecimal(precision, 0);
+                } else {
+                    colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+                }
+                break;
             case Types.INTEGER:
+                if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.maxExasolDecimalPrecision) {
+                    int precision = jdbcTypeDescription.getPrecisionOrSize() == 0 ? 18 : jdbcTypeDescription.getPrecisionOrSize();
+                    colType = DataType.createDecimal(precision, 0);
+                } else {
+                    colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+                }
+                break;
             case Types.BIGINT:  // Java type long
-                int intPrec = cols.getInt("COLUMN_SIZE");
-                if (intPrec <= DataType.maxExasolDecimalPrecision) {
-                    colType = DataType.createDecimal(intPrec, 0);
+                if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.maxExasolDecimalPrecision) {
+                    int precision = jdbcTypeDescription.getPrecisionOrSize() == 0 ? 36 : jdbcTypeDescription.getPrecisionOrSize();
+                    colType = DataType.createDecimal(precision, 0);
                 } else {
                     colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
                 }
                 break;
             case Types.DECIMAL:
-                int decimalPrec = cols.getInt("COLUMN_SIZE");
-                int decimalScale = cols.getInt("DECIMAL_DIGITS");
-                if (decimalPrec <= DataType.maxExasolDecimalPrecision) {
-                    colType = DataType.createDecimal(decimalPrec, decimalScale);
+
+                if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.maxExasolDecimalPrecision) {
+                    colType = DataType.createDecimal(jdbcTypeDescription.getPrecisionOrSize(), jdbcTypeDescription.getDecimalScale());
                 } else {
                     colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
                 }
@@ -145,10 +159,11 @@ public abstract class AbstractSqlDialect implements SqlDialect {
             case Types.NVARCHAR:
             case Types.LONGVARCHAR:
             case Types.LONGNVARCHAR: {
-                int size = cols.getInt("COLUMN_SIZE");
-                DataType.ExaCharset charset = (cols.getInt("CHAR_OCTET_LENGTH") == size) ? DataType.ExaCharset.ASCII : DataType.ExaCharset.UTF8;
-                if (size <= DataType.maxExasolVarcharSize) {
-                    colType = DataType.createVarChar(size, charset);
+                DataType.ExaCharset charset = (jdbcTypeDescription.getCharOctedLength() == jdbcTypeDescription.getPrecisionOrSize()) ? DataType.ExaCharset.ASCII : DataType.ExaCharset.UTF8;
+                if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.maxExasolVarcharSize) {
+                    int precision = jdbcTypeDescription.getPrecisionOrSize() == 0
+                            ? DataType.maxExasolVarcharSize : jdbcTypeDescription.getPrecisionOrSize();
+                    colType = DataType.createVarChar(precision, charset);
                 } else {
                     colType = DataType.createVarChar(DataType.maxExasolVarcharSize, charset);
                 }
@@ -156,13 +171,12 @@ public abstract class AbstractSqlDialect implements SqlDialect {
             }
             case Types.CHAR:
             case Types.NCHAR: {
-                int size = cols.getInt("COLUMN_SIZE");
-                DataType.ExaCharset charset = (cols.getInt("CHAR_OCTET_LENGTH") == size) ? DataType.ExaCharset.ASCII : DataType.ExaCharset.UTF8;
-                if (size <= DataType.maxExasolCharSize) {
-                    colType = DataType.createChar(size, charset);
+                DataType.ExaCharset charset = (jdbcTypeDescription.getCharOctedLength() == jdbcTypeDescription.getPrecisionOrSize()) ? DataType.ExaCharset.ASCII : DataType.ExaCharset.UTF8;
+                if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.maxExasolCharSize) {
+                    colType = DataType.createChar(jdbcTypeDescription.getPrecisionOrSize(), charset);
                 } else {
-                    if (size <= DataType.maxExasolVarcharSize) {
-                        colType = DataType.createVarChar(size, charset);
+                    if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.maxExasolVarcharSize) {
+                        colType = DataType.createVarChar(jdbcTypeDescription.getPrecisionOrSize(), charset);
                     } else {
                         colType = DataType.createVarChar(DataType.maxExasolVarcharSize, charset);
                     }
@@ -200,7 +214,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
             case Types.SQLXML:
             case Types.NULL:
             default:
-                throw new RuntimeException("Unsupported data type (" + jdbcType + ") found in source system, should never happen");
+                throw new RuntimeException("Unsupported data type (" + jdbcTypeDescription.getJdbcType() + ") found in source system, should never happen");
         }
         assert(colType != null);
         return colType;
@@ -227,8 +241,15 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     }
 
     @Override
-    public DataType mapJdbcType(ResultSet cols) throws SQLException {
-        return null;
+    public abstract DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcType) throws SQLException;
+
+    @Override
+    public final DataType mapJdbcType(JdbcTypeDescription jdbcType) throws SQLException {
+        DataType type = dialectSpecificMapJdbcType(jdbcType);
+        if (type == null) {
+            type = getExaTypeFromJdbcType(jdbcType);
+        }
+        return type;
     }
 
     @Override

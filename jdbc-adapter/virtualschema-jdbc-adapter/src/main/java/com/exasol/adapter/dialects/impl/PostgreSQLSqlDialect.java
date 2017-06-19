@@ -12,10 +12,7 @@ import com.exasol.adapter.capabilities.LiteralCapability;
 import com.exasol.adapter.capabilities.MainCapability;
 import com.exasol.adapter.capabilities.PredicateCapability;
 import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
@@ -279,16 +276,16 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect{
 	}
 	
 	 @Override
-    public DataType mapJdbcType(ResultSet cols) throws SQLException {
+    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcTypeDescription) throws SQLException {
         DataType colType = null;
-        int jdbcType = cols.getInt("DATA_TYPE");
+        int jdbcType = jdbcTypeDescription.getJdbcType();
 
         switch (jdbcType) {
         		case Types.OTHER:
-	            	String columnTypeName = cols.getString("TYPE_NAME");
+	            	String columnTypeName = jdbcTypeDescription.getTypeName();
 	
 	            	if(columnTypeName.equals("varbit")){
-	            		int n = cols.getInt("COLUMN_SIZE");
+	            		int n = jdbcTypeDescription.getPrecisionOrSize();
 	            		colType = DataType.createVarChar(n, DataType.ExaCharset.UTF8);
 	            	}
 	            	else

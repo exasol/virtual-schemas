@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -234,6 +235,11 @@ public class SqlDialectTest {
         @Override
         public String getStringLiteral(String value) {
             return "'" + value + "'";
+        }
+
+        @Override
+        public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcType) throws SQLException {
+            return null;
         }
     }
 

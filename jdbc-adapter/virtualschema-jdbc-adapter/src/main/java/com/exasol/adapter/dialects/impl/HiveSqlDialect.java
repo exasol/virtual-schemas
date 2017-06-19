@@ -1,12 +1,11 @@
 package com.exasol.adapter.dialects.impl;
 
 import com.exasol.adapter.capabilities.*;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.ScalarFunction;
 
+import java.sql.SQLException;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -230,6 +229,11 @@ public class HiveSqlDialect extends AbstractSqlDialect {
 
         return scalarAliases;
 
+    }
+
+    @Override
+    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcType) throws SQLException {
+        return null;
     }
 
 }
