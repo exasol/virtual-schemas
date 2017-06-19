@@ -49,6 +49,7 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcTypeDescription) throws SQLException {
         DataType colType = null;
         int jdbcType = jdbcTypeDescription.getJdbcType();
+
         switch (jdbcType) {
             case -104:
                 // Currently precision is hardcoded, because we cannot retrieve it via EXASOL jdbc driver.

@@ -256,7 +256,6 @@ public class JdbcAdapter {
                     throw new SQLException("getMetaData() failed");
                 }
             }
-            String[] colNames = new String[metadata.getColumnCount()];
             DataType[] internalTypes = new DataType[metadata.getColumnCount()];
             for(int col=1; col <= metadata.getColumnCount(); ++col) {
                 int jdbcType = metadata.getColumnType(col);
@@ -266,13 +265,12 @@ public class JdbcAdapter {
                         jdbcScales, jdbcPrecisions, 0,
                         metadata.getColumnTypeName(col));
                 internalTypes[col - 1] = dialect.mapJdbcType(description);
-                colNames[col - 1] = metadata.getColumnName(col);
-
             }
             StringBuffer buffer = new StringBuffer();
             buffer.append('(');
             for (int i = 0; i < internalTypes.length; i++) {
-                buffer.append(colNames[i]);
+                buffer.append("c");
+                buffer.append(i);
                 buffer.append(" ");
                 buffer.append(internalTypes[i].toString());
                 if (i < internalTypes.length - 1) {
