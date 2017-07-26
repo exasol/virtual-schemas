@@ -294,6 +294,9 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect{
         		case Types.SQLXML:
 	            		colType = DataType.createVarChar(PostgreSQLSqlDialect.maxPostgresSQLVarcharSize, DataType.ExaCharset.UTF8);
         			break;
+			case Types.DISTINCT:
+				colType=DataType.createVarChar(PostgreSQLSqlDialect.maxPostgresSQLVarcharSize, DataType.ExaCharset.UTF8);
+				break;
         }
         
         return colType;
