@@ -6,6 +6,7 @@ fi
 BASEDIR=$(dirname "$0")
 PARENTDIR=$(dirname "$BASEDIR")
 OLD_VERSION="$1"
+OLD_VERSION="${OLD_VERSION//./\\.}"
 NEW_VERSION="$2"
 
 echo "Substitute $OLD_VERSION with $NEW_VERSION in $PARENTDIR"

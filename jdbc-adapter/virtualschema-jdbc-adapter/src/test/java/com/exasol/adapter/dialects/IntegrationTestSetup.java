@@ -36,7 +36,7 @@ public class IntegrationTestSetup {
         String bucketFSpassword = config.getBucketFSPassword();
         		
         
-        // The local path look like "virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.0.0.jar"
+        // The local path look like "virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.0.1-SNAPSHOT.jar"
         String artifactDistName = "virtualschema-jdbc-adapter-dist";
         
         String jarName = artifactDistName + "-" + projectVersion + ".jar";
@@ -46,7 +46,7 @@ public class IntegrationTestSetup {
         
         uploadFileToBucketFS(bucketFSurl+"/"+jarName, jarLocalPath, bucketFSpassword);
         
-        //uploadFileToBucketFS("http://192.168.106.131:2580/bucket1/original-virtualschema-jdbc-adapter-dist-1.0.0.jar", "C:\\Users\\tb\\Desktop\\github-repos\\virtual-schemas\\jdbc-adapter\\virtualschema-jdbc-adapter-dist\\target\\original-virtualschema-jdbc-adapter-dist-1.0.0.jar","bucket1");
+        //uploadFileToBucketFS("http://192.168.106.131:2580/bucket1/original-virtualschema-jdbc-adapter-dist-1.0.1-SNAPSHOT.jar", "C:\\Users\\tb\\Desktop\\github-repos\\virtual-schemas\\jdbc-adapter\\virtualschema-jdbc-adapter-dist\\target\\original-virtualschema-jdbc-adapter-dist-1.0.1-SNAPSHOT.jar","bucket1");
                    
     }
 
