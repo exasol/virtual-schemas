@@ -8,9 +8,13 @@ Run the following steps to deploy your adapter:
 * EXASOL must be able to connect to the host and port specified in the JDBC connection string. In case of problems you can use a [UDF to test the connectivity](https://www.exasol.com/support/browse/SOL-307).
 * If the JDBC driver requires Kerberos authentication (e.g. for Hive or Impala), the EXASOL database will authenticate using a keytab file. Each EXASOL node needs access to port 88 of the the Kerberos KDC (key distribution center).
 
-### 2. Clone and Build:
+### 2. Obtain Jar:
 
-First you have to clone the repository and build a fat jar (including all dependencies):
+First you have to obtain the so called fat jar (including all dependencies).
+
+The easiest way is to download the jar from the last [Release](https://github.com/EXASOL/virtual-schemas/releases).
+
+Alternatively you can clone the repository and build the jar as follows:
 ```
 git clone https://github.com/EXASOL/virtual-schemas.git
 cd virtual-schemas/jdbc-adapter/
