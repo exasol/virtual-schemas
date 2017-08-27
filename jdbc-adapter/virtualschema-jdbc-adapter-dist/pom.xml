@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.exasol</groupId>
 		<artifactId>virtualschema-jdbc-adapter-main</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
 	<artifactId>virtualschema-jdbc-adapter-dist</artifactId>
 
@@ -16,12 +16,12 @@
 		<dependency>
 			<groupId>com.exasol</groupId>
 			<artifactId>virtualschema-common</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.exasol</groupId>
 			<artifactId>virtualschema-jdbc-adapter</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 	</dependencies>
 
