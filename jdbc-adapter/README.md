@@ -112,7 +112,6 @@ Parameter                   | Value
 
 Parameter                   | Value
 --------------------------- | -----------
-**DEBUG_ADDRESS**           | The IP address/hostname and port of the UDF debugging service, e.g. 'myhost:3000'. Debug output from the UDFs will be sent to this address. See the section on debugging below.
 **IMPORT_FROM_EXA**         | Only relevant if your data source is EXASOL. Either 'TRUE' or 'FALSE' (default). If true, IMPORT FROM EXA will be used for the pushdown instead of IMPORT FROM JDBC. You have to define EXA_CONNECTION_STRING if this property is true.
 **EXA_CONNECTION_STRING**   | The connection string used for IMPORT FROM EXA in the format 'hostname:port'.
 **IS_LOCAL**                | Only relevant if your data source is the same EXASOL database where you create the virtual schema. Either 'TRUE' or 'FALSE' (default). If true, you are connecting to the local EXASOL database (e.g. for testing purposes). In this case, the adapter can avoid the IMPORT FROM JDBC overhead.
@@ -120,15 +119,16 @@ Parameter                   | Value
 
 
 ## Debugging
-To see all communication between the database and the adapter you can use the python script udf_debug.py.
+To see all communication between the database and the adapter you can use the python script udf_debug.py located in the [tools](tools) directory.
 
 First, start the udf_debug.py script, which will listen on the specified address and print all incoming text.
 ```
 python tools/udf_debug.py -s myhost -p 3000
 ```
-And set the DEBUG_ADDRESS properties so that the adapter will send debug output to the specified address.
+
+Then run following SQL statement in your session to redirect all stdout and stderr from the adapter script to the udf_debug.py script we started before.
 ```sql
-ALTER VIRTUAL SCHEMA vs SET DEBUG_ADDRESS='host-where-udf-debug-script-runs:3000'
+ALTER SESSION SET SCRIPT_OUTPUT_ADDRESS='host-where-udf-debug-script-runs:3000'
 ```
 
 You have to make sure that EXASOL can connect to the host running the udf_debug.py script.
