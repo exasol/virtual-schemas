@@ -40,6 +40,7 @@ CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
 /
 ```
 **Create a virtual schema:**
+
 ```sql
 CREATE CONNECTION exasol_conn TO 'jdbc:exa:exasol-host:1234' USER 'user' IDENTIFIED BY 'pwd';
 
@@ -49,8 +50,11 @@ CREATE VIRTUAL SCHEMA virtual_exasol USING adapter.jdbc_adapter WITH
   SCHEMA_NAME     = 'default';
 ```
 
-EXASOL provides the faster and parallel ```IMPORT FROM EXA``` command for loading data from EXASOL. You can tell the adapter to use this command instead of ```IMPORT FROM JDBC``` by setting the ```IMPORT_FROM_EXA``` property. In this case you have to provide the additional ```EXA_CONNECTION_STING``` which is the connection string used for the internally used ```IMPORT FROM EXA``` command (it also supports ranges like ```192.168.6.11..14:8563```).
+**Use IMPORT FROM EXA instead of IMPORT FROM JDBC**
+EXASOL provides the faster and parallel ```IMPORT FROM EXA``` command for loading data from EXASOL. You can tell the adapter to use this command instead of ```IMPORT FROM JDBC``` by setting the ```IMPORT_FROM_EXA``` property. In this case you have to provide the additional ```EXA_CONNECTION_STING``` which is the connection string used for the internally used ```IMPORT FROM EXA``` command (it also supports ranges like ```192.168.6.11..14:8563```). Please note, that the ```CONNECTION``` object must still have the jdbc connection string in ```AT```, because the Adapter Script uses a JDBC connection to obtain the metadata when a schema is created or refreshed. For the internally used ```IMPORT FROM EXA``` statement, the address from ```EXA_CONNECTION_STRING``` and the username and password from the connection will be used.
 ```sql
+CREATE CONNECTION exasol_conn TO 'jdbc:exa:exasol-host:1234' USER 'user' IDENTIFIED BY 'pwd';
+
 CREATE VIRTUAL SCHEMA virtual_exasol USING adapter.jdbc_adapter WITH
   SQL_DIALECT     = 'EXASOL'
   CONNECTION_NAME = 'EXASOL_CONN'
