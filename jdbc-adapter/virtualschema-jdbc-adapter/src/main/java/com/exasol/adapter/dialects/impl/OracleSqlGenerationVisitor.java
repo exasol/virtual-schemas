@@ -144,7 +144,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     public String visit(SqlSelectList selectList) throws AdapterException {
         if (selectList.isRequestAnyColumn()) {
             // The system requested any column
-            return "true";
+            return "1";
         }
         List<String> selectListElements = new ArrayList<>();
         if (selectList.isSelectStar()) {
