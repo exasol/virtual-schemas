@@ -111,7 +111,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                 builder.append("SELECT ");
                 if (select.getSelectList().isRequestAnyColumn()) {
                     // The system requested any column
-                    return "true";
+                    return "1";
                 } else if (select.getSelectList().isSelectStar()) {
                     builder.append(Joiner.on(", ").join(buildAliases(select.getFromClause().getMetadata().getColumns().size())));
                 } else {
