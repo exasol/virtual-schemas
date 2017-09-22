@@ -115,7 +115,7 @@ Parameter                   | Value
 **IMPORT_FROM_EXA**         | Only relevant if your data source is EXASOL. Either 'TRUE' or 'FALSE' (default). If true, IMPORT FROM EXA will be used for the pushdown instead of IMPORT FROM JDBC. You have to define EXA_CONNECTION_STRING if this property is true.
 **EXA_CONNECTION_STRING**   | The connection string used for IMPORT FROM EXA in the format 'hostname:port'.
 **IS_LOCAL**                | Only relevant if your data source is the same EXASOL database where you create the virtual schema. Either 'TRUE' or 'FALSE' (default). If true, you are connecting to the local EXASOL database (e.g. for testing purposes). In this case, the adapter can avoid the IMPORT FROM JDBC overhead.
-
+**EXCEPTION_CONFIGURATION** | Activates or deactivates different exception handling. Supported values: 'IGNORE_INVALID_VIEWS', 'NONE' (default). Currently this property only affects the Teradata dialect.
 
 
 ## Debugging

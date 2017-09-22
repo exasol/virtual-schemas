@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects;
 
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
+import com.exasol.adapter.jdbc.JdbcAdapterProperties;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
@@ -285,4 +286,9 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     public SqlDialectContext getContext() {
         return context;
     }
+
+    public void handleException(SQLException exception,
+                                JdbcAdapterProperties.ExceptionConfigurationValue exceptionConfig)  throws SQLException {
+        throw exception;
+    };
 }
