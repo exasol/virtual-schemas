@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects;
 
 import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.jdbc.JdbcAdapterProperties;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
@@ -266,4 +267,13 @@ public interface SqlDialect {
      * @return the SqlGenerationVisitor to be used for this dialect
      */
     SqlGenerationVisitor getSqlGenerationVisitor(SqlGenerationContext context);
+
+    /**
+     * Allows dialect specific handling of different exceptions.
+     * @param exception the catched exception
+     * @param exceptionMode exception mode of the adapter
+     * @throws SQLException
+     */
+    void handleException(SQLException exception,
+                                JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException;
 }

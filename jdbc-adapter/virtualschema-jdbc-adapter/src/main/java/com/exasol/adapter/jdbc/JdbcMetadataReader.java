@@ -25,7 +25,8 @@ public class JdbcMetadataReader {
                                                     String schema,
                                                     List<String> tableFilter,
                                                     SqlDialects dialects,
-                                                    String dialectName) throws SQLException, AdapterException {
+                                                    String dialectName,
+                                                    JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException, AdapterException {
         assert (catalog != null);
         assert (schema != null);
         try {
@@ -55,7 +56,7 @@ public class JdbcMetadataReader {
 
             schema = findSchema(schema, dbMeta, dialect);
 
-            List<TableMetadata> tables = findTables(catalog, schema, tableFilter, dbMeta, dialect);
+            List<TableMetadata> tables = findTables(catalog, schema, tableFilter, dbMeta, dialect, exceptionMode);
 
             conn.close();
             return new SchemaMetadata(SchemaAdapterNotes.serialize(schemaAdapterNotes), tables);
@@ -234,7 +235,10 @@ public class JdbcMetadataReader {
         }
     }
 
-    private static List<TableMetadata> findTables(String catalog, String schema, List<String> tableFilter, DatabaseMetaData dbMeta, SqlDialect dialect) throws SQLException {
+    private static List<TableMetadata> findTables(String catalog, String schema, List<String> tableFilter,
+                                                  DatabaseMetaData dbMeta, SqlDialect dialect,
+                                                  JdbcAdapterProperties.ExceptionHandlingMode exceptionMode)
+            throws SQLException {
         List<TableMetadata> tables = new ArrayList<>();
         
         String[] supportedTableTypes = {"TABLE", "VIEW", "SYSTEM TABLE"};
@@ -273,8 +277,11 @@ public class JdbcMetadataReader {
                         continue;
                     }
                 }
-                List<ColumnMetadata> columns = readColumns(dbMeta, catalog, schema, table.getOriginalTableName(), dialect);
-                tables.add(new TableMetadata(table.getTableName(), "", columns, table.getTableComment()));
+                List<ColumnMetadata> columns = readColumns(dbMeta, catalog, schema, table.getOriginalTableName(),
+                        dialect, exceptionMode);
+                if (columns != null) {
+                    tables.add(new TableMetadata(table.getTableName(), "", columns, table.getTableComment()));
+                }
             } catch (Exception ex) {
                 throw new RuntimeException("Exception for table " + table.getOriginalTableName(), ex);
             }
@@ -287,14 +294,23 @@ public class JdbcMetadataReader {
                 && dialect.getQuotedIdentifierHandling() != SqlDialect.IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
     }
 
-    private static List<ColumnMetadata> readColumns(DatabaseMetaData dbMeta, String catalog, String schema, String table, SqlDialect dialect) throws SQLException {
-        ResultSet cols = dbMeta.getColumns(catalog, schema, table, null);
+    private static List<ColumnMetadata> readColumns(DatabaseMetaData dbMeta, String catalog, String schema,
+                                                    String table, SqlDialect dialect,
+                                                    JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
         List<ColumnMetadata> columns = new ArrayList<>();
-        while (cols.next()) {
-            columns.add(dialect.mapColumn(cols));
+        try {
+            ResultSet cols = dbMeta.getColumns(catalog, schema, table, null);
+            while (cols.next()) {
+                columns.add(dialect.mapColumn(cols));
+            }
+            if (columns.isEmpty()) {
+                System.out.println("Warning: Found a table without columns: " + table);
+            }
+            cols.close();
+        } catch (SQLException exception) {
+            dialect.handleException(exception, exceptionMode);
+            return null;
         }
-        if (columns.isEmpty()) { System.out.println("Warning: Found a table without columns: " + table); }
-        cols.close();
         return columns;
     }
 }

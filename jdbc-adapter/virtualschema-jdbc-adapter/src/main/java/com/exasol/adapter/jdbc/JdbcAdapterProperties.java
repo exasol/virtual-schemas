@@ -31,7 +31,14 @@ public class JdbcAdapterProperties {
     static final String PROP_IMPORT_FROM_EXA = "IMPORT_FROM_EXA";
     static final String PROP_EXA_CONNECTION_STRING = "EXA_CONNECTION_STRING";
     static final String PROP_EXCLUDED_CAPABILITIES = "EXCLUDED_CAPABILITIES";
-    
+    static final String PROP_EXCEPTION_HANDLING = "EXCEPTION_HANDLING";
+
+    // Specifies different exception handling strategies
+    public enum ExceptionHandlingMode {
+        IGNORE_INVALID_VIEWS,
+        NONE
+    }
+
     private static String getProperty(Map<String, String> properties, String name, String defaultValue) {
         if (properties.containsKey(name)) {
             return properties.get(name);
@@ -103,6 +110,9 @@ public class JdbcAdapterProperties {
         if (properties.containsKey(PROP_DEBUG_ADDRESS)) {
             validateDebugOutputAddress(properties.get(PROP_DEBUG_ADDRESS));
         }
+        if (properties.containsKey(PROP_EXCEPTION_HANDLING)) {
+            validateExceptionHandling(properties.get(PROP_EXCEPTION_HANDLING));
+        }
     }
     
     private static void validateBooleanProperty(Map<String, String> properties, String property) throws AdapterException {
@@ -125,6 +135,18 @@ public class JdbcAdapterProperties {
             if (debugAddress.split(":").length != 2) {
                 throw new AdapterException(error);
             }
+        }
+    }
+
+    private static void validateExceptionHandling(String exceptionHandling) throws AdapterException {
+        if (!exceptionHandling.isEmpty()) {
+            for (ExceptionHandlingMode mode : ExceptionHandlingMode.values()) {
+                if (mode.name().equals(exceptionHandling)) {
+                    return;
+                }
+            }
+            String error = "You specified an invalid exception mode (" + exceptionHandling + ").";
+            throw new AdapterException(error);
         }
     }
 
@@ -190,6 +212,19 @@ public class JdbcAdapterProperties {
 
     public static String getExaConnectionString(Map<String, String> properties) {
         return getProperty(properties, PROP_EXA_CONNECTION_STRING, "");
+    }
+
+    public static ExceptionHandlingMode getExceptionHandlingMode(Map<String, String> properties) {
+        String propertyValue = getProperty(properties, PROP_EXCEPTION_HANDLING, "");
+        if (propertyValue.isEmpty()) {
+            return ExceptionHandlingMode.NONE;
+        }
+        for (ExceptionHandlingMode mode : ExceptionHandlingMode.values()) {
+            if (mode.name().equals(propertyValue)) {
+                return mode;
+            }
+        }
+        return ExceptionHandlingMode.NONE;
     }
 
     public static boolean isRefreshNeeded(Map<String, String> newProperties) {

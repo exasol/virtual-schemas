@@ -115,7 +115,8 @@ public class JdbcAdapter {
                 schema,
                 tables,
                 supportedDialects,
-                JdbcAdapterProperties.getSqlDialectName(meta.getProperties(), supportedDialects));
+                JdbcAdapterProperties.getSqlDialectName(meta.getProperties(), supportedDialects),
+                JdbcAdapterProperties.getExceptionHandlingMode(meta.getProperties()));
     }
     
     private static String handleRefresh(RefreshRequest request, ExaMetadata meta) throws SQLException, AdapterException {
@@ -146,7 +147,8 @@ public class JdbcAdapter {
                     JdbcAdapterProperties.getSchema(newSchemaMeta),
                     tableFilter,
                     supportedDialects,
-                    JdbcAdapterProperties.getSqlDialectName(newSchemaMeta, supportedDialects));
+                    JdbcAdapterProperties.getSqlDialectName(newSchemaMeta, supportedDialects),
+                    JdbcAdapterProperties.getExceptionHandlingMode(newSchemaMeta));
             return ResponseJsonSerializer.makeSetPropertiesResponse(remoteMeta);
         }
         return ResponseJsonSerializer.makeSetPropertiesResponse(null);

@@ -330,7 +330,9 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         List<String> tables = new ArrayList<>(Arrays.asList(tableNames));
         SqlDialects dialects = new SqlDialects(ImmutableList.of(ExasolSqlDialect.NAME));
         SchemaMetadata meta = JdbcMetadataReader.readRemoteMetadata("jdbc:exa:" + getConfig().getExasolAddress(),
-                getConfig().getExasolUser(), getConfig().getExasolPassword(), "EXA_DB", "JDBC_ADAPTER_TEST_SCHEMA", tables, dialects, ExasolSqlDialect.NAME);
+                getConfig().getExasolUser(), getConfig().getExasolPassword(),
+                "EXA_DB", "JDBC_ADAPTER_TEST_SCHEMA", tables, dialects, ExasolSqlDialect.NAME,
+                getConfig().getExceptionHandlingMode());
         if (getConfig().isDebugOn()) {
             System.out.println("Meta: " + SchemaMetadataSerializer.serialize(meta).build().toString());
         }
