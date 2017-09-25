@@ -26,7 +26,7 @@ public class JdbcMetadataReader {
                                                     List<String> tableFilter,
                                                     SqlDialects dialects,
                                                     String dialectName,
-                                                    JdbcAdapterProperties.ExceptionConfigurationValue exceptionConfig) throws SQLException, AdapterException {
+                                                    JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException, AdapterException {
         assert (catalog != null);
         assert (schema != null);
         try {
@@ -56,7 +56,7 @@ public class JdbcMetadataReader {
 
             schema = findSchema(schema, dbMeta, dialect);
 
-            List<TableMetadata> tables = findTables(catalog, schema, tableFilter, dbMeta, dialect, exceptionConfig);
+            List<TableMetadata> tables = findTables(catalog, schema, tableFilter, dbMeta, dialect, exceptionMode);
 
             conn.close();
             return new SchemaMetadata(SchemaAdapterNotes.serialize(schemaAdapterNotes), tables);
@@ -237,7 +237,7 @@ public class JdbcMetadataReader {
 
     private static List<TableMetadata> findTables(String catalog, String schema, List<String> tableFilter,
                                                   DatabaseMetaData dbMeta, SqlDialect dialect,
-                                                  JdbcAdapterProperties.ExceptionConfigurationValue exceptionConfig)
+                                                  JdbcAdapterProperties.ExceptionHandlingMode exceptionMode)
             throws SQLException {
         List<TableMetadata> tables = new ArrayList<>();
         
@@ -278,7 +278,7 @@ public class JdbcMetadataReader {
                     }
                 }
                 List<ColumnMetadata> columns = readColumns(dbMeta, catalog, schema, table.getOriginalTableName(),
-                        dialect, exceptionConfig);
+                        dialect, exceptionMode);
                 if (columns != null) {
                     tables.add(new TableMetadata(table.getTableName(), "", columns, table.getTableComment()));
                 }
@@ -296,7 +296,7 @@ public class JdbcMetadataReader {
 
     private static List<ColumnMetadata> readColumns(DatabaseMetaData dbMeta, String catalog, String schema,
                                                     String table, SqlDialect dialect,
-                                                    JdbcAdapterProperties.ExceptionConfigurationValue exceptionConfig) throws SQLException {
+                                                    JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
         List<ColumnMetadata> columns = new ArrayList<>();
         try {
             ResultSet cols = dbMeta.getColumns(catalog, schema, table, null);
@@ -308,7 +308,7 @@ public class JdbcMetadataReader {
             }
             cols.close();
         } catch (SQLException exception) {
-            dialect.handleException(exception, exceptionConfig);
+            dialect.handleException(exception, exceptionMode);
             return null;
         }
         return columns;

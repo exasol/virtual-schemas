@@ -29,8 +29,8 @@ public class IntegrationTestConfig {
         }
     }
 
-    public JdbcAdapterProperties.ExceptionConfigurationValue getExceptionConfiguration() {
-        return JdbcAdapterProperties.ExceptionConfigurationValue.NONE;
+    public JdbcAdapterProperties.ExceptionHandlingMode getExceptionHandlingMode() {
+        return JdbcAdapterProperties.ExceptionHandlingMode.NONE;
     }
 
     public String getJdbcAdapterPath() {

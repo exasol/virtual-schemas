@@ -271,9 +271,9 @@ public interface SqlDialect {
     /**
      * Allows dialect specific handling of different exceptions.
      * @param exception the catched exception
-     * @param exceptionConfig exception configuration of the adapter
+     * @param exceptionMode exception mode of the adapter
      * @throws SQLException
      */
     void handleException(SQLException exception,
-                                JdbcAdapterProperties.ExceptionConfigurationValue exceptionConfig) throws SQLException;
+                                JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException;
 }

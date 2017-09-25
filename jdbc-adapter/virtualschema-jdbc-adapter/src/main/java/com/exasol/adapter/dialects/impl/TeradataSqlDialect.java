@@ -1,6 +1,5 @@
 package com.exasol.adapter.dialects.impl;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
@@ -312,8 +311,8 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
 	}
 
 	@Override
-    public void handleException(SQLException exception, JdbcAdapterProperties.ExceptionConfigurationValue exceptionConfig) throws SQLException {
-	    if (exceptionConfig == JdbcAdapterProperties.ExceptionConfigurationValue.IGNORE_INVALID_VIEWS) {
+    public void handleException(SQLException exception, JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
+	    if (exceptionMode == JdbcAdapterProperties.ExceptionHandlingMode.IGNORE_INVALID_VIEWS) {
 	        if (exception.getMessage().contains("Teradata Database") && exception.getMessage().contains("Error 3807")) {
 	            return;
             }

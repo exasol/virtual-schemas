@@ -288,7 +288,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     }
 
     public void handleException(SQLException exception,
-                                JdbcAdapterProperties.ExceptionConfigurationValue exceptionConfig)  throws SQLException {
+                                JdbcAdapterProperties.ExceptionHandlingMode exceptionMode)  throws SQLException {
         throw exception;
     };
 }
