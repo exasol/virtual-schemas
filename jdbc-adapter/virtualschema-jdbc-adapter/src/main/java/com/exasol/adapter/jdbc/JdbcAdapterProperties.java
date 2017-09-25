@@ -139,7 +139,7 @@ public class JdbcAdapterProperties {
     }
 
     private static void validateExceptionHandling(String exceptionHandling) throws AdapterException {
-        if (!exceptionHandling.isEmpty()) {
+        if (!(exceptionHandling == null || exceptionHandling.isEmpty())) {
             for (ExceptionHandlingMode mode : ExceptionHandlingMode.values()) {
                 if (mode.name().equals(exceptionHandling)) {
                     return;
@@ -216,7 +216,7 @@ public class JdbcAdapterProperties {
 
     public static ExceptionHandlingMode getExceptionHandlingMode(Map<String, String> properties) {
         String propertyValue = getProperty(properties, PROP_EXCEPTION_HANDLING, "");
-        if (propertyValue.isEmpty()) {
+        if (propertyValue == null || propertyValue.isEmpty()) {
             return ExceptionHandlingMode.NONE;
         }
         for (ExceptionHandlingMode mode : ExceptionHandlingMode.values()) {

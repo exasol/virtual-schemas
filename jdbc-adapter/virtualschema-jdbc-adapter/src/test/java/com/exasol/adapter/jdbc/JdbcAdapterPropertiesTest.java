@@ -207,4 +207,36 @@ public class JdbcAdapterPropertiesTest {
         assertEquals(expectedChangedProperties, JdbcAdapterProperties.getNewProperties(oldSchemaProperties, changedProperties));
     }
 
+    @Test
+    public void testNullInExceptionHandling() throws AdapterException {
+        Map<String, String> properties = getMinimumMandatory();
+        properties.put(JdbcAdapterProperties.PROP_EXCEPTION_HANDLING, null);
+        assertEquals(JdbcAdapterProperties.ExceptionHandlingMode.NONE, JdbcAdapterProperties.getExceptionHandlingMode(properties));
+        JdbcAdapterProperties.checkPropertyConsistency(properties, JdbcAdapter.supportedDialects);
+    }
+
+    @Test
+    public void testEmptyExceptionHandling() throws AdapterException {
+        Map<String, String> properties = getMinimumMandatory();
+        properties.put(JdbcAdapterProperties.PROP_EXCEPTION_HANDLING, "");
+        assertEquals(JdbcAdapterProperties.ExceptionHandlingMode.NONE, JdbcAdapterProperties.getExceptionHandlingMode(properties));
+        JdbcAdapterProperties.checkPropertyConsistency(properties, JdbcAdapter.supportedDialects);
+    }
+
+    @Test
+    public void testInvalidExceptionHandling() throws AdapterException {
+        Map<String, String> properties = getMinimumMandatory();
+        properties.put(JdbcAdapterProperties.PROP_EXCEPTION_HANDLING, "IGNORE_ALL");
+        thrown.expect(AdapterException.class);
+        thrown.expectMessage("You specified an invalid exception mode (IGNORE_ALL)");
+        JdbcAdapterProperties.checkPropertyConsistency(properties, JdbcAdapter.supportedDialects);
+    }
+
+    @Test
+    public void testNoneAsExceptionValue() throws AdapterException {
+        Map<String, String> properties = getMinimumMandatory();
+        properties.put(JdbcAdapterProperties.PROP_EXCEPTION_HANDLING, "NONE");
+        assertEquals(JdbcAdapterProperties.ExceptionHandlingMode.NONE, JdbcAdapterProperties.getExceptionHandlingMode(properties));
+        JdbcAdapterProperties.checkPropertyConsistency(properties, JdbcAdapter.supportedDialects);
+    }
 }
