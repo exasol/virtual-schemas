@@ -5,7 +5,7 @@ The purpose of this page is to provide detailed instructions for each of the sup
 * How does the **CREATE VIRTUAL SCHEMA** statement look like, i.e. which parameters are required.
 * **Data source specific notes**, like authentication with Kerberos, supported capabilities or things to consider regarding the data type mapping.
 
-As an entry point we recommend to follow the [step-by-step deployment guide](doc/deploy-adapter.md) which will link to this page whenever needed.
+As an entry point we recommend to follow the [step-by-step deployment guide](deploy-adapter.md) which will link to this page whenever needed.
 
 ## Table of Contents
 
