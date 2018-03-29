@@ -120,7 +120,7 @@ Request to set properties. The Adapter can decide whether he needs to send back 
     },
     "properties": {
         "JDBC_CONNECTION_STRING": "new-jdbc-connection-string",
-        "NEW_PROPERTY": "value of a not yet existing property"
+        "NEW_PROPERTY": "value of a not yet existing property",
         "DELETED_PROPERTY": null
     }
 }
@@ -216,12 +216,13 @@ Request the list of capabilities supported by the Adapter. Based on these capabi
 
 The set of capabilities in the example above would be sufficient to pushdown all aspects of the following query:
 ```sql
-SELECT user_id, count(url) FROM VS.clicks
- WHERE user_id>1
- GROUP BY user_id
- HAVING count(url)>1
- ORDER BY user_id
- LIMIT 10;
+SELECT user_id, COUNT(url)
+FROM   vs.clicks
+WHERE  user_id>1
+GROUP  BY user_id
+HAVING count(url)>1
+ORDER  BY user_id
+LIMIT  10;
 ```
 
 The whole set of capabilities is a lot longer. The current list of supported Capabilities can be found in the sources of the JDBC Adapter:
@@ -240,12 +241,13 @@ Contains an abstract specification of what to be pushed down, and requests an pu
 
 Running the following query
 ```sql
-SELECT user_id, count(url) FROM VS.clicks
- WHERE user_id>1
- GROUP BY user_id
- HAVING count(url)>1
- ORDER BY user_id
- LIMIT 10;
+SELECT user_id, COUNT(url)
+FROM   vs.clicks
+WHERE  user_id>1
+GROUP  BY user_id
+HAVING count(url)>1
+ORDER  BY user_id
+LIMIT  10;
 ```
 will produce the following Request, assuming that the Adapter has all required capabilities.
 
@@ -425,7 +427,7 @@ Following the example above, a valid result could look like this:
 Notes
 * ```sql```: The pushdown SQL statement. It must be either an ```SELECT``` or ```IMPORT``` statement.
 
-## Embedded Commonly Used Json Elements
+## Embedded Commonly Used JSON Elements
 
 The following Json objects can be embedded in a request or response. They have a fixed structure.
 

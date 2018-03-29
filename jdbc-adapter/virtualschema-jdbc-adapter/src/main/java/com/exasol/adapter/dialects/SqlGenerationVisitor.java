@@ -436,7 +436,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
 
     @Override
     public String visit(SqlPredicateNotEqual predicate) throws AdapterException {
-        return predicate.getLeft().accept(this) + " != "
+        return predicate.getLeft().accept(this) + " <> "
                 + predicate.getRight().accept(this);
     }
 
