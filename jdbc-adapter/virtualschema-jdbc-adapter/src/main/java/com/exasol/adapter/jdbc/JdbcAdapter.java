@@ -203,12 +203,13 @@ public class JdbcAdapter {
         String pushdownQuery = request.getSelect().accept(sqlGeneratorVisitor);
 
         boolean isLocal = JdbcAdapterProperties.isLocal(meta.getProperties());
+        boolean importFromExa = JdbcAdapterProperties.isImportFromExa(meta.getProperties());
         String credentialsAndConn = "";
         if (JdbcAdapterProperties.userSpecifiedConnection(meta.getProperties())) {
             credentialsAndConn = "AT " + JdbcAdapterProperties.getConnectionName(meta.getProperties());
         } else {
             ExaConnectionInformation connection = JdbcAdapterProperties.getConnectionInformation(meta.getProperties(), exaMeta);
-            if (JdbcAdapterProperties.isImportFromExa(meta.getProperties())) {
+            if (importFromExa) {
                 credentialsAndConn = "AT '" + JdbcAdapterProperties.getExaConnectionString(meta.getProperties()) + "'";
             } else {
                 credentialsAndConn = "AT '" + connection.getAddress() + "'";
@@ -217,9 +218,10 @@ public class JdbcAdapter {
             credentialsAndConn += " IDENTIFIED BY '" + connection.getPassword() + "'";
         }
         String importSql;
-        boolean importFromExa = JdbcAdapterProperties.isImportFromExa(meta.getProperties());
+
         if (isLocal) {
             importSql = pushdownQuery;
+
         } else if (importFromExa) {
 
             importSql =  "IMPORT FROM EXA " + credentialsAndConn
