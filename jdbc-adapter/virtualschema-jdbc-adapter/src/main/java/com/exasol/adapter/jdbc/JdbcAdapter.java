@@ -203,14 +203,15 @@ public class JdbcAdapter {
         String pushdownQuery = request.getSelect().accept(sqlGeneratorVisitor);
 
         boolean isLocal = JdbcAdapterProperties.isLocal(meta.getProperties());
-        boolean importFromExa = JdbcAdapterProperties.isImportFromExa(meta.getProperties());
         String credentialsAndConn = "";
         if (JdbcAdapterProperties.userSpecifiedConnection(meta.getProperties())) {
             credentialsAndConn = "AT " + JdbcAdapterProperties.getConnectionName(meta.getProperties());
         } else {
             ExaConnectionInformation connection = JdbcAdapterProperties.getConnectionInformation(meta.getProperties(), exaMeta);
-            if (importFromExa) {
+            if (JdbcAdapterProperties.isImportFromExa(meta.getProperties())) {
                 credentialsAndConn = "AT '" + JdbcAdapterProperties.getExaConnectionString(meta.getProperties()) + "'";
+            } else if (JdbcAdapterProperties.isImportFromOra(meta.getProperties())) {
+                credentialsAndConn = "AT '" + JdbcAdapterProperties.getOraConnectionString(meta.getProperties()) + "'";
             } else {
                 credentialsAndConn = "AT '" + connection.getAddress() + "'";
             }
@@ -222,12 +223,14 @@ public class JdbcAdapter {
         if (isLocal) {
             importSql = pushdownQuery;
 
-        } else if (importFromExa) {
-
+        } else if (JdbcAdapterProperties.isImportFromExa(meta.getProperties())) {
             importSql =  "IMPORT FROM EXA " + credentialsAndConn
                     + " STATEMENT '" + pushdownQuery.replace("'", "''") + "'";
+        } else if (JdbcAdapterProperties.isImportFromOra(meta.getProperties())) {
+            importSql =  "IMPORT FROM ORA " + credentialsAndConn
+                + " STATEMENT '" + pushdownQuery.replace("'", "''") + "'";
         } else {
-                String columnDescription = createColumnDescription(exaMeta, meta, pushdownQuery, dialect);
+            String columnDescription = createColumnDescription(exaMeta, meta, pushdownQuery, dialect);
                 if (columnDescription == null) {
                     importSql = "IMPORT" + " FROM JDBC " + credentialsAndConn
                             + " STATEMENT '" + pushdownQuery.replace("'", "''") + "'";

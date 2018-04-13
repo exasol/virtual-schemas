@@ -101,7 +101,7 @@ public class JdbcAdapterProperties {
 
     private static void checkImportPropertyConsistency(Map<String, String> properties, String propImportFromX, String propConnectionString) throws InvalidPropertyException {
         boolean isImport = getProperty(properties, propImportFromX, "").toUpperCase().equals("TRUE");
-        boolean connectionStringIsEmpty = getProperty(properties, PROP_EXA_CONNECTION_STRING, "").isEmpty();
+        boolean connectionStringIsEmpty = getProperty(properties, propConnectionString, "").isEmpty();
         if (isImport) {
             if (connectionStringIsEmpty) {
                 throw new InvalidPropertyException("You defined the property " + propImportFromX + ", please also define " + propConnectionString);
