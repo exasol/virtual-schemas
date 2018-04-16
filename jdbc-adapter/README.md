@@ -88,27 +88,32 @@ DROP VIRTUAL SCHEMA hive CASCADE;
 
 
 ### Adapter Properties
-The following properties can be used to control the behavior of the JDBC adapter. As you see above, these properties can be defined in ```CREATE VIRTUAL SCHEMA``` or changed afterwards via ```ALTER VIRTUAL SCHEMA SET```. Note that properties are always strings, like `TABLE_FILTER='T1,T2'`.
+The following properties can be used to control the behavior of the JDBC adapter. As you see above, these properties can be defined in `CREATE VIRTUAL SCHEMA` or changed afterwards via `ALTER VIRTUAL SCHEMA SET`. Note that properties are always strings, like `TABLE_FILTER='T1,T2'`.
 
-**Mandatory Properties:**
+**Mandatory Parameter:**
 
 Parameter                   | Value
 --------------------------- | -----------
 **SQL_DIALECT**             | Name of the SQL dialect: EXASOL, HIVE, IMPALA, ORACLE, TERADATA, REDSHIFT or GENERIC (case insensitive). If you try generating a virtual schema without specifying this property you will see all available dialects in the error message.
-**CONNECTION_NAME**         | Name of the connection created with ```CREATE CONNECTION``` which contains the jdbc connection string, the username and password. If you defined this property then it is not allowed to set CONNECTION_STRING, USERNAME and PASSWORD. We recommend using this property to ensure that the password will not be shown in the logfiles.
-**CONNECTION_STRING**       | The jdbc connection string. Only required if CONNECTION_NAME is not set.
 
-
-**Typical Optional Parameters:**
+**Mandatory Connection Specification:**
+Either specify `CONNECTION_NAME` OR provide `CONNECTION_STRING`, `USERNAME` and `PASSWORD`. 
 
 Parameter                   | Value
 --------------------------- | -----------
-**CATALOG_NAME**            | The name of the remote jdbc catalog. This is usually case-sensitive, depending on the dialect. It depends on the dialect whether you have to specify this or not. Usually you have to specify it if the data source JDBC driver supports the concepts of catalogs.
-**SCHEMA_NAME**             | The name of the remote jdbc schema. This is usually case-sensitive, depending on the dialect. It depends on the dialect whether you have to specify this or not. Usually you have to specify it if the data source JDBC driver supports the concepts of schemas.
-**USERNAME**                | Username for authentication. Can only be set if CONNECTION_NAME is not set.
-**PASSWORD**                | Password for authentication. Can only be set if CONNECTION_NAME is not set.
-**TABLE_FILTER**            | A comma-separated list of table names (case sensitive). Only these tables will be available as virtual tables, other tables are ignored. Use this if you don't want to have all remote tables in your virtual schema.
+**CONNECTION_NAME**         | Name of the connection created with `CREATE CONNECTION` which contains the JDBC connection string, the username and password. If you defined this property then it is not allowed to set CONNECTION_STRING, USERNAME and PASSWORD. We recommend using this property to ensure that the password will not be shown in the logfiles.
+**CONNECTION_STRING**       | The JDBC connection string. Only required if CONNECTION_NAME is not set.
+**USERNAME**                | Username for authentication. Only required if CONNECTION_NAME is not set.
+**PASSWORD**                | Password for authentication. Only required if CONNECTION_NAME is not set.
 
+
+**Common Optional Parameters:**
+
+Parameter                   | Value
+--------------------------- | -----------
+**CATALOG_NAME**            | The name of the remote JDBC catalog. This is usually case-sensitive, depending on the dialect. It depends on the dialect whether you have to specify this or not. Usually you have to specify it if the data source JDBC driver supports the concepts of catalogs.
+**SCHEMA_NAME**             | The name of the remote JDBC schema. This is usually case-sensitive, depending on the dialect. It depends on the dialect whether you have to specify this or not. Usually you have to specify it if the data source JDBC driver supports the concepts of schemas.
+**TABLE_FILTER**            | A comma-separated list of table names (case sensitive). Only these tables will be available as virtual tables, other tables are ignored. Use this if you don't want to have all remote tables in your virtual schema.
 
 **Advanced Optional Properties:**
 
@@ -116,6 +121,8 @@ Parameter                   | Value
 --------------------------- | -----------
 **IMPORT_FROM_EXA**         | Only relevant if your data source is EXASOL. Either 'TRUE' or 'FALSE' (default). If true, IMPORT FROM EXA will be used for the pushdown instead of IMPORT FROM JDBC. You have to define EXA_CONNECTION_STRING if this property is true.
 **EXA_CONNECTION_STRING**   | The connection string used for IMPORT FROM EXA in the format 'hostname:port'.
+**IMPORT_FROM_ORA**         | Similar to IMPORT_FROM_EXA but for an Oracle data source. If enabled, the more performant IMPORT FROM ORA operation will be used in place of IMPORT FROM JDBC. You also need to define ORA_CONNECTION_STRING if this property is set to 'TRUE'.
+**ORA_CONNECTION_STRING**   | The connection string (or "connect descripter") used for IMPORT FROM ORA in the format '(DESCRIPTION= [...])' as described [here](https://docs.oracle.com/cd/E11882_01/network.112/e41945/concepts.htm#NETAG253).
 **IS_LOCAL**                | Only relevant if your data source is the same Exasol database where you create the virtual schema. Either 'TRUE' or 'FALSE' (default). If true, you are connecting to the local Exasol database (e.g. for testing purposes). In this case, the adapter can avoid the IMPORT FROM JDBC overhead.
 **EXCEPTION_HANDLING**      | Activates or deactivates different exception handling modes. Supported values: 'IGNORE_INVALID_VIEWS', 'NONE' (default). Currently this property only affects the Teradata dialect.
 
@@ -137,7 +144,7 @@ You have to make sure that Exasol can connect to the host running the udf_debug.
 
 
 ## Frequent Issues
-* **Error: No suitable driver found for jdbc...**: The jdbc driver class was not discovered automatically. Either you have to add a META-INF/services/java.sql.Driver file with the classname to your jar, or you have to load the driver manually (see JdbcMetadataReader.readRemoteMetadata()).
+* **Error: No suitable driver found for JDBC...**: The JDBC driver class was not discovered automatically. Either you have to add a META-INF/services/java.sql.Driver file with the classname to your jar, or you have to load the driver manually (see JdbcMetadataReader.readRemoteMetadata()).
 See https://docs.oracle.com/javase/7/docs/api/java/sql/DriverManager.html
 
 
