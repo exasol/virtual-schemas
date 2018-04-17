@@ -31,7 +31,7 @@ public class JdbcAdapterProperties {
     static final String PROP_IMPORT_FROM_EXA = "IMPORT_FROM_EXA";
     static final String PROP_EXA_CONNECTION_STRING = "EXA_CONNECTION_STRING";
     static final String PROP_IMPORT_FROM_ORA = "IMPORT_FROM_ORA";
-    static final String PROP_ORA_CONNECTION_STRING = "ORA_CONNECTION_STRING";
+    static final String PROP_ORA_CONNECTION_NAME = "ORA_CONNECTION_NAME";
     static final String PROP_EXCLUDED_CAPABILITIES = "EXCLUDED_CAPABILITIES";
     static final String PROP_EXCEPTION_HANDLING = "EXCEPTION_HANDLING";
 
@@ -96,19 +96,19 @@ public class JdbcAdapterProperties {
         checkMandatoryProperties(properties, supportedDialects);
 
         checkImportPropertyConsistency(properties, PROP_IMPORT_FROM_EXA, PROP_EXA_CONNECTION_STRING);
-        checkImportPropertyConsistency(properties, PROP_IMPORT_FROM_ORA, PROP_ORA_CONNECTION_STRING);
+        checkImportPropertyConsistency(properties, PROP_IMPORT_FROM_ORA, PROP_ORA_CONNECTION_NAME);
     }
 
-    private static void checkImportPropertyConsistency(Map<String, String> properties, String propImportFromX, String propConnectionString) throws InvalidPropertyException {
+    private static void checkImportPropertyConsistency(Map<String, String> properties, String propImportFromX, String propConnection) throws InvalidPropertyException {
         boolean isImport = getProperty(properties, propImportFromX, "").toUpperCase().equals("TRUE");
-        boolean connectionStringIsEmpty = getProperty(properties, propConnectionString, "").isEmpty();
+        boolean connectionIsEmpty = getProperty(properties, propConnection, "").isEmpty();
         if (isImport) {
-            if (connectionStringIsEmpty) {
-                throw new InvalidPropertyException("You defined the property " + propImportFromX + ", please also define " + propConnectionString);
+            if (connectionIsEmpty) {
+                throw new InvalidPropertyException("You defined the property " + propImportFromX + ", please also define " + propConnection);
             }
         } else {
-            if (!connectionStringIsEmpty) {
-                throw new InvalidPropertyException("You defined the property " + propConnectionString + " without setting " + propImportFromX + " to 'TRUE'. This is not allowed");
+            if (!connectionIsEmpty) {
+                throw new InvalidPropertyException("You defined the property " + propConnection + " without setting " + propImportFromX + " to 'TRUE'. This is not allowed");
             }
         }
     }
@@ -190,8 +190,8 @@ public class JdbcAdapterProperties {
         return getProperty(properties, PROP_EXA_CONNECTION_STRING, "");
     }
 
-    public static String getOraConnectionString(Map<String, String> properties) {
-        return getProperty(properties, PROP_ORA_CONNECTION_STRING, "");
+    public static String getOraConnectionName(Map<String, String> properties) {
+        return getProperty(properties, PROP_ORA_CONNECTION_NAME, "");
     }
 
     public static List<String> getTableFilter(Map<String, String> properties) {

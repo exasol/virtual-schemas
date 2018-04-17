@@ -217,8 +217,8 @@ public class JdbcAdapter {
                     credentials,
                     pushdownQuery.replace("'", "''"));
         } else if (JdbcAdapterProperties.isImportFromOra(meta.getProperties())) {
-            sql = String.format("IMPORT FROM ORA AT '%s' %s STATEMENT '%s'",
-                    JdbcAdapterProperties.getOraConnectionString(meta.getProperties()),
+            sql = String.format("IMPORT FROM ORA AT %s %s STATEMENT '%s'",
+                    JdbcAdapterProperties.getOraConnectionName(meta.getProperties()),
                     credentials,
                     pushdownQuery.replace("'", "''"));
         } else {

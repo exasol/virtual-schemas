@@ -97,7 +97,7 @@ Parameter                   | Value
 **SQL_DIALECT**             | Name of the SQL dialect: EXASOL, HIVE, IMPALA, ORACLE, TERADATA, REDSHIFT or GENERIC (case insensitive). If you try generating a virtual schema without specifying this property you will see all available dialects in the error message.
 
 **Mandatory Connection Specification:**
-Either specify `CONNECTION_NAME` OR provide `CONNECTION_STRING`, `USERNAME` and `PASSWORD`. 
+Either specify `CONNECTION_NAME` OR provide `CONNECTION_STRING`,String `USERNAME` and `PASSWORD`. 
 
 Parameter                   | Value
 --------------------------- | -----------
@@ -121,8 +121,8 @@ Parameter                   | Value
 --------------------------- | -----------
 **IMPORT_FROM_EXA**         | Only relevant if your data source is EXASOL. Either 'TRUE' or 'FALSE' (default). If true, IMPORT FROM EXA will be used for the pushdown instead of IMPORT FROM JDBC. You have to define EXA_CONNECTION_STRING if this property is true.
 **EXA_CONNECTION_STRING**   | The connection string used for IMPORT FROM EXA in the format 'hostname:port'.
-**IMPORT_FROM_ORA**         | Similar to IMPORT_FROM_EXA but for an Oracle data source. If enabled, the more performant IMPORT FROM ORA operation will be used in place of IMPORT FROM JDBC. You also need to define ORA_CONNECTION_STRING if this property is set to 'TRUE'.
-**ORA_CONNECTION_STRING**   | The connection string (or "connect descripter") used for IMPORT FROM ORA in the format '(DESCRIPTION= [...])' as described [here](https://docs.oracle.com/cd/E11882_01/network.112/e41945/concepts.htm#NETAG253).
+**IMPORT_FROM_ORA**         | Similar to IMPORT_FROM_EXA but for an Oracle data source. If enabled, the more performant `IMPORT FROM ORA` operation will be used in place of `IMPORT FROM JDBC`. You also need to define ORA_CONNECTION_NAME if this property is set to 'TRUE'.
+**ORA_CONNECTION_NAME**     | Name of the connection to an Oracle database created with `CREATE CONNECTION`. Used by `IMPORT FROM ORA`.
 **IS_LOCAL**                | Only relevant if your data source is the same Exasol database where you create the virtual schema. Either 'TRUE' or 'FALSE' (default). If true, you are connecting to the local Exasol database (e.g. for testing purposes). In this case, the adapter can avoid the IMPORT FROM JDBC overhead.
 **EXCEPTION_HANDLING**      | Activates or deactivates different exception handling modes. Supported values: 'IGNORE_INVALID_VIEWS', 'NONE' (default). Currently this property only affects the Teradata dialect.
 
