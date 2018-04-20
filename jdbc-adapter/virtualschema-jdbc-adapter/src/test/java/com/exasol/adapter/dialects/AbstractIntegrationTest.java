@@ -60,13 +60,17 @@ public class AbstractIntegrationTest {
         return executeQuery(connection, query);
     }
 
+    public int executeUpdate(String query) throws SQLException {
+        checkConnection();
+        return connection.createStatement().executeUpdate(query);
+    }
     public static void createJDBCAdapter(Connection conn, List<String> jarIncludes) throws SQLException {
         Statement stmt = conn.createStatement();
         stmt.execute("CREATE SCHEMA IF NOT EXISTS ADAPTER");
         String sql = "CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS\n";
-        sql += "%scriptclass com.exasol.adapter.jdbc.JdbcAdapter;";
+        sql += "  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;\n";
         for (String includePath : jarIncludes) {
-            sql += " %jar " + includePath + ";\n";
+            sql += "  %jar " + includePath + ";\n";
         }
         //sql += " %jvmoption -Xms64m -Xmx64m;";
         sql += "/";
@@ -225,7 +229,7 @@ public class AbstractIntegrationTest {
     public static void matchSingleRowExplain(String query, String expectedExplain) throws SQLException {
         checkConnection();
         matchSingleRowExplain(connection, query, expectedExplain);
-    }
+   }
 
     private static List<Object> rowToObject(ResultSet resultSet) throws SQLException {
         int colCount = resultSet.getMetaData().getColumnCount();
