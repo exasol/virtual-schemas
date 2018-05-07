@@ -165,10 +165,11 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testFilterExpression() throws SQLException, ClassNotFoundException, FileNotFoundException {
-        String query = "SELECT C7 FROM " + EXA_TABLE_JDBC + " WHERE C7 > 12346";
-        ResultSet result = executeQuery(query);
-        matchNextRow(result, "12355.12345");
+    public void testFilterExpression() throws SQLException {
+        String query = "SELECT C7 FROM %s WHERE C7 > 12346";
+        for (ResultSet result : runQuery(query)) {
+            matchNextRow(result, "12355.12345");
+        }
         matchSingleRowExplain(query, "SELECT C7 FROM " + ORA_TABLE + " WHERE 12346 < C7");
     }
 
@@ -232,28 +233,31 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testOrderByExpression() throws SQLException, ClassNotFoundException, FileNotFoundException {
-        String query = "SELECT C7 FROM " + EXA_TABLE_JDBC + " ORDER BY ABS(C7) DESC NULLS FIRST";
-        ResultSet result = executeQuery(query);
-        matchNextRow(result, "12355.12345");
-        matchNextRow(result, "12345.12345");
+    public void testOrderByExpression() throws SQLException {
+        String query = "SELECT C7 FROM %s ORDER BY ABS(C7) DESC NULLS FIRST";
+        for (ResultSet result : runQuery(query)) {
+            matchNextRow(result, "12355.12345");
+            matchNextRow(result, "12345.12345");
+        }
         matchSingleRowExplain(query, "SELECT C7 FROM " + ORA_TABLE + " ORDER BY ABS(C7) DESC");
     }
 
     @Test
-    public void testLimit() throws SQLException, ClassNotFoundException, FileNotFoundException {
-        String query = "SELECT C7 FROM " + EXA_TABLE_JDBC + " ORDER BY C7 LIMIT 2";
-        ResultSet result = executeQuery(query);
-        matchNextRow(result, "12345.12345");
-        matchNextRow(result, "12355.12345");
+    public void testLimit() throws SQLException {
+        String query = "SELECT C7 FROM %s ORDER BY C7 LIMIT 2";
+        for (ResultSet result : runQuery(query)) {
+            matchNextRow(result, "12345.12345");
+            matchNextRow(result, "12355.12345");
+        }
         matchSingleRowExplain(query, "SELECT LIMIT_SUBSELECT.* FROM ( SELECT C7 FROM " + ORA_TABLE + " ORDER BY C7  ) LIMIT_SUBSELECT WHERE ROWNUM <= 2");
     }
 
     @Test
-    public void testLimitOffset() throws SQLException, ClassNotFoundException, FileNotFoundException {
-        String query = "SELECT C7 FROM " + EXA_TABLE_JDBC + " ORDER BY C7 LIMIT 1 OFFSET 1";
-        ResultSet result = executeQuery(query);
-        matchNextRow(result, "12355.12345");
+    public void testLimitOffset() throws SQLException {
+        String query = "SELECT C7 FROM %s ORDER BY C7 LIMIT 1 OFFSET 1";
+        for (ResultSet result : runQuery(query)) {
+            matchNextRow(result, "12355.12345");
+        }
         matchSingleRowExplain(query, "SELECT c0 FROM ( SELECT LIMIT_SUBSELECT.*, ROWNUM ROWNUM_SUB FROM ( SELECT C7 AS c0 FROM " + ORA_TABLE + " ORDER BY C7  ) LIMIT_SUBSELECT WHERE ROWNUM <= 2 ) WHERE ROWNUM_SUB > 1");
     }
 
