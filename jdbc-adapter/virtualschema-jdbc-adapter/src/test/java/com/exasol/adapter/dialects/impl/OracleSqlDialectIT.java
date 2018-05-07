@@ -42,7 +42,8 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
                 getConfig().getOracleJdbcConnectionString(),
                 IS_LOCAL,
                 getConfig().debugAddress(),
-                "ALL_TYPES");
+                "ALL_TYPES",
+                null);
     }
 
     @Test

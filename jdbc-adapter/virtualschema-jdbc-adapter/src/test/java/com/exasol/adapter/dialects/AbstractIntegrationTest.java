@@ -78,7 +78,7 @@ public class AbstractIntegrationTest {
         createJDBCAdapter(connection, jarIncludes);
     }
 
-    public static void createVirtualSchema(Connection conn, String virtualSchemaName, String dialect, String remoteCatalog, String remoteSchema, String connectionName, String user, String password, String adapter, String remoteConnectionString, boolean isLocal, String debugAddress, String tableFilter) throws SQLException {
+    public static void createVirtualSchema(Connection conn, String virtualSchemaName, String dialect, String remoteCatalog, String remoteSchema, String connectionName, String user, String password, String adapter, String remoteConnectionString, boolean isLocal, String debugAddress, String tableFilter, String suffix) throws SQLException {
         removeVirtualSchema(conn, virtualSchemaName);
         String sql = "CREATE VIRTUAL SCHEMA " + virtualSchemaName;
         sql += " USING " + adapter;
@@ -112,12 +112,15 @@ public class AbstractIntegrationTest {
         if (!tableFilter.isEmpty()) {
             sql += " TABLE_FILTER='" + tableFilter + "'";
         }
+        if (suffix != null) {
+            sql += " " + suffix;
+        }
         conn.createStatement().execute(sql);
     }
 
-    public static void createVirtualSchema(String virtualSchemaName, String dialect, String remoteCatalog, String remoteSchema, String connectionName, String user, String password, String adapter, String remoteConnectionString, boolean isLocal, String debugAddress, String tableFilter) throws SQLException {
+    public static void createVirtualSchema(String virtualSchemaName, String dialect, String remoteCatalog, String remoteSchema, String connectionName, String user, String password, String adapter, String remoteConnectionString, boolean isLocal, String debugAddress, String tableFilter, String suffix) throws SQLException {
         checkConnection();
-        createVirtualSchema(connection, virtualSchemaName, dialect, remoteCatalog, remoteSchema, connectionName, user, password, adapter, remoteConnectionString, isLocal, debugAddress, tableFilter);
+        createVirtualSchema(connection, virtualSchemaName, dialect, remoteCatalog, remoteSchema, connectionName, user, password, adapter, remoteConnectionString, isLocal, debugAddress, tableFilter, suffix);
     }
 
     public static void createConnection(Connection conn, String connectionName, String connectionString, String user, String password) throws SQLException {

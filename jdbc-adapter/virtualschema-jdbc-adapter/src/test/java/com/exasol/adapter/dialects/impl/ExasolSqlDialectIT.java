@@ -54,7 +54,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
                 "ADAPTER.JDBC_ADAPTER",
                 connectionString, IS_LOCAL,
                 getConfig().debugAddress(),
-                "");
+                "", null);
         createVirtualSchema(
                 VIRTUAL_SCHEMA_MIXED_CASE,
                 ExasolSqlDialect.NAME,
@@ -65,7 +65,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
                 "ADAPTER.JDBC_ADAPTER",
                 connectionString, IS_LOCAL,
                 getConfig().debugAddress(),
-                "");
+                "",null);
     }
 
     private static void createTestSchema() throws SQLException {
