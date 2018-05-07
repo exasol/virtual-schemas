@@ -8,12 +8,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class IntegrationTestConfig {
 
     Map config;
+
+    private static Pattern jdbcConnectionStringRegEx = Pattern.compile("[/@]+([^:/@]+)(:([0-9]+))?(/.*)?");
 
     public IntegrationTestConfig() throws FileNotFoundException {
         this(getMandatorySystemProperty("integrationtest.configfile"));
@@ -130,6 +136,30 @@ public class IntegrationTestConfig {
 
     public String getOracleJdbcConnectionString() {
         return getProperty("oracle", "connectionString");
+    }
+
+    public URI getOracleConnectionInformation() {
+        Matcher matcher = jdbcConnectionStringRegEx.matcher(getOracleJdbcConnectionString());
+        if (!matcher.find()) {
+            throw new RuntimeException("oracle.connectionString '" + getOracleJdbcConnectionString() + "' could not be parsed");
+        }
+
+        String host = matcher.group(1);
+        String portMatch = matcher.group(3);
+        int port = -1;
+        if (portMatch != null) {
+            port = Integer.parseInt(portMatch);
+        }
+        if (port == -1) {
+            port = 1521;
+        }
+        String path = matcher.group(4);
+
+        try {
+            return new URI(null, null, host, port, path, null, null);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("oracle.connectionString '" + getOracleJdbcConnectionString() + "' could not be parsed: " + e.getMessage());
+        }
     }
 
     public String getOracleUser() {

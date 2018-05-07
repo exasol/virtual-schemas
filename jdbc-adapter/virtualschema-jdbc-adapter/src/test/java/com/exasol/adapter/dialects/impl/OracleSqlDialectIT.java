@@ -8,6 +8,7 @@ import org.junit.Test;
 import javax.print.DocFlavor;
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,8 +50,10 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     public static void beforeMethod() throws FileNotFoundException, SQLException, ClassNotFoundException {
         Assume.assumeTrue(getConfig().oracleTestsRequested());
         setConnection(connectToExa());
-        // createOracleJDBCAdapter();
+
+        createOracleJDBCAdapter();
         createOracleConnection();
+
         // create JDBC virtual schema
         createVirtualSchema(
                 VIRTUAL_SCHEMA_JDBC,
@@ -110,11 +113,11 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
         return map;
     }
 
-    // TODO: make configurable
-    private static void createOracleConnection() throws SQLException {
-        createConnection("CONN_ORACLE",
-                "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST = 10.44.1.186)(PORT = 1521)))(CONNECT_DATA = (SERVICE_NAME = xe)))",
-                "system", "oracle");
+    private static void createOracleConnection() throws SQLException, FileNotFoundException {
+        URI conn = getConfig().getOracleConnectionInformation();
+        String connectionString = String.format("(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST = %s)(PORT = %d)))(CONNECT_DATA = (SERVICE_NAME = %s)))",
+                conn.getHost(), conn.getPort(), conn.getPath().substring(1));
+        createConnection("CONN_ORACLE", connectionString, getConfig().getOracleUser(), getConfig().getOraclePassword());
     }
 
     private List<ResultSet> runQuery(String query) throws SQLException {
