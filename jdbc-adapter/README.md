@@ -146,7 +146,9 @@ You have to make sure that Exasol can connect to the host running the udf_debug.
 ## Frequent Issues
 * **Error: No suitable driver found for JDBC...**: The JDBC driver class was not discovered automatically. Either you have to add a META-INF/services/java.sql.Driver file with the classname to your jar, or you have to load the driver manually (see JdbcMetadataReader.readRemoteMetadata()).
 See https://docs.oracle.com/javase/7/docs/api/java/sql/DriverManager.html
-
+* **Very slow execution of queries with SCRIPT_OUTPUT_ADDRESS**: If `SCRIPT_OUTPUT_ADDRESS` is set as explained in the [debugging section](#debugging), verify that a service is actually listening at that address. Otherwise, if Exasol can not establish a connection, repeated connection attempts can be the cause for slowdowns.
+* **Very slow execution of queries**: Depending on which JDK version Exasol uses to execute Java user-defined functions, a blocking randomness source may be used by default. Especially cryptographic operations do not complete until the operating system has collected a sufficient amount of entropy. This problem seems to occur most often when Exasol is run in an isolated environment, e.g., a virtual machine or a container. A solution is to use a non-blocking randomness source. 
+  To do so, log in to EXAOperation and shutdown the database. Append `-etlJdbcJavaEnv -Djava.security.egd=/dev/./urandom` to the "Extra Database Parameters" input field and power the database on again.
 
 ## Developing New Dialects
 
