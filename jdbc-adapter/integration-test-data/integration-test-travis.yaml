@@ -1,0 +1,14 @@
+# Configuration file for integration tests run by `run_integration_tests.sh`
+
+general:
+  debug:            false
+  debugAddress:     ''
+  bucketFsUrl:      http://127.0.0.1:6594/default
+  bucketFsPassword: write
+  jdbcAdapterPath:  /buckets/bfsdefault/default/virtualschema-jdbc-adapter-dist-1.0.2-SNAPSHOT.jar
+
+exasol:
+  runIntegrationTests: true
+  address:  127.0.0.1:8899
+  user:     sys
+  password: exasol
