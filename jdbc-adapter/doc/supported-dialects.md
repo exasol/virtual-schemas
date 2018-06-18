@@ -275,7 +275,16 @@ A how to has been included in the [setup sql file](../integration-test-data/db2-
 
 ## Oracle
 **Supported capabilities**:
-???
+The Oracle dialect does not support all capabilities. A complete list can be found in [OracleSqlDialect.getCapabilities()](../virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/impl/OracleSqlDialect.java).
+
+Oracle datatypes are mapped to their equivalents in Exasol. The following exceptions apply:
+- `NUMBER`, `NUMBER with precision > 36` and `LONG` are casted to `VARCHAR` to prevent a loss of precision.
+- `DATE` is casted to `TIMESTAMP`. This datatype is only supported for positive year values, i.e., years > 0001.
+- `TIMESTAMP WITH [LOCAL] TIME ZONE` is casted to `VARCHAR`. Exasol does not support timestamps with time zone information.
+- `INTERVAL` is casted to `VARCHAR`.
+- `CLOB`, `NCLOB` and `BLOB` are casted to `VARCHAR`.
+- `RAW` and `LONG RAW` are not supported.
+
 
 ### JDBC driver
 To setup a virtual schema that communicates with an Oracle database using JDBC, the JDBC driver, e.g., `ojdbc7-12.1.0.2.jar`, must first be installed in EXAoperation and deployed to BucketFS; see [this article](https://www.exasol.com/support/browse/SOL-179#WhichJDBCdriverforOracleshallIuse?) and [Deploying the Adapter Step By Step](deploy-adapter.md) for instructions.
