@@ -2,7 +2,7 @@
 
 The purpose of this page is to provide detailed instructions for each of the supported dialects on how to get started. Typical questions are
 * Which **JDBC driver** is used, which files have to be uploaded and included when creating the adapter script.
-* How does the **CREATE VIRTUAL SCHEMA** statement look like, i.e. which parameters are required.
+* How does the **CREATE VIRTUAL SCHEMA** statement look like, i.e. which properties are required.
 * **Data source specific notes**, like authentication with Kerberos, supported capabilities or things to consider regarding the data type mapping.
 
 As an entry point we recommend to follow the [step-by-step deployment guide](deploy-adapter.md) which will link to this page whenever needed.
@@ -306,7 +306,7 @@ CREATE JAVA ADAPTER SCRIPT adapter.jdbc_oracle AS
 ```
 
 **JDBC Connection**:
-Next, create a JDBC connection to your Oracle database. Adjust the parameters to match your environment.
+Next, create a JDBC connection to your Oracle database. Adjust the properties to match your environment.
 ```sql
 CREATE CONNECTION jdbc_oracle
   TO 'jdbc:oracle:thin:@//<host>:<port>/<service_name>'

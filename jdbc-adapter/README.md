@@ -90,16 +90,16 @@ DROP VIRTUAL SCHEMA hive CASCADE;
 ### Adapter Properties
 The following properties can be used to control the behavior of the JDBC adapter. As you see above, these properties can be defined in `CREATE VIRTUAL SCHEMA` or changed afterwards via `ALTER VIRTUAL SCHEMA SET`. Note that properties are always strings, like `TABLE_FILTER='T1,T2'`.
 
-**Mandatory Parameter:**
+**Mandatory Properties:**
 
-Parameter                   | Value
+Property                    | Value
 --------------------------- | -----------
 **SQL_DIALECT**             | Name of the SQL dialect: EXASOL, HIVE, IMPALA, ORACLE, TERADATA, REDSHIFT or GENERIC (case insensitive). If you try generating a virtual schema without specifying this property you will see all available dialects in the error message.
 
 **Mandatory Connection Specification:**
 Either specify `CONNECTION_NAME` OR provide `CONNECTION_STRING`,String `USERNAME` and `PASSWORD`.
 
-Parameter                   | Value
+Property                    | Value
 --------------------------- | -----------
 **CONNECTION_NAME**         | Name of the connection created with `CREATE CONNECTION` which contains the JDBC connection string, the username and password. If you defined this property then it is not allowed to set CONNECTION_STRING, USERNAME and PASSWORD. We recommend using this property to ensure that the password will not be shown in the logfiles.
 **CONNECTION_STRING**       | The JDBC connection string. Only required if CONNECTION_NAME is not set.
@@ -107,9 +107,9 @@ Parameter                   | Value
 **PASSWORD**                | Password for authentication. Only required if CONNECTION_NAME is not set.
 
 
-**Common Optional Parameters:**
+**Common Optional Properties:**
 
-Parameter                   | Value
+Property                    | Value
 --------------------------- | -----------
 **CATALOG_NAME**            | The name of the remote JDBC catalog. This is usually case-sensitive, depending on the dialect. It depends on the dialect whether you have to specify this or not. Usually you have to specify it if the data source JDBC driver supports the concepts of catalogs.
 **SCHEMA_NAME**             | The name of the remote JDBC schema. This is usually case-sensitive, depending on the dialect. It depends on the dialect whether you have to specify this or not. Usually you have to specify it if the data source JDBC driver supports the concepts of schemas.
@@ -117,7 +117,7 @@ Parameter                   | Value
 
 **Advanced Optional Properties:**
 
-Parameter                   | Value
+Property                    | Value
 --------------------------- | -----------
 **IMPORT_FROM_EXA**         | Only relevant if your data source is EXASOL. Either 'TRUE' or 'FALSE' (default). If true, IMPORT FROM EXA will be used for the pushdown instead of IMPORT FROM JDBC. You have to define EXA_CONNECTION_STRING if this property is true.
 **EXA_CONNECTION_STRING**   | The connection string used for IMPORT FROM EXA in the format 'hostname:port'.
