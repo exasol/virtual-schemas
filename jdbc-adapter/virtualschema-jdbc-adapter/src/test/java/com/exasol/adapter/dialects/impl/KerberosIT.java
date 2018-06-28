@@ -49,7 +49,7 @@ public class KerberosIT extends AbstractIntegrationTest {
                 "ADAPTER.JDBC_ADAPTER",
                 "", IS_LOCAL,
                 getConfig().debugAddress(),
-                "");
+                "", null);
         Statement stmt = getConnection().createStatement();
         ResultSet result = stmt.executeQuery("SELECT * FROM \"sample_07\"");
         result.next();
@@ -85,7 +85,7 @@ public class KerberosIT extends AbstractIntegrationTest {
                 adapterName,
                 "", false,
                 getConfig().debugAddress(),
-                "");
+                "", null);
         ResultSet result = stmt2.executeQuery("SELECT * FROM \"sample_07\"");
         result.next();
         assertEquals("00-0000", result.getString(1));

@@ -41,7 +41,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
                 getConfig().getHiveJdbcConnectionString(),
                 IS_LOCAL,
                 getConfig().debugAddress(),
-                "ALL_HIVE_DATA_TYPES");
+                "ALL_HIVE_DATA_TYPES",null);
     }
 
     @Test
