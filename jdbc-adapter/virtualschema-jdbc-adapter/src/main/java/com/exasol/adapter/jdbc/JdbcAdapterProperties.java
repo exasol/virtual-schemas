@@ -30,6 +30,8 @@ public class JdbcAdapterProperties {
     static final String PROP_SQL_DIALECT = "SQL_DIALECT";
     static final String PROP_IMPORT_FROM_EXA = "IMPORT_FROM_EXA";
     static final String PROP_EXA_CONNECTION_STRING = "EXA_CONNECTION_STRING";
+    static final String PROP_IMPORT_FROM_ORA = "IMPORT_FROM_ORA";
+    static final String PROP_ORA_CONNECTION_NAME = "ORA_CONNECTION_NAME";
     static final String PROP_EXCLUDED_CAPABILITIES = "EXCLUDED_CAPABILITIES";
     static final String PROP_EXCEPTION_HANDLING = "EXCEPTION_HANDLING";
 
@@ -92,14 +94,21 @@ public class JdbcAdapterProperties {
         validatePropertyValues(properties);
         
         checkMandatoryProperties(properties, supportedDialects);
-        
-        if (isImportFromExa(properties)) {
-            if (getExaConnectionString(properties).isEmpty()) {
-                throw new InvalidPropertyException("You defined the property " + PROP_IMPORT_FROM_EXA + ", please also define " + PROP_EXA_CONNECTION_STRING);
+
+        checkImportPropertyConsistency(properties, PROP_IMPORT_FROM_EXA, PROP_EXA_CONNECTION_STRING);
+        checkImportPropertyConsistency(properties, PROP_IMPORT_FROM_ORA, PROP_ORA_CONNECTION_NAME);
+    }
+
+    private static void checkImportPropertyConsistency(Map<String, String> properties, String propImportFromX, String propConnection) throws InvalidPropertyException {
+        boolean isImport = getProperty(properties, propImportFromX, "").toUpperCase().equals("TRUE");
+        boolean connectionIsEmpty = getProperty(properties, propConnection, "").isEmpty();
+        if (isImport) {
+            if (connectionIsEmpty) {
+                throw new InvalidPropertyException("You defined the property " + propImportFromX + ", please also define " + propConnection);
             }
         } else {
-            if (!getExaConnectionString(properties).isEmpty()) {
-                throw new InvalidPropertyException("You defined the property " + PROP_EXA_CONNECTION_STRING + " without setting " + PROP_IMPORT_FROM_EXA + " to 'TRUE'. This is not allowed");
+            if (!connectionIsEmpty) {
+                throw new InvalidPropertyException("You defined the property " + propConnection + " without setting " + propImportFromX + " to 'TRUE'. This is not allowed");
             }
         }
     }
@@ -107,6 +116,7 @@ public class JdbcAdapterProperties {
     private static void validatePropertyValues(Map<String, String> properties) throws AdapterException {
         validateBooleanProperty(properties, PROP_IS_LOCAL);
         validateBooleanProperty(properties, PROP_IMPORT_FROM_EXA);
+        validateBooleanProperty(properties, PROP_IMPORT_FROM_ORA);
         if (properties.containsKey(PROP_DEBUG_ADDRESS)) {
             validateDebugOutputAddress(properties.get(PROP_DEBUG_ADDRESS));
         }
@@ -172,6 +182,18 @@ public class JdbcAdapterProperties {
         return getProperty(properties, PROP_IMPORT_FROM_EXA, "").toUpperCase().equals("TRUE");
     }
 
+    public static boolean isImportFromOra(Map<String, String> properties) {
+        return getProperty(properties, PROP_IMPORT_FROM_ORA, "").toUpperCase().equals("TRUE");
+    }
+
+    public static String getExaConnectionString(Map<String, String> properties) {
+        return getProperty(properties, PROP_EXA_CONNECTION_STRING, "");
+    }
+
+    public static String getOraConnectionName(Map<String, String> properties) {
+        return getProperty(properties, PROP_ORA_CONNECTION_NAME, "");
+    }
+
     public static List<String> getTableFilter(Map<String, String> properties) {
         String tableNames = getProperty(properties, PROP_TABLES, "");
         if (!tableNames.isEmpty()) {
@@ -208,10 +230,6 @@ public class JdbcAdapterProperties {
             throw new InvalidPropertyException("SQL Dialect not supported: " + dialectName + " - all dialects: " + supportedDialects.getDialectsString());
         }
         return dialect;
-    }
-
-    public static String getExaConnectionString(Map<String, String> properties) {
-        return getProperty(properties, PROP_EXA_CONNECTION_STRING, "");
     }
 
     public static ExceptionHandlingMode getExceptionHandlingMode(Map<String, String> properties) {

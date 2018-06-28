@@ -42,7 +42,7 @@ public class DB2SqlDialectIT extends AbstractIntegrationTest {
                 getConfig().getDB2JdbcConnectionString(),
                 IS_LOCAL,
                 getConfig().debugAddress(),
-                "");
+                "",null);
     }
     
  
