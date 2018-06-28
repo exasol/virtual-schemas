@@ -21,7 +21,7 @@ cd virtual-schemas/jdbc-adapter/
 mvn clean -DskipTests package
 ```
 
-The resulting fat jar is stored in ```virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.0.1-SNAPSHOT.jar```.
+The resulting fat jar is stored in ```virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.0.1.jar```.
 
 ### 3. Upload Adapter Jar
 
@@ -32,8 +32,8 @@ Following steps are required to upload a file to a bucket:
 * Check if you have a bucket in the BucketFS. Simply click on the name of the BucketFS in EXAOperation and add a bucket there, e.g. ```bucket1```. Also make sure you know the write password. For simplicity we assume that the bucket is defined as a public bucket, i.e. it can be read by any script.
 * Now upload the file into this bucket, e.g. using curl (adapt the hostname, BucketFS port, bucket name and bucket write password).
 ```
-curl -X PUT -T virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.0.1-SNAPSHOT.jar \
- http://w:write-password@your.exasol.host.com:2580/bucket1/virtualschema-jdbc-adapter-dist-1.0.1-SNAPSHOT.jar
+curl -X PUT -T virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.0.1.jar \
+ http://w:write-password@your.exasol.host.com:2580/bucket1/virtualschema-jdbc-adapter-dist-1.0.1.jar
 ```
 
 See chapter 3.6.4. "The synchronous cluster file system BucketFS" in the EXASolution User Manual for more details about BucketFS.
@@ -61,7 +61,7 @@ CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
 
   // This will add the adapter jar to the classpath so that it can be used inside the adapter script
   // Replace the names of the bucketfs and the bucket with the ones you used.
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.0.1-SNAPSHOT.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.0.1.jar;
 
   // You have to add all files of the data source jdbc driver here (e.g. Hive JDBC driver files)
   %jar /buckets/your-bucket-fs/your-bucket/name-of-data-source-jdbc-driver.jar;
