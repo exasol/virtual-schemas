@@ -36,7 +36,7 @@ After uploading the adapter jar, the adapter script can be created as follows:
 CREATE SCHEMA adapter;
 CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
   %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.0.1.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.0.2-SNAPSHOT.jar;
 /
 ```
 **Create a virtual schema:**
@@ -85,7 +85,7 @@ CREATE SCHEMA adapter;
 CREATE  JAVA  ADAPTER SCRIPT jdbc_adapter AS
   %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
 
-  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.0.1.jar;
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.0.2-SNAPSHOT.jar;
 
   %jar /buckets/bucketfs1/bucket1/hive_metastore.jar;
   %jar /buckets/bucketfs1/bucket1/hive_service.jar;
@@ -176,7 +176,7 @@ CREATE SCHEMA adapter;
 CREATE  JAVA  ADAPTER SCRIPT jdbc_adapter AS
   %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
 
-  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.0.1.jar;
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.0.2-SNAPSHOT.jar;
 
   %jar /buckets/bucketfs1/bucket1/hive_metastore.jar;
   %jar /buckets/bucketfs1/bucket1/hive_service.jar;
@@ -246,7 +246,7 @@ CREATE or replace JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
 
   // This will add the adapter jar to the classpath so that it can be used inside the adapter script
   // Replace the names of the bucketfs and the bucket with the ones you used.
-  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.0.1.jar;
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.0.2-SNAPSHOT.jar;
 
   // DB2 Driver files
   %jar /buckets/bucketfs1/bucket1/db2jcc4.jar;
@@ -298,7 +298,7 @@ CREATE JAVA ADAPTER SCRIPT adapter.jdbc_oracle AS
 
   // You need to replace `your-bucket-fs` and `your-bucket` to match the actual location
   // of the adapter jar.
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.0.1.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.0.2-SNAPSHOT.jar;
 
   // Add the oracle jdbc driver to the classpath
   %jar /buckets/bucketfs1/bucket1/ojdbc7-12.1.0.2.jar
@@ -389,7 +389,7 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter
 
   // This will add the adapter jar to the classpath so that it can be used inside the adapter script
   // Replace the names of the bucketfs and the bucket with the ones you used.
-  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.0.1.jar;
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.0.2-SNAPSHOT.jar;
 									 
   // You have to add all files of the data source jdbc driver here (e.g. MySQL or Hive)
   %jar /buckets/bucketfs1/bucket1/terajdbc4.jar;
@@ -430,7 +430,7 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter
 
   // This will add the adapter jar to the classpath so that it can be used inside the adapter script
   // Replace the names of the bucketfs and the bucket with the ones you used.
-  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.0.1.jar;
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.0.2-SNAPSHOT.jar;
 									 
   // You have to add all files of the data source jdbc driver here (e.g. MySQL or Hive)
 
@@ -468,7 +468,7 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.sql_server_jdbc_adapter
 
   // This will add the adapter jar to the classpath so that it can be used inside the adapter script
   // Replace the names of the bucketfs and the bucket with the ones you used.
-  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.0.1.jar;
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.0.2-SNAPSHOT.jar;
 									 
   // You have to add all files of the data source jdbc driver here 
   %jar /buckets/bucketfs1/bucket1/jtds.jar;
@@ -501,7 +501,7 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter
 
   // This will add the adapter jar to the classpath so that it can be used inside the adapter script
   // Replace the names of the bucketfs and the bucket with the ones you used.
-  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.0.1.jar;
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.0.2-SNAPSHOT.jar;
 									 
   // You have to add all files of the data source jdbc driver here (e.g. MySQL or Hive)
   %jar /buckets/bucketfs1/bucket1/postgresql-42.0.0.jar;
