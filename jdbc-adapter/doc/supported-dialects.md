@@ -52,7 +52,7 @@ CREATE VIRTUAL SCHEMA virtual_exasol USING adapter.jdbc_adapter WITH
 
 **Use IMPORT FROM EXA instead of IMPORT FROM JDBC**
 
-EXASOL provides the faster and parallel ```IMPORT FROM EXA``` command for loading data from EXASOL. You can tell the adapter to use this command instead of ```IMPORT FROM JDBC``` by setting the ```IMPORT_FROM_EXA``` property. In this case you have to provide the additional ```EXA_CONNECTION_STRING``` which is the connection string used for the internally used ```IMPORT FROM EXA``` command (it also supports ranges like ```192.168.6.11..14:8563```). Please note, that the ```CONNECTION``` object must still have the jdbc connection string in ```AT```, because the Adapter Script uses a JDBC connection to obtain the metadata when a schema is created or refreshed. For the internally used ```IMPORT FROM EXA``` statement, the address from ```EXA_CONNECTION_STRING``` and the username and password from the connection will be used.
+EXASOL provides the faster and parallel `IMPORT FROM EXA` command for loading data from EXASOL. You can tell the adapter to use this command instead of `IMPORT FROM JDBC` by setting the `IMPORT_FROM_EXA` property. In this case you have to provide the additional `EXA_CONNECTION_STRING` which is the connection string used for the internally used `IMPORT FROM EXA` command (it also supports ranges like `192.168.6.11..14:8563`). Please note, that the `CONNECTION` object must still have the jdbc connection string in `AT`, because the Adapter Script uses a JDBC connection to obtain the metadata when a schema is created or refreshed. For the internally used `IMPORT FROM EXA` statement, the address from `EXA_CONNECTION_STRING` and the username and password from the connection will be used.
 ```sql
 CREATE CONNECTION exasol_conn TO 'jdbc:exa:exasol-host:1234' USER 'user' IDENTIFIED BY 'pwd';
 
@@ -72,14 +72,14 @@ The dialect was tested with the Cloudera Hive JDBC driver available on the [Clou
 When you unpack the JDBC driver archive you will see that there are two variants, JDBC 4.0 and 4.1. We tested with the JDBC 4.1 variant.
 
 You have to specify the following settings when adding the JDBC driver via EXAOperation:
-* Name: ```Hive```
-* Main: ```com.cloudera.hive.jdbc41.HS2Driver```
-* Prefix: ```jdbc:hive2:```
+* Name: `Hive`
+* Main: `com.cloudera.hive.jdbc41.HS2Driver`
+* Prefix: `jdbc:hive2:`
 
 Make sure you upload **all files** of the JDBC driver (over 10 at the time of writing) in EXAOperation **and** to the bucket.
 
 **Adapter script**:
-You have to add all files of the JDBC driver to the classpath using %jar as follows (filenames may vary):
+You have to add all files of the JDBC driver to the classpath using `%jar` as follows (filenames may vary):
 ```sql
 CREATE SCHEMA adapter;
 CREATE  JAVA  ADAPTER SCRIPT jdbc_adapter AS
@@ -112,21 +112,21 @@ CREATE VIRTUAL SCHEMA hive_default USING adapter.jdbc_adapter WITH
 
 ### Connecting To a Kerberos Secured Hadoop:
 
-Connecting to a Kerberos secured Impala or Hive service only differs in one aspect: You have to a ```CONNECTION``` object which contains all the relevant information for the Kerberos authentication. This section describes how Kerberos authentication works and how to create such a ```CONNECTION```.
+Connecting to a Kerberos secured Impala or Hive service only differs in one aspect: You have to a `CONNECTION` object which contains all the relevant information for the Kerberos authentication. This section describes how Kerberos authentication works and how to create such a `CONNECTION`.
 
 #### 0. Understand how it works (optional)
-Both the adapter script and the internally used ```IMPORT FROM JDBC``` statement support Kerberos authentication. They detect, that the connection is a Kerberos connection by a special prefix in the ```IDENTIFIED BY``` field. In such case, the authentication will happen using a Kerberos keytab and Kerberos config file (using the JAAS Java API).
+Both the adapter script and the internally used `IMPORT FROM JDBC` statement support Kerberos authentication. They detect, that the connection is a Kerberos connection by a special prefix in the `IDENTIFIED BY` field. In such case, the authentication will happen using a Kerberos keytab and Kerberos config file (using the JAAS Java API).
 
-The ```CONNECTION``` object stores all relevant information and files in its fields:
-* The ```TO``` field contains the JDBC connection string
-* The ```USER``` field contains the Kerberos principal
-* The ```IDENTIFIED BY``` field contains the Kerberos configuration file and keytab file (base64 encoded) along with an internal prefix ```ExaAuthType=Kerberos;``` to identify the CONNECTION as a Kerberos CONNECTION.
+The `CONNECTION` object stores all relevant information and files in its fields:
+* The `TO` field contains the JDBC connection string
+* The `USER` field contains the Kerberos principal
+* The `IDENTIFIED BY` field contains the Kerberos configuration file and keytab file (base64 encoded) along with an internal prefix `ExaAuthType=Kerberos;` to identify the `CONNECTION` as a Kerberos `CONNECTION`.
 
 #### 1. Generate the CREATE CONNECTION statement
-In order to simplify the creation of Kerberos CONNECTION objects, the [create_kerberos_conn.py](https://github.com/EXASOL/hadoop-etl-udfs/blob/master/tools/create_kerberos_conn.py) Python script has been provided. The script requires 5 arguments:
-* CONNECTION name (arbitrary name for the new CONNECTION)
+In order to simplify the creation of Kerberos `CONNECTION` objects, the [`create_kerberos_conn.py`](https://github.com/EXASOL/hadoop-etl-udfs/blob/master/tools/create_kerberos_conn.py) Python script has been provided. The script requires 5 arguments:
+* `CONNECTION` name (arbitrary name for the new `CONNECTION`)
 * Kerberos principal for Hadoop (i.e., Hadoop user)
-* Kerberos configuration file path (e.g., krb5.conf)
+* Kerberos configuration file path (e.g., `krb5.conf`)
 * Kerberos keytab file path, which contains keys for the Kerberos principal
 * JDBC connection string
 
@@ -141,7 +141,7 @@ CREATE CONNECTION krb_conn TO 'jdbc:hive2://hive-host.example.com:10000;AuthMech
 ```
 
 #### 2. Create the CONNECTION
-You have to execute the generated CREATE CONNECTION statement directly in EXASOL to actually create the Kerberos CONNECTION object. For more detailed information about the script, use the help option:
+You have to execute the generated `CREATE CONNECTION` statement directly in EXASOL to actually create the Kerberos `CONNECTION` object. For more detailed information about the script, use the help option:
 ```
 python tools/create_kerberos_conn.py -h
 ```
@@ -162,9 +162,9 @@ The Impala dialect is similar to the Hive dialect in most aspects. For this reas
 **JDBC driver:**
 
 You have to specify the following settings when adding the JDBC driver via EXAOperation:
-* Name: ```Hive```
-* Main: ```com.cloudera.impala.jdbc41.Driver```
-* Prefix: ```jdbc:impala:```
+* Name: `Hive`
+* Main: `com.cloudera.impala.jdbc41.Driver`
+* Prefix: `jdbc:impala:`
 
 Make sure you upload **all files** of the JDBC driver (over 10 at the time of writing) in EXAOperation and to the bucket.
 
@@ -207,11 +207,11 @@ Connecting to a Kerberos secured Impala works similar as for Hive and is describ
 
 ## DB2
 
-DB2 was tested with the IBM DB2 JCC Drivers that come with DB2 LUW V10.1 and V11. As these drivers didn't have any major changes in the past years any DB2 driver should work (back to V9.1). The driver comes with 2 different implementations db2jcc.jar and db2jcc4.jar. All tests were made with the db2jcc4.jar.
+DB2 was tested with the IBM DB2 JCC Drivers that come with DB2 LUW V10.1 and V11. As these drivers didn't have any major changes in the past years any DB2 driver should work (back to V9.1). The driver comes with 2 different implementations `db2jcc.jar` and `db2jcc4.jar`. All tests were made with the `db2jcc4.jar`.
 
 Additionally there are 2 files for the DB2 Driver.
-* db2jcc_license_cu.jar - License File for DB2 on Linux Unix and Windows
-* db2jcc_license_cisuz.jar - License File for DB2 on zOS (Mainframe)
+* `db2jcc_license_cu.jar` - License File for DB2 on Linux Unix and Windows
+* `db2jcc_license_cisuz.jar` - License File for DB2 on zOS (Mainframe)
 
 Make sure that you upload the necessary license file for the target platform you want to connect to. 
 
@@ -219,23 +219,23 @@ Make sure that you upload the necessary license file for the target platform you
 The db2 dialect handles some casts in regards of time data types and functions.
 
 Casting of Data Types
-* TIMESTAMP and TIMESTAMP(x) will be cast to VARCHAR to not lose precision.
-* VARCHAR and CHAR for bit data will be cast to a hex string with double the original size
-* TIME will be cast to VARCHAR(8)
-* XML will be cast to VARCHAR(DB2_MAX_LENGTH)
-* BLOB is not supported
+* `TIMESTAMP` and `TIMESTAMP(x)` will be cast to `VARCHAR` to not lose precision.
+* `VARCHAR` and `CHAR` for bit data will be cast to a hex string with double the original size
+* `TIME` will be cast to `VARCHAR(8)`
+* `XML` will be cast to `VARCHAR(DB2_MAX_LENGTH)`
+* `BLOB` is not supported
 
 Casting of Functions
-* LIMIT will replaced by FETCH FIRST x ROWS ONLY
-* OFFESET is currently not supported as only DB2 V11 support this nativly
-* ADD_DAYS, ADD_WEEKS ... will be replaced by COLUMN + DAYS, COLUMN + ....
+* `LIMIT` will replaced by `FETCH FIRST x ROWS ONLY`
+* `OFFSET` is currently not supported as only DB2 V11 support this nativly
+* `ADD_DAYS`, `ADD_WEEKS` ... will be replaced by `COLUMN + DAYS`, `COLUMN + ....`
 
 
 **JDBC driver:**
 You have to specify the following settings when adding the JDBC driver via EXAOperation:
-* Name: ```DB2```
-* Main: ```com.ibm.db2.jcc.DB2Driver```
-* Prefix: ```jdbc:db2:```
+* Name: `DB2`
+* Main: `com.ibm.db2.jcc.DB2Driver`
+* Prefix: `jdbc:db2:`
 
 **Adapter script**
 ```sql
@@ -268,7 +268,7 @@ create  virtual schema db2 using adapter.jdbc_adapter with
 ;
 ```
 
-```<schemaname>``` has to be replaced by the actual db2 schema you want to connect to.
+`<schemaname>` has to be replaced by the actual db2 schema you want to connect to.
 
 **Running the DB2 integration tests**
 A how to has been included in the [setup sql file](../integration-test-data/db2-testdata.sql)
@@ -335,7 +335,7 @@ Exasol provides the `IMPORT FROM ORA` command for loading data from Oracle. It i
 This behaviour is toggled by the Boolean `IMPORT_FROM_ORA` variable. Note that a JDBC connection to Oracle is still required to fetch metadata. In addition, a "direct" connection to the Oracle database is needed.
 
 **Deploy the Oracle Instant Client**:
-To be able to communicate with Oracle, you first need to supply Exasol with the Oracle Instant Client, which can be obtained [directly from Oracle](http://www.oracle.com/technetwork/database/database-technologies/instant-client/overview/index.html). Open EXAoperation, visit Software -> "Upload Oracle Instant Client" and select the downloaded package. The latest version of Oracle Instant Client we tested is "instantclient-basic-linux.x64-12.1.0.2.0".
+To be able to communicate with Oracle, you first need to supply Exasol with the Oracle Instant Client, which can be obtained [directly from Oracle](http://www.oracle.com/technetwork/database/database-technologies/instant-client/overview/index.html). Open EXAoperation, visit Software -> "Upload Oracle Instant Client" and select the downloaded package. The latest version of Oracle Instant Client we tested is `instantclient-basic-linux.x64-12.1.0.2.0`.
 
 **Create an Oracle Connection**:
 Having deployed the Oracle Instant Client, a connection to your Oracle database can be set up.
@@ -372,10 +372,10 @@ CREATE VIRTUAL SCHEMA virt_import_oracle USING adapter.jdbc_oracle WITH
 
 **JDBC driver:**
 You have to specify the following settings when adding the JDBC driver via EXAOperation:
-* Name: ```TERADATA```
-* Main: ```com.teradata.jdbc.TeraDriver```
-* Prefix: ```jdbc:teradata:```
-* Files: terajdbc4.jar, tdgssconfig.jar
+* Name: `TERADATA`
+* Main: `com.teradata.jdbc.TeraDriver`
+* Prefix: `jdbc:teradata:`
+* Files: `terajdbc4.jar`, `tdgssconfig.jar`
 
 Please also upload the jar files to a bucket for the adapter script.
 
@@ -413,10 +413,10 @@ WITH
 **JDBC driver:**
 
 You have to specify the following settings when adding the JDBC driver via EXAOperation:
-* Name: ```REDSHIFT```
-* Main: ```com.amazon.redshift.jdbc.Driver```
-* Prefix: ```jdbc:redshift:```
-* Files: RedshiftJDBC42-1.2.1.1001.jar
+* Name: `REDSHIFT`
+* Main: `com.amazon.redshift.jdbc.Driver`
+* Prefix: `jdbc:redshift:`
+* Files: `RedshiftJDBC42-1.2.1.1001.jar`
 
 Please also upload the driver jar into a bucket for the adapter script.
 
@@ -455,8 +455,8 @@ CREATE VIRTUAL SCHEMA redshift_tickit
 
 **JDBC driver:**
 The Sql Server Dialect was tested with the jdts 1.3.1 JDBC driver and Sql Server 2014.
-As the jdts driver is already preinstalled for the IMPORT command itself you only need
-to upload the jdts.jar to a bucket for the adapter script.
+As the jdts driver is already preinstalled for the `IMPORT` command itself you only need
+to upload the `jdts.jar` to a bucket for the adapter script.
 
 **Adapter script**
 ```sql
