@@ -26,16 +26,16 @@ There are the following request and response types:
 
 | Type                        | Called ...     |
 | :-------------------------- | :------------- |
-| **Create Virtual Schema**   | ... for each ```CREATE VIRTUAL SCHEMA ...``` statement |
-| **Refresh**                 | ... for each ```ALTER VIRTUAL SCHEMA ... REFRESH ...``` statement. |
-| **Set Properties**          | ... for each ```ALTER VIRTUAL SCHEMA ... SET ...``` statement. |
-| **Drop Virtual Schema**     | ... for each ```DROP VIRTUAL SCHEMA ...``` statement. |
-| **Get Capabilities**        | ... whenever a virtual table is queried in a ```SELECT``` statement. |
-| **Pushdown**                | ... whenever a virtual table is queried in a ```SELECT``` statement. |
+| **Create Virtual Schema**   | ... for each `CREATE VIRTUAL SCHEMA ...` statement |
+| **Refresh**                 | ... for each `ALTER VIRTUAL SCHEMA ... REFRESH ...` statement. |
+| **Set Properties**          | ... for each `ALTER VIRTUAL SCHEMA ... SET ...` statement. |
+| **Drop Virtual Schema**     | ... for each `DROP VIRTUAL SCHEMA ...` statement. |
+| **Get Capabilities**        | ... whenever a virtual table is queried in a `SELECT` statement. |
+| **Pushdown**                | ... whenever a virtual table is queried in a `SELECT` statement. |
 
 We describe each of the types in the following sections.
 
-**Please note:** To keep the documentation concise we defined the elements which are commonly in separate sections below, e.g. ```schemaMetadataInfo``` and ```schemaMetadata```.
+**Please note:** To keep the documentation concise we defined the elements which are commonly in separate sections below, e.g. `schemaMetadataInfo` and `schemaMetadata`.
 
 ## Requests and Responses
 
@@ -68,7 +68,7 @@ The Adapter is allowed to throw an Exception if the user missed to provide manda
 ```
 
 Notes
-* ```schemaMetadata``` is mandatory. However, it is allowed to contain no tables.
+* `schemaMetadata` is mandatory. However, it is allowed to contain no tables.
 
 
 ### Refresh
@@ -88,7 +88,7 @@ Request to refresh the metadata for the whole Virtual Schema, or for specified t
 ```
 
 Notes
-* ```requestedTables``` is optional. If existing, only the specified tables shall be refreshed. The specified tables do not have to exist, it just tell Adapter to update these tables (which might be changed, deleted, added, or non-existing).
+* `requestedTables` is optional. If existing, only the specified tables shall be refreshed. The specified tables do not have to exist, it just tell Adapter to update these tables (which might be changed, deleted, added, or non-existing).
 
 **Response:**
 
@@ -103,8 +103,8 @@ Notes
 ```
 
 Notes
-* ```schemaMetadata``` is optional. It can be skipped if the adapter does not want to refresh (e.g. because he detected that there is no change).
-* ```requestedTables``` must exist if and only if the element existed in the request. The values must be the same as in the request (to make sure that Adapter only refreshed these tables).
+* `schemaMetadata` is optional. It can be skipped if the adapter does not want to refresh (e.g. because he detected that there is no change).
+* `questedTables` must exist if and only if the element existed in the request. The values must be the same as in the request (to make sure that Adapter only refreshed these tables).
 
 ### Set Properties
 
@@ -139,7 +139,7 @@ Request to set properties. The Adapter can decide whether he needs to send back 
 
 Notes
 * Request: A property set to null means that this property was asked to be deleted. Properties set to null might also not have existed before.
-* Response: ```schemaMetadata``` is optional. It only exists if the adapter wants to send back new metadata. The existing metadata are overwritten completely.
+* Response: `schemaMetadata` is optional. It only exists if the adapter wants to send back new metadata. The existing metadata are overwritten completely.
 
 
 ### Drop Virtual Schema
@@ -400,17 +400,17 @@ will produce the following Request, assuming that the Adapter has all required c
 ```
 
 Notes
-* ```pushdownRequest```: Specification what needs to be pushed down. You can think of it like a parsed SQL statement.
-  * ```from```: The requested from clause. Currently only tables are supported, joins might be supported in future.
-  * ```selectList```: The requested select list elements, a list of expression. The order of the selectlist elements matters. If the select list is an empty list, we request at least a single column/expression, which could also be constant TRUE.
-  * ```selectList.columnNr```: Position of the column in the virtual table, starting with 0
-  * ```filter```: The requested filter (where clause), a single expression.
-  * ```aggregationType```: Optional element, set if an aggregation is requested. Either "group_by" or "single_group", if a aggregate function is used but no group by.
-  * ```groupBy```: The requested group by clause, a list of expressions.
-  * ```having```: The requested having clause, a single expression.
-  * ```orderBy```: The requested order-by clause, a list of ```order_by_element``` elements. The field ```expression``` contains the expression to order by.
-  * ```limit``` The requested limit of the result set, with an optional offset.
-* ```involvedTables```: Metadata of the involved tables, encoded like in schemaMetadata.
+* `pushdownRequest`: Specification what needs to be pushed down. You can think of it like a parsed SQL statement.
+  * `from`: The requested from clause. Currently only tables are supported, joins might be supported in future.
+  * `selectList`: The requested select list elements, a list of expression. The order of the selectlist elements matters. If the select list is an empty list, we request at least a single column/expression, which could also be constant TRUE.
+  * `selectList.columnNr`: Position of the column in the virtual table, starting with 0
+  * `filter`: The requested filter (`where` clause), a single expression.
+  * `aggregationType`Optional element, set if an aggregation is requested. Either `group_by` or `single_group`, if a aggregate function is used but no group by.
+  * `groupBy`: The requested group by clause, a list of expressions.
+  * `having`: The requested having clause, a single expression.
+  * `orderBy`: The requested order-by clause, a list of `order_by_element` elements. The field `expression` contains the expression to order by.
+  * `limit` The requested limit of the result set, with an optional offset.
+* `involvedTables`: Metadata of the involved tables, encoded like in schemaMetadata.
 
 
 **Response:**
@@ -425,14 +425,14 @@ Following the example above, a valid result could look like this:
 ```
 
 Notes
-* ```sql```: The pushdown SQL statement. It must be either an ```SELECT``` or ```IMPORT``` statement.
+* `sql`: The pushdown SQL statement. It must be either an `SELECT` or `IMPORT` statement.
 
 ## Embedded Commonly Used JSON Elements
 
 The following Json objects can be embedded in a request or response. They have a fixed structure.
 
 ### Schema Metadata Info
-This document contains the most important metadata of the virtual schema and is sent to the adapter just "for information" with each request. It is the value of an element called ```schemaMetadataInfo```.
+This document contains the most important metadata of the virtual schema and is sent to the adapter just "for information" with each request. It is the value of an element called `schemaMetadataInfo`.
 
 ```json
 {"schemaMetadataInfo":{
@@ -451,7 +451,7 @@ This document contains the most important metadata of the virtual schema and is 
 
 ### Schema Metadata
 
-This document is usually embedded in responses from the Adapter and informs the database about all metadata of the Virtual Schema, especially the contained Virtual Tables and it's columns. The Adapter can store so called ```adapterNotes``` on each level (schema, table, column), to remember information which might be relevant for the Adapter in future. In the example below, the Adapter remembers the table partitioning and the data type of a column which is not directly supported in EXASOL. The Adapter has these information during pushdown and can consider the table partitioning during pushdown or can add an appropriate cast for the column.
+This document is usually embedded in responses from the Adapter and informs the database about all metadata of the Virtual Schema, especially the contained Virtual Tables and it's columns. The Adapter can store so called `adapterNotes` on each level (schema, table, column), to remember information which might be relevant for the Adapter in future. In the example below, the Adapter remembers the table partitioning and the data type of a column which is not directly supported in EXASOL. The Adapter has these information during pushdown and can consider the table partitioning during pushdown or can add an appropriate cast for the column.
 
 ```json
 {"schemaMetadata":{
@@ -526,7 +526,7 @@ This document is usually embedded in responses from the Adapter and informs the 
 ```
 
 Notes
-* ```adapterNotes``` is an optional field which can be attached to the schema, a table or a column. It can be an arbitrarily nested Json document.
+* `adapterNotes` is an optional field which can be attached to the schema, a table or a column. It can be an arbitrarily nested Json document.
 
 The following EXASOL data types are supported:
 
@@ -767,7 +767,7 @@ This element currently only occurs in from clause
 
 Notes
 * **tablePosFromClause**: Position of the table in the from clause, starting with 0. Required for joins where same table occurs several times.
-* **columnNr**: column number in the virtual table, starting with 0
+* **columnNr**: Column number in the virtual table, starting with 0.
 
 ### Literal
 
@@ -828,7 +828,7 @@ Notes
 
 ### Predicates
 
-Whenever there is ```...``` this is a shortcut for an arbitrary expression.
+Whenever there is `...` this is a shortcut for an arbitrary expression.
 
 ```json
 {
@@ -839,7 +839,7 @@ Whenever there is ```...``` this is a shortcut for an arbitrary expression.
 }
 ```
 
-The same can be used for "predicate_or".
+The same can be used for `predicate_or`.
 
 ```json
 {
@@ -862,7 +862,7 @@ The same can be used for "predicate_or".
 }
 ```
 
-The same can be used for "predicate_notequals", "predicate_less" and "predicate_lessequals".
+The same can be used for `predicate_notequals`, `predicate_less` and `predicate_lessequals`.
 
 ```json
 {
@@ -877,7 +877,7 @@ The same can be used for "predicate_notequals", "predicate_less" and "predicate_
 }
 ```
 
-The same can be used for predicate_like_regexp
+The same can be used for `predicate_like_regexp`.
 
 Notes
 * **escapeChar** is optional
@@ -897,7 +897,7 @@ Notes
 }
 ```
 
-<exp> IN (<const1>, <const2>)
+`<exp> IN (<const1>, <const2>)`
 
 ```json
 {
@@ -966,9 +966,9 @@ Multiple arguments
 ```
 
 Notes
-* **variableInputArgs**: default value is false. If true, numArgs is not defined.
+* **variableInputArgs**: default value is false. If true, `numArgs` is not defined.
 
-Arithmetic operators have following names: ADD, SUB, MULT, FLOAT_DIV. They are defined as infix (just a hint, not necessary)
+Arithmetic operators have following names: `ADD`, `SUB`, `MULT`, `FLOAT_DIV`. They are defined as infix (just a hint, not necessary).
 
 ```json
 {
@@ -989,7 +989,7 @@ Arithmetic operators have following names: ADD, SUB, MULT, FLOAT_DIV. They are d
 
 **Special cases**
 
-EXTRACT(toExtract FROM exp1) (requires scalar-function capability EXTRACT) 
+`EXTRACT(toExtract FROM exp1)` (requires scalar-function capability `EXTRACT`) 
 
 ```json
 {
@@ -1003,7 +1003,7 @@ EXTRACT(toExtract FROM exp1) (requires scalar-function capability EXTRACT)
     ],
 }
 ```
-CAST(exp1 AS dataType) (requires scalar-function capability CAST) 
+`CAST(exp1 AS dataType)` (requires scalar-function capability `CAST`)
 
 ```json
 {
@@ -1022,7 +1022,7 @@ CAST(exp1 AS dataType) (requires scalar-function capability CAST)
 }
 ```
 
-CASE (requires scalar-function capability CAST)
+`CASE` (requires scalar-function capability `CAST`)
 
 ```sql
 CASE basis WHEN exp1 THEN result1
@@ -1069,13 +1069,12 @@ CASE basis WHEN exp1 THEN result1
 }
 ```
 Notes:
-* ```arguments```: The different cases.
-* ```results```: The different results in the same order as the arguments. If present, the ELSE result
-is the last entry in the ```results``` array.
+* `arguments`: The different cases.
+* `results`: The different results in the same order as the arguments. If present, the ELSE result is the last entry in the `results` array.
 
 ### Aggregate Functions
 
-Consistent with scalar functions. To be detailed: star-operator, distinct, ...
+Consistent with scalar functions. To be detailed: `star-operator`, `distinct`, ...
 
 ```json
 {
@@ -1106,7 +1105,7 @@ Consistent with scalar functions. To be detailed: star-operator, distinct, ...
 
 **Special cases**
 
-COUNT(exp)     (requires set-function capability COUNT)
+`COUNT(exp)`     (requires set-function capability `COUNT`)
 
 ```json
 {
@@ -1120,7 +1119,7 @@ COUNT(exp)     (requires set-function capability COUNT)
 }
 ```
 
-COUNT(*) (requires set-function capability COUNT and COUNT_STAR)
+`COUNT(*)` (requires set-function capability `COUNT` and `COUNT_STAR`)
 
 ```json
 {
@@ -1129,7 +1128,7 @@ COUNT(*) (requires set-function capability COUNT and COUNT_STAR)
 }
 ```
 
-COUNT(DISTINCT exp)    (requires set-function capability COUNT and COUNT_DISTINCT)
+`COUNT(DISTINCT exp)`    (requires set-function capability `COUNT` and `COUNT_DISTINCT`)
 
 ```json
 {
@@ -1144,7 +1143,7 @@ COUNT(DISTINCT exp)    (requires set-function capability COUNT and COUNT_DISTINC
 }
 ```
 
-COUNT((exp1, exp2))   (requires set-function capability COUNT and COUNT_TUPLE)
+`COUNT((exp1, exp2))`   (requires set-function capability `COUNT` and `COUNT_TUPLE`)
 
 ```json
 {
@@ -1161,7 +1160,7 @@ COUNT((exp1, exp2))   (requires set-function capability COUNT and COUNT_TUPLE)
     ]
 }
 ```
-AVG(exp)     (requires set-function capability AVG)
+`AVG(exp)`     (requires set-function capability `AVG`)
 
 ```json
 {
@@ -1175,7 +1174,7 @@ AVG(exp)     (requires set-function capability AVG)
 }
 ```
 
-AVG(DISTINCT exp)    (requires set-function capability AVG and AVG_DISTINCT)
+`AVG(DISTINCT exp)`    (requires set-function capability `AVG` and `AVG_DISTINCT`)
 
 ```json
 {
@@ -1190,7 +1189,7 @@ AVG(DISTINCT exp)    (requires set-function capability AVG and AVG_DISTINCT)
 }
 ```
 
-GROUP_CONCAT(DISTINCT exp1 orderBy SEPARATOR ', ') (requires set-function capability GROUP_CONCAT)
+`GROUP_CONCAT(DISTINCT exp1 orderBy SEPARATOR ', ')` (requires set-function capability `GROUP_CONCAT`)
 
 ```json
 {
@@ -1221,6 +1220,6 @@ GROUP_CONCAT(DISTINCT exp1 orderBy SEPARATOR ', ') (requires set-function capabi
 ```
 
 Notes:
-* ```distinct```: Optional. Requires set-function capability GROUP_CONCAT_DISTINCT.
-* ```orderBy```: Optional. The requested order-by clause, a list of ```order_by_element``` elements. The field ```expression``` contains the expression to order by. The group-by clause of a SELECT query uses the same ```order_by_element``` element type. The clause requires the set-function capability GROUP_CONCAT_ORDER_BY.
-* ```separator```: Optional. Requires set-function capability GROUP_CONCAT_SEPARATOR.
+* `distinct`: Optional. Requires set-function capability `GROUP_CONCAT_DISTINCT.`
+* `orderBy`: Optional. The requested order-by clause, a list of `order_by_element` elements. The field `expression` contains the expression to order by. The `group by` clause of a `SELECT` query uses the same `order_by_element` element type. The clause requires the set-function capability `GROUP_CONCAT_ORDER_BY`.
+* `separator`: Optional. Requires set-function capability `GROUP_CONCAT_SEPARATOR`.
