@@ -25,6 +25,13 @@ import org.apache.http.impl.client.HttpClientBuilder;
 public class IntegrationTestSetup {
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException {
+        if (args.length > 2) {
+            Boolean skipTestSetup = Boolean.valueOf(args[2]);
+            if (skipTestSetup) {
+                System.out.println("Skip setup of the integration test environment");
+                return;
+            }
+        }
 
         System.out.println("Start setup of the integration test environment");
         String projectVersion = args[0];

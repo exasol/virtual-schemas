@@ -1,0 +1,124 @@
+[Global]
+    Revision = 11
+    Checksum = NONE
+    ClusterName = cl4
+    Platform = Docker
+    LicenseFile = /exa/etc/license.xml
+    CoredPort = 10001
+    SSHPort = 22
+    # The type of networks for this cluster: 'public', 'private' or both.
+    Networks = private
+    # Comma-separated list of nameservers for this cluster.
+    NameServers =
+    ConfVersion = 6.0.10
+    OSVersion = 6.0.10
+    DBVersion = 6.0.10
+    ImageVersion = 6.0.10-d1
+
+# SSL options
+[SSL]
+    # The SSL certificate, private key and CA for all EXASOL services
+    Cert = /path/to/ssl.crt
+    CertKey = /path/to/ssl.key
+    CertAuth = /path/to/ssl.ca
+
+# Docker related options
+[Docker]
+    # The directory that contains all data related to this docker cluster
+    # (except for mapped devices)
+    RootDir = /exa/etc
+    # The EXASOL docker image used for all containers of this cluster
+    Image = exasol/docker-db:6.0.10-d1
+    # The type of storage devices for this cluster: 'block' or 'file'
+    DeviceType = file
+
+[Node : 11]
+    PrivateNet = 172.17.0.2/16
+    PublicNet =
+    Name = n11
+    UUID = 5D11CDFCDEA74475833F1892426428873D4BEB66
+    DockerVolume = n11
+    # Ports to be exposed (container : host)
+    ExposedPorts = 8888:8899, 6583:6594
+    [[Disk : default]]
+        Devices = dev.1
+        Mapping = dev.1:/exa/data/storage
+
+# Global EXAStorage options
+[EXAStorage]
+    # Max. throughput for background recovery / data restoration (in MiB/s)
+    RecLimit =
+
+# An EXAStorage data volume
+[EXAVolume : DataVolume1]
+    # Type of volume: 'data' | 'archive'
+    Type = data
+    # Comma-separated list of node IDs to be used for this volume (incl. redundancy nodes)
+    Nodes = 11,
+    # Name of the disk to be used for this volume.
+    # This disk must exist on all volume nodes.
+    Disk = default
+    # Volume size (e. g. '1 TiB')
+    Size = 2.0 GiB
+    # Desired redundancy for this volume
+    Redundancy = 1
+    # Volume owner (user and group ID)
+    Owner = 500 : 500
+    # OPTIONAL: a comma-separated list of labels for this volume
+    Labels =
+
+# An EXASOL database
+[DB : DB1]
+    DataVolume = DataVolume1
+    ArchiveVolume =
+    # The EXASOL version to be used for this database
+    Version = 6.0.10
+    # User and group ID that should own this database
+    Owner = 500 : 500
+    # Memory size over all nodes (e. g. '1 TiB')
+    MemSize = 2 GiB
+    Port = 8888
+    Nodes = 11,
+    NumMasterNodes = 1
+    # OPTIONAL: DB parameters
+    Params = -etlJdbcJavaEnv -Djava.security.egd=/dev/./urandom
+    # OPTIONAL: JDBC driver configuration
+    [[JDBC]]
+        # BucketFS that contains the JDBC driver
+        BucketFS = bfsdefault
+        # Bucket that contains the JDBC driver
+        Bucket = default
+        # Directory within the bucket that contains the drivers
+        Dir = drivers/jdbc
+    # OPTIONAL: Oracle driver configuration
+    [[Oracle]]
+        # BucketFS that contains the JDBC drivers
+        BucketFS = bfsdefault
+        # Bucket that contains the JDBC drivers
+        Bucket = default
+        # Directory within the bucket that contains the drivers
+        Dir = drivers/oracle
+
+# Global BucketFS options
+[BucketFS]
+    # User and group ID of the BucketFS process.
+    ServiceOwner = 500 : 500
+
+# A Bucket filesystem
+[BucketFS : bfsdefault]
+    # HTTP port number (0 = disabled)
+    HttpPort = 6583
+    # HTTPS port number (0 = disabled)
+    HttpsPort = 0
+    SyncKey = OHNNMEJTV09aeEFyajhjYVBnTmtsQ0E2MjhWMDRlYzI=
+    SyncPeriod = 30000
+
+    # A bucket
+    [[Bucket : default]]
+        # ReadPasswd is "read" (without quotes)
+        ReadPasswd = cmVhZAo=
+        # WritePasswd is "write" (without quotes)
+        WritePasswd = d3JpdGU=
+        Public = True
+        Name = default
+        AdditionalFiles = EXAClusterOS:/usr/opt/EXASuite-6/EXAClusterOS-6.0.10/var/clients/packages/ScriptLanguages-*, EXASolution-6.0.10:/usr/opt/EXASuite-6/EXASolution-6.0.10/bin/udf/*
