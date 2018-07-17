@@ -1,13 +1,14 @@
 language: java
 
-# Setting sudo to false will cause Travis to use Containers (default in the meantime)
-sudo: false
+# Setting sudo to false will cause Travis to use Containers.
+# To use Docker's privileged mode, we need to enable sudo.
+sudo: required
+
+services:
+  - docker
 
 matrix:
   include:
     - jdk: "oraclejdk8"
-      env: MVN_ARGS=""
 
-# build a jar with all dependencies. Will also run tests.
-script: "cd jdbc-adapter && mvn $MVN_ARGS clean package"
-
+script: ./jdbc-adapter/integration-test-data/run_integration_tests.sh

@@ -26,6 +26,7 @@
             <properties>
                 <!-- This property has to be overwritten from user -->
                 <integrationtest.configfile></integrationtest.configfile>
+                <integrationtest.skipTestSetup>false</integrationtest.skipTestSetup>
             </properties>
             <build>
                 <plugins>
@@ -79,6 +80,7 @@
                                         <argument>com.exasol.adapter.dialects.IntegrationTestSetup</argument>
                                         <argument>${project.version}</argument>
                                         <argument>${integrationtest.configfile}</argument>
+                                        <argument>${integrationtest.skipTestSetup}</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
