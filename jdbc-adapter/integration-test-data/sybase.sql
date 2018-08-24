@@ -10,3 +10,4 @@ INSERT INTO testdb.tester.ittable (a, b) VALUES('b', 3) go
 INSERT INTO testdb.tester.ittable (a, b) VALUES(NULL, -1) go
 INSERT INTO testdb.tester.ittable (a, b) VALUES('a', NULL) go
 INSERT INTO testdb.tester.ittable (a, b) VALUES('z', 0) go
+INSERT INTO testdb.tester.ittable (a, b) VALUES('z', 0) go

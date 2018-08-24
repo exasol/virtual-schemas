@@ -93,4 +93,11 @@ public class SybaseSqlDialectIT extends AbstractIntegrationTest {
         result.last();
         assertEquals(null, result.getObject(1));
     }
+
+    @Test
+    public void testWhereGreater() throws SQLException {
+        ResultSet result = executeQuery("SELECT \"b\" FROM vs_sybase.\"ittable\" WHERE \"b\" > 0");
+        result.last();
+        assertEquals(2, result.getRow());
+    }
 }
