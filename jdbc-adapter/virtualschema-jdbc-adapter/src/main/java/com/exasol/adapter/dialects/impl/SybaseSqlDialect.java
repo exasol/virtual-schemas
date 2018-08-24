@@ -33,7 +33,7 @@ public class SybaseSqlDialect extends AbstractSqlDialect{
     super(context);
   }
 
-  public static final String NAME = "Sybase";
+  public static final String NAME = "SYBASE";
 
   @Override
   public String getPublicName() {
@@ -503,7 +503,7 @@ public class SybaseSqlDialect extends AbstractSqlDialect{
 
   @Override
   public NullSorting getDefaultNullSorting() {
-    return NullSorting.NULLS_SORTED_AT_START;
+    return NullSorting.NULLS_SORTED_LOW;
   }
 
   @Override

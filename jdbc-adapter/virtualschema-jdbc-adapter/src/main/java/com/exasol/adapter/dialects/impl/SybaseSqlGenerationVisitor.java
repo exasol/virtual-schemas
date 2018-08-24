@@ -609,4 +609,31 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
         return sql;
     }
 
+    @Override
+    public String visit(SqlOrderBy orderBy) throws AdapterException {
+        // ORDER BY <expr> [ASC/DESC] [NULLS FIRST/LAST]
+        // ASC and NULLS LAST are default in EXASOL
+        List<String> sqlOrderElement = new ArrayList<>();
+        for (int i = 0; i < orderBy.getExpressions().size(); ++i) {
+            String elementSql = orderBy.getExpressions().get(i).accept(this);
+            boolean isNullsLast = orderBy.nullsLast().get(i);
+            boolean isAscending = orderBy.isAscending().get(i);
+
+            if (!isAscending && !isNullsLast) {
+                elementSql = "(CASE WHEN " + elementSql + " IS NULL THEN 0 ELSE 1 END), " + elementSql;
+            }
+
+            if (isAscending && isNullsLast) {
+                elementSql = "(CASE WHEN " + elementSql + " IS NULL THEN 1 ELSE 0 END), " + elementSql;
+            }
+
+            if (!isAscending) {
+              elementSql += " DESC";
+            }
+
+            sqlOrderElement.add(elementSql);
+        }
+        return "ORDER BY " + Joiner.on(", ").join(sqlOrderElement);
+    }
+
 }
