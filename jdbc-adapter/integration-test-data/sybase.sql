@@ -28,5 +28,35 @@ INSERT INTO testdb.tester.timetypes
          '11:22:33.456',
          '6.4.1553 11:11:11.111111',
          '11:11:11.111111'
+    )
+go
+
+
+-- https://help.sap.com/viewer/b65d6a040c4a4709afd93068071b2a76/16.0.3.5/en-US/aa354eb4bc2b101495d29877b5bd3c5b.html
+DROP TABLE testdb.tester.integertypes go
+CREATE TABLE testdb.tester.integertypes (
+  c_bigint bigint,
+  c_int int,
+  c_smallint smallint,
+  c_ubigint unsigned bigint,
+  c_uint unsigned int,
+  c_usmallint unsigned smallint
+) go
+
+INSERT INTO testdb.tester.integertypes
+  VALUES(-9223372036854775808,
+         -2147483648,
+         -32768,
+         0,
+         0,
+         0
+    )
+INSERT INTO testdb.tester.integertypes
+  VALUES(9223372036854775807,
+         2147483647,
+         32767,
+         18446744073709551615,
+         4294967295,
+         65535
   )
 go
