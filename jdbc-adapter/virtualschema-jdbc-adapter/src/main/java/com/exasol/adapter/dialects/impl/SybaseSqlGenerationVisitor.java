@@ -99,31 +99,25 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
         if (!isDirectlyInSelectList) {
             return projString;
         }
-    String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-    return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
-
+        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(),
+                                                         column.getMetadata().getName()).getTypeName();
+        return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
     }
 
 
     private String getColumnProjectionStringNoCheck(SqlColumn column, String projString) throws AdapterException {
-
-    String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-    return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
-
+        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(),
+                                                         column.getMetadata().getName()).getTypeName();
+        return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
     }
 
     private String getColumnProjectionStringNoCheckImpl(String typeName, SqlColumn column, String projString) {
-
       if ( typeName.startsWith("text") ) {
             projString = "CAST(" + projString + "  as NVARCHAR("+SybaseSqlDialect.maxSybaseNVarcharSize+") )";
-        } else if ( typeName.startsWith("date") || typeName.startsWith("datetime2") ) {
-            projString = "CAST(" + projString + "  as DateTime )";
-        } else if (typeName.startsWith("hierarchyid") ) {
-            projString = "CAST(" + projString + "  as NVARCHAR("+SybaseSqlDialect.maxSybaseNVarcharSize+") )";
-        } else if (typeName.startsWith("geometry") || typeName.startsWith("geography") ) {
-            projString = "CAST(" + projString + "  as VARCHAR("+SybaseSqlDialect.maxSybaseVarcharSize+") )";
-        } else if (typeName.startsWith("timestamp") ){
-            projString = "CAST(" + projString + "  as DateTime )";
+        } else if (typeName.equals("time") ){
+            projString = "CONVERT(VARCHAR(12), " + projString + ", 137)";
+        } else if (typeName.equals("bigtime") ){
+          projString = "CONVERT(VARCHAR(16), " + projString + ", 137)";
         } else if (typeName.startsWith("xml")) {
             projString = "CAST(" + projString + "  as NVARCHAR("+SybaseSqlDialect.maxSybaseNVarcharSize+") )";
         } else if (TYPE_NAME_NOT_SUPPORTED.contains(typeName)){
@@ -134,15 +128,16 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private static final List<String> TYPE_NAMES_REQUIRING_CAST =
-        ImmutableList.of("text", "date", "datetime2","hierarchyid","geometry","geography", "timestamp","xml");
+        ImmutableList.of("text", "time", "bigtime", "xml");
 
     private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("varbinary","binary");
 
     private boolean nodeRequiresCast(SqlNode node) throws AdapterException {
         if (node.getType() == SqlNodeType.COLUMN) {
             SqlColumn column = (SqlColumn)node;
-      String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-      return TYPE_NAMES_REQUIRING_CAST.contains(typeName) || TYPE_NAME_NOT_SUPPORTED.contains(typeName) ;
+            String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(),
+                                                             column.getMetadata().getName()).getTypeName();
+            return TYPE_NAMES_REQUIRING_CAST.contains(typeName) || TYPE_NAME_NOT_SUPPORTED.contains(typeName) ;
         }
         return false;
     }

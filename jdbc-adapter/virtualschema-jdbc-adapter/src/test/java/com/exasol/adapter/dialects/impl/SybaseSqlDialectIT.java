@@ -4,10 +4,12 @@ import com.exasol.adapter.dialects.AbstractIntegrationTest;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import java.io.FileNotFoundException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -99,5 +101,44 @@ public class SybaseSqlDialectIT extends AbstractIntegrationTest {
         ResultSet result = executeQuery("SELECT \"b\" FROM vs_sybase.\"ittable\" WHERE \"b\" > 0");
         result.last();
         assertEquals(2, result.getRow());
+    }
+
+    @Test
+    public void testTypeSmalldatetime() throws SQLException {
+        ResultSet result = executeQuery("SELECT \"c_smalldatetime\" FROM vs_sybase.\"timetypes\"");
+        matchNextRow(result, getSqlTimestamp(1900, 1, 1, 1, 2, 0, 0));
+    }
+
+    @Test
+    public void testTypeDatetime() throws SQLException {
+        ResultSet result = executeQuery("SELECT \"c_datetime\" FROM vs_sybase.\"timetypes\"");
+        matchNextRow(result, getSqlTimestamp(1753, 1, 1, 1, 2, 3, 100));
+    }
+
+    @Test
+    public void testTypeDate() throws SQLException {
+        ResultSet result = executeQuery("SELECT \"c_date\" FROM vs_sybase.\"timetypes\"");
+        matchNextRow(result, getSqlDate(2032, 12, 3));
+    }
+
+    @Test
+    public void testTypeTime() throws SQLException {
+        ResultSet result = executeQuery("SELECT \"c_time\" FROM vs_sybase.\"timetypes\"");
+        matchNextRow(result, "11:22:33.456");
+    }
+
+    @Test
+    @Ignore
+    public void testTypeBigdatetime() throws SQLException {
+        ResultSet result = executeQuery("SELECT \"c_bigdatetime\" FROM vs_sybase.\"timetypes\"");
+        matchNextRow(result, getSqlTimestamp(1753, 1, 1, 1, 2, 3, 100));
+        // SQL Error [22001]: Data truncation
+        //   Arithmetic overflow during implicit conversion of BIGDATETIME value to a DATETIME field .
+    }
+
+    @Test
+    public void testBigtime() throws SQLException {
+        ResultSet result = executeQuery("SELECT \"c_bigtime\" FROM vs_sybase.\"timetypes\"");
+        matchNextRow(result, "11:11:11.111111");
     }
 }

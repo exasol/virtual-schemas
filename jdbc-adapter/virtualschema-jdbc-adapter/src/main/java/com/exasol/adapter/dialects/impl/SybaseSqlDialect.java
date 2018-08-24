@@ -20,16 +20,19 @@ import com.exasol.adapter.sql.ScalarFunction;
 
 public class SybaseSqlDialect extends AbstractSqlDialect{
 
-
-  // Tested SQL Server versions: SQL Server 2014
+  // The Sybase dialect started as a copy of the SQL Server dialect.
+  // Tested Sybase version: ASE 16.0
   // Tested JDBC drivers:  jtds-1.3.1 (https://sourceforge.net/projects/jtds/)
+  // Documentation:
+  // http://infocenter.sybase.com/help/index.jsp?topic=/com.sybase.infocenter.help.ase.16.0/doc/html/title.html
+  // https://help.sap.com/viewer/p/SAP_ASE
 
   public final static int maxSybaseVarcharSize = 8000;
 
   public final static int maxSybaseNVarcharSize = 4000;
 
 
-    public SybaseSqlDialect(SqlDialectContext context) {
+  public SybaseSqlDialect(SqlDialectContext context) {
     super(context);
   }
 
@@ -90,7 +93,7 @@ public class SybaseSqlDialect extends AbstractSqlDialect{
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_STAR);
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_DISTINCT);
 
-        cap.supportAggregateFunction(AggregateFunctionCapability.SUM);
+        cap.supportAggregateFunction(AggregateFunctionCapability.SUM); // works
         cap.supportAggregateFunction(AggregateFunctionCapability.SUM_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.MIN);
         cap.supportAggregateFunction(AggregateFunctionCapability.MAX);
@@ -128,7 +131,7 @@ public class SybaseSqlDialect extends AbstractSqlDialect{
 
 
         // Standard Arithmetic Operators
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD);
+        cap.supportScalarFunction(ScalarFunctionCapability.ADD); // works
         cap.supportScalarFunction(ScalarFunctionCapability.SUB);
         cap.supportScalarFunction(ScalarFunctionCapability.MULT);
         cap.supportScalarFunction(ScalarFunctionCapability.FLOAT_DIV);
@@ -361,10 +364,13 @@ public class SybaseSqlDialect extends AbstractSqlDialect{
 
             break;
           case Types.TIME:
-            colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
+            colType = DataType.createVarChar(210, DataType.ExaCharset.UTF8);
             break;
           case 2013: //Types.TIME_WITH_TIMEZONE is Java 1.8 specific
             colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
+            break;
+          case Types.DATE:
+            colType = DataType.createDate();
             break;
           case Types.NUMERIC:
             int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
