@@ -373,16 +373,21 @@ public class SybaseSqlDialect extends AbstractSqlDialect{
             colType = DataType.createDate();
             break;
           case Types.NUMERIC:
+          case Types.DECIMAL:
             int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
-                int decimalScale = jdbcTypeDescription.getDecimalScale();
+            int decimalScale = jdbcTypeDescription.getDecimalScale();
 
-                if (decimalPrec <= DataType.maxExasolDecimalPrecision) {
-                    colType = DataType.createDecimal(decimalPrec, decimalScale);
-                } else {
-                    colType = DataType.createDouble();
+            if (decimalPrec <= DataType.maxExasolDecimalPrecision) {
+                colType = DataType.createDecimal(decimalPrec, decimalScale);
+            } else {
+                int size = decimalPrec + 1;
+                if (decimalScale > 0) {
+                    size++;
                 }
-                break;
-            case Types.OTHER:
+                colType = DataType.createVarChar(size, DataType.ExaCharset.UTF8);
+            }
+            break;
+          case Types.OTHER:
 
               //TODO
                  colType = DataType.createVarChar(SybaseSqlDialect.maxSybaseVarcharSize, DataType.ExaCharset.UTF8);
@@ -393,9 +398,9 @@ public class SybaseSqlDialect extends AbstractSqlDialect{
               colType = DataType.createVarChar(SybaseSqlDialect.maxSybaseVarcharSize, DataType.ExaCharset.UTF8);
               break;
 
-            case Types.CLOB: //xml type in SQL Server
+            case Types.CLOB: // TEXT and UNITEXT types in Sybase
 
-              colType = DataType.createVarChar(SybaseSqlDialect.maxSybaseNVarcharSize, DataType.ExaCharset.UTF8);
+              colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
               break;
 
             case Types.BLOB:

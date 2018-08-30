@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
@@ -220,5 +221,163 @@ public class SybaseSqlDialectIT extends AbstractIntegrationTest {
         matchNextRow(result, 0);
         matchNextRow(result, 65535);
         assertColumnTypeEquals("DECIMAL(5,0)", "integertypes", "c_usmallint");
+    }
+
+
+    @Test
+    public void testTypeNumeric36() throws SQLException {
+        ResultSet result = executeQuery("SELECT \"c_numeric_36_0\" FROM vs_sybase.\"decimaltypes\"");
+        matchNextRow(result, new BigDecimal("12345678901234567890123456"));
+        matchNextRow(result, new BigDecimal("-12345678901234567890123456"));
+        assertColumnTypeEquals("DECIMAL(36,0)", "decimaltypes", "c_numeric_36_0");
+    }
+
+    @Test
+    public void testTypeNumeric38() throws SQLException {
+        ResultSet result = executeQuery("SELECT \"c_numeric_38_0\" FROM vs_sybase.\"decimaltypes\"");
+        matchNextRow(result, "1234567890123456789012345678");
+        matchNextRow(result, "-1234567890123456789012345678");
+        assertColumnTypeEquals("VARCHAR(39) UTF8", "decimaltypes", "c_numeric_38_0");
+    }
+
+    @Test
+    public void testTypeDecimal2010() throws SQLException {
+        ResultSet result = executeQuery("SELECT \"c_decimal_20_10\" FROM vs_sybase.\"decimaltypes\"");
+        matchNextRow(result, new BigDecimal("1234567890.0123456789"));
+        matchNextRow(result, new BigDecimal("-1234567890.0123456789"));
+        assertColumnTypeEquals("DECIMAL(20,10)", "decimaltypes", "c_decimal_20_10");
+    }
+
+    @Test
+    public void testTypeDecimal3710() throws SQLException {
+        ResultSet result = executeQuery("SELECT \"c_decimal_37_10\" FROM vs_sybase.\"decimaltypes\"");
+        matchNextRow(result, "12345678901234567.0123456789");
+        matchNextRow(result, "-12345678901234567.0123456789");
+        assertColumnTypeEquals("VARCHAR(39) UTF8", "decimaltypes", "c_decimal_37_10");
+    }
+
+
+    @Test
+    public void testTypeDouble() throws SQLException {
+        // ResultSet result = executeQuery("SELECT \"c_double\" FROM vs_sybase.\"approxtypes\"");
+        // matchNextRow(result, "2.2250738585072014e-308");
+        // matchNextRow(result, "1.797693134862315708e+308");
+        assertColumnTypeEquals("DOUBLE", "approxtypes", "c_double");
+    }
+
+    @Test
+    public void testTypeReal() throws SQLException {
+        // ResultSet result = executeQuery("SELECT \"c_real\" FROM vs_sybase.\"approxtypes\"");
+        // matchNextRow(result, new Double("1.175494351e-38"));
+        // matchNextRow(result, new Double("3.402823466e+38"));
+        assertColumnTypeEquals("DOUBLE", "approxtypes", "c_real");
+    }
+
+
+    @Test
+    public void testTypeSmallmoney() throws SQLException {
+        ResultSet result = executeQuery("SELECT \"c_smallmoney\" FROM vs_sybase.\"moneytypes\"");
+        matchNextRow(result, new BigDecimal("214748.3647"));
+        matchNextRow(result, new BigDecimal("-214748.3648"));
+        assertColumnTypeEquals("DECIMAL(10,4)", "moneytypes", "c_smallmoney");
+    }
+
+    @Test
+    public void testTypeMoney() throws SQLException {
+        ResultSet result = executeQuery("SELECT \"c_money\" FROM vs_sybase.\"moneytypes\"");
+        matchNextRow(result, new BigDecimal("922337203685477.5807"));
+        matchNextRow(result, new BigDecimal("-922337203685477.5808"));
+        assertColumnTypeEquals("DECIMAL(19,4)", "moneytypes", "c_money");
+    }
+
+
+    public String padRight(String s, int n) {
+        return String.format("%-"+n+"s", s);
+    }
+
+    @Test
+    public void testTypeChar10() throws SQLException {
+        ResultSet result = executeQuery("SELECT \"c_char_10\" FROM vs_sybase.\"chartypes\"");
+        matchNextRow(result, padRight("abcd", 10));
+        assertColumnTypeEquals("CHAR(10) ASCII", "chartypes", "c_char_10");
+    }
+
+    @Test
+    public void testTypeCharTooBig() throws SQLException {
+        ResultSet result = executeQuery("SELECT \"c_char_toobig\" FROM vs_sybase.\"chartypes\"");
+        matchNextRow(result, padRight("Lorem ipsum dolor sit amet... rest is zero.", 2001));
+        assertColumnTypeEquals("VARCHAR(2001) ASCII", "chartypes", "c_char_toobig");
+    }
+
+    @Test
+    public void testTypeVarchar() throws SQLException {
+        String column = "c_varchar";
+        String table = "chartypes";
+        ResultSet result = executeQuery("SELECT \""+column+"\" FROM vs_sybase.\""+table+"\"");
+        matchNextRow(result, "Lorem.");
+        assertColumnTypeEquals("VARCHAR(10) ASCII", table, column);
+    }
+
+    @Test
+    public void testTypeUnichar10() throws SQLException {
+        String column = "c_unichar_10";
+        String table = "chartypes";
+        ResultSet result = executeQuery("SELECT \""+column+"\" FROM vs_sybase.\""+table+"\"");
+        matchNextRow(result, "Ipsum.");
+        assertColumnTypeEquals("CHAR(10) UTF8", table, column);
+    }
+
+    @Test
+    public void testTypeUnicharToobig() throws SQLException {
+        String column = "c_unichar_toobig";
+        String table = "chartypes";
+        ResultSet result = executeQuery("SELECT \""+column+"\" FROM vs_sybase.\""+table+"\"");
+        matchNextRow(result, "xyz");
+        assertColumnTypeEquals("VARCHAR(8192) UTF8", table, column);
+    }
+
+    @Test
+    public void testTypeUnivarchar() throws SQLException {
+        String column = "c_univarchar";
+        String table = "chartypes";
+        ResultSet result = executeQuery("SELECT \""+column+"\" FROM vs_sybase.\""+table+"\"");
+        matchNextRow(result, "Dolor.");
+        assertColumnTypeEquals("VARCHAR(10) UTF8", table, column);
+    }
+
+    @Test
+    public void testTypeNchar() throws SQLException {
+        String column = "c_nchar";
+        String table = "chartypes";
+        ResultSet result = executeQuery("SELECT \""+column+"\" FROM vs_sybase.\""+table+"\"");
+        matchNextRow(result, "Sit.");
+        assertColumnTypeEquals("CHAR(10) ASCII", table, column);
+    }
+
+    @Test
+    public void testTypeNvarchar() throws SQLException {
+        String column = "c_nvarchar";
+        String table = "chartypes";
+        ResultSet result = executeQuery("SELECT \""+column+"\" FROM vs_sybase.\""+table+"\"");
+        matchNextRow(result, "Amet.");
+        assertColumnTypeEquals("VARCHAR(10) ASCII", table, column);
+    }
+
+    @Test
+    public void testTypeText() throws SQLException {
+        String column = "c_text";
+        String table = "chartypes";
+        ResultSet result = executeQuery("SELECT \""+column+"\" FROM vs_sybase.\""+table+"\"");
+        matchNextRow(result, "Text. A wall of text.");
+        assertColumnTypeEquals("VARCHAR(2000000) UTF8", table, column);
+    }
+
+    @Test
+    public void testTypeUnitext() throws SQLException {
+        String column = "c_unitext";
+        String table = "chartypes";
+        ResultSet result = executeQuery("SELECT \""+column+"\" FROM vs_sybase.\""+table+"\"");
+        matchNextRow(result, "Text. A wall of Unicode text.");
+        assertColumnTypeEquals("VARCHAR(2000000) UTF8", table, column);
     }
 }

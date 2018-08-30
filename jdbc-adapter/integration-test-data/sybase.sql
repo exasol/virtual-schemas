@@ -60,3 +60,108 @@ INSERT INTO testdb.tester.integertypes
          65535
   )
 go
+
+
+-- https://help.sap.com/viewer/b65d6a040c4a4709afd93068071b2a76/16.0.3.5/en-US/aa357b76bc2b1014ba159ac9d0074e1d.html
+DROP TABLE testdb.tester.decimaltypes go
+CREATE TABLE testdb.tester.decimaltypes (
+    c_numeric_36_0 numeric(36, 0),
+    c_numeric_38_0 numeric(38, 0),
+    c_decimal_20_10 decimal(20, 10),
+    c_decimal_37_10 decimal(37, 10)
+) go
+
+INSERT INTO testdb.tester.decimaltypes
+VALUES(12345678901234567890123456,
+       1234567890123456789012345678,
+       1234567890.0123456789,
+       12345678901234567.0123456789
+)
+INSERT INTO testdb.tester.decimaltypes
+  VALUES(-12345678901234567890123456,
+         -1234567890123456789012345678,
+         -1234567890.0123456789,
+         -12345678901234567.0123456789
+  )
+go
+
+
+-- https://help.sap.com/viewer/b65d6a040c4a4709afd93068071b2a76/16.0.3.5/en-US/aa357b76bc2b1014ba159ac9d0074e1d.html
+-- FLOAT(p) is alias for either DOUBLE PRECISION or REAL. If p < 16, FLOAT is stored as REAL, if p >= 16, FLOAT is stored as DOUBLE PRECISION.
+DROP TABLE testdb.tester.approxtypes go
+CREATE TABLE testdb.tester.approxtypes (
+    c_double double precision,
+    c_real real,
+) go
+
+INSERT INTO testdb.tester.approxtypes VALUES(
+    2.2250738585072014e-308,
+    1.175494351e-38
+)
+INSERT INTO testdb.tester.approxtypes VALUES(
+    1.797693134862315708e+308,
+    3.402823466e+38
+)
+go
+
+
+DROP TABLE testdb.tester.moneytypes go
+CREATE TABLE testdb.tester.moneytypes (
+    c_smallmoney smallmoney,
+    c_money money,
+) go
+
+INSERT INTO testdb.tester.moneytypes VALUES(
+  214748.3647,
+  922337203685477.5807
+)
+INSERT INTO testdb.tester.moneytypes VALUES(
+  -214748.3648,
+  -922337203685477.5808
+)
+go
+
+
+-- https://help.sap.com/viewer/b65d6a040c4a4709afd93068071b2a76/16.0.3.5/en-US/aa362f6cbc2b1014b1ed808e2a54e693.html
+DROP TABLE testdb.tester.chartypes go
+CREATE TABLE testdb.tester.chartypes (
+    c_char_10 char(10),
+    c_char_toobig char(2001),
+    c_varchar varchar(10), -- maximum size in Sybase is 16384 -> smaller than Exasol's limit
+    c_unichar_10 unichar(10), -- NOT right-padded with spaces
+    c_unichar_toobig unichar(8192), -- NOT right-padded with spaces
+    c_univarchar univarchar(10), -- maximum size is 8192
+    c_nchar nchar(10), -- maximum size in Sybase is 16384. NOT right-padded with spaces.
+    c_nvarchar nvarchar(10), -- maximum size in Sybase is 16384
+    c_text text,
+    c_unitext unitext
+) go
+
+INSERT INTO testdb.tester.chartypes VALUES(
+    'abcd',
+    'Lorem ipsum dolor sit amet... rest is zero.',
+    'Lorem.',
+    'Ipsum.',
+    'xyz',
+    'Dolor.',
+    'Sit.',
+    'Amet.',
+    'Text. A wall of text.',
+    'Text. A wall of Unicode text.'
+) go
+
+
+DROP TABLE testdb.tester.misctypes go
+CREATE TABLE testdb.tester.misctypes (
+  c_binary binary(10), -- n <= 255
+  c_varbinary varbinary(10),
+  c_image image,
+  c_bit bit
+) go
+
+INSERT INTO testdb.tester.misctypes VALUES(
+  0xdeadbeef,
+  0xdeadbeef,
+  0xdeadbeef,
+  0 NOT NULL
+) go
