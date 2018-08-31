@@ -1,28 +1,45 @@
 package com.exasol.adapter.dialects;
 
-import com.exasol.adapter.dialects.impl.ExasolSqlDialect;
-import com.exasol.adapter.dialects.impl.ImpalaSqlDialect;
-import com.exasol.adapter.jdbc.SchemaAdapterNotes;
-import com.google.common.collect.ImmutableList;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
+import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
-
 public class SqlDialectsTest {
+    private SqlDialects dialects;
+
+    @Before
+    public void before() {
+        this.dialects = SqlDialects.getInstance();
+    }
 
     @Test
-    public void testGetDialectByName() {
-        SqlDialects dialects = new SqlDialects(ImmutableList.of(ExasolSqlDialect.NAME, ImpalaSqlDialect.NAME));
-        SqlDialectContext context  = new SqlDialectContext(new SchemaAdapterNotes(".", "\"", false, false, false, false, false, false, false, false, false, false, true, false));
-        assertTrue(dialects.getDialectByName("IMPALA", context).getClass().equals(ImpalaSqlDialect.class));
-        
-        assertTrue(dialects.getDialectByName("iMpAlA", context).getClass().equals(ImpalaSqlDialect.class));
-
-        assertTrue(dialects.getDialectByName("impala", context).getClass().equals(ImpalaSqlDialect.class));
-        
-        assertTrue(dialects.getDialectByName("EXASOL", context).getClass().equals(ExasolSqlDialect.class));
-        
-        assertTrue(dialects.getDialectByName("unknown-dialect", context) == null);
+    public void testGetInstance() {
+        assertThat(this.dialects, instanceOf(SqlDialects.class));
     }
-    
+
+    @Test
+    public void testIsSupported() {
+        this.dialects.register(DummySqlDialect.class);
+        assertThat(this.dialects.isSupported(DummySqlDialect.getPublicName()), is(true));
+    }
+
+    @Test
+    public void testGetDialectNames() {
+        this.dialects.register(DummySqlDialect.class);
+        this.dialects.register(AnotherDummySqlDialect.class);
+        assertThat(this.dialects.getDialectsString(),
+                equalTo(AnotherDummySqlDialect.getPublicName() + ", " + DummySqlDialect.getPublicName()));
+    }
+
+    @Test
+    public void getDialectByName() {
+        this.dialects.register(DummySqlDialect.class);
+        assertThat(this.dialects.getDialectInstanceForNameWithContext(DummySqlDialect.getPublicName(), null),
+                instanceOf(DummySqlDialect.class));
+
+    }
 }

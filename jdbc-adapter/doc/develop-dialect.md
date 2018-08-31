@@ -63,12 +63,36 @@ To implement a full dialect for a typical data source you have to run all of the
 * Testdata: Create a simple view, e.g. joining two existing tables
 * Automatic test: Query the view, optionally e.g. with a filter.
 
+## Integration Testing
 
-## How To Start Integration Tests
-We assume that you have a running EXASOL and data source database with all required test tables.
+### Security considerations
+
+Please note that in the course of the integration tests you need to provide the test framework with access rights and credentials to the source database. 
+
+In order not to create security issues:
+* Make sure the data in the source database is not confidential (demo data only)
+* Don't reuse credentials
+* Don't check in credentials
+
+### Prerequisites
+
+* Exasol running
+* Exasol accessible from within integration test environment
+* Source database running
+* Source database accessible from within integration test environment
+* Test data loaded into source database 
+
+### Preparing Integration Test
+
+1. Create a dedicated user in the source database that has the necessary access privileges 
+2. Create credentials for the user with which 
+3. Make a local copy of the [sample integration test configuration file](../integration-test-data/integration-test-sampl.yaml) **outside of the Git repository** so that you don't accidentally check this file in.
+4. Edit the credentials information
+
+### Starting Integration Tests
 
 We use following Maven phases for our integration tests:
-* pre-integration-test phase is used to automatically deploy the latest jdbc adapter jar (based on your latest code modifications)
+* pre-integration-test phase is used to automatically deploy the latest [JDBC](https://www.exasol.com/support/secure/attachment/66315/EXASOL_JDBC-6.1.rc1.tar.gz) adapter JAR (based on your latest code modifications)
 * integration-test phase is used to execute the actual integration tests
 
 Note that to check whether the integration-tests were successful, you have to run the verify Maven phase.
