@@ -50,7 +50,7 @@ public class JdbcMetadataReader {
                     dbMeta.nullsAreSortedHigh(),
                     dbMeta.nullsAreSortedLow());
 
-            SqlDialect dialect = dialects.getDialectByName(dialectName, new SqlDialectContext(schemaAdapterNotes));
+            SqlDialect dialect = dialects.getDialectInstanceForNameWithContext(dialectName, new SqlDialectContext(schemaAdapterNotes));
 
             catalog = findCatalog(catalog, dbMeta, dialect);
 

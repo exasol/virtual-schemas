@@ -225,7 +225,7 @@ public class JdbcAdapterProperties {
 
     public static SqlDialect getSqlDialect(Map<String, String> properties, SqlDialects supportedDialects, SqlDialectContext dialectContext) throws AdapterException {
         String dialectName = getProperty(properties, PROP_SQL_DIALECT, "");
-        SqlDialect dialect = supportedDialects.getDialectByName(dialectName, dialectContext);
+        SqlDialect dialect = supportedDialects.getDialectInstanceForNameWithContext(dialectName, dialectContext);
         if (dialect == null) {
             throw new InvalidPropertyException("SQL Dialect not supported: " + dialectName + " - all dialects: " + supportedDialects.getDialectsString());
         }
