@@ -135,6 +135,7 @@ public class SybaseSqlDialectIT extends AbstractIntegrationTest {
         assertEquals(2, result.getRow());
     }
 
+    // TODO: add datatype tests
     @Test
     public void testTypeSmalldatetime() throws SQLException {
         ResultSet result = executeQuery("SELECT \"c_smalldatetime\" FROM vs_sybase.\"timetypes\"");
@@ -380,4 +381,40 @@ public class SybaseSqlDialectIT extends AbstractIntegrationTest {
         matchNextRow(result, "Text. A wall of Unicode text.");
         assertColumnTypeEquals("VARCHAR(2000000) UTF8", table, column);
     }
+
+    private static final byte[] DEADBEEF = {0xd, 0xe, 0xa, 0xd, 0xb, 0xe, 0xe, 0xf};
+
+    @Test
+    public void testTypeBinary() throws SQLException {
+        String column = "c_binary";
+        String table = "misctypes";
+        ResultSet result = executeQuery("SELECT \""+column+"\" FROM vs_sybase.\""+table+"\"");
+        matchNextRow(result, "binary NOT SUPPORTED");
+    }
+
+    @Test
+    public void testTypeVarbinary() throws SQLException {
+        String column = "c_varbinary";
+        String table = "misctypes";
+        ResultSet result = executeQuery("SELECT \""+column+"\" FROM vs_sybase.\""+table+"\"");
+        matchNextRow(result, "varbinary NOT SUPPORTED");
+    }
+
+    @Test
+    public void testTypeImage() throws SQLException {
+        String column = "c_image";
+        String table = "misctypes";
+        ResultSet result = executeQuery("SELECT \""+column+"\" FROM vs_sybase.\""+table+"\"");
+        matchNextRow(result, "image NOT SUPPORTED");
+    }
+
+    @Test
+    public void testTypeBit() throws SQLException {
+        String column = "c_bit";
+        String table = "misctypes";
+        ResultSet result = executeQuery("SELECT \""+column+"\" FROM vs_sybase.\""+table+"\"");
+        matchNextRow(result, false);
+        assertColumnTypeEquals("BOOLEAN", table, column);
+    }
+
 }

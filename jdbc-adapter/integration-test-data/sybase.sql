@@ -32,9 +32,7 @@ INSERT INTO testdb.tester.timetypes
 go
 
 
--- https://help.sap.com/viewer/b65d6a040c4a4709afd93068071b2a76/16.0.3.5/en-US/aa354eb4bc2b101495d29877b5bd3c5b.html
-DROP TABLE testdb.tester.integertypes go
-CREATE TABLE testdb.tester.integertypes (
+-- https://help.sap.com/viewer/b65d6a040c4a4709afd93068071b2a76/16.0.3.5/en-US/aa354eb4bc2b101495d29877b5bd3c5b.html DROP TABLE testdb.tester.integertypes go CREATE TABLE testdb.tester.integertypes (
   c_bigint bigint,
   c_int int,
   c_smallint smallint,
@@ -156,12 +154,12 @@ CREATE TABLE testdb.tester.misctypes (
   c_binary binary(10), -- n <= 255
   c_varbinary varbinary(10),
   c_image image,
-  c_bit bit
+  c_bit bit NOT NULL
 ) go
 
 INSERT INTO testdb.tester.misctypes VALUES(
   0xdeadbeef,
   0xdeadbeef,
   0xdeadbeef,
-  0 NOT NULL
+  0
 ) go

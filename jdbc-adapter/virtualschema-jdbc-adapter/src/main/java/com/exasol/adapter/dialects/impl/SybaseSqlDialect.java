@@ -414,10 +414,6 @@ public class SybaseSqlDialect extends AbstractSqlDialect{
                 colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8);
             }
             break;
-            case Types.VARBINARY:
-            case Types.BINARY:
-             colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8);
-             break;
             case Types.DISTINCT:
               colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8);
               break;

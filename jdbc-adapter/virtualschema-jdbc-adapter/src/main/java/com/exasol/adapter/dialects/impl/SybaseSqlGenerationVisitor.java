@@ -130,7 +130,7 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
     private static final List<String> TYPE_NAMES_REQUIRING_CAST =
         ImmutableList.of("text", "time", "bigtime", "xml");
 
-    private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("varbinary","binary");
+  private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("varbinary","binary","image");
 
     private boolean nodeRequiresCast(SqlNode node) throws AdapterException {
         if (node.getType() == SqlNodeType.COLUMN) {
