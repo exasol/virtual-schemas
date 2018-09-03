@@ -1,17 +1,6 @@
 package com.exasol.adapter.dialects;
 
-import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.jdbc.SchemaAdapterNotes;
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.metadata.MetadataException;
-import com.exasol.adapter.metadata.TableMetadata;
-import com.exasol.adapter.sql.*;
-import com.exasol.utils.SqlTestUtil;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -20,104 +9,133 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.jdbc.SchemaAdapterNotes;
+import com.exasol.adapter.metadata.ColumnMetadata;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.MetadataException;
+import com.exasol.adapter.metadata.TableMetadata;
+import com.exasol.adapter.sql.AggregateFunction;
+import com.exasol.adapter.sql.ScalarFunction;
+import com.exasol.adapter.sql.SqlColumn;
+import com.exasol.adapter.sql.SqlFunctionAggregate;
+import com.exasol.adapter.sql.SqlFunctionScalar;
+import com.exasol.adapter.sql.SqlLiteralExactnumeric;
+import com.exasol.adapter.sql.SqlNode;
+import com.exasol.adapter.sql.SqlSelectList;
+import com.exasol.adapter.sql.SqlStatementSelect;
+import com.exasol.adapter.sql.SqlTable;
+import com.exasol.utils.SqlTestUtil;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 public class SqlDialectTest {
 
     @Test
     public void testAggregateFunctionAliases() throws AdapterException, MetadataException {
-        TableMetadata clicksMeta = getTestTableMetadata();
-        SqlTable fromClause = new SqlTable("TEST", clicksMeta);
-        SqlColumn col1 = new SqlColumn(1, clicksMeta.getColumns().get(0));
-        SqlSelectList selectList = SqlSelectList.createRegularSelectList( ImmutableList.<SqlNode>of(
-                new SqlFunctionAggregate(AggregateFunction.APPROXIMATE_COUNT_DISTINCT, ImmutableList.<SqlNode>of(col1), false),
+        final TableMetadata clicksMeta = getTestTableMetadata();
+        final SqlTable fromClause = new SqlTable("TEST", clicksMeta);
+        final SqlColumn col1 = new SqlColumn(1, clicksMeta.getColumns().get(0));
+        final SqlSelectList selectList = SqlSelectList.createRegularSelectList(ImmutableList.<SqlNode>of(
+                new SqlFunctionAggregate(AggregateFunction.APPROXIMATE_COUNT_DISTINCT, ImmutableList.<SqlNode>of(col1),
+                        false),
                 new SqlFunctionAggregate(AggregateFunction.AVG, ImmutableList.<SqlNode>of(col1), false),
                 new SqlFunctionAggregate(AggregateFunction.COUNT, new ArrayList<SqlNode>(), true),
-                new SqlFunctionAggregate(AggregateFunction.MAX, ImmutableList.<SqlNode>of(col1), false)
-        ));
-        SqlNode node = new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
+                new SqlFunctionAggregate(AggregateFunction.MAX, ImmutableList.<SqlNode>of(col1), false)));
+        final SqlNode node = new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
 
-        String schemaName = "SCHEMA";
-        String expectedSql = "SELECT NDV(C1), AVERAGE(C1), COUNT2(DISTINCT *), MAX(C1) FROM " + schemaName + ".TEST";
+        final String schemaName = "SCHEMA";
+        final String expectedSql = "SELECT NDV(C1), AVERAGE(C1), COUNT2(DISTINCT *), MAX(C1) FROM " + schemaName
+                + ".TEST";
 
-        Map<AggregateFunction, String> aggAliases = new EnumMap<>(AggregateFunction.class);
-        Map<ScalarFunction, String> scalarAliases = ImmutableMap.of();
-        Map<ScalarFunction, String> infixAliases = ImmutableMap.of();
+        final Map<AggregateFunction, String> aggAliases = new EnumMap<>(AggregateFunction.class);
+        final Map<ScalarFunction, String> scalarAliases = ImmutableMap.of();
+        final Map<ScalarFunction, String> infixAliases = ImmutableMap.of();
         aggAliases.put(AggregateFunction.APPROXIMATE_COUNT_DISTINCT, "NDV");
         aggAliases.put(AggregateFunction.AVG, "AVERAGE");
         aggAliases.put(AggregateFunction.COUNT, "COUNT2");
-        Map<ScalarFunction, String> prefixAliases = ImmutableMap.of();
+        final Map<ScalarFunction, String> prefixAliases = ImmutableMap.of();
 
-        SqlDialect dialect = new AliasesSqlDialect(aggAliases, scalarAliases, infixAliases, prefixAliases);
+        final SqlDialect dialect = new AliasesSqlDialect(aggAliases, scalarAliases, infixAliases, prefixAliases);
 
-        SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
-        SqlGenerationVisitor generator = new SqlGenerationVisitor(dialect, context);
-        String actualSql = node.accept(generator);
+        final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
+        final SqlGenerationVisitor generator = new SqlGenerationVisitor(dialect, context);
+        final String actualSql = node.accept(generator);
         assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
     }
 
     @Test
     public void testScalarFunctionAliases() throws AdapterException, MetadataException {
-        TableMetadata clicksMeta = getTestTableMetadata();
-        SqlTable fromClause = new SqlTable("TEST", clicksMeta);
-        SqlColumn col1 = new SqlColumn(1, clicksMeta.getColumns().get(0));
-        SqlSelectList selectList = SqlSelectList.createRegularSelectList( ImmutableList.<SqlNode>of(
+        final TableMetadata clicksMeta = getTestTableMetadata();
+        final SqlTable fromClause = new SqlTable("TEST", clicksMeta);
+        final SqlColumn col1 = new SqlColumn(1, clicksMeta.getColumns().get(0));
+        final SqlSelectList selectList = SqlSelectList.createRegularSelectList(ImmutableList.<SqlNode>of(
                 new SqlFunctionScalar(ScalarFunction.ABS, ImmutableList.<SqlNode>of(col1), false, false),
-                new SqlFunctionScalar(ScalarFunction.ADD, ImmutableList.of(col1, new SqlLiteralExactnumeric(new BigDecimal(100))), true, false),
-                new SqlFunctionScalar(ScalarFunction.SUB, ImmutableList.of(col1, new SqlLiteralExactnumeric(new BigDecimal(100))), true, false),
+                new SqlFunctionScalar(ScalarFunction.ADD,
+                        ImmutableList.of(col1, new SqlLiteralExactnumeric(new BigDecimal(100))), true, false),
+                new SqlFunctionScalar(ScalarFunction.SUB,
+                        ImmutableList.of(col1, new SqlLiteralExactnumeric(new BigDecimal(100))), true, false),
                 new SqlFunctionScalar(ScalarFunction.TO_CHAR, ImmutableList.<SqlNode>of(col1), true, false),
-                new SqlFunctionScalar(ScalarFunction.NEG, ImmutableList.<SqlNode>of(col1), false, false)
-        ));
-        SqlNode node = new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
+                new SqlFunctionScalar(ScalarFunction.NEG, ImmutableList.<SqlNode>of(col1), false, false)));
+        final SqlNode node = new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
 
-        String schemaName = "SCHEMA";
+        final String schemaName = "SCHEMA";
         // ADD is infix by default, but must be non-infix after applying the alias.
-        String expectedSql = "SELECT ABSOLUTE(C1), PLUS(C1, 100), (C1 - 100), TO_CHAR(C1), NEGATIVE(C1) FROM " + schemaName + ".TEST";
+        final String expectedSql = "SELECT ABSOLUTE(C1), PLUS(C1, 100), (C1 - 100), TO_CHAR(C1), NEGATIVE(C1) FROM "
+                + schemaName + ".TEST";
 
-        Map<ScalarFunction, String> scalarAliases = new EnumMap<>(ScalarFunction.class);
+        final Map<ScalarFunction, String> scalarAliases = new EnumMap<>(ScalarFunction.class);
         scalarAliases.put(ScalarFunction.ABS, "ABSOLUTE");
         scalarAliases.put(ScalarFunction.ADD, "PLUS");
         scalarAliases.put(ScalarFunction.NEG, "NEGATIVE");
-        SqlDialect dialect = new AliasesSqlDialect(ImmutableMap.<AggregateFunction, String>of(), scalarAliases, ImmutableMap.<ScalarFunction, String>of(), ImmutableMap.<ScalarFunction, String>of());
+        final SqlDialect dialect = new AliasesSqlDialect(ImmutableMap.<AggregateFunction, String>of(), scalarAliases,
+                ImmutableMap.<ScalarFunction, String>of(), ImmutableMap.<ScalarFunction, String>of());
 
-        SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
-        SqlGenerationVisitor generator = new SqlGenerationVisitor(dialect, context);
-        String actualSql = node.accept(generator);
+        final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
+        final SqlGenerationVisitor generator = new SqlGenerationVisitor(dialect, context);
+        final String actualSql = node.accept(generator);
         assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
     }
 
     @Test
     public void testInvalidAliases() throws Exception {
-        TableMetadata clicksMeta = getTestTableMetadata();
-        SqlTable fromClause = new SqlTable("TEST", clicksMeta);
-        SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
-        SqlNode node = new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
+        final TableMetadata clicksMeta = getTestTableMetadata();
+        final SqlTable fromClause = new SqlTable("TEST", clicksMeta);
+        final SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
+        final SqlNode node = new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
 
-        SqlGenerationContext context = new SqlGenerationContext("", "schema", false);
+        final SqlGenerationContext context = new SqlGenerationContext("", "schema", false);
 
         // Test non-simple scalar functions
-        for (ScalarFunction function : ScalarFunction.values()) {
+        for (final ScalarFunction function : ScalarFunction.values()) {
             if (!function.isSimple()) {
-                Map<ScalarFunction, String> scalarAliases = ImmutableMap.of(function, "ALIAS");
-                SqlDialect dialect = new AliasesSqlDialect(ImmutableMap.<AggregateFunction, String>of(), scalarAliases, ImmutableMap.<ScalarFunction, String>of(), ImmutableMap.<ScalarFunction, String>of());
+                final Map<ScalarFunction, String> scalarAliases = ImmutableMap.of(function, "ALIAS");
+                final SqlDialect dialect = new AliasesSqlDialect(ImmutableMap.<AggregateFunction, String>of(),
+                        scalarAliases, ImmutableMap.<ScalarFunction, String>of(),
+                        ImmutableMap.<ScalarFunction, String>of());
                 try {
-                    SqlGenerationVisitor generator = new SqlGenerationVisitor(dialect, context);
+                    final SqlGenerationVisitor generator = new SqlGenerationVisitor(dialect, context);
                     throw new Exception("Should never arrive here");
-                } catch(RuntimeException ex) {
+                } catch (final RuntimeException ex) {
                     // This error is expected
                 }
             }
         }
 
         // Test non-simple aggregate functions
-        for (AggregateFunction function : AggregateFunction.values()) {
+        for (final AggregateFunction function : AggregateFunction.values()) {
             if (!function.isSimple()) {
-                Map<AggregateFunction, String> aggregateAliases = ImmutableMap.of(function, "ALIAS");
-                SqlDialect dialect = new AliasesSqlDialect(aggregateAliases, ImmutableMap.<ScalarFunction, String>of(), ImmutableMap.<ScalarFunction, String>of(), ImmutableMap.<ScalarFunction, String>of());
+                final Map<AggregateFunction, String> aggregateAliases = ImmutableMap.of(function, "ALIAS");
+                final SqlDialect dialect = new AliasesSqlDialect(aggregateAliases,
+                        ImmutableMap.<ScalarFunction, String>of(), ImmutableMap.<ScalarFunction, String>of(),
+                        ImmutableMap.<ScalarFunction, String>of());
                 try {
-                    SqlGenerationVisitor generator = new SqlGenerationVisitor(dialect, context);
+                    final SqlGenerationVisitor generator = new SqlGenerationVisitor(dialect, context);
                     throw new Exception("Should never arrive here");
-                } catch(RuntimeException ex) {
+                } catch (final RuntimeException ex) {
                     // This error is expected
                 }
             }
@@ -125,22 +143,23 @@ public class SqlDialectTest {
     }
 
     private TableMetadata getTestTableMetadata() throws MetadataException {
-        List<ColumnMetadata> columns = new ArrayList<>();
-        columns.add(new ColumnMetadata("C1", "", DataType.createBool(), true,
-                false, "", ""));
+        final List<ColumnMetadata> columns = new ArrayList<>();
+        columns.add(new ColumnMetadata("C1", "", DataType.createBool(), true, false, "", ""));
         return new TableMetadata("TEST", "", columns, "");
     }
 
     static class AliasesSqlDialect extends AbstractSqlDialect {
 
-        private Map<AggregateFunction, String> aggregationAliases;
-        private Map<ScalarFunction, String> scalarAliases;
-        private Map<ScalarFunction, String> infixAliases;
-        private Map<ScalarFunction, String> prefixAliases;
+        private final Map<AggregateFunction, String> aggregationAliases;
+        private final Map<ScalarFunction, String> scalarAliases;
+        private final Map<ScalarFunction, String> infixAliases;
+        private final Map<ScalarFunction, String> prefixAliases;
 
-        public AliasesSqlDialect(Map<AggregateFunction, String> aggregationAliases, Map<ScalarFunction, String> scalarAliases
-                , Map<ScalarFunction, String> infixAliases, Map<ScalarFunction, String> prefixAliases) {
-            super(new SqlDialectContext(new SchemaAdapterNotes(".", "\"", false, false, false, false, false, false, false, false, false, false, true, false)));
+        public AliasesSqlDialect(final Map<AggregateFunction, String> aggregationAliases,
+                final Map<ScalarFunction, String> scalarAliases, final Map<ScalarFunction, String> infixAliases,
+                final Map<ScalarFunction, String> prefixAliases) {
+            super(new SqlDialectContext(new SchemaAdapterNotes(".", "\"", false, false, false, false, false, false,
+                    false, false, false, false, true, false)));
             this.aggregationAliases = aggregationAliases;
             this.scalarAliases = scalarAliases;
             this.infixAliases = infixAliases;
@@ -149,7 +168,7 @@ public class SqlDialectTest {
 
         @Override
         public Capabilities getCapabilities() {
-            Capabilities caps = new Capabilities();
+            final Capabilities caps = new Capabilities();
             caps.supportAllCapabilities();
             return caps;
         }
@@ -166,34 +185,33 @@ public class SqlDialectTest {
 
         @Override
         public Map<AggregateFunction, String> getAggregateFunctionAliases() {
-            return aggregationAliases;
+            return this.aggregationAliases;
         }
 
         @Override
         public Map<ScalarFunction, String> getScalarFunctionAliases() {
-            return scalarAliases;
+            return this.scalarAliases;
         }
 
         @Override
         public Map<ScalarFunction, String> getBinaryInfixFunctionAliases() {
-            if (infixAliases.isEmpty()) {
+            if (this.infixAliases.isEmpty()) {
                 return super.getBinaryInfixFunctionAliases();
             } else {
-                return infixAliases;
+                return this.infixAliases;
             }
         }
 
         @Override
         public Map<ScalarFunction, String> getPrefixFunctionAliases() {
-            if (prefixAliases.isEmpty()) {
+            if (this.prefixAliases.isEmpty()) {
                 return super.getPrefixFunctionAliases();
             } else {
-                return prefixAliases;
+                return this.prefixAliases;
             }
         }
 
-        @Override
-        public String getPublicName() {
+        public static String getPublicName() {
             return "TEST";
         }
 
@@ -208,22 +226,22 @@ public class SqlDialectTest {
         }
 
         @Override
-        public String applyQuote(String identifier) {
+        public String applyQuote(final String identifier) {
             return "\"" + identifier + "\"";
         }
 
         @Override
-        public String applyQuoteIfNeeded(String identifier) {
-            return identifier;  // Intentionally kept simple
+        public String applyQuoteIfNeeded(final String identifier) {
+            return identifier; // Intentionally kept simple
         }
 
         @Override
-        public boolean requiresCatalogQualifiedTableNames(SqlGenerationContext context) {
+        public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
             return false;
         }
 
         @Override
-        public boolean requiresSchemaQualifiedTableNames(SqlGenerationContext context) {
+        public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
             return true;
         }
 
@@ -233,12 +251,12 @@ public class SqlDialectTest {
         }
 
         @Override
-        public String getStringLiteral(String value) {
+        public String getStringLiteral(final String value) {
             return "'" + value + "'";
         }
 
         @Override
-        public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcType) throws SQLException {
+        public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
             return null;
         }
     }

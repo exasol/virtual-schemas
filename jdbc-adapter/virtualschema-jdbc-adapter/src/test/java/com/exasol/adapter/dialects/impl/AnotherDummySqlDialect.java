@@ -1,11 +1,16 @@
-package com.exasol.adapter.dialects;
+package com.exasol.adapter.dialects.impl;
 
 import java.sql.SQLException;
 
 import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.dialects.AbstractSqlDialect;
+import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.dialects.SqlDialectContext;
+import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.metadata.DataType;
 
-class AnotherDummySqlDialect extends AbstractSqlDialect implements SqlDialect {
+public class AnotherDummySqlDialect extends AbstractSqlDialect implements SqlDialect {
     public AnotherDummySqlDialect(final SqlDialectContext context) {
         super(context);
     }

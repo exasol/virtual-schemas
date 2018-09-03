@@ -113,4 +113,13 @@ public final class SqlDialects {
     public void register(final Class<? extends SqlDialect> dialect) {
         this.supportedDialects.add(dialect);
     }
+
+    /**
+     * Register a set of dialects
+     *
+     * @param dialects the set of dialects to register
+     */
+    public void registerAll(final Set<Class<? extends SqlDialect>> dialects) {
+        this.supportedDialects.addAll(dialects);
+    }
 }
