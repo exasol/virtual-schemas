@@ -1,13 +1,13 @@
 package com.exasol.adapter.dialects.impl;
 
+import java.sql.SQLException;
+
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.AbstractSqlDialect;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.dialects.SqlDialectContext;
 import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.metadata.DataType;
-
-import java.sql.SQLException;
 
 /**
  * Dialect for MySQL using the MySQL Connector jdbc driver.
@@ -16,19 +16,19 @@ import java.sql.SQLException;
  */
 public class MysqlSqlDialect extends AbstractSqlDialect {
 
-    public MysqlSqlDialect(SqlDialectContext context) {
+    public MysqlSqlDialect(final SqlDialectContext context) {
         super(context);
     }
 
-    public static final String NAME = "MYSQL";
+    private static final String NAME = "MYSQL";
 
-    public String getPublicName() {
+    public static String getPublicName() {
         return NAME;
     }
 
     @Override
     public Capabilities getCapabilities() {
-        Capabilities cap = new Capabilities();
+        final Capabilities cap = new Capabilities();
         return cap;
     }
 
@@ -53,42 +53,45 @@ public class MysqlSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String applyQuote(String identifier) {
-        // TODO ANSI_QUOTES option. Must be obtained from JDBC DatabaseMetadata. http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_ansi_quotes
-        CharSequence quoteChar = "`";
+    public String applyQuote(final String identifier) {
+        // TODO ANSI_QUOTES option. Must be obtained from JDBC DatabaseMetadata.
+        // http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_ansi_quotes
+        final CharSequence quoteChar = "`";
         return quoteChar + identifier.replace(quoteChar, quoteChar + "" + quoteChar) + quoteChar;
     }
 
     @Override
-    public String applyQuoteIfNeeded(String identifier) {
+    public String applyQuoteIfNeeded(final String identifier) {
         return applyQuote(identifier);
     }
 
     @Override
-    public boolean requiresCatalogQualifiedTableNames(SqlGenerationContext context) {
+    public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
         return true;
     }
 
     @Override
-    public boolean requiresSchemaQualifiedTableNames(SqlGenerationContext context) {
+    public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
         return false;
     }
 
     @Override
     public NullSorting getDefaultNullSorting() {
-        // See http://stackoverflow.com/questions/2051602/mysql-orderby-a-number-nulls-last
-        // and also http://stackoverflow.com/questions/9307613/mysql-order-by-null-first-and-desc-after
-        assert(getContext().getSchemaAdapterNotes().isNullsAreSortedLow());
+        // See
+        // http://stackoverflow.com/questions/2051602/mysql-orderby-a-number-nulls-last
+        // and also
+        // http://stackoverflow.com/questions/9307613/mysql-order-by-null-first-and-desc-after
+        assert (getContext().getSchemaAdapterNotes().isNullsAreSortedLow());
         return NullSorting.NULLS_SORTED_LOW;
     }
 
     @Override
-    public String getStringLiteral(String value) {
+    public String getStringLiteral(final String value) {
         return "'" + value.replace("'", "''") + "'";
     }
 
     @Override
-    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcType) throws SQLException {
+    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
         return null;
     }
 }

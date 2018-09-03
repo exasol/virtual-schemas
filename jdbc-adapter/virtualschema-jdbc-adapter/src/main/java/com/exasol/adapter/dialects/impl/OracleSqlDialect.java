@@ -1,48 +1,57 @@
 package com.exasol.adapter.dialects.impl;
 
-import com.exasol.adapter.capabilities.*;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.sql.AggregateFunction;
-import com.exasol.adapter.sql.ScalarFunction;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.EnumMap;
 import java.util.Map;
 
+import com.exasol.adapter.capabilities.AggregateFunctionCapability;
+import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.capabilities.LiteralCapability;
+import com.exasol.adapter.capabilities.MainCapability;
+import com.exasol.adapter.capabilities.PredicateCapability;
+import com.exasol.adapter.capabilities.ScalarFunctionCapability;
+import com.exasol.adapter.dialects.AbstractSqlDialect;
+import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.dialects.SqlDialectContext;
+import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.sql.AggregateFunction;
+import com.exasol.adapter.sql.ScalarFunction;
+
 /**
  * Work in Progress
  */
 public class OracleSqlDialect extends AbstractSqlDialect {
 
-    private boolean castAggFuncToFloat = true;
-    private boolean castScalarFuncToFloat = true;
+    private final boolean castAggFuncToFloat = true;
+    private final boolean castScalarFuncToFloat = true;
 
-    public OracleSqlDialect(SqlDialectContext context) {
+    public OracleSqlDialect(final SqlDialectContext context) {
         super(context);
-        omitParenthesesMap.add(ScalarFunction.SYSDATE);
-        omitParenthesesMap.add(ScalarFunction.SYSTIMESTAMP);
+        this.omitParenthesesMap.add(ScalarFunction.SYSDATE);
+        this.omitParenthesesMap.add(ScalarFunction.SYSTIMESTAMP);
     }
 
-    public static final String NAME = "ORACLE";
+    private static final String NAME = "ORACLE";
 
-    public String getPublicName() {
+    public static String getPublicName() {
         return NAME;
     }
 
     public boolean getCastAggFuncToFloat() {
-        return castAggFuncToFloat;
+        return this.castAggFuncToFloat;
     }
 
     public boolean getCastScalarFuncToFloat() {
-        return castScalarFuncToFloat;
+        return this.castScalarFuncToFloat;
     }
 
     @Override
     public Capabilities getCapabilities() {
-        Capabilities cap = new Capabilities();
+        final Capabilities cap = new Capabilities();
 
         // Capabilities
         cap.supportMainCapability(MainCapability.SELECTLIST_PROJECTION);
@@ -96,7 +105,7 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         // GEO_INTERSECTION_AGGREGATE is not supported
         // GEO_UNION_AGGREGATE is not supported
         // APPROXIMATE_COUNT_DISTINCT supported with version >= 12.1.0.2
-        if (castAggFuncToFloat) {
+        if (this.castAggFuncToFloat) {
             // Cast result to FLOAT because result set precision = 0, scale = 0
             cap.supportAggregateFunction(AggregateFunctionCapability.SUM);
             cap.supportAggregateFunction(AggregateFunctionCapability.SUM_DISTINCT);
@@ -125,10 +134,12 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.CEIL);
         cap.supportScalarFunction(ScalarFunctionCapability.DIV);
         cap.supportScalarFunction(ScalarFunctionCapability.FLOOR);
-        // ROUND is not supported. DATETIME could be pushed down, NUMBER would have to be rounded.
+        // ROUND is not supported. DATETIME could be pushed down, NUMBER would have to
+        // be rounded.
         cap.supportScalarFunction(ScalarFunctionCapability.SIGN);
-        // TRUNC is not supported. DATETIME could be pushed down, NUMBER would have to be rounded.
-        if (castScalarFuncToFloat) {
+        // TRUNC is not supported. DATETIME could be pushed down, NUMBER would have to
+        // be rounded.
+        if (this.castScalarFuncToFloat) {
             // Cast result to FLOAT because result set precision = 0, scale = 0
             cap.supportScalarFunction(ScalarFunctionCapability.ADD);
             cap.supportScalarFunction(ScalarFunctionCapability.SUB);
@@ -165,7 +176,8 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         // COLOGNE_PHONETIC is not supported.
         // CONCAT is not supported. Number of arguments can be different.
         // DUMP is not supported. Output is different.
-        // EDIT_DISTANCE is not supported. Output is different. UTL_MATCH.EDIT_DISTANCE returns -1 with NULL argument.
+        // EDIT_DISTANCE is not supported. Output is different. UTL_MATCH.EDIT_DISTANCE
+        // returns -1 with NULL argument.
         // INSERT is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.INSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.LENGTH);
@@ -180,7 +192,8 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.REPEAT);
         cap.supportScalarFunction(ScalarFunctionCapability.REPLACE);
         cap.supportScalarFunction(ScalarFunctionCapability.REVERSE);
-        // RIGHT is not supported. Possible solution with SUBSTRING (must handle corner cases correctly).
+        // RIGHT is not supported. Possible solution with SUBSTRING (must handle corner
+        // cases correctly).
         cap.supportScalarFunction(ScalarFunctionCapability.RPAD);
         cap.supportScalarFunction(ScalarFunctionCapability.RTRIM);
         cap.supportScalarFunction(ScalarFunctionCapability.SOUNDEX);
@@ -301,9 +314,10 @@ public class OracleSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Map<AggregateFunction, String> getAggregateFunctionAliases() {
-        Map<AggregateFunction, String> aggregationAliases = new EnumMap<>(AggregateFunction.class);
+        final Map<AggregateFunction, String> aggregationAliases = new EnumMap<>(AggregateFunction.class);
         // APPROXIMATE_COUNT_DISTINCT supported with version >= 12.1.0.2
-        // aggregationAliases.put(AggregateFunction.APPROXIMATE_COUNT_DISTINCT, "APPROX_COUNT_DISTINCT");
+        // aggregationAliases.put(AggregateFunction.APPROXIMATE_COUNT_DISTINCT,
+        // "APPROX_COUNT_DISTINCT");
         return aggregationAliases;
     }
 
@@ -318,10 +332,13 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public MappedTable mapTable(ResultSet tables) throws SQLException {
-        String tableName = tables.getString("TABLE_NAME");
+    public MappedTable mapTable(final ResultSet tables) throws SQLException {
+        final String tableName = tables.getString("TABLE_NAME");
         if (tableName.startsWith("BIN$")) {
-            // In case of Oracle we may see deleted tables with strange names (BIN$OeQco6jg/drgUDAKzmRzgA==$0). Should be filtered out. Squirrel also doesn't see them for unknown reasons. See http://stackoverflow.com/questions/2446053/what-are-the-bin-tables-in-oracles-all-tab-columns-table
+            // In case of Oracle we may see deleted tables with strange names
+            // (BIN$OeQco6jg/drgUDAKzmRzgA==$0). Should be filtered out. Squirrel also
+            // doesn't see them for unknown reasons. See
+            // http://stackoverflow.com/questions/2446053/what-are-the-bin-tables-in-oracles-all-tab-columns-table
             System.out.println("Skip table: " + tableName);
             return MappedTable.createIgnoredTable();
         } else {
@@ -330,52 +347,53 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcTypeDescription) throws SQLException {
+    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
         DataType colType = null;
-        int jdbcType = jdbcTypeDescription.getJdbcType();
+        final int jdbcType = jdbcTypeDescription.getJdbcType();
         switch (jdbcType) {
-            case Types.DECIMAL:
-                int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
-                int decimalScale = jdbcTypeDescription.getDecimalScale();
-                if (decimalScale == -127) {
-                    // Oracle JDBC driver returns scale -127 if NUMBER data type was specified without scale and precision. Convert to VARCHAR.
-                    // See http://docs.oracle.com/cd/B28359_01/server.111/b28318/datatype.htm#i16209
-                    // and https://docs.oracle.com/cd/E19501-01/819-3659/gcmaz/
-                    colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
-                    break;
-                }
-                if (decimalPrec <= DataType.maxExasolDecimalPrecision) {
-                    colType = DataType.createDecimal(decimalPrec, decimalScale);
-                } else {
-                    colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
-                }
-                break;
-            case Types.OTHER:
-                // Oracle JDBC uses OTHER as CLOB
-                colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
-            	break;
-            case -103:
-                // INTERVAL YEAR TO MONTH
-            case -104:
-                // INTERVAL DAY TO SECOND
+        case Types.DECIMAL:
+            final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
+            final int decimalScale = jdbcTypeDescription.getDecimalScale();
+            if (decimalScale == -127) {
+                // Oracle JDBC driver returns scale -127 if NUMBER data type was specified
+                // without scale and precision. Convert to VARCHAR.
+                // See http://docs.oracle.com/cd/B28359_01/server.111/b28318/datatype.htm#i16209
+                // and https://docs.oracle.com/cd/E19501-01/819-3659/gcmaz/
                 colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
                 break;
-            case -102:
-            case -101:
-                // -101 and -102 is TIMESTAMP WITH (LOCAL) TIMEZONE in Oracle.
+            }
+            if (decimalPrec <= DataType.maxExasolDecimalPrecision) {
+                colType = DataType.createDecimal(decimalPrec, decimalScale);
+            } else {
                 colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
-                break;
-            case 100:
-            case 101:
-                // 100 and 101 are BINARY_FLOAT and BINARY_DOUBLE in Oracle.
-                colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
-                break;
+            }
+            break;
+        case Types.OTHER:
+            // Oracle JDBC uses OTHER as CLOB
+            colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+            break;
+        case -103:
+            // INTERVAL YEAR TO MONTH
+        case -104:
+            // INTERVAL DAY TO SECOND
+            colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+            break;
+        case -102:
+        case -101:
+            // -101 and -102 is TIMESTAMP WITH (LOCAL) TIMEZONE in Oracle.
+            colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+            break;
+        case 100:
+        case 101:
+            // 100 and 101 are BINARY_FLOAT and BINARY_DOUBLE in Oracle.
+            colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+            break;
         }
         return colType;
     }
 
     @Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(SqlGenerationContext context) {
+    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new OracleSqlGenerationVisitor(this, context);
     }
 
@@ -390,14 +408,15 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String applyQuote(String identifier) {
-        // If identifier contains double quotation marks ", it needs to be escaped by another double quotation mark. E.g. "a""b" is the identifier a"b in the db.
+    public String applyQuote(final String identifier) {
+        // If identifier contains double quotation marks ", it needs to be escaped by
+        // another double quotation mark. E.g. "a""b" is the identifier a"b in the db.
         return "\"" + identifier.replace("\"", "\"\"") + "\"";
     }
 
     @Override
-    public String applyQuoteIfNeeded(String identifier) {
-        boolean isSimpleIdentifier = identifier.matches("^[A-Z][0-9A-Z_]*");
+    public String applyQuoteIfNeeded(final String identifier) {
+        final boolean isSimpleIdentifier = identifier.matches("^[A-Z][0-9A-Z_]*");
         if (isSimpleIdentifier) {
             return identifier;
         } else {
@@ -406,12 +425,12 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public boolean requiresCatalogQualifiedTableNames(SqlGenerationContext context) {
+    public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
         return false;
     }
 
     @Override
-    public boolean requiresSchemaQualifiedTableNames(SqlGenerationContext context) {
+    public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
         return true;
     }
 
@@ -421,7 +440,7 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String getStringLiteral(String value) {
+    public String getStringLiteral(final String value) {
         return "'" + value.replace("'", "''") + "'";
     }
 

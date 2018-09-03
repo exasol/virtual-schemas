@@ -1,6 +1,5 @@
 package com.exasol.adapter.dialects.impl;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.EnumMap;
@@ -12,30 +11,31 @@ import com.exasol.adapter.capabilities.LiteralCapability;
 import com.exasol.adapter.capabilities.MainCapability;
 import com.exasol.adapter.capabilities.PredicateCapability;
 import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.dialects.AbstractSqlDialect;
+import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.dialects.SqlDialectContext;
+import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
+public class RedshiftSqlDialect extends AbstractSqlDialect {
 
-public class RedshiftSqlDialect extends AbstractSqlDialect{
+    public RedshiftSqlDialect(final SqlDialectContext context) {
+        super(context);
+    }
 
+    private static final String NAME = "REDSHIFT";
 
-    public RedshiftSqlDialect(SqlDialectContext context) {
-		super(context);
-	}
+    public static String getPublicName() {
+        return NAME;
+    }
 
-	public static final String NAME = "REDSHIFT";
-	
-	@Override
-	public String getPublicName() {
-		return NAME;
-	}
+    @Override
+    public Capabilities getCapabilities() {
 
-	@Override
-	public Capabilities getCapabilities() {
-	
-        Capabilities cap = new Capabilities();
+        final Capabilities cap = new Capabilities();
 
         cap.supportMainCapability(MainCapability.SELECTLIST_PROJECTION);
         cap.supportMainCapability(MainCapability.SELECTLIST_EXPRESSIONS);
@@ -49,7 +49,7 @@ public class RedshiftSqlDialect extends AbstractSqlDialect{
         cap.supportMainCapability(MainCapability.ORDER_BY_EXPRESSION);
         cap.supportMainCapability(MainCapability.LIMIT);
         cap.supportMainCapability(MainCapability.LIMIT_WITH_OFFSET);
-        
+
         // Predicates
         cap.supportPredicate(PredicateCapability.AND);
         cap.supportPredicate(PredicateCapability.OR);
@@ -65,7 +65,7 @@ public class RedshiftSqlDialect extends AbstractSqlDialect{
         cap.supportPredicate(PredicateCapability.IN_CONSTLIST);
         cap.supportPredicate(PredicateCapability.IS_NULL);
         cap.supportPredicate(PredicateCapability.IS_NOT_NULL);
-        
+
         // Literals
         // BOOL is not supported
         cap.supportLiteral(LiteralCapability.BOOL);
@@ -77,14 +77,13 @@ public class RedshiftSqlDialect extends AbstractSqlDialect{
         cap.supportLiteral(LiteralCapability.EXACTNUMERIC);
         cap.supportLiteral(LiteralCapability.STRING);
         cap.supportLiteral(LiteralCapability.INTERVAL);
-        
-        
+
         // Aggregate functions
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT);
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_STAR);
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.GROUP_CONCAT);
-        
+
         cap.supportAggregateFunction(AggregateFunctionCapability.SUM);
         cap.supportAggregateFunction(AggregateFunctionCapability.SUM_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.MIN);
@@ -105,10 +104,9 @@ public class RedshiftSqlDialect extends AbstractSqlDialect{
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_POP);
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_POP_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_SAMP);
-        cap.supportAggregateFunction(AggregateFunctionCapability.VAR_SAMP_DISTINCT)	;
-        
-        
-        //math functions
+        cap.supportAggregateFunction(AggregateFunctionCapability.VAR_SAMP_DISTINCT);
+
+        // math functions
         cap.supportScalarFunction(ScalarFunctionCapability.CEIL);
         cap.supportScalarFunction(ScalarFunctionCapability.DIV);
         cap.supportScalarFunction(ScalarFunctionCapability.FLOOR);
@@ -141,13 +139,12 @@ public class RedshiftSqlDialect extends AbstractSqlDialect{
         cap.supportScalarFunction(ScalarFunctionCapability.SQRT);
         cap.supportScalarFunction(ScalarFunctionCapability.TAN);
         cap.supportScalarFunction(ScalarFunctionCapability.TANH);
-        cap.supportScalarFunction(ScalarFunctionCapability.ASCII); 
+        cap.supportScalarFunction(ScalarFunctionCapability.ASCII);
         cap.supportScalarFunction(ScalarFunctionCapability.CHR);
         cap.supportScalarFunction(ScalarFunctionCapability.INSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.LENGTH);
         cap.supportScalarFunction(ScalarFunctionCapability.SIGN);
-        
-        
+
         cap.supportScalarFunction(ScalarFunctionCapability.CONCAT);
         cap.supportScalarFunction(ScalarFunctionCapability.LOCATE);
         cap.supportScalarFunction(ScalarFunctionCapability.LOWER);
@@ -167,148 +164,138 @@ public class RedshiftSqlDialect extends AbstractSqlDialect{
         cap.supportScalarFunction(ScalarFunctionCapability.TRIM);
         cap.supportScalarFunction(ScalarFunctionCapability.UPPER);
 
-        
-        //Bit functions
+        // Bit functions
         cap.supportScalarFunction(ScalarFunctionCapability.BIT_AND);
         cap.supportScalarFunction(ScalarFunctionCapability.BIT_OR);
 
-        //Date and Time Functions
+        // Date and Time Functions
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_MONTHS);
         cap.supportScalarFunction(ScalarFunctionCapability.MONTHS_BETWEEN);
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_DATE);
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_TIMESTAMP);
         cap.supportScalarFunction(ScalarFunctionCapability.CONVERT_TZ);
         cap.supportScalarFunction(ScalarFunctionCapability.SYSDATE);
-        
-        cap.supportScalarFunction(ScalarFunctionCapability.YEAR); 
+
+        cap.supportScalarFunction(ScalarFunctionCapability.YEAR);
         cap.supportScalarFunction(ScalarFunctionCapability.EXTRACT);
-        
-        
-        //Convertion functions
+
+        // Convertion functions
         cap.supportScalarFunction(ScalarFunctionCapability.CAST);
         cap.supportScalarFunction(ScalarFunctionCapability.TO_NUMBER);
         cap.supportScalarFunction(ScalarFunctionCapability.TO_TIMESTAMP);
         cap.supportScalarFunction(ScalarFunctionCapability.TO_DATE);
-        
-        
-        //hash functions
+
+        // hash functions
         cap.supportScalarFunction(ScalarFunctionCapability.HASH_MD5);
         cap.supportScalarFunction(ScalarFunctionCapability.HASH_SHA1);
-        
-        
-        //system information functions
+
+        // system information functions
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_SCHEMA);
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_USER);
-        
-        return cap;
-	}
-	
-	 @Override
-    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcTypeDescription) throws SQLException {
-        DataType colType = null;
-        int jdbcType = jdbcTypeDescription.getJdbcType();
-        switch (jdbcType) {
-        	case Types.NUMERIC:
-        		int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
-                int decimalScale = jdbcTypeDescription.getDecimalScale();
 
-                if (decimalPrec <= DataType.maxExasolDecimalPrecision) {
-                    colType = DataType.createDecimal(decimalPrec, decimalScale);
-                } else {
-                    colType = DataType.createDouble();
-                }
-                break;
-            
+        return cap;
+    }
+
+    @Override
+    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
+        DataType colType = null;
+        final int jdbcType = jdbcTypeDescription.getJdbcType();
+        switch (jdbcType) {
+        case Types.NUMERIC:
+            final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
+            final int decimalScale = jdbcTypeDescription.getDecimalScale();
+
+            if (decimalPrec <= DataType.maxExasolDecimalPrecision) {
+                colType = DataType.createDecimal(decimalPrec, decimalScale);
+            } else {
+                colType = DataType.createDouble();
+            }
+            break;
+
         }
         return colType;
     }
-	
-	@Override
-    public Map<ScalarFunction, String> getScalarFunctionAliases() {
-		
-		Map<ScalarFunction,String> scalarAliases = new EnumMap<>(ScalarFunction.class); 
-		
-		scalarAliases.put(ScalarFunction.YEAR, "DATE_PART_YEAR");
-		scalarAliases.put(ScalarFunction.CONVERT_TZ, "CONVERT_TIMEZONE");
-		scalarAliases.put(ScalarFunction.HASH_MD5, "MD5");
-		scalarAliases.put(ScalarFunction.HASH_SHA1, "FUNC_SHA1");
-		
-		scalarAliases.put(ScalarFunction.SUBSTR,"SUBSTRING");
-		
-		return scalarAliases;
-		
-	}
 
-	
-	@Override
+    @Override
+    public Map<ScalarFunction, String> getScalarFunctionAliases() {
+
+        final Map<ScalarFunction, String> scalarAliases = new EnumMap<>(ScalarFunction.class);
+
+        scalarAliases.put(ScalarFunction.YEAR, "DATE_PART_YEAR");
+        scalarAliases.put(ScalarFunction.CONVERT_TZ, "CONVERT_TIMEZONE");
+        scalarAliases.put(ScalarFunction.HASH_MD5, "MD5");
+        scalarAliases.put(ScalarFunction.HASH_SHA1, "FUNC_SHA1");
+
+        scalarAliases.put(ScalarFunction.SUBSTR, "SUBSTRING");
+
+        return scalarAliases;
+
+    }
+
+    @Override
     public Map<AggregateFunction, String> getAggregateFunctionAliases() {
-        Map<AggregateFunction, String> aggregationAliases = new EnumMap<>(AggregateFunction.class);
-        
+        final Map<AggregateFunction, String> aggregationAliases = new EnumMap<>(AggregateFunction.class);
+
         return aggregationAliases;
     }
 
-
-	@Override
-	public SchemaOrCatalogSupport supportsJdbcCatalogs() {
+    @Override
+    public SchemaOrCatalogSupport supportsJdbcCatalogs() {
         return SchemaOrCatalogSupport.SUPPORTED;
-	}
+    }
 
-	@Override
-	public SchemaOrCatalogSupport supportsJdbcSchemas() {
+    @Override
+    public SchemaOrCatalogSupport supportsJdbcSchemas() {
         return SchemaOrCatalogSupport.SUPPORTED;
-	}
+    }
 
-	@Override
-	public IdentifierCaseHandling getUnquotedIdentifierHandling() {
-		 return IdentifierCaseHandling.INTERPRET_AS_UPPER;
-	}
-
-	@Override
-	public IdentifierCaseHandling getQuotedIdentifierHandling() {
+    @Override
+    public IdentifierCaseHandling getUnquotedIdentifierHandling() {
         return IdentifierCaseHandling.INTERPRET_AS_UPPER;
-	}
+    }
 
-	@Override
-	public String applyQuote(String identifier) {
-		return "\"" + identifier.replace("\"", "\"\"") + "\"";
-	}
+    @Override
+    public IdentifierCaseHandling getQuotedIdentifierHandling() {
+        return IdentifierCaseHandling.INTERPRET_AS_UPPER;
+    }
 
-	@Override
-	public String applyQuoteIfNeeded(String identifier) {
-		 boolean isSimpleIdentifier = identifier.matches("^[A-Z][0-9A-Z_]*");
-	        if (isSimpleIdentifier) {
-	            return identifier;
-	        } else {
-	            return applyQuote(identifier);
-	        }
-	}
+    @Override
+    public String applyQuote(final String identifier) {
+        return "\"" + identifier.replace("\"", "\"\"") + "\"";
+    }
 
-	@Override
-	public boolean requiresCatalogQualifiedTableNames(
-			SqlGenerationContext context) {
-		return false;
-	}
+    @Override
+    public String applyQuoteIfNeeded(final String identifier) {
+        final boolean isSimpleIdentifier = identifier.matches("^[A-Z][0-9A-Z_]*");
+        if (isSimpleIdentifier) {
+            return identifier;
+        } else {
+            return applyQuote(identifier);
+        }
+    }
 
-	
-	
-	@Override
-	public boolean requiresSchemaQualifiedTableNames(
-			SqlGenerationContext context) {
-		return true;
-	}
+    @Override
+    public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
+        return false;
+    }
 
-	@Override
-	public NullSorting getDefaultNullSorting() {
-		return NullSorting.NULLS_SORTED_AT_END;
-	}
+    @Override
+    public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
+        return true;
+    }
 
-	@Override
-	public String getStringLiteral(String value) {
-		 return "'" + value.replace("'", "''") + "'";
-	}
-	
-	 @Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(SqlGenerationContext context) {
+    @Override
+    public NullSorting getDefaultNullSorting() {
+        return NullSorting.NULLS_SORTED_AT_END;
+    }
+
+    @Override
+    public String getStringLiteral(final String value) {
+        return "'" + value.replace("'", "''") + "'";
+    }
+
+    @Override
+    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new RedshiftSqlGenerationVisitor(this, context);
     }
 

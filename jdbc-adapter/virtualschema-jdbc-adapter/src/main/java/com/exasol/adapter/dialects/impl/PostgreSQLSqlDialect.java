@@ -1,6 +1,5 @@
 package com.exasol.adapter.dialects.impl;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.EnumMap;
@@ -12,31 +11,33 @@ import com.exasol.adapter.capabilities.LiteralCapability;
 import com.exasol.adapter.capabilities.MainCapability;
 import com.exasol.adapter.capabilities.PredicateCapability;
 import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.dialects.AbstractSqlDialect;
+import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.dialects.SqlDialectContext;
+import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
-public class PostgreSQLSqlDialect extends AbstractSqlDialect{
+public class PostgreSQLSqlDialect extends AbstractSqlDialect {
 
+    public PostgreSQLSqlDialect(final SqlDialectContext context) {
+        super(context);
+    }
 
-    public PostgreSQLSqlDialect(SqlDialectContext context) {
-		super(context);
-	}
+    private static final String NAME = "POSTGRESQL";
 
-	public static final String NAME = "POSTGRESQL";
-	
-	public static int maxPostgresSQLVarcharSize = 2000000; // Postgres limit actually is 1 GB, so we use as max the EXASOL limit
-	
-	@Override
-	public String getPublicName() {
-		return NAME;
-	}
+    public static int maxPostgresSQLVarcharSize = 2000000; // Postgres limit actually is 1 GB, so we use as max the
+                                                           // EXASOL limit
 
-	@Override
-	public Capabilities getCapabilities() {
-	
-        Capabilities cap = new Capabilities();
+    public static String getPublicName() {
+        return NAME;
+    }
+
+    @Override
+    public Capabilities getCapabilities() {
+
+        final Capabilities cap = new Capabilities();
 
         cap.supportMainCapability(MainCapability.SELECTLIST_PROJECTION);
         cap.supportMainCapability(MainCapability.SELECTLIST_EXPRESSIONS);
@@ -50,7 +51,7 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect{
         cap.supportMainCapability(MainCapability.ORDER_BY_EXPRESSION);
         cap.supportMainCapability(MainCapability.LIMIT);
         cap.supportMainCapability(MainCapability.LIMIT_WITH_OFFSET);
-        
+
         // Predicates
         cap.supportPredicate(PredicateCapability.AND);
         cap.supportPredicate(PredicateCapability.OR);
@@ -66,7 +67,7 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect{
         cap.supportPredicate(PredicateCapability.IN_CONSTLIST);
         cap.supportPredicate(PredicateCapability.IS_NULL);
         cap.supportPredicate(PredicateCapability.IS_NOT_NULL);
-        
+
         // Literals
         // BOOL is not supported
         cap.supportLiteral(LiteralCapability.BOOL);
@@ -77,43 +78,41 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect{
         cap.supportLiteral(LiteralCapability.DOUBLE);
         cap.supportLiteral(LiteralCapability.EXACTNUMERIC);
         cap.supportLiteral(LiteralCapability.STRING);
-        //cap.supportLiteral(LiteralCapability.INTERVAL);
-        
-        
+        // cap.supportLiteral(LiteralCapability.INTERVAL);
+
         // Aggregate functions
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT);
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_STAR);
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_DISTINCT);
-        
+
         cap.supportAggregateFunction(AggregateFunctionCapability.SUM);
         cap.supportAggregateFunction(AggregateFunctionCapability.SUM_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.MIN);
         cap.supportAggregateFunction(AggregateFunctionCapability.MAX);
         cap.supportAggregateFunction(AggregateFunctionCapability.AVG);
         cap.supportAggregateFunction(AggregateFunctionCapability.AVG_DISTINCT);
-        
+
         cap.supportAggregateFunction(AggregateFunctionCapability.MEDIAN);
         cap.supportAggregateFunction(AggregateFunctionCapability.FIRST_VALUE);
         cap.supportAggregateFunction(AggregateFunctionCapability.LAST_VALUE);
-        
+
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV);
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_POP);
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_POP_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_SAMP);
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_SAMP_DISTINCT);
-        
+
         cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE);
         cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_POP);
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_POP_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_SAMP);
-        cap.supportAggregateFunction(AggregateFunctionCapability.VAR_SAMP_DISTINCT)	;
-        
+        cap.supportAggregateFunction(AggregateFunctionCapability.VAR_SAMP_DISTINCT);
+
         cap.supportAggregateFunction(AggregateFunctionCapability.GROUP_CONCAT); // translated to string_agg
 
-        
-        //math functions
+        // math functions
         // Standard Arithmetic Operators
         cap.supportScalarFunction(ScalarFunctionCapability.ADD);
         cap.supportScalarFunction(ScalarFunctionCapability.SUB);
@@ -153,45 +152,44 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect{
         cap.supportScalarFunction(ScalarFunctionCapability.TAN);
         cap.supportScalarFunction(ScalarFunctionCapability.TANH);
         cap.supportScalarFunction(ScalarFunctionCapability.TRUNC);
-        
-        
+
         // String Functions
         cap.supportScalarFunction(ScalarFunctionCapability.ASCII);
         cap.supportScalarFunction(ScalarFunctionCapability.BIT_LENGTH);
         cap.supportScalarFunction(ScalarFunctionCapability.CHR);
-        //cap.supportScalarFunction(ScalarFunctionCapability.COLOGNE_PHONETIC);
+        // cap.supportScalarFunction(ScalarFunctionCapability.COLOGNE_PHONETIC);
         cap.supportScalarFunction(ScalarFunctionCapability.CONCAT);
-        //cap.supportScalarFunction(ScalarFunctionCapability.DUMP);
-        //cap.supportScalarFunction(ScalarFunctionCapability.EDIT_DISTANCE);
-        //cap.supportScalarFunction(ScalarFunctionCapability.INSERT);
+        // cap.supportScalarFunction(ScalarFunctionCapability.DUMP);
+        // cap.supportScalarFunction(ScalarFunctionCapability.EDIT_DISTANCE);
+        // cap.supportScalarFunction(ScalarFunctionCapability.INSERT);
         cap.supportScalarFunction(ScalarFunctionCapability.INSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.LENGTH);
-        //cap.supportScalarFunction(ScalarFunctionCapability.LOCATE);
+        // cap.supportScalarFunction(ScalarFunctionCapability.LOCATE);
         cap.supportScalarFunction(ScalarFunctionCapability.LOWER);
         cap.supportScalarFunction(ScalarFunctionCapability.LPAD);
         cap.supportScalarFunction(ScalarFunctionCapability.LTRIM);
         cap.supportScalarFunction(ScalarFunctionCapability.OCTET_LENGTH);
-        //cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_INSTR);
+        // cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_INSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_REPLACE);
-        //cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_SUBSTR);
+        // cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_SUBSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.REPEAT);
         cap.supportScalarFunction(ScalarFunctionCapability.REPLACE);
         cap.supportScalarFunction(ScalarFunctionCapability.REVERSE);
         cap.supportScalarFunction(ScalarFunctionCapability.RIGHT);
         cap.supportScalarFunction(ScalarFunctionCapability.RPAD);
         cap.supportScalarFunction(ScalarFunctionCapability.RTRIM);
-        //cap.supportScalarFunction(ScalarFunctionCapability.SOUNDEX);
-        //cap.supportScalarFunction(ScalarFunctionCapability.SPACE);
+        // cap.supportScalarFunction(ScalarFunctionCapability.SOUNDEX);
+        // cap.supportScalarFunction(ScalarFunctionCapability.SPACE);
         cap.supportScalarFunction(ScalarFunctionCapability.SUBSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.TRANSLATE);
         cap.supportScalarFunction(ScalarFunctionCapability.TRIM);
         cap.supportScalarFunction(ScalarFunctionCapability.UNICODE);
         cap.supportScalarFunction(ScalarFunctionCapability.UNICODECHR);
         cap.supportScalarFunction(ScalarFunctionCapability.UPPER);
-        
+
         // Date/Time Functions
-        
-        //The following functions will be rewrited to + operator in the Visitor
+
+        // The following functions will be rewrited to + operator in the Visitor
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_DAYS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_HOURS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_MINUTES);
@@ -199,19 +197,19 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect{
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_SECONDS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_WEEKS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_YEARS);
-        
-        //cap.supportScalarFunction(ScalarFunctionCapability.CONVERT_TZ);
-        
-        
-        //handled via Visitor and transformed to e.g. date_part('day',age('2012-03-05','2010-04-01' ))
+
+        // cap.supportScalarFunction(ScalarFunctionCapability.CONVERT_TZ);
+
+        // handled via Visitor and transformed to e.g.
+        // date_part('day',age('2012-03-05','2010-04-01' ))
         cap.supportScalarFunction(ScalarFunctionCapability.SECONDS_BETWEEN);
         cap.supportScalarFunction(ScalarFunctionCapability.MINUTES_BETWEEN);
         cap.supportScalarFunction(ScalarFunctionCapability.HOURS_BETWEEN);
         cap.supportScalarFunction(ScalarFunctionCapability.DAYS_BETWEEN);
         cap.supportScalarFunction(ScalarFunctionCapability.MONTHS_BETWEEN);
         cap.supportScalarFunction(ScalarFunctionCapability.YEARS_BETWEEN);
-        
-        //handled via Visitor and transformed to e.g. date_part
+
+        // handled via Visitor and transformed to e.g. date_part
         cap.supportScalarFunction(ScalarFunctionCapability.MINUTE);
         cap.supportScalarFunction(ScalarFunctionCapability.SECOND);
         cap.supportScalarFunction(ScalarFunctionCapability.DAY);
@@ -219,20 +217,19 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect{
         cap.supportScalarFunction(ScalarFunctionCapability.MONTH);
         cap.supportScalarFunction(ScalarFunctionCapability.YEAR);
 
-
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_DATE);
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_TIMESTAMP);
         cap.supportScalarFunction(ScalarFunctionCapability.DATE_TRUNC);
-        
-        //cap.supportScalarFunction(ScalarFunctionCapability.DBTIMEZONE);
+
+        // cap.supportScalarFunction(ScalarFunctionCapability.DBTIMEZONE);
         cap.supportScalarFunction(ScalarFunctionCapability.EXTRACT);
         cap.supportScalarFunction(ScalarFunctionCapability.LOCALTIMESTAMP);
-        //cap.supportScalarFunction(ScalarFunctionCapability.NUMTODSINTERVAL);
-        //cap.supportScalarFunction(ScalarFunctionCapability.NUMTOYMINTERVAL);
-        cap.supportScalarFunction(ScalarFunctionCapability.POSIX_TIME); //converted to extract(epoche
-        //cap.supportScalarFunction(ScalarFunctionCapability.SESSIONTIMEZONE);
-        //cap.supportScalarFunction(ScalarFunctionCapability.SYSDATE);
-        //cap.supportScalarFunction(ScalarFunctionCapability.SYSTIMESTAMP);
+        // cap.supportScalarFunction(ScalarFunctionCapability.NUMTODSINTERVAL);
+        // cap.supportScalarFunction(ScalarFunctionCapability.NUMTOYMINTERVAL);
+        cap.supportScalarFunction(ScalarFunctionCapability.POSIX_TIME); // converted to extract(epoche
+        // cap.supportScalarFunction(ScalarFunctionCapability.SESSIONTIMEZONE);
+        // cap.supportScalarFunction(ScalarFunctionCapability.SYSDATE);
+        // cap.supportScalarFunction(ScalarFunctionCapability.SYSTIMESTAMP);
 
         // Conversion functions
 //        cap.supportScalarFunction(ScalarFunctionCapability.IS_NUMBER);
@@ -247,7 +244,7 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect{
 //        cap.supportScalarFunction(ScalarFunctionCapability.TO_YMINTERVAL);
 //        cap.supportScalarFunction(ScalarFunctionCapability.TO_NUMBER);
 //        cap.supportScalarFunction(ScalarFunctionCapability.TO_TIMESTAMP);
-        
+
         // Bitwise functions
 //        cap.supportScalarFunction(ScalarFunctionCapability.BIT_AND);
 //        cap.supportScalarFunction(ScalarFunctionCapability.BIT_CHECK);
@@ -256,9 +253,8 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect{
 //        cap.supportScalarFunction(ScalarFunctionCapability.BIT_SET);
 //        cap.supportScalarFunction(ScalarFunctionCapability.BIT_TO_NUM);
 //        cap.supportScalarFunction(ScalarFunctionCapability.BIT_XOR);
-        
-        
-     // Other functions
+
+        // Other functions
         cap.supportScalarFunction(ScalarFunctionCapability.CASE);
 //        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_SCHEMA);
 //        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_SESSION);
@@ -271,124 +267,120 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect{
 //        cap.supportScalarFunction(ScalarFunctionCapability.NULLIFZERO);
 //        cap.supportScalarFunction(ScalarFunctionCapability.SYS_GUID);
 //        cap.supportScalarFunction(ScalarFunctionCapability.ZEROIFNULL);
-        
+
         return cap;
-	}
-	
-	 @Override
-    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcTypeDescription) throws SQLException {
+    }
+
+    @Override
+    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
         DataType colType = null;
-        int jdbcType = jdbcTypeDescription.getJdbcType();
+        final int jdbcType = jdbcTypeDescription.getJdbcType();
 
         switch (jdbcType) {
-        		case Types.OTHER:
-	            	String columnTypeName = jdbcTypeDescription.getTypeName();
-	
-	            	if(columnTypeName.equals("varbit")){
-	            		int n = jdbcTypeDescription.getPrecisionOrSize();
-	            		colType = DataType.createVarChar(n, DataType.ExaCharset.UTF8);
-	            	}
-	            	else
-	            		colType = DataType.createVarChar(PostgreSQLSqlDialect.maxPostgresSQLVarcharSize, DataType.ExaCharset.UTF8);     
-	                break;
-        		case Types.SQLXML:
-	            		colType = DataType.createVarChar(PostgreSQLSqlDialect.maxPostgresSQLVarcharSize, DataType.ExaCharset.UTF8);
-        			break;
-			case Types.DISTINCT:
-				colType=DataType.createVarChar(PostgreSQLSqlDialect.maxPostgresSQLVarcharSize, DataType.ExaCharset.UTF8);
-				break;
+        case Types.OTHER:
+            final String columnTypeName = jdbcTypeDescription.getTypeName();
+
+            if (columnTypeName.equals("varbit")) {
+                final int n = jdbcTypeDescription.getPrecisionOrSize();
+                colType = DataType.createVarChar(n, DataType.ExaCharset.UTF8);
+            } else {
+                colType = DataType.createVarChar(PostgreSQLSqlDialect.maxPostgresSQLVarcharSize,
+                        DataType.ExaCharset.UTF8);
+            }
+            break;
+        case Types.SQLXML:
+            colType = DataType.createVarChar(PostgreSQLSqlDialect.maxPostgresSQLVarcharSize, DataType.ExaCharset.UTF8);
+            break;
+        case Types.DISTINCT:
+            colType = DataType.createVarChar(PostgreSQLSqlDialect.maxPostgresSQLVarcharSize, DataType.ExaCharset.UTF8);
+            break;
         }
-        
+
         return colType;
     }
-	
-	@Override
+
+    @Override
     public Map<ScalarFunction, String> getScalarFunctionAliases() {
-		
-		Map<ScalarFunction,String> scalarAliases = new EnumMap<>(ScalarFunction.class); 
-		
-		scalarAliases.put(ScalarFunction.SUBSTR,"SUBSTRING");
-		scalarAliases.put(ScalarFunction.HASH_MD5, "MD5");
-		
-		return scalarAliases;
-		
-	}
 
-	
-	@Override
-	public SchemaOrCatalogSupport supportsJdbcCatalogs() {
-        return SchemaOrCatalogSupport.SUPPORTED;
-	}
+        final Map<ScalarFunction, String> scalarAliases = new EnumMap<>(ScalarFunction.class);
 
-	@Override
-	public SchemaOrCatalogSupport supportsJdbcSchemas() {
-        return SchemaOrCatalogSupport.SUPPORTED;
-	}
+        scalarAliases.put(ScalarFunction.SUBSTR, "SUBSTRING");
+        scalarAliases.put(ScalarFunction.HASH_MD5, "MD5");
 
-	@Override
-    public String changeIdentifierCaseIfNeeded(String identifier) {
-		
-		boolean isSimplePostgresIdentifier = identifier.matches("^[a-z][0-9a-z_]*");
-		
-		 if(isSimplePostgresIdentifier) 
-			 return identifier.toUpperCase();
-		 else
-			 return identifier;
-		 
+        return scalarAliases;
+
     }
-	
-	@Override
-	public IdentifierCaseHandling getUnquotedIdentifierHandling() {
-		 return IdentifierCaseHandling.INTERPRET_AS_LOWER;
-	}
 
-	@Override
-	public IdentifierCaseHandling getQuotedIdentifierHandling() {
+    @Override
+    public SchemaOrCatalogSupport supportsJdbcCatalogs() {
+        return SchemaOrCatalogSupport.SUPPORTED;
+    }
+
+    @Override
+    public SchemaOrCatalogSupport supportsJdbcSchemas() {
+        return SchemaOrCatalogSupport.SUPPORTED;
+    }
+
+    @Override
+    public String changeIdentifierCaseIfNeeded(final String identifier) {
+
+        final boolean isSimplePostgresIdentifier = identifier.matches("^[a-z][0-9a-z_]*");
+
+        if (isSimplePostgresIdentifier) {
+            return identifier.toUpperCase();
+        } else {
+            return identifier;
+        }
+
+    }
+
+    @Override
+    public IdentifierCaseHandling getUnquotedIdentifierHandling() {
+        return IdentifierCaseHandling.INTERPRET_AS_LOWER;
+    }
+
+    @Override
+    public IdentifierCaseHandling getQuotedIdentifierHandling() {
         return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
-	}
+    }
 
-	
-	@Override
-	public String applyQuote(String identifier) {
-		return "\"" + identifier.replace("\"", "\"\"") + "\"";
-	}
+    @Override
+    public String applyQuote(final String identifier) {
+        return "\"" + identifier.replace("\"", "\"\"") + "\"";
+    }
 
-	@Override
-	public String applyQuoteIfNeeded(String identifier) {
-		 boolean isSimpleIdentifier = identifier.matches("^[A-Z][0-9A-Z_]*");
-	        if (isSimpleIdentifier) {
-	            return identifier;
-	        } else {
-	            return applyQuote(identifier);
-	        }
-	}
+    @Override
+    public String applyQuoteIfNeeded(final String identifier) {
+        final boolean isSimpleIdentifier = identifier.matches("^[A-Z][0-9A-Z_]*");
+        if (isSimpleIdentifier) {
+            return identifier;
+        } else {
+            return applyQuote(identifier);
+        }
+    }
 
-	@Override
-	public boolean requiresCatalogQualifiedTableNames(
-			SqlGenerationContext context) {
-		return false;
-	}
+    @Override
+    public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
+        return false;
+    }
 
-	
-	
-	@Override
-	public boolean requiresSchemaQualifiedTableNames(
-			SqlGenerationContext context) {
-		return true;
-	}
+    @Override
+    public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
+        return true;
+    }
 
-	@Override
-	public NullSorting getDefaultNullSorting() {
-		return NullSorting.NULLS_SORTED_AT_END;
-	}
+    @Override
+    public NullSorting getDefaultNullSorting() {
+        return NullSorting.NULLS_SORTED_AT_END;
+    }
 
-	@Override
-	public String getStringLiteral(String value) {
-		 return "'" + value.replace("'", "''") + "'";
-	}
-	
-	 @Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(SqlGenerationContext context) {
+    @Override
+    public String getStringLiteral(final String value) {
+        return "'" + value.replace("'", "''") + "'";
+    }
+
+    @Override
+    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new PostgresSQLSqlGenerationVisitor(this, context);
     }
 

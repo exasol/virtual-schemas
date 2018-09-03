@@ -1,8 +1,5 @@
 package com.exasol.adapter.dialects.impl;
 
-import com.exasol.adapter.dialects.*;
-
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
@@ -12,6 +9,11 @@ import com.exasol.adapter.capabilities.LiteralCapability;
 import com.exasol.adapter.capabilities.MainCapability;
 import com.exasol.adapter.capabilities.PredicateCapability;
 import com.exasol.adapter.capabilities.ScalarFunctionCapability;
+import com.exasol.adapter.dialects.AbstractSqlDialect;
+import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.dialects.SqlDialectContext;
+import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.metadata.DataType;
 
 /**
@@ -22,23 +24,19 @@ import com.exasol.adapter.metadata.DataType;
 
 public class DB2SqlDialect extends AbstractSqlDialect {
 
-    public DB2SqlDialect(SqlDialectContext context)
-    {
+    public DB2SqlDialect(final SqlDialectContext context) {
         super(context);
     }
 
-    public static final String NAME = "DB2";
-    
-    @Override
-    public String getPublicName()
-    {
+    private static final String NAME = "DB2";
+
+    public static String getPublicName() {
         return NAME;
     }
 
     @Override
-    public Capabilities getCapabilities()
-    {
-        Capabilities cap = new Capabilities();
+    public Capabilities getCapabilities() {
+        final Capabilities cap = new Capabilities();
         // Capabilities
         cap.supportMainCapability(MainCapability.SELECTLIST_PROJECTION);
         cap.supportMainCapability(MainCapability.SELECTLIST_EXPRESSIONS);
@@ -101,7 +99,8 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         cap.supportAggregateFunction(AggregateFunctionCapability.FIRST_VALUE);
         cap.supportAggregateFunction(AggregateFunctionCapability.LAST_VALUE);
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV);
-        // not supported  cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_DISTINCT);
+        // not supported
+        // cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_POP);
         // STDDEV_POP_DISTINCT
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_SAMP);
@@ -153,7 +152,8 @@ public class DB2SqlDialect extends AbstractSqlDialect {
 
         // CONCAT is not supported. Number of arguments can be different.
         // DUMP is not supported. Output is different.
-        // EDIT_DISTANCE is not supported. Output is different. UTL_MATCH.EDIT_DISTANCE returns -1 with NULL argument.
+        // EDIT_DISTANCE is not supported. Output is different. UTL_MATCH.EDIT_DISTANCE
+        // returns -1 with NULL argument.
         // INSERT is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.INSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.LENGTH);
@@ -162,9 +162,12 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.LPAD);
         cap.supportScalarFunction(ScalarFunctionCapability.LTRIM);
         // OCTET_LENGTH is not supported. Can be different for Unicode characters.
-        // not supported cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_INSTR);
-     // not supported cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_REPLACE);
-     // not supported cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_SUBSTR);
+        // not supported
+        // cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_INSTR);
+        // not supported
+        // cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_REPLACE);
+        // not supported
+        // cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_SUBSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.REPEAT);
         cap.supportScalarFunction(ScalarFunctionCapability.REPLACE);
         // REVERSE is not supported
@@ -200,8 +203,8 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         // MINUTES_BETWEEN is not supported. EXTRACT does not work on strings.
         // MONTH is not supported. EXTRACT does not work on strings.
         // MONTHS_BETWEEN is not supported. EXTRACT does not work on strings.
-        //cap.supportScalarFunction(ScalarFunctionCapability.NUMTODSINTERVAL);
-        //cap.supportScalarFunction(ScalarFunctionCapability.NUMTOYMINTERVAL);
+        // cap.supportScalarFunction(ScalarFunctionCapability.NUMTODSINTERVAL);
+        // cap.supportScalarFunction(ScalarFunctionCapability.NUMTOYMINTERVAL);
         // POSIX_TIME is not supported. Does not work on strings.
         // SECOND is not supported. EXTRACT does not work on strings.
         // SECONDS_BETWEEN is not supported. EXTRACT does not work on strings.
@@ -278,42 +281,38 @@ public class DB2SqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public SchemaOrCatalogSupport supportsJdbcCatalogs()
-    {
+    public SchemaOrCatalogSupport supportsJdbcCatalogs() {
         return SchemaOrCatalogSupport.UNSUPPORTED;
     }
 
     @Override
-    public SchemaOrCatalogSupport supportsJdbcSchemas()
-    {
+    public SchemaOrCatalogSupport supportsJdbcSchemas() {
         return SchemaOrCatalogSupport.SUPPORTED;
     }
 
     @Override
-    public IdentifierCaseHandling getUnquotedIdentifierHandling()
-    {
+    public IdentifierCaseHandling getUnquotedIdentifierHandling() {
         return IdentifierCaseHandling.INTERPRET_AS_UPPER;
     }
 
     @Override
-    public IdentifierCaseHandling getQuotedIdentifierHandling()
-    {
+    public IdentifierCaseHandling getQuotedIdentifierHandling() {
         return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
     }
 
     @Override
-    public String applyQuote(String identifier)
-    {
-        // If identifier contains double quotation marks ", it needs to be espaced by another double quotation mark. E.g. "a""b" is the identifier a"b in the db.
+    public String applyQuote(final String identifier) {
+        // If identifier contains double quotation marks ", it needs to be espaced by
+        // another double quotation mark. E.g. "a""b" is the identifier a"b in the db.
         return "\"" + identifier.replace("\"", "\"\"") + "\"";
     }
 
     @Override
-    public String applyQuoteIfNeeded(String identifier)
-    {
+    public String applyQuoteIfNeeded(final String identifier) {
         // Quoted identifiers can contain any unicode char except dot (.).
-        // This is a simplified rule, which might cause that some identifiers are quoted although not needed
-        boolean isSimpleIdentifier = identifier.matches("^[A-Z][0-9A-Z_]*");
+        // This is a simplified rule, which might cause that some identifiers are quoted
+        // although not needed
+        final boolean isSimpleIdentifier = identifier.matches("^[A-Z][0-9A-Z_]*");
         if (isSimpleIdentifier) {
             return identifier;
         } else {
@@ -322,44 +321,38 @@ public class DB2SqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public boolean requiresCatalogQualifiedTableNames(
-            SqlGenerationContext context)
-    {
-        //DB2 does not know catalogs
+    public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
+        // DB2 does not know catalogs
         return false;
     }
 
     @Override
-    public boolean requiresSchemaQualifiedTableNames(
-            SqlGenerationContext context)
-    {
+    public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
         return true;
     }
-    
+
     @Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(SqlGenerationContext context) {
+    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new DB2SqlGenerationVisitor(this, context);
     }
 
     @Override
-    public NullSorting getDefaultNullSorting()
-    {
-        //default db2 behaviour is to set nulls to the end of the result
+    public NullSorting getDefaultNullSorting() {
+        // default db2 behaviour is to set nulls to the end of the result
         return NullSorting.NULLS_SORTED_AT_END;
     }
 
     @Override
-    public String getStringLiteral(String value)
-    {
+    public String getStringLiteral(final String value) {
         // Don't forget to escape single quote
         return "'" + value.replace("'", "''") + "'";
     }
-    
+
     @Override
-    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcTypeDescription) throws SQLException {
+    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
         DataType colType = null;
-        int jdbcType = jdbcTypeDescription.getJdbcType();
-        
+        final int jdbcType = jdbcTypeDescription.getJdbcType();
+
         switch (jdbcType) {
         case Types.CLOB:
             colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
@@ -372,16 +365,17 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         case Types.TIMESTAMP:
             colType = DataType.createVarChar(32, DataType.ExaCharset.UTF8);
             break;
-            
-        // db2 driver always delivers UTF8 Characters no matter what encoding is specified for var + char data
+
+        // db2 driver always delivers UTF8 Characters no matter what encoding is
+        // specified for var + char data
         case Types.VARCHAR:
         case Types.NVARCHAR:
         case Types.LONGVARCHAR:
         case Types.CHAR:
         case Types.NCHAR:
         case Types.LONGNVARCHAR: {
-            int size = jdbcTypeDescription.getPrecisionOrSize();
-            DataType.ExaCharset charset =  DataType.ExaCharset.UTF8;
+            final int size = jdbcTypeDescription.getPrecisionOrSize();
+            final DataType.ExaCharset charset = DataType.ExaCharset.UTF8;
             if (size <= DataType.maxExasolVarcharSize) {
                 colType = DataType.createVarChar(size, charset);
             } else {
@@ -389,12 +383,13 @@ public class DB2SqlDialect extends AbstractSqlDialect {
             }
             break;
         }
-            
-        // VARCHAR  and CHAR for bit data -> will be converted to hex string so we have to double the size
+
+        // VARCHAR and CHAR for bit data -> will be converted to hex string so we have
+        // to double the size
         case -2:
-            colType = DataType.createChar(jdbcTypeDescription.getPrecisionOrSize()*2, DataType.ExaCharset.ASCII);
+            colType = DataType.createChar(jdbcTypeDescription.getPrecisionOrSize() * 2, DataType.ExaCharset.ASCII);
         case -3:
-            colType = DataType.createVarChar(jdbcTypeDescription.getPrecisionOrSize()*2, DataType.ExaCharset.ASCII);
+            colType = DataType.createVarChar(jdbcTypeDescription.getPrecisionOrSize() * 2, DataType.ExaCharset.ASCII);
             break;
         }
         return colType;
