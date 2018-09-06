@@ -1,59 +1,49 @@
 package com.exasol.adapter.dialects;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.Assert.assertThat;
-
-import java.util.Arrays;
-import java.util.HashSet;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.exasol.adapter.dialects.impl.AnotherDummySqlDialect;
-import com.exasol.adapter.dialects.impl.DummySqlDialect;
+import com.exasol.adapter.dialects.impl.DB2SqlDialect;
+import com.exasol.adapter.dialects.impl.ExasolSqlDialect;
 
 public class SqlDialectsTest {
-    private SqlDialects dialects;
-
     @Before
     public void before() {
-        this.dialects = SqlDialects.getInstance();
+        SqlDialects.deleteInstance();
     }
 
     @Test
     public void testGetInstance() {
-        assertThat(this.dialects, instanceOf(SqlDialects.class));
+        final SqlDialects dialects = SqlDialects.getInstance();
+        assertThat(dialects, instanceOf(SqlDialects.class));
     }
 
     @Test
     public void testIsSupported() {
-        this.dialects.register(DummySqlDialect.class);
-        assertThat(this.dialects.isSupported(DummySqlDialect.getPublicName()), is(true));
+        assertThat(SqlDialects.getInstance().isSupported(ExasolSqlDialect.getPublicName()), is(true));
+    }
+
+    @Test
+    public void testIsNotSupported() {
+        assertThat(SqlDialects.getInstance().isSupported("Unknown Dialect"), is(false));
     }
 
     @Test
     public void testGetDialectNames() {
-        this.dialects.register(DummySqlDialect.class);
-        this.dialects.register(AnotherDummySqlDialect.class);
-        assertThat(this.dialects.getDialectsString(),
-                equalTo(AnotherDummySqlDialect.getPublicName() + ", " + DummySqlDialect.getPublicName()));
+        assertThat(SqlDialects.getInstance().getDialectsString(), matchesPattern(
+                ".*" + DB2SqlDialect.getPublicName() + ".*,.* " + ExasolSqlDialect.getPublicName() + ".*"));
     }
 
     @Test
     public void testGetDialectByName() {
-        this.dialects.register(DummySqlDialect.class);
-        assertThat(this.dialects.getDialectInstanceForNameWithContext(DummySqlDialect.getPublicName(), null),
-                instanceOf(DummySqlDialect.class));
+        assertThat(
+                SqlDialects.getInstance().getDialectInstanceForNameWithContext(ExasolSqlDialect.getPublicName(), null),
+                instanceOf(ExasolSqlDialect.class));
 
-    }
-
-    @Test
-    public void testRegisterMultipleDialects() {
-        this.dialects.registerAll(new HashSet<Class<? extends SqlDialect>>(
-                Arrays.asList(DummySqlDialect.class, AnotherDummySqlDialect.class)));
-        assertThat(this.dialects.getDialectsString(),
-                equalTo(AnotherDummySqlDialect.getPublicName() + ", " + DummySqlDialect.getPublicName()));
     }
 }

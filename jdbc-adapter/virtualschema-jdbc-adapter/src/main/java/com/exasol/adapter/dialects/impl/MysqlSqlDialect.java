@@ -15,7 +15,6 @@ import com.exasol.adapter.metadata.DataType;
  * TODO Finish implementation of this dialect and add as a supported dialect
  */
 public class MysqlSqlDialect extends AbstractSqlDialect {
-
     public MysqlSqlDialect(final SqlDialectContext context) {
         super(context);
     }

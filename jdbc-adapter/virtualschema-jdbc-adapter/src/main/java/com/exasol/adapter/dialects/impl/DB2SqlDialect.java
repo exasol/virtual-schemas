@@ -23,7 +23,6 @@ import com.exasol.adapter.metadata.DataType;
  */
 
 public class DB2SqlDialect extends AbstractSqlDialect {
-
     public DB2SqlDialect(final SqlDialectContext context) {
         super(context);
     }

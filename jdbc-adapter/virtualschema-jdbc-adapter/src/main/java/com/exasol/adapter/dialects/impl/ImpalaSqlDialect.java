@@ -22,7 +22,6 @@ import com.exasol.adapter.metadata.DataType;
  * http://www.cloudera.com/documentation/enterprise/latest/topics/impala_langref.html
  */
 public class ImpalaSqlDialect extends AbstractSqlDialect {
-
     public ImpalaSqlDialect(final SqlDialectContext context) {
         super(context);
     }

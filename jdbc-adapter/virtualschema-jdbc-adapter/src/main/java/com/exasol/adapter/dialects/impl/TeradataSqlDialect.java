@@ -18,14 +18,12 @@ import com.exasol.adapter.jdbc.JdbcAdapterProperties;
 import com.exasol.adapter.metadata.DataType;
 
 public class TeradataSqlDialect extends AbstractSqlDialect {
-
     public final static int maxTeradataVarcharSize = 32000;
+    private static final String NAME = "TERADATA";
 
     public TeradataSqlDialect(final SqlDialectContext context) {
         super(context);
     }
-
-    private static final String NAME = "TERADATA";
 
     public static String getPublicName() {
         return NAME;

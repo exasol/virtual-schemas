@@ -16,7 +16,6 @@ import com.exasol.adapter.metadata.DataType;
  * JDBC Metadata.
  */
 public class GenericSqlDialect extends AbstractSqlDialect {
-
     public GenericSqlDialect(final SqlDialectContext context) {
         super(context);
     }

@@ -25,7 +25,6 @@ import com.exasol.adapter.sql.ScalarFunction;
  * supported dialect
  */
 public class HiveSqlDialect extends AbstractSqlDialect {
-
     public HiveSqlDialect(final SqlDialectContext context) {
         super(context);
     }

@@ -20,14 +20,13 @@ import org.junit.rules.ExpectedException;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
-import com.exasol.adapter.dialects.SqlDialects;
 import com.exasol.adapter.jdbc.JdbcMetadataReader;
 import com.exasol.adapter.json.SchemaMetadataSerializer;
 import com.exasol.adapter.metadata.SchemaMetadata;
 import com.google.common.collect.ImmutableList;
 
 /**
- * Integration tests for the EXASOL SQL dialect.
+ * Integration tests for the Exasol SQL dialect.
  */
 public class ExasolSqlDialectIT extends AbstractIntegrationTest {
 
@@ -47,25 +46,25 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         final String connectionString = "jdbc:exa:localhost:" + getPortOfConnectedDatabase(); // connect via Virtual
                                                                                               // Schema to local
                                                                                               // database
-        // The EXASOL jdbc driver is included in the Maven dependencies, so no need to
-        // add
+        // The Exasol JDBC driver is included in the Maven dependencies, so no need to
+        // add it.
         final List<String> includes = ImmutableList.of(getConfig().getJdbcAdapterPath());
         createJDBCAdapter(includes);
         createTestSchema();
-        createVirtualSchema(VIRTUAL_SCHEMA, ExasolSqlDialect.NAME, "", TEST_SCHEMA, "", getConfig().getExasolUser(),
-                getConfig().getExasolPassword(), "ADAPTER.JDBC_ADAPTER", connectionString, IS_LOCAL,
-                getConfig().debugAddress(), "", null);
-        createVirtualSchema(VIRTUAL_SCHEMA_MIXED_CASE, ExasolSqlDialect.NAME, "", TEST_SCHEMA_MIXED_CASE, "",
+        createVirtualSchema(VIRTUAL_SCHEMA, ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "",
+                getConfig().getExasolUser(), getConfig().getExasolPassword(), "ADAPTER.JDBC_ADAPTER", connectionString,
+                IS_LOCAL, getConfig().debugAddress(), "", null);
+        createVirtualSchema(VIRTUAL_SCHEMA_MIXED_CASE, ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA_MIXED_CASE, "",
                 getConfig().getExasolUser(), getConfig().getExasolPassword(), "ADAPTER.JDBC_ADAPTER", connectionString,
                 IS_LOCAL, getConfig().debugAddress(), "", null);
     }
 
     private static void createTestSchema() throws SQLException {
-        // EXASOL integration test is special, because we can directly create our test
+        // Exasol integration test is special, because we can directly create our test
         // data.
         // For other dialects you have to prepare the source data base separately,
         // because
-        // otherwise we would need to make the jdbc driver visible to the integration
+        // otherwise we would need to make the JDBC driver visible to the integration
         // test framework as well (adds complexity)
         final Statement stmt = getConnection().createStatement();
         stmt.execute("DROP SCHEMA IF EXISTS " + TEST_SCHEMA + " CASCADE");
@@ -294,11 +293,29 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
     public void testDifferentDataTypes()
             throws SQLException, ClassNotFoundException, FileNotFoundException, AdapterException {
         final Statement stmt = getConnection().createStatement();
+        createOrReplaceSchema(stmt);
+        createTables(stmt);
+        final String[] tableNames = new String[] { "T8", "T9", "TA", "TB", "TC", "TD" };
+        final List<String> tables = new ArrayList<>(Arrays.asList(tableNames));
+        final SchemaMetadata meta = JdbcMetadataReader.readRemoteMetadata("jdbc:exa:" + getConfig().getExasolAddress(),
+                getConfig().getExasolUser(), getConfig().getExasolPassword(), "EXA_DB", "JDBC_ADAPTER_TEST_SCHEMA",
+                tables, ExasolSqlDialect.getPublicName(), getConfig().getExceptionHandlingMode());
+        if (getConfig().isDebugOn()) {
+            System.out.println("Meta: " + SchemaMetadataSerializer.serialize(meta).build().toString());
+        }
+        assertNotNull(meta);
+    }
+
+    private void createOrReplaceSchema(final Statement stmt) throws SQLException {
         final String jdbc_adapter_test_schema = "JDBC_ADAPTER_TEST_SCHEMA";
         String sql = "DROP SCHEMA IF EXISTS " + jdbc_adapter_test_schema + " CASCADE";
         stmt.execute(sql);
         sql = "CREATE SCHEMA " + jdbc_adapter_test_schema;
         stmt.execute(sql);
+    }
+
+    private void createTables(final Statement stmt) throws SQLException {
+        String sql;
         sql = "CREATE TABLE T8(c1 boolean default TRUE, c2 char(10) default 'foo'"
                 + ", c3 date default '2016-06-01', c4 decimal(5,0) default 0)";
         stmt.execute(sql);
@@ -317,17 +334,6 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         sql = "CREATE TABLE TD(c1 timestamp default NULL, c2 timestamp with local time zone default NULL"
                 + ", c3 varchar(100) default NULL)";
         stmt.execute(sql);
-        final String[] tableNames = new String[] { "T8", "T9", "TA", "TB", "TC", "TD" };
-        final List<String> tables = new ArrayList<>(Arrays.asList(tableNames));
-        final SqlDialects dialects = SqlDialects.getInstance();
-        dialects.register(ExasolSqlDialect.class);
-        final SchemaMetadata meta = JdbcMetadataReader.readRemoteMetadata("jdbc:exa:" + getConfig().getExasolAddress(),
-                getConfig().getExasolUser(), getConfig().getExasolPassword(), "EXA_DB", "JDBC_ADAPTER_TEST_SCHEMA",
-                tables, dialects, ExasolSqlDialect.NAME, getConfig().getExceptionHandlingMode());
-        if (getConfig().isDebugOn()) {
-            System.out.println("Meta: " + SchemaMetadataSerializer.serialize(meta).build().toString());
-        }
-        assertNotNull(meta);
     }
 
 }
