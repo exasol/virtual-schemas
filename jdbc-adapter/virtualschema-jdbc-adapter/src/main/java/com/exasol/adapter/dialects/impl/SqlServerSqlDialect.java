@@ -21,19 +21,15 @@ import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
 public class SqlServerSqlDialect extends AbstractSqlDialect {
-
     // Tested SQL Server versions: SQL Server 2014
     // Tested JDBC drivers: jtds-1.3.1 (https://sourceforge.net/projects/jtds/)
-
     public final static int maxSqlServerVarcharSize = 8000;
-
     public final static int maxSqlServerNVarcharSize = 4000;
+    private static final String NAME = "SQLSERVER";
 
     public SqlServerSqlDialect(final SqlDialectContext context) {
         super(context);
     }
-
-    private static final String NAME = "SQLSERVER";
 
     public static String getPublicName() {
         return NAME;

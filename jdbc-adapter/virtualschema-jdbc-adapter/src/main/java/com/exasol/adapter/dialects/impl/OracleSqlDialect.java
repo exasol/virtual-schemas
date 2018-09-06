@@ -25,7 +25,6 @@ import com.exasol.adapter.sql.ScalarFunction;
  * Work in Progress
  */
 public class OracleSqlDialect extends AbstractSqlDialect {
-
     private final boolean castAggFuncToFloat = true;
     private final boolean castScalarFuncToFloat = true;
 

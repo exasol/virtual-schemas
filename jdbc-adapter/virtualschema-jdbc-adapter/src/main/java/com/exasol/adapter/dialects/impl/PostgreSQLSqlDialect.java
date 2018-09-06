@@ -20,7 +20,6 @@ import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.ScalarFunction;
 
 public class PostgreSQLSqlDialect extends AbstractSqlDialect {
-
     public PostgreSQLSqlDialect(final SqlDialectContext context) {
         super(context);
     }

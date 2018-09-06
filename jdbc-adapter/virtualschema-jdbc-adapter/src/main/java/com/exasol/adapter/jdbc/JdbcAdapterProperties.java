@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.exasol.ExaConnectionAccessException;
 import com.exasol.ExaConnectionInformation;
@@ -19,6 +21,7 @@ import com.exasol.adapter.dialects.SqlDialects;
  * types, checks for valid property values and consistency.
  */
 public final class JdbcAdapterProperties {
+    static final Logger LOGGER = Logger.getLogger(JdbcAdapterProperties.class.getName());
 
     // One of the following needs to be set
     static final String PROP_CATALOG_NAME = "CATALOG_NAME";
@@ -39,6 +42,9 @@ public final class JdbcAdapterProperties {
     static final String PROP_ORA_CONNECTION_NAME = "ORA_CONNECTION_NAME";
     static final String PROP_EXCLUDED_CAPABILITIES = "EXCLUDED_CAPABILITIES";
     static final String PROP_EXCEPTION_HANDLING = "EXCEPTION_HANDLING";
+    static final String PROP_LOG_LEVEL = "LOG_LEVEL";
+
+    private static final String DEFAULT_LOG_LEVEL = "INFO";
 
     private JdbcAdapterProperties() {
         // prevent instantiation of static helper class
@@ -101,12 +107,9 @@ public final class JdbcAdapterProperties {
         }
     }
 
-    public static void checkPropertyConsistency(final Map<String, String> properties,
-            final SqlDialects supportedDialects) throws AdapterException {
+    public static void checkPropertyConsistency(final Map<String, String> properties) throws AdapterException {
         validatePropertyValues(properties);
-
-        checkMandatoryProperties(properties, supportedDialects);
-
+        checkMandatoryProperties(properties);
         checkImportPropertyConsistency(properties, PROP_IMPORT_FROM_EXA, PROP_EXA_CONNECTION_STRING);
         checkImportPropertyConsistency(properties, PROP_IMPORT_FROM_ORA, PROP_ORA_CONNECTION_NAME);
     }
@@ -154,13 +157,12 @@ public final class JdbcAdapterProperties {
         if (!debugAddress.isEmpty()) {
             final String error = "You specified an invalid hostname and port for the udf debug service ("
                     + PROP_DEBUG_ADDRESS + "). Please provide a valid value, e.g. 'hostname:3000'";
-            try {
-                final String debugHost = debugAddress.split(":")[0];
-                final int debugPort = Integer.parseInt(debugAddress.split(":")[1]);
-            } catch (final Exception ex) {
+            if (debugAddress.split(":").length != 2) {
                 throw new AdapterException(error);
             }
-            if (debugAddress.split(":").length != 2) {
+            try {
+                Integer.parseInt(debugAddress.split(":")[1]);
+            } catch (final Exception ex) {
                 throw new AdapterException(error);
             }
         }
@@ -178,15 +180,15 @@ public final class JdbcAdapterProperties {
         }
     }
 
-    private static void checkMandatoryProperties(final Map<String, String> properties,
-            final SqlDialects supportedDialects) throws AdapterException {
+    private static void checkMandatoryProperties(final Map<String, String> properties) throws AdapterException {
+        final String availableDialects = "Available dialects: " + SqlDialects.getInstance().getDialectsString();
         if (!properties.containsKey(PROP_SQL_DIALECT)) {
-            throw new InvalidPropertyException("You have to specify the SQL dialect (" + PROP_SQL_DIALECT
-                    + "). Available dialects: " + supportedDialects.getDialectsString());
+            throw new InvalidPropertyException(
+                    "You have to specify the SQL dialect (" + PROP_SQL_DIALECT + "). " + availableDialects);
         }
-        if (!supportedDialects.isSupported(properties.get(PROP_SQL_DIALECT))) {
-            throw new InvalidPropertyException("SQL Dialect not supported: " + properties.get(PROP_SQL_DIALECT)
-                    + ". Available dialects: " + supportedDialects.getDialectsString());
+        if (!SqlDialects.getInstance().isSupported(properties.get(PROP_SQL_DIALECT))) {
+            throw new InvalidPropertyException(
+                    "SQL Dialect \"" + properties.get(PROP_SQL_DIALECT) + "\" is not supported. " + availableDialects);
         }
         if (properties.containsKey(PROP_CONNECTION_NAME)) {
             if (properties.containsKey(PROP_CONNECTION_STRING) || properties.containsKey(PROP_USERNAME)
@@ -244,17 +246,18 @@ public final class JdbcAdapterProperties {
         return getProperty(properties, PROP_IS_LOCAL, "").toUpperCase().equals("TRUE");
     }
 
-    public static String getSqlDialectName(final Map<String, String> properties, final SqlDialects supportedDialects) {
+    public static String getSqlDialectName(final Map<String, String> properties) {
         return getProperty(properties, PROP_SQL_DIALECT, "");
     }
 
-    public static SqlDialect getSqlDialect(final Map<String, String> properties, final SqlDialects supportedDialects,
-            final SqlDialectContext dialectContext) throws AdapterException {
+    public static SqlDialect getSqlDialect(final Map<String, String> properties, final SqlDialectContext dialectContext)
+            throws InvalidPropertyException {
         final String dialectName = getProperty(properties, PROP_SQL_DIALECT, "");
-        final SqlDialect dialect = supportedDialects.getDialectInstanceForNameWithContext(dialectName, dialectContext);
+        final SqlDialect dialect = SqlDialects.getInstance().getDialectInstanceForNameWithContext(dialectName,
+                dialectContext);
         if (dialect == null) {
             throw new InvalidPropertyException("SQL Dialect not supported: " + dialectName + " - all dialects: "
-                    + supportedDialects.getDialectsString());
+                    + SqlDialects.getInstance().getDialectsString());
         }
         return dialect;
     }
@@ -270,6 +273,15 @@ public final class JdbcAdapterProperties {
             }
         }
         return ExceptionHandlingMode.NONE;
+    }
+
+    public static Level getLogLevel(final Map<String, String> properties) throws InvalidPropertyException {
+        final String levelAsText = getProperty(properties, PROP_LOG_LEVEL, DEFAULT_LOG_LEVEL);
+        try {
+            return Level.parse(levelAsText);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new InvalidPropertyException("Unable to set log level \"" + levelAsText + "\"");
+        }
     }
 
     public static boolean isRefreshNeeded(final Map<String, String> newProperties) {

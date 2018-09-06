@@ -7,6 +7,10 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
 
 import com.exasol.ExaConnectionInformation;
 import com.exasol.ExaMetadata;
@@ -19,8 +23,6 @@ import com.exasol.adapter.capabilities.ScalarFunctionCapability;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlDialectLoader;
-import com.exasol.adapter.dialects.SqlDialects;
 import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.json.RequestJsonParser;
@@ -39,28 +41,23 @@ import com.exasol.utils.JsonHelper;
 import com.exasol.utils.UdfUtils;
 
 public class JdbcAdapter {
-
     public static final int MAX_STRING_CHAR_LENGTH = 2000000;
-
-    final static SqlDialects supportedDialects = SqlDialects.getInstance();
-    static {
-        supportedDialects.registerAll(SqlDialectLoader.getInstance().findDriverClasses());
-    }
+    public static final Logger LOGGER = Logger.getLogger(JdbcAdapter.class.getName());
 
     /**
      * This method gets called by the database during interactions with the virtual
      * schema.
      *
      * @param meta  Metadata object
-     * @param input json request, as defined in the Adapter Script API
-     * @return json response, as defined in the Adapter Script API
+     * @param input JSON request, as defined in the Adapter Script API
+     * @return JSON response, as defined in the Adapter Script API
      */
     public static String adapterCall(final ExaMetadata meta, final String input) throws Exception {
         String result = "";
         try {
             final AdapterRequest request = new RequestJsonParser().parseRequest(input);
             tryAttachToOutputService(request.getSchemaMetadataInfo());
-            System.out.println("----------\nAdapter Request:\n----------\n" + input);
+            LOGGER.fine(() -> "----------\nAdapter Request:\n----------\n" + input);
 
             switch (request.getType()) {
             case CREATE_VIRTUAL_SCHEMA:
@@ -85,7 +82,7 @@ public class JdbcAdapter {
                 throw new RuntimeException("Request Type not supported: " + request.getType());
             }
             assert (result.isEmpty());
-            System.out.println(
+            LOGGER.fine(
                     "----------\nResponse:\n----------\n" + JsonHelper.prettyJson(JsonHelper.getJsonObject(result)));
             return result;
         } catch (final AdapterException ex) {
@@ -99,10 +96,27 @@ public class JdbcAdapter {
 
     private static String handleCreateVirtualSchema(final CreateVirtualSchemaRequest request, final ExaMetadata meta)
             throws SQLException, AdapterException {
-        JdbcAdapterProperties.checkPropertyConsistency(request.getSchemaMetadataInfo().getProperties(),
-                supportedDialects);
+        final Map<String, String> properties = request.getSchemaMetadataInfo().getProperties();
+        setLogLevel(properties);
+        JdbcAdapterProperties.checkPropertyConsistency(properties);
         final SchemaMetadata remoteMeta = readMetadata(request.getSchemaMetadataInfo(), meta);
         return ResponseJsonSerializer.makeCreateVirtualSchemaResponse(remoteMeta);
+    }
+
+    private static void setLogLevel(final Map<String, String> properties) throws InvalidPropertyException {
+        final Level logLevel = JdbcAdapterProperties.getLogLevel(properties);
+        // System.setProperty("handlers", "java.util.logging.Streamhandler");
+        System.setProperty("java.util.logging.SimpleFormatter.format",
+                "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS.%1$tL %4$-7s [%3$s] %5$s %6$s%n");
+        // System.setProperty("java.util.logging.StreamHandler.level",
+        // logLevel.toString());
+        final Logger logger = Logger.getLogger("com.exasol");
+        final SimpleFormatter formatter = new SimpleFormatter();
+        final StreamHandler handler = new StreamHandler(System.out, formatter);
+        handler.setFormatter(formatter);
+        logger.addHandler(handler);
+        logger.setLevel(logLevel);
+        LOGGER.info(() -> "Virtual Schema Adapter - log level \"" + logLevel.toString() + "\"");
     }
 
     private static SchemaMetadata readMetadata(final SchemaMetadataInfo schemaMeta, final ExaMetadata meta)
@@ -119,16 +133,15 @@ public class JdbcAdapter {
         final String catalog = JdbcAdapterProperties.getCatalog(meta.getProperties());
         final String schema = JdbcAdapterProperties.getSchema(meta.getProperties());
         return JdbcMetadataReader.readRemoteMetadata(connection.getAddress(), connection.getUser(),
-                connection.getPassword(), catalog, schema, tables, supportedDialects,
-                JdbcAdapterProperties.getSqlDialectName(meta.getProperties(), supportedDialects),
+                connection.getPassword(), catalog, schema, tables,
+                JdbcAdapterProperties.getSqlDialectName(meta.getProperties()),
                 JdbcAdapterProperties.getExceptionHandlingMode(meta.getProperties()));
     }
 
     private static String handleRefresh(final RefreshRequest request, final ExaMetadata meta)
             throws SQLException, AdapterException {
         SchemaMetadata remoteMeta;
-        JdbcAdapterProperties.checkPropertyConsistency(request.getSchemaMetadataInfo().getProperties(),
-                supportedDialects);
+        JdbcAdapterProperties.checkPropertyConsistency(request.getSchemaMetadataInfo().getProperties());
         if (request.isRefreshForTables()) {
             final List<String> tables = request.getTables();
             remoteMeta = readMetadata(request.getSchemaMetadataInfo(), tables, meta);
@@ -143,15 +156,15 @@ public class JdbcAdapter {
         final Map<String, String> changedProperties = request.getProperties();
         final Map<String, String> newSchemaMeta = JdbcAdapterProperties
                 .getNewProperties(request.getSchemaMetadataInfo().getProperties(), changedProperties);
-        JdbcAdapterProperties.checkPropertyConsistency(newSchemaMeta, supportedDialects);
+        JdbcAdapterProperties.checkPropertyConsistency(newSchemaMeta);
         if (JdbcAdapterProperties.isRefreshNeeded(changedProperties)) {
             final ExaConnectionInformation connection = JdbcAdapterProperties.getConnectionInformation(newSchemaMeta,
                     exaMeta);
             final List<String> tableFilter = JdbcAdapterProperties.getTableFilter(newSchemaMeta);
             final SchemaMetadata remoteMeta = JdbcMetadataReader.readRemoteMetadata(connection.getAddress(),
                     connection.getUser(), connection.getPassword(), JdbcAdapterProperties.getCatalog(newSchemaMeta),
-                    JdbcAdapterProperties.getSchema(newSchemaMeta), tableFilter, supportedDialects,
-                    JdbcAdapterProperties.getSqlDialectName(newSchemaMeta, supportedDialects),
+                    JdbcAdapterProperties.getSchema(newSchemaMeta), tableFilter,
+                    JdbcAdapterProperties.getSqlDialectName(newSchemaMeta),
                     JdbcAdapterProperties.getExceptionHandlingMode(newSchemaMeta));
             return ResponseJsonSerializer.makeSetPropertiesResponse(remoteMeta);
         }
@@ -166,7 +179,7 @@ public class JdbcAdapter {
         final SqlDialectContext dialectContext = new SqlDialectContext(SchemaAdapterNotes.deserialize(
                 request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()));
         final SqlDialect dialect = JdbcAdapterProperties.getSqlDialect(request.getSchemaMetadataInfo().getProperties(),
-                supportedDialects, dialectContext);
+                dialectContext);
         final Capabilities capabilities = dialect.getCapabilities();
         final Capabilities excludedCapabilities = parseExcludedCapabilities(
                 JdbcAdapterProperties.getExcludedCapabilities(request.getSchemaMetadataInfo().getProperties()));
@@ -208,7 +221,7 @@ public class JdbcAdapter {
         final SqlDialectContext dialectContext = new SqlDialectContext(SchemaAdapterNotes.deserialize(
                 request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()));
         final SqlDialect dialect = JdbcAdapterProperties.getSqlDialect(request.getSchemaMetadataInfo().getProperties(),
-                supportedDialects, dialectContext);
+                dialectContext);
         final SqlGenerationContext context = new SqlGenerationContext(
                 JdbcAdapterProperties.getCatalog(meta.getProperties()),
                 JdbcAdapterProperties.getSchema(meta.getProperties()),

@@ -19,7 +19,6 @@ import com.exasol.adapter.sql.ScalarFunction;
  * retrieved via JDBC. Should be retrieved from system table.<br>
  */
 public class ExasolSqlDialect extends AbstractSqlDialect {
-
     public ExasolSqlDialect(final SqlDialectContext context) {
         super(context);
         this.omitParenthesesMap.add(ScalarFunction.SYSDATE);
@@ -30,7 +29,7 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
         this.omitParenthesesMap.add(ScalarFunction.CURRENT_USER);
     }
 
-    public static final String NAME = "EXASOL";
+    private static final String NAME = "EXASOL";
 
     public static String getPublicName() {
         return NAME;
