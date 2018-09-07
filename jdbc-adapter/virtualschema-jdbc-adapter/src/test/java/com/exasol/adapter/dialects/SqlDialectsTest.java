@@ -1,5 +1,7 @@
 package com.exasol.adapter.dialects;
 
+import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesPattern;
@@ -15,12 +17,18 @@ public class SqlDialectsTest {
     @Before
     public void before() {
         SqlDialects.deleteInstance();
+        System.clearProperty(SqlDialects.SQL_DIALECTS_PROPERTY);
     }
 
     @Test
     public void testGetInstance() {
         final SqlDialects dialects = SqlDialects.getInstance();
         assertThat(dialects, instanceOf(SqlDialects.class));
+    }
+
+    @Test
+    public void testGetInstanceTwiceYieldsSameInstance() {
+        assertThat(SqlDialects.getInstance(), sameInstance(SqlDialects.getInstance()));
     }
 
     @Test
@@ -45,5 +53,30 @@ public class SqlDialectsTest {
                 SqlDialects.getInstance().getDialectInstanceForNameWithContext(ExasolSqlDialect.getPublicName(), null),
                 instanceOf(ExasolSqlDialect.class));
 
+    }
+
+    @Test
+    public void testReadDialectsFromSystemProperty() {
+        System.setProperty(SqlDialects.SQL_DIALECTS_PROPERTY, "com.exasol.adapter.dialects.impl.ExasolSqlDialect");
+        assertThat(SqlDialects.getInstance().getDialectsString(), equalTo("EXASOL"));
+    }
+
+    @Test(expected = SqlDialectsRegistryException.class)
+    public void testUsingDialectWithoutNameMethodThrowsException() {
+        System.setProperty(SqlDialects.SQL_DIALECTS_PROPERTY,
+                "com.exasol.adapter.dialects.impl.DummyDialectWithoutNameMethod");
+        SqlDialects.getInstance().getDialectsString();
+    }
+
+    @Test(expected = SqlDialectsRegistryException.class)
+    public void testRegisteringNonExistentDialectThrowsException() {
+        System.setProperty(SqlDialects.SQL_DIALECTS_PROPERTY, "this.dialect.does.not.exist.DummySqlDialect");
+        SqlDialects.getInstance();
+    }
+
+    @Test(expected = SqlDialectsRegistryException.class)
+    public void testRequestingInstanceOfNonExistentDialectThrowsException() {
+        SqlDialects.getInstance();
+        SqlDialects.getInstance().getDialectInstanceForNameWithContext("NonExistentDialect", null);
     }
 }

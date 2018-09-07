@@ -29,10 +29,8 @@ public class HiveSqlDialect extends AbstractSqlDialect {
         super(context);
     }
 
-    private static final String NAME = "HIVE";
-
     public static String getPublicName() {
-        return NAME;
+        return "HIVE";
     }
 
     @Override

@@ -23,10 +23,12 @@ The Virtual Schema adapter creates an instance of an SQL dialect on demand. You 
 To register your new dialect add it to the list in [sql_dialects.properties](../virtualschema-jdbc-adapter/src/main/resources/sql_dialects.properties]).
 
 ```properties
-sql_dialects=\
+com.exasol.adapter.dialects.supported=\
 ...
 com.exasol.adapter.dialects.impl.MyAweSomeSqlDialect
 ```
+
+For tests or in case you want to exclude existing dialects in certain scenarios you can override the contents of this file by setting the system property `com.exasol.adapter.dialects.supported`.
 
 ### Setup Data Source
 
@@ -177,7 +179,7 @@ Next find out your IP address.
 Linux:
 
 ```bash
-ip address
+ip -br address
 ```
 
 Windows:
@@ -193,8 +195,10 @@ CREATE VIRTUAL SCHEMA VS_EXA_IT
 USING ADAPTER.JDBC_ADAPTER
 WITH CONNECTION_STRING='jdbc:exa:localhost:8563' USERNAME='sys' PASSWORD='exasol'
      SCHEMA_NAME='NATIVE_EXA_IT' SQL_DIALECT='EXASOL' IS_LOCAL='true'
-     DEBUG_ADDRESS='10.44.1.228:3000';
+     DEBUG_ADDRESS='10.44.1.228:3000' LOG_LEVEL=ALL;
 ```
+
+The parameter LOG_LEVEL lets you pick a log level as defined in [java.util.logging.Level](https://docs.oracle.com/javase/8/docs/api/java/util/logging/Level.html).
 
 You can tell that the connection works if you see the following message after executing the SQL command that installs a virtual schema:
 
