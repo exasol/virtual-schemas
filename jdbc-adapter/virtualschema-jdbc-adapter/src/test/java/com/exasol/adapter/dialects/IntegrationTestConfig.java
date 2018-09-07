@@ -218,8 +218,7 @@ public class IntegrationTestConfig {
     public boolean DB2TestsRequested() {
         return getProperty("db2", "runIntegrationTests", false);
     }
-    
-    
+
     public boolean genericTestsRequested() {
         return getProperty("generic", "runIntegrationTests", false);
     }
@@ -239,11 +238,31 @@ public class IntegrationTestConfig {
     public String getGenericPassword() {
         return getProperty("generic", "password");
     }
-    
+
+    public boolean sybaseTestsRequested() {
+        return getProperty("sybase", "runIntegrationTests", false);
+    }
+
+    public String getSybaseJdbcDriverPath() {
+        return getProperty("sybase", "jdbcDriverPath");
+    }
+
+    public String getSybaseJdbcConnectionString() {
+        return getProperty("sybase", "connectionString");
+    }
+
+    public String getSybaseUser() {
+        return getProperty("sybase", "user");
+    }
+
+    public String getSybasePassword() {
+        return getProperty("sybase", "password");
+    }
+
     public String getBucketFSPassword(){
         return getProperty("general", "bucketFsPassword");
     }
-    
+
     public String getBucketFSURL(){
         return getProperty("general", "bucketFsUrl");
     }

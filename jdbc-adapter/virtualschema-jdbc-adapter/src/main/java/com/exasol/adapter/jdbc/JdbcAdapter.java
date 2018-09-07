@@ -37,7 +37,8 @@ public class JdbcAdapter {
                         HiveSqlDialect.NAME,
                         DB2SqlDialect.NAME,
                         SqlServerSqlDialect.NAME,
-                        PostgreSQLSqlDialect.NAME));
+                        PostgreSQLSqlDialect.NAME,
+                        SybaseSqlDialect.NAME));
     }
 
     /**
@@ -255,6 +256,7 @@ public class JdbcAdapter {
         int val = -1;
         try {
             connection = establishConnection(connectionInformation);
+            System.out.println("createColumnDescription: " + pushdownQuery);
             ps = connection.prepareStatement(pushdownQuery);
             ResultSetMetaData metadata=ps.getMetaData();
             if (metadata==null){
@@ -289,7 +291,7 @@ public class JdbcAdapter {
             buffer.append(')');
             return buffer.toString();
         } catch (SQLException e) {
-            throw new RuntimeException("Cannot resolve column types." + e.getMessage());
+            throw new RuntimeException("Cannot resolve column types." + e.getMessage(), e);
 
         }
     }

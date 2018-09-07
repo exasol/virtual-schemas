@@ -2,14 +2,14 @@
 
 general:
   debug:           false
-  debugAddress:    '192.168.0.12:3000'  # Address which will be defined as DEBUG_ADDRESS in the virtual schemas
-  bucketFsUrl:  http://exasol-host:2580/bucket1
-  bucketFsPassword: bucket1
-  jdbcAdapterPath:  /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.0.2-SNAPSHOT.jar
+  debugAddress:    '10.44.1.228:3000'  # Address which will be defined as DEBUG_ADDRESS in the virtual schemas
+  bucketFsUrl:      http://localhost:2580/jars
+  bucketFsPassword: public
+  jdbcAdapterPath:  /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.0.2-SNAPSHOT.jar
 
 exasol:
   runIntegrationTests: true
-  address:  exasol-host:8563
+  address:  localhost:8563
   user:     sys
   password: exasol
 
@@ -18,10 +18,10 @@ exasol:
 # Generic sql dialect is tested via MySQL
 generic:
   runIntegrationTests: false
-  jdbcDriverPath:      /buckets/mybucketfs/mybucket/mysql/mysql-connector-java-5.1.38-bin.jar
-  connectionString:    jdbc:mysql://mysql-host/mydatabase
-  user:                myuser
-  password:            mypass
+  jdbcDriverPath:      /buckets/bfsdefault/jars/mysql-connector-java-8.0.12.jar
+  connectionString:    jdbc:mysql://localhost/virtual-schema-integration-test
+  user:                virtual-schema-integration-test
+  password:            password
 
 oracle:
   runIntegrationTests: false
@@ -87,9 +87,3 @@ hive:
   user: user
   password: pass
 
-sybase:
-  runIntegrationTests: false
-  jdbcDriverPath:      /buckets/mybucketfs/mybucket/jtds-1.3.1.jar
-  connectionString:    jdbc:jtds:sybase://127.0.0.1:5000/db
-  user:                sybase-user
-  password:            sybase-password
