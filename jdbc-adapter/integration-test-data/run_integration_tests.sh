@@ -12,7 +12,7 @@ readonly config="$(pwd)/integration-test-data/integration-test-travis.yaml"
 readonly exasol_docker_image_version="6.0.10-d1"
 readonly docker_image="exasol/docker-db:$exasol_docker_image_version"
 readonly docker_name="exasoldb"
-readonly tmp="$(mktemp -d exasol-vs-adapter-integration.XXXXXX)" || exit 1
+readonly tmp="$(mktemp -td exasol-vs-adapter-integration.XXXXXX)" || exit 1
 
 function cleanup() {
     docker rm -f exasoldb || true
