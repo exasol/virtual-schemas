@@ -20,34 +20,59 @@ function cleanup() {
 }
 trap cleanup EXIT
 
-# Setup directory "exa" with pre-configured EXAConf to attach it to the exasoldb docker container
-mkdir -p "$tmp"/{etc,data/storage}
-cp integration-test-data/EXAConf "$tmp/etc/EXAConf"
-dd if=/dev/zero of="$tmp/data/storage/dev.1.data" bs=1 count=1 seek=4G
-touch "$tmp/data/storage/dev.1.meta"
+main() {
+	prepare_configuration_dir "$tmp/etc"
+	prepare_data_dir "$tmp/data/storage"
+	init_docker
+	check_docker_ready
+	build
+	upload_jar_to_bucket
+	run_tests
+}
 
-docker pull "$docker_image"
-docker run \
-    --name "$docker_name" \
-    -p 8899:8888 \
-    -p 6594:6583 \
-    --detach \
-    --privileged \
-    -v "$tmp:/exa" \
-    "$docker_image" \
-    init-sc --node-id 11
+prepare_configuration_dir() {
+	mkdir -p "$1"
+	cp integration-test-data/EXAConf "$1/EXAConf"
+}
 
-docker logs -f "$docker_name" &
+prepare_data_dir() {
+	mkdir -p "$1"
+	dd if=/dev/zero of="$1/dev.1.data" bs=1 count=1 seek=4G
+	touch "$1/dev.1.meta"
+}
 
-# Wait until database is ready
-(docker logs -f --tail 0 "$docker_name" &) 2>&1 | grep -q -i 'stage4: All stages finished'
-sleep 30
+init_docker() {
+	docker pull "$docker_image"
+	docker run \
+	    --name "$docker_name" \
+	    -p 8899:8888 \
+	    -p 6594:6583 \
+	    --detach \
+	    --privileged \
+	    -v "$tmp:/exa" \
+	    "$docker_image" \
+	    init-sc --node-id 11
+	docker logs -f "$docker_name" &
+}
 
-mvn -q clean package
+check_docker_ready() {
+	# Wait until database is ready
+	(docker logs -f --tail 0 "$docker_name" &) 2>&1 | grep -q -i 'stage4: All stages finished'
+	sleep 30
+}
 
-# Load virtualschema-jdbc-adapter JAR into BucketFS and wait until it's available.
-mvn -q pre-integration-test -DskipTests -Pit -Dintegrationtest.configfile="$config"
-(docker exec "$docker_name" sh -c 'tail -f -n +0 /exa/logs/cored/*bucket*' &) | \
-    grep -q -i 'File.*virtualschema-jdbc-adapter.*linked'
+build() {
+	mvn -q clean package
+}
 
-mvn -q verify -Pit -Dintegrationtest.configfile="$config" -Dintegrationtest.skipTestSetup=true
+upload_jar_to_bucket() {
+	mvn -q pre-integration-test -DskipTests -Pit -Dintegrationtest.configfile="$config"
+	(docker exec "$docker_name" sh -c 'tail -f -n +0 /exa/logs/cored/*bucket*' &) | \
+	    grep -q -i 'File.*virtualschema-jdbc-adapter.*linked'
+}
+
+run_tests() {
+	mvn -q verify -Pit -Dintegrationtest.configfile="$config" -Dintegrationtest.skipTestSetup=true
+}
+
+main "$@"
