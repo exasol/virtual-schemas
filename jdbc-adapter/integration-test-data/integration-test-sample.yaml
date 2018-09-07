@@ -87,3 +87,9 @@ hive:
   user: user
   password: pass
 
+sybase:
+  runIntegrationTests: false
+  jdbcDriverPath:      /buckets/mybucketfs/mybucket/jtds-1.3.1.jar
+  connectionString:    jdbc:jtds:sybase://127.0.0.1:5000/db
+  user:                sybase-user
+  password:            sybase-password

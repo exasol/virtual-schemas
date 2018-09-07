@@ -49,6 +49,8 @@ public class SqlDialects {
         	return new SqlServerSqlDialect(context);
         } else if (name.equalsIgnoreCase(PostgreSQLSqlDialect.NAME)) {
         	return new PostgreSQLSqlDialect(context);
+        } else if (name.equalsIgnoreCase(SybaseSqlDialect.NAME)) {
+          return new SybaseSqlDialect(context);
         }
         else {
             return null;
