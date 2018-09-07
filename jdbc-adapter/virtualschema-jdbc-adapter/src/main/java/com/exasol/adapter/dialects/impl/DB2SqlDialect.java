@@ -17,17 +17,17 @@ import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.metadata.DataType;
 
 /**
- * Dialect for DB2 using the DB2 Connector jdbc driver.
+ * Dialect for DB2 using the DB2 Connector JDBC driver.
  *
  * @author Karl Griesser (fullref@gmail.com)
  */
 
 public class DB2SqlDialect extends AbstractSqlDialect {
+    private static final String NAME = "DB2";
+
     public DB2SqlDialect(final SqlDialectContext context) {
         super(context);
     }
-
-    private static final String NAME = "DB2";
 
     public static String getPublicName() {
         return NAME;

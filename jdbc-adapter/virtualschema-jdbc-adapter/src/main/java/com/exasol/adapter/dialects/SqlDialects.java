@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
  * This class implements a registry for supported SQL dialects.
  */
 public final class SqlDialects {
+    public static final String SQL_DIALECTS_PROPERTY = "com.exasol.adapter.dialects.supported";
     private static final String GET_PUBLIC_NAME_METHOD = "getPublicName";
     private static final String DIALECTS_PROPERTIES_FILE = "sql_dialects.properties";
-    private static final String SQL_DIALECTS_PROPERTY = "sql_dialects";
     private static SqlDialects instance = null;
     private final Set<Class<? extends SqlDialect>> supportedDialects = new HashSet<>();
     private static final Logger LOGGER = Logger.getLogger(SqlDialects.class.getName());
@@ -29,22 +29,37 @@ public final class SqlDialects {
     public static synchronized SqlDialects getInstance() {
         if (instance == null) {
             instance = new SqlDialects();
-            instance.readDialectsList();
+            instance.registerDialectsFromProperty();
         }
         return instance;
     }
 
-    private void readDialectsList() {
+    private SqlDialects() {
+        // prevent instantiation outside of singleton.
+    }
+
+    private void registerDialectsFromProperty() {
+        final String sqlDialects = (System.getProperty(SQL_DIALECTS_PROPERTY) == null)
+                ? readDialectListFromPropertyFile()
+                : System.getProperty(SQL_DIALECTS_PROPERTY);
+        registerDialects(sqlDialects);
+    }
+
+    private String readDialectListFromPropertyFile() {
         final Properties properties = new Properties();
-        try (final InputStream stream = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(DIALECTS_PROPERTIES_FILE)) {
+        final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        try (final InputStream stream = contextClassLoader.getResourceAsStream(DIALECTS_PROPERTIES_FILE)) {
             properties.load(stream);
-            for (final String className : properties.getProperty(SQL_DIALECTS_PROPERTY).split("\\s*,\\s*")) {
-                registerDialect(className);
-            }
+            return properties.getProperty(SQL_DIALECTS_PROPERTY);
         } catch (final IOException e) {
             throw new SqlDialectsRegistryException(
                     "Unable to load list of SQL dialect from " + DIALECTS_PROPERTIES_FILE);
+        }
+    }
+
+    private void registerDialects(final String sqlDialects) {
+        for (final String className : sqlDialects.split("\\s*,\\s*")) {
+            registerDialect(className);
         }
     }
 
@@ -57,10 +72,6 @@ public final class SqlDialects {
         } catch (final ClassNotFoundException e) {
             throw new SqlDialectsRegistryException("Unable to find SQL dialect implementation class " + className);
         }
-    }
-
-    private SqlDialects() {
-        // prevent instantiation outside of singleton.
     }
 
     /**
@@ -81,7 +92,7 @@ public final class SqlDialects {
             dialectName = (String) dialect.getMethod(GET_PUBLIC_NAME_METHOD).invoke(null);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
                 | SecurityException e) {
-            throw new RuntimeException(
+            throw new SqlDialectsRegistryException(
                     "Unable to invoke " + GET_PUBLIC_NAME_METHOD + " trying to determine SQL dialect name");
         }
         return dialectName;
