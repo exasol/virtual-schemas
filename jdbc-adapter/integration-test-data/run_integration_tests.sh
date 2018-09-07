@@ -9,8 +9,10 @@ set -eux
 cd "$(dirname "$0")/.."
 
 readonly config="$(pwd)/integration-test-data/integration-test-travis.yaml"
-readonly exasol_version='6.0.10-d1'
-readonly tmp="$(pwd)/integration-test-data/exa"
+readonly exasol_docker_image_version="6.0.10-d1"
+readonly docker_image="exasol/docker-db:$exasol_docker_image_version"
+readonly docker_name="exasoldb"
+readonly tmp="$(mktemp -d exasol-vs-adapter-integration.XXXXXX)" || exit 1
 
 function cleanup() {
     docker rm -f exasoldb || true
@@ -24,28 +26,28 @@ cp integration-test-data/EXAConf integration-test-data/exa/etc/EXAConf
 dd if=/dev/zero of=integration-test-data/exa/data/storage/dev.1.data bs=1 count=1 seek=4G
 touch integration-test-data/exa/data/storage/dev.1.meta
 
-docker pull exasol/docker-db:latest
+docker pull "$docker_image"
 docker run \
-    --name exasoldb \
+    --name "$docker_name" \
     -p 8899:8888 \
     -p 6594:6583 \
     --detach \
     --privileged \
     -v "$tmp:/exa" \
-    "exasol/docker-db:$exasol_version" \
+    "$docker_image" \
     init-sc --node-id 11
 
-docker logs -f exasoldb &
+docker logs -f "$docker_name" &
 
 # Wait until database is ready
-(docker logs -f --tail 0 exasoldb &) 2>&1 | grep -q -i 'stage4: All stages finished'
+(docker logs -f --tail 0 "$docker_name" &) 2>&1 | grep -q -i 'stage4: All stages finished'
 sleep 30
 
 mvn -q clean package
 
 # Load virtualschema-jdbc-adapter JAR into BucketFS and wait until it's available.
 mvn -q pre-integration-test -DskipTests -Pit -Dintegrationtest.configfile="$config"
-(docker exec exasoldb sh -c 'tail -f -n +0 /exa/logs/cored/*bucket*' &) | \
+(docker exec "$docker_name" sh -c 'tail -f -n +0 /exa/logs/cored/*bucket*' &) | \
     grep -q -i 'File.*virtualschema-jdbc-adapter.*linked'
 
 mvn -q verify -Pit -Dintegrationtest.configfile="$config" -Dintegrationtest.skipTestSetup=true
