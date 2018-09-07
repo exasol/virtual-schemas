@@ -22,9 +22,9 @@ trap cleanup EXIT
 
 # Setup directory "exa" with pre-configured EXAConf to attach it to the exasoldb docker container
 mkdir -p "$tmp"/{etc,data/storage}
-cp integration-test-data/EXAConf integration-test-data/exa/etc/EXAConf
-dd if=/dev/zero of=integration-test-data/exa/data/storage/dev.1.data bs=1 count=1 seek=4G
-touch integration-test-data/exa/data/storage/dev.1.meta
+cp integration-test-data/EXAConf "$tmp/etc/EXAConf"
+dd if=/dev/zero of="$tmp/data/storage/dev.1.data" bs=1 count=1 seek=4G
+touch "$tmp/data/storage/dev.1.meta"
 
 docker pull "$docker_image"
 docker run \
