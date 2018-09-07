@@ -9,7 +9,7 @@ set -eux
 cd "$(dirname "$0")/.."
 
 readonly config="$(pwd)/integration-test-data/integration-test-travis.yaml"
-readonly exasol_version=6.0.10
+readonly exasol_version='6.0.10-d1'
 readonly tmp="$(pwd)/integration-test-data/exa"
 
 function cleanup() {
