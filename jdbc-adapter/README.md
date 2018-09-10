@@ -1,6 +1,6 @@
 # JDBC Adapter for Virtual Schemas
 
-[![Build Status](https://travis-ci.org/EXASOL/virtual-schemas.svg?branch=master)](https://travis-ci.org/EXASOL/virtual-schemas)
+[![Build Status](https://travis-ci.org/EXASOL/virtual-schemas.svg)](https://travis-ci.org/EXASOL/virtual-schemas)
 
 ## Overview
 The JDBC adapter for virtual schemas allows you to connect to JDBC data sources like Hive, Oracle, Teradata, Exasol or any other data source supporting JDBC. It uses the well proven ```IMPORT FROM JDBC``` Exasol statement behind the scenes to obtain the requested data, when running a query on a virtual table. The JDBC adapter also serves as the reference adapter for the Exasol virtual schema framework.
