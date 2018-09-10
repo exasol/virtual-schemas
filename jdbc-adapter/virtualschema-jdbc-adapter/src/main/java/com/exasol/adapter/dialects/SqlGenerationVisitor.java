@@ -1,39 +1,80 @@
 package com.exasol.adapter.dialects;
 
-import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.sql.*;
-import com.google.common.base.Joiner;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.sql.AggregateFunction;
+import com.exasol.adapter.sql.ScalarFunction;
+import com.exasol.adapter.sql.SqlColumn;
+import com.exasol.adapter.sql.SqlFunctionAggregate;
+import com.exasol.adapter.sql.SqlFunctionAggregateGroupConcat;
+import com.exasol.adapter.sql.SqlFunctionScalar;
+import com.exasol.adapter.sql.SqlFunctionScalarCase;
+import com.exasol.adapter.sql.SqlFunctionScalarCast;
+import com.exasol.adapter.sql.SqlFunctionScalarExtract;
+import com.exasol.adapter.sql.SqlGroupBy;
+import com.exasol.adapter.sql.SqlLimit;
+import com.exasol.adapter.sql.SqlLiteralBool;
+import com.exasol.adapter.sql.SqlLiteralDate;
+import com.exasol.adapter.sql.SqlLiteralDouble;
+import com.exasol.adapter.sql.SqlLiteralExactnumeric;
+import com.exasol.adapter.sql.SqlLiteralInterval;
+import com.exasol.adapter.sql.SqlLiteralNull;
+import com.exasol.adapter.sql.SqlLiteralString;
+import com.exasol.adapter.sql.SqlLiteralTimestamp;
+import com.exasol.adapter.sql.SqlLiteralTimestampUtc;
+import com.exasol.adapter.sql.SqlNode;
+import com.exasol.adapter.sql.SqlNodeVisitor;
+import com.exasol.adapter.sql.SqlOrderBy;
+import com.exasol.adapter.sql.SqlPredicateAnd;
+import com.exasol.adapter.sql.SqlPredicateBetween;
+import com.exasol.adapter.sql.SqlPredicateEqual;
+import com.exasol.adapter.sql.SqlPredicateInConstList;
+import com.exasol.adapter.sql.SqlPredicateIsNotNull;
+import com.exasol.adapter.sql.SqlPredicateIsNull;
+import com.exasol.adapter.sql.SqlPredicateLess;
+import com.exasol.adapter.sql.SqlPredicateLessEqual;
+import com.exasol.adapter.sql.SqlPredicateLike;
+import com.exasol.adapter.sql.SqlPredicateLikeRegexp;
+import com.exasol.adapter.sql.SqlPredicateNot;
+import com.exasol.adapter.sql.SqlPredicateNotEqual;
+import com.exasol.adapter.sql.SqlPredicateOr;
+import com.exasol.adapter.sql.SqlSelectList;
+import com.exasol.adapter.sql.SqlStatementSelect;
+import com.exasol.adapter.sql.SqlTable;
+import com.google.common.base.Joiner;
+
 /**
- * This class has the logic to generate SQL queries based on a graph of {@link SqlNode} elements.
- * It uses the visitor pattern.
- * This class interacts with the dialects in some situations, e.g. to find out how to handle quoting,
+ * This class has the logic to generate SQL queries based on a graph of
+ * {@link SqlNode} elements. It uses the visitor pattern. This class interacts
+ * with the dialects in some situations, e.g. to find out how to handle quoting,
  * case-sensitivity.
  *
  * <p>
- * If this class is not sufficiently customizable for your use case, you can extend
- * this class and override the required methods. You also have to return your custom
- * visitor class then in the method {@link SqlDialect#getSqlGenerationVisitor(SqlGenerationContext)}.
- * See {@link com.exasol.adapter.dialects.impl.OracleSqlGenerationVisitor} for an example.
+ * If this class is not sufficiently customizable for your use case, you can
+ * extend this class and override the required methods. You also have to return
+ * your custom visitor class then in the method
+ * {@link SqlDialect#getSqlGenerationVisitor(SqlGenerationContext)}. See
+ * {@link com.exasol.adapter.dialects.impl.OracleSqlGenerationVisitor} for an
+ * example.
  * </p>
  *
  * Note on operator associativity and parenthesis generation: Currently we use
- * parenthesis almost always. Without parenthesis, two SqlNode graphs with different
- * semantic lead to "select 1 = 1 - 1 + 1". Also "SELECT NOT NOT TRUE" needs to be written
- * as "SELECT NOT (NOT TRUE)" to work at all, whereas SELECT NOT TRUE works fine
- * without parentheses. Currently we make inflationary use of parenthesis to to enforce
- * the right semantic, but hopefully there is a better way.
+ * parenthesis almost always. Without parenthesis, two SqlNode graphs with
+ * different semantic lead to "select 1 = 1 - 1 + 1". Also "SELECT NOT NOT TRUE"
+ * needs to be written as "SELECT NOT (NOT TRUE)" to work at all, whereas SELECT
+ * NOT TRUE works fine without parentheses. Currently we make inflationary use
+ * of parenthesis to to enforce the right semantic, but hopefully there is a
+ * better way.
  */
 public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
 
-    private SqlDialect dialect;
-    private SqlGenerationContext context;
+    private final SqlDialect dialect;
+    private final SqlGenerationContext context;
 
-    public SqlGenerationVisitor(SqlDialect dialect, SqlGenerationContext context) {
+    public SqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         this.dialect = dialect;
         this.context = context;
 
@@ -42,21 +83,25 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
 
     protected void checkDialectAliases() {
         // Check if dialect provided invalid aliases, which would never be applied.
-        for (ScalarFunction function : dialect.getScalarFunctionAliases().keySet()) {
+        for (final ScalarFunction function : this.dialect.getScalarFunctionAliases().keySet()) {
             if (!function.isSimple()) {
-                throw new RuntimeException("The dialect " + dialect.getPublicName() + " provided an alias for the non-simple scalar function " + function.name() + ". This alias will never be considered.");
+                throw new RuntimeException("The dialect " + SqlDialect.getPublicName()
+                        + " provided an alias for the non-simple scalar function " + function.name()
+                        + ". This alias will never be considered.");
             }
         }
-        for (AggregateFunction function : dialect.getAggregateFunctionAliases().keySet()) {
+        for (final AggregateFunction function : this.dialect.getAggregateFunctionAliases().keySet()) {
             if (!function.isSimple()) {
-                throw new RuntimeException("The dialect " + dialect.getPublicName() + " provided an alias for the non-simple aggregate function " + function.name() + ". This alias will never be considered.");
+                throw new RuntimeException("The dialect " + SqlDialect.getPublicName()
+                        + " provided an alias for the non-simple aggregate function " + function.name()
+                        + ". This alias will never be considered.");
             }
         }
     }
 
     @Override
-    public String visit(SqlStatementSelect select) throws AdapterException {
-        StringBuilder sql = new StringBuilder();
+    public String visit(final SqlStatementSelect select) throws AdapterException {
+        final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append(select.getSelectList().accept(this));
         sql.append(" FROM ");
@@ -85,15 +130,15 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     }
 
     @Override
-    public String visit(SqlSelectList selectList) throws AdapterException {
-        List<String> selectElement = new ArrayList<>();
+    public String visit(final SqlSelectList selectList) throws AdapterException {
+        final List<String> selectElement = new ArrayList<>();
         if (selectList.isRequestAnyColumn()) {
             // The system requested any column
             selectElement.add("true");
         } else if (selectList.isSelectStar()) {
             selectElement.add("*");
         } else {
-            for (SqlNode node : selectList.getExpressions()) {
+            for (final SqlNode node : selectList.getExpressions()) {
                 selectElement.add(node.accept(this));
             }
         }
@@ -101,41 +146,42 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     }
 
     @Override
-    public String visit(SqlColumn column) throws AdapterException {
-        return dialect.applyQuoteIfNeeded(column.getName());
+    public String visit(final SqlColumn column) throws AdapterException {
+        return this.dialect.applyQuoteIfNeeded(column.getName());
     }
 
     @Override
-    public String visit(SqlTable table) {
+    public String visit(final SqlTable table) {
         String schemaPrefix = "";
-        if (dialect.requiresCatalogQualifiedTableNames(context) && context.getCatalogName() != null && !context.getCatalogName().isEmpty()) {
-            schemaPrefix = dialect.applyQuoteIfNeeded(context.getCatalogName())
-                    + dialect.getTableCatalogAndSchemaSeparator();
+        if (this.dialect.requiresCatalogQualifiedTableNames(this.context) && this.context.getCatalogName() != null
+                && !this.context.getCatalogName().isEmpty()) {
+            schemaPrefix = this.dialect.applyQuoteIfNeeded(this.context.getCatalogName())
+                    + this.dialect.getTableCatalogAndSchemaSeparator();
         }
-        if (dialect.requiresSchemaQualifiedTableNames(context) && context.getSchemaName() != null && !context.getSchemaName().isEmpty()) {
-            schemaPrefix += dialect.applyQuoteIfNeeded(context.getSchemaName())
-                    + dialect.getTableCatalogAndSchemaSeparator();
+        if (this.dialect.requiresSchemaQualifiedTableNames(this.context) && this.context.getSchemaName() != null
+                && !this.context.getSchemaName().isEmpty()) {
+            schemaPrefix += this.dialect.applyQuoteIfNeeded(this.context.getSchemaName())
+                    + this.dialect.getTableCatalogAndSchemaSeparator();
         }
-        return schemaPrefix + dialect.applyQuoteIfNeeded(table.getName());
+        return schemaPrefix + this.dialect.applyQuoteIfNeeded(table.getName());
     }
 
     @Override
-    public String visit(SqlGroupBy groupBy) throws AdapterException {
+    public String visit(final SqlGroupBy groupBy) throws AdapterException {
         if (groupBy.getExpressions() == null || groupBy.getExpressions().isEmpty()) {
-            throw new RuntimeException(
-                    "Unexpected internal state (empty group by)");
+            throw new RuntimeException("Unexpected internal state (empty group by)");
         }
-        List<String> selectElement = new ArrayList<>();
-        for (SqlNode node : groupBy.getExpressions()) {
+        final List<String> selectElement = new ArrayList<>();
+        for (final SqlNode node : groupBy.getExpressions()) {
             selectElement.add(node.accept(this));
         }
         return Joiner.on(", ").join(selectElement);
     }
 
     @Override
-    public String visit(SqlFunctionAggregate function) throws AdapterException {
-        List<String> argumentsSql = new ArrayList<>();
-        for (SqlNode node : function.getArguments()) {
+    public String visit(final SqlFunctionAggregate function) throws AdapterException {
+        final List<String> argumentsSql = new ArrayList<>();
+        for (final SqlNode node : function.getArguments()) {
             argumentsSql.add(node.accept(this));
         }
         if (function.getFunctionName().equalsIgnoreCase("count") && argumentsSql.size() == 0) {
@@ -146,26 +192,25 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
             distinctSql = "DISTINCT ";
         }
         String functionNameInSourceSystem = function.getFunctionName();
-        if (dialect.getAggregateFunctionAliases().containsKey(function.getFunction())) {
-            functionNameInSourceSystem = dialect.getAggregateFunctionAliases().get(function.getFunction());
+        if (this.dialect.getAggregateFunctionAliases().containsKey(function.getFunction())) {
+            functionNameInSourceSystem = this.dialect.getAggregateFunctionAliases().get(function.getFunction());
         }
-        return functionNameInSourceSystem + "(" + distinctSql
-                + Joiner.on(", ").join(argumentsSql) + ")";
+        return functionNameInSourceSystem + "(" + distinctSql + Joiner.on(", ").join(argumentsSql) + ")";
     }
 
     @Override
-    public String visit(SqlFunctionAggregateGroupConcat function) throws AdapterException {
-        StringBuilder builder = new StringBuilder();
+    public String visit(final SqlFunctionAggregateGroupConcat function) throws AdapterException {
+        final StringBuilder builder = new StringBuilder();
         builder.append(function.getFunctionName());
         builder.append("(");
         if (function.hasDistinct()) {
             builder.append("DISTINCT ");
         }
-        assert(function.getArguments().size() == 1 && function.getArguments().get(0) != null);
+        assert (function.getArguments().size() == 1 && function.getArguments().get(0) != null);
         builder.append(function.getArguments().get(0).accept(this));
         if (function.hasOrderBy()) {
             builder.append(" ");
-            String orderByString = function.getOrderBy().accept(this);
+            final String orderByString = function.getOrderBy().accept(this);
             builder.append(orderByString);
         }
         if (function.getSeparator() != null) {
@@ -179,35 +224,33 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     }
 
     @Override
-    public String visit(SqlFunctionScalar function) throws AdapterException {
-        List<String> argumentsSql = new ArrayList<>();
-        for (SqlNode node : function.getArguments()) {
+    public String visit(final SqlFunctionScalar function) throws AdapterException {
+        final List<String> argumentsSql = new ArrayList<>();
+        for (final SqlNode node : function.getArguments()) {
             argumentsSql.add(node.accept(this));
         }
         String functionNameInSourceSystem = function.getFunctionName();
-        if (dialect.getScalarFunctionAliases().containsKey(function.getFunction())) {
+        if (this.dialect.getScalarFunctionAliases().containsKey(function.getFunction())) {
             // Take alias if one is defined - will overwrite the infix
-            functionNameInSourceSystem = dialect.getScalarFunctionAliases().get(function.getFunction());
+            functionNameInSourceSystem = this.dialect.getScalarFunctionAliases().get(function.getFunction());
         } else {
-            if (dialect.getBinaryInfixFunctionAliases().containsKey(function.getFunction())) {
+            if (this.dialect.getBinaryInfixFunctionAliases().containsKey(function.getFunction())) {
                 assert (argumentsSql.size() == 2);
                 String realFunctionName = function.getFunctionName();
-                if (dialect.getBinaryInfixFunctionAliases().containsKey(function.getFunction())) {
-                    realFunctionName = dialect.getBinaryInfixFunctionAliases().get(function.getFunction());
+                if (this.dialect.getBinaryInfixFunctionAliases().containsKey(function.getFunction())) {
+                    realFunctionName = this.dialect.getBinaryInfixFunctionAliases().get(function.getFunction());
                 }
-                return "(" + argumentsSql.get(0) + " " + realFunctionName + " "
-                        + argumentsSql.get(1) + ")";
-            } else if (dialect.getPrefixFunctionAliases().containsKey(function.getFunction())) {
+                return "(" + argumentsSql.get(0) + " " + realFunctionName + " " + argumentsSql.get(1) + ")";
+            } else if (this.dialect.getPrefixFunctionAliases().containsKey(function.getFunction())) {
                 assert (argumentsSql.size() == 1);
                 String realFunctionName = function.getFunctionName();
-                if (dialect.getPrefixFunctionAliases().containsKey(function.getFunction())) {
-                    realFunctionName = dialect.getPrefixFunctionAliases().get(function.getFunction());
+                if (this.dialect.getPrefixFunctionAliases().containsKey(function.getFunction())) {
+                    realFunctionName = this.dialect.getPrefixFunctionAliases().get(function.getFunction());
                 }
-                return "(" + realFunctionName
-                        + argumentsSql.get(0) + ")";
+                return "(" + realFunctionName + argumentsSql.get(0) + ")";
             }
         }
-        if (argumentsSql.size() == 0 && dialect.omitParentheses(function.getFunction())) {
+        if (argumentsSql.size() == 0 && this.dialect.omitParentheses(function.getFunction())) {
             return functionNameInSourceSystem;
         } else {
             return functionNameInSourceSystem + "(" + Joiner.on(", ").join(argumentsSql) + ")";
@@ -215,16 +258,16 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     }
 
     @Override
-    public String visit(SqlFunctionScalarCase function) throws AdapterException {
-        StringBuilder builder = new StringBuilder();
+    public String visit(final SqlFunctionScalarCase function) throws AdapterException {
+        final StringBuilder builder = new StringBuilder();
         builder.append("CASE");
         if (function.getBasis() != null) {
             builder.append(" ");
             builder.append(function.getBasis().accept(this));
         }
         for (int i = 0; i < function.getArguments().size(); i++) {
-            SqlNode node = function.getArguments().get(i);
-            SqlNode result = function.getResults().get(i);
+            final SqlNode node = function.getArguments().get(i);
+            final SqlNode result = function.getResults().get(i);
             builder.append(" WHEN ");
             builder.append(node.accept(this));
             builder.append(" THEN ");
@@ -239,12 +282,12 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     }
 
     @Override
-    public String visit(SqlFunctionScalarCast function) throws AdapterException {
+    public String visit(final SqlFunctionScalarCast function) throws AdapterException {
 
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         builder.append("CAST");
         builder.append("(");
-        assert(function.getArguments().size() == 1 && function.getArguments().get(0) != null);
+        assert (function.getArguments().size() == 1 && function.getArguments().get(0) != null);
         builder.append(function.getArguments().get(0).accept(this));
         builder.append(" AS ");
         builder.append(function.getDataType());
@@ -253,14 +296,14 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     }
 
     @Override
-    public String visit(SqlFunctionScalarExtract function) throws AdapterException {
-        assert(function.getArguments().size() == 1 && function.getArguments().get(0) != null);
-        String expression = function.getArguments().get(0).accept(this);
-        return function.getFunctionName() + "(" + function.getToExtract() + " FROM "+ expression + ")";
+    public String visit(final SqlFunctionScalarExtract function) throws AdapterException {
+        assert (function.getArguments().size() == 1 && function.getArguments().get(0) != null);
+        final String expression = function.getArguments().get(0).accept(this);
+        return function.getFunctionName() + "(" + function.getToExtract() + " FROM " + expression + ")";
     }
 
     @Override
-    public String visit(SqlLimit limit) {
+    public String visit(final SqlLimit limit) {
         String offsetSql = "";
         if (limit.getOffset() != 0) {
             offsetSql = " OFFSET " + limit.getOffset();
@@ -269,7 +312,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     }
 
     @Override
-    public String visit(SqlLiteralBool literal) {
+    public String visit(final SqlLiteralBool literal) {
         if (literal.getValue()) {
             return "true";
         } else {
@@ -278,50 +321,50 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     }
 
     @Override
-    public String visit(SqlLiteralDate literal) {
+    public String visit(final SqlLiteralDate literal) {
         return "DATE '" + literal.getValue() + "'"; // This gets always executed
                                                     // as
                                                     // TO_DATE('2015-02-01','YYYY-MM-DD')
     }
 
     @Override
-    public String visit(SqlLiteralDouble literal) {
+    public String visit(final SqlLiteralDouble literal) {
         return Double.toString(literal.getValue());
     }
 
     @Override
-    public String visit(SqlLiteralExactnumeric literal) {
+    public String visit(final SqlLiteralExactnumeric literal) {
         return literal.getValue().toString();
     }
 
     @Override
-    public String visit(SqlLiteralNull literal) {
+    public String visit(final SqlLiteralNull literal) {
         return "NULL";
     }
 
     @Override
-    public String visit(SqlLiteralString literal) {
-        return dialect.getStringLiteral(literal.getValue());
+    public String visit(final SqlLiteralString literal) {
+        return this.dialect.getStringLiteral(literal.getValue());
     }
 
     @Override
-    public String visit(SqlLiteralTimestamp literal) {
+    public String visit(final SqlLiteralTimestamp literal) {
         // TODO Allow dialect to modify behavior
         return "TIMESTAMP '" + literal.getValue().toString() + "'";
     }
 
     @Override
-    public String visit(SqlLiteralTimestampUtc literal) {
+    public String visit(final SqlLiteralTimestampUtc literal) {
         // TODO Allow dialect to modify behavior
         return "TIMESTAMP '" + literal.getValue().toString() + "'";
     }
 
     @Override
-    public String visit(SqlLiteralInterval literal) {
+    public String visit(final SqlLiteralInterval literal) {
         // TODO Allow dialect to modify behavior
         if (literal.getDataType().getIntervalType() == DataType.IntervalType.YEAR_TO_MONTH) {
-            return "INTERVAL '" + literal.getValue().toString()
-                    + "' YEAR (" + literal.getDataType().getPrecision() + ") TO MONTH";
+            return "INTERVAL '" + literal.getValue().toString() + "' YEAR (" + literal.getDataType().getPrecision()
+                    + ") TO MONTH";
         } else {
             return "INTERVAL '" + literal.getValue().toString() + "' DAY (" + literal.getDataType().getPrecision()
                     + ") TO SECOND (" + literal.getDataType().getIntervalFraction() + ")";
@@ -329,18 +372,18 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     }
 
     @Override
-    public String visit(SqlOrderBy orderBy) throws AdapterException {
+    public String visit(final SqlOrderBy orderBy) throws AdapterException {
         // ORDER BY <expr> [ASC/DESC] [NULLS FIRST/LAST]
         // ASC and NULLS LAST are default in EXASOL
-        List<String> sqlOrderElement = new ArrayList<>();
+        final List<String> sqlOrderElement = new ArrayList<>();
         for (int i = 0; i < orderBy.getExpressions().size(); ++i) {
             String elementSql = orderBy.getExpressions().get(i).accept(this);
-            boolean shallNullsBeAtTheEnd = orderBy.nullsLast().get(i);
-            boolean isAscending = orderBy.isAscending().get(i);
+            final boolean shallNullsBeAtTheEnd = orderBy.nullsLast().get(i);
+            final boolean isAscending = orderBy.isAscending().get(i);
             if (isAscending == false) {
                 elementSql += " DESC";
             }
-            if (shallNullsBeAtTheEnd != nullsAreAtEndByDefault(isAscending, dialect.getDefaultNullSorting())) {
+            if (shallNullsBeAtTheEnd != nullsAreAtEndByDefault(isAscending, this.dialect.getDefaultNullSorting())) {
                 // we have to specify null positioning explicitly, otherwise it would be wrong
                 elementSql += (shallNullsBeAtTheEnd) ? " NULLS LAST" : " NULLS FIRST";
             }
@@ -350,11 +393,13 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     }
 
     /**
-     * @param isAscending           true if the desired sort order is ascending, false if descending
-     * @param defaultNullSorting    default null sorting of dialect
-     * @return true, if the data source would position nulls at end of the resultset if NULLS FIRST/LAST is not specified explicitly.
+     * @param isAscending        true if the desired sort order is ascending, false
+     *                           if descending
+     * @param defaultNullSorting default null sorting of dialect
+     * @return true, if the data source would position nulls at end of the resultset
+     *         if NULLS FIRST/LAST is not specified explicitly.
      */
-    private boolean nullsAreAtEndByDefault(boolean isAscending, SqlDialect.NullSorting defaultNullSorting) {
+    private boolean nullsAreAtEndByDefault(final boolean isAscending, final SqlDialect.NullSorting defaultNullSorting) {
         if (defaultNullSorting == SqlDialect.NullSorting.NULLS_SORTED_AT_END) {
             return true;
         } else if (defaultNullSorting == SqlDialect.NullSorting.NULLS_SORTED_AT_START) {
@@ -369,53 +414,47 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     }
 
     @Override
-    public String visit(SqlPredicateAnd predicate) throws AdapterException {
-        List<String> operandsSql = new ArrayList<>();
-        for (SqlNode node : predicate.getAndedPredicates()) {
+    public String visit(final SqlPredicateAnd predicate) throws AdapterException {
+        final List<String> operandsSql = new ArrayList<>();
+        for (final SqlNode node : predicate.getAndedPredicates()) {
             operandsSql.add(node.accept(this));
         }
         return "(" + Joiner.on(" AND ").join(operandsSql) + ")";
     }
 
     @Override
-    public String visit(SqlPredicateBetween predicate) throws AdapterException {
-        return predicate.getExpression().accept(this) + " BETWEEN "
-                + predicate.getBetweenLeft().accept(this) + " AND "
+    public String visit(final SqlPredicateBetween predicate) throws AdapterException {
+        return predicate.getExpression().accept(this) + " BETWEEN " + predicate.getBetweenLeft().accept(this) + " AND "
                 + predicate.getBetweenRight().accept(this);
     }
 
     @Override
-    public String visit(SqlPredicateEqual predicate) throws AdapterException {
-        return predicate.getLeft().accept(this) + " = "
-                + predicate.getRight().accept(this);
+    public String visit(final SqlPredicateEqual predicate) throws AdapterException {
+        return predicate.getLeft().accept(this) + " = " + predicate.getRight().accept(this);
     }
 
     @Override
-    public String visit(SqlPredicateInConstList predicate) throws AdapterException {
-        List<String> argumentsSql = new ArrayList<>();
-        for (SqlNode node : predicate.getInArguments()) {
+    public String visit(final SqlPredicateInConstList predicate) throws AdapterException {
+        final List<String> argumentsSql = new ArrayList<>();
+        for (final SqlNode node : predicate.getInArguments()) {
             argumentsSql.add(node.accept(this));
         }
-        return predicate.getExpression().accept(this) + " IN ("
-                + Joiner.on(", ").join(argumentsSql) + ")";
+        return predicate.getExpression().accept(this) + " IN (" + Joiner.on(", ").join(argumentsSql) + ")";
     }
 
     @Override
-    public String visit(SqlPredicateLess predicate) throws AdapterException {
-        return predicate.getLeft().accept(this) + " < "
-                + predicate.getRight().accept(this);
+    public String visit(final SqlPredicateLess predicate) throws AdapterException {
+        return predicate.getLeft().accept(this) + " < " + predicate.getRight().accept(this);
     }
 
     @Override
-    public String visit(SqlPredicateLessEqual predicate) throws AdapterException {
-        return predicate.getLeft().accept(this) + " <= "
-                + predicate.getRight().accept(this);
+    public String visit(final SqlPredicateLessEqual predicate) throws AdapterException {
+        return predicate.getLeft().accept(this) + " <= " + predicate.getRight().accept(this);
     }
 
     @Override
-    public String visit(SqlPredicateLike predicate) throws AdapterException {
-        String sql = predicate.getLeft().accept(this) + " LIKE "
-                + predicate.getPattern().accept(this);
+    public String visit(final SqlPredicateLike predicate) throws AdapterException {
+        String sql = predicate.getLeft().accept(this) + " LIKE " + predicate.getPattern().accept(this);
         if (predicate.getEscapeChar() != null) {
             sql += " ESCAPE " + predicate.getEscapeChar().accept(this);
         }
@@ -423,39 +462,37 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     }
 
     @Override
-    public String visit(SqlPredicateLikeRegexp predicate) throws AdapterException {
-        return predicate.getLeft().accept(this) + " REGEXP_LIKE "
-                + predicate.getPattern().accept(this);
+    public String visit(final SqlPredicateLikeRegexp predicate) throws AdapterException {
+        return predicate.getLeft().accept(this) + " REGEXP_LIKE " + predicate.getPattern().accept(this);
     }
 
     @Override
-    public String visit(SqlPredicateNot predicate) throws AdapterException {
+    public String visit(final SqlPredicateNot predicate) throws AdapterException {
         // "SELECT NOT NOT TRUE" is invalid syntax, "SELECT NOT (NOT TRUE)" works.
         return "NOT (" + predicate.getExpression().accept(this) + ")";
     }
 
     @Override
-    public String visit(SqlPredicateNotEqual predicate) throws AdapterException {
-        return predicate.getLeft().accept(this) + " <> "
-                + predicate.getRight().accept(this);
+    public String visit(final SqlPredicateNotEqual predicate) throws AdapterException {
+        return predicate.getLeft().accept(this) + " <> " + predicate.getRight().accept(this);
     }
 
     @Override
-    public String visit(SqlPredicateOr predicate) throws AdapterException {
-        List<String> operandsSql = new ArrayList<>();
-        for (SqlNode node : predicate.getOrPredicates()) {
+    public String visit(final SqlPredicateOr predicate) throws AdapterException {
+        final List<String> operandsSql = new ArrayList<>();
+        for (final SqlNode node : predicate.getOrPredicates()) {
             operandsSql.add(node.accept(this));
         }
         return "(" + Joiner.on(" OR ").join(operandsSql) + ")";
     }
 
     @Override
-    public String visit(SqlPredicateIsNull predicate) throws AdapterException {
+    public String visit(final SqlPredicateIsNull predicate) throws AdapterException {
         return predicate.getExpression().accept(this) + " IS NULL";
     }
 
     @Override
-    public String visit(SqlPredicateIsNotNull predicate) throws AdapterException {
+    public String visit(final SqlPredicateIsNotNull predicate) throws AdapterException {
         return predicate.getExpression().accept(this) + " IS NOT NULL";
 
     }
