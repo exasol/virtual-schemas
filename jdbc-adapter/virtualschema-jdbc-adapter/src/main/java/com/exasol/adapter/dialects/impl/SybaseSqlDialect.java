@@ -19,7 +19,6 @@ import com.exasol.adapter.sql.ScalarFunction;
 
 
 public class SybaseSqlDialect extends AbstractSqlDialect{
-
   // The Sybase dialect started as a copy of the SQL Server dialect.
   // Tested Sybase version: ASE 16.0
   // Tested JDBC drivers:  jtds-1.3.1 (https://sourceforge.net/projects/jtds/)
@@ -28,15 +27,17 @@ public class SybaseSqlDialect extends AbstractSqlDialect{
   // https://help.sap.com/viewer/p/SAP_ASE
 
   public final static int maxSybaseVarcharSize = 8000;
-
   public final static int maxSybaseNVarcharSize = 4000;
+  private static final String NAME = "SYBASE";
 
+  public static String getPublicName()
+  {
+      return NAME;
+  }
 
   public SybaseSqlDialect(SqlDialectContext context) {
     super(context);
   }
-
-  public static final String NAME = "SYBASE";
 
   @Override
   public String getPublicName() {

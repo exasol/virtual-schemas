@@ -21,6 +21,10 @@ As an entry point we recommend to follow the [step-by-step deployment guide](dep
 8. [PostgresSQL](#postgresql)
 10. [Generic](#generic)
 
+## Before you Start
+
+Please note that the syntax for creating adapter scripts is not recognized by all SQL clients. [DBeaver](https://dbeaver.io/) for example. If you encounter such a problem, try a different client.
+
 ## EXASOL
 
 **Supported capabilities**:
@@ -32,6 +36,7 @@ You don't have to install any JDBC driver, because it is already installed in th
 
 **Adapter script**:
 After uploading the adapter jar, the adapter script can be created as follows:
+
 ```sql
 CREATE SCHEMA adapter;
 CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
@@ -53,6 +58,7 @@ CREATE VIRTUAL SCHEMA virtual_exasol USING adapter.jdbc_adapter WITH
 **Use IMPORT FROM EXA instead of IMPORT FROM JDBC**
 
 EXASOL provides the faster and parallel `IMPORT FROM EXA` command for loading data from EXASOL. You can tell the adapter to use this command instead of `IMPORT FROM JDBC` by setting the `IMPORT_FROM_EXA` property. In this case you have to provide the additional `EXA_CONNECTION_STRING` which is the connection string used for the internally used `IMPORT FROM EXA` command (it also supports ranges like `192.168.6.11..14:8563`). Please note, that the `CONNECTION` object must still have the jdbc connection string in `AT`, because the Adapter Script uses a JDBC connection to obtain the metadata when a schema is created or refreshed. For the internally used `IMPORT FROM EXA` statement, the address from `EXA_CONNECTION_STRING` and the username and password from the connection will be used.
+
 ```sql
 CREATE CONNECTION exasol_conn TO 'jdbc:exa:exasol-host:1234' USER 'user' IDENTIFIED BY 'pwd';
 
@@ -67,11 +73,13 @@ CREATE VIRTUAL SCHEMA virtual_exasol USING adapter.jdbc_adapter WITH
 ## Hive
 
 **JDBC driver**:
+
 The dialect was tested with the Cloudera Hive JDBC driver available on the [Cloudera downloads page](http://www.cloudera.com/downloads). The driver is also available directly from [Simba technologies](http://www.simba.com/), who developed the driver.
 
 When you unpack the JDBC driver archive you will see that there are two variants, JDBC 4.0 and 4.1. We tested with the JDBC 4.1 variant.
 
 You have to specify the following settings when adding the JDBC driver via EXAOperation:
+
 * Name: `Hive`
 * Main: `com.cloudera.hive.jdbc41.HS2Driver`
 * Prefix: `jdbc:hive2:`
@@ -79,7 +87,9 @@ You have to specify the following settings when adding the JDBC driver via EXAOp
 Make sure you upload **all files** of the JDBC driver (over 10 at the time of writing) in EXAOperation **and** to the bucket.
 
 **Adapter script**:
+
 You have to add all files of the JDBC driver to the classpath using `%jar` as follows (filenames may vary):
+
 ```sql
 CREATE SCHEMA adapter;
 CREATE  JAVA  ADAPTER SCRIPT jdbc_adapter AS
@@ -101,6 +111,7 @@ CREATE  JAVA  ADAPTER SCRIPT jdbc_adapter AS
 /
 ```
 **Create a virtual schema:**
+
 ```sql
 CREATE CONNECTION hive_conn TO 'jdbc:hive2://hive-host:10000' USER 'hive-usr' IDENTIFIED BY 'hive-pwd';
 
@@ -115,15 +126,19 @@ CREATE VIRTUAL SCHEMA hive_default USING adapter.jdbc_adapter WITH
 Connecting to a Kerberos secured Impala or Hive service only differs in one aspect: You have to a `CONNECTION` object which contains all the relevant information for the Kerberos authentication. This section describes how Kerberos authentication works and how to create such a `CONNECTION`.
 
 #### 0. Understand how it works (optional)
+
 Both the adapter script and the internally used `IMPORT FROM JDBC` statement support Kerberos authentication. They detect, that the connection is a Kerberos connection by a special prefix in the `IDENTIFIED BY` field. In such case, the authentication will happen using a Kerberos keytab and Kerberos config file (using the JAAS Java API).
 
 The `CONNECTION` object stores all relevant information and files in its fields:
+
 * The `TO` field contains the JDBC connection string
 * The `USER` field contains the Kerberos principal
 * The `IDENTIFIED BY` field contains the Kerberos configuration file and keytab file (base64 encoded) along with an internal prefix `ExaAuthType=Kerberos;` to identify the `CONNECTION` as a Kerberos `CONNECTION`.
 
 #### 1. Generate the CREATE CONNECTION statement
+
 In order to simplify the creation of Kerberos `CONNECTION` objects, the [`create_kerberos_conn.py`](https://github.com/EXASOL/hadoop-etl-udfs/blob/master/tools/create_kerberos_conn.py) Python script has been provided. The script requires 5 arguments:
+
 * `CONNECTION` name (arbitrary name for the new `CONNECTION`)
 * Kerberos principal for Hadoop (i.e., Hadoop user)
 * Kerberos configuration file path (e.g., `krb5.conf`)
@@ -131,23 +146,29 @@ In order to simplify the creation of Kerberos `CONNECTION` objects, the [`create
 * JDBC connection string
 
 Example command:
+
 ```
 python tools/create_kerberos_conn.py krb_conn krbuser@EXAMPLE.COM /etc/krb5.conf ./krbuser.keytab \
   'jdbc:hive2://hive-host.example.com:10000;AuthMech=1;KrbRealm=EXAMPLE.COM;KrbHostFQDN=hive-host.example.com;KrbServiceName=hive'
 ```
+
 Output:
+
 ```sql
 CREATE CONNECTION krb_conn TO 'jdbc:hive2://hive-host.example.com:10000;AuthMech=1;KrbRealm=EXAMPLE.COM;KrbHostFQDN=hive-host.example.com;KrbServiceName=hive' USER 'krbuser@EXAMPLE.COM' IDENTIFIED BY 'ExaAuthType=Kerberos;enp6Cg==;YWFhCg=='
 ```
 
 #### 2. Create the CONNECTION
 You have to execute the generated `CREATE CONNECTION` statement directly in EXASOL to actually create the Kerberos `CONNECTION` object. For more detailed information about the script, use the help option:
-```
+
+```sh
 python tools/create_kerberos_conn.py -h
 ```
 
 #### 3. Use the connection when creating a virtual schema
+
 You can now create a virtual schema using the Kerberos connection created before.
+
 ```sql
 CREATE VIRTUAL SCHEMA hive_default USING adapter.jdbc_adapter WITH
   SQL_DIALECT     = 'HIVE'
@@ -162,6 +183,7 @@ The Impala dialect is similar to the Hive dialect in most aspects. For this reas
 **JDBC driver:**
 
 You have to specify the following settings when adding the JDBC driver via EXAOperation:
+
 * Name: `Hive`
 * Main: `com.cloudera.impala.jdbc41.Driver`
 * Prefix: `jdbc:impala:`
@@ -169,7 +191,9 @@ You have to specify the following settings when adding the JDBC driver via EXAOp
 Make sure you upload **all files** of the JDBC driver (over 10 at the time of writing) in EXAOperation and to the bucket.
 
 **Adapter script**:
+
 The adapter can be created similar to Hive:
+
 ```sql
 
 CREATE SCHEMA adapter;
@@ -193,7 +217,9 @@ CREATE  JAVA  ADAPTER SCRIPT jdbc_adapter AS
 ```
 
 **Create a virtual schema:**
+
 You can now create a virtual schema as follows:
+
 ```sql
 CREATE CONNECTION impala_conn TO 'jdbc:impala://impala-host:21050' USER 'impala-usr' IDENTIFIED BY 'impala-pwd';
 
@@ -216,6 +242,7 @@ Additionally there are 2 files for the DB2 Driver.
 Make sure that you upload the necessary license file for the target platform you want to connect to. 
 
 **Supported capabilities**:
+
 The db2 dialect handles some casts in regards of time data types and functions.
 
 Casting of Data Types
@@ -232,12 +259,14 @@ Casting of Functions
 
 
 **JDBC driver:**
+
 You have to specify the following settings when adding the JDBC driver via EXAOperation:
 * Name: `DB2`
 * Main: `com.ibm.db2.jcc.DB2Driver`
 * Prefix: `jdbc:db2:`
 
 **Adapter script**
+
 ```sql
 CREATE or replace JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
 
@@ -257,7 +286,9 @@ CREATE or replace JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
 ```
 
 **Create a virtual schema**
+
 You can now create a virtual schema as follows:
+
 ```sql
 create or replace connection DB2_CON to 'jdbc:db2://host:port/database' user 'db2-usr' identified by 'db2-pwd';
 
@@ -271,13 +302,17 @@ create  virtual schema db2 using adapter.jdbc_adapter with
 `<schemaname>` has to be replaced by the actual db2 schema you want to connect to.
 
 **Running the DB2 integration tests**
+
 A how to has been included in the [setup sql file](../integration-test-data/db2-testdata.sql)
 
 ## Oracle
+
 **Supported capabilities**:
+
 The Oracle dialect does not support all capabilities. A complete list can be found in [OracleSqlDialect.getCapabilities()](../virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/impl/OracleSqlDialect.java).
 
 Oracle datatypes are mapped to their equivalents in Exasol. The following exceptions apply:
+
 - `NUMBER`, `NUMBER with precision > 36` and `LONG` are casted to `VARCHAR` to prevent a loss of precision.
 - `DATE` is casted to `TIMESTAMP`. This datatype is only supported for positive year values, i.e., years > 0001.
 - `TIMESTAMP WITH [LOCAL] TIME ZONE` is casted to `VARCHAR`. Exasol does not support timestamps with time zone information.
@@ -285,12 +320,14 @@ Oracle datatypes are mapped to their equivalents in Exasol. The following except
 - `CLOB`, `NCLOB` and `BLOB` are casted to `VARCHAR`.
 - `RAW` and `LONG RAW` are not supported.
 
-
 ### JDBC driver
+
 To setup a virtual schema that communicates with an Oracle database using JDBC, the JDBC driver, e.g., `ojdbc7-12.1.0.2.jar`, must first be installed in EXAoperation and deployed to BucketFS; see [this article](https://www.exasol.com/support/browse/SOL-179#WhichJDBCdriverforOracleshallIuse?) and [Deploying the Adapter Step By Step](deploy-adapter.md) for instructions.
 
 **Adapter script**:
+
 After uploading the adapter jar we are ready to create an Oracle adapter script. Adapt the following script as indicated.
+
 ```sql
 CREATE SCHEMA adapter;
 CREATE JAVA ADAPTER SCRIPT adapter.jdbc_oracle AS
@@ -306,7 +343,9 @@ CREATE JAVA ADAPTER SCRIPT adapter.jdbc_oracle AS
 ```
 
 **JDBC Connection**:
+
 Next, create a JDBC connection to your Oracle database. Adjust the properties to match your environment.
+
 ```sql
 CREATE CONNECTION jdbc_oracle
   TO 'jdbc:oracle:thin:@//<host>:<port>/<service_name>'
@@ -315,13 +354,16 @@ CREATE CONNECTION jdbc_oracle
 ```
 
 A quick option to test the `JDBC_ORACLE` connection is to run an `IMPORT FROM JDBC` query. The connection works, if `42` is returned.
+
 ```sql
 IMPORT FROM JDBC AT jdbc_oracle
   STATEMENT 'SELECT 42 FROM DUAL';
 ```
 
 **Virtual schema:**
+
 Having created both a JDBC adapter script and a JDBC oracle connection, we are ready to create a virtual schema. Insert the name of the schema that you want to expose in Exasol.
+
 ```sql
 CREATE VIRTUAL SCHEMA virt_oracle USING adapter.jdbc_oracle WITH
   SQL_DIALECT     = 'ORACLE'
@@ -330,15 +372,19 @@ CREATE VIRTUAL SCHEMA virt_oracle USING adapter.jdbc_oracle WITH
 ```
 
 ### Use IMPORT FROM ORA instead of IMPORT FROM JDBC**
+
 Exasol provides the `IMPORT FROM ORA` command for loading data from Oracle. It is possible to create a virtual schema that uses `IMPORT FROM ORA` instead of JDBC to communicate with Oracle. Both options are indented to support the same features. `IMPORT FROM ORA` almost always offers better performance since it is implemented natively.
 
 This behaviour is toggled by the Boolean `IMPORT_FROM_ORA` variable. Note that a JDBC connection to Oracle is still required to fetch metadata. In addition, a "direct" connection to the Oracle database is needed.
 
 **Deploy the Oracle Instant Client**:
+
 To be able to communicate with Oracle, you first need to supply Exasol with the Oracle Instant Client, which can be obtained [directly from Oracle](http://www.oracle.com/technetwork/database/database-technologies/instant-client/overview/index.html). Open EXAoperation, visit Software -> "Upload Oracle Instant Client" and select the downloaded package. The latest version of Oracle Instant Client we tested is `instantclient-basic-linux.x64-12.1.0.2.0`.
 
 **Create an Oracle Connection**:
+
 Having deployed the Oracle Instant Client, a connection to your Oracle database can be set up.
+
 ```sql
 CREATE CONNECTION conn_oracle
   TO '(DESCRIPTION =
@@ -352,13 +398,16 @@ CREATE CONNECTION conn_oracle
 ```
 
 This connection can be tested using, e.g., the following SQL expression.
+
 ```sql
 IMPORT FROM ORA at CONN_ORACLE
   STATEMENT 'SELECT 42 FROM DUAL';
 ```
 
 **Virtual schema**:
+
 Assuming you already setup the JDBC connection `JDBC_ORACLE` as shown in the previous section, you can continue with creating the virtual schema.
+
 ```sql
 CREATE VIRTUAL SCHEMA virt_import_oracle USING adapter.jdbc_oracle WITH
   SQL_DIALECT     = 'ORACLE'
@@ -371,7 +420,9 @@ CREATE VIRTUAL SCHEMA virt_import_oracle USING adapter.jdbc_oracle WITH
 ## Teradata
 
 **JDBC driver:**
+
 You have to specify the following settings when adding the JDBC driver via EXAOperation:
+
 * Name: `TERADATA`
 * Main: `com.teradata.jdbc.TeraDriver`
 * Prefix: `jdbc:teradata:`
@@ -380,6 +431,7 @@ You have to specify the following settings when adding the JDBC driver via EXAOp
 Please also upload the jar files to a bucket for the adapter script.
 
 **Adapter script**
+
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter 
   AS
@@ -399,6 +451,7 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter
 ```
 
 **Create a virtual schema**
+
 ```sql
 CREATE VIRTUAL SCHEMA TERADATA_financial USING adapter.jdbc_adapter 
 WITH
@@ -421,6 +474,7 @@ You have to specify the following settings when adding the JDBC driver via EXAOp
 Please also upload the driver jar into a bucket for the adapter script.
 
 **Adapter script**
+
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter 
   AS
@@ -440,6 +494,7 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter
 ```
 
 **Create a virtual schema**
+
 ```sql
 CREATE VIRTUAL SCHEMA redshift_tickit
 	USING adapter.jdbc_adapter 
@@ -454,11 +509,13 @@ CREATE VIRTUAL SCHEMA redshift_tickit
 ## Sql Server
 
 **JDBC driver:**
+
 The Sql Server Dialect was tested with the jdts 1.3.1 JDBC driver and Sql Server 2014.
 As the jdts driver is already preinstalled for the `IMPORT` command itself you only need
 to upload the `jdts.jar` to a bucket for the adapter script.
 
 **Adapter script**
+
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.sql_server_jdbc_adapter 
   AS
@@ -476,6 +533,7 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.sql_server_jdbc_adapter
 ```
 
 **Create a virtual schema**
+
 ```sql
 CREATE VIRTUAL SCHEMA VS_SQLSERVER USING adapter.sql_server_jdbc_adapter
 WITH
@@ -488,10 +546,13 @@ WITH
 
 ## PostgreSQL
 
+
 **JDBC driver:**
+
 The PostgreSQL dialect was tested with JDBC driver version 42.0.0 and PostgreSQL 9.6.2 .
 
 **Adapter script**
+
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter 
   AS
@@ -510,6 +571,7 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter
 ```
 
 **Create a virtual schema**
+
 ```sql
 CREATE VIRTUAL SCHEMA postgres
 	USING adapter.jdbc_adapter 
@@ -523,16 +585,21 @@ CREATE VIRTUAL SCHEMA postgres
 
 ## Generic
 
-
 ## Sybase
 
 **JDBC driver:**
 
-The Sybase dialect was tested with the jdts 1.3.1 JDBC driver and Sybase 16.0.
-While the jdts driver is preinstalled in EXAOperation, you still need to upload
-`jdts.jar` to BucketFS.
+The Sybase dialect was tested with the [jTDS 1.3.1 JDBC driver](https://sourceforge.net/projects/jtds/files/jtds/1.3.1/) and Sybase 16.0.
+While the jTDS driver is pre-installed in EXAOperation, you still need to upload `jdts.jar` to BucketFS.
+
+You can check the Sybase version with the following SQL command:
+
+```sql
+SELECT @@version;
+```
 
 **Adapter script**
+
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter
   AS
@@ -543,7 +610,12 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter
 /
 ```
 
+**Install test data**
+
+Create and populate the test database using the [sybase-testdata.sql](../integration-test-data/sybase-testdata.sql) SQL script.
+
 **Create a virtual schema**
+
 ```sql
 CREATE OR REPLACE CONNECTION "conn_sybase"
 	TO 'jdbc:jtds:sybase://172.17.0.1:5000/testdb'
@@ -558,6 +630,7 @@ CREATE VIRTUAL SCHEMA sybase USING adapter.jdbc_adapter WITH
 ```
 
 **Supported Data types**
+
 - `NUMERIC/DECIMAL(precision, scale)`: Sybase supports precision values up to 38, Exasol only up to 36 decimals. `NUMERIC/DECIMAL` with precision <= 36 are mappend to Exasol's `DECIMAL` type; greater precision values are mapped to a `VARCHAR` column.
 - The Sybase data type `CHAR(n > 2000)` is mapped to Exasol's `VARCHAR(n)`. Exasol only supports `n <= 2000` for data type `CHAR`.
 - The Sybase data types `TEXT` and `UNITEXT` are mapped to `VARCHAR(2000000) UTF8`. If the virtual schema is queried and a row of the text column is matched that contains a value that exceed Exasol's column size, an error is shown.
