@@ -25,17 +25,16 @@ In addition to the aforementioned dialects there is the so called `GENERIC` dial
 
 If you are interested in a introduction to virtual schemas please refer to the Exasol user manual. You can find it in the [download area of the Exasol user portal](https://www.exasol.com/portal/display/DOWNLOAD/6.0).
 
-
 ## Getting Started
 
 Before you can start using the JDBC adapter for virtual schemas you have to deploy the adapter and the JDBC driver of your data source in your Exasol database.
-Please follow the [step-by-step deployment guide](doc/deploy-adapter.md).
-
+Please follow the [step-by-step deployment guide](doc/deploying_the_virtual_schema_adapter.md).
 
 ## Using the Adapter
 The following statements demonstrate how you can use virtual schemas with the JDBC adapter to connect to a Hive system. Please scroll down to see a list of all properties supported by the JDBC adapter.
 
 First we create a virtual schema using the JDBC adapter. The adapter will retrieve the metadata via JDBC and map them to virtual tables. The metadata (virtual tables, columns and data types) are then cached in Exasol.
+
 ```sql
 CREATE CONNECTION hive_conn TO 'jdbc:hive2://localhost:10000/default' USER 'hive-usr' IDENTIFIED BY 'hive-pwd';
 
@@ -46,6 +45,7 @@ CREATE VIRTUAL SCHEMA hive USING adapter.jdbc_adapter WITH
 ```
 
 We can now explore the tables in the virtual schema, just like for a regular schema:
+
 ```sql
 OPEN SCHEMA hive;
 SELECT * FROM cat;
@@ -53,6 +53,7 @@ DESCRIBE clicks;
 ```
 
 And we can run arbitrary queries on the virtual tables:
+
 ```sql
 SELECT count(*) FROM clicks;
 SELECT DISTINCT USER_ID FROM clicks;
@@ -61,31 +62,35 @@ SELECT DISTINCT USER_ID FROM clicks;
 Behind the scenes the Exasol command `IMPORT FROM JDBC` will be executed to obtain the data needed from the data source to fulfil the query. The Exasol database interacts with the adapter to pushdown as much as possible to the data source (e.g. filters, aggregations or `ORDER BY`/`LIMIT`), while considering the capabilities of the data source.
 
 Let's combine a virtual and a native tables in a query:
-```
+
+```sql
 SELECT * from clicks JOIN native_schema.users on clicks.userid = users.id;
 ```
 
 You can refresh the schemas metadata, e.g. if tables were added in the remote system:
+
 ```sql
 ALTER VIRTUAL SCHEMA hive REFRESH;
 ALTER VIRTUAL SCHEMA hive REFRESH TABLES t1 t2; -- refresh only these tables
 ```
 
-Or set properties. Depending on the adapter and the property you set this might update the metadata or not. In our example the metadata are affected, because afterwards the virtual schema will only expose two virtul tables.
+Or set properties. Depending on the adapter and the property you set this might update the metadata or not. In our example the metadata are affected, because afterwards the virtual schema will only expose two virtual tables.
+
 ```sql
 ALTER VIRTUAL SCHEMA hive SET TABLE_FILTER='CUSTOMERS, CLICKS';
 ```
 
 Finally you can unset properties:
+
 ```sql
 ALTER VIRTUAL SCHEMA hive SET TABLE_FILTER=null;
 ```
 
 Or drop the virtual schema:
+
 ```sql
 DROP VIRTUAL SCHEMA hive CASCADE;
 ```
-
 
 ### Adapter Properties
 The following properties can be used to control the behavior of the JDBC adapter. As you see above, these properties can be defined in `CREATE VIRTUAL SCHEMA` or changed afterwards via `ALTER VIRTUAL SCHEMA SET`. Note that properties are always strings, like `TABLE_FILTER='T1,T2'`.
@@ -153,4 +158,4 @@ See https://docs.oracle.com/javase/7/docs/api/java/sql/DriverManager.html
 
 ## Developing New Dialects
 
-If you want to contribute a new dialect please visit the guide [how to develop and test a dialect](doc/develop-dialect.md).
+If you want to contribute a new dialect please visit the guide [how to develop and test a dialect](doc/developing_an_sql_dialect.md).

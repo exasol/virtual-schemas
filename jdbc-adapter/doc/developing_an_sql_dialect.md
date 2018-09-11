@@ -128,7 +128,7 @@ If BucketFS is new to you, there are nice [training videos on BucketFS](https://
 2. Create credentials for the user with which 
 3. Make a local copy of the [sample integration test configuration file](../integration-test-data/integration-test-sample.yaml) in a place where you don't accidentally check this file in.
 4. Edit the credentials information
-5. [Deploy the JDBC driver(s)](deploy-adapter.md#deploying-jdbc-driver-files) to the prepared bucket in Exasol's BucketFS       
+5. [Deploy the JDBC driver(s)](deploying_the_virtual_schema_adapter.md#deploying-jdbc-driver-files) to the prepared bucket in Exasol's BucketFS       
 
 #### Creating Your own Integration Test Configuration
 
@@ -233,3 +233,11 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter
 In eclipse (or any other Java IDE) you can then attach remotely to the Java Adapter using the IP of your one node Exasol environment and the port 8000.
 
 The switch `suspend=y` tells the Java-process to wait until the debugger connects to the Java UDF.
+
+## Troubleshooting
+
+### Setting the Right IP Addresses for Database Connections
+
+Keep in mind that the adapter script is deployed in the Exasol database. If you want it to be able to make connections to other databases, you need to make sure that the IP addresses or host names are the ones that the database sees, not your local machine. This is easily forgotten in case of automated integration tests since it feels like they run on your machine -- which is only partially true.
+
+So a common source of error would be to specify `localhost` or `127.0.0.1` as address of the remote database in case you have it running in Docker or a VM on your local machine. But the Exasol Database cannot reach the other database there unless it is running on the same machine directly (i.e. not behind a virtual network device).
