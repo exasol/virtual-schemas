@@ -19,9 +19,7 @@ import org.junit.Test;
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
 
 public class SybaseSqlDialectIT extends AbstractIntegrationTest {
-
     private static final boolean IS_LOCAL = false;
-
     private static final String VS_NAME = "VS_SYBASE";
 
     @BeforeClass
@@ -287,14 +285,14 @@ public class SybaseSqlDialectIT extends AbstractIntegrationTest {
     @Test
     public void testTypeChar10() throws SQLException {
         final ResultSet result = executeQuery("SELECT \"c_char_10\" FROM vs_sybase.\"chartypes\"");
-        matchNextRow(result, padRight("abcd", 10));
+        matchNextRow(result, padRight("c10", 10));
         assertColumnTypeEquals("CHAR(10) ASCII", "chartypes", "c_char_10");
     }
 
     @Test
     public void testTypeCharTooBig() throws SQLException {
         final ResultSet result = executeQuery("SELECT \"c_char_toobig\" FROM vs_sybase.\"chartypes\"");
-        matchNextRow(result, padRight("Lorem ipsum dolor sit amet... rest is zero.", 2001));
+        matchNextRow(result, padRight("c2001", 2001));
         assertColumnTypeEquals("VARCHAR(2001) ASCII", "chartypes", "c_char_toobig");
     }
 
@@ -303,7 +301,7 @@ public class SybaseSqlDialectIT extends AbstractIntegrationTest {
         final String column = "c_varchar";
         final String table = "chartypes";
         final ResultSet result = executeQuery("SELECT \"" + column + "\" FROM vs_sybase.\"" + table + "\"");
-        matchNextRow(result, "Lorem.");
+        matchNextRow(result, "vc10");
         assertColumnTypeEquals("VARCHAR(10) ASCII", table, column);
     }
 
@@ -312,17 +310,18 @@ public class SybaseSqlDialectIT extends AbstractIntegrationTest {
         final String column = "c_unichar_10";
         final String table = "chartypes";
         final ResultSet result = executeQuery("SELECT \"" + column + "\" FROM vs_sybase.\"" + table + "\"");
-        matchNextRow(result, "Ipsum.");
+        matchNextRow(result, padRight("uc10", 10));
         assertColumnTypeEquals("CHAR(10) UTF8", table, column);
     }
 
     @Test
     public void testTypeUnicharToobig() throws SQLException {
+        final int fieldSize = 8148;
         final String column = "c_unichar_toobig";
-        final String table = "chartypes";
+        final String table = "fatunichartypes";
         final ResultSet result = executeQuery("SELECT \"" + column + "\" FROM vs_sybase.\"" + table + "\"");
-        matchNextRow(result, "xyz");
-        assertColumnTypeEquals("VARCHAR(8192) UTF8", table, column);
+        matchNextRow(result, padRight("xyz", fieldSize));
+        assertColumnTypeEquals("VARCHAR(" + fieldSize + ") UTF8", table, column);
     }
 
     @Test
@@ -330,7 +329,7 @@ public class SybaseSqlDialectIT extends AbstractIntegrationTest {
         final String column = "c_univarchar";
         final String table = "chartypes";
         final ResultSet result = executeQuery("SELECT \"" + column + "\" FROM vs_sybase.\"" + table + "\"");
-        matchNextRow(result, "Dolor.");
+        matchNextRow(result, "uvc10");
         assertColumnTypeEquals("VARCHAR(10) UTF8", table, column);
     }
 
@@ -339,7 +338,7 @@ public class SybaseSqlDialectIT extends AbstractIntegrationTest {
         final String column = "c_nchar";
         final String table = "chartypes";
         final ResultSet result = executeQuery("SELECT \"" + column + "\" FROM vs_sybase.\"" + table + "\"");
-        matchNextRow(result, "Sit.");
+        matchNextRow(result, padRight("nc10", 10));
         assertColumnTypeEquals("CHAR(10) ASCII", table, column);
     }
 
@@ -348,14 +347,14 @@ public class SybaseSqlDialectIT extends AbstractIntegrationTest {
         final String column = "c_nvarchar";
         final String table = "chartypes";
         final ResultSet result = executeQuery("SELECT \"" + column + "\" FROM vs_sybase.\"" + table + "\"");
-        matchNextRow(result, "Amet.");
+        matchNextRow(result, "nvc10");
         assertColumnTypeEquals("VARCHAR(10) ASCII", table, column);
     }
 
     @Test
     public void testTypeText() throws SQLException {
         final String column = "c_text";
-        final String table = "chartypes";
+        final String table = "texttypes";
         final ResultSet result = executeQuery("SELECT \"" + column + "\" FROM vs_sybase.\"" + table + "\"");
         matchNextRow(result, "Text. A wall of text.");
         assertColumnTypeEquals("VARCHAR(2000000) UTF8", table, column);
@@ -364,7 +363,7 @@ public class SybaseSqlDialectIT extends AbstractIntegrationTest {
     @Test
     public void testTypeUnitext() throws SQLException {
         final String column = "c_unitext";
-        final String table = "chartypes";
+        final String table = "texttypes";
         final ResultSet result = executeQuery("SELECT \"" + column + "\" FROM vs_sybase.\"" + table + "\"");
         matchNextRow(result, "Text. A wall of Unicode text.");
         assertColumnTypeEquals("VARCHAR(2000000) UTF8", table, column);
@@ -402,5 +401,4 @@ public class SybaseSqlDialectIT extends AbstractIntegrationTest {
         matchNextRow(result, false);
         assertColumnTypeEquals("BOOLEAN", table, column);
     }
-
 }
