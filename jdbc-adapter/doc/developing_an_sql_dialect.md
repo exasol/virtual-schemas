@@ -195,7 +195,7 @@ CREATE VIRTUAL SCHEMA VS_EXA_IT
 USING ADAPTER.JDBC_ADAPTER
 WITH CONNECTION_STRING='jdbc:exa:localhost:8563' USERNAME='sys' PASSWORD='exasol'
      SCHEMA_NAME='NATIVE_EXA_IT' SQL_DIALECT='EXASOL' IS_LOCAL='true'
-     DEBUG_ADDRESS='10.44.1.228:3000' LOG_LEVEL=ALL;
+     DEBUG_ADDRESS='10.44.1.228:3000' LOG_LEVEL='ALL';
 ```
 
 The parameter LOG_LEVEL lets you pick a log level as defined in [java.util.logging.Level](https://docs.oracle.com/javase/8/docs/api/java/util/logging/Level.html).

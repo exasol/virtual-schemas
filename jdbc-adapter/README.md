@@ -5,20 +5,14 @@
 ## Overview
 The JDBC adapter for virtual schemas allows you to connect to JDBC data sources like Hive, Oracle, Teradata, Exasol or any other data source supporting JDBC. It uses the well proven ```IMPORT FROM JDBC``` Exasol statement behind the scenes to obtain the requested data, when running a query on a virtual table. The JDBC adapter also serves as the reference adapter for the Exasol virtual schema framework.
 
-The JDBC adapter currently supports the following SQL dialects and data sources. This list will be continuously extended based on the feedback from our users:
-* Exasol
-* Hive
-* Impala
-* Oracle
-* Teradata
-* Redshift
-* DB2
-* SQL Server
-* PostgreSQL
+Check the [SQL dialect list](doc/supported_sql_dialects.md) to learn which SQL dialects the JDBC adapter currently supports
+
+This list will be continuously extended based on the feedback from our users.
 
 Each such implementation of a dialect handles three major aspects:
+
 * How to **map the tables** in the source systems to virtual tables in Exasol, including how to **map the data types** to Exasol data types.
-* How is the **SQL syntax** of the data source, including identifier quoting, case-sensitivity, function names, or special syntax like `LIMIT`/`TOP`.
+* How is the **SQL syntax** of the data source, including identifier quoting, case-sensitivity, function names, or special syntax like `LIMIT` / `TOP`.
 * Which **capabilities** are supported by the data source. E.g. is it supported to run filters, to specify select list expressions, to run aggregation or scalar functions or to order or limit the result.
 
 In addition to the aforementioned dialects there is the so called `GENERIC` dialect, which is designed to work with any JDBC driver. It derives the SQL dialect from the JDBC driver metadata. However, it does not support any capabilities and might fail if the data source has special syntax or data types, so it should only be used for evaluation purposes.
@@ -59,7 +53,7 @@ SELECT count(*) FROM clicks;
 SELECT DISTINCT USER_ID FROM clicks;
 ```
 
-Behind the scenes the Exasol command `IMPORT FROM JDBC` will be executed to obtain the data needed from the data source to fulfil the query. The Exasol database interacts with the adapter to pushdown as much as possible to the data source (e.g. filters, aggregations or `ORDER BY`/`LIMIT`), while considering the capabilities of the data source.
+Behind the scenes the Exasol command `IMPORT FROM JDBC` will be executed to obtain the data needed from the data source to fulfil the query. The Exasol database interacts with the adapter to pushdown as much as possible to the data source (e.g. filters, aggregations or `ORDER BY` / `LIMIT`), while considering the capabilities of the data source.
 
 Let's combine a virtual and a native tables in a query:
 
@@ -134,14 +128,17 @@ Property                    | Value
 
 
 ## Debugging
+
 To see all communication between the database and the adapter you can use the python script udf_debug.py located in the [tools](tools) directory.
 
 First, start the `udf_debug.py` script, which will listen on the specified address and print all incoming text.
-```
+
+```sh
 python tools/udf_debug.py -s myhost -p 3000
 ```
 
 Then run following SQL statement in your session to redirect all stdout and stderr from the adapter script to the `udf_debug.py` script we started before.
+
 ```sql
 ALTER SESSION SET SCRIPT_OUTPUT_ADDRESS='host-where-udf-debug-script-runs:3000'
 ```
@@ -150,10 +147,19 @@ You have to make sure that Exasol can connect to the host running the `udf_debug
 
 
 ## Frequent Issues
-* **Error: No suitable driver found for JDBC...**: The JDBC driver class was not discovered automatically. Either you have to add a `META-INF/services/java.sql.Driver` file with the classname to your jar, or you have to load the driver manually (see `JdbcMetadataReader.readRemoteMetadata()`).
+
+### Error: No suitable driver found for JDBC...
+
+The JDBC driver class was not discovered automatically. Either you have to add a `META-INF/services/java.sql.Driver` file with the classname to your jar, or you have to load the driver manually (see `JdbcMetadataReader.readRemoteMetadata()`).
 See https://docs.oracle.com/javase/7/docs/api/java/sql/DriverManager.html
-* **Very slow execution of queries with SCRIPT_OUTPUT_ADDRESS**: If `SCRIPT_OUTPUT_ADDRESS` is set as explained in the [debugging section](#debugging), verify that a service is actually listening at that address. Otherwise, if Exasol can not establish a connection, repeated connection attempts can be the cause for slowdowns.
-* **Very slow execution of queries**: Depending on which JDK version Exasol uses to execute Java user-defined functions, a blocking randomness source may be used by default. Especially cryptographic operations do not complete until the operating system has collected a sufficient amount of entropy. This problem seems to occur most often when Exasol is run in an isolated environment, e.g., a virtual machine or a container. A solution is to use a non-blocking randomness source. 
+
+### Very Slow Execution of Queries With SCRIPT_OUTPUT_ADDRESS
+
+If `SCRIPT_OUTPUT_ADDRESS` is set as explained in the [debugging section](#debugging), verify that a service is actually listening at that address. Otherwise, if Exasol can not establish a connection, repeated connection attempts can be the cause for slowdowns.
+
+### Very Slow Execution of Queries
+
+Depending on which JDK version Exasol uses to execute Java user-defined functions, a blocking randomness source may be used by default. Especially cryptographic operations do not complete until the operating system has collected a sufficient amount of entropy. This problem seems to occur most often when Exasol is run in an isolated environment, e.g., a virtual machine or a container. A solution is to use a non-blocking randomness source. 
   To do so, log in to EXAOperation and shutdown the database. Append `-etlJdbcJavaEnv -Djava.security.egd=/dev/./urandom` to the "Extra Database Parameters" input field and power the database on again.
 
 ## Developing New Dialects

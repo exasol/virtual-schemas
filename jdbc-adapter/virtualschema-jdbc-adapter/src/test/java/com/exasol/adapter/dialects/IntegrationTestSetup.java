@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -43,33 +44,53 @@ import org.apache.http.impl.client.HttpClientBuilder;
 public class IntegrationTestSetup {
     private static final String ARTIFACT_DISTRIBUTION_NAME = "virtualschema-jdbc-adapter-dist";
     private static final Logger LOGGER = Logger.getLogger(IntegrationTestConfig.class.getName());
-    private final IntegrationTestConfig config;
+    private IntegrationTestConfig config = null;
     private final String version;
+    private final String configFile;
 
-    public static void main(final String[] args) throws ClientProtocolException, IOException, URISyntaxException {
+    /**
+     * Entry point of the {@link IntegrationTestSetup}
+     *
+     * @param args version of the adapter, path to configuration file and skipping
+     *             (optional)
+     * @throws ClientProtocolException
+     * @throws IOException
+     * @throws URISyntaxException
+     */
+    public static void main(final String[] args) {
         if (isSkippingIntegrationTestConfigured(args)) {
             LOGGER.info("Skipping setup of the integration test environment");
         } else {
             LOGGER.info("Setting up the integration test environment");
             final String projectVersion = args[0];
             final String configFile = args[1];
-            new IntegrationTestSetup(new IntegrationTestConfig(configFile), projectVersion).run();
+            new IntegrationTestSetup(configFile, projectVersion).run();
         }
+    }
+
+    private IntegrationTestSetup(final String configFile, final String version) {
+        this.configFile = configFile;
+        this.version = version;
     }
 
     private static boolean isSkippingIntegrationTestConfigured(final String[] args) {
         return args.length > 2 && Boolean.valueOf(args[2]);
     }
 
-    private void run() throws ClientProtocolException, IOException, URISyntaxException {
+    private void run() {
+        readConfiguration();
         uploadFileToBucketFS(getJarUrlForBucketFS(this.config.getBucketFSURL()), //
                 getLocalJarPath(), //
                 this.config.getBucketFSPassword());
     }
 
-    private IntegrationTestSetup(final IntegrationTestConfig config, final String version) {
-        this.config = config;
-        this.version = version;
+    private void readConfiguration() {
+        try {
+            this.config = new IntegrationTestConfig(this.configFile);
+        } catch (final FileNotFoundException e) {
+            throw new IntegrationTestSetupException(
+                    "Unable to read integration test configuration file \"" + this.configFile + "\"", e);
+        }
     }
 
     private String getJarUrlForBucketFS(final String bucketFSurl) {
@@ -85,8 +106,7 @@ public class IntegrationTestSetup {
         return ARTIFACT_DISTRIBUTION_NAME + "-" + projectVersion + ".jar";
     }
 
-    private void uploadFileToBucketFS(final String url, final String filePath, final String password)
-            throws ClientProtocolException, IOException, URISyntaxException {
+    private void uploadFileToBucketFS(final String url, final String filePath, final String password) {
         LOGGER.info(() -> "Uploading \"" + filePath + "\"" + " to \"" + url + "\"");
         final HttpPut request = buildPutRequest(url, filePath, password);
         final HttpResponse response = executePutRequest(request);
@@ -94,28 +114,45 @@ public class IntegrationTestSetup {
         LOGGER.fine(() -> "HTTP PUT response:" + System.lineSeparator() + response);
     }
 
-    private void handleResponse(final HttpResponse response) throws IOException {
+    private void handleResponse(final HttpResponse response) {
         if (response.getStatusLine().getStatusCode() != 200) {
-            throw new IOException(response.toString());
+            throw new IntegrationTestSetupException("HTTP PUT request to BucketFS failed: " + response.toString());
         }
     }
 
-    private HttpResponse executePutRequest(final HttpPut request) throws IOException, ClientProtocolException {
-        final HttpClient httpClient = HttpClientBuilder.create().build();
-        final HttpResponse response = httpClient.execute(request);
-        return response;
+    private HttpResponse executePutRequest(final HttpPut request) {
+        try {
+            final HttpClient httpClient = HttpClientBuilder.create().build();
+            HttpResponse response;
+            response = httpClient.execute(request);
+            return response;
+        } catch (final IOException e) {
+            throw new IntegrationTestSetupException("Unable to execute HTTP PUT to BucketFS", e);
+        }
     }
 
-    private HttpPut buildPutRequest(final String url, final String filePath, final String password)
-            throws URISyntaxException {
-        final URIBuilder uriBuilder = new URIBuilder(url);
-        final HttpPut request = new HttpPut(uriBuilder.build());
+    private HttpPut buildPutRequest(final String url, final String filePath, final String password) {
+        try {
+            final URIBuilder uriBuilder = new URIBuilder(url);
+            final HttpPut request = new HttpPut(uriBuilder.build());
+            setAuthenticationHeaderInRequestForPassword(request, password);
+            setFileToBeTransferred(request, filePath);
+            return request;
+        } catch (final URISyntaxException e) {
+            throw new IntegrationTestSetupException(
+                    "Unable to build HTTP PUT request from \"" + filePath + "\" to \"" + url + "\"", e);
+        }
+    }
+
+    private void setAuthenticationHeaderInRequestForPassword(final HttpPut request, final String password) {
         final String auth = "w:" + password;
         final byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(Charset.forName("UTF-8")));
         final String authHeader = "Basic " + new String(encodedAuth);
         request.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+    }
+
+    private void setFileToBeTransferred(final HttpPut request, final String filePath) {
         final FileEntity fileEntity = new FileEntity(new File(filePath));
         request.setEntity(fileEntity);
-        return request;
     }
 }

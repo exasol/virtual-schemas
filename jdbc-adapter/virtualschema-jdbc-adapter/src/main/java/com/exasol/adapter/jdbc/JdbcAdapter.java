@@ -1,5 +1,6 @@
 package com.exasol.adapter.jdbc;
 
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -42,7 +43,7 @@ import com.exasol.utils.UdfUtils;
 
 public class JdbcAdapter {
     public static final int MAX_STRING_CHAR_LENGTH = 2000000;
-    public static final Logger LOGGER = Logger.getLogger(JdbcAdapter.class.getName());
+    private static Logger LOGGER = null;
 
     /**
      * This method gets called by the database during interactions with the virtual
@@ -56,7 +57,8 @@ public class JdbcAdapter {
         String result = "";
         try {
             final AdapterRequest request = new RequestJsonParser().parseRequest(input);
-            tryAttachToOutputService(request.getSchemaMetadataInfo());
+            final SchemaMetadataInfo schemaMetadata = request.getSchemaMetadataInfo();
+            configureLogOutput(schemaMetadata);
             LOGGER.fine(() -> "----------\nAdapter Request:\n----------\n" + input);
 
             switch (request.getType()) {
@@ -94,29 +96,38 @@ public class JdbcAdapter {
         }
     }
 
-    private static String handleCreateVirtualSchema(final CreateVirtualSchemaRequest request, final ExaMetadata meta)
-            throws SQLException, AdapterException {
-        final Map<String, String> properties = request.getSchemaMetadataInfo().getProperties();
-        setLogLevel(properties);
-        JdbcAdapterProperties.checkPropertyConsistency(properties);
-        final SchemaMetadata remoteMeta = readMetadata(request.getSchemaMetadataInfo(), meta);
-        return ResponseJsonSerializer.makeCreateVirtualSchemaResponse(remoteMeta);
+    private static void configureLogOutput(final SchemaMetadataInfo schemaMetadata)
+            throws AdapterException, InvalidPropertyException {
+        final OutputStream out = tryAttachToOutputService(schemaMetadata);
+        if (out != null) {
+            configureLogger(out, schemaMetadata.getProperties());
+        }
     }
 
-    private static void setLogLevel(final Map<String, String> properties) throws InvalidPropertyException {
-        final Level logLevel = JdbcAdapterProperties.getLogLevel(properties);
-        // System.setProperty("handlers", "java.util.logging.Streamhandler");
-        System.setProperty("java.util.logging.SimpleFormatter.format",
-                "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS.%1$tL %4$-7s [%3$s] %5$s %6$s%n");
-        // System.setProperty("java.util.logging.StreamHandler.level",
-        // logLevel.toString());
-        final Logger logger = Logger.getLogger("com.exasol");
-        final SimpleFormatter formatter = new SimpleFormatter();
-        final StreamHandler handler = new StreamHandler(System.out, formatter);
-        handler.setFormatter(formatter);
-        logger.addHandler(handler);
-        logger.setLevel(logLevel);
-        LOGGER.info(() -> "Virtual Schema Adapter - log level \"" + logLevel.toString() + "\"");
+    private static synchronized void configureLogger(final OutputStream out, final Map<String, String> properties)
+            throws InvalidPropertyException {
+        if (LOGGER == null) {
+            final Level logLevel = JdbcAdapterProperties.getLogLevel(properties);
+            final SimpleFormatter formatter = new SimpleFormatter();
+            final StreamHandler handler = new StreamHandler(out, formatter);
+            handler.setFormatter(formatter);
+            handler.setLevel(logLevel);
+            final Logger baseLogger = Logger.getLogger("com.exasol");
+            baseLogger.setLevel(logLevel);
+            baseLogger.addHandler(handler);
+            LOGGER = Logger.getLogger(JdbcAdapter.class.getName());
+            LOGGER.info(() -> "Attached to output service with log level " + LOGGER.getLevel() + ".");
+        }
+    }
+
+    private static String handleCreateVirtualSchema(final CreateVirtualSchemaRequest request, final ExaMetadata meta)
+            throws SQLException, AdapterException {
+        final SchemaMetadataInfo schemaMetadata = request.getSchemaMetadataInfo();
+        final Map<String, String> properties = schemaMetadata.getProperties();
+        configureLogOutput(schemaMetadata);
+        JdbcAdapterProperties.checkPropertyConsistency(properties);
+        final SchemaMetadata remoteMeta = readMetadata(schemaMetadata, meta);
+        return ResponseJsonSerializer.makeCreateVirtualSchemaResponse(remoteMeta);
     }
 
     private static SchemaMetadata readMetadata(final SchemaMetadataInfo schemaMeta, final ExaMetadata meta)
@@ -188,7 +199,8 @@ public class JdbcAdapter {
     }
 
     private static Capabilities parseExcludedCapabilities(final String excludedCapabilitiesStr) {
-        System.out.println("Excluded Capabilities: " + excludedCapabilitiesStr);
+        LOGGER.info(() -> "Excluded Capabilities: "
+                + (excludedCapabilitiesStr.isEmpty() ? "none" : excludedCapabilitiesStr));
         final Capabilities excludedCapabilities = new Capabilities();
         for (final String cap : excludedCapabilitiesStr.split(",")) {
             if (cap.trim().isEmpty()) {
@@ -276,7 +288,7 @@ public class JdbcAdapter {
         Connection connection = null;
         try {
             connection = establishConnection(connectionInformation);
-            System.out.println("createColumnDescription: " + pushdownQuery);
+            LOGGER.fine(() -> "createColumnDescription: " + pushdownQuery);
             ps = connection.prepareStatement(pushdownQuery);
             ResultSetMetaData metadata = ps.getMetaData();
             if (metadata == null) {
@@ -318,7 +330,7 @@ public class JdbcAdapter {
         final String connectionString = connection.getAddress();
         final String user = connection.getUser();
         final String password = connection.getPassword();
-        System.out.println("conn: " + connectionString);
+        LOGGER.fine(() -> "Connection parameters: " + connectionString);
 
         final java.util.Properties info = new java.util.Properties();
         if (user != null) {
@@ -339,18 +351,19 @@ public class JdbcAdapter {
     }
 
     // Forward stdout to an external output service
-    private static void tryAttachToOutputService(final SchemaMetadataInfo meta) throws AdapterException {
+    private static OutputStream tryAttachToOutputService(final SchemaMetadataInfo meta) throws AdapterException {
         final String debugAddress = JdbcAdapterProperties.getDebugAddress(meta.getProperties());
         if (!debugAddress.isEmpty()) {
             try {
                 final String debugHost = debugAddress.split(":")[0];
                 final int debugPort = Integer.parseInt(debugAddress.split(":")[1]);
-                UdfUtils.tryAttachToOutputService(debugHost, debugPort);
+                return UdfUtils.tryAttachToOutputService(debugHost, debugPort);
             } catch (final Exception ex) {
                 throw new AdapterException(
                         "You have to specify a valid hostname and port for the udf debug service, e.g. 'hostname:3000'");
             }
         }
+        return null;
     }
 
 }
