@@ -8,9 +8,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 
 import com.exasol.ExaConnectionInformation;
@@ -38,6 +38,7 @@ import com.exasol.adapter.request.GetCapabilitiesRequest;
 import com.exasol.adapter.request.PushdownRequest;
 import com.exasol.adapter.request.RefreshRequest;
 import com.exasol.adapter.request.SetPropertiesRequest;
+import com.exasol.logging.CompactFormatter;
 import com.exasol.utils.JsonHelper;
 import com.exasol.utils.UdfUtils;
 
@@ -59,7 +60,7 @@ public class JdbcAdapter {
             final AdapterRequest request = new RequestJsonParser().parseRequest(input);
             final SchemaMetadataInfo schemaMetadata = request.getSchemaMetadataInfo();
             configureLogOutput(schemaMetadata);
-            LOGGER.fine(() -> "----------\nAdapter Request:\n----------\n" + input);
+            LOGGER.fine(() -> "Adapter request:\n" + input);
 
             switch (request.getType()) {
             case CREATE_VIRTUAL_SCHEMA:
@@ -84,8 +85,7 @@ public class JdbcAdapter {
                 throw new RuntimeException("Request Type not supported: " + request.getType());
             }
             assert (result.isEmpty());
-            LOGGER.fine(
-                    "----------\nResponse:\n----------\n" + JsonHelper.prettyJson(JsonHelper.getJsonObject(result)));
+            LOGGER.fine("Response:\n" + JsonHelper.prettyJson(JsonHelper.getJsonObject(result)));
             return result;
         } catch (final AdapterException ex) {
             throw ex;
@@ -108,7 +108,7 @@ public class JdbcAdapter {
             throws InvalidPropertyException {
         if (LOGGER == null) {
             final Level logLevel = JdbcAdapterProperties.getLogLevel(properties);
-            final SimpleFormatter formatter = new SimpleFormatter();
+            final Formatter formatter = new CompactFormatter();
             final StreamHandler handler = new StreamHandler(out, formatter);
             handler.setFormatter(formatter);
             handler.setLevel(logLevel);
