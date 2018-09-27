@@ -14,7 +14,7 @@ The JDBC adapter currently supports the following SQL dialects and data sources.
 * Redshift
 * DB2
 * SQL Server
-* PostgreSQL
+* PostgreSQL / EnterpriseDB(EDB)
 
 Each such implementation of a dialect handles three major aspects:
 * How to **map the tables** in the source systems to virtual tables in Exasol, including how to **map the data types** to Exasol data types.
