@@ -30,6 +30,8 @@ com.exasol.adapter.dialects.impl.MyAweSomeSqlDialect
 
 For tests or in case you want to exclude existing dialects in certain scenarios you can override the contents of this file by setting the system property `com.exasol.adapter.dialects.supported`.
 
+Please also remember to [list the supported dialect in the documentation](../README.md).
+
 ### Setup Data Source
 
 * Setup and start the database

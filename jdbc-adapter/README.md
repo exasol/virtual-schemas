@@ -2,6 +2,29 @@
 
 [![Build Status](https://travis-ci.org/EXASOL/virtual-schemas.svg)](https://travis-ci.org/EXASOL/virtual-schemas)
 
+## Supported Dialects
+
+The purpose of this page is to provide detailed instructions for each of the supported dialects on how to get started. Typical questions are
+* Which **JDBC driver** is used, which files have to be uploaded and included when creating the adapter script.
+* How does the **CREATE VIRTUAL SCHEMA** statement look like, i.e. which properties are required.
+* **Data source specific notes**, like authentication with Kerberos, supported capabilities or things to consider regarding the data type mapping.
+
+As an entry point we recommend you follow the [step-by-step deployment guide](deploying_the_virtual_schema_adapter.md) which will link to this page whenever needed.
+
+### List of Supported Dialects
+
+1. [EXASOL](doc/sql_dialects/exasol.md)
+1. [Hive](doc/sql_dialects/hive.md)
+1. [Impala](doc/sql_dialects/impala.md)
+1. [DB2](doc/sql_dialects/db2.md)
+1. [Oracle](doc/sql_dialects/oracle.md)
+1. [Teradata](doc/sql_dialects/teradata.md)
+1. [Redshift](doc/sql_dialects/redshift.md)
+1. [SQL Server](doc/sql_dialects/sql_server.md)
+1. [Sybase ASE](doc/sql_dialects/sybase.md)
+1. [PostgresSQL](doc/sql_dialects/postgresql.md)
+1. Generic
+
 ## Overview
 The JDBC adapter for virtual schemas allows you to connect to JDBC data sources like Hive, Oracle, Teradata, Exasol or any other data source supporting JDBC. It uses the well proven ```IMPORT FROM JDBC``` Exasol statement behind the scenes to obtain the requested data, when running a query on a virtual table. The JDBC adapter also serves as the reference adapter for the Exasol virtual schema framework.
 
@@ -17,7 +40,11 @@ Each such implementation of a dialect handles three major aspects:
 
 In addition to the aforementioned dialects there is the so called `GENERIC` dialect, which is designed to work with any JDBC driver. It derives the SQL dialect from the JDBC driver metadata. However, it does not support any capabilities and might fail if the data source has special syntax or data types, so it should only be used for evaluation purposes.
 
-If you are interested in a introduction to virtual schemas please refer to the Exasol user manual. You can find it in the [download area of the Exasol user portal](https://www.exasol.com/portal/display/DOWNLOAD/6.0).
+If you are interested in a introduction to virtual schemas please refer to the Exasol user manual. You can find it in the [download area of the Exasol user portal](https://www.exasol.com/portal/display/DOC/Database+User+Manual).
+
+## Before you Start
+
+Please note that the syntax for creating adapter scripts is not recognized by all SQL clients. [DBeaver](https://dbeaver.io/) for example. If you encounter such a problem, try a different client.
 
 ## Getting Started
 
