@@ -15,5 +15,7 @@ dependency-reduced-pom.xml
 
 # Others
 .DS_Store
-*.swp
 **/local
+*.swp 
+Scripts/*
+.dbeaver-data-sources.xml

@@ -276,6 +276,7 @@ public class JdbcAdapter {
         Connection connection = null;
         try {
             connection = establishConnection(connectionInformation);
+            System.out.println("createColumnDescription: " + pushdownQuery);
             ps = connection.prepareStatement(pushdownQuery);
             ResultSetMetaData metadata = ps.getMetaData();
             if (metadata == null) {
@@ -308,9 +309,8 @@ public class JdbcAdapter {
 
             buffer.append(')');
             return buffer.toString();
-        } catch (final SQLException e) {
-            throw new RuntimeException("Cannot resolve column types." + e.getMessage());
-
+        } catch (SQLException e) {
+            throw new RuntimeException("Cannot resolve column types.", e);
         }
     }
 
