@@ -30,14 +30,16 @@ com.exasol.adapter.dialects.impl.MyAweSomeSqlDialect
 
 For tests or in case you want to exclude existing dialects in certain scenarios you can override the contents of this file by setting the system property `com.exasol.adapter.dialects.supported`.
 
+Please also remember to [list the supported dialect in the documentation](../README.md).
+
 ### Setup Data Source
 
 * Setup and start the database
 * Testdata: Create a test schema with a simple table (simple data types)
 
-### Setup EXASOL
+### Setup Exasol
 
-* Setup and start an EXASOL database with virtual schemas feature
+* Setup and start an Exasol database with virtual schemas feature
 * Upload the JDBC drivers of the data source via EXAOperation
 * Manual test: query data from the data source via `IMPORT FROM JDBC`
 
@@ -110,7 +112,7 @@ In order not to create security issues:
 * Source database running
 * Source database accessible from within integration test environment
 * Test data loaded into source database
-* [BucketFS HTTP port listening and reachable](https://www.exasol.com/support/browse/SOL-503?src=confmacro) (e.g. port 2580)
+* [BucketFS HTTP port listening and reachable](https://www.exasol.com/support/browse/SOL-503?src=confmacro) (e.g. on port 2580)
 
   ![BucketFS on port 2580](images/Screenshot_BucketFS_default_service.png)
   
@@ -128,7 +130,7 @@ If BucketFS is new to you, there are nice [training videos on BucketFS](https://
 2. Create credentials for the user under which the integration tests run at the source
 3. Make a local copy of the [sample integration test configuration file](../integration-test-data/integration-test-sample.yaml) in a place where you don't accidentally check this file in.
 4. Edit the credentials information
-5. [Deploy the JDBC driver(s)](deploy-adapter.md#deploying-jdbc-driver-files) to the prepared bucket in Exasol's BucketFS       
+5. [Deploy the JDBC driver(s)](deploying_the_virtual_schema_adapter.md#deploying-jdbc-driver-files) to the prepared bucket in Exasol's BucketFS       
 
 #### Creating Your own Integration Test Configuration
 
@@ -195,19 +197,24 @@ CREATE VIRTUAL SCHEMA VS_EXA_IT
 USING ADAPTER.JDBC_ADAPTER
 WITH CONNECTION_STRING='jdbc:exa:localhost:8563' USERNAME='sys' PASSWORD='exasol'
      SCHEMA_NAME='NATIVE_EXA_IT' SQL_DIALECT='EXASOL' IS_LOCAL='true'
-     DEBUG_ADDRESS='10.44.1.228:3000' LOG_LEVEL=ALL;
+     DEBUG_ADDRESS='10.44.1.228:3000' LOG_LEVEL='ALL';
 ```
 
 The parameter LOG_LEVEL lets you pick a log level as defined in [java.util.logging.Level](https://docs.oracle.com/javase/8/docs/api/java/util/logging/Level.html).
 
+The recommended standard log levels are:
+
+* `INFO` in production
+* `ALL` for in-depth debugging
+
 You can tell that the connection works if you see the following message after executing the SQL command that installs a virtual schema:
 
-    Attached to outputservice
+    Attached to output service
 
 ## Java Remote Debugging of Adapter script
 
 When developing a new dialect it is sometimes really helpful to debug the deployed adapter script inside the database.
-In a one node EXASOL environment setting up remote debugging is straight forward.
+In a one node Exasol environment setting up remote debugging is straight forward.
 First define the following `env` directive in your adapter script:
 
 ```sql
@@ -230,6 +237,14 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter
 /
 ```
 
-In eclipse (or any other Java IDE) you can then attach remotely to the Java Adapter using the IP of your one node EXASOL environment and the port 8000.
+In eclipse (or any other Java IDE) you can then attach remotely to the Java Adapter using the IP of your one node Exasol environment and the port 8000.
 
 The switch `suspend=y` tells the Java-process to wait until the debugger connects to the Java UDF.
+
+## Troubleshooting
+
+### Setting the Right IP Addresses for Database Connections
+
+Keep in mind that the adapter script is deployed in the Exasol database. If you want it to be able to make connections to other databases, you need to make sure that the IP addresses or host names are the ones that the database sees, not your local machine. This is easily forgotten in case of automated integration tests since it feels like they run on your machine -- which is only partially true.
+
+So a common source of error would be to specify `localhost` or `127.0.0.1` as address of the remote database in case you have it running in Docker or a VM on your local machine. But the Exasol Database cannot reach the other database there unless it is running on the same machine directly (i.e. not behind a virtual network device).

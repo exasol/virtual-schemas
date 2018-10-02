@@ -1,54 +1,33 @@
 package com.exasol.adapter.jdbc;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.io.OutputStream;
+import java.sql.*;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-import java.util.logging.StreamHandler;
+import java.util.logging.*;
 
 import com.exasol.ExaConnectionInformation;
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.capabilities.AggregateFunctionCapability;
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.capabilities.LiteralCapability;
-import com.exasol.adapter.capabilities.MainCapability;
-import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.json.RequestJsonParser;
 import com.exasol.adapter.json.ResponseJsonSerializer;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.metadata.SchemaMetadata;
-import com.exasol.adapter.metadata.SchemaMetadataInfo;
-import com.exasol.adapter.request.AdapterRequest;
-import com.exasol.adapter.request.CreateVirtualSchemaRequest;
-import com.exasol.adapter.request.DropVirtualSchemaRequest;
-import com.exasol.adapter.request.GetCapabilitiesRequest;
-import com.exasol.adapter.request.PushdownRequest;
-import com.exasol.adapter.request.RefreshRequest;
-import com.exasol.adapter.request.SetPropertiesRequest;
+import com.exasol.adapter.metadata.*;
+import com.exasol.adapter.request.*;
+import com.exasol.logging.CompactFormatter;
 import com.exasol.utils.JsonHelper;
 import com.exasol.utils.UdfUtils;
 
 public class JdbcAdapter {
     public static final int MAX_STRING_CHAR_LENGTH = 2000000;
-    public static final Logger LOGGER = Logger.getLogger(JdbcAdapter.class.getName());
+    private static Logger logger = null;
 
     /**
      * This method gets called by the database during interactions with the virtual
      * schema.
      *
-     * @param meta  Metadata object
+     * @param meta Metadata object
      * @param input JSON request, as defined in the Adapter Script API
      * @return JSON response, as defined in the Adapter Script API
      */
@@ -56,8 +35,9 @@ public class JdbcAdapter {
         String result = "";
         try {
             final AdapterRequest request = new RequestJsonParser().parseRequest(input);
-            tryAttachToOutputService(request.getSchemaMetadataInfo());
-            LOGGER.fine(() -> "----------\nAdapter Request:\n----------\n" + input);
+            final SchemaMetadataInfo schemaMetadata = request.getSchemaMetadataInfo();
+            configureLogOutput(schemaMetadata);
+            logger.fine(() -> "Adapter request:\n" + input);
 
             switch (request.getType()) {
             case CREATE_VIRTUAL_SCHEMA:
@@ -82,41 +62,60 @@ public class JdbcAdapter {
                 throw new RuntimeException("Request Type not supported: " + request.getType());
             }
             assert (result.isEmpty());
-            LOGGER.fine(
-                    "----------\nResponse:\n----------\n" + JsonHelper.prettyJson(JsonHelper.getJsonObject(result)));
+            logger.fine("Response:\n" + JsonHelper.prettyJson(JsonHelper.getJsonObject(result)));
             return result;
-        } catch (final AdapterException ex) {
-            throw ex;
-        } catch (final Exception ex) {
-            final String stacktrace = UdfUtils.traceToString(ex);
-            throw new Exception("Unexpected error in adapter: " + ex.getMessage() + "\nStacktrace: " + stacktrace
-                    + "\nFor following request: " + input + "\nResponse: " + result);
+        } catch (final AdapterException e) {
+            throw e;
+        } catch (final Exception e) {
+            throw new Exception("Unexpected error in adapter for following request: " + input + "\nResponse: " + result,
+                    e);
         }
+    }
+
+    private static void configureLogOutput(final SchemaMetadataInfo schemaMetadata)
+            throws AdapterException, InvalidPropertyException {
+        final OutputStream out = tryAttachToOutputService(schemaMetadata);
+        if (out == null) {
+            // Fall back to regular STDOUT in case the socket output stream is not
+            // available. In most cases (except unit test scenarios) this will mean that
+            // logs will not be available.
+            configureLogger(System.out, schemaMetadata.getProperties());
+        } else {
+            configureLogger(out, schemaMetadata.getProperties());
+        }
+
+    }
+
+    private static synchronized void configureLogger(final OutputStream out, final Map<String, String> properties)
+            throws InvalidPropertyException {
+        if (logger == null) {
+            final Level logLevel = determineLogLevel(properties);
+            final Formatter formatter = new CompactFormatter();
+            final StreamHandler handler = new StreamHandler(out, formatter);
+            handler.setFormatter(formatter);
+            handler.setLevel(logLevel);
+            final Logger baseLogger = Logger.getLogger("com.exasol");
+            baseLogger.setLevel(logLevel);
+            baseLogger.addHandler(handler);
+            logger = Logger.getLogger(JdbcAdapter.class.getName());
+            logger.info(() -> "Attached to output service with log level " + logLevel + ".");
+        }
+    }
+
+    private static Level determineLogLevel(final Map<String, String> properties) throws InvalidPropertyException {
+        return (JdbcAdapterProperties.getLogLevel(properties) == null) //
+                ? Level.INFO //
+                : JdbcAdapterProperties.getLogLevel(properties);
     }
 
     private static String handleCreateVirtualSchema(final CreateVirtualSchemaRequest request, final ExaMetadata meta)
             throws SQLException, AdapterException {
-        final Map<String, String> properties = request.getSchemaMetadataInfo().getProperties();
-        setLogLevel(properties);
+        final SchemaMetadataInfo schemaMetadata = request.getSchemaMetadataInfo();
+        final Map<String, String> properties = schemaMetadata.getProperties();
+        configureLogOutput(schemaMetadata);
         JdbcAdapterProperties.checkPropertyConsistency(properties);
-        final SchemaMetadata remoteMeta = readMetadata(request.getSchemaMetadataInfo(), meta);
+        final SchemaMetadata remoteMeta = readMetadata(schemaMetadata, meta);
         return ResponseJsonSerializer.makeCreateVirtualSchemaResponse(remoteMeta);
-    }
-
-    private static void setLogLevel(final Map<String, String> properties) throws InvalidPropertyException {
-        final Level logLevel = JdbcAdapterProperties.getLogLevel(properties);
-        // System.setProperty("handlers", "java.util.logging.Streamhandler");
-        System.setProperty("java.util.logging.SimpleFormatter.format",
-                "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS.%1$tL %4$-7s [%3$s] %5$s %6$s%n");
-        // System.setProperty("java.util.logging.StreamHandler.level",
-        // logLevel.toString());
-        final Logger logger = Logger.getLogger("com.exasol");
-        final SimpleFormatter formatter = new SimpleFormatter();
-        final StreamHandler handler = new StreamHandler(System.out, formatter);
-        handler.setFormatter(formatter);
-        logger.addHandler(handler);
-        logger.setLevel(logLevel);
-        LOGGER.info(() -> "Virtual Schema Adapter - log level \"" + logLevel.toString() + "\"");
     }
 
     private static SchemaMetadata readMetadata(final SchemaMetadataInfo schemaMeta, final ExaMetadata meta)
@@ -188,7 +187,8 @@ public class JdbcAdapter {
     }
 
     private static Capabilities parseExcludedCapabilities(final String excludedCapabilitiesStr) {
-        System.out.println("Excluded Capabilities: " + excludedCapabilitiesStr);
+        logger.info(() -> "Excluded Capabilities: "
+                + (excludedCapabilitiesStr.isEmpty() ? "none" : excludedCapabilitiesStr));
         final Capabilities excludedCapabilities = new Capabilities();
         for (final String cap : excludedCapabilitiesStr.split(",")) {
             if (cap.trim().isEmpty()) {
@@ -276,7 +276,7 @@ public class JdbcAdapter {
         Connection connection = null;
         try {
             connection = establishConnection(connectionInformation);
-            System.out.println("createColumnDescription: " + pushdownQuery);
+            logger.fine(() -> "createColumnDescription: " + pushdownQuery);
             ps = connection.prepareStatement(pushdownQuery);
             ResultSetMetaData metadata = ps.getMetaData();
             if (metadata == null) {
@@ -309,7 +309,7 @@ public class JdbcAdapter {
 
             buffer.append(')');
             return buffer.toString();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new RuntimeException("Cannot resolve column types.", e);
         }
     }
@@ -318,7 +318,7 @@ public class JdbcAdapter {
         final String connectionString = connection.getAddress();
         final String user = connection.getUser();
         final String password = connection.getPassword();
-        System.out.println("conn: " + connectionString);
+        logger.fine(() -> "Connection parameters: " + connectionString);
 
         final java.util.Properties info = new java.util.Properties();
         if (user != null) {
@@ -339,18 +339,18 @@ public class JdbcAdapter {
     }
 
     // Forward stdout to an external output service
-    private static void tryAttachToOutputService(final SchemaMetadataInfo meta) throws AdapterException {
+    private static OutputStream tryAttachToOutputService(final SchemaMetadataInfo meta) throws AdapterException {
         final String debugAddress = JdbcAdapterProperties.getDebugAddress(meta.getProperties());
         if (!debugAddress.isEmpty()) {
             try {
                 final String debugHost = debugAddress.split(":")[0];
                 final int debugPort = Integer.parseInt(debugAddress.split(":")[1]);
-                UdfUtils.tryAttachToOutputService(debugHost, debugPort);
+                return UdfUtils.tryAttachToOutputService(debugHost, debugPort);
             } catch (final Exception ex) {
                 throw new AdapterException(
                         "You have to specify a valid hostname and port for the udf debug service, e.g. 'hostname:3000'");
             }
         }
+        return null;
     }
-
 }

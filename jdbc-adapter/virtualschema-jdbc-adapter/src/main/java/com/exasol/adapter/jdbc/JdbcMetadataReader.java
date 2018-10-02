@@ -1,20 +1,13 @@
 package com.exasol.adapter.jdbc;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlDialects;
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.SchemaMetadata;
-import com.exasol.adapter.metadata.TableMetadata;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.metadata.*;
 import com.google.common.base.Joiner;
 
 /**
@@ -23,6 +16,7 @@ import com.google.common.base.Joiner;
  * property like IGNORE_INVALID_TABLES.
  */
 public class JdbcMetadataReader {
+    private static final Logger LOGGER = Logger.getLogger(JdbcMetadataReader.class.getName());
 
     public static SchemaMetadata readRemoteMetadata(final String connectionString, final String user,
             final String password, String catalog, String schema, final List<String> tableFilter,
@@ -63,8 +57,7 @@ public class JdbcMetadataReader {
 
     private static Connection establishConnection(final String connectionString, final String user,
             final String password) throws SQLException {
-        System.out.println("conn: " + connectionString);
-
+        LOGGER.fine(() -> "Establishing connection with paramters: " + connectionString);
         final java.util.Properties info = new java.util.Properties();
         if (user != null) {
             info.put("user", user);
@@ -271,7 +264,7 @@ public class JdbcMetadataReader {
         // Columns
         for (int i = 0; i < tablesMapped.size(); ++i) {
             final SqlDialect.MappedTable table = tablesMapped.get(i);
-            System.out.println("Process columns for table: " + table);
+            LOGGER.finest(() -> "Processing columns for table \"" + table + "\"");
             try {
                 if (!tableFilter.isEmpty()) {
                     boolean isInFilter = false;
@@ -285,7 +278,7 @@ public class JdbcMetadataReader {
                         isInFilter = tableFilter.contains(table.getTableName());
                     }
                     if (!isInFilter) {
-                        System.out.println("Skip table: " + table);
+                        LOGGER.finest(() -> "Skipping table \"" + table + "\"");
                         continue;
                     }
                 }
@@ -316,7 +309,7 @@ public class JdbcMetadataReader {
                 columns.add(dialect.mapColumn(cols));
             }
             if (columns.isEmpty()) {
-                System.out.println("Warning: Found a table without columns: " + table);
+                LOGGER.warning(() -> "Found a table \"" + table + "\" that has no columns.");
             }
             cols.close();
         } catch (final SQLException exception) {

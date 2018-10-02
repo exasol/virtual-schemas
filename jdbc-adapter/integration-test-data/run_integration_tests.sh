@@ -30,6 +30,7 @@ main() {
 	run_tests
 }
 
+
 prepare_configuration_dir() {
 	mkdir -p "$1"
 	cp integration-test-data/EXAConf "$1/EXAConf"

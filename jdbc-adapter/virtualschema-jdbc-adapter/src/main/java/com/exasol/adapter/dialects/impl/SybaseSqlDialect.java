@@ -5,32 +5,37 @@ import java.sql.Types;
 import java.util.EnumMap;
 import java.util.Map;
 
-import com.exasol.adapter.capabilities.*;
-import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.capabilities.AggregateFunctionCapability;
+import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.capabilities.LiteralCapability;
+import com.exasol.adapter.capabilities.MainCapability;
+import com.exasol.adapter.capabilities.PredicateCapability;
+import com.exasol.adapter.capabilities.ScalarFunctionCapability;
+import com.exasol.adapter.dialects.AbstractSqlDialect;
+import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.dialects.SqlDialectContext;
+import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
 public class SybaseSqlDialect extends AbstractSqlDialect {
-
     // The Sybase dialect started as a copy of the SQL Server dialect.
     // Tested Sybase version: ASE 16.0
     // Tested JDBC drivers: jtds-1.3.1 (https://sourceforge.net/projects/jtds/)
     // Documentation:
     // http://infocenter.sybase.com/help/index.jsp?topic=/com.sybase.infocenter.help.ase.16.0/doc/html/title.html
     // https://help.sap.com/viewer/p/SAP_ASE
-
     public final static int maxSybaseVarcharSize = 8000;
-
     public final static int maxSybaseNVarcharSize = 4000;
+    private static final String NAME = "SYBASE";
 
     public SybaseSqlDialect(final SqlDialectContext context) {
         super(context);
     }
 
-    public static final String NAME = "SYBASE";
-
-    public String getPublicName() {
+    public static String getPublicName() {
         return NAME;
     }
 
