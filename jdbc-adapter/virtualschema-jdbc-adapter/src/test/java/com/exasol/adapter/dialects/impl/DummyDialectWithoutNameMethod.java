@@ -5,68 +5,58 @@ import java.sql.SQLException;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.AbstractSqlDialect;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectContext;
 import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.metadata.DataType;
 
 /**
- * Dialect for MySQL using the MySQL Connector jdbc driver.
- *
- * TODO Finish implementation of this dialect and add as a supported dialect
+ * This class implements a dummy of an {@link SqlDialect} without a name method.
+ * It is used for tests only.
  */
-public class MysqlSqlDialect extends AbstractSqlDialect {
-    public MysqlSqlDialect(final SqlDialectContext context) {
+public class DummyDialectWithoutNameMethod extends AbstractSqlDialect {
+    public DummyDialectWithoutNameMethod(final SqlDialectContext context) {
         super(context);
-    }
-
-    private static final String NAME = "MYSQL";
-
-    public static String getPublicName() {
-        return NAME;
     }
 
     @Override
     public Capabilities getCapabilities() {
-        final Capabilities cap = new Capabilities();
-        return cap;
+        return null;
     }
 
     @Override
     public SchemaOrCatalogSupport supportsJdbcCatalogs() {
-        return SchemaOrCatalogSupport.SUPPORTED;
+        return null;
     }
 
     @Override
     public SchemaOrCatalogSupport supportsJdbcSchemas() {
-        return SchemaOrCatalogSupport.UNSUPPORTED;
+        return null;
     }
 
     @Override
     public IdentifierCaseHandling getUnquotedIdentifierHandling() {
-        return IdentifierCaseHandling.INTERPRET_AS_UPPER;
+        return null;
     }
 
     @Override
     public IdentifierCaseHandling getQuotedIdentifierHandling() {
-        return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
+        return null;
     }
 
     @Override
     public String applyQuote(final String identifier) {
-        // TODO ANSI_QUOTES option. Must be obtained from JDBC DatabaseMetadata.
-        // http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_ansi_quotes
-        final CharSequence quoteChar = "`";
-        return quoteChar + identifier.replace(quoteChar, quoteChar + "" + quoteChar) + quoteChar;
+        return null;
     }
 
     @Override
     public String applyQuoteIfNeeded(final String identifier) {
-        return applyQuote(identifier);
+        return null;
     }
 
     @Override
     public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
-        return true;
+        return false;
     }
 
     @Override
@@ -76,17 +66,12 @@ public class MysqlSqlDialect extends AbstractSqlDialect {
 
     @Override
     public NullSorting getDefaultNullSorting() {
-        // See
-        // http://stackoverflow.com/questions/2051602/mysql-orderby-a-number-nulls-last
-        // and also
-        // http://stackoverflow.com/questions/9307613/mysql-order-by-null-first-and-desc-after
-        assert (getContext().getSchemaAdapterNotes().isNullsAreSortedLow());
-        return NullSorting.NULLS_SORTED_LOW;
+        return null;
     }
 
     @Override
     public String getStringLiteral(final String value) {
-        return "'" + value.replace("'", "''") + "'";
+        return null;
     }
 
     @Override

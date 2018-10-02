@@ -9,30 +9,30 @@ import com.exasol.adapter.capabilities.LiteralCapability;
 import com.exasol.adapter.capabilities.MainCapability;
 import com.exasol.adapter.capabilities.PredicateCapability;
 import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.dialects.AbstractSqlDialect;
+import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.dialects.SqlDialectContext;
+import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.jdbc.JdbcAdapterProperties;
 import com.exasol.adapter.metadata.DataType;
 
+public class TeradataSqlDialect extends AbstractSqlDialect {
+    public final static int maxTeradataVarcharSize = 32000;
+    private static final String NAME = "TERADATA";
 
-public class TeradataSqlDialect extends AbstractSqlDialect{
+    public TeradataSqlDialect(final SqlDialectContext context) {
+        super(context);
+    }
 
-	public final static int maxTeradataVarcharSize = 32000;  
-	
-    public TeradataSqlDialect(SqlDialectContext context) {
-		super(context);
-	}
+    public static String getPublicName() {
+        return NAME;
+    }
 
-	public static final String NAME = "TERADATA";
-	
-	@Override
-	public String getPublicName() {
-		return NAME;
-	}
+    @Override
+    public Capabilities getCapabilities() {
 
-	@Override
-	public Capabilities getCapabilities() {
-	
-        Capabilities cap = new Capabilities();
+        final Capabilities cap = new Capabilities();
 
         cap.supportMainCapability(MainCapability.SELECTLIST_PROJECTION);
         cap.supportMainCapability(MainCapability.SELECTLIST_EXPRESSIONS);
@@ -45,7 +45,6 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
         cap.supportMainCapability(MainCapability.ORDER_BY_COLUMN);
         cap.supportMainCapability(MainCapability.ORDER_BY_EXPRESSION);
         cap.supportMainCapability(MainCapability.LIMIT);
-        
 
         // Predicates
         cap.supportPredicate(PredicateCapability.AND);
@@ -62,7 +61,7 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
         cap.supportPredicate(PredicateCapability.IN_CONSTLIST);
         cap.supportPredicate(PredicateCapability.IS_NULL);
         cap.supportPredicate(PredicateCapability.IS_NOT_NULL);
-        
+
         // Literals
         // BOOL is not supported
         cap.supportLiteral(LiteralCapability.NULL);
@@ -73,8 +72,7 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
         cap.supportLiteral(LiteralCapability.EXACTNUMERIC);
         cap.supportLiteral(LiteralCapability.STRING);
         cap.supportLiteral(LiteralCapability.INTERVAL);
-        
-        
+
         // Aggregate functions
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT);
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_STAR);
@@ -83,7 +81,7 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
         // GEO_INTERSECTION_AGGREGATE is not supported
         // GEO_UNION_AGGREGATE is not supported
         // APPROXIMATE_COUNT_DISTINCT not supported
-        
+
         cap.supportAggregateFunction(AggregateFunctionCapability.SUM);
         cap.supportAggregateFunction(AggregateFunctionCapability.SUM_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.MIN);
@@ -93,26 +91,26 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
         cap.supportAggregateFunction(AggregateFunctionCapability.MEDIAN);
         cap.supportAggregateFunction(AggregateFunctionCapability.FIRST_VALUE);
         cap.supportAggregateFunction(AggregateFunctionCapability.LAST_VALUE);
-        //cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV);
-        //cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_DISTINCT);
+        // cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV);
+        // cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_POP);
         // STDDEV_POP_DISTINCT
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_SAMP);
         // STDDEV_SAMP_DISTINCT
-        //cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE);
-        //cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE_DISTINCT);
+        // cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE);
+        // cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_POP);
         // VAR_POP_DISTINCT
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_SAMP);
         // VAR_SAMP_DISTINCT
-        
+
         cap.supportScalarFunction(ScalarFunctionCapability.CEIL);
         cap.supportScalarFunction(ScalarFunctionCapability.DIV);
         cap.supportScalarFunction(ScalarFunctionCapability.FLOOR);
         cap.supportScalarFunction(ScalarFunctionCapability.ROUND);
         cap.supportScalarFunction(ScalarFunctionCapability.SIGN);
         cap.supportScalarFunction(ScalarFunctionCapability.TRUNC);
-        
+
         cap.supportScalarFunction(ScalarFunctionCapability.ADD);
         cap.supportScalarFunction(ScalarFunctionCapability.SUB);
         cap.supportScalarFunction(ScalarFunctionCapability.MULT);
@@ -141,15 +139,15 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
         cap.supportScalarFunction(ScalarFunctionCapability.SQRT);
         cap.supportScalarFunction(ScalarFunctionCapability.TAN);
         cap.supportScalarFunction(ScalarFunctionCapability.TANH);
-        
-       
-        cap.supportScalarFunction(ScalarFunctionCapability.ASCII); 
+
+        cap.supportScalarFunction(ScalarFunctionCapability.ASCII);
         // BIT_LENGTH is not supported. Can be different for Unicode characters.
         cap.supportScalarFunction(ScalarFunctionCapability.CHR);
         // COLOGNE_PHONETIC is not supported.
         // CONCAT is not supported. Number of arguments can be different.
         // DUMP is not supported. Output is different.
-        // EDIT_DISTANCE is not supported. Output is different. UTL_MATCH.EDIT_DISTANCE returns -1 with NULL argument.
+        // EDIT_DISTANCE is not supported. Output is different. UTL_MATCH.EDIT_DISTANCE
+        // returns -1 with NULL argument.
         // INSERT is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.INSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.LENGTH);
@@ -164,7 +162,8 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
         cap.supportScalarFunction(ScalarFunctionCapability.REPEAT);
         cap.supportScalarFunction(ScalarFunctionCapability.REPLACE);
         cap.supportScalarFunction(ScalarFunctionCapability.REVERSE);
-        // RIGHT is not supported. Possible solution with SUBSTRING (must handle corner cases correctly).
+        // RIGHT is not supported. Possible solution with SUBSTRING (must handle corner
+        // cases correctly).
         cap.supportScalarFunction(ScalarFunctionCapability.RPAD);
         cap.supportScalarFunction(ScalarFunctionCapability.RTRIM);
         cap.supportScalarFunction(ScalarFunctionCapability.SOUNDEX);
@@ -182,142 +181,141 @@ public class TeradataSqlDialect extends AbstractSqlDialect{
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_SECONDS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_WEEKS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_YEARS);
-        
+
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_DATE);
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_TIMESTAMP);
-        
+
         cap.supportScalarFunction(ScalarFunctionCapability.NULLIFZERO);
         cap.supportScalarFunction(ScalarFunctionCapability.ZEROIFNULL);
-        
+
         return cap;
-	}
+    }
 
-	
     @Override
-    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcTypeDescription) throws SQLException {
+    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
         DataType colType = null;
-        int jdbcType = jdbcTypeDescription.getJdbcType();
+        final int jdbcType = jdbcTypeDescription.getJdbcType();
         switch (jdbcType) {
-        	case Types.TIME:
-        		colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
-        		break;
-        	case 2013: //Types.TIME_WITH_TIMEZONE is Java 1.8 specific
-        		colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
-        		break;
-        	case Types.NUMERIC:
-        		int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
-                int decimalScale = jdbcTypeDescription.getDecimalScale();
+        case Types.TIME:
+            colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
+            break;
+        case 2013: // Types.TIME_WITH_TIMEZONE is Java 1.8 specific
+            colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
+            break;
+        case Types.NUMERIC:
+            final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
+            final int decimalScale = jdbcTypeDescription.getDecimalScale();
 
-                if (decimalPrec <= DataType.maxExasolDecimalPrecision) {
-                    colType = DataType.createDecimal(decimalPrec, decimalScale);
-                } else {
-                    colType = DataType.createDouble();
-                }
-                break;
-            case Types.OTHER: // Teradata JDBC uses OTHER for several data types GEOMETRY, INTERVAL etc...  
-            	String columnTypeName = jdbcTypeDescription.getTypeName();
-            	
-            	 if ( columnTypeName.equals("GEOMETRY") )
-            		 colType = DataType.createVarChar(jdbcTypeDescription.getPrecisionOrSize(), DataType.ExaCharset.UTF8);
-            	 else if (columnTypeName.startsWith("INTERVAL") )
-            		 colType = DataType.createVarChar(30, DataType.ExaCharset.UTF8); //TODO verify that varchar 30 is sufficient in all cases
-            	 else if (columnTypeName.startsWith("PERIOD") )
-            		 colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8); 
-            	 else
-            		 colType = DataType.createVarChar(TeradataSqlDialect.maxTeradataVarcharSize, DataType.ExaCharset.UTF8);     
-            	 break;
-            	 
-            case Types.SQLXML:
-           	 	colType = DataType.createVarChar(TeradataSqlDialect.maxTeradataVarcharSize, DataType.ExaCharset.UTF8);
-            	break;
-            	
-            case Types.CLOB:
-            	colType = DataType.createVarChar(TeradataSqlDialect.maxTeradataVarcharSize, DataType.ExaCharset.UTF8);
-            	break;
-            	
-            case Types.BLOB:
-            case Types.VARBINARY:
-            case Types.BINARY:
-	       		 colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8); 
-	       		 break;
-            case Types.DISTINCT:
-            	colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8);
-            	break;
+            if (decimalPrec <= DataType.maxExasolDecimalPrecision) {
+                colType = DataType.createDecimal(decimalPrec, decimalScale);
+            } else {
+                colType = DataType.createDouble();
+            }
+            break;
+        case Types.OTHER: // Teradata JDBC uses OTHER for several data types GEOMETRY, INTERVAL etc...
+            final String columnTypeName = jdbcTypeDescription.getTypeName();
+
+            if (columnTypeName.equals("GEOMETRY")) {
+                colType = DataType.createVarChar(jdbcTypeDescription.getPrecisionOrSize(), DataType.ExaCharset.UTF8);
+            } else if (columnTypeName.startsWith("INTERVAL")) {
+                colType = DataType.createVarChar(30, DataType.ExaCharset.UTF8); // TODO verify that varchar 30 is
+                                                                                // sufficient in all cases
+            } else if (columnTypeName.startsWith("PERIOD")) {
+                colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8);
+            } else {
+                colType = DataType.createVarChar(TeradataSqlDialect.maxTeradataVarcharSize, DataType.ExaCharset.UTF8);
+            }
+            break;
+
+        case Types.SQLXML:
+            colType = DataType.createVarChar(TeradataSqlDialect.maxTeradataVarcharSize, DataType.ExaCharset.UTF8);
+            break;
+
+        case Types.CLOB:
+            colType = DataType.createVarChar(TeradataSqlDialect.maxTeradataVarcharSize, DataType.ExaCharset.UTF8);
+            break;
+
+        case Types.BLOB:
+        case Types.VARBINARY:
+        case Types.BINARY:
+            colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8);
+            break;
+        case Types.DISTINCT:
+            colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8);
+            break;
         }
         return colType;
     }
-	
-	
-	@Override
-	public SchemaOrCatalogSupport supportsJdbcCatalogs() {
+
+    @Override
+    public SchemaOrCatalogSupport supportsJdbcCatalogs() {
         return SchemaOrCatalogSupport.UNSUPPORTED;
-	}
+    }
 
-	@Override
-	public SchemaOrCatalogSupport supportsJdbcSchemas() {
+    @Override
+    public SchemaOrCatalogSupport supportsJdbcSchemas() {
         return SchemaOrCatalogSupport.SUPPORTED;
-	}
+    }
 
-	@Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(SqlGenerationContext context) {
+    @Override
+    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new TeradataSqlGenerationVisitor(this, context);
     }
-	
-	@Override
-	public IdentifierCaseHandling getUnquotedIdentifierHandling() {
-		 return IdentifierCaseHandling.INTERPRET_AS_UPPER;
-	}
 
-	@Override
-	public IdentifierCaseHandling getQuotedIdentifierHandling() {
+    @Override
+    public IdentifierCaseHandling getUnquotedIdentifierHandling() {
+        return IdentifierCaseHandling.INTERPRET_AS_UPPER;
+    }
+
+    @Override
+    public IdentifierCaseHandling getQuotedIdentifierHandling() {
         return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
-	}
+    }
 
-	@Override
-	public String applyQuote(String identifier) {
-		return "\"" + identifier.replace("\"", "\"\"") + "\"";
-	}
+    @Override
+    public String applyQuote(final String identifier) {
+        return "\"" + identifier.replace("\"", "\"\"") + "\"";
+    }
 
-	@Override
-	public String applyQuoteIfNeeded(String identifier) {
-		 boolean isSimpleIdentifier = identifier.matches("^[A-Z][0-9A-Z_]*");
-	        if (isSimpleIdentifier) {
-	            return identifier;
-	        } else {
-	            return applyQuote(identifier);
-	        }
-	}
+    @Override
+    public String applyQuoteIfNeeded(final String identifier) {
+        final boolean isSimpleIdentifier = identifier.matches("^[A-Z][0-9A-Z_]*");
+        if (isSimpleIdentifier) {
+            return identifier;
+        } else {
+            return applyQuote(identifier);
+        }
+    }
 
-	@Override
-	public boolean requiresCatalogQualifiedTableNames(
-			SqlGenerationContext context) {
-		return false;
-	}
+    @Override
+    public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
+        return false;
+    }
 
-	@Override
-	public boolean requiresSchemaQualifiedTableNames(
-			SqlGenerationContext context) {
-		return true;
-	}
+    @Override
+    public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
+        return true;
+    }
 
-	@Override
-	public NullSorting getDefaultNullSorting() {
-		return NullSorting.NULLS_SORTED_HIGH;
-	}
+    @Override
+    public NullSorting getDefaultNullSorting() {
+        return NullSorting.NULLS_SORTED_HIGH;
+    }
 
-	@Override
-	public String getStringLiteral(String value) {
-		 return "'" + value.replace("'", "''") + "'";
-	}
+    @Override
+    public String getStringLiteral(final String value) {
+        return "'" + value.replace("'", "''") + "'";
+    }
 
-	@Override
-    public void handleException(SQLException exception, JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
-	    if (exceptionMode == JdbcAdapterProperties.ExceptionHandlingMode.IGNORE_INVALID_VIEWS) {
-	        if (exception.getMessage().contains("Teradata Database") && exception.getMessage().contains("Error 3807")) {
-	            return;
+    @Override
+    public void handleException(final SQLException exception,
+            final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
+        if (exceptionMode == JdbcAdapterProperties.ExceptionHandlingMode.IGNORE_INVALID_VIEWS) {
+            if (exception.getMessage().contains("Teradata Database") && exception.getMessage().contains("Error 3807")) {
+                return;
             }
         }
-	    throw exception;
-	};
+        throw exception;
+    };
 
 }
