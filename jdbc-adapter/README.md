@@ -4,15 +4,6 @@
 
 ## Supported Dialects
 
-The purpose of this page is to provide detailed instructions for each of the supported dialects on how to get started. Typical questions are
-* Which **JDBC driver** is used, which files have to be uploaded and included when creating the adapter script.
-* How does the **CREATE VIRTUAL SCHEMA** statement look like, i.e. which properties are required.
-* **Data source specific notes**, like authentication with Kerberos, supported capabilities or things to consider regarding the data type mapping.
-
-As an entry point we recommend you follow the [step-by-step deployment guide](deploying_the_virtual_schema_adapter.md) which will link to this page whenever needed.
-
-### List of Supported Dialects
-
 1. [EXASOL](doc/sql_dialects/exasol.md)
 1. [Hive](doc/sql_dialects/hive.md)
 1. [Impala](doc/sql_dialects/impala.md)
