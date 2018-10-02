@@ -83,7 +83,7 @@ public class JdbcAdapter {
     private static synchronized void configureLogger(final OutputStream out, final Map<String, String> properties)
             throws InvalidPropertyException {
         if (logger == null) {
-            final Level logLevel = JdbcAdapterProperties.getLogLevel(properties);
+            final Level logLevel = determineLogLevel(properties);
             final Formatter formatter = new CompactFormatter();
             final StreamHandler handler = new StreamHandler(out, formatter);
             handler.setFormatter(formatter);
@@ -94,6 +94,12 @@ public class JdbcAdapter {
             logger = Logger.getLogger(JdbcAdapter.class.getName());
             logger.info(() -> "Attached to output service with log level " + logLevel + ".");
         }
+    }
+
+    private static Level determineLogLevel(final Map<String, String> properties) throws InvalidPropertyException {
+        return (JdbcAdapterProperties.getLogLevel(properties) == null) //
+                ? Level.INFO //
+                : JdbcAdapterProperties.getLogLevel(properties);
     }
 
     private static String handleCreateVirtualSchema(final CreateVirtualSchemaRequest request, final ExaMetadata meta)
