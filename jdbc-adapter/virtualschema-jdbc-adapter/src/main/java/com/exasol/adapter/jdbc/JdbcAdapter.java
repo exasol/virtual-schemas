@@ -75,9 +75,15 @@ public class JdbcAdapter {
     private static void configureLogOutput(final SchemaMetadataInfo schemaMetadata)
             throws AdapterException, InvalidPropertyException {
         final OutputStream out = tryAttachToOutputService(schemaMetadata);
-        if (out != null) {
+        if (out == null) {
+            // Fall back to regular STDOUT in case the socket output stream is not
+            // available. In most cases (except unit test scenarios) this will mean that
+            // logs will not be available.
+            configureLogger(System.out, schemaMetadata.getProperties());
+        } else {
             configureLogger(out, schemaMetadata.getProperties());
         }
+
     }
 
     private static synchronized void configureLogger(final OutputStream out, final Map<String, String> properties)
