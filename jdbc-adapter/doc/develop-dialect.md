@@ -93,7 +93,7 @@ For tests or in case you want to exclude existing dialects in certain scenarios 
 
 ## Integration Testing
 
-### Security considerations
+### Security Considerations
 
 Please note that in the course of the integration tests you need to provide the test framework with access rights and credentials to the source database. 
 
@@ -110,7 +110,7 @@ In order not to create security issues:
 * Source database running
 * Source database accessible from within integration test environment
 * Test data loaded into source database
-* [BucketFS HTTP port listening and reachable](https://www.exasol.com/support/browse/SOL-503?src=confmacro)
+* [BucketFS HTTP port listening and reachable](https://www.exasol.com/support/browse/SOL-503?src=confmacro) (e.g. port 2580)
 
   ![BucketFS on port 2580](images/Screenshot_BucketFS_default_service.png)
   
@@ -125,7 +125,7 @@ If BucketFS is new to you, there are nice [training videos on BucketFS](https://
 ### Preparing Integration Test
 
 1. Create a dedicated user in the source database that has the necessary access privileges 
-2. Create credentials for the user with which 
+2. Create credentials for the user under which the integration tests run at the source
 3. Make a local copy of the [sample integration test configuration file](../integration-test-data/integration-test-sample.yaml) in a place where you don't accidentally check this file in.
 4. Edit the credentials information
 5. [Deploy the JDBC driver(s)](deploy-adapter.md#deploying-jdbc-driver-files) to the prepared bucket in Exasol's BucketFS       
