@@ -128,7 +128,7 @@ public class AbstractIntegrationTest {
         if (!debugAddress.isEmpty()) {
             sql += " DEBUG_ADDRESS='" + debugAddress + "'";
         }
-        sql += " LOG_LEVEL='FINEST'";
+        sql += " LOG_LEVEL='ALL'";
         if (!tableFilter.isEmpty()) {
             sql += " TABLE_FILTER='" + tableFilter + "'";
         }

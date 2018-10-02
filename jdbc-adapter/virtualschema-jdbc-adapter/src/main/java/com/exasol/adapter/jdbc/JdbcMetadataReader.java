@@ -1,21 +1,13 @@
 package com.exasol.adapter.jdbc;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlDialects;
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.SchemaMetadata;
-import com.exasol.adapter.metadata.TableMetadata;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.metadata.*;
 import com.google.common.base.Joiner;
 
 /**
@@ -66,7 +58,6 @@ public class JdbcMetadataReader {
     private static Connection establishConnection(final String connectionString, final String user,
             final String password) throws SQLException {
         LOGGER.fine(() -> "Establishing connection with paramters: " + connectionString);
-
         final java.util.Properties info = new java.util.Properties();
         if (user != null) {
             info.put("user", user);

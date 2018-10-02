@@ -1,56 +1,33 @@
 package com.exasol.adapter.jdbc;
 
 import java.io.OutputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Formatter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.StreamHandler;
+import java.util.logging.*;
 
 import com.exasol.ExaConnectionInformation;
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.capabilities.AggregateFunctionCapability;
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.capabilities.LiteralCapability;
-import com.exasol.adapter.capabilities.MainCapability;
-import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.json.RequestJsonParser;
 import com.exasol.adapter.json.ResponseJsonSerializer;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.metadata.SchemaMetadata;
-import com.exasol.adapter.metadata.SchemaMetadataInfo;
-import com.exasol.adapter.request.AdapterRequest;
-import com.exasol.adapter.request.CreateVirtualSchemaRequest;
-import com.exasol.adapter.request.DropVirtualSchemaRequest;
-import com.exasol.adapter.request.GetCapabilitiesRequest;
-import com.exasol.adapter.request.PushdownRequest;
-import com.exasol.adapter.request.RefreshRequest;
-import com.exasol.adapter.request.SetPropertiesRequest;
+import com.exasol.adapter.metadata.*;
+import com.exasol.adapter.request.*;
 import com.exasol.logging.CompactFormatter;
 import com.exasol.utils.JsonHelper;
 import com.exasol.utils.UdfUtils;
 
 public class JdbcAdapter {
     public static final int MAX_STRING_CHAR_LENGTH = 2000000;
-    private static Logger LOGGER = null;
+    private static Logger logger = null;
 
     /**
      * This method gets called by the database during interactions with the virtual
      * schema.
      *
-     * @param meta  Metadata object
+     * @param meta Metadata object
      * @param input JSON request, as defined in the Adapter Script API
      * @return JSON response, as defined in the Adapter Script API
      */
@@ -60,7 +37,7 @@ public class JdbcAdapter {
             final AdapterRequest request = new RequestJsonParser().parseRequest(input);
             final SchemaMetadataInfo schemaMetadata = request.getSchemaMetadataInfo();
             configureLogOutput(schemaMetadata);
-            LOGGER.fine(() -> "Adapter request:\n" + input);
+            logger.fine(() -> "Adapter request:\n" + input);
 
             switch (request.getType()) {
             case CREATE_VIRTUAL_SCHEMA:
@@ -85,14 +62,13 @@ public class JdbcAdapter {
                 throw new RuntimeException("Request Type not supported: " + request.getType());
             }
             assert (result.isEmpty());
-            LOGGER.fine("Response:\n" + JsonHelper.prettyJson(JsonHelper.getJsonObject(result)));
+            logger.fine("Response:\n" + JsonHelper.prettyJson(JsonHelper.getJsonObject(result)));
             return result;
-        } catch (final AdapterException ex) {
-            throw ex;
-        } catch (final Exception ex) {
-            final String stacktrace = UdfUtils.traceToString(ex);
-            throw new Exception("Unexpected error in adapter: " + ex.getMessage() + "\nStacktrace: " + stacktrace
-                    + "\nFor following request: " + input + "\nResponse: " + result);
+        } catch (final AdapterException e) {
+            throw e;
+        } catch (final Exception e) {
+            throw new Exception("Unexpected error in adapter for following request: " + input + "\nResponse: " + result,
+                    e);
         }
     }
 
@@ -106,7 +82,7 @@ public class JdbcAdapter {
 
     private static synchronized void configureLogger(final OutputStream out, final Map<String, String> properties)
             throws InvalidPropertyException {
-        if (LOGGER == null) {
+        if (logger == null) {
             final Level logLevel = JdbcAdapterProperties.getLogLevel(properties);
             final Formatter formatter = new CompactFormatter();
             final StreamHandler handler = new StreamHandler(out, formatter);
@@ -115,8 +91,8 @@ public class JdbcAdapter {
             final Logger baseLogger = Logger.getLogger("com.exasol");
             baseLogger.setLevel(logLevel);
             baseLogger.addHandler(handler);
-            LOGGER = Logger.getLogger(JdbcAdapter.class.getName());
-            LOGGER.info(() -> "Attached to output service with log level " + LOGGER.getLevel() + ".");
+            logger = Logger.getLogger(JdbcAdapter.class.getName());
+            logger.info(() -> "Attached to output service with log level " + logLevel + ".");
         }
     }
 
@@ -199,7 +175,7 @@ public class JdbcAdapter {
     }
 
     private static Capabilities parseExcludedCapabilities(final String excludedCapabilitiesStr) {
-        LOGGER.info(() -> "Excluded Capabilities: "
+        logger.info(() -> "Excluded Capabilities: "
                 + (excludedCapabilitiesStr.isEmpty() ? "none" : excludedCapabilitiesStr));
         final Capabilities excludedCapabilities = new Capabilities();
         for (final String cap : excludedCapabilitiesStr.split(",")) {
@@ -288,7 +264,7 @@ public class JdbcAdapter {
         Connection connection = null;
         try {
             connection = establishConnection(connectionInformation);
-            LOGGER.fine(() -> "createColumnDescription: " + pushdownQuery);
+            logger.fine(() -> "createColumnDescription: " + pushdownQuery);
             ps = connection.prepareStatement(pushdownQuery);
             ResultSetMetaData metadata = ps.getMetaData();
             if (metadata == null) {
@@ -322,7 +298,7 @@ public class JdbcAdapter {
             buffer.append(')');
             return buffer.toString();
         } catch (final SQLException e) {
-            throw new RuntimeException("Cannot resolve column types." + e.getMessage());
+            throw new RuntimeException("Cannot resolve column types.", e);
         }
     }
 
@@ -330,7 +306,7 @@ public class JdbcAdapter {
         final String connectionString = connection.getAddress();
         final String user = connection.getUser();
         final String password = connection.getPassword();
-        LOGGER.fine(() -> "Connection parameters: " + connectionString);
+        logger.fine(() -> "Connection parameters: " + connectionString);
 
         final java.util.Properties info = new java.util.Properties();
         if (user != null) {
@@ -365,5 +341,4 @@ public class JdbcAdapter {
         }
         return null;
     }
-
 }

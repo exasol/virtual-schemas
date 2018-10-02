@@ -6,7 +6,7 @@ Run the following steps to deploy your adapter:
 
 * Exasol Version 6.0 or later
 * Advanced edition (which includes the ability to execute adapter scripts), or Free Small Business Edition
-* Exasol must be able to connect to the host and port specified in the JDBC connection string. In case of problems you can use a [UDF to test the connectivity](HTTPS://www.exasol.com/support/browse/SOL-307).
+* Exasol must be able to connect to the host and port specified in the JDBC connection string. In case of problems you can use a [UDF to test the connectivity](https://www.exasol.com/support/browse/SOL-307).
 * If the JDBC driver requires Kerberos authentication (e.g. for Hive or Impala), the Exasol database will authenticate using a keytab file. Each Exasol node needs access to port 88 of the the Kerberos KDC (key distribution center).
 
 ## Obtaining JAR Archives

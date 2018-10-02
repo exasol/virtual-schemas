@@ -27,7 +27,6 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
     // Documentation:
     // http://infocenter.sybase.com/help/index.jsp?topic=/com.sybase.infocenter.help.ase.16.0/doc/html/title.html
     // https://help.sap.com/viewer/p/SAP_ASE
-
     public final static int maxSybaseVarcharSize = 8000;
     public final static int maxSybaseNVarcharSize = 4000;
     private static final String NAME = "SYBASE";
