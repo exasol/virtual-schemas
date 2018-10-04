@@ -1,34 +1,41 @@
 package com.exasol.adapter.dialects.impl;
 
-import com.exasol.adapter.capabilities.*;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.sql.ScalarFunction;
-
 import java.sql.SQLException;
 import java.util.EnumMap;
 import java.util.Map;
 
+import com.exasol.adapter.capabilities.AggregateFunctionCapability;
+import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.capabilities.LiteralCapability;
+import com.exasol.adapter.capabilities.MainCapability;
+import com.exasol.adapter.capabilities.PredicateCapability;
+import com.exasol.adapter.capabilities.ScalarFunctionCapability;
+import com.exasol.adapter.dialects.AbstractSqlDialect;
+import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.dialects.SqlDialectContext;
+import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.sql.ScalarFunction;
+
 /**
- * Dialect for Hive, using the Cloudera Hive JDBC Driver/Connector (developed by Simba).
- * Only supports Hive 2.1.0 and later because of the order by (nulls first/last option)
- * TODO Finish implementation of this dialect and add as a supported dialect
+ * Dialect for Hive, using the Cloudera Hive JDBC Driver/Connector (developed by
+ * Simba). Only supports Hive 2.1.0 and later because of the order by (nulls
+ * first/last option) TODO Finish implementation of this dialect and add as a
+ * supported dialect
  */
 public class HiveSqlDialect extends AbstractSqlDialect {
-
-    public HiveSqlDialect(SqlDialectContext context) {
+    public HiveSqlDialect(final SqlDialectContext context) {
         super(context);
     }
 
-    public static final String NAME = "HIVE";
-
-    public String getPublicName() {
-        return NAME;
+    public static String getPublicName() {
+        return "HIVE";
     }
 
     @Override
     public Capabilities getCapabilities() {
-        Capabilities cap = new Capabilities();
+        final Capabilities cap = new Capabilities();
         cap.supportMainCapability(MainCapability.SELECTLIST_PROJECTION);
         cap.supportMainCapability(MainCapability.SELECTLIST_EXPRESSIONS);
         cap.supportMainCapability(MainCapability.FILTER_EXPRESSIONS);
@@ -131,7 +138,7 @@ public class HiveSqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.SECOND);
         cap.supportScalarFunction(ScalarFunctionCapability.WEEK);
 
-        /*hive doesn't support geospatial functions*/
+        /* hive doesn't support geospatial functions */
 
         cap.supportScalarFunction(ScalarFunctionCapability.CAST);
 
@@ -145,11 +152,12 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     }
 
     /**
-     * Quote from user manual The Cloudera JDBC Driver for Apache Hive supports both catalogs and schemas to make it easy for
-     * the driver to work with various JDBC applications. Since Hive only organizes tables into
-     * schemas/databases, the driver provides a synthetic catalog called “HIVE” under which all of the
-     * schemas/databases are organized. The driver also maps the JDBC schema to the Hive
-     * schema/database.
+     * Quote from user manual The Cloudera JDBC Driver for Apache Hive supports both
+     * catalogs and schemas to make it easy for the driver to work with various JDBC
+     * applications. Since Hive only organizes tables into schemas/databases, the
+     * driver provides a synthetic catalog called “HIVE” under which all of the
+     * schemas/databases are organized. The driver also maps the JDBC schema to the
+     * Hive schema/database.
      */
     @Override
     public SchemaOrCatalogSupport supportsJdbcCatalogs() {
@@ -172,26 +180,30 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String applyQuote(String identifier) {
-        // If identifier contains double quotation marks ", it needs to be escaped by another double quotation mark. E.g. "a""b" is the identifier a"b in the db.
+    public String applyQuote(final String identifier) {
+        // If identifier contains double quotation marks ", it needs to be escaped by
+        // another double quotation mark. E.g. "a""b" is the identifier a"b in the db.
         return "`" + identifier + "`";
     }
 
     @Override
-    public String applyQuoteIfNeeded(String identifier) {
-        // We need to apply quotes only in case of reserved keywords. Since we don't know these (could look up in JDBC Metadata...) we always quote.
+    public String applyQuoteIfNeeded(final String identifier) {
+        // We need to apply quotes only in case of reserved keywords. Since we don't
+        // know these (could look up in JDBC Metadata...) we always quote.
         return applyQuote(identifier);
     }
 
     @Override
-    public boolean requiresCatalogQualifiedTableNames(SqlGenerationContext context) {
+    public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
         return false;
     }
 
     @Override
-    public boolean requiresSchemaQualifiedTableNames(SqlGenerationContext context) {
-        // We need schema qualifiers a) if we are in IS_LOCAL mode, i.e. we run statements directly in a subselect without IMPORT FROM JDBC
-        // and b) if we don't have the schema in the jdbc connection string (like "jdbc:exa:localhost:5555;schema=native")
+    public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
+        // We need schema qualifiers a) if we are in IS_LOCAL mode, i.e. we run
+        // statements directly in a subselect without IMPORT FROM JDBC
+        // and b) if we don't have the schema in the jdbc connection string (like
+        // "jdbc:exa:localhost:5555;schema=native")
         return true;
         // return context.isLocal();
     }
@@ -207,20 +219,20 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String getStringLiteral(String value) {
+    public String getStringLiteral(final String value) {
         // Don't forget to escape single quote
         return "'" + value.replace("'", "''") + "'";
     }
 
     @Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(SqlGenerationContext context) {
+    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new HiveSqlGenerationVisitor(this, context);
     }
 
     @Override
     public Map<ScalarFunction, String> getScalarFunctionAliases() {
 
-        Map<ScalarFunction,String> scalarAliases = new EnumMap<>(ScalarFunction.class);
+        final Map<ScalarFunction, String> scalarAliases = new EnumMap<>(ScalarFunction.class);
 
         scalarAliases.put(ScalarFunction.ADD_DAYS, "DATE_ADD");
         scalarAliases.put(ScalarFunction.DAYS_BETWEEN, "DATEDIFF");
@@ -232,7 +244,7 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcType) throws SQLException {
+    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
         return null;
     }
 

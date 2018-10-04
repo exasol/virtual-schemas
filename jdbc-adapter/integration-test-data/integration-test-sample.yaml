@@ -5,7 +5,7 @@ general:
   debugAddress:    '192.168.0.12:3000'  # Address which will be defined as DEBUG_ADDRESS in the virtual schemas
   bucketFsUrl:  http://exasol-host:2580/bucket1
   bucketFsPassword: bucket1
-  jdbcAdapterPath:  /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.0.2-SNAPSHOT.jar
+  jdbcAdapterPath:  /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.1.0.jar
 
 exasol:
   runIntegrationTests: true
@@ -87,3 +87,9 @@ hive:
   user: user
   password: pass
 
+sybase:
+  runIntegrationTests: false
+  jdbcDriverPath:      /buckets/mybucketfs/mybucket/jtds-1.3.1.jar
+  connectionString:    jdbc:jtds:sybase://127.0.0.1:5000/db
+  user:                sybase-user
+  password:            sybase-password

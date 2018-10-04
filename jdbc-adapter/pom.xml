@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>virtualschema-jdbc-adapter-main</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>${product.version}</version>
 
     <packaging>pom</packaging>
 
@@ -14,7 +14,9 @@
     </modules>
 
     <properties>
+        <product.version>1.1.0</product.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
     </properties>
 
@@ -55,7 +57,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
+            <version>4.12</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -64,6 +66,12 @@
             <version>2.0.52-beta</version>
         </dependency>
 
+        <dependency>
+          <groupId>org.hamcrest</groupId>
+          <artifactId>hamcrest-junit</artifactId>
+          <version>2.0.0.0</version>
+          <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/EXASOL/virtual-schemas.svg?branch=master)](https://travis-ci.org/EXASOL/virtual-schemas)
 
-###### Please note that this is an open source project which is officially supported by Exasol. For any question, you can contact our support team.
+<p style="border: 1px solid black;padding: 10px; background-color: #FFFFCC;"><span style="font-size:200%">&#9888;</span> Please note that this is an open source project which is officially supported by Exasol. For any question, you can contact our support team.</p>
 
 Virtual schemas provide a powerful abstraction to conveniently access arbitrary data sources. Virtual schemas are a kind of read-only link to an external source and contain virtual tables which look like regular tables except that the actual data are not stored locally.
 
@@ -14,11 +14,9 @@ Please note that virtual schemas are part of the Advanced Edition of Exasol.
 
 For further details about the concept, usage and examples, please see the corresponding chapter in our Exasol User Manual.
 
-
 ## API Specification
 
 The subdirectory [doc](doc) contains the API specification for virtual schema adapters.
-
 
 ## JDBC Adapter
 
