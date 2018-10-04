@@ -2,7 +2,11 @@
 
 [![Build Status](https://travis-ci.org/EXASOL/virtual-schemas.svg)](https://travis-ci.org/EXASOL/virtual-schemas)
 
-## Supported Dialects
+## Overview
+
+The JDBC adapter for virtual schemas allows you to connect to JDBC data sources like Hive, Oracle, Teradata, Exasol or any other data source supporting JDBC. It uses the well proven ```IMPORT FROM JDBC``` Exasol statement behind the scenes to obtain the requested data, when running a query on a virtual table. The JDBC adapter also serves as the reference adapter for the Exasol virtual schema framework.
+
+The following dialects are supported:
 
 1. [EXASOL](doc/sql_dialects/exasol.md)
 1. [Hive](doc/sql_dialects/hive.md)
@@ -16,20 +20,9 @@
 1. [PostgresSQL](doc/sql_dialects/postgresql.md)
 1. Generic
 
-## Overview
-The JDBC adapter for virtual schemas allows you to connect to JDBC data sources like Hive, Oracle, Teradata, Exasol or any other data source supporting JDBC. It uses the well proven ```IMPORT FROM JDBC``` Exasol statement behind the scenes to obtain the requested data, when running a query on a virtual table. The JDBC adapter also serves as the reference adapter for the Exasol virtual schema framework.
-
-Check the [SQL dialect list](doc/supported_sql_dialects.md) to learn which SQL dialects the JDBC adapter currently supports
-
 This list will be continuously extended based on the feedback from our users.
 
-Each such implementation of a dialect handles three major aspects:
-
-* How to **map the tables** in the source systems to virtual tables in Exasol, including how to **map the data types** to Exasol data types.
-* How is the **SQL syntax** of the data source, including identifier quoting, case-sensitivity, function names, or special syntax like `LIMIT` / `TOP`.
-* Which **capabilities** are supported by the data source. E.g. is it supported to run filters, to specify select list expressions, to run aggregation or scalar functions or to order or limit the result.
-
-In addition to the aforementioned dialects there is the so called `GENERIC` dialect, which is designed to work with any JDBC driver. It derives the SQL dialect from the JDBC driver metadata. However, it does not support any capabilities and might fail if the data source has special syntax or data types, so it should only be used for evaluation purposes.
+The so called `GENERIC` dialect is designed to work with any JDBC driver. It derives the SQL dialect from the JDBC driver metadata. However, it does not support any capabilities and might fail if the data source has special syntax or data types, so it should only be used for evaluation purposes.
 
 If you are interested in a introduction to virtual schemas please refer to the Exasol user manual. You can find it in the [download area of the Exasol user portal](https://www.exasol.com/portal/display/DOC/Database+User+Manual).
 
