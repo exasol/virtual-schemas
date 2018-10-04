@@ -228,7 +228,7 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter
 
   // This will add the adapter jar to the classpath so that it can be used inside the adapter script
   // Replace the names of the bucketfs and the bucket with the ones you used.
-  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.0.2-SNAPSHOT.jar;
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.1.0.jar;
 									 
   // You have to add all files of the data source jdbc driver here (e.g. MySQL or Hive)
 
@@ -240,6 +240,26 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter
 In eclipse (or any other Java IDE) you can then attach remotely to the Java Adapter using the IP of your one node Exasol environment and the port 8000.
 
 The switch `suspend=y` tells the Java-process to wait until the debugger connects to the Java UDF.
+
+## Version Management
+
+All dialects have the same version as the master project. In the master `pom.xml` file a property called `product-version` is set. Use this in as the artifact version number in the JDBC adapter and all dialects.
+
+Run the script
+
+```bash
+jdbc-adapter/tools/version.sh verify
+```
+
+To check that all documentation and templates reference the same version number. This script is also used as a build breaker in the continuous integration script.
+
+To update documentation files run
+
+```bash
+jdbc-adapter/tools/version.sh unify
+```
+
+Note that the script must be run from the root directory of the virtual schema project.
 
 ## Troubleshooting
 
