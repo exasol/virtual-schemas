@@ -1,4 +1,4 @@
-if [ $# -ne 2 ]; then
+Relif [ $# -ne 2 ]; then
 	echo "Usage example: $0 0.0.1-SNAPSHOT 0.0.1"
 	exit 1;
 fi
