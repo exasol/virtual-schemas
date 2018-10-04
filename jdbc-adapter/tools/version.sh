@@ -4,7 +4,7 @@ readonly jar_suffix='jar'
 readonly vs_jar_pattern="$vs_jar_prefix-.*\.$jar_suffix"
 readonly root_dir='virtual-schemas'
 readonly master_pom='jdbc-adapter/pom.xml'
-readonly file_find_regex='*.(md|yaml)'
+readonly file_find_regex='.*\.(md|yaml)'
 readonly script=$(basename $0)
 
 main() {
@@ -19,14 +19,16 @@ main() {
             unify
             ;;
         *)
-            log "Unknown command: $1"
+            log "Unknown command: \"$1\""
+            log
+            usage
             exit 1
             ;;
     esac
 }
 
 usage () {
-    log "usage: $script help"
+    log "Usage: $script help"
     log "       $script verify"
     log "       $script unify"
     log 
@@ -68,14 +70,18 @@ log () {
 }
 
 verify_no_other_version_numbers() {
-    find -type f -regextype posix-extended -regex '.*\.(md|yaml)' -exec \
-      grep -Hnor $vs_jar_pattern {} \; | grep -v "$1"
-    if [[ !$? ]]
+    find -type f -regextype posix-extended -regex "$file_find_regex" \
+      -exec grep -Hnor $vs_jar_pattern {} \; | grep -v "$1"
+    if [[ $? -eq 0 ]]
     then
         log
+        log "Verification failed."
         log "Found version mismatches that need to be fixed. Try the following command"
         log
         log "    $script unify"
+        exit 1
+    else
+        log "Verification successful."
     fi
 }
 
@@ -85,8 +91,9 @@ unify() {
 }
 
 update_documentation() {
-    find -type f -regextype posix-extended -regex '.*\.(md|yaml)' \
-      -exec echo "Updating \"{}\"" \; \
+log "Checking all files matching \"$file_find_regex\""
+    find -type f -regextype posix-extended -regex "$file_find_regex" \
+      -exec echo "Processing \"{}\"" \; \
       -exec sed -i s/"$vs_jar_pattern"/"$vs_jar_prefix-$version.$jar_suffix"/g {} \;
 }
 
