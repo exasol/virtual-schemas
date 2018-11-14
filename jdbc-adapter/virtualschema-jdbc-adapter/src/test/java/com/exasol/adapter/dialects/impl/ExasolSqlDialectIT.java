@@ -275,13 +275,13 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
                 + ".SIMPLE_VALUES";
         ResultSet result = executeQuery(query);
         matchNextRow(result, "YES");
-        matchSingleRowExplain(query, "SELECT CASE A WHEN 1 THEN 'YES' WHEN 2 THEN 'PERHAPS' ELSE 'NO' END FROM "
-                + TEST_SCHEMA + ".SIMPLE_VALUES", IS_LOCAL);
+        matchSingleRowExplain(query, "SELECT CASE \"A\" WHEN 1 THEN 'YES' WHEN 2 THEN 'PERHAPS' ELSE 'NO' END FROM \""
+                + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
         query = "SELECT CASE WHEN A > 1 THEN 'YES' ELSE 'NO' END FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchNextRow(result, "NO");
         matchSingleRowExplain(query,
-                "SELECT CASE WHEN 1 < A THEN 'YES' ELSE 'NO' END FROM " + TEST_SCHEMA + ".SIMPLE_VALUES", IS_LOCAL);
+                "SELECT CASE WHEN 1 < \"A\" THEN 'YES' ELSE 'NO' END FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
     }
 
     /**
