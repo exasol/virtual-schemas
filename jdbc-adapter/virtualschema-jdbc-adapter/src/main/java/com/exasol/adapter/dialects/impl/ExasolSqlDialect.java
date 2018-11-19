@@ -105,15 +105,8 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuoteIfNeeded(final String identifier) {
-        // Quoted identifiers can contain any unicode char except dot (.).
-        // This is a simplified rule, which might cause that some identifiers are quoted
-        // although not needed
-        final boolean isSimpleIdentifier = identifier.matches("^[A-Z][0-9A-Z_]*");
-        if (isSimpleIdentifier) {
-            return identifier;
-        } else {
-            return applyQuote(identifier);
-        }
+        // This is a simplified rule, which quotes all identifiers although not needed
+        return applyQuote(identifier);
     }
 
     @Override

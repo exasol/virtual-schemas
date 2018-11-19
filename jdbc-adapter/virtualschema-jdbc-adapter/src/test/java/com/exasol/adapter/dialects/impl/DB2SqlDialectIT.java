@@ -40,7 +40,7 @@ public class DB2SqlDialectIT extends AbstractIntegrationTest {
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new BigDecimal("9.99"), new BigDecimal("7.25"));
         matchSingleRowExplain(query,
-                "SELECT PRICE, PROMOPRICE FROM " + DB2_SCHEMA + ".PRODUCT WHERE PID = '100-100-01'");
+                "SELECT \"PRICE\", \"PROMOPRICE\" FROM \"" + DB2_SCHEMA + "\".\"PRODUCT\" WHERE \"PID\" = '100-100-01'");
     }
 
     @Test
@@ -49,7 +49,7 @@ public class DB2SqlDialectIT extends AbstractIntegrationTest {
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new BigDecimal("9.99"), new BigDecimal("7.25"));
         matchSingleRowExplain(query,
-                "SELECT PRICE, PROMOPRICE FROM " + DB2_SCHEMA + ".PRODUCT FETCH FIRST 1 ROWS ONLY");
+                "SELECT \"PRICE\", \"PROMOPRICE\" FROM \"" + DB2_SCHEMA + "\".\"PRODUCT\" FETCH FIRST 1 ROWS ONLY");
     }
 
     @Test
@@ -58,8 +58,8 @@ public class DB2SqlDialectIT extends AbstractIntegrationTest {
                 + ".\"Additional_Datatypes\"  WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "2020-01-01-00.00.00.123456789123", "12.05.11");
-        matchSingleRowExplain(query, "SELECT VARCHAR(DETAIL_TIMESTAMP), VARCHAR(UHRZEIT) FROM " + DB2_SCHEMA
-                + ".\"Additional_Datatypes\" WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'");
+        matchSingleRowExplain(query, "SELECT VARCHAR(\"DETAIL_TIMESTAMP\"), VARCHAR(\"UHRZEIT\") FROM \"" + DB2_SCHEMA
+                + "\".\"Additional_Datatypes\" WHERE \"DETAIL_TIMESTAMP\" = '2020-01-01-00.00.00.123456789123'");
 
     }
 
@@ -70,8 +70,8 @@ public class DB2SqlDialectIT extends AbstractIntegrationTest {
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "30303031",
                 "41414242202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020");
-        matchSingleRowExplain(query, "SELECT HEX(BIDATAVARCHAR), HEX(BIDATACHAR) FROM " + DB2_SCHEMA
-                + ".\"Additional_Datatypes\" WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'");
+        matchSingleRowExplain(query, "SELECT HEX(\"BIDATAVARCHAR\"), HEX(\"BIDATACHAR\") FROM \"" + DB2_SCHEMA
+                + "\".\"Additional_Datatypes\" WHERE \"DETAIL_TIMESTAMP\" = '2020-01-01-00.00.00.123456789123'");
 
     }
 
@@ -81,8 +81,8 @@ public class DB2SqlDialectIT extends AbstractIntegrationTest {
                 + ".\"Additional_Datatypes\"  WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "CHAR 茶");
-        matchSingleRowExplain(query, "SELECT UNICODECOL FROM " + DB2_SCHEMA
-                + ".\"Additional_Datatypes\" WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'");
+        matchSingleRowExplain(query, "SELECT \"UNICODECOL\" FROM \"" + DB2_SCHEMA
+                + "\".\"Additional_Datatypes\" WHERE \"DETAIL_TIMESTAMP\" = '2020-01-01-00.00.00.123456789123'");
 
     }
 
@@ -94,9 +94,9 @@ public class DB2SqlDialectIT extends AbstractIntegrationTest {
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "2020-01-03-00.00.00.123456789123", "2018-01-01-00.00.00.123456789123", "CHAR");
         matchSingleRowExplain(query,
-                "SELECT VARCHAR(DETAIL_TIMESTAMP + 2 DAYS), VARCHAR(DETAIL_TIMESTAMP + -2 YEARS), SUBSTR(UNICODECOL, 1, 4) FROM "
+                "SELECT VARCHAR(\"DETAIL_TIMESTAMP\" + 2 DAYS), VARCHAR(\"DETAIL_TIMESTAMP\" + -2 YEARS), SUBSTR(\"UNICODECOL\", 1, 4) FROM \""
                         + DB2_SCHEMA
-                        + ".\"Additional_Datatypes\" WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'");
+                        + "\".\"Additional_Datatypes\" WHERE \"DETAIL_TIMESTAMP\" = '2020-01-01-00.00.00.123456789123'");
     }
 
     private static void createDB2JDBCAdapter() throws SQLException, FileNotFoundException {
