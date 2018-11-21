@@ -28,8 +28,8 @@ public class CustomSqlGenerationVisitorTest {
     public void testSqlGenerator() throws AdapterException {
         SqlNode node = getTestSqlNode();
         String schemaName = "SCHEMA";
-        String expectedSql = "SELECT NOT_CUSTOM (NOT_CUSTOM (C1)) FROM " + schemaName
-                + ".TEST";
+        String expectedSql = "SELECT NOT_CUSTOM (NOT_CUSTOM (\"C1\")) FROM \"" + schemaName
+                + "\".\"TEST\"";
         SqlGenerationContext context = new SqlGenerationContext("", schemaName,
                 false);
         SqlDialectContext dialectContext = new SqlDialectContext(Mockito.mock(SchemaAdapterNotes.class));

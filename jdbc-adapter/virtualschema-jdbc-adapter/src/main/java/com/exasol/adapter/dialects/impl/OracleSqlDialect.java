@@ -415,12 +415,8 @@ public class OracleSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuoteIfNeeded(final String identifier) {
-        final boolean isSimpleIdentifier = identifier.matches("^[A-Z][0-9A-Z_]*");
-        if (isSimpleIdentifier) {
-            return identifier;
-        } else {
-            return applyQuote(identifier);
-        }
+        // This is a simplified rule, which quotes all identifiers although not needed
+        return applyQuote(identifier);
     }
 
     @Override

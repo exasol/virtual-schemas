@@ -18,9 +18,9 @@ public class ExasolSqlDialectTest {
     public void testApplyQuoteIfNeeded() {
         ExasolSqlDialect dialect = new ExasolSqlDialect(DialectTestData.getExasolDialectContext());
         // Regular Identifiers
-        assertEquals("A1", dialect.applyQuoteIfNeeded("A1"));
-        assertEquals("A_1", dialect.applyQuoteIfNeeded("A_1"));
-        assertEquals("A", dialect.applyQuoteIfNeeded("A"));
+        assertEquals("\"A1\"", dialect.applyQuoteIfNeeded("A1"));
+        assertEquals("\"A_1\"", dialect.applyQuoteIfNeeded("A_1"));
+        assertEquals("\"A\"", dialect.applyQuoteIfNeeded("A"));
         
         // Irregular Identifiers
         assertEquals("\"A_a_1\"", dialect.applyQuoteIfNeeded("A_a_1"));
@@ -41,11 +41,11 @@ public class ExasolSqlDialectTest {
     public void testSqlGenerator() throws AdapterException {
         SqlNode node = DialectTestData.getTestSqlNode();
         String schemaName = "SCHEMA";
-        String expectedSql = "SELECT USER_ID, COUNT(URL) FROM " + schemaName + ".CLICKS" +
-        " WHERE 1 < USER_ID" +
-        " GROUP BY USER_ID" +
-        " HAVING 1 < COUNT(URL)" +
-        " ORDER BY USER_ID" +
+        String expectedSql = "SELECT \"USER_ID\", COUNT(\"URL\") FROM \"" + schemaName + "\".\"CLICKS\"" +
+        " WHERE 1 < \"USER_ID\"" +
+        " GROUP BY \"USER_ID\"" +
+        " HAVING 1 < COUNT(\"URL\")" +
+        " ORDER BY \"USER_ID\"" +
         " LIMIT 10";
         SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
         SqlDialect dialect = new ExasolSqlDialect(DialectTestData.getExasolDialectContext());
