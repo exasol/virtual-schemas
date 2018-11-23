@@ -67,7 +67,7 @@ public class JdbcAdapter {
         } catch (final AdapterException e) {
             throw e;
         } catch (final Exception e) {
-            throw new Exception("Unexpected error in adapter for following request: " + input + "\nResponse: " + result,
+            throw new Exception("Unexpected error in adapter: " + e.getMessage() + "\nFor following request: " + input + "\nResponse: " + result,
                     e);
         }
     }
