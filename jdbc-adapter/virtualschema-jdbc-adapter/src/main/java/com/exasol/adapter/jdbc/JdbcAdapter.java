@@ -67,7 +67,8 @@ public class JdbcAdapter {
         } catch (final AdapterException e) {
             throw e;
         } catch (final Exception e) {
-            throw new Exception("Unexpected error in adapter for following request: " + input + "\nResponse: " + result,
+            String stacktrace = UdfUtils.traceToString(e);
+            throw new Exception("Unexpected error in adapter: " + e.getMessage() + "\nFor following request: " + input + "\nResponse: " + result + "\nAdapter stack trace: " + stacktrace,
                     e);
         }
     }

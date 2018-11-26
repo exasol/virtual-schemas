@@ -1,6 +1,6 @@
 # JDBC Adapter for Virtual Schemas
 
-[![Build Status](https://travis-ci.org/EXASOL/virtual-schemas.svg)](https://travis-ci.org/EXASOL/virtual-schemas)
+[![Build Status](https://travis-ci.org/exasol/virtual-schemas.svg)](https://travis-ci.org/exasol/virtual-schemas)
 
 ## Overview
 
