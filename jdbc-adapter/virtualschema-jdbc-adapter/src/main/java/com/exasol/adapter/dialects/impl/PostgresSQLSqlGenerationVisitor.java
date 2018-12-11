@@ -239,7 +239,8 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
 	    		typeName.startsWith("path") || 
 	    		typeName.startsWith("polygon") || 
 	    		typeName.startsWith("circle")  ||
-	    		typeName.startsWith("cidr") ||
+                typeName.startsWith("cidr") ||
+                typeName.startsWith("citext") ||
 	    		typeName.startsWith("inet") ||
 	    		typeName.startsWith("macaddr") ||
 	    		typeName.startsWith("interval") ||
@@ -283,7 +284,7 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
         return requiresCasts;
     }
     
-    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("varbit","point","line","lseg","box","path","polygon","circle","cidr","inet","macaddr","interval","json","jsonb","uuid","tsquery", "tsvector","xml");
+    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("varbit","point","line","lseg","box","path","polygon","circle","cidr","citext","inet","macaddr","interval","json","jsonb","uuid","tsquery", "tsvector","xml");
     
     private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("bytea"); 
 

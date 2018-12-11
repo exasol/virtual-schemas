@@ -284,6 +284,15 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
                 "SELECT CASE WHEN 1 < \"A\" THEN 'YES' ELSE 'NO' END FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
     }
 
+    @Test
+    public void testErrorMessages() throws SQLException, FileNotFoundException {
+        this.thrown.expect(Exception.class);
+        this.thrown.expectMessage("Could not access the connection information of connection NO_CONNECTION");
+        createVirtualSchema("VS_EXA_IT_BROKEN", ExasolSqlDialect.getPublicName(), "", "NATIVE_EXA_IT", "NO_CONNECTION",
+        "", "", "ADAPTER.JDBC_ADAPTER", "",
+        false, getConfig().debugAddress(), "", null);
+    }
+
     /**
      * This was replaced by integration test {@link #testDataTypeMapping()}. It can
      * be enabled temporarily for debugging.
