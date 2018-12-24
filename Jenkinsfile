@@ -11,5 +11,10 @@ pipeline {
                 sh 'cd jdbc-adapter && mvn -Dmaven.test.failure.ignore clean package'
             }
         }
+        stage('Integration Test') {
+            steps {
+                sh 'cd jdbc-adapter && ./jdbc-adapter/integration-test-data/run_integration_tests.sh'
+            }
+        }
     }
 }
