@@ -13,7 +13,7 @@ pipeline {
         }
         stage('Integration Test') {
             steps {
-                sh 'cd jdbc-adapter && ./jdbc-adapter/integration-test-data/run_integration_tests.sh'
+                sh './jdbc-adapter/integration-test-data/run_integration_tests.sh'
             }
         }
     }
