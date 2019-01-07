@@ -1,0 +1,43 @@
+{
+    "testSchema" :
+    [
+        "create table t(x int)",
+        "create table u(y int)"
+    ],
+    "testQuery": "select x from vs.u left outer join vs.t on vs.t.x=vs.u.y",
+    "expectedPushdownRequest": 
+    [
+        {
+            "pushdownRequest" : 
+            {
+                "type" : "select",
+                "from" : 
+                {
+                    "name" : "T",
+                    "type" : "table"
+                }
+            },
+            "type" : "pushdown"
+        },
+        {
+            "pushdownRequest" : 
+            {
+                "from" : 
+                {
+                    "name" : "U",
+                    "type" : "table"
+                },
+                "type" : "select"
+            },
+            "type" : "pushdown"
+        }
+    ],
+    "expectedPushdownResponse":
+    {
+        "Exasol": 
+        [
+            "SELECT * FROM \"LS\".\"T\"",
+            "SELECT * FROM \"LS\".\"U\""
+        ]
+    }
+}

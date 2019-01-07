@@ -1,0 +1,29 @@
+{
+    "testSchema" :
+    [
+        "create table t(x int)"
+    ],
+    "testQuery": "select x from vs.t",
+    "expectedPushdownRequest": 
+    [
+        {
+            "pushdownRequest" : 
+            {
+                "type" : "select",
+                "from" : 
+                {
+                    "name" : "T",
+                    "type" : "table"
+                }
+            },
+            "type" : "pushdown"
+        }
+    ],
+    "expectedPushdownResponse":
+    {
+        "Exasol": 
+        [
+            "SELECT * FROM \"LS\".\"T\""
+        ]
+    }
+}
