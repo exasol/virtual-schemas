@@ -1,0 +1,118 @@
+{
+    "testSchema" :
+    [
+        "create table t1(x int, y int)",
+        "create table t2(x int, y int)",
+        "create table t3(x int)",
+        "create table t4(x int, y int)",
+        "create table t5(x int)"
+    ],
+    "testQuery": "select * from (select x from vs.t1) noAliasSubSel, (select x from vs.t2 as withAlias) aliasSubSel, (select x from vs.t3 as withAlias), (select t4alias.x as col1, t5alias.x as col2 from vs.t4 as t4alias join vs.t5 t5alias on t5alias.x=t5alias.x) aliasJoin",
+    "expectedPushdownRequest": 
+    [
+        {
+            "pushdownRequest" : 
+            {
+                "type" : "select",
+                "selectList":
+                [
+                    {
+                        "type": "column",
+                        "tableName": "T1",
+                        "name": "X",
+                        "columnNr": 0
+                    }
+                ],
+                "from" : 
+                {
+                    "name" : "T1",
+                    "type" : "table"
+                }
+            },
+            "type" : "pushdown"
+        },
+        {
+            "pushdownRequest" : 
+            {
+                "type" : "select",
+                "selectList":
+                [
+                    {
+                        "type": "column",
+                        "tableName": "T2",
+                        "tableAlias": "WITHALIAS",
+                        "name": "X",
+                        "columnNr": 0
+                    }
+                ],
+                "from" : 
+                {
+                    "name" : "T2",
+                    "alias": "WITHALIAS",
+                    "type" : "table"
+                }
+            },
+            "type" : "pushdown"
+        },
+        {
+            "pushdownRequest" : 
+            {
+                "type" : "select",
+                "from" : 
+                {
+                    "name" : "T3",
+                    "alias": "WITHALIAS",
+                    "type" : "table"
+                }
+            },
+            "type" : "pushdown"
+        },
+        {
+            "pushdownRequest" : 
+            {
+                "type" : "select",
+                "selectList":
+                [
+                    {
+                        "type": "column",
+                        "tableName": "T4",
+                        "tableAlias": "T4ALIAS",
+                        "name": "X",
+                        "columnNr": 0
+                    }
+                ],
+                "from" : 
+                {
+                    "name" : "T4",
+                    "alias": "T4ALIAS",
+                    "type" : "table"
+                }
+            },
+            "type" : "pushdown"
+        },
+        {
+            "pushdownRequest" : 
+            {
+                "type" : "select",
+                "from" : 
+                {
+                    "name" : "T5",
+                    "alias": "T5ALIAS",
+                    "type" : "table"
+                }
+            },
+            "type" : "pushdown"
+        }
+    ],
+    "expectedPushdownResponse":
+    {
+        "Exasol": 
+        [
+            "SELECT \"X\" FROM \"LS\".\"T1\"",
+            "SELECT \"X\" FROM \"LS\".\"T2\"",
+            "SELECT * FROM \"LS\".\"T3\"",
+            "SELECT \"X\" FROM \"LS\".\"T4\"",
+            "SELECT * FROM \"LS\".\"T5\""
+        ]
+    }
+}
