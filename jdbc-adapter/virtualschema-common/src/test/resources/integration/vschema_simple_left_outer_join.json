@@ -4,40 +4,45 @@
         "create table t(x int)",
         "create table u(y int)"
     ],
-    "testQuery": "select x from vs.u left outer join vs.t on vs.t.x=vs.u.y",
-    "expectedPushdownRequest": 
+    "testCases" :
     [
         {
-            "pushdownRequest" : 
-            {
-                "type" : "select",
-                "from" : 
+            "testQuery": "select x from vs.u left outer join vs.t on vs.t.x=vs.u.y",
+            "expectedPushdownRequest": 
+            [
                 {
-                    "name" : "T",
-                    "type" : "table"
-                }
-            },
-            "type" : "pushdown"
-        },
-        {
-            "pushdownRequest" : 
-            {
-                "from" : 
-                {
-                    "name" : "U",
-                    "type" : "table"
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "from" : 
+                        {
+                            "name" : "T",
+                            "type" : "table"
+                        }
+                    },
+                    "type" : "pushdown"
                 },
-                "type" : "select"
-            },
-            "type" : "pushdown"
+                {
+                    "pushdownRequest" : 
+                    {
+                        "from" : 
+                        {
+                            "name" : "U",
+                            "type" : "table"
+                        },
+                        "type" : "select"
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT * FROM \"LS\".\"T\"",
+                    "SELECT * FROM \"LS\".\"U\""
+                ]
+            }
         }
-    ],
-    "expectedPushdownResponse":
-    {
-        "Exasol": 
-        [
-            "SELECT * FROM \"LS\".\"T\"",
-            "SELECT * FROM \"LS\".\"U\""
-        ]
-    }
+    ]
 }

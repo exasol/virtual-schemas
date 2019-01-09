@@ -1,29 +1,60 @@
 {
     "testSchema" :
     [
-        "create table t(x int)"
+        "create table t(x int)",
+        "create table u(x int)"
     ],
-    "testQuery": "select x from vs.t",
-    "expectedPushdownRequest": 
+    "testCases" :
     [
         {
-            "pushdownRequest" : 
-            {
-                "type" : "select",
-                "from" : 
+            "testQuery": "select x from vs.t",
+            "expectedPushdownRequest": 
+            [
                 {
-                    "name" : "T",
-                    "type" : "table"
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "from" : 
+                        {
+                            "name" : "T",
+                            "type" : "table"
+                        }
+                    },
+                    "type" : "pushdown"
                 }
-            },
-            "type" : "pushdown"
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT * FROM \"LS\".\"T\""
+                ]
+            }
+        },
+        {
+            "testQuery": "select x from vs.u",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "from" : 
+                        {
+                            "name" : "U",
+                            "type" : "table"
+                        }
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT * FROM \"LS\".\"U\""
+                ]
+            }
         }
-    ],
-    "expectedPushdownResponse":
-    {
-        "Exasol": 
-        [
-            "SELECT * FROM \"LS\".\"T\""
-        ]
-    }
+    ]
 }
