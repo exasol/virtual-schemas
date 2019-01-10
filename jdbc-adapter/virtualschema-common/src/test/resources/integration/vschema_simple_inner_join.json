@@ -25,16 +25,6 @@
                                         "type" : "DECIMAL"
                                     },
                                     "name" : "ID"
-                                },
-                                {
-                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
-                                    "dataType" :
-                                    {
-                                        "precision" : 18,
-                                        "scale" : 0,
-                                        "type" : "DECIMAL"
-                                    },
-                                    "name" : "VAL"
                                 }
                             ],
                             "name" : "T1"
@@ -50,16 +40,6 @@
                                         "type" : "DECIMAL"
                                     },
                                     "name" : "ID"
-                                },
-                                {
-                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
-                                    "dataType" :
-                                    {
-                                        "precision" : 18,
-                                        "scale" : 0,
-                                        "type" : "DECIMAL"
-                                    },
-                                    "name" : "VAL"
                                 }
                             ],
                             "name" : "T2"
