@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.json.JsonObject;
+import javax.json.JsonValue;
+
 import org.junit.Test;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 
@@ -19,6 +22,14 @@ import com.exasol.adapter.metadata.DataType.ExaCharset;
 import com.exasol.adapter.request.AdapterRequest;
 import com.exasol.adapter.request.PushdownRequest;
 import com.exasol.adapter.request.SetPropertiesRequest;
+import com.exasol.adapter.sql.JoinType;
+import com.exasol.adapter.sql.SqlJoin;
+import com.exasol.adapter.sql.SqlNode;
+import com.exasol.adapter.sql.SqlNodeType;
+import com.exasol.adapter.sql.SqlPredicate;
+import com.exasol.adapter.sql.SqlPredicateEqual;
+import com.exasol.adapter.sql.SqlStatementSelect;
+import com.exasol.utils.JsonHelper;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
@@ -114,6 +125,30 @@ public class RequestJsonParserTest {
         AdapterRequest request = parser.parseRequest(json);
         assertObjectEquals(expectedSchemaMetaInfo, request.getSchemaMetadataInfo());
         assertObjectEquals(expectedNewProperties, ((SetPropertiesRequest)request).getProperties());
+    }
+
+    @Test
+    public void testSimpleInnerJoinRequest() throws Exception {
+        String file = "target/test-classes/integration/vschema_simple_inner_join.json";
+        String json = Files.toString(new File(file), Charsets.UTF_8);
+
+        // get pushdown from testfile
+        JsonObject root = JsonHelper.getJsonObject(json);
+        JsonObject test = root.getJsonArray("testCases").getValuesAs(JsonObject.class).get(0);
+        String req = test.getJsonArray("expectedPushdownRequest").get(0).toString();
+        
+        RequestJsonParser parser = new RequestJsonParser();
+        AdapterRequest request = parser.parseRequest(req);
+        PushdownRequest pushdown = (PushdownRequest) request;
+
+        SqlStatementSelect select = (SqlStatementSelect) pushdown.getSelect();
+        SqlJoin from = (SqlJoin) select.getFromClause();
+        
+        assertTrue(from.getType() == SqlNodeType.JOIN);
+        assertTrue(from.getJoinType() == JoinType.INNER);
+        assertTrue(from.getCondition().getType() == SqlNodeType.PREDICATE_EQUAL);
+        assertTrue(from.getLeft().getType() == SqlNodeType.TABLE);
+        assertTrue(from.getRight().getType() == SqlNodeType.TABLE);
     }
     
     /**

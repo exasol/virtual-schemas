@@ -6,6 +6,7 @@ import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
+import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.sql.*;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
@@ -29,17 +30,21 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
         }
         List<String> selectListElements = new ArrayList<>();
         if (selectList.isSelectStar()) {
-            if (selectListRequiresCasts(selectList)) {
+            if (helper.selectListRequiresCasts(selectList, nodeRequiresCast)) {
 
                 // Do as if the user has all columns in select list
                 SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
                 
-                int columnId = 0;
-                for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
-                    SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-                    selectListElements.add( getColumnProjectionStringNoCheck(sqlColumn,  super.visit(sqlColumn)  )   );
-                    ++columnId;
-                }
+				int columnId = 0;
+				List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
+                helper.getMetadataFrom(select.getFromClause(), tableMetadata );
+                for (TableMetadata tableMeta : tableMetadata) {
+					for (ColumnMetadata columnMeta : tableMeta.getColumns()) {
+						SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
+						selectListElements.add( getColumnProjectionStringNoCheck(sqlColumn,  super.visit(sqlColumn)  )   );
+						++columnId;
+					}
+				}
                 
             } else {
                 selectListElements.add("*");
@@ -138,29 +143,18 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
     
     private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("varbinary","binary"); 
 
-    private boolean nodeRequiresCast(SqlNode node) throws AdapterException {
-        if (node.getType() == SqlNodeType.COLUMN) {
-            SqlColumn column = (SqlColumn)node;
-			String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-			return TYPE_NAMES_REQUIRING_CAST.contains(typeName) || TYPE_NAME_NOT_SUPPORTED.contains(typeName) ;
+	private java.util.function.Predicate<SqlNode> nodeRequiresCast = node -> {
+		try {
+			if (node.getType() == SqlNodeType.COLUMN) {
+				SqlColumn column = (SqlColumn)node;
+				String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+				return TYPE_NAMES_REQUIRING_CAST.contains(typeName) || TYPE_NAME_NOT_SUPPORTED.contains(typeName) ;
+			}
+			return false;
+		} catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return false;
-    }
-
-    private boolean selectListRequiresCasts(SqlSelectList selectList) throws AdapterException {
-        boolean requiresCasts = false;
-
-        // Do as if the user has all columns in select list
-        SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
-        int columnId = 0;
-        for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
-        	if (nodeRequiresCast(new SqlColumn(columnId, columnMeta))) {
-                requiresCasts = true;
-        	}
-        }
-
-        return requiresCasts;
-    }
+    };
     
     
     @Override

@@ -7,6 +7,7 @@ import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.sql.*;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
@@ -113,7 +114,13 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                     // The system requested any column
                     return "1";
                 } else if (select.getSelectList().isSelectStar()) {
-                    builder.append(Joiner.on(", ").join(buildAliases(select.getFromClause().getMetadata().getColumns().size())));
+                    int numberOfColumns = 0;
+                    List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
+                    helper.getMetadataFrom(select.getFromClause(), tableMetadata );
+                    for (TableMetadata tableMeta : tableMetadata) {
+                        numberOfColumns += tableMeta.getColumns().size();
+                    }
+                    builder.append(Joiner.on(", ").join(buildAliases(numberOfColumns)));
                 } else {
                     builder.append(Joiner.on(", ").join(buildAliases(select.getSelectList().getExpressions().size())));
                 }
@@ -152,12 +159,16 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
             SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
             boolean selectListRequiresCasts = false;
             int columnId = 0;
-            for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
-                SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-                sqlColumn.setParent(selectList);
-                selectListRequiresCasts |= nodeRequiresCast(sqlColumn);
-                selectListElements.add(sqlColumn.accept(this));
-                ++columnId;
+            List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
+            helper.getMetadataFrom(select.getFromClause(), tableMetadata );
+            for (TableMetadata tableMeta : tableMetadata) {
+                for (ColumnMetadata columnMeta : tableMeta.getColumns()) {
+                    SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
+                    sqlColumn.setParent(selectList);
+                    selectListRequiresCasts |= nodeRequiresCast(sqlColumn);
+                    selectListElements.add(sqlColumn.accept(this));
+                    ++columnId;
+                }
             }
             if (!requiresSelectListAliasesForLimit && !selectListRequiresCasts) {
                 selectListElements.clear();

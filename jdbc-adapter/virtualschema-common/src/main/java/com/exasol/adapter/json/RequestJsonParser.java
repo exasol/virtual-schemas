@@ -167,7 +167,7 @@ public class RequestJsonParser {
     private SqlStatementSelect parseSelect(JsonObject select) throws MetadataException {
         // FROM clause
         SqlNode table = parseExpression(select.getJsonObject("from"));
-        assert(table.getType() == SqlNodeType.TABLE);
+        assert(table.getType() == SqlNodeType.TABLE || table.getType() == SqlNodeType.JOIN);
         // SELECT list
         SqlSelectList selectList = parseSelectList(select.getJsonArray("selectList"));
         // GROUP BY
@@ -196,7 +196,7 @@ public class RequestJsonParser {
         if (select.containsKey("limit")) {
             limit = parseLimit(select.getJsonObject("limit"));
         }
-        return new SqlStatementSelect((SqlTable)table, selectList, whereClause, groupByClause, having, orderBy, limit);
+        return new SqlStatementSelect(table, selectList, whereClause, groupByClause, having, orderBy, limit);
     }
     
     private List<SqlNode> parseExpressionList(JsonArray array) throws MetadataException {
@@ -294,6 +294,13 @@ public class RequestJsonParser {
             } else {
                 return new SqlTable(tableName, tableMetadata);
             }
+        }
+        case JOIN: {
+            SqlNode left = parseExpression(exp.getJsonObject("left"));
+            SqlNode right = parseExpression(exp.getJsonObject("right"));
+            SqlNode condition = parseExpression(exp.getJsonObject("condition"));
+            JoinType joinType = fromJoinTypeName(exp.getString("join_type"));
+            return new SqlJoin(left, right, condition, joinType);
         }
         case COLUMN: {
             int columnId = exp.getInt("columnNr");
@@ -517,6 +524,13 @@ public class RequestJsonParser {
         default:
             throw new RuntimeException("Unknown node type: " + typeName);
         }
+    }
+
+    /**
+     * Mapping from join type name (as in json api) to enum
+     */
+    private static JoinType fromJoinTypeName(String typeName) {
+        return Enum.valueOf(JoinType.class, typeName.toUpperCase());
     }
 
     /**

@@ -6,11 +6,13 @@ import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
+import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.sql.*;
 import com.google.common.base.Joiner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
 
@@ -25,18 +27,22 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
         List<String> selectListElements = new ArrayList<>();
         SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
         if (selectList.isSelectStar()) {
-            if (selectListRequiresCasts(selectList)) {
+            if (helper.selectListRequiresCasts(selectList, nodeRequiresCast)) {
                 // Do as if the user has all columns in select list
                 int columnId = 0;
-                for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
-                    SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-                    String typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
-                    if (typeName.equals("BINARY")) {
-                        selectListElements.add("base64(" + super.visit(sqlColumn) + ")");
-                    } else {
-                        selectListElements.add(super.visit(sqlColumn));
+                List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
+                helper.getMetadataFrom(select.getFromClause(), tableMetadata );
+                for (TableMetadata tableMeta : tableMetadata) {
+                    for (ColumnMetadata columnMeta : tableMeta.getColumns()) {
+                        SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
+                        String typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
+                        if (typeName.equals("BINARY")) {
+                            selectListElements.add("base64(" + super.visit(sqlColumn) + ")");
+                        } else {
+                            selectListElements.add(super.visit(sqlColumn));
+                        }
+                        ++columnId;
                     }
-                    ++columnId;
                 }
             }
             else {
@@ -232,21 +238,17 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
         return builder.toString();
     }
 
-
-    private boolean selectListRequiresCasts(SqlSelectList selectList) throws AdapterException {
-
-        // Do as if the user has all columns in select list
-        SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
-        int columnId = 0;
-        for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
-            SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-            String typeName = ColumnAdapterNotes.deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
-            if(typeName.equals("BINARY")  ){
-                return true;
+    private Predicate<SqlNode> nodeRequiresCast = node -> {
+        try {
+            if (node.getType() == SqlNodeType.COLUMN) {
+                SqlColumn column = (SqlColumn)node;
+                String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(),
+                                                                 column.getMetadata().getName()).getTypeName();
+                return typeName.equals("BINARY");
             }
-            ++columnId;
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-        return false;
-    }
+    };
 }
