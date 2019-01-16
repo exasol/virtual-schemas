@@ -6,7 +6,7 @@ The Impala dialect is similar to the Hive dialect in most aspects. For this reas
 
 You have to specify the following settings when adding the JDBC driver via EXAOperation:
 
-* Name: `Hive`
+* Name: `Impala`
 * Main: `com.cloudera.impala.jdbc41.Driver`
 * Prefix: `jdbc:impala:`
 
