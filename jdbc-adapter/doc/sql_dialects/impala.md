@@ -6,7 +6,7 @@ The Impala dialect is similar to the Hive dialect in most aspects. For this reas
 
 You have to specify the following settings when adding the JDBC driver via EXAOperation:
 
-* Name: `Hive`
+* Name: `Impala`
 * Main: `com.cloudera.impala.jdbc41.Driver`
 * Prefix: `jdbc:impala:`
 
@@ -22,7 +22,7 @@ CREATE SCHEMA adapter;
 CREATE  JAVA  ADAPTER SCRIPT jdbc_adapter AS
   %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
 
-  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.2.0.jar;
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.3.0.jar;
 
   %jar /buckets/bucketfs1/bucket1/hive_metastore.jar;
   %jar /buckets/bucketfs1/bucket1/hive_service.jar;
