@@ -129,13 +129,80 @@ public class RequestJsonParserTest {
 
     @Test
     public void testSimpleInnerJoinRequest() throws Exception {
-        String file = "target/test-classes/integration/vschema_simple_inner_join.json";
-        String json = Files.toString(new File(file), Charsets.UTF_8);
-
-        // get pushdown from testfile
-        JsonObject root = JsonHelper.getJsonObject(json);
-        JsonObject test = root.getJsonArray("testCases").getValuesAs(JsonObject.class).get(0);
-        String req = test.getJsonArray("expectedPushdownRequest").get(0).toString();
+        String req = 
+        "{"+
+        "\"involvedTables\" :" +
+        "            [" +
+        "                {" +
+        "                    \"columns\" :" +
+        "                    [" +
+        "                        {" +
+        "                            \"dataType\" :" +
+        "                            {" +
+        "                                \"precision\" : 18," +
+        "                                \"scale\" : 0," +
+        "                                \"type\" : \"DECIMAL\"" +
+        "                            }," +
+        "                            \"name\" : \"ID\"" +
+        "                        }" +
+        "                    ]," +
+        "                    \"name\" : \"T1\"" +
+        "                }," +
+        "                {" +
+        "                    \"columns\" :" +
+        "                    [" +
+        "                        {" +
+        "                            \"dataType\" :" +
+        "                            {" +
+        "                                \"precision\" : 18," +
+        "                                \"scale\" : 0," +
+        "                                \"type\" : \"DECIMAL\"" +
+        "                            }," +
+        "                            \"name\" : \"ID\"" +
+        "                        }" +
+        "                    ]," +
+        "                    \"name\" : \"T2\"" +
+        "                }" +
+        "            ]," +
+        "    \"pushdownRequest\" : " +
+        "    {" +
+        "        \"type\" : \"select\"," +
+        "        \"from\" : " +
+        "        {" +
+        "            \"type\": \"join\"," +
+        "            \"join_type\": \"inner\"," +
+        "            \"left\":" +
+        "            {" +
+        "                \"name\" : \"T1\"," +
+        "                \"type\" : \"table\"" +
+        "            }," +
+        "            \"right\":" +
+        "            {" +
+        "                \"name\" : \"T2\"," +
+        "                \"type\" : \"table\"" +
+        "            }," +
+        "            \"condition\":" +
+        "            {" +
+        "                \"left\" :" +
+        "                {" +
+        "                        \"columnNr\" : 0," +
+        "                        \"name\" : \"ID\"," +
+        "                        \"tableName\" : \"T1\"," +
+        "                        \"type\" : \"column\"" +
+        "                }," +
+        "                \"right\" :" +
+        "                {" +
+        "                        \"columnNr\" : 0," +
+        "                        \"name\" : \"ID\"," +
+        "                        \"tableName\" : \"T2\"," +
+        "                        \"type\" : \"column\"" +
+        "                }," +
+        "                \"type\" : \"predicate_equal\"" +
+        "            }" +
+        "        }" +
+        "    }," +
+        "    \"type\" : \"pushdown\"" +
+        "}";
         
         RequestJsonParser parser = new RequestJsonParser();
         AdapterRequest request = parser.parseRequest(req);
