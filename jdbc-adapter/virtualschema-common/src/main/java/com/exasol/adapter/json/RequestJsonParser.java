@@ -307,7 +307,7 @@ public class RequestJsonParser {
             String columnName = exp.getString("name");
             String tableName = exp.getString("tableName");
             ColumnMetadata columnMetadata = findColumnMetadata(tableName, columnName);
-            return new SqlColumn(columnId, columnMetadata);
+            return new SqlColumn(columnId, columnMetadata, tableName);
         }
         case LITERAL_NULL: {
             return new SqlLiteralNull();

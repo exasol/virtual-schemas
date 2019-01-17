@@ -31,7 +31,7 @@ public class CustomSqlGenerationVisitorTest {
         String expectedSql = "SELECT NOT_CUSTOM (NOT_CUSTOM (\"C1\")) FROM \"" + schemaName
                 + "\".\"TEST\"";
         SqlGenerationContext context = new SqlGenerationContext("", schemaName,
-                false);
+                false, false);
         SqlDialectContext dialectContext = new SqlDialectContext(Mockito.mock(SchemaAdapterNotes.class));
         SqlGenerationVisitor generator = new TestSqlGenerationVisitor(
                 new ExasolSqlDialect(dialectContext), context);

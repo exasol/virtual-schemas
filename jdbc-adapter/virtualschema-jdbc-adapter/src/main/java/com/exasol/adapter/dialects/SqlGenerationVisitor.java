@@ -150,7 +150,12 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
 
     @Override
     public String visit(final SqlColumn column) throws AdapterException {
-        return this.dialect.applyQuoteIfNeeded(column.getName());
+        String tablePrefix = "";
+        if (this.context.hasMoreThanOneTable()) {
+            tablePrefix = this.dialect.applyQuoteIfNeeded(column.getTableName())
+                    + this.dialect.getTableCatalogAndSchemaSeparator();
+        }
+        return tablePrefix + this.dialect.applyQuoteIfNeeded(column.getName());
     }
 
     @Override
