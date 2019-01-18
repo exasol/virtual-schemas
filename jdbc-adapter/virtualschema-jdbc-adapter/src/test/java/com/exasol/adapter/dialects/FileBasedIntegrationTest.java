@@ -55,6 +55,11 @@ import org.mockito.Mockito;
  */
 public class FileBasedIntegrationTest {
     private static final String INTEGRATION_TESTFILES_DIR = "target/test-classes/integration";
+    private static final String TEST_FILE_KEY_TESTCASES = "testCases";
+    private static final String TEST_FILE_KEY_EXP_PD_REQUEST = "expectedPushdownRequest";
+    private static final String TEST_FILE_KEY_EXP_PD_RESPONSE = "expectedPushdownResponse";
+    private static final String TEST_FILE_KEY_DIALECT_EXASOL = "Exasol";
+    private static final String JSON_API_KEY_INVOLVED_TABLES = "involvedTables";
 
     @Test
     public void testPushdownFromTestFile() throws Exception {
@@ -94,16 +99,16 @@ public class FileBasedIntegrationTest {
 
     private int getNumberOfTestsFrom(String jsonTest) throws Exception {
         JsonObject root = JsonHelper.getJsonObject(jsonTest);
-        return root.getJsonArray("testCases").size();
+        return root.getJsonArray(TEST_FILE_KEY_TESTCASES).size();
     }
 
     private List<PushdownRequest> getPushdownRequestsFrom(String jsonTest, int testNr) throws Exception {
         JsonObject root = JsonHelper.getJsonObject(jsonTest);
-        JsonObject test = root.getJsonArray("testCases").getValuesAs(JsonObject.class).get(testNr);
-        int numberOfPushdownRequests = test.getJsonArray("expectedPushdownRequest").size();
+        JsonObject test = root.getJsonArray(TEST_FILE_KEY_TESTCASES).getValuesAs(JsonObject.class).get(testNr);
+        int numberOfPushdownRequests = test.getJsonArray(TEST_FILE_KEY_EXP_PD_REQUEST).size();
         List<PushdownRequest> pushdownRequests = new ArrayList<PushdownRequest>(numberOfPushdownRequests);
         for(int requestNr = 0; requestNr < numberOfPushdownRequests; requestNr++) {
-            String req = test.getJsonArray("expectedPushdownRequest").get(requestNr).toString();
+            String req = test.getJsonArray(TEST_FILE_KEY_EXP_PD_REQUEST).get(requestNr).toString();
             RequestJsonParser parser = new RequestJsonParser();
             AdapterRequest request = parser.parseRequest(req);
             pushdownRequests.add((PushdownRequest) request);
@@ -113,9 +118,9 @@ public class FileBasedIntegrationTest {
 
     private Boolean hasMultipleTables(String jsonTest, int testNr) throws Exception {
         JsonObject root = JsonHelper.getJsonObject(jsonTest);
-        JsonObject test = root.getJsonArray("testCases").getValuesAs(JsonObject.class).get(testNr);
-        JsonValue req = test.getJsonArray("expectedPushdownRequest").get(0);
-        int size = ((JsonObject) req).getJsonArray("involvedTables").size();
+        JsonObject test = root.getJsonArray(TEST_FILE_KEY_TESTCASES).getValuesAs(JsonObject.class).get(testNr);
+        JsonValue req = test.getJsonArray(TEST_FILE_KEY_EXP_PD_REQUEST).get(0);
+        int size = ((JsonObject) req).getJsonArray(JSON_API_KEY_INVOLVED_TABLES).size();
         return size > 1;
     }
 
@@ -130,11 +135,11 @@ public class FileBasedIntegrationTest {
 
     private List<String> getExpectedPushdownQueriesFrom(String jsonTest, int testNr) throws Exception {
         JsonObject root = JsonHelper.getJsonObject(jsonTest);
-        JsonObject test = root.getJsonArray("testCases").getValuesAs(JsonObject.class).get(testNr);
-        int numberOfPushdownResponses = test.getJsonObject("expectedPushdownResponse").getJsonArray("Exasol").size();
+        JsonObject test = root.getJsonArray(TEST_FILE_KEY_TESTCASES).getValuesAs(JsonObject.class).get(testNr);
+        int numberOfPushdownResponses = test.getJsonObject(TEST_FILE_KEY_EXP_PD_RESPONSE).getJsonArray(TEST_FILE_KEY_DIALECT_EXASOL).size();
         List<String> pushdownResponses = new ArrayList<>(numberOfPushdownResponses);
         for(int pushdownNr = 0; pushdownNr < numberOfPushdownResponses; pushdownNr++) {
-            pushdownResponses.add(test.getJsonObject("expectedPushdownResponse").getJsonArray("Exasol").get(pushdownNr)
+            pushdownResponses.add(test.getJsonObject(TEST_FILE_KEY_EXP_PD_RESPONSE).getJsonArray(TEST_FILE_KEY_DIALECT_EXASOL).get(pushdownNr)
                     .toString().replaceAll("\\\\\"", "\"").replaceAll("^\"+", "").replaceAll("\"$", ""));
         }
         return pushdownResponses;
