@@ -28,7 +28,7 @@ CREATE JAVA ADAPTER SCRIPT adapter.jdbc_oracle AS
 
   // You need to replace `your-bucket-fs` and `your-bucket` to match the actual location
   // of the adapter jar.
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.2.0.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.3.0.jar;
 
   // Add the oracle jdbc driver to the classpath
   %jar /buckets/bucketfs1/bucket1/ojdbc7-12.1.0.2.jar
@@ -107,5 +107,5 @@ CREATE VIRTUAL SCHEMA virt_import_oracle USING adapter.jdbc_oracle WITH
   CONNECTION_NAME = 'JDBC_ORACLE'
   SCHEMA_NAME     = '<schema>'
   IMPORT_FROM_ORA = 'true'
-  EXA_CONNECTION_NAME = 'CONN_ORACLE';
+  ORA_CONNECTION_NAME = 'CONN_ORACLE';
 ```
