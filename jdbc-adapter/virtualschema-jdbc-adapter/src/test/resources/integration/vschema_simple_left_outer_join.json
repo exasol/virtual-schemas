@@ -76,8 +76,8 @@
             {
                 "Exasol": 
                 [
-                    "SELECT * FROM \"LS\".\"T\"",
-                    "SELECT * FROM \"LS\".\"U\""
+                    "SELECT * FROM \"LS\".\"U\"",
+                    "SELECT * FROM \"LS\".\"T\""
                 ]
             }
         }

@@ -1,19 +1,18 @@
 package com.exasol.adapter.dialects;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 
 import java.io.File;
-import java.io.FilenameFilter;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 
-import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.impl.ExasolSqlDialect;
 import com.exasol.adapter.json.RequestJsonParser;
-import com.exasol.adapter.metadata.SchemaMetadataInfo;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 import com.exasol.adapter.request.AdapterRequest;
 import com.exasol.adapter.request.PushdownRequest;
@@ -37,15 +36,32 @@ public class FileBasedIntegrationTest {
             String jsonTest = Files.toString(testFile, Charsets.UTF_8);
             int numberOftests = getNumberOfTestsFrom(jsonTest);
             for (int testNr = 0; testNr < numberOftests; testNr++) {
-                PushdownRequest pushdownRequest = getPushdownRequestFrom(jsonTest, testNr);
-                String pushdownQuery = generatePushdownQuery(pushdownRequest, hasMultipleTables(jsonTest, testNr));
-                String expectedPushdownQuery = getExpectedPushdownQueryFrom(jsonTest, testNr);
-                //TODO: custom error message
-                System.out.println("$$$$$$$$$$$$$$$$$$ " + testFile);
-                System.out.println("$$$$$$$$$$$$$$$$$$$$$$$ " + testNr);
-                assertEquals(expectedPushdownQuery, pushdownQuery);
+                List<PushdownRequest> pushdownRequests = getPushdownRequestsFrom(jsonTest, testNr);
+                List<String> expectedPushdownQueries = getExpectedPushdownQueriesFrom(jsonTest, testNr);
+                for (PushdownRequest pushdownRequest: pushdownRequests) {
+                    String pushdownQuery = generatePushdownQuery(pushdownRequest, hasMultipleTables(jsonTest, testNr));
+                    assertExpectedPushdowns(expectedPushdownQueries, pushdownQuery, testFile.getName(), testNr);
+                }
             }
         }
+    }
+
+    private void assertExpectedPushdowns(List<String> expectedPushdownQueries, String pushdownQuery, String testFile,
+            int testNr) {
+        boolean foundInExpected = expectedPushdownQueries.stream().anyMatch(pushdownQuery::contains);
+        StringBuilder errorMessage = new StringBuilder();
+        if (!foundInExpected)
+        {
+            errorMessage.append("Generated Pushdown: ");
+            errorMessage.append(pushdownQuery);
+            errorMessage.append(" not found in expected pushdowns (");
+            errorMessage.append(expectedPushdownQueries);
+            errorMessage.append("). Testfile:");
+            errorMessage.append(testFile);
+            errorMessage.append(" ,Test#:");
+            errorMessage.append(testNr);
+        }
+        assertTrue(errorMessage.toString(), foundInExpected);
     }
 
     private int getNumberOfTestsFrom(String jsonTest) throws Exception {
@@ -53,14 +69,18 @@ public class FileBasedIntegrationTest {
         return root.getJsonArray("testCases").size();
     }
 
-    private PushdownRequest getPushdownRequestFrom(String jsonTest, int testNr) throws Exception {
+    private List<PushdownRequest> getPushdownRequestsFrom(String jsonTest, int testNr) throws Exception {
         JsonObject root = JsonHelper.getJsonObject(jsonTest);
         JsonObject test = root.getJsonArray("testCases").getValuesAs(JsonObject.class).get(testNr);
-        String req = test.getJsonArray("expectedPushdownRequest").get(0).toString();
-        RequestJsonParser parser = new RequestJsonParser();
-        AdapterRequest request = parser.parseRequest(req);
-        PushdownRequest pushdownRequest = (PushdownRequest) request;
-        return pushdownRequest;
+        int numberOfPushdownRequests = test.getJsonArray("expectedPushdownRequest").size();
+        List<PushdownRequest> pushdownRequests = new ArrayList<PushdownRequest>(numberOfPushdownRequests);
+        for(int requestNr = 0; requestNr < numberOfPushdownRequests; requestNr++) {
+            String req = test.getJsonArray("expectedPushdownRequest").get(requestNr).toString();
+            RequestJsonParser parser = new RequestJsonParser();
+            AdapterRequest request = parser.parseRequest(req);
+            pushdownRequests.add((PushdownRequest) request);
+        }
+        return pushdownRequests;
     }
 
     private Boolean hasMultipleTables(String jsonTest, int testNr) throws Exception {
@@ -68,7 +88,6 @@ public class FileBasedIntegrationTest {
         JsonObject test = root.getJsonArray("testCases").getValuesAs(JsonObject.class).get(testNr);
         JsonValue req = test.getJsonArray("expectedPushdownRequest").get(0);
         int size = ((JsonObject) req).getJsonArray("involvedTables").size();
-        System.out.println("SIZESIZESIZSE: " + size);
         return size > 1;
     }
 
@@ -81,10 +100,15 @@ public class FileBasedIntegrationTest {
         return pushdownRequest.getSelect().accept(sqlGeneratorVisitor);
     }
 
-    private String getExpectedPushdownQueryFrom(String jsonTest, int testNr) throws Exception {
+    private List<String> getExpectedPushdownQueriesFrom(String jsonTest, int testNr) throws Exception {
         JsonObject root = JsonHelper.getJsonObject(jsonTest);
         JsonObject test = root.getJsonArray("testCases").getValuesAs(JsonObject.class).get(testNr);
-        return test.getJsonObject("expectedPushdownResponse").getJsonArray("Exasol").get(0)
-                .toString().replaceAll("\\\\\"", "\"").replaceAll("^\"+", "").replaceAll("\"$", "");
+        int numberOfPushdownResponses = test.getJsonObject("expectedPushdownResponse").getJsonArray("Exasol").size();
+        List<String> pushdownResponses = new ArrayList<>(numberOfPushdownResponses);
+        for(int pushdownNr = 0; pushdownNr < numberOfPushdownResponses; pushdownNr++) {
+            pushdownResponses.add(test.getJsonObject("expectedPushdownResponse").getJsonArray("Exasol").get(pushdownNr)
+                    .toString().replaceAll("\\\\\"", "\"").replaceAll("^\"+", "").replaceAll("\"$", ""));
+        }
+        return pushdownResponses;
     }
 }
