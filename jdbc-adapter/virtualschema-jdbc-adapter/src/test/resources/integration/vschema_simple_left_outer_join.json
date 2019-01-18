@@ -11,6 +11,25 @@
             "expectedPushdownRequest": 
             [
                 {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                }
+                            ],
+                            "name" : "T"
+                        }
+                    ],
                     "pushdownRequest" : 
                     {
                         "type" : "select",
@@ -23,6 +42,24 @@
                     "type" : "pushdown"
                 },
                 {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,                                                                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "Y"
+                                }
+                            ],
+                            "name" : "U"
+                        }
+                    ],
                     "pushdownRequest" : 
                     {
                         "from" : 

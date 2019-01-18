@@ -11,6 +11,35 @@
             "expectedPushdownRequest": 
             [
                 {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "Y"
+                                }
+                            ],
+                            "name" : "T1"
+                        }
+                    ],
                     "pushdownRequest" : 
                     {
                         "type" : "select",
@@ -45,6 +74,35 @@
             "expectedPushdownRequest": 
             [
                 {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "Y"
+                                }
+                            ],
+                            "name" : "T1"
+                        }
+                    ],
                     "pushdownRequest" : 
                     {
                         "type" : "select",
@@ -81,6 +139,24 @@
             "expectedPushdownRequest": 
             [
                 {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,                                                                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                }
+                            ],
+                            "name" : "T2"
+                        }
+                    ],
                     "pushdownRequest" : 
                     {
                         "type" : "select",
@@ -107,6 +183,35 @@
             "expectedPushdownRequest": 
             [
                 {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "Y"
+                                }
+                            ],
+                            "name" : "T1"
+                        }
+                    ],
                     "pushdownRequest" : 
                     {
                         "type" : "select",
@@ -130,6 +235,24 @@
                     "type" : "pushdown"
                 },
                 {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,                                                                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                }
+                            ],
+                            "name" : "T2"
+                        }
+                    ],
                     "pushdownRequest" : 
                     {
                         "type" : "select",
