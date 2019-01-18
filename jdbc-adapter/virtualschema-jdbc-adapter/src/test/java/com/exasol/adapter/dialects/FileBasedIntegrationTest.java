@@ -56,9 +56,9 @@ public class FileBasedIntegrationTest {
             errorMessage.append(pushdownQuery);
             errorMessage.append(" not found in expected pushdowns (");
             errorMessage.append(expectedPushdownQueries);
-            errorMessage.append("). Testfile:");
+            errorMessage.append("). Testfile: ");
             errorMessage.append(testFile);
-            errorMessage.append(" ,Test#:");
+            errorMessage.append(" ,Test#: ");
             errorMessage.append(testNr);
         }
         assertTrue(errorMessage.toString(), foundInExpected);
