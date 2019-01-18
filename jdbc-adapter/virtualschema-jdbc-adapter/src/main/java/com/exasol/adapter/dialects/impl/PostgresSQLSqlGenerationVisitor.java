@@ -263,6 +263,15 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
             projString = "CAST(" + projString + "  as VARCHAR )";
 
         }
+        else if (typeName.startsWith("smallserial")) {
+            projString = "CAST(" + projString + "  as SMALLINT )";
+        }
+        else if (typeName.startsWith("serial")) {
+            projString = "CAST(" + projString + "  as INTEGER )";
+        }
+        else if (typeName.startsWith("bigserial")) {
+            projString = "CAST(" + projString + "  as BIGINT )";
+        }
         else if (TYPE_NAME_NOT_SUPPORTED.contains(typeName)){
         	
         	projString = "cast('"+typeName+" NOT SUPPORTED' as varchar) as not_supported"; //returning a string constant for unsupported data types
@@ -273,7 +282,7 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
     }
     
     
-    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("varbit","point","line","lseg","box","path","polygon","circle","cidr","citext","inet","macaddr","interval","json","jsonb","uuid","tsquery", "tsvector","xml");
+    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("varbit","point","line","lseg","box","path","polygon","circle","cidr","citext","inet","macaddr","interval","json","jsonb","uuid","tsquery", "tsvector","xml","smallserial","serial","bigserial");
     
     private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("bytea"); 
 
