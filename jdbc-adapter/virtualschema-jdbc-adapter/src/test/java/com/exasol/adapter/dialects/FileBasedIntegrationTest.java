@@ -32,21 +32,30 @@ public class FileBasedIntegrationTest {
     @Test
     public void testPushdownFromTestFile() throws Exception {
         File testDir = new File(INTEGRATION_TESTFILES_DIR);
-        //FilenameFilter filter = (dir, name) -> name.endsWith(".json");
         File[] files = testDir.listFiles((dir, name) -> name.endsWith(".json"));
         for (File testFile : files) {
             String jsonTest = Files.toString(testFile, Charsets.UTF_8);
-            PushdownRequest pushdownRequest = getPushdownRequestFrom(jsonTest);
-            String pushdownQuery = generatePushdownQuery(pushdownRequest, hasMultipleTables(jsonTest));
-            String expectedPushdownQuery = getExpectedPushdownQueryFrom(jsonTest);
-            System.out.println("$$$$$$$$$$$$$$$$$$ " + testFile);
-            assertEquals(expectedPushdownQuery, pushdownQuery);
+            int numberOftests = getNumberOfTestsFrom(jsonTest);
+            for (int testNr = 0; testNr < numberOftests; testNr++) {
+                PushdownRequest pushdownRequest = getPushdownRequestFrom(jsonTest, testNr);
+                String pushdownQuery = generatePushdownQuery(pushdownRequest, hasMultipleTables(jsonTest, testNr));
+                String expectedPushdownQuery = getExpectedPushdownQueryFrom(jsonTest, testNr);
+                //TODO: custom error message
+                System.out.println("$$$$$$$$$$$$$$$$$$ " + testFile);
+                System.out.println("$$$$$$$$$$$$$$$$$$$$$$$ " + testNr);
+                assertEquals(expectedPushdownQuery, pushdownQuery);
+            }
         }
     }
 
-    private PushdownRequest getPushdownRequestFrom(String jsonTest) throws Exception {
+    private int getNumberOfTestsFrom(String jsonTest) throws Exception {
         JsonObject root = JsonHelper.getJsonObject(jsonTest);
-        JsonObject test = root.getJsonArray("testCases").getValuesAs(JsonObject.class).get(0);
+        return root.getJsonArray("testCases").size();
+    }
+
+    private PushdownRequest getPushdownRequestFrom(String jsonTest, int testNr) throws Exception {
+        JsonObject root = JsonHelper.getJsonObject(jsonTest);
+        JsonObject test = root.getJsonArray("testCases").getValuesAs(JsonObject.class).get(testNr);
         String req = test.getJsonArray("expectedPushdownRequest").get(0).toString();
         RequestJsonParser parser = new RequestJsonParser();
         AdapterRequest request = parser.parseRequest(req);
@@ -54,9 +63,9 @@ public class FileBasedIntegrationTest {
         return pushdownRequest;
     }
 
-    private Boolean hasMultipleTables(String jsonTest) throws Exception {
+    private Boolean hasMultipleTables(String jsonTest, int testNr) throws Exception {
         JsonObject root = JsonHelper.getJsonObject(jsonTest);
-        JsonObject test = root.getJsonArray("testCases").getValuesAs(JsonObject.class).get(0);
+        JsonObject test = root.getJsonArray("testCases").getValuesAs(JsonObject.class).get(testNr);
         JsonValue req = test.getJsonArray("expectedPushdownRequest").get(0);
         int size = ((JsonObject) req).getJsonArray("involvedTables").size();
         System.out.println("SIZESIZESIZSE: " + size);
@@ -72,9 +81,9 @@ public class FileBasedIntegrationTest {
         return pushdownRequest.getSelect().accept(sqlGeneratorVisitor);
     }
 
-    private String getExpectedPushdownQueryFrom(String jsonTest) throws Exception {
+    private String getExpectedPushdownQueryFrom(String jsonTest, int testNr) throws Exception {
         JsonObject root = JsonHelper.getJsonObject(jsonTest);
-        JsonObject test = root.getJsonArray("testCases").getValuesAs(JsonObject.class).get(0);
+        JsonObject test = root.getJsonArray("testCases").getValuesAs(JsonObject.class).get(testNr);
         return test.getJsonObject("expectedPushdownResponse").getJsonArray("Exasol").get(0)
                 .toString().replaceAll("\\\\\"", "\"").replaceAll("^\"+", "").replaceAll("\"$", "");
     }
