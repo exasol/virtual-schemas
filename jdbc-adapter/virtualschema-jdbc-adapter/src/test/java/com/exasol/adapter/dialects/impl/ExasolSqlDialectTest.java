@@ -47,7 +47,7 @@ public class ExasolSqlDialectTest {
         " HAVING 1 < COUNT(\"URL\")" +
         " ORDER BY \"USER_ID\"" +
         " LIMIT 10";
-        SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
+        SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, false);
         SqlDialect dialect = new ExasolSqlDialect(DialectTestData.getExasolDialectContext());
         SqlGenerationVisitor generator = dialect.getSqlGenerationVisitor(context);
         String actualSql = node.accept(generator);

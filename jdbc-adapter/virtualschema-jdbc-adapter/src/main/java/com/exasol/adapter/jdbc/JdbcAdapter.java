@@ -223,10 +223,12 @@ public class JdbcAdapter {
                 request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()));
         final SqlDialect dialect = JdbcAdapterProperties.getSqlDialect(request.getSchemaMetadataInfo().getProperties(),
                 dialectContext);
+        final boolean hasMoreThanOneTable = request.getInvolvedTablesMetadata().size() > 1;
         final SqlGenerationContext context = new SqlGenerationContext(
                 JdbcAdapterProperties.getCatalog(meta.getProperties()),
                 JdbcAdapterProperties.getSchema(meta.getProperties()),
-                JdbcAdapterProperties.isLocal(meta.getProperties()));
+                JdbcAdapterProperties.isLocal(meta.getProperties()),
+                hasMoreThanOneTable);
         final SqlGenerationVisitor sqlGeneratorVisitor = dialect.getSqlGenerationVisitor(context);
         final String pushdownQuery = request.getSelect().accept(sqlGeneratorVisitor);
 

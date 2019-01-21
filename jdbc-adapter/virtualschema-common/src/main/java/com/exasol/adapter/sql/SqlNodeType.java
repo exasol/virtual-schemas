@@ -9,6 +9,7 @@ public enum SqlNodeType {
     SELECT,
     
     TABLE,
+    JOIN,
     
     SELECT_LIST,
     GROUP_BY,
