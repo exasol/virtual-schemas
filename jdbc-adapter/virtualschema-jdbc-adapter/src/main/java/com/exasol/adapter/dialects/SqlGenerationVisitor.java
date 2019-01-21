@@ -150,8 +150,13 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     public String visit(final SqlColumn column) throws AdapterException {
         String tablePrefix = "";
         if (this.context.hasMoreThanOneTable()) {
-            tablePrefix = this.dialect.applyQuoteIfNeeded(column.getTableName())
-                    + this.dialect.getTableCatalogAndSchemaSeparator();
+            if (column.hasTableAlias()) {
+                tablePrefix = this.dialect.applyQuoteIfNeeded(column.getTableAlias())
+                        + this.dialect.getTableCatalogAndSchemaSeparator();
+            } else {
+                tablePrefix = this.dialect.applyQuoteIfNeeded(column.getTableName())
+                        + this.dialect.getTableCatalogAndSchemaSeparator();
+            }
         }
         return tablePrefix + this.dialect.applyQuoteIfNeeded(column.getName());
     }
@@ -169,7 +174,12 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
             schemaPrefix += this.dialect.applyQuoteIfNeeded(this.context.getSchemaName())
                     + this.dialect.getTableCatalogAndSchemaSeparator();
         }
-        return schemaPrefix + this.dialect.applyQuoteIfNeeded(table.getName());
+        if (table.hasAlias()) {
+            return schemaPrefix + this.dialect.applyQuoteIfNeeded(table.getName())
+                    + " " + this.dialect.applyQuoteIfNeeded(table.getAlias());
+        } else {
+            return schemaPrefix + this.dialect.applyQuoteIfNeeded(table.getName());
+        }
     }
 
     @Override
