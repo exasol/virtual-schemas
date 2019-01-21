@@ -74,12 +74,10 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
 
     private final SqlDialect dialect;
     private final SqlGenerationContext context;
-    protected final SqlGenerationHelper helper;
 
     public SqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         this.dialect = dialect;
         this.context = context;
-        this.helper = new SqlGenerationHelper();
 
         checkDialectAliases();
     }

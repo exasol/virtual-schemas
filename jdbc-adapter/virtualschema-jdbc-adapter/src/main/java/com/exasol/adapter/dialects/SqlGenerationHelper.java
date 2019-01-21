@@ -22,7 +22,7 @@ import com.exasol.adapter.sql.SqlTable;
  */
 public class SqlGenerationHelper {
 
-    public boolean selectListRequiresCasts(SqlSelectList selectList, Predicate<SqlNode> nodeRequiresCast) throws AdapterException {
+    public static boolean selectListRequiresCasts(SqlSelectList selectList, Predicate<SqlNode> nodeRequiresCast) throws AdapterException {
         boolean requiresCasts = false;
 
         // Do as if the user has all columns in select list
@@ -41,7 +41,7 @@ public class SqlGenerationHelper {
         return requiresCasts;
     }
 
-    public void getMetadataFrom(SqlNode node, List<TableMetadata> metadata){
+    public static void getMetadataFrom(SqlNode node, List<TableMetadata> metadata){
         if (node.getType() == SqlNodeType.TABLE) {
             SqlTable table = (SqlTable) node;
             metadata.add(table.getMetadata());

@@ -3,6 +3,7 @@ package com.exasol.adapter.dialects.impl;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.dialects.SqlGenerationHelper;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
@@ -127,14 +128,14 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         }
         List<String> selectListElements = new ArrayList<>();
         if (selectList.isSelectStar()) {
-            if (helper.selectListRequiresCasts(selectList, nodeRequiresCast)) {
+            if (SqlGenerationHelper.selectListRequiresCasts(selectList, nodeRequiresCast)) {
 
                 // Do as if the user has all columns in select list
                 SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
                 
                 int columnId = 0;
                 List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
-                helper.getMetadataFrom(select.getFromClause(), tableMetadata );
+                SqlGenerationHelper.getMetadataFrom(select.getFromClause(), tableMetadata );
                 for (TableMetadata tableMeta : tableMetadata) {
                     for (ColumnMetadata columnMeta : tableMeta.getColumns()) {
                         SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
