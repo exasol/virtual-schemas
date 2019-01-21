@@ -5,7 +5,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Arrays;
 
 import javax.json.JsonObject;
 import javax.json.JsonValue;
@@ -21,6 +23,8 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mockito.Mockito;
 
 
@@ -53,6 +57,7 @@ import org.mockito.Mockito;
  *     returned Pushdown SQLs.
  *
  */
+@RunWith(Parameterized.class)
 public class FileBasedIntegrationTest {
     private static final String INTEGRATION_TESTFILES_DIR = "target/test-classes/integration";
     private static final String TEST_FILE_KEY_TESTCASES = "testCases";
@@ -61,20 +66,28 @@ public class FileBasedIntegrationTest {
     private static final String TEST_FILE_KEY_DIALECT_EXASOL = "Exasol";
     private static final String JSON_API_KEY_INVOLVED_TABLES = "involvedTables";
 
+    @Parameterized.Parameters(name = "{index}: {0}")
+    public static Iterable<? extends Object> data() {
+        File testDir = new File(INTEGRATION_TESTFILES_DIR);
+        return Arrays.asList(testDir.listFiles((dir, name) -> name.endsWith(".json")));
+    }
+
+    private File testFile;
+
+    public FileBasedIntegrationTest(File testFile) {
+        this.testFile = testFile;
+    }
+
     @Test
     public void testPushdownFromTestFile() throws Exception {
-        File testDir = new File(INTEGRATION_TESTFILES_DIR);
-        File[] files = testDir.listFiles((dir, name) -> name.endsWith(".json"));
-        for (File testFile : files) {
-            String jsonTest = Files.toString(testFile, Charsets.UTF_8);
-            int numberOftests = getNumberOfTestsFrom(jsonTest);
-            for (int testNr = 0; testNr < numberOftests; testNr++) {
-                List<PushdownRequest> pushdownRequests = getPushdownRequestsFrom(jsonTest, testNr);
-                List<String> expectedPushdownQueries = getExpectedPushdownQueriesFrom(jsonTest, testNr);
-                for (PushdownRequest pushdownRequest: pushdownRequests) {
-                    String pushdownQuery = generatePushdownQuery(pushdownRequest, hasMultipleTables(jsonTest, testNr));
-                    assertExpectedPushdowns(expectedPushdownQueries, pushdownQuery, testFile.getName(), testNr);
-                }
+        String jsonTest = Files.toString(testFile, Charsets.UTF_8);
+        int numberOftests = getNumberOfTestsFrom(jsonTest);
+        for (int testNr = 0; testNr < numberOftests; testNr++) {
+            List<PushdownRequest> pushdownRequests = getPushdownRequestsFrom(jsonTest, testNr);
+            List<String> expectedPushdownQueries = getExpectedPushdownQueriesFrom(jsonTest, testNr);
+            for (PushdownRequest pushdownRequest : pushdownRequests) {
+                String pushdownQuery = generatePushdownQuery(pushdownRequest, hasMultipleTables(jsonTest, testNr));
+                assertExpectedPushdowns(expectedPushdownQueries, pushdownQuery, testFile.getName(), testNr);
             }
         }
     }
