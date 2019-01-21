@@ -42,7 +42,7 @@ public class KerberosIT extends AbstractIntegrationTest {
     @Test
     public void testKerberosVirtualSchema() throws SQLException, ClassNotFoundException, FileNotFoundException {
         createVirtualSchema(VIRTUAL_SCHEMA, ExasolSqlDialect.getPublicName(), "", "default", CONNECTION_NAME, "", "",
-                "ADAPTER.JDBC_ADAPTER", "", IS_LOCAL, getConfig().debugAddress(), "", null);
+                "ADAPTER.JDBC_ADAPTER", "", IS_LOCAL, getConfig().debugAddress(), "", null,"");
         final Statement stmt = getConnection().createStatement();
         final ResultSet result = stmt.executeQuery("SELECT * FROM \"sample_07\"");
         result.next();
@@ -69,7 +69,7 @@ public class KerberosIT extends AbstractIntegrationTest {
         final Connection conn2 = connectToExa(userName, userName);
         final Statement stmt2 = conn2.createStatement();
         createVirtualSchema(conn2, VIRTUAL_SCHEMA, ExasolSqlDialect.getPublicName(), "", "default", CONNECTION_NAME, "",
-                "", adapterName, "", false, getConfig().debugAddress(), "", null);
+                "", adapterName, "", false, getConfig().debugAddress(), "", null,"");
         final ResultSet result = stmt2.executeQuery("SELECT * FROM \"sample_07\"");
         result.next();
         assertEquals("00-0000", result.getString(1));

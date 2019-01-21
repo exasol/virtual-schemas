@@ -97,7 +97,7 @@ public class AbstractIntegrationTest {
     public static void createVirtualSchema(final Connection conn, final String virtualSchemaName, final String dialect,
             final String remoteCatalog, final String remoteSchema, final String connectionName, final String user,
             final String password, final String adapter, final String remoteConnectionString, final boolean isLocal,
-            final String debugAddress, final String tableFilter, final String suffix) throws SQLException {
+            final String debugAddress, final String tableFilter, final String suffix, final String excludedCapabilities) throws SQLException {
         removeVirtualSchema(conn, virtualSchemaName);
         String sql = "CREATE VIRTUAL SCHEMA " + virtualSchemaName;
         sql += " USING " + adapter;
@@ -129,6 +129,9 @@ public class AbstractIntegrationTest {
             sql += " DEBUG_ADDRESS='" + debugAddress + "'";
         }
         sql += " LOG_LEVEL='ALL'";
+        if (!excludedCapabilities.isEmpty()) {
+            sql += " EXCLUDED_CAPABILITIES='" + excludedCapabilities + "'";
+        }
         if (!tableFilter.isEmpty()) {
             sql += " TABLE_FILTER='" + tableFilter + "'";
         }
@@ -141,10 +144,10 @@ public class AbstractIntegrationTest {
     public static void createVirtualSchema(final String virtualSchemaName, final String dialect,
             final String remoteCatalog, final String remoteSchema, final String connectionName, final String user,
             final String password, final String adapter, final String remoteConnectionString, final boolean isLocal,
-            final String debugAddress, final String tableFilter, final String suffix) throws SQLException {
+            final String debugAddress, final String tableFilter, final String suffix, final String excludedCapabilities) throws SQLException {
         checkConnection();
         createVirtualSchema(connection, virtualSchemaName, dialect, remoteCatalog, remoteSchema, connectionName, user,
-                password, adapter, remoteConnectionString, isLocal, debugAddress, tableFilter, suffix);
+                password, adapter, remoteConnectionString, isLocal, debugAddress, tableFilter, suffix, excludedCapabilities);
     }
 
     public static void createConnection(final Connection conn, final String connectionName,

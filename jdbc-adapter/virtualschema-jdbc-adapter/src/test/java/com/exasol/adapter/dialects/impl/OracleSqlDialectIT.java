@@ -55,14 +55,14 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
                 getConfig().getOracleUser(), getConfig().getOraclePassword(),
                 // "ADAPTER.JDBC_ORACLE_DEBUG",
                 "ADAPTER.JDBC_ORACLE", getConfig().getOracleJdbcConnectionString(), IS_LOCAL,
-                getConfig().debugAddress(), TEST_TABLE, null);
+                getConfig().debugAddress(), TEST_TABLE, null,"");
 
         // create IMPORT FROM ORA virtual schema
         createVirtualSchema(VIRTUAL_SCHEMA_IMPORT, OracleSqlDialect.getPublicName(), "", ORACLE_SCHEMA, "",
                 getConfig().getOracleUser(), getConfig().getOraclePassword(),
                 // "ADAPTER.JDBC_ORACLE_DEBUG",
                 "ADAPTER.JDBC_ORACLE", getConfig().getOracleJdbcConnectionString(), IS_LOCAL,
-                getConfig().debugAddress(), TEST_TABLE, "IMPORT_FROM_ORA='true' ORA_CONNECTION_NAME='CONN_ORACLE'");
+                getConfig().debugAddress(), TEST_TABLE, "IMPORT_FROM_ORA='true' ORA_CONNECTION_NAME='CONN_ORACLE'","");
     }
 
     private static void createOracleJDBCAdapter() throws SQLException, FileNotFoundException {
