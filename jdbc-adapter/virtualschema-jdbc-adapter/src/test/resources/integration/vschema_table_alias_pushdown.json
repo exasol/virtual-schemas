@@ -130,7 +130,7 @@
             {
                 "Exasol": 
                 [
-                    "SELECT \"X\" FROM \"LS\".\"T1\""
+                    "SELECT \"X\" FROM \"LS\".\"T1\" \"WITHALIAS\""
                 ]
             }
         },
@@ -174,7 +174,7 @@
             {
                 "Exasol": 
                 [
-                    "SELECT * FROM \"LS\".\"T2\""
+                    "SELECT * FROM \"LS\".\"T2\" \"WITHALIAS\""
                 ]
             }
         },
@@ -210,33 +210,7 @@
                                 }
                             ],
                             "name" : "T1"
-                        }
-                    ],
-                    "pushdownRequest" : 
-                    {
-                        "type" : "select",
-                        "selectList":
-                        [
-                            {
-                                "type": "column",
-                                "tableName": "T1",
-                                "tableAlias": "T1ALIAS",
-                                "name": "X",
-                                "columnNr": 0
-                            }
-                        ],
-                        "from" : 
-                        {
-                            "name" : "T1",
-                            "alias": "T1ALIAS",
-                            "type" : "table"
-                        }
-                    },
-                    "type" : "pushdown"
-                },
-                {
-                    "involvedTables" :
-                    [
+                        },
                         {
                             "columns" :
                             [
@@ -255,12 +229,60 @@
                     ],
                     "pushdownRequest" : 
                     {
-                        "type" : "select",
-                        "from" : 
+                        "type": "select",
+                        "selectList":
+                        [
+                            {
+                                "type": "column",
+                                "tableAlias": "T1ALIAS",
+                                "tableName": "T1",
+                                "name": "X",
+                                "columnNr": 0
+                            },
+                            {
+                                "type": "column",
+                                "tableAlias": "T2ALIAS",
+                                "tableName": "T2",
+                                "name": "X",
+                                "columnNr": 0
+                            }
+                        ],
+                        "from":
                         {
-                            "name" : "T2",
-                            "alias": "T2ALIAS",
-                            "type" : "table"
+                            "type": "join",
+                            "join_type": "inner",
+                            "right":
+                            {
+                                "alias": "T2ALIAS",
+                                "type": "table",
+                                "name": "T2"
+                            },
+                            "left":
+                            {
+                                "alias": "T1ALIAS",
+                                "type": "table",
+                                "name": "T1"
+                            },
+                            "condition":
+                            {
+                                "right":
+                                {
+                                    "type": "column",
+                                    "tableAlias": "T2ALIAS",
+                                    "tableName": "T2",
+                                    "name": "X",
+                                    "columnNr": 0
+                                },
+                                "type": "predicate_equal",
+                                "left":
+                                {
+                                    "type": "column",
+                                    "tableAlias": "T1ALIAS",
+                                    "tableName": "T1",
+                                    "name": "X",
+                                    "columnNr": 0
+                                }
+                            }
                         }
                     },
                     "type" : "pushdown"
@@ -270,8 +292,7 @@
             {
                 "Exasol": 
                 [
-                    "SELECT \"X\" FROM \"LS\".\"T1\"",
-                    "SELECT * FROM \"LS\".\"T2\""
+                    "SELECT \"T1ALIAS\".\"X\", \"T2ALIAS\".\"X\" FROM \"LS\".\"T1\" \"T1ALIAS\" INNER JOIN \"LS\".\"T2\" \"T2ALIAS\" ON \"T1ALIAS\".\"X\" = \"T2ALIAS\".\"X\""
                 ]
             }
         }

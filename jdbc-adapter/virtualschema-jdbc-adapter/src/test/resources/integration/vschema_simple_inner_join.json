@@ -49,6 +49,21 @@
                     "pushdownRequest" : 
                     {
                         "type" : "select",
+                        "selectList" :
+                        [
+                            {
+                                "columnNr" : 0,
+                                "name" : "ID",
+                                "tableName" : "T1",
+                                "type" : "column"
+                            },
+                            {
+                                "columnNr" : 0,
+                                "name" : "ID",
+                                "tableName" : "T2",
+                                "type" : "column"
+                            }
+                        ],
                         "from" : 
                         {
                             "type": "join",
@@ -90,7 +105,7 @@
             {
                 "Exasol": 
                 [
-                    "SELECT * FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
+                    "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
                 ]
             }
         },
@@ -137,6 +152,23 @@
                     "pushdownRequest" :
                     {
                         "type" : "select",
+                        "selectList" :
+                        [
+                            {
+                                "columnNr" : 0,
+                                "name" : "ID",
+                                "tableAlias" : "A",
+                                "tableName" : "T1",
+                                "type" : "column"
+                            },
+                            {
+                                "columnNr" : 0,
+                                "name" : "ID",
+                                "tableAlias" : "B",
+                                "tableName" : "T2",
+                                "type" : "column"
+                            }
+                        ],
                         "from" :
                         {
                             "type": "join",
@@ -182,7 +214,7 @@
             {
                 "Exasol":
                 [
-                    "SELECT * FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\""
+                    "SELECT \"A\".\"ID\", \"B\".\"ID\" FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\""
                 ]
             }
         },
@@ -229,6 +261,22 @@
                     "pushdownRequest" :
                     {
                         "type" : "select",
+                        "selectList" :
+                        [
+                            {
+                                "columnNr" : 0,
+                                "name" : "ID",
+                                "tableAlias" : "A",
+                                "tableName" : "T1",
+                                "type" : "column"
+                            },
+                            {
+                                "columnNr" : 0,
+                                "name" : "ID",
+                                "tableName" : "T2",
+                                "type" : "column"
+                            }
+                        ],
                         "from" :
                         {
                             "type": "join",
@@ -272,7 +320,7 @@
             {
                 "Exasol":
                 [
-                    "SELECT * FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" ON \"A\".\"ID\" = \"T2\".\"ID\""
+                    "SELECT \"A\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" ON \"A\".\"ID\" = \"T2\".\"ID\""
                 ]
             }
         }
