@@ -102,6 +102,15 @@ public enum MainCapability {
     LIMIT_WITH_OFFSET,
 
     /**
+     * Support for joins.
+     * If you don't support this capability no joins will be generated in the pushdown.
+     *
+     * <p>Attention: In order to generate joins in the pushdown you additionally
+     *    have to return at least one capability for join type and join contition.</p>
+     */
+    JOIN,
+
+    /**
      * Support inner joins.
      *
      * <p>Example: SELECT * FROM t INNER JOIN u ON t.id = u.id;</p>
