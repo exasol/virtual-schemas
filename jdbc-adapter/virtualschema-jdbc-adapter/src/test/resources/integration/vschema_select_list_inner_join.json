@@ -64,7 +64,7 @@
                         "type" : "column"
                       },
                       {
-                        "columnNr" : 1,
+                        "columnNr" : 0,
                         "name" : "ID",
                         "tableName" : "T2",
                         "type" : "column"
@@ -185,7 +185,7 @@
                         "type" : "column"
                       },
                       {
-                        "columnNr" : 1,
+                        "columnNr" : 0,
                         "name" : "ID",
                         "tableName" : "T2",
                         "tableAlias": "B",
@@ -311,7 +311,7 @@
                         "type" : "column"
                       },
                       {
-                        "columnNr" : 1,
+                        "columnNr" : 0,
                         "name" : "ID",
                         "tableName" : "T2",
                         "type" : "column"
