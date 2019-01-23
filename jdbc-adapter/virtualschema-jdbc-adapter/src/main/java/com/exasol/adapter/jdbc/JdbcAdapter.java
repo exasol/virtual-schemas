@@ -191,8 +191,9 @@ public class JdbcAdapter {
         logger.info(() -> "Excluded Capabilities: "
                 + (excludedCapabilitiesStr.isEmpty() ? "none" : excludedCapabilitiesStr));
         final Capabilities excludedCapabilities = new Capabilities();
-        for (final String cap : excludedCapabilitiesStr.split(",")) {
-            if (cap.trim().isEmpty()) {
+        for (String cap : excludedCapabilitiesStr.split(",")) {
+            cap = cap.trim();
+            if (cap.isEmpty()) {
                 continue;
             }
             if (cap.startsWith(ResponseJsonSerializer.LITERAL_PREFIX)) {
