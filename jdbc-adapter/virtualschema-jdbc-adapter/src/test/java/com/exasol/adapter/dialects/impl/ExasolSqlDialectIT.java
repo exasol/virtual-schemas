@@ -293,7 +293,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         createVirtualSchema("VS_EXA_IT_BROKEN", ExasolSqlDialect.getPublicName(), "", "NATIVE_EXA_IT", "NO_CONNECTION",
         "", "", "ADAPTER.JDBC_ADAPTER", "",
         false, getConfig().debugAddress(), "", null,
-                "JOIN_TYPE_INNER,JOIN_TYPE_LEFT_OUTER,JOIN_TYPE_RIGHT_OUTER,JOIN_TYPE_FULL_OUTER,JOIN_CONDITION_EQUI,JOIN_CONDITION_ALL");
+                "JOIN,JOIN_TYPE_INNER,JOIN_TYPE_LEFT_OUTER,JOIN_TYPE_RIGHT_OUTER,JOIN_TYPE_FULL_OUTER,JOIN_CONDITION_EQUI,JOIN_CONDITION_ALL");
     }
 
     /**
