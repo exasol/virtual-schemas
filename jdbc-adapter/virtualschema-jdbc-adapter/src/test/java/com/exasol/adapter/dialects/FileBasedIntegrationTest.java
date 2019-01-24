@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 
 import java.io.File;
@@ -140,7 +141,12 @@ public class FileBasedIntegrationTest {
     private String generatePushdownQuery(PushdownRequest pushdownRequest, Boolean multipleTables) throws AdapterException {
         String schemaName = "LS";
         SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, multipleTables);
-        SqlDialectContext dialectContext = new SqlDialectContext(Mockito.mock(SchemaAdapterNotes.class));
+        SchemaAdapterNotes notes = Mockito.mock(SchemaAdapterNotes.class);
+        when(notes.isNullsAreSortedAtEnd()).thenReturn(false);
+        when(notes.isNullsAreSortedAtStart()).thenReturn(false);
+        when(notes.isNullsAreSortedHigh()).thenReturn(true);
+        when(notes.isNullsAreSortedLow()).thenReturn(false);
+        SqlDialectContext dialectContext = new SqlDialectContext(notes);
         ExasolSqlDialect dialect = new ExasolSqlDialect(dialectContext);
         final SqlGenerationVisitor sqlGeneratorVisitor = dialect.getSqlGenerationVisitor(context);
         return pushdownRequest.getSelect().accept(sqlGeneratorVisitor);
