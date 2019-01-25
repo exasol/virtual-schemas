@@ -1,0 +1,228 @@
+{
+  "testSchema" :
+  [
+    "create table t1(id int, val int)",
+    "create table t2(id int, val int)"
+  ],
+  "testCases" :
+  [
+    {
+      "testQuery": "select a.id, b.id, sum(a.val), sum(b.val) from vs.t1 a inner join vs.t2 b on a.id=b.id group by a.id, b.id having sum(a.val) > 0 order by a.id limit 1000",
+      "expectedPushdownRequest":
+      [
+        {
+          "involvedTables" :
+          [
+            {
+              "columns" :
+              [
+                {
+                  "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                  "dataType" :
+                  {
+                    "precision" : 18,
+                    "scale" : 0,
+                    "type" : "DECIMAL"
+                  },
+                  "name" : "ID"
+                },
+                {
+                  "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                  "dataType" :
+                  {
+                    "precision" : 18,
+                    "scale" : 0,
+                    "type" : "DECIMAL"
+                  },
+                  "name" : "VAL"
+                }
+              ],
+              "name" : "T1"
+            },
+            {
+              "columns" :
+              [
+                {
+                  "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                  "dataType" :
+                  {
+                    "precision" : 18,
+                    "scale" : 0,
+                    "type" : "DECIMAL"
+                  },
+                  "name" : "ID"
+                },
+                {
+                  "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                  "dataType" :
+                  {
+                    "precision" : 18,
+                    "scale" : 0,
+                    "type" : "DECIMAL"
+                  },
+                  "name" : "VAL"
+                }
+              ],
+              "name" : "T2"
+            }
+          ],
+          "pushdownRequest" :
+          {
+            "type" : "select",
+            "selectList" :
+            [
+              {
+                "columnNr" : 0,
+                "name" : "ID",
+                "tableAlias" : "A",
+                "tableName" : "T1",
+                "type" : "column"
+              },
+              {
+                "columnNr" : 0,
+                "name" : "ID",
+                "tableAlias" : "B",
+                "tableName" : "T2",
+                "type" : "column"
+              },
+              {
+                "type" : "function_aggregate",
+                "name" : "sum",
+                "arguments" :
+                [
+                  {
+                    "columnNr" : 1,
+                    "name" : "VAL",
+                    "tableAlias" : "A",
+                    "tableName" : "T1",
+                    "type" : "column"
+                  }
+                ]
+              },
+              {
+                "type" : "function_aggregate",
+                "name" : "sum",
+                "arguments" :
+                [
+                  {
+                    "columnNr" : 1,
+                    "name" : "VAL",
+                    "tableAlias" : "B",
+                    "tableName" : "T2",
+                    "type" : "column"
+                  }
+                ]
+              }
+            ],
+            "from" :
+            {
+              "type": "join",
+              "join_type": "inner",
+              "left":
+              {
+                "name" : "T1",
+                "type" : "table",
+                "alias": "A"
+              },
+              "right":
+              {
+                "name" : "T2",
+                "type" : "table",
+                "alias": "B"
+              },
+              "condition":
+              {
+                "left" :
+                {
+                  "columnNr" : 0,
+                  "name" : "ID",
+                  "tableName" : "T1",
+                  "tableAlias" : "A",
+                  "type" : "column"
+                },
+                "right" :
+                {
+                  "columnNr" : 0,
+                  "name" : "ID",
+                  "tableName" : "T2",
+                  "tableAlias" : "B",
+                  "type" : "column"
+                },
+                "type" : "predicate_equal"
+              }
+            },
+            "groupBy" :
+            [
+              {
+                "columnNr" : 0,
+                "name" : "ID",
+                "tableAlias" : "A",
+                "tableName" : "T1",
+                "type" : "column"
+              },
+              {
+                "columnNr" : 0,
+                "name" : "ID",
+                "tableAlias" : "B",
+                "tableName" : "T2",
+                "type" : "column"
+              }
+            ],
+            "having" :
+            {
+              "type" : "predicate_less",
+              "left" :
+              {
+                "type" : "literal_exactnumeric",
+                "value" : "0"
+              },
+              "right" :
+              {
+                "type" : "function_aggregate",
+                "name" : "sum",
+                "arguments" :
+                [
+                  {
+                    "columnNr" : 1,
+                    "name" : "VAL",
+                    "tableAlias" : "A",
+                    "tableName" : "T1",
+                    "type" : "column"
+                  }
+                ]
+              }
+            },
+            "orderBy" :
+            [
+              {
+                "expression" :
+                {
+                  "columnNr" : 0,
+                  "name" : "ID",
+                  "tableName" : "T1",
+                  "tableAlias" : "A",
+                  "type" : "column"
+                },
+                "isAscending" : true,
+                "nullsLast" : true,
+                "type" : "order_by_element"
+              }
+            ],
+            "limit" :
+            {
+              "numElements" : 1000
+            }
+          },
+          "type" : "pushdown"
+        }
+      ],
+      "expectedPushdownResponse":
+      {
+        "Exasol":
+        [
+          "SELECT \"A\".\"ID\", \"B\".\"ID\", SUM(\"A\".\"VAL\"), SUM(\"B\".\"VAL\") FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\" GROUP BY \"A\".\"ID\", \"B\".\"ID\" HAVING 0 < SUM(\"A\".\"VAL\") ORDER BY \"A\".\"ID\" LIMIT 1000"
+        ]
+      }
+    }
+  ]
+}
