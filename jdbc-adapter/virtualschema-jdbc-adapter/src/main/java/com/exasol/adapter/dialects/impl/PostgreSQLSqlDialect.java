@@ -345,7 +345,7 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuote(final String identifier) {
-        return "\"" + identifier.replace("\"", "\"\"") + "\"";
+        return "\"" + identifier.toLowerCase().replace("\"", "\"\"") + "\"";
     }
 
     @Override
