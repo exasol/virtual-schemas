@@ -6,7 +6,6 @@ import java.sql.Types;
 import java.util.EnumMap;
 import java.util.Map;
 
-import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.capabilities.AggregateFunctionCapability;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.capabilities.LiteralCapability;
@@ -300,15 +299,22 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         return colType;
     }
 
+    //TODO: write unittest for ignoreerrorlist
+    //TODO: make return type of ignoreerrorlist an actial List<String>
+    //TODO: write integrationtest
     @Override
-    public MappedTable mapTable(final ResultSet tables) throws SQLException {
+    public MappedTable mapTable(final ResultSet tables, String ignoreErrorList) throws SQLException {
         final String tableName = tables.getString("TABLE_NAME");
+        //TODO: remove magic value
+        if (ignoreErrorList.equals("POSTGRES_IGNORE_UPPERCASE_TABLES")) {
+            return super.mapTable(tables, ignoreErrorList);
+        }
         if (!tableName.equals(tableName.toLowerCase())) {
             //TODO: think about a good error message
             throw new IllegalArgumentException("Table " + tableName + " cannot be used in virtual schema. " +
-                    "Use property POSTGRES_IGNORE_UPPERCASE_TABLES to enforce schema creation.");
+                    "Set property IGNORE_ERROR_LIST to POSTGRES_IGNORE_UPPERCASE_TABLES to enforce schema creation.");
         } else {
-            return super.mapTable(tables);
+            return super.mapTable(tables, ignoreErrorList);
         }
     }
 

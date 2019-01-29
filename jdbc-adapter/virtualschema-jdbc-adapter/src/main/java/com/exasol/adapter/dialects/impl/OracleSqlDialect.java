@@ -331,7 +331,7 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public MappedTable mapTable(final ResultSet tables) throws SQLException {
+    public MappedTable mapTable(final ResultSet tables, String ignoreErrorList) throws SQLException {
         final String tableName = tables.getString("TABLE_NAME");
         if (tableName.startsWith("BIN$")) {
             // In case of Oracle we may see deleted tables with strange names
@@ -341,7 +341,7 @@ public class OracleSqlDialect extends AbstractSqlDialect {
             System.out.println("Skip table: " + tableName);
             return MappedTable.createIgnoredTable();
         } else {
-            return super.mapTable(tables);
+            return super.mapTable(tables, ignoreErrorList);
         }
     }
 

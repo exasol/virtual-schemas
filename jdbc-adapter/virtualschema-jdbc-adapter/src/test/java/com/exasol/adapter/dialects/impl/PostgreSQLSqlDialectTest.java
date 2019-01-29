@@ -40,7 +40,7 @@ public class PostgreSQLSqlDialectTest {
         ResultSet resultSet = mock(ResultSet.class);
         when(resultSet.getString("TABLE_NAME")).thenReturn("uPPer");
         PostgreSQLSqlDialect postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
-        postgresDialect.mapTable(resultSet);
+        postgresDialect.mapTable(resultSet, "");
     }
 
     @Test
@@ -48,6 +48,6 @@ public class PostgreSQLSqlDialectTest {
         ResultSet resultSet = mock(ResultSet.class);
         when(resultSet.getString("TABLE_NAME")).thenReturn("lower");
         PostgreSQLSqlDialect postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
-        postgresDialect.mapTable(resultSet);
+        postgresDialect.mapTable(resultSet, "");
     }
 }

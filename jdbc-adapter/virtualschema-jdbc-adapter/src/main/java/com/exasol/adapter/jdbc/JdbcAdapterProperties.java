@@ -43,6 +43,7 @@ public final class JdbcAdapterProperties {
     static final String PROP_EXCLUDED_CAPABILITIES = "EXCLUDED_CAPABILITIES";
     static final String PROP_EXCEPTION_HANDLING = "EXCEPTION_HANDLING";
     static final String PROP_LOG_LEVEL = "LOG_LEVEL";
+    static final String PROP_IGNORE_ERROR_LIST = "IGNORE_ERROR_LIST";
 
     private static final String DEFAULT_LOG_LEVEL = "INFO";
 
@@ -62,6 +63,10 @@ public final class JdbcAdapterProperties {
         } else {
             return defaultValue;
         }
+    }
+
+    public static String getIgnoreErrorList(final Map<String, String> properties) {
+        return getProperty(properties, PROP_IGNORE_ERROR_LIST, "");
     }
 
     public static String getCatalog(final Map<String, String> properties) {

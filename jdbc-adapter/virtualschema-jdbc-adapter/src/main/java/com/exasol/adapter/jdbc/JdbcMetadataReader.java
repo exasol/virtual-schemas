@@ -20,7 +20,7 @@ public class JdbcMetadataReader {
 
     public static SchemaMetadata readRemoteMetadata(final String connectionString, final String user,
             final String password, String catalog, String schema, final List<String> tableFilter,
-            final String dialectName, final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode)
+            final String dialectName, final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, final String ignoreErrorList)
             throws SQLException, AdapterException {
         assert (catalog != null);
         assert (schema != null);
@@ -45,7 +45,7 @@ public class JdbcMetadataReader {
 
             schema = findSchema(schema, dbMeta, dialect);
 
-            final List<TableMetadata> tables = findTables(catalog, schema, tableFilter, dbMeta, dialect, exceptionMode);
+            final List<TableMetadata> tables = findTables(catalog, schema, tableFilter, dbMeta, dialect, exceptionMode, ignoreErrorList);
 
             conn.close();
             return new SchemaMetadata(SchemaAdapterNotes.serialize(schemaAdapterNotes), tables);
@@ -242,8 +242,8 @@ public class JdbcMetadataReader {
     }
 
     private static List<TableMetadata> findTables(final String catalog, final String schema,
-            final List<String> tableFilter, final DatabaseMetaData dbMeta, final SqlDialect dialect,
-            final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
+                                                  final List<String> tableFilter, final DatabaseMetaData dbMeta, final SqlDialect dialect,
+                                                  final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, String ignoreErrorList) throws SQLException {
         final List<TableMetadata> tables = new ArrayList<>();
 
         final String[] supportedTableTypes = { "TABLE", "VIEW", "SYSTEM TABLE" };
@@ -252,7 +252,7 @@ public class JdbcMetadataReader {
         final List<SqlDialect.MappedTable> tablesMapped = new ArrayList<>();
         // List<String> tableComments = new ArrayList<>();
         while (resTables.next()) {
-            final SqlDialect.MappedTable mappedTable = dialect.mapTable(resTables);
+            final SqlDialect.MappedTable mappedTable = dialect.mapTable(resTables, ignoreErrorList);
             if (!mappedTable.isIgnored()) {
                 tablesMapped.add(mappedTable);
                 // tableComments.add(mappedTable.getTableComment());
