@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
@@ -40,7 +41,7 @@ public class PostgreSQLSqlDialectTest {
         ResultSet resultSet = mock(ResultSet.class);
         when(resultSet.getString("TABLE_NAME")).thenReturn("uPPer");
         PostgreSQLSqlDialect postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
-        postgresDialect.mapTable(resultSet, "");
+        postgresDialect.mapTable(resultSet, Collections.emptyList());
     }
 
     @Test
@@ -48,6 +49,6 @@ public class PostgreSQLSqlDialectTest {
         ResultSet resultSet = mock(ResultSet.class);
         when(resultSet.getString("TABLE_NAME")).thenReturn("lower");
         PostgreSQLSqlDialect postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
-        postgresDialect.mapTable(resultSet, "");
+        postgresDialect.mapTable(resultSet, Collections.emptyList());
     }
 }

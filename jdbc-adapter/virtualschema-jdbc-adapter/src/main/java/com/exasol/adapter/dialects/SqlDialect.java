@@ -3,6 +3,7 @@ package com.exasol.adapter.dialects;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 import com.exasol.adapter.capabilities.Capabilities;
@@ -156,7 +157,7 @@ public interface SqlDialect {
      * @param ignoreErrorList
      * @return An instance of {@link MappedTable} describing the mapped table.
      */
-    public MappedTable mapTable(ResultSet tables, String ignoreErrorList) throws SQLException;
+    public MappedTable mapTable(ResultSet tables, List<String> ignoreErrorList) throws SQLException;
 
     /**
      * @param columns A jdbc Resultset for the

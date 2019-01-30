@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.exasol.ExaConnectionAccessException;
 import com.exasol.ExaConnectionInformation;
@@ -65,8 +66,10 @@ public final class JdbcAdapterProperties {
         }
     }
 
-    public static String getIgnoreErrorList(final Map<String, String> properties) {
-        return getProperty(properties, PROP_IGNORE_ERROR_LIST, "");
+    public static List<String> getIgnoreErrorList(final Map<String, String> properties) {
+        String ignoreErrors = getProperty(properties, PROP_IGNORE_ERROR_LIST, "");
+        List<String> ignoreErrorsList = Arrays.asList(ignoreErrors.split(","));
+        return ignoreErrorsList.stream().map(error -> error.trim()).collect(Collectors.toList());
     }
 
     public static String getCatalog(final Map<String, String> properties) {

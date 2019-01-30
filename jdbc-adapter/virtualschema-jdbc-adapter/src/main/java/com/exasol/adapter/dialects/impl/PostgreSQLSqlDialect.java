@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 import com.exasol.adapter.capabilities.AggregateFunctionCapability;
@@ -303,7 +304,7 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     //TODO: make return type of ignoreerrorlist an actial List<String>
     //TODO: write integrationtest
     @Override
-    public MappedTable mapTable(final ResultSet tables, String ignoreErrorList) throws SQLException {
+    public MappedTable mapTable(final ResultSet tables, List<String> ignoreErrorList) throws SQLException {
         final String tableName = tables.getString("TABLE_NAME");
         //TODO: remove magic value
         if (ignoreErrorList.equals("POSTGRES_IGNORE_UPPERCASE_TABLES")) {

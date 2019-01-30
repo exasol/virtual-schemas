@@ -20,7 +20,7 @@ public class JdbcMetadataReader {
 
     public static SchemaMetadata readRemoteMetadata(final String connectionString, final String user,
             final String password, String catalog, String schema, final List<String> tableFilter,
-            final String dialectName, final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, final String ignoreErrorList)
+            final String dialectName, final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, final List<String> ignoreErrorList)
             throws SQLException, AdapterException {
         assert (catalog != null);
         assert (schema != null);
@@ -243,7 +243,7 @@ public class JdbcMetadataReader {
 
     private static List<TableMetadata> findTables(final String catalog, final String schema,
                                                   final List<String> tableFilter, final DatabaseMetaData dbMeta, final SqlDialect dialect,
-                                                  final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, String ignoreErrorList) throws SQLException {
+                                                  final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, List<String> ignoreErrorList) throws SQLException {
         final List<TableMetadata> tables = new ArrayList<>();
 
         final String[] supportedTableTypes = { "TABLE", "VIEW", "SYSTEM TABLE" };

@@ -3,11 +3,7 @@ package com.exasol.adapter.dialects;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.jdbc.JdbcAdapterProperties;
@@ -40,7 +36,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     }
 
     @Override
-    public MappedTable mapTable(final ResultSet tables, String ignoreErrorList) throws SQLException {
+    public MappedTable mapTable(final ResultSet tables, List<String> ignoreErrorList) throws SQLException {
         String commentString = tables.getString("REMARKS");
         if (commentString == null) {
             commentString = "";
