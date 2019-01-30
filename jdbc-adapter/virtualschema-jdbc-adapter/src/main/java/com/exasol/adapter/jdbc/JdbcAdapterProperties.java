@@ -69,7 +69,7 @@ public final class JdbcAdapterProperties {
     public static List<String> getIgnoreErrorList(final Map<String, String> properties) {
         String ignoreErrors = getProperty(properties, PROP_IGNORE_ERROR_LIST, "");
         List<String> ignoreErrorsList = Arrays.asList(ignoreErrors.split(","));
-        return ignoreErrorsList.stream().map(error -> error.trim()).collect(Collectors.toList());
+        return ignoreErrorsList.stream().map(error -> error.trim().toUpperCase()).collect(Collectors.toList());
     }
 
     public static String getCatalog(final Map<String, String> properties) {

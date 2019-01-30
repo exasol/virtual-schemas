@@ -2,6 +2,7 @@ package com.exasol.adapter.jdbc;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -245,5 +246,16 @@ public class JdbcAdapterPropertiesTest {
         assertEquals(JdbcAdapterProperties.ExceptionHandlingMode.NONE,
                 JdbcAdapterProperties.getExceptionHandlingMode(properties));
         JdbcAdapterProperties.checkPropertyConsistency(properties);
+    }
+
+    @Test
+    public void getIgnoreErrorList() {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("IGNORE_ERROR_LIST", "ERrror_foo, error_bar    ,  another_error");
+        List<String> expectedErrorList = new ArrayList<>();
+        expectedErrorList.add("ERRROR_FOO");
+        expectedErrorList.add("ERROR_BAR");
+        expectedErrorList.add("ANOTHER_ERROR");
+        assertEquals(expectedErrorList, JdbcAdapterProperties.getIgnoreErrorList(properties));
     }
 }

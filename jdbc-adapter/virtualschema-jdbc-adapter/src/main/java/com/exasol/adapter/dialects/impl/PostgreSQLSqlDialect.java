@@ -22,6 +22,9 @@ import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.ScalarFunction;
 
 public class PostgreSQLSqlDialect extends AbstractSqlDialect {
+
+    public static final String POSTGRES_IGNORE_UPPERCASE_TABLES = "POSTGRES_IGNORE_UPPERCASE_TABLES";
+
     public PostgreSQLSqlDialect(final SqlDialectContext context) {
         super(context);
     }
@@ -300,23 +303,22 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         return colType;
     }
 
-    //TODO: write unittest for ignoreerrorlist
-    //TODO: make return type of ignoreerrorlist an actial List<String>
-    //TODO: write integrationtest
     @Override
     public MappedTable mapTable(final ResultSet tables, List<String> ignoreErrorList) throws SQLException {
         final String tableName = tables.getString("TABLE_NAME");
-        //TODO: remove magic value
-        if (ignoreErrorList.equals("POSTGRES_IGNORE_UPPERCASE_TABLES")) {
+        if (ignoreErrorList.contains(POSTGRES_IGNORE_UPPERCASE_TABLES)) {
             return super.mapTable(tables, ignoreErrorList);
         }
-        if (!tableName.equals(tableName.toLowerCase())) {
-            //TODO: think about a good error message
+        if (containsUppercaseCharacter(tableName)) {
             throw new IllegalArgumentException("Table " + tableName + " cannot be used in virtual schema. " +
                     "Set property IGNORE_ERROR_LIST to POSTGRES_IGNORE_UPPERCASE_TABLES to enforce schema creation.");
         } else {
             return super.mapTable(tables, ignoreErrorList);
         }
+    }
+
+    private boolean containsUppercaseCharacter(String tableName) {
+        return !tableName.equals(tableName.toLowerCase());
     }
 
     @Override
