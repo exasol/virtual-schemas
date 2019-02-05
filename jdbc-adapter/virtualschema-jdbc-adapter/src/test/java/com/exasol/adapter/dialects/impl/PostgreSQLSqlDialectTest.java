@@ -20,34 +20,41 @@ public class PostgreSQLSqlDialectTest {
     @Mock
     SqlDialectContext sqlDialectContext;
 
-
     @Before
     public void setUp() throws SQLException {
 
     }
 
     @Test
-    public void applyQuoteOnUpperCase() {
+    public void testApplyQuoteOnUpperCase() {
         PostgreSQLSqlDialect postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
         assertEquals("\"abc\"", postgresDialect.applyQuote("ABC"));
     }
 
     @Test
-    public void applyQuoteOnMixedCase() {
+    public void testApplyQuoteOnMixedCase() {
         PostgreSQLSqlDialect postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
         assertEquals("\"abcde\"", postgresDialect.applyQuote("AbCde"));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void mapTableWithUpperCaseCharacters() throws SQLException {
+    public void testMapTableWithUpperCaseCharactersAndNoErrorIgnoredThrowsException() throws SQLException {
         ResultSet resultSet = mock(ResultSet.class);
         when(resultSet.getString("TABLE_NAME")).thenReturn("uPPer");
         PostgreSQLSqlDialect postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
         postgresDialect.mapTable(resultSet, Collections.emptyList());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testMapTableWithRussianUpperCaseCharactersAndNoErrorIgnoredThrowsException() throws SQLException {
+        ResultSet resultSet = mock(ResultSet.class);
+        when(resultSet.getString("TABLE_NAME")).thenReturn("аППер");
+        PostgreSQLSqlDialect postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
+        postgresDialect.mapTable(resultSet, Collections.emptyList());
+    }
+
     @Test
-    public void mapTableWithLowerCaseCharacters() throws SQLException {
+    public void testMapTableWithLowerCaseCharacters() throws SQLException {
         ResultSet resultSet = mock(ResultSet.class);
         when(resultSet.getString("TABLE_NAME")).thenReturn("lower");
         PostgreSQLSqlDialect postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
@@ -55,7 +62,7 @@ public class PostgreSQLSqlDialectTest {
     }
 
     @Test
-    public void mapTableWithIgnoreUppercaseCharactersError() throws SQLException {
+    public void testMapTableWithIgnoreUppercaseCharactersError() throws SQLException {
         ResultSet resultSet = mock(ResultSet.class);
         when(resultSet.getString("TABLE_NAME")).thenReturn("Upper");
         List<String> ignoreList = new ArrayList<>();

@@ -154,10 +154,10 @@ public interface SqlDialect {
      * @param tables A jdbc Resultset for the
      *               {@link DatabaseMetaData#getTables(String, String, String, String[])}
      *               call, pointing to the current table.
-     * @param ignoreErrorList
+     * @param ignoreErrorList The elements of this list suppress certain errors the adapter would throw
      * @return An instance of {@link MappedTable} describing the mapped table.
      */
-    public MappedTable mapTable(ResultSet tables, List<String> ignoreErrorList) throws SQLException;
+    public MappedTable mapTable(ResultSet tables, final List<String> ignoreErrorList) throws SQLException;
 
     /**
      * @param columns A jdbc Resultset for the

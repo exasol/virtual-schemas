@@ -36,7 +36,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     }
 
     @Override
-    public MappedTable mapTable(final ResultSet tables, List<String> ignoreErrorList) throws SQLException {
+    public MappedTable mapTable(final ResultSet tables, final List<String> ignoreErrorList) throws SQLException {
         String commentString = tables.getString("REMARKS");
         if (commentString == null) {
             commentString = "";

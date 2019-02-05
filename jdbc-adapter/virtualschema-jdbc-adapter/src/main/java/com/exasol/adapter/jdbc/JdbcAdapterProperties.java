@@ -66,27 +66,34 @@ public final class JdbcAdapterProperties {
         }
     }
 
+    private static String getProperty(final Map<String, String> properties, final String name) {
+        return getProperty(properties, name, "");
+    }
+
     public static List<String> getIgnoreErrorList(final Map<String, String> properties) {
-        String ignoreErrors = getProperty(properties, PROP_IGNORE_ERROR_LIST, "");
-        List<String> ignoreErrorsList = Arrays.asList(ignoreErrors.split(","));
-        return ignoreErrorsList.stream().map(error -> error.trim().toUpperCase()).collect(Collectors.toList());
+        final String ignoreErrors = getProperty(properties, PROP_IGNORE_ERROR_LIST);
+        return Arrays.
+                stream(ignoreErrors.split(","))
+                .map(String::trim)
+                .map(String::toUpperCase)
+                .collect(Collectors.toList());
     }
 
     public static String getCatalog(final Map<String, String> properties) {
-        return getProperty(properties, PROP_CATALOG_NAME, "");
+        return getProperty(properties, PROP_CATALOG_NAME);
     }
 
     public static String getSchema(final Map<String, String> properties) {
-        return getProperty(properties, PROP_SCHEMA_NAME, "");
+        return getProperty(properties, PROP_SCHEMA_NAME);
     }
 
     public static boolean userSpecifiedConnection(final Map<String, String> properties) {
-        final String connName = getProperty(properties, PROP_CONNECTION_NAME, "");
+        final String connName = getProperty(properties, PROP_CONNECTION_NAME);
         return (connName != null && !connName.isEmpty());
     }
 
     public static String getConnectionName(final Map<String, String> properties) {
-        final String connName = getProperty(properties, PROP_CONNECTION_NAME, "");
+        final String connName = getProperty(properties, PROP_CONNECTION_NAME);
         assert (connName != null && !connName.isEmpty());
         return connName;
     }
@@ -98,7 +105,7 @@ public final class JdbcAdapterProperties {
      */
     public static ExaConnectionInformation getConnectionInformation(final Map<String, String> properties,
             final ExaMetadata exaMeta) {
-        final String connName = getProperty(properties, PROP_CONNECTION_NAME, "");
+        final String connName = getProperty(properties, PROP_CONNECTION_NAME);
         if (connName != null && !connName.isEmpty()) {
             try {
                 final ExaConnectionInformation connInfo = exaMeta.getConnection(connName);
@@ -124,8 +131,8 @@ public final class JdbcAdapterProperties {
 
     private static void checkImportPropertyConsistency(final Map<String, String> properties,
             final String propImportFromX, final String propConnection) throws InvalidPropertyException {
-        final boolean isImport = getProperty(properties, propImportFromX, "").toUpperCase().equals("TRUE");
-        final boolean connectionIsEmpty = getProperty(properties, propConnection, "").isEmpty();
+        final boolean isImport = getProperty(properties, propImportFromX).toUpperCase().equals("TRUE");
+        final boolean connectionIsEmpty = getProperty(properties, propConnection).isEmpty();
         if (isImport) {
             if (connectionIsEmpty) {
                 throw new InvalidPropertyException(
@@ -214,23 +221,23 @@ public final class JdbcAdapterProperties {
     }
 
     public static boolean isImportFromExa(final Map<String, String> properties) {
-        return getProperty(properties, PROP_IMPORT_FROM_EXA, "").toUpperCase().equals("TRUE");
+        return getProperty(properties, PROP_IMPORT_FROM_EXA).toUpperCase().equals("TRUE");
     }
 
     public static boolean isImportFromOra(final Map<String, String> properties) {
-        return getProperty(properties, PROP_IMPORT_FROM_ORA, "").toUpperCase().equals("TRUE");
+        return getProperty(properties, PROP_IMPORT_FROM_ORA).toUpperCase().equals("TRUE");
     }
 
     public static String getExaConnectionString(final Map<String, String> properties) {
-        return getProperty(properties, PROP_EXA_CONNECTION_STRING, "");
+        return getProperty(properties, PROP_EXA_CONNECTION_STRING);
     }
 
     public static String getOraConnectionName(final Map<String, String> properties) {
-        return getProperty(properties, PROP_ORA_CONNECTION_NAME, "");
+        return getProperty(properties, PROP_ORA_CONNECTION_NAME);
     }
 
     public static List<String> getTableFilter(final Map<String, String> properties) {
-        final String tableNames = getProperty(properties, PROP_TABLES, "");
+        final String tableNames = getProperty(properties, PROP_TABLES);
         if (!tableNames.isEmpty()) {
             final List<String> tables = Arrays.asList(tableNames.split(","));
             for (int i = 0; i < tables.size(); ++i) {
@@ -243,24 +250,24 @@ public final class JdbcAdapterProperties {
     }
 
     public static String getExcludedCapabilities(final Map<String, String> properties) {
-        return getProperty(properties, PROP_EXCLUDED_CAPABILITIES, "");
+        return getProperty(properties, PROP_EXCLUDED_CAPABILITIES);
     }
 
     public static String getDebugAddress(final Map<String, String> properties) {
-        return getProperty(properties, PROP_DEBUG_ADDRESS, "");
+        return getProperty(properties, PROP_DEBUG_ADDRESS);
     }
 
     public static boolean isLocal(final Map<String, String> properties) {
-        return getProperty(properties, PROP_IS_LOCAL, "").toUpperCase().equals("TRUE");
+        return getProperty(properties, PROP_IS_LOCAL).toUpperCase().equals("TRUE");
     }
 
     public static String getSqlDialectName(final Map<String, String> properties) {
-        return getProperty(properties, PROP_SQL_DIALECT, "");
+        return getProperty(properties, PROP_SQL_DIALECT);
     }
 
     public static SqlDialect getSqlDialect(final Map<String, String> properties, final SqlDialectContext dialectContext)
             throws InvalidPropertyException {
-        final String dialectName = getProperty(properties, PROP_SQL_DIALECT, "");
+        final String dialectName = getProperty(properties, PROP_SQL_DIALECT);
         final SqlDialect dialect = SqlDialects.getInstance().getDialectInstanceForNameWithContext(dialectName,
                 dialectContext);
         if (dialect == null) {
@@ -271,7 +278,7 @@ public final class JdbcAdapterProperties {
     }
 
     public static ExceptionHandlingMode getExceptionHandlingMode(final Map<String, String> properties) {
-        final String propertyValue = getProperty(properties, PROP_EXCEPTION_HANDLING, "");
+        final String propertyValue = getProperty(properties, PROP_EXCEPTION_HANDLING);
         if (propertyValue == null || propertyValue.isEmpty()) {
             return ExceptionHandlingMode.NONE;
         }

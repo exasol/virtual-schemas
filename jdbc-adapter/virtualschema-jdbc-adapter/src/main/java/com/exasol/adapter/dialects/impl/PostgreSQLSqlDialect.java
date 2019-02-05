@@ -304,12 +304,9 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public MappedTable mapTable(final ResultSet tables, List<String> ignoreErrorList) throws SQLException {
+    public MappedTable mapTable(final ResultSet tables, final List<String> ignoreErrorList) throws SQLException {
         final String tableName = tables.getString("TABLE_NAME");
-        if (ignoreErrorList.contains(POSTGRES_IGNORE_UPPERCASE_TABLES)) {
-            return super.mapTable(tables, ignoreErrorList);
-        }
-        if (containsUppercaseCharacter(tableName)) {
+        if (!ignoreErrorList.contains(POSTGRES_IGNORE_UPPERCASE_TABLES) && containsUppercaseCharacter(tableName)) {
             throw new IllegalArgumentException("Table " + tableName + " cannot be used in virtual schema. " +
                     "Set property IGNORE_ERROR_LIST to POSTGRES_IGNORE_UPPERCASE_TABLES to enforce schema creation.");
         } else {
@@ -317,7 +314,7 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         }
     }
 
-    private boolean containsUppercaseCharacter(String tableName) {
+    private boolean containsUppercaseCharacter(final String tableName) {
         return !tableName.equals(tableName.toLowerCase());
     }
 
@@ -368,7 +365,12 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuote(final String identifier) {
-        return "\"" + identifier.toLowerCase().replace("\"", "\"\"") + "\"";
+        final String lowercaseIdentifier = convertIdentifierToLowerCase(identifier);
+        return "\"" + lowercaseIdentifier.replace("\"", "\"\"") + "\"";
+    }
+
+    private String convertIdentifierToLowerCase(final String identifier) {
+        return identifier.toLowerCase();
     }
 
     @Override

@@ -251,11 +251,12 @@ public class JdbcAdapterPropertiesTest {
     @Test
     public void getIgnoreErrorList() {
         Map<String, String> properties = new HashMap<>();
-        properties.put("IGNORE_ERROR_LIST", "ERrror_foo, error_bar    ,  another_error");
+        properties.put("IGNORE_ERROR_LIST", "ERrror_foo, error_bar    ,  another_error, уккщк");
         List<String> expectedErrorList = new ArrayList<>();
         expectedErrorList.add("ERRROR_FOO");
         expectedErrorList.add("ERROR_BAR");
         expectedErrorList.add("ANOTHER_ERROR");
+        expectedErrorList.add("УККЩК");
         assertEquals(expectedErrorList, JdbcAdapterProperties.getIgnoreErrorList(properties));
     }
 }

@@ -332,7 +332,7 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public MappedTable mapTable(final ResultSet tables, List<String> ignoreErrorList) throws SQLException {
+    public MappedTable mapTable(final ResultSet tables, final List<String> ignoreErrorList) throws SQLException {
         final String tableName = tables.getString("TABLE_NAME");
         if (tableName.startsWith("BIN$")) {
             // In case of Oracle we may see deleted tables with strange names
