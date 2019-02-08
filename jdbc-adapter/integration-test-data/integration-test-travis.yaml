@@ -12,3 +12,14 @@ exasol:
   address:  127.0.0.1:8899
   user:     sys
   password: exasol
+
+postgresql:
+  runIntegrationTests: true
+  jdbcDriverPath:      /buckets/bfsdefault/default/drivers/jdbc/POSTGRESQL/postgresql-42.2.5.jar;
+  connectionString:    jdbc:postgresql://DBHOST:5432/postgres
+  user:                postgres
+  password:            postgres
+  dockerImage:         postgres
+  dockerImageVersion:  latest
+  dockerPortMapping:   5432:5432
+  dockerName:          testpg

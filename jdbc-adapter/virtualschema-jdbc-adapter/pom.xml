@@ -139,6 +139,12 @@
             <artifactId>exasol-jdbc</artifactId>
             <version>6.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <scope>verify</scope>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.2.5</version>
+        </dependency>
 	</dependencies>
 
     <build>
