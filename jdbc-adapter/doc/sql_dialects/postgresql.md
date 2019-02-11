@@ -48,11 +48,11 @@ CREATE VIRTUAL SCHEMA postgres
 	CATALOG_NAME = 'postgres'
 	SCHEMA_NAME = 'public'
 	CONNECTION_NAME = 'POSTGRES_DOCKER'
-	IGNORE_ERROR_LIST='POSTGRES_IGNORE_UPPERCASE_TABLES'
+	IGNORE_ERRORS = 'POSTGRESQL_UPPERCASE_TABLES'
 ;
 ```
 You can also set this property for an exitsing virtual schema:
 ```sql
-ALTER VIRTUAL SCHEMA postgres SET IGNORE_ERROR_LIST = 'POSTGRES_IGNORE_UPPERCASE_TABLES';
+ALTER VIRTUAL SCHEMA postgres SET IGNORE_ERRORS = 'POSTGRESQL_UPPERCASE_TABLES';
 ```
 However you won't be able to query the identifier containing the upper case character.
