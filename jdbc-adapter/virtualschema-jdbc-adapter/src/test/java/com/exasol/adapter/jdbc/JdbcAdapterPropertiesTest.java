@@ -251,7 +251,7 @@ public class JdbcAdapterPropertiesTest {
     @Test
     public void getIgnoreErrorList() {
         Map<String, String> properties = new HashMap<>();
-        properties.put("IGNORE_ERROR_LIST", "ERrror_foo, error_bar    ,  another_error, уккщк");
+        properties.put("IGNORE_ERRORS", "ERrror_foo, error_bar    ,  another_error, уккщк");
         List<String> expectedErrorList = new ArrayList<>();
         expectedErrorList.add("ERRROR_FOO");
         expectedErrorList.add("ERROR_BAR");

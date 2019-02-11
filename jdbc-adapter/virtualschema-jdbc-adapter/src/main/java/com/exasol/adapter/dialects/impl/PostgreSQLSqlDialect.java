@@ -23,7 +23,7 @@ import com.exasol.adapter.sql.ScalarFunction;
 
 public class PostgreSQLSqlDialect extends AbstractSqlDialect {
 
-    public static final String POSTGRES_IGNORE_UPPERCASE_TABLES = "POSTGRES_IGNORE_UPPERCASE_TABLES";
+    public static final String POSTGRES_IGNORE_UPPERCASE_TABLES = "POSTGRES_UPPERCASE_TABLES";
 
     public PostgreSQLSqlDialect(final SqlDialectContext context) {
         super(context);

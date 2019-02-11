@@ -44,7 +44,7 @@ public final class JdbcAdapterProperties {
     static final String PROP_EXCLUDED_CAPABILITIES = "EXCLUDED_CAPABILITIES";
     static final String PROP_EXCEPTION_HANDLING = "EXCEPTION_HANDLING";
     static final String PROP_LOG_LEVEL = "LOG_LEVEL";
-    static final String PROP_IGNORE_ERROR_LIST = "IGNORE_ERROR_LIST";
+    static final String PROP_IGNORE_ERROR_LIST = "IGNORE_ERRORS";
 
     private static final String DEFAULT_LOG_LEVEL = "INFO";
 
