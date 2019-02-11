@@ -93,14 +93,14 @@ Please also remember to [list the supported dialect in the documentation](../REA
 * Testdata: Create a simple view, e.g. joining two existing tables
 * Automatic test: Query the view, optionally e.g. with a filter.
 
-## Integration Testing with containers
+## Integration Testing with Containers
 
 This integration test works fully automated, there are no manual steps in setting up the source database and the connection to EXASOL.
 
 ### Overview
 
-The idea of the container base tests is:
-* Run the EXASOL and source databases in a container
+The idea of the container based tests is:
+* Run the EXASOL and source databases in containers
 * Prepare the test schema in the source database
 * Create a virtual schema for the source database
 * Run the tests on the virtual schmema
@@ -110,11 +110,10 @@ The idea of the container base tests is:
 
 ### Prerequisites
 
-So what you need is
+What you need is, for each source database:
 
-* For each source databases:
-  * A docker image with user you can connect to
-  * JDBC driver for the database
+* A docker image with user you can connect to
+* A JDBC driver for the database
 
 ### Preparing Integration Test
 
@@ -127,15 +126,15 @@ Set the following properties for your database:
 
 | configuration property | explanation |
 |------------------------|-------------|
-| runIntegrationTests |    enable/disable your test (true|false)|
+| runIntegrationTests |    enable/disable your test (e.g. true)|
 | jdbcDriverPath |         path to the jdbc driver in bucketFS (e.g /buckets/bfsdefault/default/drivers/jdbc/POSTGRESQL/postgresql-42.2.5.jar;)|
-| connectionString |       connection string to connect to the db from the integration test system, so use the exposed port (e.g. jdbc:postgresql://localhost:45432/postgres)|
+| connectionString |       connection string to connect to the source database from the integration test system, so use the exposed port (e.g. jdbc:postgresql://localhost:45432/postgres)|
 | user |                   the database user|
 | password |               password for the database user|
 | dockerImage |            name of the docker image for the source db|
 | dockerImageVersion |     version of the used docker image (eg. latest)|
 | dockerPortMapping |      docker port mapping external_db_port:internal_db_port (e.g. 45432:5432)|
-| dockerName |             name for the docker container (choose what you want, eg. testpg)|
+| dockerName |             name for the docker container (e.g. testpg)|
 | dockerConnectionString | connection string to connect to the source db from the EXASOL docker container. Use the constant DBHOST as hostname, this will be set to the actual internal docker network IP by the integration test skript during runtime (e.g. jdbc:postgresql://DBHOST:5432/postgres)|
 
 #### Provide JDBC drivers for the Source Database
@@ -145,14 +144,14 @@ The JDBC drivers are automatically deployed during the test. You have to create 
 #### Add a new Integration Test Class
 
 Add a new class that derives from [AbstractIntegrationTest](../virtualschema-jdbc-adapter/src/test/java/com/exasol/adapter/dialects/AbstractIntegrationTest.java). This class has to:
-* create the test schema in the source database
-* create the virtual schema
-* execute the tests on the virtual schema
+* Create the test schema in the source database
+* Create the virtual schema
+* Execute the tests on the virtual schema
 See [PostgreSQLDialectIT](../virtualschema-jdbc-adapter/src/test/java/com/exasol/adapter/dialects/impl/PostgreSQLDialectIT.java) for an example.
 
 ### Executing Integration Tests
 
-Executing the integration test is easy, just run the [integration test bash script](../integration-test-data/run_integration_test.sh)
+Executing the integration test is easy, just run the [integration test bash script](../integration-test-data/run_integration_tests.sh)
 
 ## Integration Testing against a local database
 
