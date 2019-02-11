@@ -15,7 +15,7 @@ readonly docker_name="exasoldb"
 readonly jdbc_driver_dir="$(pwd)/integration-test-data/drivers"
 readonly docker_helper="$(pwd)/integration-test-data/socker.py"
 readonly tmp="$(mktemp -td exasol-vs-adapter-integration.XXXXXX)" || exit 1
-readonly config_with_ips="$tmp/integration-test-travis.yaml"
+readonly config_with_ips="$(pwd)/integration-test-data/integration-test-travis_with_ips.yaml"
 
 function cleanup() {
     docker rm -f exasoldb || true
@@ -50,7 +50,7 @@ deploy_jdbc_drivers() {
 }
 
 replace_hosts_with_ips_in_config() {
-	sudo $docker_helper --add_docker_hosts $config > $config_with_ips
+	$docker_helper --add_docker_hosts $config > $config_with_ips
 }
 
 start_remote_dbs() {
