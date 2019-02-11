@@ -67,7 +67,7 @@ public class PostgreSQLSqlDialectTest {
         when(resultSet.getString("TABLE_NAME")).thenReturn("Upper");
         List<String> ignoreList = new ArrayList<>();
         ignoreList.add("Dummy_Error");
-        ignoreList.add("POSTGRES_UPPERCASE_TABLES");
+        ignoreList.add("POSTGRESQL_UPPERCASE_TABLES");
         PostgreSQLSqlDialect postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
         postgresDialect.mapTable(resultSet, ignoreList);
     }
