@@ -37,7 +37,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
         createTestSchema();
         createPostgreSQLJDBCAdapter();
         createVirtualSchema(VIRTUAL_SCHEMA, PostgreSQLSqlDialect.getPublicName(), POSTGRES_CATALOG, POSTRGES_SCHEMA, "", getConfig().getPostgresqlUser(),
-                getConfig().getPostgresqlPassword(), "ADAPTER.JDBC_ADAPTER", getConfig().getPostgresqlJdbcConnectionString(),
+                getConfig().getPostgresqlPassword(), "ADAPTER.JDBC_ADAPTER", getConfig().getPostgresqlDockerJdbcConnectionString(),
                 IS_LOCAL, getConfig().debugAddress(), "", null);
     }
 

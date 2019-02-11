@@ -271,6 +271,10 @@ public class IntegrationTestConfig {
         return getProperty("postgresql", "connectionString");
     }
 
+    public String getPostgresqlDockerJdbcConnectionString() {
+        return getProperty("postgresql", "dockerConnectionString");
+    }
+
     public String getPostgresqlUser() {
         return getProperty("postgresql", "user");
     }
