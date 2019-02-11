@@ -141,6 +141,8 @@ Set the following properties for your database:
 
 The JDBC drivers are automatically deployed during the test. You have to create a directory for the jdbc driver under integration-test-data/drivers. The folder contains the driver jar file(s) and a config file. See the [PostgreSQL config](../integration-test-data/drivers/POSTGRESQL/settings.cfg) for an example.
 
+In order to connect to the source database from your integration test you also have to add the jdbc driver dependency to the [POM](../virtualschema-jdbc-adapter/pom.xml) scope verify.
+
 #### Add a new Integration Test Class
 
 Add a new class that derives from [AbstractIntegrationTest](../virtualschema-jdbc-adapter/src/test/java/com/exasol/adapter/dialects/AbstractIntegrationTest.java). This class has to:
