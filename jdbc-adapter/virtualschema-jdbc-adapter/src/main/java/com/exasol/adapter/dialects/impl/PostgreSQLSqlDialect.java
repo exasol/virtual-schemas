@@ -308,7 +308,7 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         final String tableName = tables.getString("TABLE_NAME");
         if (!ignoreErrorList.contains(POSTGRES_IGNORE_UPPERCASE_TABLES) && containsUppercaseCharacter(tableName)) {
             throw new IllegalArgumentException("Table " + tableName + " cannot be used in virtual schema. " +
-                    "Set property IGNORE_ERROR_LIST to POSTGRES_IGNORE_UPPERCASE_TABLES to enforce schema creation.");
+                    "Set property IGNORE_ERRORS to POSTGRES_UPPERCASE_TABLES to enforce schema creation.");
         } else {
             return super.mapTable(tables, ignoreErrorList);
         }
