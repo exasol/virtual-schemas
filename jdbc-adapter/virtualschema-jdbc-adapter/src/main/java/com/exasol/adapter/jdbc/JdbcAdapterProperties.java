@@ -1,10 +1,6 @@
 package com.exasol.adapter.jdbc;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -72,6 +68,9 @@ public final class JdbcAdapterProperties {
 
     public static List<String> getIgnoreErrorList(final Map<String, String> properties) {
         final String ignoreErrors = getProperty(properties, PROP_IGNORE_ERROR_LIST);
+        if (ignoreErrors.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
         return Arrays.
                 stream(ignoreErrors.split(","))
                 .map(String::trim)
@@ -127,6 +126,19 @@ public final class JdbcAdapterProperties {
         checkMandatoryProperties(properties);
         checkImportPropertyConsistency(properties, PROP_IMPORT_FROM_EXA, PROP_EXA_CONNECTION_STRING);
         checkImportPropertyConsistency(properties, PROP_IMPORT_FROM_ORA, PROP_ORA_CONNECTION_NAME);
+        checkIgnoreErrors(properties);
+    }
+
+    private static void checkIgnoreErrors(final Map<String, String> properties) throws InvalidPropertyException {
+        final String dialect = getSqlDialectName(properties);
+        List<String> errorsToIgnore = getIgnoreErrorList(properties);
+        for (String errorToIgnore : errorsToIgnore) {
+            if (!errorToIgnore.startsWith(dialect)) {
+                throw new InvalidPropertyException(
+                        "Error " + errorToIgnore + " cannot be ignored in " + dialect + " dialect."
+                );
+            }
+        }
     }
 
     private static void checkImportPropertyConsistency(final Map<String, String> properties,

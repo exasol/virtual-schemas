@@ -249,7 +249,7 @@ public class JdbcAdapterPropertiesTest {
     }
 
     @Test
-    public void getIgnoreErrorList() {
+    public void getIgnoreErrors() {
         Map<String, String> properties = new HashMap<>();
         properties.put("IGNORE_ERRORS", "ERrror_foo, error_bar    ,  another_error, уккщк");
         List<String> expectedErrorList = new ArrayList<>();
@@ -258,5 +258,13 @@ public class JdbcAdapterPropertiesTest {
         expectedErrorList.add("ANOTHER_ERROR");
         expectedErrorList.add("УККЩК");
         assertEquals(expectedErrorList, JdbcAdapterProperties.getIgnoreErrorList(properties));
+    }
+
+    @Test(expected = InvalidPropertyException.class)
+    public void checkIgnoreErrorsConsistency() throws AdapterException {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("IGNORE_ERRORS", "ORACLE_ERROR");
+        properties.put("dialect", "postgresql");
+        JdbcAdapterProperties.checkPropertyConsistency(properties);
     }
 }
