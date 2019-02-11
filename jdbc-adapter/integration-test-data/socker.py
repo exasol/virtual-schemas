@@ -1,9 +1,5 @@
 #!/usr/bin/python
 
-#travis python installieren
-#travis python-pip installieren
-#travis pip install pyyaml
-
 import argparse
 import subprocess
 import yaml
@@ -78,7 +74,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     yaml_config = read_config(args.config)
-    #print(yaml_config)
 
     if args.run:
         docker_run(yaml_config)
