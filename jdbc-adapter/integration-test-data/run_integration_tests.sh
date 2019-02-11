@@ -50,7 +50,7 @@ deploy_jdbc_drivers() {
 }
 
 replace_hosts_with_ips_in_config() {
-	$docker_helper --add_docker_hosts $config > $config_with_ips
+	sudo $docker_helper --add_docker_hosts $config > $config_with_ips
 }
 
 start_remote_dbs() {

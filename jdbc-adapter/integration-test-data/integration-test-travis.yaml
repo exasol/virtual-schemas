@@ -16,10 +16,10 @@ exasol:
 postgresql:
   runIntegrationTests: true
   jdbcDriverPath:      /buckets/bfsdefault/default/drivers/jdbc/POSTGRESQL/postgresql-42.2.5.jar;
-  connectionString:    jdbc:postgresql://DBHOST:5432/postgres
+  connectionString:    jdbc:postgresql://DBHOST:45432/postgres
   user:                postgres
   password:            postgres
   dockerImage:         postgres
   dockerImageVersion:  latest
-  dockerPortMapping:   5432:5432
+  dockerPortMapping:   45432:5432
   dockerName:          testpg
