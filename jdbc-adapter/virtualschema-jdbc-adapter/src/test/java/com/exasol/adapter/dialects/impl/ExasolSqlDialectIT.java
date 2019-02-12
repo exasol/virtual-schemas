@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Assume;
@@ -308,7 +309,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         final List<String> tables = new ArrayList<>(Arrays.asList(tableNames));
         final SchemaMetadata meta = JdbcMetadataReader.readRemoteMetadata("jdbc:exa:" + getConfig().getExasolAddress(),
                 getConfig().getExasolUser(), getConfig().getExasolPassword(), "EXA_DB", "JDBC_ADAPTER_TEST_SCHEMA",
-                tables, ExasolSqlDialect.getPublicName(), getConfig().getExceptionHandlingMode());
+                tables, ExasolSqlDialect.getPublicName(), getConfig().getExceptionHandlingMode(), Collections.emptyList());
         if (getConfig().isDebugOn()) {
             System.out.println("Meta: " + SchemaMetadataSerializer.serialize(meta).build().toString());
         }

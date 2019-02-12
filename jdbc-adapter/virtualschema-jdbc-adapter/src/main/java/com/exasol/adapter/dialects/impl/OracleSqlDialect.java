@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 import com.exasol.adapter.capabilities.AggregateFunctionCapability;
@@ -331,7 +332,7 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public MappedTable mapTable(final ResultSet tables) throws SQLException {
+    public MappedTable mapTable(final ResultSet tables, final List<String> ignoreErrorList) throws SQLException {
         final String tableName = tables.getString("TABLE_NAME");
         if (tableName.startsWith("BIN$")) {
             // In case of Oracle we may see deleted tables with strange names
@@ -341,7 +342,7 @@ public class OracleSqlDialect extends AbstractSqlDialect {
             System.out.println("Skip table: " + tableName);
             return MappedTable.createIgnoredTable();
         } else {
-            return super.mapTable(tables);
+            return super.mapTable(tables, ignoreErrorList);
         }
     }
 

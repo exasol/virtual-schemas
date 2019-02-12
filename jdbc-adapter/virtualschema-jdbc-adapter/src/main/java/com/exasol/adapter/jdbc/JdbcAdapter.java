@@ -135,7 +135,8 @@ public class JdbcAdapter {
         return JdbcMetadataReader.readRemoteMetadata(connection.getAddress(), connection.getUser(),
                 connection.getPassword(), catalog, schema, tables,
                 JdbcAdapterProperties.getSqlDialectName(meta.getProperties()),
-                JdbcAdapterProperties.getExceptionHandlingMode(meta.getProperties()));
+                JdbcAdapterProperties.getExceptionHandlingMode(meta.getProperties()),
+                JdbcAdapterProperties.getIgnoreErrorList(meta.getProperties()));
     }
 
     private static String handleRefresh(final RefreshRequest request, final ExaMetadata meta)
@@ -165,7 +166,8 @@ public class JdbcAdapter {
                     connection.getUser(), connection.getPassword(), JdbcAdapterProperties.getCatalog(newSchemaMeta),
                     JdbcAdapterProperties.getSchema(newSchemaMeta), tableFilter,
                     JdbcAdapterProperties.getSqlDialectName(newSchemaMeta),
-                    JdbcAdapterProperties.getExceptionHandlingMode(newSchemaMeta));
+                    JdbcAdapterProperties.getExceptionHandlingMode(newSchemaMeta),
+                    JdbcAdapterProperties.getIgnoreErrorList(newSchemaMeta));
             return ResponseJsonSerializer.makeSetPropertiesResponse(remoteMeta);
         }
         return ResponseJsonSerializer.makeSetPropertiesResponse(null);

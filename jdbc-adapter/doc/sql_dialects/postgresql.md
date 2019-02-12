@@ -35,3 +35,24 @@ CREATE VIRTUAL SCHEMA postgres
 	CONNECTION_NAME = 'POSTGRES_DOCKER'
 	;
 ```
+
+## Postgres identifiers
+
+In contrast to EXASOL, PostgreSQL does not treat identifiers as specified in the SQL standard. PostgreSQL folds unquoted identifiers to lower case instead of upper case. The adapter can do the identifier conversion as long as there are no identifiers in the PostgreSQL database that contain upper case characters. If that is the case an error will be thrown when creating or refreshing the virtual schema.
+In order to create or refresh the virtual schema regrardlessly, you can specifiy that the adapter should ignore this specific error:
+```sql
+CREATE VIRTUAL SCHEMA postgres
+	USING adapter.jdbc_adapter 
+	WITH
+	SQL_DIALECT = 'POSTGRESQL'
+	CATALOG_NAME = 'postgres'
+	SCHEMA_NAME = 'public'
+	CONNECTION_NAME = 'POSTGRES_DOCKER'
+	IGNORE_ERRORS = 'POSTGRESQL_UPPERCASE_TABLES'
+;
+```
+You can also set this property for an exitsing virtual schema:
+```sql
+ALTER VIRTUAL SCHEMA postgres SET IGNORE_ERRORS = 'POSTGRESQL_UPPERCASE_TABLES';
+```
+However you won't be able to query the identifier containing the upper case character.

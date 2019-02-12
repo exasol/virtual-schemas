@@ -1,8 +1,10 @@
 package com.exasol.adapter.dialects.impl;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 import com.exasol.adapter.capabilities.AggregateFunctionCapability;
@@ -20,6 +22,9 @@ import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.ScalarFunction;
 
 public class PostgreSQLSqlDialect extends AbstractSqlDialect {
+
+    public static final String POSTGRES_IGNORE_UPPERCASE_TABLES = "POSTGRESQL_UPPERCASE_TABLES";
+
     public PostgreSQLSqlDialect(final SqlDialectContext context) {
         super(context);
     }
@@ -299,6 +304,21 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    public MappedTable mapTable(final ResultSet tables, final List<String> ignoreErrorList) throws SQLException {
+        final String tableName = tables.getString("TABLE_NAME");
+        if (!ignoreErrorList.contains(POSTGRES_IGNORE_UPPERCASE_TABLES) && containsUppercaseCharacter(tableName)) {
+            throw new IllegalArgumentException("Table " + tableName + " cannot be used in virtual schema. " +
+                    "Set property IGNORE_ERRORS to POSTGRES_UPPERCASE_TABLES to enforce schema creation.");
+        } else {
+            return super.mapTable(tables, ignoreErrorList);
+        }
+    }
+
+    private boolean containsUppercaseCharacter(final String tableName) {
+        return !tableName.equals(tableName.toLowerCase());
+    }
+
+    @Override
     public Map<ScalarFunction, String> getScalarFunctionAliases() {
 
         final Map<ScalarFunction, String> scalarAliases = new EnumMap<>(ScalarFunction.class);
@@ -345,7 +365,12 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuote(final String identifier) {
-        return "\"" + identifier.replace("\"", "\"\"") + "\"";
+        final String lowercaseIdentifier = convertIdentifierToLowerCase(identifier);
+        return "\"" + lowercaseIdentifier.replace("\"", "\"\"") + "\"";
+    }
+
+    private String convertIdentifierToLowerCase(final String identifier) {
+        return identifier.toLowerCase();
     }
 
     @Override
