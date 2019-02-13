@@ -84,4 +84,6 @@ public interface SqlNodeVisitor<R> {
 
     public R visit(SqlTable sqlTable) throws AdapterException;
 
+    public R visit(SqlJoin sqlJoin) throws AdapterException;
+
 }

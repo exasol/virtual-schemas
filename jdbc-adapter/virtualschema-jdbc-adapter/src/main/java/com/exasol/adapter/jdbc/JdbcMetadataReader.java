@@ -19,13 +19,12 @@ public class JdbcMetadataReader {
     private static final Logger LOGGER = Logger.getLogger(JdbcMetadataReader.class.getName());
 
     public static SchemaMetadata readRemoteMetadata(final String connectionString, final String user,
-            final String password, String catalog, String schema, final List<String> tableFilter,
-            final String dialectName, final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode)
+                                                    final String password, String catalog, String schema, final List<String> tableFilter,
+                                                    final String dialectName, final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, final List<String> ignoreErrorList)
             throws SQLException, AdapterException {
         assert (catalog != null);
         assert (schema != null);
-        try {
-            final Connection conn = establishConnection(connectionString, user, password);
+        try (final Connection conn = establishConnection(connectionString, user, password);) {
             final DatabaseMetaData dbMeta = conn.getMetaData();
 
             // Retrieve relevant parts of DatabaseMetadata. Will be cached in adapternotes
@@ -45,9 +44,8 @@ public class JdbcMetadataReader {
 
             schema = findSchema(schema, dbMeta, dialect);
 
-            final List<TableMetadata> tables = findTables(catalog, schema, tableFilter, dbMeta, dialect, exceptionMode);
+            final List<TableMetadata> tables = findTables(catalog, schema, tableFilter, dbMeta, dialect, exceptionMode, ignoreErrorList);
 
-            conn.close();
             return new SchemaMetadata(SchemaAdapterNotes.serialize(schemaAdapterNotes), tables);
         } catch (final SQLException e) {
             e.printStackTrace();
@@ -56,7 +54,7 @@ public class JdbcMetadataReader {
     }
 
     private static Connection establishConnection(final String connectionString, final String user,
-            final String password) throws SQLException {
+                                                  final String password) throws SQLException {
         LOGGER.fine(() -> "Establishing connection with paramters: " + connectionString);
         final java.util.Properties info = new java.util.Properties();
         if (user != null) {
@@ -242,24 +240,23 @@ public class JdbcMetadataReader {
     }
 
     private static List<TableMetadata> findTables(final String catalog, final String schema,
-            final List<String> tableFilter, final DatabaseMetaData dbMeta, final SqlDialect dialect,
-            final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
+                                                  final List<String> tableFilter, final DatabaseMetaData dbMeta, final SqlDialect dialect,
+                                                  final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, List<String> ignoreErrorList) throws SQLException {
         final List<TableMetadata> tables = new ArrayList<>();
 
-        final String[] supportedTableTypes = { "TABLE", "VIEW", "SYSTEM TABLE" };
+        final String[] supportedTableTypes = {"TABLE", "VIEW", "SYSTEM TABLE"};
 
-        final ResultSet resTables = dbMeta.getTables(catalog, schema, null, supportedTableTypes);
         final List<SqlDialect.MappedTable> tablesMapped = new ArrayList<>();
-        // List<String> tableComments = new ArrayList<>();
-        while (resTables.next()) {
-            final SqlDialect.MappedTable mappedTable = dialect.mapTable(resTables);
-            if (!mappedTable.isIgnored()) {
-                tablesMapped.add(mappedTable);
-                // tableComments.add(mappedTable.getTableComment());
+        try (final ResultSet resTables = dbMeta.getTables(catalog, schema, null, supportedTableTypes)) {
+            // List<String> tableComments = new ArrayList<>();
+            while (resTables.next()) {
+                final SqlDialect.MappedTable mappedTable = dialect.mapTable(resTables, ignoreErrorList);
+                if (!mappedTable.isIgnored()) {
+                    tablesMapped.add(mappedTable);
+                    // tableComments.add(mappedTable.getTableComment());
+                }
             }
         }
-
-        resTables.close();
 
         // Columns
         for (int i = 0; i < tablesMapped.size(); ++i) {
@@ -300,8 +297,8 @@ public class JdbcMetadataReader {
     }
 
     private static List<ColumnMetadata> readColumns(final DatabaseMetaData dbMeta, final String catalog,
-            final String schema, final String table, final SqlDialect dialect,
-            final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
+                                                    final String schema, final String table, final SqlDialect dialect,
+                                                    final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
         final List<ColumnMetadata> columns = new ArrayList<>();
         try {
             final ResultSet cols = dbMeta.getColumns(catalog, schema, table, null);

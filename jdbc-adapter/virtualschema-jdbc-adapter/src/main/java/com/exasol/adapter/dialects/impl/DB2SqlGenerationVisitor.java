@@ -3,9 +3,11 @@ package com.exasol.adapter.dialects.impl;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.dialects.SqlGenerationHelper;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
+import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.sql.*;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
@@ -126,16 +128,20 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         }
         List<String> selectListElements = new ArrayList<>();
         if (selectList.isSelectStar()) {
-            if (selectListRequiresCasts(selectList)) {
+            if (SqlGenerationHelper.selectListRequiresCasts(selectList, nodeRequiresCast)) {
 
                 // Do as if the user has all columns in select list
                 SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
                 
                 int columnId = 0;
-                for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
-                    SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-                    selectListElements.add( getColumnProjectionStringNoCheck(sqlColumn,  super.visit(sqlColumn)  )   );
-                    ++columnId;
+                List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
+                SqlGenerationHelper.getMetadataFrom(select.getFromClause(), tableMetadata );
+                for (TableMetadata tableMeta : tableMetadata) {
+                    for (ColumnMetadata columnMeta : tableMeta.getColumns()) {
+                        SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
+                        selectListElements.add( getColumnProjectionStringNoCheck(sqlColumn,  super.visit(sqlColumn)  )   );
+                        ++columnId;
+                    }
                 }
                 
             } else {
@@ -361,30 +367,16 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
     private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("TIMESTAMP","DECFLOAT","CLOB","XML","TIME");
     private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("BLOB"); 
 
-
-    private boolean nodeRequiresCast(SqlNode node) throws AdapterException {
-        if (node.getType() == SqlNodeType.COLUMN) {
-            SqlColumn column = (SqlColumn)node;
-            String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-            return TYPE_NAMES_REQUIRING_CAST.contains(typeName);
+    private java.util.function.Predicate<SqlNode> nodeRequiresCast = node -> {
+        try {
+            if (node.getType() == SqlNodeType.COLUMN) {
+                SqlColumn column = (SqlColumn)node;
+                String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+                return TYPE_NAMES_REQUIRING_CAST.contains(typeName);
+            }
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return false;
-    }
-
-    private boolean selectListRequiresCasts(SqlSelectList selectList) throws AdapterException {
-        boolean requiresCasts = false;
-
-        // Do as if the user has all columns in select list
-        SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
-        int columnId = 0;
-        for (ColumnMetadata columnMeta : select.getFromClause().getMetadata().getColumns()) {
-                if (nodeRequiresCast(new SqlColumn(columnId, columnMeta))) {
-                requiresCasts = true;
-                }
-        }
-
-        return requiresCasts;
-    }
-
-
+    };
 }

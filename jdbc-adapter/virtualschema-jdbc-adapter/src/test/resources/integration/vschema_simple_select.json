@@ -1,0 +1,97 @@
+{
+    "testSchema" :
+    [
+        "create table t(x int)",
+        "create table u(x int)"
+    ],
+    "testCases" :
+    [
+        {
+            "testQuery": "select x from vs.t",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                }
+                            ],
+                            "name" : "T"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "from" : 
+                        {
+                            "name" : "T",
+                            "type" : "table"
+                        }
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT * FROM \"LS\".\"T\""
+                ]
+            }
+        },
+        {
+            "testQuery": "select x from vs.u",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,                                                                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "Y"
+                                }
+                            ],
+                            "name" : "U"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "from" : 
+                        {
+                            "name" : "U",
+                            "type" : "table"
+                        }
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT * FROM \"LS\".\"U\""
+                ]
+            }
+        }
+    ]
+}

@@ -7,10 +7,17 @@ public class SqlColumn extends SqlNode {
     
     private int id;
     private ColumnMetadata metadata;
+    private String tableName;
 
     public SqlColumn(int id, ColumnMetadata metadata) {
         this.id = id;
         this.metadata = metadata;
+    }
+
+    public SqlColumn(int id, ColumnMetadata metadata, String tableName) {
+        this.id = id;
+        this.metadata = metadata;
+        this.tableName = tableName;
     }
     
     public int getId() {
@@ -23,6 +30,10 @@ public class SqlColumn extends SqlNode {
     
     public String getName() {
         return metadata.getName();
+    }
+
+    public String getTableName() {
+        return tableName;
     }
     
     @Override

@@ -15,6 +15,7 @@ import com.exasol.adapter.sql.SqlFunctionScalarCase;
 import com.exasol.adapter.sql.SqlFunctionScalarCast;
 import com.exasol.adapter.sql.SqlFunctionScalarExtract;
 import com.exasol.adapter.sql.SqlGroupBy;
+import com.exasol.adapter.sql.SqlJoin;
 import com.exasol.adapter.sql.SqlLimit;
 import com.exasol.adapter.sql.SqlLiteralBool;
 import com.exasol.adapter.sql.SqlLiteralDate;
@@ -147,7 +148,12 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
 
     @Override
     public String visit(final SqlColumn column) throws AdapterException {
-        return this.dialect.applyQuoteIfNeeded(column.getName());
+        String tablePrefix = "";
+        if (this.context.hasMoreThanOneTable()) {
+            tablePrefix = this.dialect.applyQuoteIfNeeded(column.getTableName())
+                    + this.dialect.getTableCatalogAndSchemaSeparator();
+        }
+        return tablePrefix + this.dialect.applyQuoteIfNeeded(column.getName());
     }
 
     @Override
@@ -164,6 +170,13 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
                     + this.dialect.getTableCatalogAndSchemaSeparator();
         }
         return schemaPrefix + this.dialect.applyQuoteIfNeeded(table.getName());
+    }
+
+    @Override
+    public String visit(final SqlJoin join) throws AdapterException {
+        return join.getLeft().accept(this) + " " + join.getJoinType().name().replace('_', ' ')
+                 + " JOIN " + join.getRight().accept(this)
+                 + " ON " + join.getCondition().accept(this);
     }
 
     @Override

@@ -30,7 +30,7 @@ public class OracleSqlDialectTest {
                 "    HAVING 1 < COUNT(\"URL\")" +
                 "    ORDER BY \"USER_ID\" " +
                 ") LIMIT_SUBSELECT WHERE ROWNUM <= 10" ;
-        SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
+        SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, false);
         SqlDialectContext dialectContext = new SqlDialectContext(Mockito.mock(SchemaAdapterNotes.class));
         SqlDialect dialect = new OracleSqlDialect(dialectContext);
         SqlGenerationVisitor generator = dialect.getSqlGenerationVisitor(context);
@@ -53,7 +53,7 @@ public class OracleSqlDialectTest {
                 "      ORDER BY \"USER_ID\"" +
                 "  ) LIMIT_SUBSELECT WHERE ROWNUM <= 15 " +
                 ") WHERE ROWNUM_SUB > 5";
-        SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
+        SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, false);
         SqlDialectContext dialectContext = new SqlDialectContext(Mockito.mock(SchemaAdapterNotes.class));
         SqlDialect dialect = new OracleSqlDialect(dialectContext);
         SqlGenerationVisitor generator = dialect.getSqlGenerationVisitor(context);
@@ -77,7 +77,7 @@ public class OracleSqlDialectTest {
                 "      ORDER BY \"USER_ID\"" +
                 "  ) LIMIT_SUBSELECT WHERE ROWNUM <= 15 " +
                 ") WHERE ROWNUM_SUB > 5";
-        SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
+        SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, false);
         SqlDialectContext dialectContext = new SqlDialectContext(Mockito.mock(SchemaAdapterNotes.class));
         SqlDialect dialect = new OracleSqlDialect(dialectContext);
         SqlGenerationVisitor generator = dialect.getSqlGenerationVisitor(context);

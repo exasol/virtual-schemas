@@ -1,0 +1,279 @@
+{
+    "testSchema" :
+    [
+        "create table t1(x int, y int)",
+        "create table t2(x int)"
+    ],
+    "testCases" :
+    [
+        {
+            "testQuery": "select * from (select x from vs.t1) noAliasSubSel",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "Y"
+                                }
+                            ],
+                            "name" : "T1"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "selectList":
+                        [
+                            {
+                                "type": "column",
+                                "tableName": "T1",
+                                "name": "X",
+                                "columnNr": 0
+                            }
+                        ],
+                        "from" : 
+                        {
+                            "name" : "T1",
+                            "type" : "table"
+                        }
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT \"X\" FROM \"LS\".\"T1\""
+                ]
+            }
+        },
+        {
+            "testQuery": "select * from (select x from vs.t1 as withAlias) aliasSubSel",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "Y"
+                                }
+                            ],
+                            "name" : "T1"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "selectList":
+                        [
+                            {
+                                "type": "column",
+                                "tableName": "T1",
+                                "tableAlias": "WITHALIAS",
+                                "name": "X",
+                                "columnNr": 0
+                            }
+                        ],
+                        "from" : 
+                        {
+                            "name" : "T1",
+                            "alias": "WITHALIAS",
+                            "type" : "table"
+                        }
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT \"X\" FROM \"LS\".\"T1\""
+                ]
+            }
+        },
+        {
+            "testQuery": "select * from (select x from vs.t2 as withAlias) aliasWithFullSelection",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,                                                                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                }
+                            ],
+                            "name" : "T2"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "from" : 
+                        {
+                            "name" : "T2",
+                            "alias": "WITHALIAS",
+                            "type" : "table"
+                        }
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT * FROM \"LS\".\"T2\""
+                ]
+            }
+        },
+        {
+            "testQuery": "select * from (select t1alias.x as col1, t2alias.x as col2 from vs.t1 as t1alias join vs.t2 t2alias on t1alias.x=t2alias.x) aliasJoin",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "Y"
+                                }
+                            ],
+                            "name" : "T1"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "selectList":
+                        [
+                            {
+                                "type": "column",
+                                "tableName": "T1",
+                                "tableAlias": "T1ALIAS",
+                                "name": "X",
+                                "columnNr": 0
+                            }
+                        ],
+                        "from" : 
+                        {
+                            "name" : "T1",
+                            "alias": "T1ALIAS",
+                            "type" : "table"
+                        }
+                    },
+                    "type" : "pushdown"
+                },
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,                                                                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                }
+                            ],
+                            "name" : "T2"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "from" : 
+                        {
+                            "name" : "T2",
+                            "alias": "T2ALIAS",
+                            "type" : "table"
+                        }
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT \"X\" FROM \"LS\".\"T1\"",
+                    "SELECT * FROM \"LS\".\"T2\""
+                ]
+            }
+        }
+    ]
+}
