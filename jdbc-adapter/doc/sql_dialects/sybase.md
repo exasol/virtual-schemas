@@ -18,7 +18,7 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter
   AS
 
   %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
-  %jar /buckets/bucketfs1/virtualschema/virtualschema-jdbc-adapter-dist-1.3.0.jar;
+  %jar /buckets/bucketfs1/virtualschema/virtualschema-jdbc-adapter-dist-1.4.0.jar;
   %jar /buckets/bucketfs1/virtualschema/jtds-1.3.1.jar;
 /
 ```

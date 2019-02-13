@@ -61,7 +61,7 @@ public class SqlDialectTest {
 
         final SqlDialect dialect = new AliasesSqlDialect(aggAliases, scalarAliases, infixAliases, prefixAliases);
 
-        final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
+        final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, false);
         final SqlGenerationVisitor generator = new SqlGenerationVisitor(dialect, context);
         final String actualSql = node.accept(generator);
         assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
@@ -94,7 +94,7 @@ public class SqlDialectTest {
         final SqlDialect dialect = new AliasesSqlDialect(ImmutableMap.<AggregateFunction, String>of(), scalarAliases,
                 ImmutableMap.<ScalarFunction, String>of(), ImmutableMap.<ScalarFunction, String>of());
 
-        final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
+        final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, false);
         final SqlGenerationVisitor generator = new SqlGenerationVisitor(dialect, context);
         final String actualSql = node.accept(generator);
         assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
@@ -107,7 +107,7 @@ public class SqlDialectTest {
         final SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
         final SqlNode node = new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
 
-        final SqlGenerationContext context = new SqlGenerationContext("", "schema", false);
+        final SqlGenerationContext context = new SqlGenerationContext("", "schema", false, false);
 
         // Test non-simple scalar functions
         for (final ScalarFunction function : ScalarFunction.values()) {

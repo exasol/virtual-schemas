@@ -76,6 +76,11 @@ public class AbstractIntegrationTest {
         return connection.createStatement().executeUpdate(query);
     }
 
+    public void execute(final String stmt) throws SQLException {
+        checkConnection();
+        connection.createStatement().execute(stmt);
+    }
+
     public static void createJDBCAdapter(final Connection conn, final List<String> jarIncludes) throws SQLException {
         final Statement stmt = conn.createStatement();
         stmt.execute("CREATE SCHEMA IF NOT EXISTS ADAPTER");

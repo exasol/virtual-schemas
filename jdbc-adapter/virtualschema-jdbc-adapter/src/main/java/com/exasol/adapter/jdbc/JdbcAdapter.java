@@ -135,7 +135,8 @@ public class JdbcAdapter {
         return JdbcMetadataReader.readRemoteMetadata(connection.getAddress(), connection.getUser(),
                 connection.getPassword(), catalog, schema, tables,
                 JdbcAdapterProperties.getSqlDialectName(meta.getProperties()),
-                JdbcAdapterProperties.getExceptionHandlingMode(meta.getProperties()));
+                JdbcAdapterProperties.getExceptionHandlingMode(meta.getProperties()),
+                JdbcAdapterProperties.getIgnoreErrorList(meta.getProperties()));
     }
 
     private static String handleRefresh(final RefreshRequest request, final ExaMetadata meta)
@@ -165,7 +166,8 @@ public class JdbcAdapter {
                     connection.getUser(), connection.getPassword(), JdbcAdapterProperties.getCatalog(newSchemaMeta),
                     JdbcAdapterProperties.getSchema(newSchemaMeta), tableFilter,
                     JdbcAdapterProperties.getSqlDialectName(newSchemaMeta),
-                    JdbcAdapterProperties.getExceptionHandlingMode(newSchemaMeta));
+                    JdbcAdapterProperties.getExceptionHandlingMode(newSchemaMeta),
+                    JdbcAdapterProperties.getIgnoreErrorList(newSchemaMeta));
             return ResponseJsonSerializer.makeSetPropertiesResponse(remoteMeta);
         }
         return ResponseJsonSerializer.makeSetPropertiesResponse(null);
@@ -223,10 +225,12 @@ public class JdbcAdapter {
                 request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()));
         final SqlDialect dialect = JdbcAdapterProperties.getSqlDialect(request.getSchemaMetadataInfo().getProperties(),
                 dialectContext);
+        final boolean hasMoreThanOneTable = request.getInvolvedTablesMetadata().size() > 1;
         final SqlGenerationContext context = new SqlGenerationContext(
                 JdbcAdapterProperties.getCatalog(meta.getProperties()),
                 JdbcAdapterProperties.getSchema(meta.getProperties()),
-                JdbcAdapterProperties.isLocal(meta.getProperties()));
+                JdbcAdapterProperties.isLocal(meta.getProperties()),
+                hasMoreThanOneTable);
         final SqlGenerationVisitor sqlGeneratorVisitor = dialect.getSqlGenerationVisitor(context);
         final String pushdownQuery = request.getSelect().accept(sqlGeneratorVisitor);
 

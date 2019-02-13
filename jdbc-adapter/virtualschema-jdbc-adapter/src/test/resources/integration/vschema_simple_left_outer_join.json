@@ -1,0 +1,85 @@
+{
+    "testSchema" :
+    [
+        "create table t(x int)",
+        "create table u(y int)"
+    ],
+    "testCases" :
+    [
+        {
+            "testQuery": "select x from vs.u left outer join vs.t on vs.t.x=vs.u.y",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                }
+                            ],
+                            "name" : "T"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "from" : 
+                        {
+                            "name" : "T",
+                            "type" : "table"
+                        }
+                    },
+                    "type" : "pushdown"
+                },
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,                                                                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "Y"
+                                }
+                            ],
+                            "name" : "U"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "from" : 
+                        {
+                            "name" : "U",
+                            "type" : "table"
+                        },
+                        "type" : "select"
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT * FROM \"LS\".\"U\"",
+                    "SELECT * FROM \"LS\".\"T\""
+                ]
+            }
+        }
+    ]
+}

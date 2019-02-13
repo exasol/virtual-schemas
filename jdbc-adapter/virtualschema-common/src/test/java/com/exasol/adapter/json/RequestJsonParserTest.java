@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.json.JsonObject;
+import javax.json.JsonValue;
+
 import org.junit.Test;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 
@@ -19,6 +22,14 @@ import com.exasol.adapter.metadata.DataType.ExaCharset;
 import com.exasol.adapter.request.AdapterRequest;
 import com.exasol.adapter.request.PushdownRequest;
 import com.exasol.adapter.request.SetPropertiesRequest;
+import com.exasol.adapter.sql.JoinType;
+import com.exasol.adapter.sql.SqlJoin;
+import com.exasol.adapter.sql.SqlNode;
+import com.exasol.adapter.sql.SqlNodeType;
+import com.exasol.adapter.sql.SqlPredicate;
+import com.exasol.adapter.sql.SqlPredicateEqual;
+import com.exasol.adapter.sql.SqlStatementSelect;
+import com.exasol.utils.JsonHelper;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
@@ -114,6 +125,97 @@ public class RequestJsonParserTest {
         AdapterRequest request = parser.parseRequest(json);
         assertObjectEquals(expectedSchemaMetaInfo, request.getSchemaMetadataInfo());
         assertObjectEquals(expectedNewProperties, ((SetPropertiesRequest)request).getProperties());
+    }
+
+    @Test
+    public void testSimpleInnerJoinRequest() throws Exception {
+        String req = 
+        "{"+
+        "\"involvedTables\" :" +
+        "            [" +
+        "                {" +
+        "                    \"columns\" :" +
+        "                    [" +
+        "                        {" +
+        "                            \"dataType\" :" +
+        "                            {" +
+        "                                \"precision\" : 18," +
+        "                                \"scale\" : 0," +
+        "                                \"type\" : \"DECIMAL\"" +
+        "                            }," +
+        "                            \"name\" : \"ID\"" +
+        "                        }" +
+        "                    ]," +
+        "                    \"name\" : \"T1\"" +
+        "                }," +
+        "                {" +
+        "                    \"columns\" :" +
+        "                    [" +
+        "                        {" +
+        "                            \"dataType\" :" +
+        "                            {" +
+        "                                \"precision\" : 18," +
+        "                                \"scale\" : 0," +
+        "                                \"type\" : \"DECIMAL\"" +
+        "                            }," +
+        "                            \"name\" : \"ID\"" +
+        "                        }" +
+        "                    ]," +
+        "                    \"name\" : \"T2\"" +
+        "                }" +
+        "            ]," +
+        "    \"pushdownRequest\" : " +
+        "    {" +
+        "        \"type\" : \"select\"," +
+        "        \"from\" : " +
+        "        {" +
+        "            \"type\": \"join\"," +
+        "            \"join_type\": \"inner\"," +
+        "            \"left\":" +
+        "            {" +
+        "                \"name\" : \"T1\"," +
+        "                \"type\" : \"table\"" +
+        "            }," +
+        "            \"right\":" +
+        "            {" +
+        "                \"name\" : \"T2\"," +
+        "                \"type\" : \"table\"" +
+        "            }," +
+        "            \"condition\":" +
+        "            {" +
+        "                \"left\" :" +
+        "                {" +
+        "                        \"columnNr\" : 0," +
+        "                        \"name\" : \"ID\"," +
+        "                        \"tableName\" : \"T1\"," +
+        "                        \"type\" : \"column\"" +
+        "                }," +
+        "                \"right\" :" +
+        "                {" +
+        "                        \"columnNr\" : 0," +
+        "                        \"name\" : \"ID\"," +
+        "                        \"tableName\" : \"T2\"," +
+        "                        \"type\" : \"column\"" +
+        "                }," +
+        "                \"type\" : \"predicate_equal\"" +
+        "            }" +
+        "        }" +
+        "    }," +
+        "    \"type\" : \"pushdown\"" +
+        "}";
+        
+        RequestJsonParser parser = new RequestJsonParser();
+        AdapterRequest request = parser.parseRequest(req);
+        PushdownRequest pushdown = (PushdownRequest) request;
+
+        SqlStatementSelect select = (SqlStatementSelect) pushdown.getSelect();
+        SqlJoin from = (SqlJoin) select.getFromClause();
+        
+        assertTrue(from.getType() == SqlNodeType.JOIN);
+        assertTrue(from.getJoinType() == JoinType.INNER);
+        assertTrue(from.getCondition().getType() == SqlNodeType.PREDICATE_EQUAL);
+        assertTrue(from.getLeft().getType() == SqlNodeType.TABLE);
+        assertTrue(from.getRight().getType() == SqlNodeType.TABLE);
     }
     
     /**
