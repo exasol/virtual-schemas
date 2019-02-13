@@ -55,4 +55,4 @@ You can also set this property for an exitsing virtual schema:
 ```sql
 ALTER VIRTUAL SCHEMA postgres SET IGNORE_ERRORS = 'POSTGRESQL_UPPERCASE_TABLES';
 ```
-However you won't be able to query the identifier containing the upper case character.
+However you won't be able to query the identifier containing the upper case character, the name resolution will fail when querying the virtual table.
