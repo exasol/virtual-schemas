@@ -54,12 +54,10 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         createTestSchema();
         createVirtualSchema(VIRTUAL_SCHEMA, ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "",
                 getConfig().getExasolUser(), getConfig().getExasolPassword(), "ADAPTER.JDBC_ADAPTER", connectionString,
-                IS_LOCAL, getConfig().debugAddress(), "", null,
-                "JOIN,JOIN_TYPE_INNER,JOIN_TYPE_LEFT_OUTER,JOIN_TYPE_RIGHT_OUTER,JOIN_TYPE_FULL_OUTER,JOIN_CONDITION_EQUI,JOIN_CONDITION_ALL");
+                IS_LOCAL, getConfig().debugAddress(), "", null, "");
         createVirtualSchema(VIRTUAL_SCHEMA_MIXED_CASE, ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA_MIXED_CASE, "",
                 getConfig().getExasolUser(), getConfig().getExasolPassword(), "ADAPTER.JDBC_ADAPTER", connectionString,
-                IS_LOCAL, getConfig().debugAddress(), "", null,
-                "JOIN,JOIN_TYPE_INNER,JOIN_TYPE_LEFT_OUTER,JOIN_TYPE_RIGHT_OUTER,JOIN_TYPE_FULL_OUTER,JOIN_CONDITION_EQUI,JOIN_CONDITION_ALL");
+                IS_LOCAL, getConfig().debugAddress(), "", null, "");
     }
 
     private static void createTestSchema() throws SQLException {
