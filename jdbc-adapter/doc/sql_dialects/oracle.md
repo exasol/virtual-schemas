@@ -15,7 +15,7 @@ Oracle data types are mapped to their equivalents in Exasol. The following excep
 
 ## JDBC Driver
 
-To setup a virtual schema that communicates with an Oracle database using JDBC, the JDBC driver, e.g., `ojdbc7-12.1.0.2.jar`, must first be installed in EXAoperation and deployed to BucketFS; see [this article](https://www.exasol.com/support/browse/SOL-179#WhichJDBCdriverforOracleshallIuse?) and [Deploying the Adapter Step By Step](deploying_the_virtual_schema_adapter.md) for instructions.
+To setup a virtual schema that communicates with an Oracle database using JDBC, the JDBC driver, e.g., `ojdbc7-12.1.0.2.jar`, must first be installed in EXAoperation and deployed to BucketFS; see [this article](https://www.exasol.com/support/browse/SOL-179#WhichJDBCdriverforOracleshallIuse?) and [Deploying the Adapter Step By Step](../deploying_the_virtual_schema_adapter.md) for instructions.
 
 ## Adapter Script
 
@@ -28,7 +28,7 @@ CREATE JAVA ADAPTER SCRIPT adapter.jdbc_oracle AS
 
   // You need to replace `your-bucket-fs` and `your-bucket` to match the actual location
   // of the adapter jar.
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.3.0.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.4.0.jar;
 
   // Add the oracle jdbc driver to the classpath
   %jar /buckets/bucketfs1/bucket1/ojdbc7-12.1.0.2.jar
