@@ -17,7 +17,7 @@ After uploading the adapter jar, the adapter script can be created as follows:
 CREATE SCHEMA adapter;
 CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
   %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.3.0.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.4.0.jar;
 /
 ```
 
