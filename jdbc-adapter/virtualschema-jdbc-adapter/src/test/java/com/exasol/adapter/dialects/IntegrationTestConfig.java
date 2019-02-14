@@ -259,6 +259,30 @@ public class IntegrationTestConfig {
         return getProperty("sybase", "password");
     }
 
+    public boolean getPostgresqlTestsRequested() {
+        return getProperty("postgresql", "runIntegrationTests", false);
+    }
+
+    public String getPostgresqlJdbcDriverPath() {
+        return getProperty("postgresql", "jdbcDriverPath");
+    }
+
+    public String getPostgresqlJdbcConnectionString() {
+        return getProperty("postgresql", "connectionString");
+    }
+
+    public String getPostgresqlDockerJdbcConnectionString() {
+        return getProperty("postgresql", "dockerConnectionString");
+    }
+
+    public String getPostgresqlUser() {
+        return getProperty("postgresql", "user");
+    }
+
+    public String getPostgresqlPassword() {
+        return getProperty("postgresql", "password");
+    }
+
     public String getBucketFSPassword(){
         return getProperty("general", "bucketFsPassword");
     }

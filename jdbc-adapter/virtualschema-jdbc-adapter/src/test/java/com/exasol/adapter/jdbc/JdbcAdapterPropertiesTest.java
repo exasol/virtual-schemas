@@ -2,6 +2,7 @@ package com.exasol.adapter.jdbc;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -244,6 +245,26 @@ public class JdbcAdapterPropertiesTest {
         properties.put(JdbcAdapterProperties.PROP_EXCEPTION_HANDLING, "NONE");
         assertEquals(JdbcAdapterProperties.ExceptionHandlingMode.NONE,
                 JdbcAdapterProperties.getExceptionHandlingMode(properties));
+        JdbcAdapterProperties.checkPropertyConsistency(properties);
+    }
+
+    @Test
+    public void getIgnoreErrors() {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("IGNORE_ERRORS", "ERrror_foo, error_bar    ,  another_error, уккщк");
+        List<String> expectedErrorList = new ArrayList<>();
+        expectedErrorList.add("ERRROR_FOO");
+        expectedErrorList.add("ERROR_BAR");
+        expectedErrorList.add("ANOTHER_ERROR");
+        expectedErrorList.add("УККЩК");
+        assertEquals(expectedErrorList, JdbcAdapterProperties.getIgnoreErrorList(properties));
+    }
+
+    @Test(expected = InvalidPropertyException.class)
+    public void checkIgnoreErrorsConsistency() throws AdapterException {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("IGNORE_ERRORS", "ORACLE_ERROR");
+        properties.put("dialect", "postgresql");
         JdbcAdapterProperties.checkPropertyConsistency(properties);
     }
 }

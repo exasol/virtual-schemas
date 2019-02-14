@@ -137,6 +137,7 @@ Property                    | Value
 **IS_LOCAL**                | Only relevant if your data source is the same Exasol database where you create the virtual schema. Either `TRUE` or `FALSE` (default). If true, you are connecting to the local Exasol database (e.g. for testing purposes). In this case, the adapter can avoid the `IMPORT FROM JDBC` overhead.
 **EXCEPTION_HANDLING**      | Activates or deactivates different exception handling modes. Supported values: `IGNORE_INVALID_VIEWS` and `NONE` (default). Currently this property only affects the Teradata dialect.
 **EXCLUDED_CAPABILITIES**   | A comma-separated list of capabilities that you want to deactivate (although the adapter might support them).
+**IGNORE_ERRORS**           | Is used to ignore errors thrown by the adapter. Supported values: 'POSTGRESQL_UPPERCASE_TABLES' (see PostgreSQL dialect documentation).
 
 
 ## Debugging

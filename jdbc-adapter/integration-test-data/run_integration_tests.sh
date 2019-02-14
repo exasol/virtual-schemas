@@ -12,11 +12,15 @@ readonly config="$(pwd)/integration-test-data/integration-test-travis.yaml"
 readonly exasol_docker_image_version="6.0.10-d1"
 readonly docker_image="exasol/docker-db:$exasol_docker_image_version"
 readonly docker_name="exasoldb"
+readonly jdbc_driver_dir="$(pwd)/integration-test-data/drivers"
+readonly docker_helper="$(pwd)/integration-test-data/socker.py"
 readonly tmp="$(mktemp -td exasol-vs-adapter-integration.XXXXXX)" || exit 1
+readonly config_with_ips="$(pwd)/integration-test-data/integration-test-travis_with_ips.yaml"
 
 function cleanup() {
     docker rm -f exasoldb || true
     sudo rm -rf "$tmp" || true
+	cleanup_remote_dbs || true
 }
 trap cleanup EXIT
 
@@ -27,9 +31,35 @@ main() {
 	check_docker_ready
 	build
 	upload_jar_to_bucket
+	deploy_jdbc_drivers
+	start_remote_dbs
+	replace_hosts_with_ips_in_config
 	run_tests
 }
 
+deploy_jdbc_drivers() {
+	bucket_fs_url=$(awk '/bucketFsUrl/{print $NF}' $config)
+	bfs_url_no_http=$(echo $bucket_fs_url | awk -F/ '{for(i=3;i<=NF;++i)printf "%s/",$i}')
+	bucket_fs_pwd=$(awk '/bucketFsPassword/{print $NF}' $config)
+	bucket_fs_upload_url=http://w:$bucket_fs_pwd@$bfs_url_no_http/drivers/jdbc/
+	for d in $jdbc_driver_dir/*
+	do
+	    db_driver=$(basename $d)
+	    find $jdbc_driver_dir/$db_driver -type f -exec curl -X PUT -T {} $bucket_fs_upload_url/$db_driver/ \;
+	done
+}
+
+replace_hosts_with_ips_in_config() {
+	$docker_helper --add_docker_hosts $config > $config_with_ips
+}
+
+start_remote_dbs() {
+	$docker_helper --run $config
+}
+
+cleanup_remote_dbs() {
+	$docker_helper --rm $config
+}
 
 prepare_configuration_dir() {
 	mkdir -p "$1"
@@ -73,7 +103,7 @@ upload_jar_to_bucket() {
 }
 
 run_tests() {
-	mvn -q verify -Pit -Dintegrationtest.configfile="$config" -Dintegrationtest.skipTestSetup=true
+	mvn -q verify -Pit -Dintegrationtest.configfile="$config_with_ips" -Dintegrationtest.skipTestSetup=true
 }
 
 main "$@"

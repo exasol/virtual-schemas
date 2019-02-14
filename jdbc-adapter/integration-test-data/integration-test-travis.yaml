@@ -5,10 +5,22 @@ general:
   debugAddress:     ''
   bucketFsUrl:      http://127.0.0.1:6594/default
   bucketFsPassword: write
-  jdbcAdapterPath:  /buckets/bfsdefault/default/virtualschema-jdbc-adapter-dist-1.3.0.jar
+  jdbcAdapterPath:  /buckets/bfsdefault/default/virtualschema-jdbc-adapter-dist-1.4.0.jar
 
 exasol:
   runIntegrationTests: true
   address:  127.0.0.1:8899
   user:     sys
   password: exasol
+
+postgresql:
+  runIntegrationTests:    true
+  jdbcDriverPath:         /buckets/bfsdefault/default/drivers/jdbc/POSTGRESQL/postgresql-42.2.5.jar;
+  connectionString:       jdbc:postgresql://localhost:45432/postgres
+  user:                   postgres
+  password:               postgres
+  dockerImage:            postgres
+  dockerImageVersion:     latest
+  dockerPortMapping:      45432:5432
+  dockerName:             testpg
+  dockerConnectionString: jdbc:postgresql://DBHOST:5432/postgres
