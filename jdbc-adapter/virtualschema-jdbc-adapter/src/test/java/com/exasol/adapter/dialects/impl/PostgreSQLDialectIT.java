@@ -48,11 +48,11 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
         createPostgreSQLJDBCAdapter();
         createVirtualSchema(VIRTUAL_SCHEMA, PostgreSQLSqlDialect.getPublicName(), POSTGRES_CATALOG, POSTGRES_SCHEMA, "", getConfig().getPostgresqlUser(),
                 getConfig().getPostgresqlPassword(), "ADAPTER.JDBC_ADAPTER", getConfig().getPostgresqlDockerJdbcConnectionString(),
-                IS_LOCAL, getConfig().debugAddress(), "", null);
+                IS_LOCAL, getConfig().debugAddress(), "", null, "JOIN");
         createVirtualSchema(VIRTUAL_SCHEMA_UPPERCASE_TABLE, PostgreSQLSqlDialect.getPublicName(), POSTGRES_CATALOG, POSTGRES_SCHEMA_UPPERCASE_TABLE, "",
                 getConfig().getPostgresqlUser(), getConfig().getPostgresqlPassword(), "ADAPTER.JDBC_ADAPTER",
                 getConfig().getPostgresqlDockerJdbcConnectionString(), IS_LOCAL, getConfig().debugAddress(), "",
-                "ignore_errors='POSTGRESQL_UPPERCASE_TABLES'");
+                "ignore_errors='POSTGRESQL_UPPERCASE_TABLES'", "JOIN");
     }
 
     private static void createTestSchema() throws SQLException, ClassNotFoundException, FileNotFoundException {
@@ -101,7 +101,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
         expectedEx.expectMessage("Table UPPer_t cannot be used in virtual schema. Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation.");
         createVirtualSchema("FOO", PostgreSQLSqlDialect.getPublicName(), POSTGRES_CATALOG, POSTGRES_SCHEMA_UPPERCASE_TABLE, "",
                 getConfig().getPostgresqlUser(), getConfig().getPostgresqlPassword(), "ADAPTER.JDBC_ADAPTER",
-                getConfig().getPostgresqlDockerJdbcConnectionString(), IS_LOCAL, getConfig().debugAddress(), "", null);
+                getConfig().getPostgresqlDockerJdbcConnectionString(), IS_LOCAL, getConfig().debugAddress(), "", null, "JOIN");
     }
 
     @Test
