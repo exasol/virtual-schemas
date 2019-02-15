@@ -7,8 +7,8 @@ import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.sql.SqlNode;
-import com.exasol.utils.SqlTestUtil;
 import org.junit.Test;
+import utils.SqlTestUtil;
 
 import static org.junit.Assert.assertEquals;
 

@@ -8,10 +8,10 @@ import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.metadata.MetadataException;
 import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.sql.*;
-import com.exasol.utils.SqlTestUtil;
 import com.google.common.collect.ImmutableList;
 import org.junit.Test;
 import org.mockito.Mockito;
+import utils.SqlTestUtil;
 
 import java.util.ArrayList;
 import java.util.List;

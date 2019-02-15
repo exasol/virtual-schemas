@@ -9,9 +9,9 @@ import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 import com.exasol.adapter.sql.SqlNode;
 import com.exasol.adapter.sql.SqlSelectList;
 import com.exasol.adapter.sql.SqlStatementSelect;
-import com.exasol.utils.SqlTestUtil;
 import org.junit.Test;
 import org.mockito.Mockito;
+import utils.SqlTestUtil;
 
 import static org.junit.Assert.assertEquals;
 
