@@ -8,7 +8,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>virtualschema-common</module>
         <module>virtualschema-jdbc-adapter</module>
         <module>virtualschema-jdbc-adapter-dist</module>
     </modules>

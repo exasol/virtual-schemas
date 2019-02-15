@@ -28,9 +28,9 @@ import com.exasol.adapter.sql.SqlNode;
 import com.exasol.adapter.sql.SqlSelectList;
 import com.exasol.adapter.sql.SqlStatementSelect;
 import com.exasol.adapter.sql.SqlTable;
-import com.exasol.utils.SqlTestUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import utils.SqlTestUtil;
 
 public class SqlDialectTest {
 
