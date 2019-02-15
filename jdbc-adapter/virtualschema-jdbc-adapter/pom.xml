@@ -92,11 +92,11 @@
     </profiles>
 
 	<dependencies>
-		<dependency>
+        <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>virtual-schema-common-java</artifactId>
-            <version>1.0.0</version>
-		</dependency>
+            <version>1.0.2</version>
+        </dependency>
         <!-- We need this only for the integration test profile, however without adding it here you would have to enable the profile in the IDE to have the dependency -->
         <dependency>
             <groupId>org.yaml</groupId>
