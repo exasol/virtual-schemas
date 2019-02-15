@@ -5,10 +5,8 @@ import static org.mockito.Mockito.when;
 
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Arrays;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 import javax.json.JsonObject;
 import javax.json.JsonValue;
@@ -64,7 +62,6 @@ public class FileBasedIntegrationTest {
     private static final String TEST_FILE_KEY_TESTCASES = "testCases";
     private static final String TEST_FILE_KEY_EXP_PD_REQUEST = "expectedPushdownRequest";
     private static final String TEST_FILE_KEY_EXP_PD_RESPONSE = "expectedPushdownResponse";
-    private static final String TEST_FILE_KEY_DIALECT_EXASOL = "Exasol";
     private static final String JSON_API_KEY_INVOLVED_TABLES = "involvedTables";
 
     @Parameterized.Parameters(name = "{index}: {0}")
@@ -85,16 +82,18 @@ public class FileBasedIntegrationTest {
         int numberOftests = getNumberOfTestsFrom(jsonTest);
         for (int testNr = 0; testNr < numberOftests; testNr++) {
             List<PushdownRequest> pushdownRequests = getPushdownRequestsFrom(jsonTest, testNr);
-            List<String> expectedPushdownQueries = getExpectedPushdownQueriesFrom(jsonTest, testNr);
-            for (PushdownRequest pushdownRequest : pushdownRequests) {
-                String pushdownQuery = generatePushdownQuery(pushdownRequest, hasMultipleTables(jsonTest, testNr));
-                assertExpectedPushdowns(expectedPushdownQueries, pushdownQuery, testFile.getName(), testNr);
+            Map<String, List<String>> expectedPushdownQueries = getExpectedPushdownQueriesFrom(jsonTest, testNr);
+            for (String dialect : expectedPushdownQueries.keySet()) {
+                for (PushdownRequest pushdownRequest : pushdownRequests) {
+                    String pushdownQuery = generatePushdownQuery(dialect, pushdownRequest, hasMultipleTables(jsonTest, testNr));
+                    assertExpectedPushdowns(expectedPushdownQueries.get(dialect), pushdownQuery, testFile.getName(), testNr, dialect);
+                }
             }
         }
     }
 
     private void assertExpectedPushdowns(List<String> expectedPushdownQueries, String pushdownQuery, String testFile,
-            int testNr) {
+                                         int testNr, String dialect) {
         boolean foundInExpected = expectedPushdownQueries.stream().anyMatch(pushdownQuery::contains);
         StringBuilder errorMessage = new StringBuilder();
         if (!foundInExpected)
@@ -107,6 +106,8 @@ public class FileBasedIntegrationTest {
             errorMessage.append(testFile);
             errorMessage.append(" ,Test#: ");
             errorMessage.append(testNr);
+            errorMessage.append(" ,Dialect: ");
+            errorMessage.append(dialect);
         }
         assertTrue(errorMessage.toString(), foundInExpected);
     }
@@ -138,7 +139,7 @@ public class FileBasedIntegrationTest {
         return size > 1;
     }
 
-    private String generatePushdownQuery(PushdownRequest pushdownRequest, Boolean multipleTables) throws AdapterException {
+    private String generatePushdownQuery(String dialect, PushdownRequest pushdownRequest, Boolean multipleTables) throws AdapterException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         String schemaName = "LS";
         SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, multipleTables);
         SchemaAdapterNotes notes = Mockito.mock(SchemaAdapterNotes.class);
@@ -147,20 +148,26 @@ public class FileBasedIntegrationTest {
         when(notes.isNullsAreSortedHigh()).thenReturn(true);
         when(notes.isNullsAreSortedLow()).thenReturn(false);
         SqlDialectContext dialectContext = new SqlDialectContext(notes);
-        ExasolSqlDialect dialect = new ExasolSqlDialect(dialectContext);
-        final SqlGenerationVisitor sqlGeneratorVisitor = dialect.getSqlGenerationVisitor(context);
+        Class dialectClass = Class.forName("com.exasol.adapter.dialects.impl." + dialect + "SqlDialect");
+        SqlDialect sqlDialect = (SqlDialect)dialectClass.getConstructor(SqlDialectContext.class).newInstance(dialectContext);
+        final SqlGenerationVisitor sqlGeneratorVisitor = sqlDialect.getSqlGenerationVisitor(context);
         return pushdownRequest.getSelect().accept(sqlGeneratorVisitor);
     }
 
-    private List<String> getExpectedPushdownQueriesFrom(String jsonTest, int testNr) throws Exception {
+    private Map<String, List<String>> getExpectedPushdownQueriesFrom(String jsonTest, int testNr) throws Exception {
         JsonObject root = JsonHelper.getJsonObject(jsonTest);
         JsonObject test = root.getJsonArray(TEST_FILE_KEY_TESTCASES).getValuesAs(JsonObject.class).get(testNr);
-        int numberOfPushdownResponses = test.getJsonObject(TEST_FILE_KEY_EXP_PD_RESPONSE).getJsonArray(TEST_FILE_KEY_DIALECT_EXASOL).size();
-        List<String> pushdownResponses = new ArrayList<>(numberOfPushdownResponses);
-        for(int pushdownNr = 0; pushdownNr < numberOfPushdownResponses; pushdownNr++) {
-            pushdownResponses.add(test.getJsonObject(TEST_FILE_KEY_EXP_PD_RESPONSE).getJsonArray(TEST_FILE_KEY_DIALECT_EXASOL).get(pushdownNr)
-                    .toString().replaceAll("\\\\\"", "\"").replaceAll("^\"+", "").replaceAll("\"$", ""));
+        JsonObject expectedResponses = test.getJsonObject(TEST_FILE_KEY_EXP_PD_RESPONSE);
+        Map<String, List<String>> expectedQueriesForDialects = new HashMap<>();
+        for ( String dialect : expectedResponses.keySet()) {
+            int numberOfPushdownResponses = test.getJsonObject(TEST_FILE_KEY_EXP_PD_RESPONSE).getJsonArray(dialect).size();
+            List<String> pushdownResponses = new ArrayList<>(numberOfPushdownResponses);
+            for(int pushdownNr = 0; pushdownNr < numberOfPushdownResponses; pushdownNr++) {
+                pushdownResponses.add(test.getJsonObject(TEST_FILE_KEY_EXP_PD_RESPONSE).getJsonArray(dialect).get(pushdownNr)
+                        .toString().replaceAll("\\\\\"", "\"").replaceAll("^\"+", "").replaceAll("\"$", ""));
+            }
+            expectedQueriesForDialects.put(dialect, pushdownResponses);
         }
-        return pushdownResponses;
+        return expectedQueriesForDialects;
     }
 }
