@@ -367,7 +367,7 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
             final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
             final int decimalScale = jdbcTypeDescription.getDecimalScale();
 
-            if (decimalPrec <= DataType.maxExasolDecimalPrecision) {
+            if (decimalPrec <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
                 colType = DataType.createDecimal(decimalPrec, decimalScale);
             } else {
                 int size = decimalPrec + 1;
@@ -390,7 +390,7 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
 
         case Types.CLOB: // TEXT and UNITEXT types in Sybase
 
-            colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
             break;
 
         case Types.BLOB:
