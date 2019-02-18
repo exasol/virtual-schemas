@@ -47,6 +47,10 @@
                 "Exasol": 
                 [
                     "SELECT * FROM \"LS\".\"T\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT * FROM \"ls\".\"t\""
                 ]
             }
         },
@@ -90,6 +94,10 @@
                 "Exasol": 
                 [
                     "SELECT * FROM \"LS\".\"U\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT * FROM \"ls\".\"u\""
                 ]
             }
         }

@@ -66,6 +66,10 @@
                 "Exasol": 
                 [
                     "SELECT \"X\" FROM \"LS\".\"T1\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT \"x\" FROM \"ls\".\"t1\""
                 ]
             }
         },
@@ -131,6 +135,10 @@
                 "Exasol": 
                 [
                     "SELECT \"X\" FROM \"LS\".\"T1\" \"WITHALIAS\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT \"x\" FROM \"ls\".\"t1\" \"withalias\""
                 ]
             }
         },
@@ -175,6 +183,10 @@
                 "Exasol": 
                 [
                     "SELECT * FROM \"LS\".\"T2\" \"WITHALIAS\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT * FROM \"ls\".\"t2\" \"withalias\""
                 ]
             }
         },
@@ -293,6 +305,10 @@
                 "Exasol": 
                 [
                     "SELECT \"T1ALIAS\".\"X\", \"T2ALIAS\".\"X\" FROM \"LS\".\"T1\" \"T1ALIAS\" INNER JOIN \"LS\".\"T2\" \"T2ALIAS\" ON \"T1ALIAS\".\"X\" = \"T2ALIAS\".\"X\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT \"t1alias\".\"x\", \"t2alias\".\"x\" FROM \"ls\".\"t1\" \"t1alias\" INNER JOIN \"ls\".\"t2\" \"t2alias\" ON \"t1alias\".\"x\" = \"t2alias\".\"x\""
                 ]
             }
         }

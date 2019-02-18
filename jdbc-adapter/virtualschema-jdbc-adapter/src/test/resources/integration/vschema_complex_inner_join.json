@@ -221,6 +221,10 @@
         "Exasol":
         [
           "SELECT \"A\".\"ID\", \"B\".\"ID\", SUM(\"A\".\"VAL\"), SUM(\"B\".\"VAL\") FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\" GROUP BY \"A\".\"ID\", \"B\".\"ID\" HAVING 0 < SUM(\"A\".\"VAL\") ORDER BY \"A\".\"ID\" LIMIT 1000"
+        ],
+        "PostgreSQL":
+        [
+          "SELECT \"a\".\"id\", \"b\".\"id\", SUM(\"a\".\"val\"), SUM(\"b\".\"val\") FROM \"ls\".\"t1\" \"a\" INNER JOIN \"ls\".\"t2\" \"b\" ON \"a\".\"id\" = \"b\".\"id\" GROUP BY \"a\".\"id\", \"b\".\"id\" HAVING 0 < SUM(\"a\".\"val\") ORDER BY \"a\".\"id\" LIMIT 1000"
         ]
       }
     }

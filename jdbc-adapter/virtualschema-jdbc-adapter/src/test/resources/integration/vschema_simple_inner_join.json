@@ -219,6 +219,10 @@
                 "Exasol":
                 [
                     "SELECT \"A\".\"ID\", \"B\".\"ID\" FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT \"a\".\"id\", \"b\".\"id\" FROM \"ls\".\"t1\" \"a\" INNER JOIN \"ls\".\"t2\" \"b\" ON \"a\".\"id\" = \"b\".\"id\""
                 ]
             }
         },
@@ -325,6 +329,10 @@
                 "Exasol":
                 [
                     "SELECT \"A\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" ON \"A\".\"ID\" = \"T2\".\"ID\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT \"a\".\"id\", \"t2\".\"id\" FROM \"ls\".\"t1\" \"a\" INNER JOIN \"ls\".\"t2\" ON \"a\".\"id\" = \"t2\".\"id\""
                 ]
             }
         }
