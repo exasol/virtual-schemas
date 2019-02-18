@@ -4,7 +4,7 @@ This page describes how you can develop and semi-automatically test a dialect fo
 ## Content
 
 * [Developing a Dialect](#developing-a-dialect)
-* [Integration Testing](#integration-testing)
+* [Preparing Integration Test](#preparing-integration-test)
 
 ## Developing a Dialect
 
