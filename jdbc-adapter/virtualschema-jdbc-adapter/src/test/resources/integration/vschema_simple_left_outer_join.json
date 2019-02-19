@@ -109,6 +109,10 @@
                 "PostgreSQL":
                 [
                     "SELECT \"u\".\"y\", \"t\".\"x\" FROM \"ls\".\"u\" LEFT OUTER JOIN \"ls\".\"t\" ON \"t\".\"x\" = \"u\".\"y\""
+                ],
+                "Oracle":
+                [
+                    "SELECT \"U\".\"Y\", \"T\".\"X\" FROM \"LS\".\"U\" LEFT OUTER JOIN \"LS\".\"T\" ON \"T\".\"X\" = \"U\".\"Y\""
                 ]
             }
         }

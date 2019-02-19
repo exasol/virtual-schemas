@@ -70,6 +70,10 @@
                 "PostgreSQL":
                 [
                     "SELECT \"x\" FROM \"ls\".\"t1\""
+                ],
+                "Oracle":
+                [
+                    "SELECT \"X\" FROM \"LS\".\"T1\""
                 ]
             }
         },
@@ -139,6 +143,10 @@
                 "PostgreSQL":
                 [
                     "SELECT \"x\" FROM \"ls\".\"t1\" \"withalias\""
+                ],
+                "Oracle":
+                [
+                    "SELECT \"X\" FROM \"LS\".\"T1\" \"WITHALIAS\""
                 ]
             }
         },
@@ -187,6 +195,10 @@
                 "PostgreSQL":
                 [
                     "SELECT * FROM \"ls\".\"t2\" \"withalias\""
+                ],
+                "Oracle":
+                [
+                    "SELECT * FROM \"LS\".\"T2\" \"WITHALIAS\""
                 ]
             }
         },
@@ -309,6 +321,10 @@
                 "PostgreSQL":
                 [
                     "SELECT \"t1alias\".\"x\", \"t2alias\".\"x\" FROM \"ls\".\"t1\" \"t1alias\" INNER JOIN \"ls\".\"t2\" \"t2alias\" ON \"t1alias\".\"x\" = \"t2alias\".\"x\""
+                ],
+                "Oracle":
+                [
+                    "SELECT \"T1ALIAS\".\"X\", \"T2ALIAS\".\"X\" FROM \"LS\".\"T1\" \"T1ALIAS\" INNER JOIN \"LS\".\"T2\" \"T2ALIAS\" ON \"T1ALIAS\".\"X\" = \"T2ALIAS\".\"X\""
                 ]
             }
         }

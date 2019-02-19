@@ -127,6 +127,10 @@
         "PostgreSQL":
         [
           "SELECT NULLIFZERO((\"t1\".\"id\" - \"t2\".\"id\")) FROM \"ls\".\"t1\" INNER JOIN \"ls\".\"t2\" ON \"t1\".\"id\" = \"t2\".\"id\""
+        ],
+        "Oracle":
+        [
+          "SELECT NULLIF((\"T1\".\"ID\" - \"T2\".\"ID\"), 0) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
         ]
       }
     },
@@ -257,6 +261,10 @@
         "PostgreSQL":
         [
           "SELECT NULLIFZERO((\"a\".\"id\" - \"b\".\"id\")) FROM \"ls\".\"t1\" \"a\" INNER JOIN \"ls\".\"t2\" \"b\" ON \"a\".\"id\" = \"b\".\"id\""
+        ],
+        "Oracle":
+        [
+          "SELECT NULLIF((\"A\".\"ID\" - \"B\".\"ID\"), 0) FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\""
         ]
       }
     },
@@ -384,6 +392,10 @@
         "PostgreSQL":
         [
           "SELECT NULLIFZERO((\"a\".\"id\" - \"t2\".\"id\")) FROM \"ls\".\"t1\" \"a\" INNER JOIN \"ls\".\"t2\" ON \"a\".\"id\" = \"t2\".\"id\""
+        ],
+        "Oracle":
+        [
+          "SELECT NULLIF((\"A\".\"ID\" - \"T2\".\"ID\"), 0) FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" ON \"A\".\"ID\" = \"T2\".\"ID\""
         ]
       }
     }

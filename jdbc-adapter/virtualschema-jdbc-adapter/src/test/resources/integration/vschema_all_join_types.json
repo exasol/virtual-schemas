@@ -108,6 +108,10 @@
                 [
                     "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
                 ],
+                "Oracle":
+                [
+                    "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
+                ],
                 "PostgreSQL":
                 [
                     "SELECT \"t1\".\"id\", \"t2\".\"id\" FROM \"ls\".\"t1\" INNER JOIN \"ls\".\"t2\" ON \"t1\".\"id\" = \"t2\".\"id\""
@@ -213,6 +217,10 @@
             "expectedPushdownResponse":
             {
                 "Exasol": 
+                [
+                    "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" LEFT OUTER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
+                ],
+                "Oracle":
                 [
                     "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" LEFT OUTER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
                 ],
@@ -324,6 +332,10 @@
                 [
                     "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" RIGHT OUTER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
                 ],
+                "Oracle":
+                [
+                    "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" RIGHT OUTER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
+                ],
                 "PostgreSQL":
                 [
                     "SELECT \"t1\".\"id\", \"t2\".\"id\" FROM \"ls\".\"t1\" RIGHT OUTER JOIN \"ls\".\"t2\" ON \"t1\".\"id\" = \"t2\".\"id\""
@@ -429,6 +441,10 @@
             "expectedPushdownResponse":
             {
                 "Exasol": 
+                [
+                    "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" FULL OUTER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
+                ],
+                "Oracle":
                 [
                     "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" FULL OUTER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
                 ],
