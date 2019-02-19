@@ -56,6 +56,30 @@
           ],
           "pushdownRequest": {
             "type": "select",
+            "selectList" :
+            [
+              {
+                "columnNr" : 0,
+                "name" : "ID",
+                "tableAlias" : "A",
+                "tableName" : "T1",
+                "type" : "column"
+              },
+              {
+                "columnNr" : 0,
+                "name" : "ID",
+                "tableAlias" : "B",
+                "tableName" : "T2",
+                "type" : "column"
+              },
+              {
+                "columnNr" : 0,
+                "name" : "ID",
+                "tableAlias" : "C",
+                "tableName" : "T3",
+                "type" : "column"
+              }
+            ],
             "from": {
               "type" : "join",
               "join_type": "inner",
@@ -119,13 +143,16 @@
       ],
       "expectedPushdownResponse": {
         "Exasol": [
-          "SELECT * FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\" INNER JOIN \"LS\".\"T3\" \"C\" ON \"C\".\"ID\" = \"A\".\"ID\""
+          "SELECT \"A\".\"ID\", \"B\".\"ID\", \"C\".\"ID\" FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\" INNER JOIN \"LS\".\"T3\" \"C\" ON \"C\".\"ID\" = \"A\".\"ID\""
         ],
         "PostgreSQL": [
-          "SELECT * FROM \"ls\".\"t1\" \"a\" INNER JOIN \"ls\".\"t2\" \"b\" ON \"a\".\"id\" = \"b\".\"id\" INNER JOIN \"ls\".\"t3\" \"c\" ON \"c\".\"id\" = \"a\".\"id\""
+          "SELECT \"a\".\"id\", \"b\".\"id\", \"c\".\"id\" FROM \"ls\".\"t1\" \"a\" INNER JOIN \"ls\".\"t2\" \"b\" ON \"a\".\"id\" = \"b\".\"id\" INNER JOIN \"ls\".\"t3\" \"c\" ON \"c\".\"id\" = \"a\".\"id\""
+        ],
+        "Oracle": [
+          "SELECT \"A\".\"ID\", \"B\".\"ID\", \"C\".\"ID\" FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\" INNER JOIN \"LS\".\"T3\" \"C\" ON \"C\".\"ID\" = \"A\".\"ID\""
         ],
         "Hive": [
-          "SELECT * FROM `LS`.`T1` `A` INNER JOIN `LS`.`T2` `B` ON `A`.`ID` = `B`.`ID` INNER JOIN `LS`.`T3` `C` ON `C`.`ID` = `A`.`ID`"
+          "SELECT `A`.`ID`, `B`.`ID`, `C`.`ID` FROM `LS`.`T1` `A` INNER JOIN `LS`.`T2` `B` ON `A`.`ID` = `B`.`ID` INNER JOIN `LS`.`T3` `C` ON `C`.`ID` = `A`.`ID`"
         ]
       }
     },
@@ -193,6 +220,37 @@
           ],
           "pushdownRequest": {
             "type": "select",
+            "selectList" :
+            [
+              {
+                "columnNr" : 0,
+                "name" : "ID",
+                "tableAlias" : "A",
+                "tableName" : "T1",
+                "type" : "column"
+              },
+              {
+                "columnNr" : 0,
+                "name" : "ID",
+                "tableAlias" : "B",
+                "tableName" : "T2",
+                "type" : "column"
+              },
+              {
+                "columnNr" : 0,
+                "name" : "ID",
+                "tableAlias" : "C",
+                "tableName" : "T3",
+                "type" : "column"
+              },
+              {
+                "columnNr" : 0,
+                "name" : "ID",
+                "tableAlias" : "D",
+                "tableName" : "T4",
+                "type" : "column"
+              }
+            ],
             "from": {
               "type" : "join",
               "join_type": "inner",
@@ -282,13 +340,16 @@
       ],
       "expectedPushdownResponse": {
         "Exasol": [
-          "SELECT * FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\" INNER JOIN \"LS\".\"T3\" \"C\" ON \"A\".\"ID\" = \"C\".\"ID\" INNER JOIN \"LS\".\"T4\" \"D\" ON \"C\".\"ID\" = \"D\".\"ID\""
+          "SELECT \"A\".\"ID\", \"B\".\"ID\", \"C\".\"ID\", \"D\".\"ID\" FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\" INNER JOIN \"LS\".\"T3\" \"C\" ON \"A\".\"ID\" = \"C\".\"ID\" INNER JOIN \"LS\".\"T4\" \"D\" ON \"C\".\"ID\" = \"D\".\"ID\""
         ],
         "PostgreSQL": [
-          "SELECT * FROM \"ls\".\"t1\" \"a\" INNER JOIN \"ls\".\"t2\" \"b\" ON \"a\".\"id\" = \"b\".\"id\" INNER JOIN \"ls\".\"t3\" \"c\" ON \"a\".\"id\" = \"c\".\"id\" INNER JOIN \"ls\".\"t4\" \"d\" ON \"c\".\"id\" = \"d\".\"id\""
+          "SELECT \"a\".\"id\", \"b\".\"id\", \"c\".\"id\", \"d\".\"id\" FROM \"ls\".\"t1\" \"a\" INNER JOIN \"ls\".\"t2\" \"b\" ON \"a\".\"id\" = \"b\".\"id\" INNER JOIN \"ls\".\"t3\" \"c\" ON \"a\".\"id\" = \"c\".\"id\" INNER JOIN \"ls\".\"t4\" \"d\" ON \"c\".\"id\" = \"d\".\"id\""
+        ],
+        "Oracle": [
+          "SELECT \"A\".\"ID\", \"B\".\"ID\", \"C\".\"ID\", \"D\".\"ID\" FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\" INNER JOIN \"LS\".\"T3\" \"C\" ON \"A\".\"ID\" = \"C\".\"ID\" INNER JOIN \"LS\".\"T4\" \"D\" ON \"C\".\"ID\" = \"D\".\"ID\""
         ],
         "Hive": [
-          "SELECT * FROM `LS`.`T1` `A` INNER JOIN `LS`.`T2` `B` ON `A`.`ID` = `B`.`ID` INNER JOIN `LS`.`T3` `C` ON `A`.`ID` = `C`.`ID` INNER JOIN `LS`.`T4` `D` ON `C`.`ID` = `D`.`ID`"
+          "SELECT `A`.`ID`, `B`.`ID`, `C`.`ID`, `D`.`ID` FROM `LS`.`T1` `A` INNER JOIN `LS`.`T2` `B` ON `A`.`ID` = `B`.`ID` INNER JOIN `LS`.`T3` `C` ON `A`.`ID` = `C`.`ID` INNER JOIN `LS`.`T4` `D` ON `C`.`ID` = `D`.`ID`"
         ]
       }
     }
