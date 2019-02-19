@@ -85,7 +85,7 @@ public class FileBasedIntegrationTest {
             Map<String, List<String>> expectedPushdownQueries = getExpectedPushdownQueriesFrom(jsonTest, testNr);
             for (String dialect : expectedPushdownQueries.keySet()) {
                 for (PushdownRequest pushdownRequest : pushdownRequests) {
-                    String pushdownQuery = generatePushdownQuery(dialect, pushdownRequest, hasMultipleTables(jsonTest, testNr));
+                    String pushdownQuery = generatePushdownQuery(dialect, pushdownRequest, hasMultipleTables(jsonTest, testNr), testFile.getName(), testNr);
                     assertExpectedPushdowns(expectedPushdownQueries.get(dialect), pushdownQuery, testFile.getName(), testNr, dialect);
                 }
             }
@@ -139,19 +139,25 @@ public class FileBasedIntegrationTest {
         return size > 1;
     }
 
-    private String generatePushdownQuery(String dialect, PushdownRequest pushdownRequest, Boolean multipleTables) throws AdapterException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        String schemaName = "LS";
-        SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, multipleTables);
-        SchemaAdapterNotes notes = Mockito.mock(SchemaAdapterNotes.class);
-        when(notes.isNullsAreSortedAtEnd()).thenReturn(false);
-        when(notes.isNullsAreSortedAtStart()).thenReturn(false);
-        when(notes.isNullsAreSortedHigh()).thenReturn(true);
-        when(notes.isNullsAreSortedLow()).thenReturn(false);
-        SqlDialectContext dialectContext = new SqlDialectContext(notes);
-        Class dialectClass = Class.forName("com.exasol.adapter.dialects.impl." + dialect + "SqlDialect");
-        SqlDialect sqlDialect = (SqlDialect)dialectClass.getConstructor(SqlDialectContext.class).newInstance(dialectContext);
-        final SqlGenerationVisitor sqlGeneratorVisitor = sqlDialect.getSqlGenerationVisitor(context);
-        return pushdownRequest.getSelect().accept(sqlGeneratorVisitor);
+    private String generatePushdownQuery(String dialect, PushdownRequest pushdownRequest, Boolean multipleTables, final String testFile, final int testNr) throws AdapterException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        try {
+            String schemaName = "LS";
+            SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, multipleTables);
+            SchemaAdapterNotes notes = Mockito.mock(SchemaAdapterNotes.class);
+            when(notes.isNullsAreSortedAtEnd()).thenReturn(false);
+            when(notes.isNullsAreSortedAtStart()).thenReturn(false);
+            when(notes.isNullsAreSortedHigh()).thenReturn(true);
+            when(notes.isNullsAreSortedLow()).thenReturn(false);
+            SqlDialectContext dialectContext = new SqlDialectContext(notes);
+            Class dialectClass = Class.forName("com.exasol.adapter.dialects.impl." + dialect + "SqlDialect");
+            SqlDialect sqlDialect = (SqlDialect)dialectClass.getConstructor(SqlDialectContext.class).newInstance(dialectContext);
+            final SqlGenerationVisitor sqlGeneratorVisitor = sqlDialect.getSqlGenerationVisitor(context);
+            return pushdownRequest.getSelect().accept(sqlGeneratorVisitor);
+        } catch (Exception e)
+        {
+            System.err.println("Exception in: " + testFile + " Test#: " + testNr + " dialect: " + dialect);
+            throw e;
+        }
     }
 
     private Map<String, List<String>> getExpectedPushdownQueriesFrom(String jsonTest, int testNr) throws Exception {
