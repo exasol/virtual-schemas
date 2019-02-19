@@ -114,6 +114,10 @@
                 "Oracle":
                 [
                     "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
+                ],
+                "Hive":
+                [
+                    "SELECT `T1`.`ID`, `T2`.`ID` FROM `LS`.`T1` INNER JOIN `LS`.`T2` ON `T1`.`ID` = `T2`.`ID`"
                 ]
             }
         },
@@ -231,6 +235,10 @@
                 "Oracle":
                 [
                     "SELECT \"A\".\"ID\", \"B\".\"ID\" FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\""
+                ],
+                "Hive":
+                [
+                    "SELECT `A`.`ID`, `B`.`ID` FROM `LS`.`T1` `A` INNER JOIN `LS`.`T2` `B` ON `A`.`ID` = `B`.`ID`"
                 ]
             }
         },
@@ -345,6 +353,10 @@
                 "Oracle":
                 [
                     "SELECT \"A\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" ON \"A\".\"ID\" = \"T2\".\"ID\""
+                ],
+                "Hive":
+                [
+                    "SELECT `A`.`ID`, `T2`.`ID` FROM `LS`.`T1` `A` INNER JOIN `LS`.`T2` ON `A`.`ID` = `T2`.`ID`"
                 ]
             }
         }

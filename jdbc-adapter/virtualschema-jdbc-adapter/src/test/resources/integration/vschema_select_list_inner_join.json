@@ -131,6 +131,10 @@
         "Oracle":
         [
           "SELECT NULLIF((\"T1\".\"ID\" - \"T2\".\"ID\"), 0) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
+        ],
+        "Hive":
+        [
+          "SELECT NULLIFZERO((`T1`.`ID` - `T2`.`ID`)) FROM `LS`.`T1` INNER JOIN `LS`.`T2` ON `T1`.`ID` = `T2`.`ID`"
         ]
       }
     },
@@ -265,6 +269,10 @@
         "Oracle":
         [
           "SELECT NULLIF((\"A\".\"ID\" - \"B\".\"ID\"), 0) FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\""
+        ],
+        "Hive":
+        [
+          "SELECT NULLIFZERO((`A`.`ID` - `B`.`ID`)) FROM `LS`.`T1` `A` INNER JOIN `LS`.`T2` `B` ON `A`.`ID` = `B`.`ID`"
         ]
       }
     },
@@ -396,6 +404,10 @@
         "Oracle":
         [
           "SELECT NULLIF((\"A\".\"ID\" - \"T2\".\"ID\"), 0) FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" ON \"A\".\"ID\" = \"T2\".\"ID\""
+        ],
+        "Hive":
+        [
+          "SELECT NULLIFZERO((`A`.`ID` - `T2`.`ID`)) FROM `LS`.`T1` `A` INNER JOIN `LS`.`T2` ON `A`.`ID` = `T2`.`ID`"
         ]
       }
     }

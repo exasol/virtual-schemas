@@ -113,6 +113,10 @@
                 "Oracle":
                 [
                     "SELECT \"U\".\"Y\", \"T\".\"X\" FROM \"LS\".\"U\" LEFT OUTER JOIN \"LS\".\"T\" ON \"T\".\"X\" = \"U\".\"Y\""
+                ],
+                "Hive":
+                [
+                    "SELECT `U`.`Y`, `T`.`X` FROM `LS`.`U` LEFT OUTER JOIN `LS`.`T` ON `T`.`X` = `U`.`Y`"
                 ]
             }
         }

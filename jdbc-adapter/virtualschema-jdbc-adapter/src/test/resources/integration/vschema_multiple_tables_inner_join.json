@@ -123,6 +123,9 @@
         ],
         "PostgreSQL": [
           "SELECT * FROM \"ls\".\"t1\" \"a\" INNER JOIN \"ls\".\"t2\" \"b\" ON \"a\".\"id\" = \"b\".\"id\" INNER JOIN \"ls\".\"t3\" \"c\" ON \"c\".\"id\" = \"a\".\"id\""
+        ],
+        "Hive": [
+          "SELECT * FROM `LS`.`T1` `A` INNER JOIN `LS`.`T2` `B` ON `A`.`ID` = `B`.`ID` INNER JOIN `LS`.`T3` `C` ON `C`.`ID` = `A`.`ID`"
         ]
       }
     },
@@ -283,6 +286,9 @@
         ],
         "PostgreSQL": [
           "SELECT * FROM \"ls\".\"t1\" \"a\" INNER JOIN \"ls\".\"t2\" \"b\" ON \"a\".\"id\" = \"b\".\"id\" INNER JOIN \"ls\".\"t3\" \"c\" ON \"a\".\"id\" = \"c\".\"id\" INNER JOIN \"ls\".\"t4\" \"d\" ON \"c\".\"id\" = \"d\".\"id\""
+        ],
+        "Hive": [
+          "SELECT * FROM `LS`.`T1` `A` INNER JOIN `LS`.`T2` `B` ON `A`.`ID` = `B`.`ID` INNER JOIN `LS`.`T3` `C` ON `A`.`ID` = `C`.`ID` INNER JOIN `LS`.`T4` `D` ON `C`.`ID` = `D`.`ID`"
         ]
       }
     }

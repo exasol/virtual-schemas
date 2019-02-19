@@ -74,6 +74,10 @@
                 "Oracle":
                 [
                     "SELECT \"X\" FROM \"LS\".\"T1\""
+                ],
+                "Hive":
+                [
+                    "SELECT `X` FROM `LS`.`T1`"
                 ]
             }
         },
@@ -147,6 +151,10 @@
                 "Oracle":
                 [
                     "SELECT \"X\" FROM \"LS\".\"T1\" \"WITHALIAS\""
+                ],
+                "Hive":
+                [
+                    "SELECT `X` FROM `LS`.`T1` `WITHALIAS`"
                 ]
             }
         },
@@ -199,6 +207,10 @@
                 "Oracle":
                 [
                     "SELECT * FROM \"LS\".\"T2\" \"WITHALIAS\""
+                ],
+                "Hive":
+                [
+                    "SELECT * FROM `LS`.`T2` `WITHALIAS`"
                 ]
             }
         },
@@ -325,6 +337,10 @@
                 "Oracle":
                 [
                     "SELECT \"T1ALIAS\".\"X\", \"T2ALIAS\".\"X\" FROM \"LS\".\"T1\" \"T1ALIAS\" INNER JOIN \"LS\".\"T2\" \"T2ALIAS\" ON \"T1ALIAS\".\"X\" = \"T2ALIAS\".\"X\""
+                ],
+                "Hive":
+                [
+                    "SELECT `T1ALIAS`.`X`, `T2ALIAS`.`X` FROM `LS`.`T1` `T1ALIAS` INNER JOIN `LS`.`T2` `T2ALIAS` ON `T1ALIAS`.`X` = `T2ALIAS`.`X`"
                 ]
             }
         }

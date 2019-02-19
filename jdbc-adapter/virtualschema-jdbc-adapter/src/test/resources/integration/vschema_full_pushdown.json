@@ -88,6 +88,10 @@
                 "Oracle":
                 [
                     "SELECT CAST((\"B\" + 1) AS FLOAT) FROM \"LS\".\"T1\""
+                ],
+                "Hive":
+                [
+                    "SELECT (`B` + 1) FROM `LS`.`T1`"
                 ]
             }
         },
@@ -190,6 +194,10 @@
                 "Oracle":
                 [
                     "SELECT CAST((\"B\" + 1) AS FLOAT) FROM \"LS\".\"T1\" WHERE 7 < \"B\""
+                ],
+                "Hive":
+                [
+                    "SELECT (`B` + 1) FROM `LS`.`T1` WHERE 7 < `B`"
                 ]
             }
         },
@@ -346,6 +354,10 @@
                 "Oracle":
                 [
                     "SELECT CAST((\"T1\".\"B\" + 1) AS FLOAT) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\""
+                ],
+                "Hive":
+                [
+                    "SELECT (`T1`.`B` + 1) FROM `LS`.`T1` INNER JOIN `LS`.`T2` ON `T1`.`A` = `T2`.`X` WHERE 7 < `T1`.`B`"
                 ]
             }
         },
@@ -522,6 +534,10 @@
                 "Oracle":
                 [
                     "SELECT c0 FROM ( SELECT LIMIT_SUBSELECT.*, ROWNUM ROWNUM_SUB FROM ( SELECT CAST((\"T1\".\"B\" + 1) AS FLOAT) AS c0 FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\" ORDER BY \"T2\".\"Y\"  ) LIMIT_SUBSELECT WHERE ROWNUM <= 4 ) WHERE ROWNUM_SUB > 1"
+                ],
+                "Hive":
+                [
+                    "SELECT (`T1`.`B` + 1) FROM `LS`.`T1` INNER JOIN `LS`.`T2` ON `T1`.`A` = `T2`.`X` WHERE 7 < `T1`.`B` ORDER BY `T2`.`Y` NULLS LAST LIMIT 3 OFFSET 1"
                 ]
             }
         },
@@ -686,6 +702,10 @@
                 "Oracle":
                 [
                     "SELECT CAST(SUM((\"T1\".\"B\" + 1)) AS FLOAT) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\""
+                ],
+                "Hive":
+                [
+                    "SELECT SUM((`T1`.`B` + 1)) FROM `LS`.`T1` INNER JOIN `LS`.`T2` ON `T1`.`A` = `T2`.`X` WHERE 7 < `T1`.`B`"
                 ]
             }
         },
@@ -865,6 +885,10 @@
                 "Oracle":
                 [
                     "SELECT CAST(SUM((\"T1\".\"B\" + 1)) AS FLOAT) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\" GROUP BY \"T1\".\"A\", \"T2\".\"Y\""
+                ],
+                "Hive":
+                [
+                    "SELECT SUM((`T1`.`B` + 1)) FROM `LS`.`T1` INNER JOIN `LS`.`T2` ON `T1`.`A` = `T2`.`X` WHERE 7 < `T1`.`B` GROUP BY `T1`.`A`, `T2`.`Y`"
                 ]
             }
         },
@@ -1067,6 +1091,10 @@
                 "Oracle":
                 [
                     "SELECT CAST(SUM((\"T1\".\"B\" + 1)) AS FLOAT) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\" GROUP BY \"T1\".\"A\", \"T2\".\"Y\" HAVING 0 < SUM(\"T2\".\"X\")"
+                ],
+                "Hive":
+                [
+                    "SELECT SUM((`T1`.`B` + 1)) FROM `LS`.`T1` INNER JOIN `LS`.`T2` ON `T1`.`A` = `T2`.`X` WHERE 7 < `T1`.`B` GROUP BY `T1`.`A`, `T2`.`Y` HAVING 0 < SUM(`T2`.`X`)"
                 ]
             }
         },
@@ -1309,6 +1337,10 @@
                 "Oracle":
                 [
                     "SELECT c0 FROM ( SELECT LIMIT_SUBSELECT.*, ROWNUM ROWNUM_SUB FROM ( SELECT CAST(SUM((\"T1\".\"B\" + 1)) AS FLOAT) AS c0 FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\" GROUP BY \"T1\".\"A\", \"T2\".\"Y\" HAVING 0 < SUM(\"T2\".\"X\") ORDER BY SUM((\"T2\".\"Y\" + 1))  ) LIMIT_SUBSELECT WHERE ROWNUM <= 4 ) WHERE ROWNUM_SUB > 1"
+                ],
+                "Hive":
+                [
+                    "SELECT SUM((`T1`.`B` + 1)) FROM `LS`.`T1` INNER JOIN `LS`.`T2` ON `T1`.`A` = `T2`.`X` WHERE 7 < `T1`.`B` GROUP BY `T1`.`A`, `T2`.`Y` HAVING 0 < SUM(`T2`.`X`) ORDER BY SUM((`T2`.`Y` + 1)) NULLS LAST LIMIT 3 OFFSET 1"
                 ]
             }
         }
