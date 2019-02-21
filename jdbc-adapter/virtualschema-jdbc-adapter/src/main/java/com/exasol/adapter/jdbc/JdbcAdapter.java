@@ -234,42 +234,75 @@ public class JdbcAdapter {
         final SqlGenerationVisitor sqlGeneratorVisitor = dialect.getSqlGenerationVisitor(context);
         final String pushdownQuery = request.getSelect().accept(sqlGeneratorVisitor);
 
-        final ExaConnectionInformation connection = JdbcAdapterProperties.getConnectionInformation(meta.getProperties(),
-                exaMeta);
-        String credentials = "";
-        if (connection.getUser() != null || connection.getPassword() != null) {
-            credentials = "USER '" + connection.getUser() + "' IDENTIFIED BY '" + connection.getPassword() + "'";
-        }
-
-        String sql = "";
-        if (JdbcAdapterProperties.isLocal(meta.getProperties())) {
-            sql = pushdownQuery;
-        } else if (JdbcAdapterProperties.isImportFromExa(meta.getProperties())) {
-            sql = String.format("IMPORT FROM EXA AT '%s' %s STATEMENT '%s'",
-                    JdbcAdapterProperties.getExaConnectionString(meta.getProperties()), credentials,
-                    pushdownQuery.replace("'", "''"));
-        } else if (JdbcAdapterProperties.isImportFromOra(meta.getProperties())) {
-            sql = String.format("IMPORT FROM ORA AT %s %s STATEMENT '%s'",
-                    JdbcAdapterProperties.getOraConnectionName(meta.getProperties()), credentials,
-                    pushdownQuery.replace("'", "''"));
-        } else {
-            if (JdbcAdapterProperties.userSpecifiedConnection(meta.getProperties())) {
-                credentials = JdbcAdapterProperties.getConnectionName(meta.getProperties());
-            } else {
-                credentials = "'" + connection.getAddress() + "' " + credentials;
-            }
-
-            final String columnDescription = createColumnDescription(exaMeta, meta, pushdownQuery, dialect);
-            if (columnDescription == null) {
-                sql = String.format("IMPORT FROM JDBC AT %s STATEMENT '%s'", credentials,
-                        pushdownQuery.replace("'", "''"));
-            } else {
-                sql = String.format("IMPORT INTO %s FROM JDBC AT %s STATEMENT '%s'", columnDescription, credentials,
-                        pushdownQuery.replace("'", "''"));
-            }
-        }
+        String sql = generateImportQueryForPushdownQuery(exaMeta, meta, dialect, pushdownQuery);
 
         return ResponseJsonSerializer.makePushdownResponse(sql);
+    }
+
+    private static String generateImportQueryForPushdownQuery(ExaMetadata exaMeta, SchemaMetadataInfo meta, SqlDialect dialect, String pushdownQuery) throws AdapterException {
+        String sql = "";
+        if (JdbcAdapterProperties.isLocal(meta.getProperties())) {
+            sql = generateLocalQuery(pushdownQuery);
+        } else if (JdbcAdapterProperties.isImportFromExa(meta.getProperties())) {
+            sql = generateExasolImportQuery(exaMeta, meta, pushdownQuery);
+        } else if (JdbcAdapterProperties.isImportFromOra(meta.getProperties())) {
+            sql = generateOracleImportQuery(exaMeta, meta, pushdownQuery);
+        } else {
+            sql = generateJDBCImportQuery(exaMeta, meta, dialect, pushdownQuery);
+        }
+        return sql;
+    }
+
+    private static String generateLocalQuery(final String pushdownQuery) {
+        return pushdownQuery;
+    }
+
+    private static String generateExasolImportQuery(ExaMetadata exaMeta, SchemaMetadataInfo meta, String pushdownQuery) {
+        String credentials = getCredentialsForImport(exaMeta, meta, false);
+        return String.format("IMPORT FROM EXA AT '%s' %s STATEMENT '%s'",
+                JdbcAdapterProperties.getExaConnectionString(meta.getProperties()), credentials,
+                pushdownQuery.replace("'", "''"));
+    }
+
+    private static String generateOracleImportQuery(ExaMetadata exaMeta, SchemaMetadataInfo meta, String pushdownQuery) {
+        String credentials = getCredentialsForImport(exaMeta, meta, false);
+        return String.format("IMPORT FROM ORA AT %s %s STATEMENT '%s'",
+                JdbcAdapterProperties.getOraConnectionName(meta.getProperties()), credentials,
+                pushdownQuery.replace("'", "''"));
+    }
+
+    private static String generateJDBCImportQuery(ExaMetadata exaMeta, SchemaMetadataInfo meta, SqlDialect dialect, String pushdownQuery) throws AdapterException {
+        String credentials = getCredentialsForImport(exaMeta, meta, true);
+
+        String sql;
+        final String columnDescription = createColumnDescription(exaMeta, meta, pushdownQuery, dialect);
+        if (columnDescription == null) {
+            sql = String.format("IMPORT FROM JDBC AT %s STATEMENT '%s'", credentials,
+                    pushdownQuery.replace("'", "''"));
+        } else {
+            sql = String.format("IMPORT INTO %s FROM JDBC AT %s STATEMENT '%s'", columnDescription, credentials,
+                    pushdownQuery.replace("'", "''"));
+        }
+        return sql;
+    }
+
+    protected static String getCredentialsForImport(ExaMetadata exaMeta, SchemaMetadataInfo meta, final boolean isJdbcConnection) {
+        String credentials = "";
+        if (JdbcAdapterProperties.userSpecifiedConnection(meta.getProperties())) {
+            if (isJdbcConnection) {
+                credentials = JdbcAdapterProperties.getConnectionName(meta.getProperties());
+            }
+        } else {
+            final ExaConnectionInformation connection = JdbcAdapterProperties.getConnectionInformation(meta.getProperties(),
+                    exaMeta);
+            if (connection.getUser() != null || connection.getPassword() != null) {
+                credentials = "USER '" + connection.getUser() + "' IDENTIFIED BY '" + connection.getPassword() + "'";
+            }
+            if (isJdbcConnection) {
+                credentials = "'" + connection.getAddress() + "' " + credentials;
+            }
+        }
+        return credentials;
     }
 
     private static String createColumnDescription(final ExaMetadata exaMeta, final SchemaMetadataInfo meta,
