@@ -259,31 +259,51 @@ public class JdbcAdapter {
 
     private static String generateExasolImportQuery(ExaMetadata exaMeta, SchemaMetadataInfo meta, String pushdownQuery) {
         String credentials = getCredentialsForEXAImport(exaMeta, meta);
-        return String.format("IMPORT FROM EXA AT '%s' %s STATEMENT '%s'",
-                JdbcAdapterProperties.getExaConnectionString(meta.getProperties()), credentials,
-                pushdownQuery.replace("'", "''"));
+        StringBuilder exasolImportQuery = new StringBuilder();
+        exasolImportQuery.append("IMPORT FROM EXA AT '");
+        exasolImportQuery.append(JdbcAdapterProperties.getExaConnectionString(meta.getProperties()));
+        exasolImportQuery.append("' ");
+        exasolImportQuery.append(credentials);
+        exasolImportQuery.append(" STATEMENT '");
+        exasolImportQuery.append( pushdownQuery.replace("'", "''"));
+        exasolImportQuery.append("'");
+        return exasolImportQuery.toString();
     }
 
     private static String generateOracleImportQuery(ExaMetadata exaMeta, SchemaMetadataInfo meta, String pushdownQuery) {
         String credentials = getCredentialsForORAImport(exaMeta, meta);
-        return String.format("IMPORT FROM ORA AT %s %s STATEMENT '%s'",
-                JdbcAdapterProperties.getOraConnectionName(meta.getProperties()), credentials,
-                pushdownQuery.replace("'", "''"));
+        StringBuilder oracleImportQuery = new StringBuilder();
+        oracleImportQuery.append("IMPORT FROM ORA AT ");
+        oracleImportQuery.append(JdbcAdapterProperties.getOraConnectionName(meta.getProperties()));
+        oracleImportQuery.append(" ");
+        oracleImportQuery.append(credentials);
+        oracleImportQuery.append(" STATEMENT '");
+        oracleImportQuery.append( pushdownQuery.replace("'", "''"));
+        oracleImportQuery.append("'");
+        return oracleImportQuery.toString();
     }
 
     private static String generateJDBCImportQuery(ExaMetadata exaMeta, SchemaMetadataInfo meta, SqlDialect dialect, String pushdownQuery) throws AdapterException {
         String credentials = getCredentialsForJDBCImport(exaMeta, meta);
 
-        String sql;
+        StringBuilder jdbcImportQuery = new StringBuilder();
         final String columnDescription = createColumnDescription(exaMeta, meta, pushdownQuery, dialect);
         if (columnDescription == null) {
-            sql = String.format("IMPORT FROM JDBC AT %s STATEMENT '%s'", credentials,
-                    pushdownQuery.replace("'", "''"));
+            jdbcImportQuery.append("IMPORT FROM JDBC AT ");
+            jdbcImportQuery.append(credentials);
+            jdbcImportQuery.append(" STATEMENT '");
+            jdbcImportQuery.append( pushdownQuery.replace("'", "''"));
+            jdbcImportQuery.append("'");
         } else {
-            sql = String.format("IMPORT INTO %s FROM JDBC AT %s STATEMENT '%s'", columnDescription, credentials,
-                    pushdownQuery.replace("'", "''"));
+            jdbcImportQuery.append("IMPORT INTO ");
+            jdbcImportQuery.append(columnDescription);
+            jdbcImportQuery.append(" FROM JDBC AT ");
+            jdbcImportQuery.append(credentials);
+            jdbcImportQuery.append(" STATEMENT '");
+            jdbcImportQuery.append( pushdownQuery.replace("'", "''"));
+            jdbcImportQuery.append("'");
         }
-        return sql;
+        return jdbcImportQuery.toString();
     }
 
     protected static String getCredentialsForJDBCImport(ExaMetadata exaMeta, SchemaMetadataInfo meta) {
