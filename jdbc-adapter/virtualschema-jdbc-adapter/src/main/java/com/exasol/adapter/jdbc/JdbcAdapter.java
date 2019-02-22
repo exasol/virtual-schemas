@@ -308,7 +308,7 @@ public class JdbcAdapter {
 
     protected static String getCredentialsForJDBCImport(ExaMetadata exaMeta, SchemaMetadataInfo meta) {
         String credentials = "";
-        if (JdbcAdapterProperties.userSpecifiedConnection(meta.getProperties())) {
+        if (JdbcAdapterProperties.isUserSpecifiedConnection(meta.getProperties())) {
             credentials = JdbcAdapterProperties.getConnectionName(meta.getProperties());
         } else {
             credentials = getUserAndPasswordForImport(exaMeta, meta);
@@ -320,7 +320,7 @@ public class JdbcAdapter {
 
     protected static String getCredentialsForORAImport(ExaMetadata exaMeta, SchemaMetadataInfo meta) {
         String credentials = "";
-        if (!JdbcAdapterProperties.userSpecifiedConnection(meta.getProperties())) {
+        if (!JdbcAdapterProperties.isUserSpecifiedConnection(meta.getProperties())) {
             credentials = getUserAndPasswordForImport(exaMeta, meta);
         }
         return credentials;
