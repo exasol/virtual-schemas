@@ -132,31 +132,33 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testIdentifierCaseSensitivity() throws SQLException, FileNotFoundException {
-        ResultSet result = executeQuery("SELECT * FROM " + VIRTUAL_SCHEMA_MIXED_CASE + ".\"Table_Mixed_Case\"");
-        matchLastRow(result, 1L, 2L, 3L);
-        result = executeQuery("SELECT \"Column1\", \"column2\", COLUMN3 FROM " + VIRTUAL_SCHEMA_MIXED_CASE + ".\"Table_Mixed_Case\"");
-        matchLastRow(result, 1L, 2L, 3L);
-        result = executeQuery("SELECT \"Column1\", \"column2\", COLUMN3 FROM " + VIRTUAL_SCHEMA_MIXED_CASE + ".\"Table_Mixed_Case\"");
+    public void testIdentifierCaseSensitivityOnTable() throws SQLException {
+        final ResultSet result = executeQuery("SELECT * FROM " + VIRTUAL_SCHEMA_MIXED_CASE + ".\"Table_Mixed_Case\"");
         matchLastRow(result, 1L, 2L, 3L);
     }
 
     @Test
-    public void testIdentifierCaseSensitivityException1() throws SQLException, FileNotFoundException {
+    public void testIdentifierCaseSensitivityOnColumns() throws SQLException {
+        final ResultSet result = executeQuery("SELECT \"Column1\", \"column2\", COLUMN3 FROM " + VIRTUAL_SCHEMA_MIXED_CASE + ".\"Table_Mixed_Case\"");
+        matchLastRow(result, 1L, 2L, 3L);
+    }
+
+    @Test
+    public void assertUnquotedMixedCaseTableIsNotFound() throws SQLException {
         this.thrown.expect(SQLException.class);
         this.thrown.expectMessage("object VS_EXA_IT_MIXED_CASE.TABLE_MIXED_CASE not found");
         executeQuery("SELECT \"Column1\", \"column2\", COLUMN3 FROM " + VIRTUAL_SCHEMA_MIXED_CASE + ".Table_Mixed_Case");
     }
 
     @Test
-    public void testIdentifierCaseSensitivityException2() throws SQLException, FileNotFoundException {
+    public void assertUnquotedMixedCaseColumnIsNotFound() throws SQLException {
         this.thrown.expect(SQLException.class);
         this.thrown.expectMessage("object COLUMN1 not found");
         executeQuery("SELECT Column1, column2, COLUMN3 FROM " + VIRTUAL_SCHEMA_MIXED_CASE + ".\"Table_Mixed_Case\"");
     }
 
     @Test
-    public void testGroupConcat() throws SQLException, FileNotFoundException {
+    public void testGroupConcat() throws SQLException {
         String query = "SELECT GROUP_CONCAT(A) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         ResultSet result = executeQuery(query);
         matchLastRow(result, "1,1,2,2,3,3");
@@ -189,7 +191,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testExtract() throws SQLException, FileNotFoundException {
+    public void testExtract() throws SQLException {
         String query = "SELECT EXTRACT(MONTH FROM C9) FROM " + VIRTUAL_SCHEMA + ".ALL_EXA_TYPES";
         ResultSet result = executeQuery(query);
         matchLastRow(result, (short) 8);
@@ -201,7 +203,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testCast() throws SQLException, FileNotFoundException {
+    public void testCast() throws SQLException {
         String query = "SELECT CAST(A AS CHAR(15)) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         ResultSet result = executeQuery(query);
         matchNextRow(result, "1              ");
@@ -271,7 +273,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testCase() throws SQLException, FileNotFoundException {
+    public void testCase() throws SQLException {
         String query = "SELECT CASE A WHEN 1 THEN 'YES' WHEN 2 THEN 'PERHAPS' ELSE 'NO' END FROM " + VIRTUAL_SCHEMA
                 + ".SIMPLE_VALUES";
         ResultSet result = executeQuery(query);
@@ -297,14 +299,14 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
     @Test
     public void testVirtualSchemaImportFromJDBCWithConnectionName() throws SQLException, FileNotFoundException {
         final String connectionString = "jdbc:exa:localhost:" + getPortOfConnectedDatabase();
-        String createConnection = "create connection VS_JDBC_WITH_CONNNAME_CONNECTION to '" + connectionString + "' user '"
+        final String createConnection = "create connection VS_JDBC_WITH_CONNNAME_CONNECTION to '" + connectionString + "' user '"
                 + getConfig().getExasolUser() +"' identified by '"+ getConfig().getExasolPassword() +"'";
         execute(createConnection);
         createVirtualSchema("VS_JDBC_WITH_CONNNAME", ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "VS_JDBC_WITH_CONNNAME_CONNECTION",
         "", "", "ADAPTER.JDBC_ADAPTER", "",
         false, "", "", null);
-        String query = "SELECT 1 FROM VS_JDBC_WITH_CONNNAME.SIMPLE_VALUES";
-        ResultSet result = executeQuery(query);
+        final String query = "SELECT 1 FROM VS_JDBC_WITH_CONNNAME.SIMPLE_VALUES";
+        final ResultSet result = executeQuery(query);
         matchNextRow(result, new Short("1"));
         matchSingleRowExplain(query, "IMPORT INTO (c0 DECIMAL(1, 0)) FROM JDBC AT VS_JDBC_WITH_CONNNAME_CONNECTION STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
@@ -313,14 +315,14 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
     @Test
     public void testVirtualSchemaImportFromEXAWithConnectionName() throws SQLException, FileNotFoundException {
         final String connectionString = "jdbc:exa:localhost:" + getPortOfConnectedDatabase();
-        String createConnection = "create connection VS_EXA_WITH_CONNNAME_CONNECTION to '" + connectionString + "' user '"
+        final String createConnection = "create connection VS_EXA_WITH_CONNNAME_CONNECTION to '" + connectionString + "' user '"
                 + getConfig().getExasolUser() +"' identified by '"+ getConfig().getExasolPassword() +"'";
         execute(createConnection);
         createVirtualSchema("VS_EXA_WITH_CONNNAME", ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "VS_EXA_WITH_CONNNAME_CONNECTION",
                 "", "", "ADAPTER.JDBC_ADAPTER", "",
                 false, "", "", "IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:" + getPortOfConnectedDatabase() + "'");
-        String query = "SELECT 1 FROM VS_EXA_WITH_CONNNAME.SIMPLE_VALUES";
-        ResultSet result = executeQuery(query);
+        final String query = "SELECT 1 FROM VS_EXA_WITH_CONNNAME.SIMPLE_VALUES";
+        final ResultSet result = executeQuery(query);
         matchNextRow(result, new Short("1"));
         matchSingleRowExplain(query, "IMPORT FROM EXA AT 'localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
@@ -332,8 +334,8 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         createVirtualSchema("VS_JDBC_WITH_USER_PW", ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "",
                 getConfig().getExasolUser(), getConfig().getExasolPassword(), "ADAPTER.JDBC_ADAPTER", connectionString,
                 false, "", "", null);
-        String query = "SELECT 1 FROM VS_JDBC_WITH_USER_PW.SIMPLE_VALUES";
-        ResultSet result = executeQuery(query);
+        final String query = "SELECT 1 FROM VS_JDBC_WITH_USER_PW.SIMPLE_VALUES";
+        final ResultSet result = executeQuery(query);
         matchNextRow(result, new Short("1"));
         matchSingleRowExplain(query, "IMPORT INTO (c0 DECIMAL(1, 0)) FROM JDBC AT 'jdbc:exa:localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
@@ -345,8 +347,8 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         createVirtualSchema("VS_EXA_WITH_USER_PW", ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "",
                 getConfig().getExasolUser(), getConfig().getExasolPassword(), "ADAPTER.JDBC_ADAPTER", connectionString,
                 false, "", "", "IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:" + getPortOfConnectedDatabase() + "'");
-        String query = "SELECT 1 FROM VS_EXA_WITH_USER_PW.SIMPLE_VALUES";
-        ResultSet result = executeQuery(query);
+        final String query = "SELECT 1 FROM VS_EXA_WITH_USER_PW.SIMPLE_VALUES";
+        final ResultSet result = executeQuery(query);
         matchNextRow(result, new Short("1"));
         matchSingleRowExplain(query, "IMPORT FROM EXA AT 'localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
@@ -360,7 +362,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
     @Ignore
     @Test
     public void testDifferentDataTypes()
-            throws SQLException, ClassNotFoundException, FileNotFoundException, AdapterException {
+            throws SQLException, FileNotFoundException, AdapterException {
         final Statement stmt = getConnection().createStatement();
         createOrReplaceSchema(stmt);
         createTables(stmt);
