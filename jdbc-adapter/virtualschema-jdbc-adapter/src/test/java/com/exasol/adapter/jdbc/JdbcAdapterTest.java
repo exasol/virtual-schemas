@@ -3,11 +3,9 @@ package com.exasol.adapter.jdbc;
 import com.exasol.ExaConnectionAccessException;
 import com.exasol.ExaConnectionInformation;
 import com.exasol.ExaMetadata;
-import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.metadata.SchemaMetadataInfo;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +32,7 @@ public class JdbcAdapterTest {
 
     @Test
     public void getCredentialsForJDBCImportWithConnectionNameGiven() {
-        Map<String, String> properties = new HashMap<>();
+        final Map<String, String> properties = new HashMap<>();
         properties.put("CONNECTION_NAME", "JDBC_ORACLE");
         final SchemaMetadataInfo schemaMetadataInfo = new SchemaMetadataInfo("", "", properties);
         final String credentials = JdbcAdapter.getCredentialsForJDBCImport(exaMetadata, schemaMetadataInfo);
@@ -43,7 +41,7 @@ public class JdbcAdapterTest {
 
     @Test
     public void getCredentialsForORAImportWithConnectionNameGiven() {
-        Map<String, String> properties = new HashMap<>();
+        final Map<String, String> properties = new HashMap<>();
         properties.put("CONNECTION_NAME", "JDBC_ORACLE");
         final SchemaMetadataInfo schemaMetadataInfo = new SchemaMetadataInfo("", "", properties);
         final String credentials = JdbcAdapter.getCredentialsForORAImport(exaMetadata, schemaMetadataInfo);
@@ -52,7 +50,7 @@ public class JdbcAdapterTest {
 
     @Test
     public void getCredentialsForEXAImportWithConnectionNameGiven() {
-        Map<String, String> properties = new HashMap<>();
+        final Map<String, String> properties = new HashMap<>();
         properties.put("CONNECTION_NAME", "JDBC_EXA");
         final SchemaMetadataInfo schemaMetadataInfo = new SchemaMetadataInfo("", "", properties);
         final String credentials = JdbcAdapter.getCredentialsForEXAImport(exaMetadata, schemaMetadataInfo);
@@ -61,7 +59,7 @@ public class JdbcAdapterTest {
 
     @Test
     public void getCredentialsForJDBCImportWithConnectionStringUsernamePasswordGiven() {
-        Map<String, String> properties = new HashMap<>();
+        final Map<String, String> properties = new HashMap<>();
         properties.put("CONNECTION_STRING", "testConnectionString");
         properties.put("USERNAME", "testUsername");
         properties.put("PASSWORD", "testPassword");
@@ -72,7 +70,7 @@ public class JdbcAdapterTest {
 
     @Test
     public void getCredentialsForORAImportWithConnectionStringUsernamePasswordGiven() {
-        Map<String, String> properties = new HashMap<>();
+        final Map<String, String> properties = new HashMap<>();
         properties.put("CONNECTION_STRING", "testConnectionString");
         properties.put("USERNAME", "testUsername");
         properties.put("PASSWORD", "testPassword");
@@ -83,7 +81,7 @@ public class JdbcAdapterTest {
 
     @Test
     public void getCredentialsForEXAImportWithConnectionStringUsernamePasswordGiven() {
-        Map<String, String> properties = new HashMap<>();
+        final Map<String, String> properties = new HashMap<>();
         properties.put("CONNECTION_STRING", "testConnectionString");
         properties.put("USERNAME", "testUsername");
         properties.put("PASSWORD", "testPassword");
