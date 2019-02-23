@@ -31,6 +31,49 @@ import com.google.common.collect.ImmutableList;
  */
 public class ExasolSqlDialectIT extends AbstractIntegrationTest {
 
+    public static class ConnectionBuilder {
+        private String connectionName;
+        private String connectionString;
+        private String connectionUser;
+        private String connectionPassword;
+
+        public ConnectionBuilder(
+                final String connectionName,
+                final String connectionString) {
+            this.connectionName = connectionName;
+            this.connectionString = connectionString;
+            this.connectionUser = "";
+            this.connectionPassword = "";
+        }
+
+        public ConnectionBuilder user(final String user) {
+            this.connectionUser = user;
+            return this;
+        }
+
+        public ConnectionBuilder password(final String password) {
+            this.connectionPassword = password;
+            return this;
+        }
+
+        public String getCreateConnection() {
+            StringBuilder createConnection = new StringBuilder();
+            createConnection.append("CREATE CONNECTION ");
+            createConnection.append(this.connectionName);
+            createConnection.append(" TO '");
+            createConnection.append(this.connectionString);
+            createConnection.append("'");
+            if (this.connectionUser != "" && this.connectionPassword != "") {
+                createConnection.append(" USER '");
+                createConnection.append(this.connectionUser);
+                createConnection.append("' IDENTIFIED BY '");
+                createConnection.append(this.connectionPassword);
+                createConnection.append("'");
+            }
+            return createConnection.toString();
+        }
+    }
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -299,9 +342,11 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
     @Test
     public void testVirtualSchemaImportFromJDBCWithConnectionName() throws SQLException, FileNotFoundException {
         final String connectionString = "jdbc:exa:localhost:" + getPortOfConnectedDatabase();
-        final String createConnection = "create connection VS_JDBC_WITH_CONNNAME_CONNECTION to '" + connectionString + "' user '"
-                + getConfig().getExasolUser() +"' identified by '"+ getConfig().getExasolPassword() +"'";
-        execute(createConnection);
+        ConnectionBuilder JDBCConnection = new ConnectionBuilder(
+                "VS_JDBC_WITH_CONNNAME_CONNECTION", connectionString).
+                user(getConfig().getExasolUser()).
+                password(getConfig().getExasolPassword());
+        execute(JDBCConnection.getCreateConnection());
         createVirtualSchema("VS_JDBC_WITH_CONNNAME", ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "VS_JDBC_WITH_CONNNAME_CONNECTION",
         "", "", "ADAPTER.JDBC_ADAPTER", "",
         false, "", "", null);
@@ -315,9 +360,11 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
     @Test
     public void testVirtualSchemaImportFromEXAWithConnectionName() throws SQLException, FileNotFoundException {
         final String connectionString = "jdbc:exa:localhost:" + getPortOfConnectedDatabase();
-        final String createConnection = "create connection VS_EXA_WITH_CONNNAME_CONNECTION to '" + connectionString + "' user '"
-                + getConfig().getExasolUser() +"' identified by '"+ getConfig().getExasolPassword() +"'";
-        execute(createConnection);
+        ConnectionBuilder EXAConnection = new ConnectionBuilder(
+                "VS_EXA_WITH_CONNNAME_CONNECTION", connectionString).
+                user(getConfig().getExasolUser()).
+                password(getConfig().getExasolPassword());
+        execute(EXAConnection.getCreateConnection());
         createVirtualSchema("VS_EXA_WITH_CONNNAME", ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "VS_EXA_WITH_CONNNAME_CONNECTION",
                 "", "", "ADAPTER.JDBC_ADAPTER", "",
                 false, "", "", "IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:" + getPortOfConnectedDatabase() + "'");
