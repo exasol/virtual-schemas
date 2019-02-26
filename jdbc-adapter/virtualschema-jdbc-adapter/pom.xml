@@ -8,7 +8,7 @@
 		<version>${product.version}</version>
 	</parent>
 	<artifactId>virtualschema-jdbc-adapter</artifactId>
-    
+
     <properties>
         <surefire.and.failsafe.plugin.version>2.19.1</surefire.and.failsafe.plugin.version>
     </properties>
@@ -92,11 +92,11 @@
     </profiles>
 
 	<dependencies>
-		<dependency>
-			<groupId>com.exasol</groupId>
-			<artifactId>virtualschema-common</artifactId>
-			<version>${product.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>com.exasol</groupId>
+            <artifactId>virtual-schema-common-java</artifactId>
+            <version>1.1.1</version>
+        </dependency>
         <!-- We need this only for the integration test profile, however without adding it here you would have to enable the profile in the IDE to have the dependency -->
         <dependency>
             <groupId>org.yaml</groupId>
@@ -104,8 +104,8 @@
             <version>1.17</version>
             <scope>integration-test</scope>
         </dependency>
-        
-        
+
+
         <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient Needed to upload jar to BucketFS-->
 		<dependency>
 		    <groupId>org.apache.httpcomponents</groupId>
@@ -113,7 +113,7 @@
 		    <version>4.5.2</version>
 		    <scope>integration-test</scope>
 		</dependency>
-		        
+
 		        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/fluent-hc -->
 		<dependency>
 		    <groupId>org.apache.httpcomponents</groupId>
@@ -121,17 +121,17 @@
 		    <version>4.5.2</version>
 		    <scope>integration-test</scope>
 		</dependency>
-		
-		
+
+
 		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
 		<dependency>
 		    <groupId>org.apache.httpcomponents</groupId>
 		    <artifactId>httpmime</artifactId>
 		    <version>4.5.2</version>
 		    <scope>integration-test</scope>
-		</dependency>		
-		        
-        
+		</dependency>
+
+
         <!-- The EXASOL jdbc driver is only needed for verify scope, however we add it always so that you can always create virtual schemas to an EXASOL -->
         <dependency>
             <!-- <scope>verify</scope> -->
@@ -154,7 +154,26 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire.and.failsafe.plugin.version}</version>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.3</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-    
+
 </project>

@@ -28,22 +28,7 @@
                                 }
                             ],
                             "name" : "T"
-                        }
-                    ],
-                    "pushdownRequest" : 
-                    {
-                        "type" : "select",
-                        "from" : 
-                        {
-                            "name" : "T",
-                            "type" : "table"
-                        }
-                    },
-                    "type" : "pushdown"
-                },
-                {
-                    "involvedTables" :
-                    [
+                        },
                         {
                             "columns" :
                             [
@@ -62,12 +47,55 @@
                     ],
                     "pushdownRequest" : 
                     {
-                        "from" : 
+                        "type": "select",
+                        "selectList":
+                        [
+                            {
+                                "type": "column",
+                                "tableName": "U",
+                                "name": "Y",
+                                "columnNr": 0
+                            },
+                            {
+                                "type": "column",
+                                "tableName": "T",
+                                "name": "X",
+                                "columnNr": 0
+                            }
+                        ],
+                        "from":
                         {
-                            "name" : "U",
-                            "type" : "table"
-                        },
-                        "type" : "select"
+                            "type": "join",
+                            "join_type": "left_outer",
+                            "left":
+                            {
+                                "type": "table",
+                                "name": "U"
+                            },
+                            "right":
+                            {
+                                "type": "table",
+                                "name": "T"
+                            },
+                            "condition":
+                            {
+                                "type": "predicate_equal",
+                                "left":
+                                {
+                                    "type": "column",
+                                    "tableName": "T",
+                                    "name": "X",
+                                    "columnNr": 0
+                                },
+                                "right":
+                                {
+                                    "type": "column",
+                                    "tableName": "U",
+                                    "name": "Y",
+                                    "columnNr": 0
+                                }
+                            }
+                        }
                     },
                     "type" : "pushdown"
                 }
@@ -76,8 +104,19 @@
             {
                 "Exasol": 
                 [
-                    "SELECT * FROM \"LS\".\"U\"",
-                    "SELECT * FROM \"LS\".\"T\""
+                    "SELECT \"U\".\"Y\", \"T\".\"X\" FROM \"LS\".\"U\" LEFT OUTER JOIN \"LS\".\"T\" ON \"T\".\"X\" = \"U\".\"Y\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT \"u\".\"y\", \"t\".\"x\" FROM \"ls\".\"u\" LEFT OUTER JOIN \"ls\".\"t\" ON \"t\".\"x\" = \"u\".\"y\""
+                ],
+                "Oracle":
+                [
+                    "SELECT \"U\".\"Y\", \"T\".\"X\" FROM \"LS\".\"U\" LEFT OUTER JOIN \"LS\".\"T\" ON \"T\".\"X\" = \"U\".\"Y\""
+                ],
+                "Hive":
+                [
+                    "SELECT `U`.`Y`, `T`.`X` FROM `LS`.`U` LEFT OUTER JOIN `LS`.`T` ON `T`.`X` = `U`.`Y`"
                 ]
             }
         }

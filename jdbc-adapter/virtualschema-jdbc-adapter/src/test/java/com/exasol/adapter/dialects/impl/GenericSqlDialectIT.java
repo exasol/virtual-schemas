@@ -29,7 +29,7 @@ public class GenericSqlDialectIT extends AbstractIntegrationTest {
         final String schemaName = "";
         createVirtualSchema("VS_GENERIC_MYSQL", GenericSqlDialect.getPublicName(), catalogName, schemaName, "",
                 getConfig().getGenericUser(), getConfig().getGenericPassword(), "ADAPTER.JDBC_ADAPTER",
-                connectionString, IS_LOCAL, getConfig().debugAddress(), "", null);
+                connectionString, IS_LOCAL, getConfig().debugAddress(), "", null,"");
     }
 
     @Test

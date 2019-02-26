@@ -26,7 +26,7 @@ public class SybaseSqlDialectIT extends AbstractIntegrationTest {
         final String schemaName = "tester";
         createVirtualSchema(VS_NAME, SybaseSqlDialect.getPublicName(), catalogName, schemaName, "",
                 getConfig().getSybaseUser(), getConfig().getSybasePassword(), "ADAPTER.JDBC_ADAPTER",
-                getConfig().getSybaseJdbcConnectionString(), IS_LOCAL, getConfig().debugAddress(), "", null);
+                getConfig().getSybaseJdbcConnectionString(), IS_LOCAL, getConfig().debugAddress(), "", null,"");
     }
 
     private static void createSybaseJDBCAdapter() throws SQLException, FileNotFoundException {

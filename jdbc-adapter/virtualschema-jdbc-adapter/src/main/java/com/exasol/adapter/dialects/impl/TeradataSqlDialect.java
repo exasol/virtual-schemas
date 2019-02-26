@@ -206,7 +206,7 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
             final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
             final int decimalScale = jdbcTypeDescription.getDecimalScale();
 
-            if (decimalPrec <= DataType.maxExasolDecimalPrecision) {
+            if (decimalPrec <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
                 colType = DataType.createDecimal(decimalPrec, decimalScale);
             } else {
                 colType = DataType.createDouble();
