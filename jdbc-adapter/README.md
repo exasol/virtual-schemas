@@ -17,7 +17,7 @@ The following dialects are supported:
 1. [Redshift](doc/sql_dialects/redshift.md)
 1. [SQL Server](doc/sql_dialects/sql_server.md)
 1. [Sybase ASE](doc/sql_dialects/sybase.md)
-1. [PostgresSQL](doc/sql_dialects/postgresql.md)
+1. [PostgreSQL](doc/sql_dialects/postgresql.md)
 1. Generic
 
 This list will be continuously extended based on the feedback from our users.
