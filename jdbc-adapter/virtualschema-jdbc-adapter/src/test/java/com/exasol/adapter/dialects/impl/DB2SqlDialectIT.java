@@ -31,7 +31,7 @@ public class DB2SqlDialectIT extends AbstractIntegrationTest {
         createDB2JDBCAdapter();
         createVirtualSchema(VIRTUAL_SCHEMA, DB2SqlDialect.getPublicName(), "", DB2_SCHEMA, "", getConfig().getDB2User(),
                 getConfig().getDB2Password(), "ADAPTER.JDBC_ADAPTER", getConfig().getDB2JdbcConnectionString(),
-                IS_LOCAL, getConfig().debugAddress(), "", null);
+                IS_LOCAL, getConfig().debugAddress(), "", null, "");
     }
 
     @Test

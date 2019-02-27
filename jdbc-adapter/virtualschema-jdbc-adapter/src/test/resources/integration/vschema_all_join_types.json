@@ -8,6 +8,7 @@
     [
         {
             "testQuery": "select * from vs.t1 inner join vs.t2 on vs.t1.id=vs.t2.id",
+            "testDescription" : "pushdown of INNER JOIN",
             "expectedPushdownRequest": 
             [
                 {
@@ -107,13 +108,13 @@
                 [
                     "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
                 ],
-                "PostgreSQL":
-                [
-                    "SELECT \"t1\".\"id\", \"t2\".\"id\" FROM \"ls\".\"t1\" INNER JOIN \"ls\".\"t2\" ON \"t1\".\"id\" = \"t2\".\"id\""
-                ],
                 "Oracle":
                 [
                     "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT \"t1\".\"id\", \"t2\".\"id\" FROM \"ls\".\"t1\" INNER JOIN \"ls\".\"t2\" ON \"t1\".\"id\" = \"t2\".\"id\""
                 ],
                 "Hive":
                 [
@@ -122,8 +123,9 @@
             }
         },
         {
-            "testQuery": "select * from vs.t1 a inner join vs.t2 b on a.id=b.id",
-            "expectedPushdownRequest":
+            "testQuery": "select * from vs.t1 left join vs.t2 on vs.t1.id=vs.t2.id",
+            "testDescription" : "pushdown of LEFT JOIN",
+            "expectedPushdownRequest": 
             [
                 {
                     "involvedTables" :
@@ -161,7 +163,7 @@
                             "name" : "T2"
                         }
                     ],
-                    "pushdownRequest" :
+                    "pushdownRequest" : 
                     {
                         "type" : "select",
                         "selectList" :
@@ -169,128 +171,6 @@
                             {
                                 "columnNr" : 0,
                                 "name" : "ID",
-                                "tableAlias" : "A",
-                                "tableName" : "T1",
-                                "type" : "column"
-                            },
-                            {
-                                "columnNr" : 0,
-                                "name" : "ID",
-                                "tableAlias" : "B",
-                                "tableName" : "T2",
-                                "type" : "column"
-                            }
-                        ],
-                        "from" :
-                        {
-                            "type": "join",
-                            "join_type": "inner",
-                            "left":
-                            {
-                                "name" : "T1",
-                                "type" : "table",
-                                "alias": "A"
-                            },
-                            "right":
-                            {
-                                "name" : "T2",
-                                "type" : "table",
-                                "alias": "B"
-                            },
-                            "condition":
-                            {
-                                "left" :
-                                {
-                                    "columnNr" : 0,
-                                    "name" : "ID",
-                                    "tableName" : "T1",
-                                    "tableAlias" : "A",
-                                    "type" : "column"
-                                },
-                                "right" :
-                                {
-                                    "columnNr" : 0,
-                                    "name" : "ID",
-                                    "tableName" : "T2",
-                                    "tableAlias" : "B",
-                                    "type" : "column"
-                                },
-                                "type" : "predicate_equal"
-                            }
-                        }
-                    },
-                    "type" : "pushdown"
-                }
-            ],
-            "expectedPushdownResponse":
-            {
-                "Exasol":
-                [
-                    "SELECT \"A\".\"ID\", \"B\".\"ID\" FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\""
-                ],
-                "PostgreSQL":
-                [
-                    "SELECT \"a\".\"id\", \"b\".\"id\" FROM \"ls\".\"t1\" \"a\" INNER JOIN \"ls\".\"t2\" \"b\" ON \"a\".\"id\" = \"b\".\"id\""
-                ],
-                "Oracle":
-                [
-                    "SELECT \"A\".\"ID\", \"B\".\"ID\" FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\""
-                ],
-                "Hive":
-                [
-                    "SELECT `A`.`ID`, `B`.`ID` FROM `LS`.`T1` `A` INNER JOIN `LS`.`T2` `B` ON `A`.`ID` = `B`.`ID`"
-                ]
-            }
-        },
-        {
-            "testQuery": "select * from vs.t1 a inner join vs.t2 on a.id=vs.t2.id",
-            "expectedPushdownRequest":
-            [
-                {
-                    "involvedTables" :
-                    [
-                        {
-                            "columns" :
-                            [
-                                {
-                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
-                                    "dataType" :
-                                    {
-                                        "precision" : 18,
-                                        "scale" : 0,
-                                        "type" : "DECIMAL"
-                                    },
-                                    "name" : "ID"
-                                }
-                            ],
-                            "name" : "T1"
-                        },
-                        {
-                            "columns" :
-                            [
-                                {
-                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
-                                    "dataType" :
-                                    {
-                                        "precision" : 18,
-                                        "scale" : 0,
-                                        "type" : "DECIMAL"
-                                    },
-                                    "name" : "ID"
-                                }
-                            ],
-                            "name" : "T2"
-                        }
-                    ],
-                    "pushdownRequest" :
-                    {
-                        "type" : "select",
-                        "selectList" :
-                        [
-                            {
-                                "columnNr" : 0,
-                                "name" : "ID",
-                                "tableAlias" : "A",
                                 "tableName" : "T1",
                                 "type" : "column"
                             },
@@ -301,15 +181,14 @@
                                 "type" : "column"
                             }
                         ],
-                        "from" :
+                        "from" : 
                         {
                             "type": "join",
-                            "join_type": "inner",
+                            "join_type": "left_outer",
                             "left":
                             {
                                 "name" : "T1",
-                                "type" : "table",
-                                "alias": "A"
+                                "type" : "table"
                             },
                             "right":
                             {
@@ -320,18 +199,17 @@
                             {
                                 "left" :
                                 {
-                                    "columnNr" : 0,
-                                    "name" : "ID",
-                                    "tableName" : "T1",
-                                    "tableAlias" : "A",
-                                    "type" : "column"
+                                        "columnNr" : 0,
+                                        "name" : "ID",
+                                        "tableName" : "T1",
+                                        "type" : "column"
                                 },
                                 "right" :
                                 {
-                                    "columnNr" : 0,
-                                    "name" : "ID",
-                                    "tableName" : "T2",
-                                    "type" : "column"
+                                        "columnNr" : 0,
+                                        "name" : "ID",
+                                        "tableName" : "T2",
+                                        "type" : "column"
                                 },
                                 "type" : "predicate_equal"
                             }
@@ -342,21 +220,253 @@
             ],
             "expectedPushdownResponse":
             {
-                "Exasol":
+                "Exasol": 
                 [
-                    "SELECT \"A\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" ON \"A\".\"ID\" = \"T2\".\"ID\""
-                ],
-                "PostgreSQL":
-                [
-                    "SELECT \"a\".\"id\", \"t2\".\"id\" FROM \"ls\".\"t1\" \"a\" INNER JOIN \"ls\".\"t2\" ON \"a\".\"id\" = \"t2\".\"id\""
+                    "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" LEFT OUTER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
                 ],
                 "Oracle":
                 [
-                    "SELECT \"A\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" ON \"A\".\"ID\" = \"T2\".\"ID\""
+                    "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" LEFT OUTER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT \"t1\".\"id\", \"t2\".\"id\" FROM \"ls\".\"t1\" LEFT OUTER JOIN \"ls\".\"t2\" ON \"t1\".\"id\" = \"t2\".\"id\""
                 ],
                 "Hive":
                 [
-                    "SELECT `A`.`ID`, `T2`.`ID` FROM `LS`.`T1` `A` INNER JOIN `LS`.`T2` ON `A`.`ID` = `T2`.`ID`"
+                    "SELECT `T1`.`ID`, `T2`.`ID` FROM `LS`.`T1` LEFT OUTER JOIN `LS`.`T2` ON `T1`.`ID` = `T2`.`ID`"
+                ]
+            }
+        },
+        {
+            "testQuery": "select * from vs.t1 right join vs.t2 on vs.t1.id=vs.t2.id",
+            "testDescription" : "pushdown of RIGHT JOIN",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "ID"
+                                }
+                            ],
+                            "name" : "T1"
+                        },
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "ID"
+                                }
+                            ],
+                            "name" : "T2"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "selectList" :
+                        [
+                            {
+                                "columnNr" : 0,
+                                "name" : "ID",
+                                "tableName" : "T1",
+                                "type" : "column"
+                            },
+                            {
+                                "columnNr" : 0,
+                                "name" : "ID",
+                                "tableName" : "T2",
+                                "type" : "column"
+                            }
+                        ],
+                        "from" : 
+                        {
+                            "type": "join",
+                            "join_type": "right_outer",
+                            "left":
+                            {
+                                "name" : "T1",
+                                "type" : "table"
+                            },
+                            "right":
+                            {
+                                "name" : "T2",
+                                "type" : "table"
+                            },
+                            "condition":
+                            {
+                                "left" :
+                                {
+                                        "columnNr" : 0,
+                                        "name" : "ID",
+                                        "tableName" : "T1",
+                                        "type" : "column"
+                                },
+                                "right" :
+                                {
+                                        "columnNr" : 0,
+                                        "name" : "ID",
+                                        "tableName" : "T2",
+                                        "type" : "column"
+                                },
+                                "type" : "predicate_equal"
+                            }
+                        }
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" RIGHT OUTER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
+                ],
+                "Oracle":
+                [
+                    "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" RIGHT OUTER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT \"t1\".\"id\", \"t2\".\"id\" FROM \"ls\".\"t1\" RIGHT OUTER JOIN \"ls\".\"t2\" ON \"t1\".\"id\" = \"t2\".\"id\""
+                ],
+                "Hive":
+                [
+                    "SELECT `T1`.`ID`, `T2`.`ID` FROM `LS`.`T1` RIGHT OUTER JOIN `LS`.`T2` ON `T1`.`ID` = `T2`.`ID`"
+                ]
+            }
+        },
+        {
+            "testQuery": "select * from vs.t1 full join vs.t2 on vs.t1.id=vs.t2.id",
+            "testDescription" : "pushdown of FULL JOIN",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "ID"
+                                }
+                            ],
+                            "name" : "T1"
+                        },
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "ID"
+                                }
+                            ],
+                            "name" : "T2"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "selectList" :
+                        [
+                            {
+                                "columnNr" : 0,
+                                "name" : "ID",
+                                "tableName" : "T1",
+                                "type" : "column"
+                            },
+                            {
+                                "columnNr" : 0,
+                                "name" : "ID",
+                                "tableName" : "T2",
+                                "type" : "column"
+                            }
+                        ],
+                        "from" : 
+                        {
+                            "type": "join",
+                            "join_type": "full_outer",
+                            "left":
+                            {
+                                "name" : "T1",
+                                "type" : "table"
+                            },
+                            "right":
+                            {
+                                "name" : "T2",
+                                "type" : "table"
+                            },
+                            "condition":
+                            {
+                                "left" :
+                                {
+                                        "columnNr" : 0,
+                                        "name" : "ID",
+                                        "tableName" : "T1",
+                                        "type" : "column"
+                                },
+                                "right" :
+                                {
+                                        "columnNr" : 0,
+                                        "name" : "ID",
+                                        "tableName" : "T2",
+                                        "type" : "column"
+                                },
+                                "type" : "predicate_equal"
+                            }
+                        }
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" FULL OUTER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
+                ],
+                "Oracle":
+                [
+                    "SELECT \"T1\".\"ID\", \"T2\".\"ID\" FROM \"LS\".\"T1\" FULL OUTER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT \"t1\".\"id\", \"t2\".\"id\" FROM \"ls\".\"t1\" FULL OUTER JOIN \"ls\".\"t2\" ON \"t1\".\"id\" = \"t2\".\"id\""
+                ],
+                "Hive":
+                [
+                    "SELECT `T1`.`ID`, `T2`.`ID` FROM `LS`.`T1` FULL OUTER JOIN `LS`.`T2` ON `T1`.`ID` = `T2`.`ID`"
                 ]
             }
         }

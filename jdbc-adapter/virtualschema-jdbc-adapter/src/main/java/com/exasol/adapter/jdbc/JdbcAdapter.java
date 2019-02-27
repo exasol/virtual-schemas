@@ -193,25 +193,26 @@ public class JdbcAdapter {
         logger.info(() -> "Excluded Capabilities: "
                 + (excludedCapabilitiesStr.isEmpty() ? "none" : excludedCapabilitiesStr));
         final Capabilities excludedCapabilities = new Capabilities();
-        for (final String cap : excludedCapabilitiesStr.split(",")) {
-            if (cap.trim().isEmpty()) {
+        for (String capability : excludedCapabilitiesStr.split(",")) {
+            capability = capability.trim();
+            if (capability.isEmpty()) {
                 continue;
             }
-            if (cap.startsWith(ResponseJsonSerializer.LITERAL_PREFIX)) {
-                final String literalCap = cap.replaceFirst(ResponseJsonSerializer.LITERAL_PREFIX, "");
+            if (capability.startsWith(ResponseJsonSerializer.LITERAL_PREFIX)) {
+                final String literalCap = capability.replaceFirst(ResponseJsonSerializer.LITERAL_PREFIX, "");
                 excludedCapabilities.supportLiteral(LiteralCapability.valueOf(literalCap));
-            } else if (cap.startsWith(ResponseJsonSerializer.AGGREGATE_FUNCTION_PREFIX)) {
+            } else if (capability.startsWith(ResponseJsonSerializer.AGGREGATE_FUNCTION_PREFIX)) {
                 // Aggregate functions must be checked before scalar functions
-                final String aggregateFunctionCap = cap.replaceFirst(ResponseJsonSerializer.AGGREGATE_FUNCTION_PREFIX,
+                final String aggregateFunctionCap = capability.replaceFirst(ResponseJsonSerializer.AGGREGATE_FUNCTION_PREFIX,
                         "");
                 excludedCapabilities
                         .supportAggregateFunction(AggregateFunctionCapability.valueOf(aggregateFunctionCap));
-            } else if (cap.startsWith(ResponseJsonSerializer.SCALAR_FUNCTION_PREFIX)) {
-                final String scalarFunctionCap = cap.replaceFirst(ResponseJsonSerializer.SCALAR_FUNCTION_PREFIX, "");
+            } else if (capability.startsWith(ResponseJsonSerializer.SCALAR_FUNCTION_PREFIX)) {
+                final String scalarFunctionCap = capability.replaceFirst(ResponseJsonSerializer.SCALAR_FUNCTION_PREFIX, "");
                 excludedCapabilities.supportScalarFunction(ScalarFunctionCapability.valueOf(scalarFunctionCap));
             } else {
                 // High Level Capability
-                excludedCapabilities.supportMainCapability(MainCapability.valueOf(cap));
+                excludedCapabilities.supportMainCapability(MainCapability.valueOf(capability));
             }
         }
         return excludedCapabilities;
