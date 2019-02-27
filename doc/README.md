@@ -786,6 +786,8 @@ Notes
 
 ### Column Lookup
 
+A column lookup is a reference to a table column. It can reference the table directly or via an alias.
+
 ```json
 {
     "type": "column",
