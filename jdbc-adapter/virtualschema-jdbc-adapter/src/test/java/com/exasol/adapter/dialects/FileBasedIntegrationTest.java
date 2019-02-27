@@ -66,36 +66,36 @@ public class FileBasedIntegrationTest {
 
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Iterable<? extends Object> data() {
-        File testDir = new File(INTEGRATION_TESTFILES_DIR);
+        final File testDir = new File(INTEGRATION_TESTFILES_DIR);
         return Arrays.asList(testDir.listFiles((dir, name) -> name.endsWith(".json")));
     }
 
-    private File testFile;
+    private final File testFile;
 
-    public FileBasedIntegrationTest(File testFile) {
+    public FileBasedIntegrationTest(final File testFile) {
         this.testFile = testFile;
     }
 
     @Test
     public void testPushdownFromTestFile() throws Exception {
-        String jsonTest = Files.toString(testFile, Charsets.UTF_8);
-        int numberOftests = getNumberOfTestsFrom(jsonTest);
+        final String jsonTest = Files.toString(testFile, Charsets.UTF_8);
+        final int numberOftests = getNumberOfTestsFrom(jsonTest);
         for (int testNr = 0; testNr < numberOftests; testNr++) {
-            List<PushdownRequest> pushdownRequests = getPushdownRequestsFrom(jsonTest, testNr);
-            Map<String, List<String>> expectedPushdownQueries = getExpectedPushdownQueriesFrom(jsonTest, testNr);
-            for (String dialect : expectedPushdownQueries.keySet()) {
-                for (PushdownRequest pushdownRequest : pushdownRequests) {
-                    String pushdownQuery = generatePushdownQuery(dialect, pushdownRequest, hasMultipleTables(jsonTest, testNr), testFile.getName(), testNr);
+            final List<PushdownRequest> pushdownRequests = getPushdownRequestsFrom(jsonTest, testNr);
+            final Map<String, List<String>> expectedPushdownQueries = getExpectedPushdownQueriesFrom(jsonTest, testNr);
+            for (final String dialect : expectedPushdownQueries.keySet()) {
+                for (final PushdownRequest pushdownRequest : pushdownRequests) {
+                    final String pushdownQuery = generatePushdownQuery(dialect, pushdownRequest, hasMultipleTables(jsonTest, testNr), testFile.getName(), testNr);
                     assertExpectedPushdowns(expectedPushdownQueries.get(dialect), pushdownQuery, testFile.getName(), testNr, dialect);
                 }
             }
         }
     }
 
-    private void assertExpectedPushdowns(List<String> expectedPushdownQueries, String pushdownQuery, String testFile,
-                                         int testNr, String dialect) {
-        boolean foundInExpected = expectedPushdownQueries.stream().anyMatch(pushdownQuery::contains);
-        StringBuilder errorMessage = new StringBuilder();
+    private void assertExpectedPushdowns(final List<String> expectedPushdownQueries, final String pushdownQuery, final String testFile,
+                                         final int testNr, final String dialect) {
+        final boolean foundInExpected = expectedPushdownQueries.stream().anyMatch(pushdownQuery::contains);
+        final StringBuilder errorMessage = new StringBuilder();
         if (!foundInExpected)
         {
             errorMessage.append("Generated Pushdown: ");
@@ -112,62 +112,62 @@ public class FileBasedIntegrationTest {
         assertTrue(errorMessage.toString(), foundInExpected);
     }
 
-    private int getNumberOfTestsFrom(String jsonTest) throws Exception {
-        JsonObject root = JsonHelper.getJsonObject(jsonTest);
+    private int getNumberOfTestsFrom(final String jsonTest) throws Exception {
+        final JsonObject root = JsonHelper.getJsonObject(jsonTest);
         return root.getJsonArray(TEST_FILE_KEY_TESTCASES).size();
     }
 
-    private List<PushdownRequest> getPushdownRequestsFrom(String jsonTest, int testNr) throws Exception {
-        JsonObject root = JsonHelper.getJsonObject(jsonTest);
-        JsonObject test = root.getJsonArray(TEST_FILE_KEY_TESTCASES).getValuesAs(JsonObject.class).get(testNr);
-        int numberOfPushdownRequests = test.getJsonArray(TEST_FILE_KEY_EXP_PD_REQUEST).size();
-        List<PushdownRequest> pushdownRequests = new ArrayList<PushdownRequest>(numberOfPushdownRequests);
+    private List<PushdownRequest> getPushdownRequestsFrom(final String jsonTest, final int testNr) throws Exception {
+        final JsonObject root = JsonHelper.getJsonObject(jsonTest);
+        final JsonObject test = root.getJsonArray(TEST_FILE_KEY_TESTCASES).getValuesAs(JsonObject.class).get(testNr);
+        final int numberOfPushdownRequests = test.getJsonArray(TEST_FILE_KEY_EXP_PD_REQUEST).size();
+        final List<PushdownRequest> pushdownRequests = new ArrayList<PushdownRequest>(numberOfPushdownRequests);
         for(int requestNr = 0; requestNr < numberOfPushdownRequests; requestNr++) {
-            String req = test.getJsonArray(TEST_FILE_KEY_EXP_PD_REQUEST).get(requestNr).toString();
-            RequestJsonParser parser = new RequestJsonParser();
-            AdapterRequest request = parser.parseRequest(req);
+            final String req = test.getJsonArray(TEST_FILE_KEY_EXP_PD_REQUEST).get(requestNr).toString();
+            final RequestJsonParser parser = new RequestJsonParser();
+            final AdapterRequest request = parser.parseRequest(req);
             pushdownRequests.add((PushdownRequest) request);
         }
         return pushdownRequests;
     }
 
-    private Boolean hasMultipleTables(String jsonTest, int testNr) throws Exception {
-        JsonObject root = JsonHelper.getJsonObject(jsonTest);
-        JsonObject test = root.getJsonArray(TEST_FILE_KEY_TESTCASES).getValuesAs(JsonObject.class).get(testNr);
-        JsonValue req = test.getJsonArray(TEST_FILE_KEY_EXP_PD_REQUEST).get(0);
-        int size = ((JsonObject) req).getJsonArray(JSON_API_KEY_INVOLVED_TABLES).size();
+    private Boolean hasMultipleTables(final String jsonTest, final int testNr) throws Exception {
+        final JsonObject root = JsonHelper.getJsonObject(jsonTest);
+        final JsonObject test = root.getJsonArray(TEST_FILE_KEY_TESTCASES).getValuesAs(JsonObject.class).get(testNr);
+        final JsonValue req = test.getJsonArray(TEST_FILE_KEY_EXP_PD_REQUEST).get(0);
+        final int size = ((JsonObject) req).getJsonArray(JSON_API_KEY_INVOLVED_TABLES).size();
         return size > 1;
     }
 
-    private String generatePushdownQuery(String dialect, PushdownRequest pushdownRequest, Boolean multipleTables, final String testFile, final int testNr) throws AdapterException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        try {
-            String schemaName = "LS";
-            SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, multipleTables);
-            SchemaAdapterNotes notes = Mockito.mock(SchemaAdapterNotes.class);
+    private String generatePushdownQuery(final String dialect, final PushdownRequest pushdownRequest, final Boolean multipleTables, final String testFile, final int testNr) throws AdapterException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+            final String schemaName = "LS";
+            final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, multipleTables);
+            final SchemaAdapterNotes notes = Mockito.mock(SchemaAdapterNotes.class);
             when(notes.isNullsAreSortedAtEnd()).thenReturn(false);
             when(notes.isNullsAreSortedAtStart()).thenReturn(false);
             when(notes.isNullsAreSortedHigh()).thenReturn(true);
             when(notes.isNullsAreSortedLow()).thenReturn(false);
-            SqlDialectContext dialectContext = new SqlDialectContext(notes);
-            Class dialectClass = Class.forName("com.exasol.adapter.dialects.impl." + dialect + "SqlDialect");
-            SqlDialect sqlDialect = (SqlDialect)dialectClass.getConstructor(SqlDialectContext.class).newInstance(dialectContext);
+            final SqlDialectContext dialectContext = new SqlDialectContext(notes);
+            final Class dialectClass = Class.forName("com.exasol.adapter.dialects.impl." + dialect + "SqlDialect");
+            final SqlDialect sqlDialect = (SqlDialect)dialectClass.getConstructor(SqlDialectContext.class).newInstance(dialectContext);
             final SqlGenerationVisitor sqlGeneratorVisitor = sqlDialect.getSqlGenerationVisitor(context);
+        try {
             return pushdownRequest.getSelect().accept(sqlGeneratorVisitor);
-        } catch (Exception e)
+        } catch (final Exception e)
         {
             System.err.println("Exception in: " + testFile + " Test#: " + testNr + " dialect: " + dialect);
             throw e;
         }
     }
 
-    private Map<String, List<String>> getExpectedPushdownQueriesFrom(String jsonTest, int testNr) throws Exception {
-        JsonObject root = JsonHelper.getJsonObject(jsonTest);
-        JsonObject test = root.getJsonArray(TEST_FILE_KEY_TESTCASES).getValuesAs(JsonObject.class).get(testNr);
-        JsonObject expectedResponses = test.getJsonObject(TEST_FILE_KEY_EXP_PD_RESPONSE);
-        Map<String, List<String>> expectedQueriesForDialects = new HashMap<>();
-        for ( String dialect : expectedResponses.keySet()) {
-            int numberOfPushdownResponses = test.getJsonObject(TEST_FILE_KEY_EXP_PD_RESPONSE).getJsonArray(dialect).size();
-            List<String> pushdownResponses = new ArrayList<>(numberOfPushdownResponses);
+    private Map<String, List<String>> getExpectedPushdownQueriesFrom(final String jsonTest, final int testNr) throws Exception {
+        final JsonObject root = JsonHelper.getJsonObject(jsonTest);
+        final JsonObject test = root.getJsonArray(TEST_FILE_KEY_TESTCASES).getValuesAs(JsonObject.class).get(testNr);
+        final JsonObject expectedResponses = test.getJsonObject(TEST_FILE_KEY_EXP_PD_RESPONSE);
+        final Map<String, List<String>> expectedQueriesForDialects = new HashMap<>();
+        for ( final String dialect : expectedResponses.keySet()) {
+            final int numberOfPushdownResponses = test.getJsonObject(TEST_FILE_KEY_EXP_PD_RESPONSE).getJsonArray(dialect).size();
+            final List<String> pushdownResponses = new ArrayList<>(numberOfPushdownResponses);
             for(int pushdownNr = 0; pushdownNr < numberOfPushdownResponses; pushdownNr++) {
                 pushdownResponses.add(test.getJsonObject(TEST_FILE_KEY_EXP_PD_RESPONSE).getJsonArray(dialect).get(pushdownNr)
                         .toString().replaceAll("\\\\\"", "\"").replaceAll("^\"+", "").replaceAll("\"$", ""));
