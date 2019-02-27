@@ -350,7 +350,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         execute(JDBCConnection.getCreateConnection());
         createVirtualSchema("VS_JDBC_WITH_CONNNAME", ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "VS_JDBC_WITH_CONNNAME_CONNECTION",
         "", "", "ADAPTER.JDBC_ADAPTER", "",
-        false, "", "", null);
+        false, "", "", null, "");
         final String query = "SELECT 1 FROM VS_JDBC_WITH_CONNNAME.SIMPLE_VALUES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new Short("1"));
@@ -368,7 +368,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         execute(EXAConnection.getCreateConnection());
         createVirtualSchema("VS_EXA_WITH_CONNNAME", ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "VS_EXA_WITH_CONNNAME_CONNECTION",
                 "", "", "ADAPTER.JDBC_ADAPTER", "",
-                false, "", "", "IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:" + getPortOfConnectedDatabase() + "'");
+                false, "", "", "IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:" + getPortOfConnectedDatabase() + "'", "");
         final String query = "SELECT 1 FROM VS_EXA_WITH_CONNNAME.SIMPLE_VALUES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new Short("1"));
@@ -381,7 +381,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         final String connectionString = "jdbc:exa:localhost:" + getPortOfConnectedDatabase();
         createVirtualSchema("VS_JDBC_WITH_USER_PW", ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "",
                 getConfig().getExasolUser(), getConfig().getExasolPassword(), "ADAPTER.JDBC_ADAPTER", connectionString,
-                false, "", "", null);
+                false, "", "", null, "");
         final String query = "SELECT 1 FROM VS_JDBC_WITH_USER_PW.SIMPLE_VALUES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new Short("1"));
@@ -394,7 +394,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         final String connectionString = "jdbc:exa:localhost:" + getPortOfConnectedDatabase();
         createVirtualSchema("VS_EXA_WITH_USER_PW", ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "",
                 getConfig().getExasolUser(), getConfig().getExasolPassword(), "ADAPTER.JDBC_ADAPTER", connectionString,
-                false, "", "", "IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:" + getPortOfConnectedDatabase() + "'");
+                false, "", "", "IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:" + getPortOfConnectedDatabase() + "'", "");
         final String query = "SELECT 1 FROM VS_EXA_WITH_USER_PW.SIMPLE_VALUES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new Short("1"));
