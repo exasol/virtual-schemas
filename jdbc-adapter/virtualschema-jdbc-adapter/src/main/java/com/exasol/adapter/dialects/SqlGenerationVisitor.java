@@ -151,12 +151,11 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         String tablePrefix = "";
         if (this.context.hasMoreThanOneTable()) {
             if (column.hasTableAlias()) {
-                tablePrefix = this.dialect.applyQuoteIfNeeded(column.getTableAlias())
-                        + this.dialect.getTableCatalogAndSchemaSeparator();
+                tablePrefix = this.dialect.applyQuoteIfNeeded(column.getTableAlias());
             } else {
-                tablePrefix = this.dialect.applyQuoteIfNeeded(column.getTableName())
-                        + this.dialect.getTableCatalogAndSchemaSeparator();
+                tablePrefix = this.dialect.applyQuoteIfNeeded(column.getTableName());
             }
+            tablePrefix = tablePrefix + this.dialect.getTableCatalogAndSchemaSeparator();
         }
         return tablePrefix + this.dialect.applyQuoteIfNeeded(column.getName());
     }
