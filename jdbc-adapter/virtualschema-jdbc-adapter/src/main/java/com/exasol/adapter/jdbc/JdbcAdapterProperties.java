@@ -86,7 +86,7 @@ public final class JdbcAdapterProperties {
         return getProperty(properties, PROP_SCHEMA_NAME);
     }
 
-    public static boolean userSpecifiedConnection(final Map<String, String> properties) {
+    public static boolean isUserSpecifiedConnection(final Map<String, String> properties) {
         final String connName = getProperty(properties, PROP_CONNECTION_NAME);
         return (connName != null && !connName.isEmpty());
     }
