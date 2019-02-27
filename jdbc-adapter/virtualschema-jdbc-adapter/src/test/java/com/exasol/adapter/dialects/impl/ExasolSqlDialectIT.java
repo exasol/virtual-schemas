@@ -97,10 +97,10 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         createTestSchema();
         createVirtualSchema(VIRTUAL_SCHEMA, ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "",
                 getConfig().getExasolUser(), getConfig().getExasolPassword(), "ADAPTER.JDBC_ADAPTER", connectionString,
-                IS_LOCAL, getConfig().debugAddress(), "", null);
+                IS_LOCAL, getConfig().debugAddress(), "", null, "");
         createVirtualSchema(VIRTUAL_SCHEMA_MIXED_CASE, ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA_MIXED_CASE, "",
                 getConfig().getExasolUser(), getConfig().getExasolPassword(), "ADAPTER.JDBC_ADAPTER", connectionString,
-                IS_LOCAL, getConfig().debugAddress(), "", null);
+                IS_LOCAL, getConfig().debugAddress(), "", null, "");
     }
 
     private static void createTestSchema() throws SQLException {
@@ -336,7 +336,8 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         this.thrown.expectMessage("Could not access the connection information of connection NO_CONNECTION");
         createVirtualSchema("VS_EXA_IT_BROKEN", ExasolSqlDialect.getPublicName(), "", "NATIVE_EXA_IT", "NO_CONNECTION",
         "", "", "ADAPTER.JDBC_ADAPTER", "",
-        false, getConfig().debugAddress(), "", null);
+        false, getConfig().debugAddress(), "", null,
+                "");
     }
 
     @Test
