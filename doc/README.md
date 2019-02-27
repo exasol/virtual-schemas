@@ -14,6 +14,7 @@
   - [Schema Metadata](#schema-metadata)
 - [Expressions](#expressions)
   - [Table](#table)
+  - [Join](#join)
   - [Column Lookup](#column-lookup)
   - [Literal](#literal)
   - [Predicates](#predicates)
@@ -401,7 +402,7 @@ will produce the following Request, assuming that the Adapter has all required c
 
 Notes
 * `pushdownRequest`: Specification what needs to be pushed down. You can think of it like a parsed SQL statement.
-  * `from`: The requested from clause. Currently only tables are supported, joins might be supported in future.
+  * `from`: The requested from clause. This can be a table or a join.
   * `selectList`: The requested select list elements, a list of expression. The order of the selectlist elements matters. If the select list is an empty list, we request at least a single column/expression, which could also be constant TRUE.
   * `selectList.columnNr`: Position of the column in the virtual table, starting with 0
   * `filter`: The requested filter (`where` clause), a single expression.
@@ -749,24 +750,56 @@ This element currently only occurs in from clause
 ```json
 {
     "type": "table",
-    "name": "CLICKS"
+    "name": "CLICKS",
+    "alias": "A"
 }
 ```
 
+Notes
+* **alias**: This is an optional property and is added if the table has an alias in the original query.
+
+### Join
+
+This element currently only occurs in from clause
+
+```json
+{
+    "type": "join",
+    "join_type": "inner",
+    "left": { 
+        ... 
+    },
+    "right" : { 
+        ... 
+    },
+    "condition" : { 
+        ... 
+    }
+}
+```
+
+Notes
+* **join_type**: Can be `inner`, `left_outer`, `right_outer` or `full_outer`.
+* **left**: This can be a `table` or a `join`.
+* **right**: This can be a `table` or a `join`.
+* **condition**: This can be an arbitrary expression.
+
 ### Column Lookup
+
+A column lookup is a reference to a table column. It can reference the table directly or via an alias.
 
 ```json
 {
     "type": "column",
     "tableName": "T",
-    "tablePosFromClause": 0,
+    "tableAlias": "A",
     "columnNr": 0,
     "name": "ID"
 }
 ```
 
 Notes
-* **tablePosFromClause**: Position of the table in the from clause, starting with 0. Required for joins where same table occurs several times.
+* **tableAlias**: This is an optional property and is added if the referenced table has an alias.
 * **columnNr**: Column number in the virtual table, starting with 0.
 
 ### Literal

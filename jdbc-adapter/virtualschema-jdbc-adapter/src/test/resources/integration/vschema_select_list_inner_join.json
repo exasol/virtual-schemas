@@ -1,0 +1,415 @@
+{
+  "testSchema" :
+  [
+    "create table t1(id int)",
+    "create table t2(id int)"
+  ],
+  "testCases" :
+  [
+    {
+      "testQuery": "select nullifzero(vs.t1.id - vs.t2.id) from vs.t1 inner join vs.t2 on vs.t1.id=vs.t2.id",
+      "expectedPushdownRequest":
+      [
+        {
+          "involvedTables" :
+          [
+            {
+              "columns" :
+              [
+                {
+                  "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                  "dataType" :
+                  {
+                    "precision" : 18,
+                    "scale" : 0,
+                    "type" : "DECIMAL"
+                  },
+                  "name" : "ID"
+                }
+              ],
+              "name" : "T1"
+            },
+            {
+              "columns" :
+              [
+                {
+                  "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                  "dataType" :
+                  {
+                    "precision" : 18,
+                    "scale" : 0,
+                    "type" : "DECIMAL"
+                  },
+                  "name" : "ID"
+                }
+              ],
+              "name" : "T2"
+            }
+          ],
+          "pushdownRequest" :
+          {
+            "type" : "select",
+            "selectList" :
+            [
+              {
+                "arguments" :
+                [
+                  {
+                    "arguments" :
+                    [
+                      {
+                        "columnNr" : 0,
+                        "name" : "ID",
+                        "tableName" : "T1",
+                        "type" : "column"
+                      },
+                      {
+                        "columnNr" : 0,
+                        "name" : "ID",
+                        "tableName" : "T2",
+                        "type" : "column"
+                      }
+                    ],
+                    "infix" : true,
+                    "name" : "SUB",
+                    "numArgs" : 2,
+                    "type" : "function_scalar"
+                  }
+                ],
+                "name" : "NULLIFZERO",
+                "numArgs" : 1,
+                "type" : "function_scalar"
+              }
+            ],
+            "from" :
+            {
+              "type": "join",
+              "join_type": "inner",
+              "left":
+              {
+                "name" : "T1",
+                "type" : "table"
+              },
+              "right":
+              {
+                "name" : "T2",
+                "type" : "table"
+              },
+              "condition":
+              {
+                "left" :
+                {
+                  "columnNr" : 0,
+                  "name" : "ID",
+                  "tableName" : "T1",
+                  "type" : "column"
+                },
+                "right" :
+                {
+                  "columnNr" : 0,
+                  "name" : "ID",
+                  "tableName" : "T2",
+                  "type" : "column"
+                },
+                "type" : "predicate_equal"
+              }
+            }
+          },
+          "type" : "pushdown"
+        }
+      ],
+      "expectedPushdownResponse":
+      {
+        "Exasol":
+        [
+          "SELECT NULLIFZERO((\"T1\".\"ID\" - \"T2\".\"ID\")) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
+        ],
+        "PostgreSQL":
+        [
+          "SELECT NULLIFZERO((\"t1\".\"id\" - \"t2\".\"id\")) FROM \"ls\".\"t1\" INNER JOIN \"ls\".\"t2\" ON \"t1\".\"id\" = \"t2\".\"id\""
+        ],
+        "Oracle":
+        [
+          "SELECT NULLIF((\"T1\".\"ID\" - \"T2\".\"ID\"), 0) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"ID\" = \"T2\".\"ID\""
+        ],
+        "Hive":
+        [
+          "SELECT NULLIFZERO((`T1`.`ID` - `T2`.`ID`)) FROM `LS`.`T1` INNER JOIN `LS`.`T2` ON `T1`.`ID` = `T2`.`ID`"
+        ]
+      }
+    },
+    {
+      "testQuery": "select nullifzero(a.id - b.id) from vs.t1 a inner join vs.t2 b on a.id=b.id",
+      "expectedPushdownRequest":
+      [
+        {
+          "involvedTables" :
+          [
+            {
+              "columns" :
+              [
+                {
+                  "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                  "dataType" :
+                  {
+                    "precision" : 18,
+                    "scale" : 0,
+                    "type" : "DECIMAL"
+                  },
+                  "name" : "ID"
+                }
+              ],
+              "name" : "T1"
+            },
+            {
+              "columns" :
+              [
+                {
+                  "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                  "dataType" :
+                  {
+                    "precision" : 18,
+                    "scale" : 0,
+                    "type" : "DECIMAL"
+                  },
+                  "name" : "ID"
+                }
+              ],
+              "name" : "T2"
+            }
+          ],
+          "pushdownRequest" :
+          {
+            "type" : "select",
+            "selectList" :
+            [
+              {
+                "arguments" :
+                [
+                  {
+                    "arguments" :
+                    [
+                      {
+                        "columnNr" : 0,
+                        "name" : "ID",
+                        "tableName" : "T1",
+                        "tableAlias": "A",
+                        "type" : "column"
+                      },
+                      {
+                        "columnNr" : 0,
+                        "name" : "ID",
+                        "tableName" : "T2",
+                        "tableAlias": "B",
+                        "type" : "column"
+                      }
+                    ],
+                    "infix" : true,
+                    "name" : "SUB",
+                    "numArgs" : 2,
+                    "type" : "function_scalar"
+                  }
+                ],
+                "name" : "NULLIFZERO",
+                "numArgs" : 1,
+                "type" : "function_scalar"
+              }
+            ],
+            "from" :
+            {
+              "type": "join",
+              "join_type": "inner",
+              "left":
+              {
+                "name" : "T1",
+                "type" : "table",
+                "alias": "A"
+              },
+              "right":
+              {
+                "name" : "T2",
+                "type" : "table",
+                "alias": "B"
+              },
+              "condition":
+              {
+                "left" :
+                {
+                  "columnNr" : 0,
+                  "name" : "ID",
+                  "tableName" : "T1",
+                  "tableAlias" : "A",
+                  "type" : "column"
+                },
+                "right" :
+                {
+                  "columnNr" : 0,
+                  "name" : "ID",
+                  "tableName" : "T2",
+                  "tableAlias" : "B",
+                  "type" : "column"
+                },
+                "type" : "predicate_equal"
+              }
+            }
+          },
+          "type" : "pushdown"
+        }
+      ],
+      "expectedPushdownResponse":
+      {
+        "Exasol":
+        [
+          "SELECT NULLIFZERO((\"A\".\"ID\" - \"B\".\"ID\")) FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\""
+        ],
+        "PostgreSQL":
+        [
+          "SELECT NULLIFZERO((\"a\".\"id\" - \"b\".\"id\")) FROM \"ls\".\"t1\" \"a\" INNER JOIN \"ls\".\"t2\" \"b\" ON \"a\".\"id\" = \"b\".\"id\""
+        ],
+        "Oracle":
+        [
+          "SELECT NULLIF((\"A\".\"ID\" - \"B\".\"ID\"), 0) FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" \"B\" ON \"A\".\"ID\" = \"B\".\"ID\""
+        ],
+        "Hive":
+        [
+          "SELECT NULLIFZERO((`A`.`ID` - `B`.`ID`)) FROM `LS`.`T1` `A` INNER JOIN `LS`.`T2` `B` ON `A`.`ID` = `B`.`ID`"
+        ]
+      }
+    },
+    {
+      "testQuery": "select nullifzero(a.id - vs.t2.id)  from vs.t1 a inner join vs.t2 on a.id=vs.t2.id",
+      "expectedPushdownRequest":
+      [
+        {
+          "involvedTables" :
+          [
+            {
+              "columns" :
+              [
+                {
+                  "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                  "dataType" :
+                  {
+                    "precision" : 18,
+                    "scale" : 0,
+                    "type" : "DECIMAL"
+                  },
+                  "name" : "ID"
+                }
+              ],
+              "name" : "T1"
+            },
+            {
+              "columns" :
+              [
+                {
+                  "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                  "dataType" :
+                  {
+                    "precision" : 18,
+                    "scale" : 0,
+                    "type" : "DECIMAL"
+                  },
+                  "name" : "ID"
+                }
+              ],
+              "name" : "T2"
+            }
+          ],
+          "pushdownRequest" :
+          {
+            "type" : "select",
+            "selectList" :
+            [
+              {
+                "arguments" :
+                [
+                  {
+                    "arguments" :
+                    [
+                      {
+                        "columnNr" : 0,
+                        "name" : "ID",
+                        "tableName" : "T1",
+                        "tableAlias": "A",
+                        "type" : "column"
+                      },
+                      {
+                        "columnNr" : 0,
+                        "name" : "ID",
+                        "tableName" : "T2",
+                        "type" : "column"
+                      }
+                    ],
+                    "infix" : true,
+                    "name" : "SUB",
+                    "numArgs" : 2,
+                    "type" : "function_scalar"
+                  }
+                ],
+                "name" : "NULLIFZERO",
+                "numArgs" : 1,
+                "type" : "function_scalar"
+              }
+            ],
+            "from" :
+            {
+              "type": "join",
+              "join_type": "inner",
+              "left":
+              {
+                "name" : "T1",
+                "type" : "table",
+                "alias": "A"
+              },
+              "right":
+              {
+                "name" : "T2",
+                "type" : "table"
+              },
+              "condition":
+              {
+                "left" :
+                {
+                  "columnNr" : 0,
+                  "name" : "ID",
+                  "tableName" : "T1",
+                  "tableAlias" : "A",
+                  "type" : "column"
+                },
+                "right" :
+                {
+                  "columnNr" : 0,
+                  "name" : "ID",
+                  "tableName" : "T2",
+                  "type" : "column"
+                },
+                "type" : "predicate_equal"
+              }
+            }
+          },
+          "type" : "pushdown"
+        }
+      ],
+      "expectedPushdownResponse":
+      {
+        "Exasol":
+        [
+          "SELECT NULLIFZERO((\"A\".\"ID\" - \"T2\".\"ID\")) FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" ON \"A\".\"ID\" = \"T2\".\"ID\""
+        ],
+        "PostgreSQL":
+        [
+          "SELECT NULLIFZERO((\"a\".\"id\" - \"t2\".\"id\")) FROM \"ls\".\"t1\" \"a\" INNER JOIN \"ls\".\"t2\" ON \"a\".\"id\" = \"t2\".\"id\""
+        ],
+        "Oracle":
+        [
+          "SELECT NULLIF((\"A\".\"ID\" - \"T2\".\"ID\"), 0) FROM \"LS\".\"T1\" \"A\" INNER JOIN \"LS\".\"T2\" ON \"A\".\"ID\" = \"T2\".\"ID\""
+        ],
+        "Hive":
+        [
+          "SELECT NULLIFZERO((`A`.`ID` - `T2`.`ID`)) FROM `LS`.`T1` `A` INNER JOIN `LS`.`T2` ON `A`.`ID` = `T2`.`ID`"
+        ]
+      }
+    }
+  ]
+}

@@ -47,6 +47,18 @@
                 "Exasol": 
                 [
                     "SELECT * FROM \"LS\".\"T\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT * FROM \"ls\".\"t\""
+                ],
+                "Oracle":
+                [
+                    "SELECT * FROM \"LS\".\"T\""
+                ],
+                "Hive":
+                [
+                    "SELECT * FROM `LS`.`T`"
                 ]
             }
         },
@@ -64,7 +76,8 @@
                                     "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
                                     "dataType" :
                                     {
-                                        "precision" : 18,                                                                                        "scale" : 0,
+                                        "precision" : 18,
+                                        "scale" : 0,
                                         "type" : "DECIMAL"
                                     },
                                     "name" : "Y"
@@ -90,6 +103,18 @@
                 "Exasol": 
                 [
                     "SELECT * FROM \"LS\".\"U\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT * FROM \"ls\".\"u\""
+                ],
+                "Oracle":
+                [
+                    "SELECT * FROM \"LS\".\"U\""
+                ],
+                "Hive":
+                [
+                    "SELECT * FROM `LS`.`U`"
                 ]
             }
         }

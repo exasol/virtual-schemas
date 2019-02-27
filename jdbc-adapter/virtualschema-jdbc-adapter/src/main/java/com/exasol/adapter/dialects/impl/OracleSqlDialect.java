@@ -359,34 +359,34 @@ public class OracleSqlDialect extends AbstractSqlDialect {
                 // without scale and precision. Convert to VARCHAR.
                 // See http://docs.oracle.com/cd/B28359_01/server.111/b28318/datatype.htm#i16209
                 // and https://docs.oracle.com/cd/E19501-01/819-3659/gcmaz/
-                colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+                colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
                 break;
             }
-            if (decimalPrec <= DataType.maxExasolDecimalPrecision) {
+            if (decimalPrec <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
                 colType = DataType.createDecimal(decimalPrec, decimalScale);
             } else {
-                colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+                colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
             }
             break;
         case Types.OTHER:
             // Oracle JDBC uses OTHER as CLOB
-            colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
             break;
         case -103:
             // INTERVAL YEAR TO MONTH
         case -104:
             // INTERVAL DAY TO SECOND
-            colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
             break;
         case -102:
         case -101:
             // -101 and -102 is TIMESTAMP WITH (LOCAL) TIMEZONE in Oracle.
-            colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
             break;
         case 100:
         case 101:
             // 100 and 101 are BINARY_FLOAT and BINARY_DOUBLE in Oracle.
-            colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
             break;
         }
         return colType;

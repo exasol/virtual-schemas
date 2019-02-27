@@ -347,10 +347,10 @@ public class DB2SqlDialect extends AbstractSqlDialect {
 
         switch (jdbcType) {
         case Types.CLOB:
-            colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
             break;
         case 1111:
-            colType = DataType.createVarChar(DataType.maxExasolVarcharSize, DataType.ExaCharset.UTF8);
+            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
             break;
         // set timestamp to varchar as db2 offers a much higher precision than exasol
         // however java timestamp only supports nanoseconds -> varchar(32)
@@ -368,10 +368,10 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         case Types.LONGNVARCHAR: {
             final int size = jdbcTypeDescription.getPrecisionOrSize();
             final DataType.ExaCharset charset = DataType.ExaCharset.UTF8;
-            if (size <= DataType.maxExasolVarcharSize) {
+            if (size <= DataType.MAX_EXASOL_VARCHAR_SIZE) {
                 colType = DataType.createVarChar(size, charset);
             } else {
-                colType = DataType.createVarChar(DataType.maxExasolVarcharSize, charset);
+                colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, charset);
             }
             break;
         }

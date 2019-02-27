@@ -1,0 +1,1348 @@
+{
+    "testSchema" :
+    [
+        "create table t1(a int, b int)",
+        "create table t2(x int, y int)"
+    ],
+    "testCases" :
+    [
+        {
+            "testQuery": "select b+1 from vs.t1",
+            "testDescription": "Full pushdown with select-list in case with only from and select-list",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "A"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "B"
+                                }
+                            ],
+                            "name" : "T1"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "selectList":
+                        [
+                            {
+                                "numArgs": 2,
+                                "infix": true,
+                                "type": "function_scalar",
+                                "arguments":
+                                [
+                                    {
+                                        "type": "column",
+                                        "tableName": "T1",
+                                        "name": "B",
+                                        "columnNr": 1
+                                    },
+                                    {
+                                        "type": "literal_exactnumeric",
+                                        "value": "1"
+                                    }
+                                ],
+                                "name": "ADD"
+                            }
+                        ],
+                        "from" : 
+                        {
+                            "type" : "table",
+                            "name" : "T1"
+                        }
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT (\"B\" + 1) FROM \"LS\".\"T1\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT (\"b\" + 1) FROM \"ls\".\"t1\""
+                ],
+                "Oracle":
+                [
+                    "SELECT CAST((\"B\" + 1) AS FLOAT) FROM \"LS\".\"T1\""
+                ],
+                "Hive":
+                [
+                    "SELECT (`B` + 1) FROM `LS`.`T1`"
+                ]
+            }
+        },
+        {
+            "testQuery": "select b+1 from vs.t1 where t1.b>7",
+            "testDescription": "Full pushdown with select-list and WHERE-clause",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "A"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "B"
+                                }
+                            ],
+                            "name" : "T1"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "selectList":
+                        [
+                            {
+                                "numArgs": 2,
+                                "infix": true,
+                                "type": "function_scalar",
+                                "arguments":
+                                [
+                                    {
+                                        "type": "column",
+                                        "tableName": "T1",
+                                        "name": "B",
+                                        "columnNr": 1
+                                    },
+                                    {
+                                        "type": "literal_exactnumeric",
+                                        "value": "1"
+                                    }
+                                ],
+                                "name": "ADD"
+                            }
+                        ],
+                        "from" : 
+                        {
+                            "type" : "table",
+                            "name" : "T1"
+                        },
+                        "filter":
+                        {
+                            "right":
+                            {
+                                "type": "column",
+                                "tableName": "T1",
+                                "name": "B",
+                                "columnNr": 1
+                            },
+                            "type": "predicate_less", 
+                            "left":
+                            {
+                                "type": "literal_exactnumeric",
+                                "value": "7"
+                            }
+                        },
+                        "filter_expr_string_for_debug": "7<T1.B"
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT (\"B\" + 1) FROM \"LS\".\"T1\" WHERE 7 < \"B\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT (\"b\" + 1) FROM \"ls\".\"t1\" WHERE 7 < \"b\""
+                ],
+                "Oracle":
+                [
+                    "SELECT CAST((\"B\" + 1) AS FLOAT) FROM \"LS\".\"T1\" WHERE 7 < \"B\""
+                ],
+                "Hive":
+                [
+                    "SELECT (`B` + 1) FROM `LS`.`T1` WHERE 7 < `B`"
+                ]
+            }
+        },
+        {
+            "testQuery": "select b+1 from vs.t1 join vs.t2 on a=x where t1.b>7",
+            "testDescription": "Full pushdown with select-list, join and WHERE-clause",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "A"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "B"
+                                }
+                            ],
+                            "name" : "T1"
+                        },
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "Y"
+                                }
+                            ],
+                            "name" : "T2"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "selectList":
+                        [
+                            {
+                                "numArgs": 2,
+                                "infix": true,
+                                "type": "function_scalar",
+                                "arguments":
+                                [
+                                    {
+                                        "type": "column",
+                                        "tableName": "T1",
+                                        "name": "B",
+                                        "columnNr": 1
+                                    },
+                                    {
+                                        "type": "literal_exactnumeric",
+                                        "value": "1"
+                                    }
+                                ],
+                                "name": "ADD"
+                            }
+                        ],
+                        "from":
+                        {
+                            "type": "join",
+                            "join_type": "inner",
+                            "right":
+                            {
+                                "type": "table",
+                                "name": "T2"
+                            },
+                            "left":
+                            {
+                                "type": "table",
+                                "name": "T1"
+                            },
+                            "condition":
+                            {
+                                "right":
+                                {
+                                    "type": "column",
+                                    "tableName": "T2",
+                                    "name": "X",
+                                    "columnNr": 0
+                                },
+                                "type": "predicate_equal",
+                                "left":
+                                {
+                                    "type": "column",
+                                    "tableName": "T1",
+                                    "name": "A",
+                                    "columnNr": 0
+                                }
+                            }
+                        },
+                        "filter":
+                        {
+                            "right":
+                            {
+                                "type": "column",
+                                "tableName": "T1",
+                                "name": "B",
+                                "columnNr": 1
+                            },
+                            "type": "predicate_less", 
+                            "left":
+                            {
+                                "type": "literal_exactnumeric",
+                                "value": "7"
+                            }
+                        },
+                        "filter_expr_string_for_debug": "7<T1.B"
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT (\"T1\".\"B\" + 1) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT (\"t1\".\"b\" + 1) FROM \"ls\".\"t1\" INNER JOIN \"ls\".\"t2\" ON \"t1\".\"a\" = \"t2\".\"x\" WHERE 7 < \"t1\".\"b\""
+                ],
+                "Oracle":
+                [
+                    "SELECT CAST((\"T1\".\"B\" + 1) AS FLOAT) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\""
+                ],
+                "Hive":
+                [
+                    "SELECT (`T1`.`B` + 1) FROM `LS`.`T1` INNER JOIN `LS`.`T2` ON `T1`.`A` = `T2`.`X` WHERE 7 < `T1`.`B`"
+                ]
+            }
+        },
+        {
+            "testQuery": "select b+1 from vs.t1 join vs.t2 on a=x where t1.b>7 order by t2.y limit 3 offset 1",
+            "testDescription": "Full pushdown with select-list, join and WHERE-clause, ORDER BY and LIMIT",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "A"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "B"
+                                }
+                            ],
+                            "name" : "T1"
+                        },
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "Y"
+                                }
+                            ],
+                            "name" : "T2"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "selectList":
+                        [
+                            {
+                                "numArgs": 2,
+                                "infix": true,
+                                "type": "function_scalar",
+                                "arguments":
+                                [
+                                    {
+                                        "type": "column",
+                                        "tableName": "T1",
+                                        "name": "B",
+                                        "columnNr": 1
+                                    },
+                                    {
+                                        "type": "literal_exactnumeric",
+                                        "value": "1"
+                                    }
+                                ],
+                                "name": "ADD"
+                            }
+                        ],
+                        "from":
+                        {
+                            "type": "join",
+                            "join_type": "inner",
+                            "right":
+                            {
+                                "type": "table",
+                                "name": "T2"
+                            },
+                            "left":
+                            {
+                                "type": "table",
+                                "name": "T1"
+                            },
+                            "condition":
+                            {
+                                "right":
+                                {
+                                    "type": "column",
+                                    "tableName": "T2",
+                                    "name": "X",
+                                    "columnNr": 0
+                                },
+                                "type": "predicate_equal",
+                                "left":
+                                {
+                                    "type": "column",
+                                    "tableName": "T1",
+                                    "name": "A",
+                                    "columnNr": 0
+                                }
+                            }
+                        },
+                        "filter":
+                        {
+                            "right":
+                            {
+                                "type": "column",
+                                "tableName": "T1",
+                                "name": "B",
+                                "columnNr": 1
+                            },
+                            "type": "predicate_less", 
+                            "left":
+                            {
+                                "type": "literal_exactnumeric",
+                                "value": "7"
+                            }
+                        },
+                        "filter_expr_string_for_debug": "7<T1.B",
+                        "orderBy":
+                        [
+                            {
+                                "type": "order_by_element",
+                                "nullsLast": true,
+                                "expression":
+                                {
+                                    "type": "column",
+                                    "tableName": "T2",
+                                    "name": "Y",
+                                    "columnNr": 1
+                                },
+                                "isAscending": true
+                            }
+                        ],
+                        "limit":
+                        {
+                            "numElements": 3,
+                            "offset": 1
+                        }
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT (\"T1\".\"B\" + 1) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\" ORDER BY \"T2\".\"Y\" LIMIT 3 OFFSET 1"
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT (\"t1\".\"b\" + 1) FROM \"ls\".\"t1\" INNER JOIN \"ls\".\"t2\" ON \"t1\".\"a\" = \"t2\".\"x\" WHERE 7 < \"t1\".\"b\" ORDER BY \"t2\".\"y\" LIMIT 3 OFFSET 1"
+                ],
+                "Oracle":
+                [
+                    "SELECT c0 FROM ( SELECT LIMIT_SUBSELECT.*, ROWNUM ROWNUM_SUB FROM ( SELECT CAST((\"T1\".\"B\" + 1) AS FLOAT) AS c0 FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\" ORDER BY \"T2\".\"Y\"  ) LIMIT_SUBSELECT WHERE ROWNUM <= 4 ) WHERE ROWNUM_SUB > 1"
+                ],
+                "Hive":
+                [
+                    "SELECT (`T1`.`B` + 1) FROM `LS`.`T1` INNER JOIN `LS`.`T2` ON `T1`.`A` = `T2`.`X` WHERE 7 < `T1`.`B` ORDER BY `T2`.`Y` NULLS LAST LIMIT 3 OFFSET 1"
+                ]
+            }
+        },
+        {
+            "testQuery": "select sum(b+1) from vs.t1 join vs.t2 on a=x where t1.b>7",
+            "testDescription": "Full pushdown with select-list with aggregation, join and WHERE-clause",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "A"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "B"
+                                }
+                            ],
+                            "name" : "T1"
+                        },
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "Y"
+                                }
+                            ],
+                            "name" : "T2"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "selectList":
+                        [
+                            {
+                                "type": "function_aggregate",
+                                "arguments":
+                                [
+                                    {
+                                        "numArgs": 2,
+                                        "infix": true,
+                                        "type": "function_scalar",
+                                        "arguments":
+                                        [
+                                            {
+                                                "type": "column",
+                                                "tableName": "T1",
+                                                "name": "B",
+                                                "columnNr": 1
+                                            },
+                                            {
+                                                "type": "literal_exactnumeric",
+                                                "value": "1"
+                                            }
+                                        ],
+                                        "name": "ADD"
+                                    }
+                                ],
+                                "name": "sum"
+                            }
+                        ],
+                        "from":
+                        {
+                            "type": "join",
+                            "join_type": "inner",
+                            "right":
+                            {
+                                "type": "table",
+                                "name": "T2"
+                            },
+                            "left":
+                            {
+                                "type": "table",
+                                "name": "T1"
+                            },
+                            "condition":
+                            {
+                                "right":
+                                {
+                                    "type": "column",
+                                    "tableName": "T2",
+                                    "name": "X",
+                                    "columnNr": 0
+                                },
+                                "type": "predicate_equal",
+                                "left":
+                                {
+                                    "type": "column",
+                                    "tableName": "T1",
+                                    "name": "A",
+                                    "columnNr": 0
+                                }
+                            }
+                        },
+                        "filter":
+                        {
+                            "right":
+                            {
+                                "type": "column",
+                                "tableName": "T1",
+                                "name": "B",
+                                "columnNr": 1
+                            },
+                            "type": "predicate_less", 
+                            "left":
+                            {
+                                "type": "literal_exactnumeric",
+                                "value": "7"
+                            }
+                        },
+                        "filter_expr_string_for_debug": "7<T1.B",
+                        "aggregationType": "single_group"
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT SUM((\"T1\".\"B\" + 1)) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT SUM((\"t1\".\"b\" + 1)) FROM \"ls\".\"t1\" INNER JOIN \"ls\".\"t2\" ON \"t1\".\"a\" = \"t2\".\"x\" WHERE 7 < \"t1\".\"b\""
+                ],
+                "Oracle":
+                [
+                    "SELECT CAST(SUM((\"T1\".\"B\" + 1)) AS FLOAT) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\""
+                ],
+                "Hive":
+                [
+                    "SELECT SUM((`T1`.`B` + 1)) FROM `LS`.`T1` INNER JOIN `LS`.`T2` ON `T1`.`A` = `T2`.`X` WHERE 7 < `T1`.`B`"
+                ]
+            }
+        },
+        {
+            "testQuery": "select sum(b+1) from vs.t1 join vs.t2 on a=x where t1.b>7 group by a,y",
+            "testDescription": "Full pushdown with select-list with aggregation, join and WHERE-clause, GROUP BY",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "A"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "B"
+                                }
+                            ],
+                            "name" : "T1"
+                        },
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "Y"
+                                }
+                            ],
+                            "name" : "T2"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "selectList":
+                        [
+                            {
+                                "type": "function_aggregate",
+                                "arguments":
+                                [
+                                    {
+                                        "numArgs": 2,
+                                        "infix": true,
+                                        "type": "function_scalar",
+                                        "arguments":
+                                        [
+                                            {
+                                                "type": "column",
+                                                "tableName": "T1",
+                                                "name": "B",
+                                                "columnNr": 1
+                                            },
+                                            {
+                                                "type": "literal_exactnumeric",
+                                                "value": "1"
+                                            }
+                                        ],
+                                        "name": "ADD"
+                                    }
+                                ],
+                                "name": "sum"
+                            }
+                        ],
+                        "from":
+                        {
+                            "type": "join",
+                            "join_type": "inner",
+                            "right":
+                            {
+                                "type": "table",
+                                "name": "T2"
+                            },
+                            "left":
+                            {
+                                "type": "table",
+                                "name": "T1"
+                            },
+                            "condition":
+                            {
+                                "right":
+                                {
+                                    "type": "column",
+                                    "tableName": "T2",
+                                    "name": "X",
+                                    "columnNr": 0
+                                },
+                                "type": "predicate_equal",
+                                "left":
+                                {
+                                    "type": "column",
+                                    "tableName": "T1",
+                                    "name": "A",
+                                    "columnNr": 0
+                                }
+                            }
+                        },
+                        "filter":
+                        {
+                            "right":
+                            {
+                                "type": "column",
+                                "tableName": "T1",
+                                "name": "B",
+                                "columnNr": 1
+                            },
+                            "type": "predicate_less", 
+                            "left":
+                            {
+                                "type": "literal_exactnumeric",
+                                "value": "7"
+                            }
+                        },
+                        "filter_expr_string_for_debug": "7<T1.B",
+                        "aggregationType": "group_by",
+                        "groupBy":
+                        [
+                            {
+                                "type": "column",
+                                "tableName": "T1",
+                                "name": "A",
+                                "columnNr": 0
+                            },
+                            {
+                                "type": "column",
+                                "tableName": "T2",
+                                "name": "Y",
+                                "columnNr": 1
+                            }
+                        ]
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT SUM((\"T1\".\"B\" + 1)) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\" GROUP BY \"T1\".\"A\", \"T2\".\"Y\""
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT SUM((\"t1\".\"b\" + 1)) FROM \"ls\".\"t1\" INNER JOIN \"ls\".\"t2\" ON \"t1\".\"a\" = \"t2\".\"x\" WHERE 7 < \"t1\".\"b\" GROUP BY \"t1\".\"a\", \"t2\".\"y\""
+                ],
+                "Oracle":
+                [
+                    "SELECT CAST(SUM((\"T1\".\"B\" + 1)) AS FLOAT) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\" GROUP BY \"T1\".\"A\", \"T2\".\"Y\""
+                ],
+                "Hive":
+                [
+                    "SELECT SUM((`T1`.`B` + 1)) FROM `LS`.`T1` INNER JOIN `LS`.`T2` ON `T1`.`A` = `T2`.`X` WHERE 7 < `T1`.`B` GROUP BY `T1`.`A`, `T2`.`Y`"
+                ]
+            }
+        },
+        {
+            "testQuery": "select sum(b+1) from vs.t1 join vs.t2 on a=x where t1.b>7 group by a,y having sum(x) > 0",
+            "testDescription": "Full pushdown with select-list with aggregation, join and WHERE-clause, GROUP BY, HAVING",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "A"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "B"
+                                }
+                            ],
+                            "name" : "T1"
+                        },
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "Y"
+                                }
+                            ],
+                            "name" : "T2"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "selectList":
+                        [
+                            {
+                                "type": "function_aggregate",
+                                "arguments":
+                                [
+                                    {
+                                        "numArgs": 2,
+                                        "infix": true,
+                                        "type": "function_scalar",
+                                        "arguments":
+                                        [
+                                            {
+                                                "type": "column",
+                                                "tableName": "T1",
+                                                "name": "B",
+                                                "columnNr": 1
+                                            },
+                                            {
+                                                "type": "literal_exactnumeric",
+                                                "value": "1"
+                                            }
+                                        ],
+                                        "name": "ADD"
+                                    }
+                                ],
+                                "name": "sum"
+                            }
+                        ],
+                        "from":
+                        {
+                            "type": "join",
+                            "join_type": "inner",
+                            "right":
+                            {
+                                "type": "table",
+                                "name": "T2"
+                            },
+                            "left":
+                            {
+                                "type": "table",
+                                "name": "T1"
+                            },
+                            "condition":
+                            {
+                                "right":
+                                {
+                                    "type": "column",
+                                    "tableName": "T2",
+                                    "name": "X",
+                                    "columnNr": 0
+                                },
+                                "type": "predicate_equal",
+                                "left":
+                                {
+                                    "type": "column",
+                                    "tableName": "T1",
+                                    "name": "A",
+                                    "columnNr": 0
+                                }
+                            }
+                        },
+                        "filter":
+                        {
+                            "right":
+                            {
+                                "type": "column",
+                                "tableName": "T1",
+                                "name": "B",
+                                "columnNr": 1
+                            },
+                            "type": "predicate_less", 
+                            "left":
+                            {
+                                "type": "literal_exactnumeric",
+                                "value": "7"
+                            }
+                        },
+                        "filter_expr_string_for_debug": "7<T1.B",
+                        "aggregationType": "group_by",
+                        "groupBy":
+                        [
+                            {
+                                "type": "column",
+                                "tableName": "T1",
+                                "name": "A",
+                                "columnNr": 0
+                            },
+                            {
+                                "type": "column",
+                                "tableName": "T2",
+                                "name": "Y",
+                                "columnNr": 1
+                            }
+                        ],
+                        "having":
+                        {
+                            "type": "predicate_less",
+                            "left":
+                            {
+                                "type": "literal_exactnumeric",
+                                "value": "0"
+                            },
+                            "right":
+                            {
+                                "type": "function_aggregate",
+                                "arguments":
+                                [
+                                    {
+                                        "type": "column",
+                                        "tableName": "T2",
+                                        "name": "X",
+                                        "columnNr": 0
+                                    }
+                                ],
+                                "name": "sum"
+                            }
+                        }
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT SUM((\"T1\".\"B\" + 1)) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\" GROUP BY \"T1\".\"A\", \"T2\".\"Y\" HAVING 0 < SUM(\"T2\".\"X\")"
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT SUM((\"t1\".\"b\" + 1)) FROM \"ls\".\"t1\" INNER JOIN \"ls\".\"t2\" ON \"t1\".\"a\" = \"t2\".\"x\" WHERE 7 < \"t1\".\"b\" GROUP BY \"t1\".\"a\", \"t2\".\"y\" HAVING 0 < SUM(\"t2\".\"x\")"
+                ],
+                "Oracle":
+                [
+                    "SELECT CAST(SUM((\"T1\".\"B\" + 1)) AS FLOAT) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\" GROUP BY \"T1\".\"A\", \"T2\".\"Y\" HAVING 0 < SUM(\"T2\".\"X\")"
+                ],
+                "Hive":
+                [
+                    "SELECT SUM((`T1`.`B` + 1)) FROM `LS`.`T1` INNER JOIN `LS`.`T2` ON `T1`.`A` = `T2`.`X` WHERE 7 < `T1`.`B` GROUP BY `T1`.`A`, `T2`.`Y` HAVING 0 < SUM(`T2`.`X`)"
+                ]
+            }
+        },
+        {
+            "testQuery": "select sum(b+1) from vs.t1 join vs.t2 on a=x where t1.b>7 group by a,y having sum(x) > 0 order by sum(y+1) limit 3 offset 1",
+            "testDescription": "Full pushdown with select-list with aggregation, join and WHERE-clause, GROUP BY, HAVING, ORDER BY and LIMIT",
+            "expectedPushdownRequest": 
+            [
+                {
+                    "involvedTables" :
+                    [
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "A"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "B"
+                                }
+                            ],
+                            "name" : "T1"
+                        },
+                        {
+                            "columns" :
+                            [
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "X"
+                                },
+                                {
+                                    "adapterNotes" : "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType" :
+                                    {
+                                        "precision" : 18,
+                                        "scale" : 0,
+                                        "type" : "DECIMAL"
+                                    },
+                                    "name" : "Y"
+                                }
+                            ],
+                            "name" : "T2"
+                        }
+                    ],
+                    "pushdownRequest" : 
+                    {
+                        "type" : "select",
+                        "selectList":
+                        [
+                            {
+                                "type": "function_aggregate",
+                                "arguments":
+                                [
+                                    {
+                                        "numArgs": 2,
+                                        "infix": true,
+                                        "type": "function_scalar",
+                                        "arguments":
+                                        [
+                                            {
+                                                "type": "column",
+                                                "tableName": "T1",
+                                                "name": "B",
+                                                "columnNr": 1
+                                            },
+                                            {
+                                                "type": "literal_exactnumeric",
+                                                "value": "1"
+                                            }
+                                        ],
+                                        "name": "ADD"
+                                    }
+                                ],
+                                "name": "sum"
+                            }
+                        ],
+                        "from":
+                        {
+                            "type": "join",
+                            "join_type": "inner",
+                            "right":
+                            {
+                                "type": "table",
+                                "name": "T2"
+                            },
+                            "left":
+                            {
+                                "type": "table",
+                                "name": "T1"
+                            },
+                            "condition":
+                            {
+                                "right":
+                                {
+                                    "type": "column",
+                                    "tableName": "T2",
+                                    "name": "X",
+                                    "columnNr": 0
+                                },
+                                "type": "predicate_equal",
+                                "left":
+                                {
+                                    "type": "column",
+                                    "tableName": "T1",
+                                    "name": "A",
+                                    "columnNr": 0
+                                }
+                            }
+                        },
+                        "filter":
+                        {
+                            "right":
+                            {
+                                "type": "column",
+                                "tableName": "T1",
+                                "name": "B",
+                                "columnNr": 1
+                            },
+                            "type": "predicate_less", 
+                            "left":
+                            {
+                                "type": "literal_exactnumeric",
+                                "value": "7"
+                            }
+                        },
+                        "filter_expr_string_for_debug": "7<T1.B",
+                        "aggregationType": "group_by",
+                        "groupBy":
+                        [
+                            {
+                                "type": "column",
+                                "tableName": "T1",
+                                "name": "A",
+                                "columnNr": 0
+                            },
+                            {
+                                "type": "column",
+                                "tableName": "T2",
+                                "name": "Y",
+                                "columnNr": 1
+                            }
+                        ],
+                        "having":
+                        {
+                            "type": "predicate_less",
+                            "left":
+                            {
+                                "type": "literal_exactnumeric",
+                                "value": "0"
+                            },
+                            "right":
+                            {
+                                "type": "function_aggregate",
+                                "arguments":
+                                [
+                                    {
+                                        "type": "column",
+                                        "tableName": "T2",
+                                        "name": "X",
+                                        "columnNr": 0
+                                    }
+                                ],
+                                "name": "sum"
+                            }
+                        },
+                        "orderBy":
+                        [
+                            {
+                                "type": "order_by_element",
+                                "nullsLast": true,
+                                "expression":
+                                {
+                                    "type": "function_aggregate",
+                                    "arguments":
+                                    [
+                                        {
+                                            "numArgs": 2,
+                                            "infix": true,
+                                            "type": "function_scalar",
+                                            "arguments":
+                                            [
+                                                {
+                                                    "type": "column",
+                                                    "tableName": "T2",
+                                                    "name": "Y",
+                                                    "columnNr": 1
+                                                },
+                                                {
+                                                    "type": "literal_exactnumeric",
+                                                    "value": "1"
+                                                }
+                                            ],
+                                            "name": "ADD"
+                                        }
+                                    ],
+                                    "name": "sum"
+                                },
+                                "isAscending": true
+                            }
+                        ],
+                        "limit":
+                        {
+                            "numElements": 3,
+                            "offset": 1
+                        }
+                    },
+                    "type" : "pushdown"
+                }
+            ],
+            "expectedPushdownResponse":
+            {
+                "Exasol": 
+                [
+                    "SELECT SUM((\"T1\".\"B\" + 1)) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\" GROUP BY \"T1\".\"A\", \"T2\".\"Y\" HAVING 0 < SUM(\"T2\".\"X\") ORDER BY SUM((\"T2\".\"Y\" + 1)) LIMIT 3 OFFSET 1"
+                ],
+                "PostgreSQL":
+                [
+                    "SELECT SUM((\"t1\".\"b\" + 1)) FROM \"ls\".\"t1\" INNER JOIN \"ls\".\"t2\" ON \"t1\".\"a\" = \"t2\".\"x\" WHERE 7 < \"t1\".\"b\" GROUP BY \"t1\".\"a\", \"t2\".\"y\" HAVING 0 < SUM(\"t2\".\"x\") ORDER BY SUM((\"t2\".\"y\" + 1)) LIMIT 3 OFFSET 1"
+                ],
+                "Oracle":
+                [
+                    "SELECT c0 FROM ( SELECT LIMIT_SUBSELECT.*, ROWNUM ROWNUM_SUB FROM ( SELECT CAST(SUM((\"T1\".\"B\" + 1)) AS FLOAT) AS c0 FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\" GROUP BY \"T1\".\"A\", \"T2\".\"Y\" HAVING 0 < SUM(\"T2\".\"X\") ORDER BY SUM((\"T2\".\"Y\" + 1))  ) LIMIT_SUBSELECT WHERE ROWNUM <= 4 ) WHERE ROWNUM_SUB > 1"
+                ],
+                "Hive":
+                [
+                    "SELECT SUM((`T1`.`B` + 1)) FROM `LS`.`T1` INNER JOIN `LS`.`T2` ON `T1`.`A` = `T2`.`X` WHERE 7 < `T1`.`B` GROUP BY `T1`.`A`, `T2`.`Y` HAVING 0 < SUM(`T2`.`X`) ORDER BY SUM((`T2`.`Y` + 1)) NULLS LAST LIMIT 3 OFFSET 1"
+                ]
+            }
+        }
+    ]
+}

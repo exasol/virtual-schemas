@@ -33,7 +33,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
         createImpalaJDBCAdapter();
         createVirtualSchema(VIRTUAL_SCHEMA, ImpalaSqlDialect.getPublicName(), "", IMPALA_SCHEMA, "", "no-user",
                 "no-password", "ADAPTER.JDBC_ADAPTER", getConfig().getImpalaJdbcConnectionString(), IS_LOCAL,
-                getConfig().debugAddress(), "SAMPLE_07,ALL_HIVE_IMPALA_TYPES,SIMPLE,SIMPLE_WITH_NULLS", null);
+                getConfig().debugAddress(), "SAMPLE_07,ALL_HIVE_IMPALA_TYPES,SIMPLE,SIMPLE_WITH_NULLS", null,"");
     }
 
     @Test
