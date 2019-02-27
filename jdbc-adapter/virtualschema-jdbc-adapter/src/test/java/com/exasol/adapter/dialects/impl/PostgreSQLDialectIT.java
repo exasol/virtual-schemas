@@ -9,10 +9,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.jdbc.DataException;
@@ -122,7 +119,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
             stmt.execute(String.format("INSERT INTO %s.%s(mycharactervar) VALUES('hjkdhjgfh')", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(mycidr) VALUES('192.168.100.128/25'::cidr)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(mycircle) VALUES('( ( 1 , 5 ) , 3 )'::circle)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
-            stmt.execute(String.format("INSERT INTO %s.%s(mydate) VALUES(current_date)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
+            stmt.execute(String.format("INSERT INTO %s.%s(mydate) VALUES('2010-01-01')", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(mydouble) VALUES(192189234.1723854)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(myinet) VALUES('192.168.100.128'::inet)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(myinteger) VALUES(7189234)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
@@ -140,10 +137,10 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
             stmt.execute(String.format("INSERT INTO %s.%s(myreal) VALUES(10.12)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(mysmallint) VALUES(100)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(mytext) VALUES('skldfjgkl jsdklfgjklsdjfg jsklfdjg')", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
-            stmt.execute(String.format("INSERT INTO %s.%s(mytime) VALUES(current_time)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
-            stmt.execute(String.format("INSERT INTO %s.%s(mytimeWithTimeZone) VALUES(current_time)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
-            stmt.execute(String.format("INSERT INTO %s.%s(mytimestamp) VALUES(current_timestamp)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
-            stmt.execute(String.format("INSERT INTO %s.%s(mytimestampwithtimezone) VALUES(current_timestamp)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
+            stmt.execute(String.format("INSERT INTO %s.%s(mytime) VALUES('11:11:11')", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
+            stmt.execute(String.format("INSERT INTO %s.%s(mytimeWithTimeZone) VALUES('11:11:11')", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
+            stmt.execute(String.format("INSERT INTO %s.%s(mytimestamp) VALUES('2010-01-01 11:11:11')", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
+            stmt.execute(String.format("INSERT INTO %s.%s(mytimestampwithtimezone) VALUES('2010-01-01 11:11:11')", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(mytsquery) VALUES('fat & rat'::tsquery)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(mytsvector) VALUES(to_tsvector('english', 'The Fat Rats'))", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(myuuid) VALUES('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'::uuid)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
@@ -229,20 +226,177 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
 
     @Test
     public void testDatatypeBigint() throws SQLException {
-        testDatatype("mybigint", "10000000000", "DECIMAL(19,0)");
+        testDatatype("mybigint", new BigDecimal("10000000000"), "DECIMAL(19,0)");
     }
     @Test
     public void testDatatypeBigSerial() throws SQLException {
-        testDatatype("mybigserial", "1", "DECIMAL(19,0)");
+        testDatatype("mybigserial", new BigDecimal("1"), "DECIMAL(19,0)");
+    }
+    @Test
+    public void testDatatypeBit() throws SQLException {
+        testDatatype("mybit",  Boolean.TRUE, "BOOLEAN");
+    }
+    @Test
+    public void testDatatypeBitVar() throws SQLException {
+        testDatatype("mybitvar",  Boolean.FALSE, "VARCHAR(5) UTF8");
+    }
+    @Test
+    public void testDatatypeBoolean() throws SQLException {
+        testDatatype("myboolean",  Boolean.FALSE, "BOOLEAN");
+    }
+    @Test
+    public void testDatatypeBox() throws SQLException {
+        testDatatype("mybox", "(4,16),(1,8)", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypeBytea() throws SQLException {
+        testDatatype("mybytea", "bytea NOT SUPPORTED", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypeCharacter() throws SQLException {
+        final String empty = " ";
+        final String expected = "hajksdf" + String.join("", Collections.nCopies(993, empty));
+        testDatatype("mycharacter", expected, "CHAR(1000) ASCII");
+    }
+    @Test
+    public void testDatatypeCharacterVar() throws SQLException {
+        testDatatype("mycharactervar", "hjkdhjgfh", "VARCHAR(1000) ASCII");
+    }
+    @Test
+    public void testDatatypeCidr() throws SQLException {
+        testDatatype("mycidr", "192.168.100.128/25", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypeCircle() throws SQLException {
+        testDatatype("mycircle", "<(1,5),3>", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypeDate() throws SQLException {
+        testDatatype("mydate", "2010-01-01", "DATE");
+    }
+    @Test
+    public void testDatatypeDouble() throws SQLException {
+        testDatatype("mydouble", new Double("192189234.1723854"), "DOUBLE");
+    }
+    @Test
+    public void testDatatypeInet() throws SQLException {
+        testDatatype("myinet", "192.168.100.128/32", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypeInteger() throws SQLException {
+        testDatatype("myinteger", new Integer("7189234"), "DECIMAL(10,0)");
+    }
+    @Test
+    public void testDatatypeIntervalYM() throws SQLException {
+        testDatatype("myinterval", "1 year", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypeJSON() throws SQLException {
+        testDatatype("myjson", "{\"bar\": \"baz\", \"balance\": 7.77, \"active\": false}", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypeJSONB() throws SQLException {
+        testDatatype("myjsonb", "{\"bar\": \"baz\", \"active\": false, \"balance\": 7.77}", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypeLine() throws SQLException {
+        testDatatype("myline", "{1,2,3}", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypeLSeg() throws SQLException {
+        testDatatype("mylseg", "[(1,2),(3,4)]", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypeMACAddr() throws SQLException {
+        testDatatype("mymacaddr", "08:00:2b:01:02:03", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypeMoney() throws SQLException {
+        testDatatype("mymoney", "100.01", "DOUBLE");
+    }
+    @Test
+    public void testDatatypeNumeric() throws SQLException {
+        testDatatype("mynumeric", new BigDecimal("24.2300000000"), "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypePath() throws SQLException {
+        testDatatype("mypath", "[(1,2),(3,4)]", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypePoint() throws SQLException {
+        testDatatype("mypoint", "(1,3)", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypePolygon() throws SQLException {
+        testDatatype("mypolygon", "((1,2),(2,4),(3,7))", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypeReal() throws SQLException {
+        testDatatype("myreal", new Float("10.12"), "DOUBLE");
+    }
+    @Test
+    public void testDatatypeSmallInt() throws SQLException {
+        testDatatype("mysmallint", new Integer("100"), "DECIMAL(5,0)");
+    }
+    @Test
+    public void testDatatypeText() throws SQLException {
+        testDatatype("mytext", "skldfjgkl jsdklfgjklsdjfg jsklfdjg", "VARCHAR(2000000) ASCII");
+    }
+    @Test
+    public void testDatatypeTime() throws SQLException {
+        testDatatype("mytime", "1970-01-01 11:11:11.0", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypeTimeWithTimezone() throws SQLException {
+        testDatatype("mytimeWithTimeZone", "1970-01-01 10:11:11.0", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypeTimestamp() throws SQLException {
+        testDatatype("mytimestamp", "2010-01-01 11:11:11.000000", "TIMESTAMP");
+    }
+    @Test
+    public void testDatatypeTimestampWithTimezone() throws SQLException {
+        testDatatype("mytimestampwithtimezone", "2010-01-01 10:11:11.000000", "TIMESTAMP");
+    }
+    @Test
+    public void testDatatypeTsQuery() throws SQLException {
+        testDatatype("mytsquery", "'fat' & 'rat'", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypeTsvector() throws SQLException {
+        testDatatype("mytsvector", "'fat':2 'rat':3", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypeUUID() throws SQLException {
+        testDatatype("myuuid", "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11", "VARCHAR(2000000) UTF8");
+    }
+    @Test
+    public void testDatatypeXML() throws SQLException {
+        testDatatype("myxml", "<?xml version=\"1.0\"?><book><title>Manual</title><chapter>...</chapter></book>", "VARCHAR(2000000) UTF8");
     }
 
-    public void testDatatype(final String columnName, final String expectedValue, final String expectedType) throws SQLException {
-        final String query = String.format("SELECT %s FROM %s.%s", columnName, VIRTUAL_SCHEMA, POSTGRES_TABLE_DATATYPES);
-        final ResultSet result = executeQuery(query);
+    public void testDatatype(final String columnName, final Object expectedValue, final String expectedType) throws SQLException {
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT ").append(columnName);
+        query.append(" FROM ").append(VIRTUAL_SCHEMA).append(".").append(POSTGRES_TABLE_DATATYPES);
+        query.append(" WHERE ").append(columnName).append(" IS NOT NULL");
+        final ResultSet result = executeQuery(query.toString());
         result.next();
-        final BigDecimal expected = new BigDecimal(expectedValue);
-        final BigDecimal actual = result.getBigDecimal(columnName);
-        assertEquals(expected, actual);
+        Object actual = null;
+        if (expectedValue.getClass() == BigDecimal.class) {
+            actual = result.getBigDecimal(columnName);
+        } else if (expectedValue.getClass() == Boolean.class) {
+            actual = result.getBoolean(columnName);
+        } else if (expectedValue.getClass() == String.class) {
+            actual = result.getString(columnName);
+        } else if (expectedValue.getClass() == Double.class) {
+            actual = result.getDouble(columnName);
+        } else if (expectedValue.getClass() == Integer.class) {
+            actual = result.getInt(columnName);
+        } else if (expectedValue.getClass() == Float.class) {
+            actual = result.getFloat(columnName);
+        }
+        assertEquals(expectedValue, actual);
         assertEquals(expectedType, getColumnType(columnName, POSTGRES_TABLE_DATATYPES));
     }
 
