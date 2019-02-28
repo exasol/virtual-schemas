@@ -11,6 +11,14 @@ matrix:
   include:
     - jdk: "oraclejdk8"
 
+
+addons:
+  sonarcloud:
+    organization: exasol
+
 before_script: ./jdbc-adapter/tools/version.sh verify
 
-script: ./jdbc-adapter/integration-test-data/run_integration_tests.sh
+script:
+  - ./jdbc-adapter/integration-test-data/run_integration_tests.sh
+  - cd  jdbc-adapter
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar
