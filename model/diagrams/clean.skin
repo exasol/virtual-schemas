@@ -1,0 +1,14 @@
+@startuml
+!include path_definitions.plantuml
+hide empty methods
+hide empty attributes
+skinparam style strictuml
+skinparam classAttributeIconSize 0
+!pragma horizontalLineBetweenDifferentPackageAllowed
+
+skinparam defaultFontName Calibri
+
+skinparam monochrome true
+
+skinparam padding 2
+@enduml

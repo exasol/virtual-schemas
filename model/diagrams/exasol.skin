@@ -1,0 +1,138 @@
+@startuml
+!include path_definitions.plantuml
+hide empty methods
+hide empty attributes
+skinparam style strictuml
+skinparam classAttributeIconSize 0
+!pragma horizontalLineBetweenDifferentPackageAllowed
+
+skinparam defaultFontName Calibri
+
+!define EXA_GREEN        76BC1C
+!define EXA_DARK_BLUE    093E52
+!define EXA_WHITE        FFFFFF
+!define EXA_YELLOW_GREEN C3D600
+!define EXA_TEAL         00B09B
+!define EXA_DARK_TEAL    007167
+!define EXA_DARK_GREY    56565A
+!define EXA_LIGHT_GREY   BEBAB9
+
+skinparam Arrow {
+    Color EXA_DARK_BLUE
+    FontColor EXA_DARK_BLUE
+}
+
+skinparam Class {
+    BackgroundColor EXA_TEAL
+    FontColor EXA_WHITE
+    FontStyle bold
+    BorderColor EXA_DARK_BLUE
+    BackgroundColor<<interface>> EXA_TEAL
+    FontColor<<interface>> EXA_WHITE
+    StereotypeFontColor<<interface>> EXA_WHITE
+}
+
+skinparam Object {
+    BackgroundColor EXA_TEAL
+    FontColor EXA_WHITE
+    FontStyle bold
+    BorderColor EXA_DARK_BLUE
+    BackgroundColor<<interface>> EXA_TEAL
+    FontColor<<interface>> EXA_WHITE
+    StereotypeFontColor<<interface>> EXA_WHITE
+}
+
+skinparam ClassAttribute {
+    BackgroundColor EXA_TEAL
+    FontColor EXA_WHITE
+    BorderColor EXA_DARK_BLUE
+    BackgroundColor<<interface>> EXA_TEAL
+    FontColor<<interface>> EXA_WHITE
+    StereotypeFontColor<<interface>> EXA_WHITE
+}
+
+skinparam ObjectAttribute {
+    BackgroundColor EXA_TEAL
+    FontColor EXA_WHITE
+    BorderColor EXA_DARK_BLUE
+    BackgroundColor<<interface>> EXA_TEAL
+    FontColor<<interface>> EXA_WHITE
+    StereotypeFontColor<<interface>> EXA_WHITE
+}
+
+skinparam Package {
+    FontColor EXA_DARK_BLUE
+    FontStyle bold
+    BorderColor EXA_DARK_BLUE
+}
+
+skinparam Rectangle {
+    BackgroundColor EXA_WHITE
+    FontColor EXA_DARK_BLUE
+    FontStyle bold
+    BorderColor EXA_DARK_BLUE
+}
+
+skinparam Component {
+    BackgroundColor EXA_GREEN
+    FontColor EXA_WHITE
+    BorderColor EXA_DARK_BLUE
+    StereotypeFontColor EXA_WHITE
+    BackgroundColor<<external>> EXA_LIGHT_GREY
+    FontColor<<external>> EXA_WHITE
+    BorderColor<<external>> EXA_DARK_GREY
+    StereotypeFontColor<<external>> EXA_WHITE
+}
+
+skinparam Interface {
+    BackgroundColor EXA_GREEN
+    FontColor EXA_WHITE
+    BorderColor EXA_DARK_BLUE
+    StereotypeFontColor EXA_WHITE
+    BackgroundColor<<external>> EXA_LIGHT_GREY
+    FontColor<<external>> EXA_WHITE
+    BorderColor<<external>> EXA_DARK_GREY
+    StereotypeFontColor<<external>> EXA_WHITE
+}
+
+skinparam Node {
+    BackgroundColor EXA_GREEN
+    FontColor EXA_WHITE
+    BorderColor EXA_DARK_BLUE
+    StereotypeFontColor EXA_WHITE
+    BackgroundColor<<external>> EXA_LIGHT_GREY
+    FontColor<<external>> EXA_WHITE
+    BorderColor<<external>> EXA_DARK_GREY
+    StereotypeFontColor<<external>> EXA_WHITE
+}
+
+skinparam Database {
+    BackgroundColor EXA_GREEN
+    FontColor EXA_WHITE
+    BorderColor EXA_DARK_BLUE
+    BackgroundColor<<external>> EXA_LIGHT_GREY
+    FontColor<<external>> EXA_WHITE
+    BorderColor<<external>> EXA_DARK_GREY
+    StereotypeFontColor<<external>> EXA_WHITE
+}
+
+skinparam Actor {
+    BackgroundColor EXA_WHITE
+    FontColor EXA_DARK_BLUE
+    BorderColor EXA_DARK_BLUE
+    FontColor<<external>> EXA_DARK_GREY
+    BorderColor<<external>> EXA_DARK_GREY
+    StereotypeFontColor<<external>> EXA_DARK_GREY
+}
+
+skinparam Artifact {
+    BackgroundColor EXA_WHITE
+    FontColor EXA_DARK_BLUE
+    BorderColor EXA_DARK_BLUE
+    FontColor<<external>> EXA_DARK_GREY
+    BorderColor<<external>> EXA_DARK_GREY
+    StereotypeFontColor<<external>> EXA_DARK_GREY
+}
+
+skinparam padding 2
+@enduml
