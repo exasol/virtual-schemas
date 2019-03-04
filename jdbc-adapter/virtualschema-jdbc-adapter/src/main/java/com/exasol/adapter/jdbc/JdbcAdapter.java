@@ -292,7 +292,7 @@ public class JdbcAdapter {
     }
 
     private static String generateJDBCImportQuery(
-          final ExaMetadata exaMeta, final SchemaMetadataInfo meta, final SqlDialect dialect, final String pushdownQuery) throws AdapterException {
+          final ExaMetadata exaMeta, final SchemaMetadataInfo meta, final SqlDialect dialect, final String pushdownQuery) {
         final String credentials = getCredentialsForJDBCImport(exaMeta, meta);
 
         final StringBuilder jdbcImportQuery = new StringBuilder();
