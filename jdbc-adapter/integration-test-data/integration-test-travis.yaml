@@ -5,7 +5,7 @@ general:
   debugAddress:     ''
   bucketFsUrl:      http://127.0.0.1:6594/default
   bucketFsPassword: write
-  jdbcAdapterPath:  /buckets/bfsdefault/default/virtualschema-jdbc-adapter-dist-1.5.2.jar
+  jdbcAdapterPath:  /buckets/bfsdefault/default/virtualschema-jdbc-adapter-dist-1.5.3.jar
 
 exasol:
   runIntegrationTests: true

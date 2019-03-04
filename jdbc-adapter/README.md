@@ -2,6 +2,20 @@
 
 [![Build Status](https://travis-ci.org/exasol/virtual-schemas.svg)](https://travis-ci.org/exasol/virtual-schemas)
 
+SonarCloud results:
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtualschema-jdbc-adapter-main&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtualschema-jdbc-adapter-main)
+
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtualschema-jdbc-adapter-main&metric=security_rating)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtualschema-jdbc-adapter-main)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtualschema-jdbc-adapter-main&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtualschema-jdbc-adapter-main)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtualschema-jdbc-adapter-main&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtualschema-jdbc-adapter-main)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtualschema-jdbc-adapter-main&metric=sqale_index)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtualschema-jdbc-adapter-main)
+
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtualschema-jdbc-adapter-main&metric=code_smells)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtualschema-jdbc-adapter-main)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtualschema-jdbc-adapter-main&metric=coverage)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtualschema-jdbc-adapter-main)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtualschema-jdbc-adapter-main&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtualschema-jdbc-adapter-main)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtualschema-jdbc-adapter-main&metric=ncloc)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtualschema-jdbc-adapter-main)
+
 ## Overview
 
 The JDBC adapter for virtual schemas allows you to connect to JDBC data sources like Hive, Oracle, Teradata, Exasol or any other data source supporting JDBC. It uses the well proven ```IMPORT FROM JDBC``` Exasol statement behind the scenes to obtain the requested data, when running a query on a virtual table. The JDBC adapter also serves as the reference adapter for the Exasol virtual schema framework.
