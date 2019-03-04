@@ -72,7 +72,7 @@ public class JdbcAdapter {
         } catch (final AdapterException e) {
             throw e;
         } catch (final Exception e) {
-            String stacktrace = UdfUtils.traceToString(e);
+            final String stacktrace = UdfUtils.traceToString(e);
             throw new Exception("Unexpected error in adapter: " + e.getMessage() + "\nFor following request: " + input + "\nResponse: " + result + "\nAdapter stack trace: " + stacktrace,
                     e);
         }
@@ -146,7 +146,7 @@ public class JdbcAdapter {
 
     private static String handleRefresh(final RefreshRequest request, final ExaMetadata meta)
             throws SQLException, AdapterException {
-        SchemaMetadata remoteMeta;
+        final SchemaMetadata remoteMeta;
         JdbcAdapterProperties.checkPropertyConsistency(request.getSchemaMetadataInfo().getProperties());
         if (request.isRefreshForTables()) {
             final List<String> tables = request.getTables();
@@ -240,12 +240,12 @@ public class JdbcAdapter {
         final SqlGenerationVisitor sqlGeneratorVisitor = dialect.getSqlGenerationVisitor(context);
         final String pushdownQuery = request.getSelect().accept(sqlGeneratorVisitor);
 
-        String sql = generateImportQueryForPushdownQuery(exaMeta, meta, dialect, pushdownQuery);
+        final String sql = generateImportQueryForPushdownQuery(exaMeta, meta, dialect, pushdownQuery);
 
         return ResponseJsonSerializer.makePushdownResponse(sql);
     }
 
-    private static String generateImportQueryForPushdownQuery(ExaMetadata exaMeta, SchemaMetadataInfo meta, SqlDialect dialect, String pushdownQuery) throws AdapterException {
+    private static String generateImportQueryForPushdownQuery(final ExaMetadata exaMeta, final SchemaMetadataInfo meta, final SqlDialect dialect, final String pushdownQuery) throws AdapterException {
         String sql = "";
         if (JdbcAdapterProperties.isLocal(meta.getProperties())) {
             sql = generateLocalQuery(pushdownQuery);
@@ -263,9 +263,10 @@ public class JdbcAdapter {
         return pushdownQuery;
     }
 
-    private static String generateExasolImportQuery(ExaMetadata exaMeta, SchemaMetadataInfo meta, String pushdownQuery) {
-        String credentials = getCredentialsForEXAImport(exaMeta, meta);
-        StringBuilder exasolImportQuery = new StringBuilder();
+    private static String generateExasolImportQuery(
+          final ExaMetadata exaMeta, final SchemaMetadataInfo meta, final String pushdownQuery) {
+        final String credentials = getCredentialsForEXAImport(exaMeta, meta);
+        final StringBuilder exasolImportQuery = new StringBuilder();
         exasolImportQuery.append("IMPORT FROM EXA AT '");
         exasolImportQuery.append(JdbcAdapterProperties.getExaConnectionString(meta.getProperties()));
         exasolImportQuery.append("' ");
@@ -276,9 +277,10 @@ public class JdbcAdapter {
         return exasolImportQuery.toString();
     }
 
-    private static String generateOracleImportQuery(ExaMetadata exaMeta, SchemaMetadataInfo meta, String pushdownQuery) {
-        String credentials = getCredentialsForORAImport(exaMeta, meta);
-        StringBuilder oracleImportQuery = new StringBuilder();
+    private static String generateOracleImportQuery(
+          final ExaMetadata exaMeta, final SchemaMetadataInfo meta, final String pushdownQuery) {
+        final String credentials = getCredentialsForORAImport(exaMeta, meta);
+        final StringBuilder oracleImportQuery = new StringBuilder();
         oracleImportQuery.append("IMPORT FROM ORA AT ");
         oracleImportQuery.append(JdbcAdapterProperties.getOraConnectionName(meta.getProperties()));
         oracleImportQuery.append(" ");
@@ -289,10 +291,11 @@ public class JdbcAdapter {
         return oracleImportQuery.toString();
     }
 
-    private static String generateJDBCImportQuery(ExaMetadata exaMeta, SchemaMetadataInfo meta, SqlDialect dialect, String pushdownQuery) throws AdapterException {
-        String credentials = getCredentialsForJDBCImport(exaMeta, meta);
+    private static String generateJDBCImportQuery(
+          final ExaMetadata exaMeta, final SchemaMetadataInfo meta, final SqlDialect dialect, final String pushdownQuery) throws AdapterException {
+        final String credentials = getCredentialsForJDBCImport(exaMeta, meta);
 
-        StringBuilder jdbcImportQuery = new StringBuilder();
+        final StringBuilder jdbcImportQuery = new StringBuilder();
         final String columnDescription = createColumnDescription(exaMeta, meta, pushdownQuery, dialect);
         if (columnDescription == null) {
             jdbcImportQuery.append("IMPORT FROM JDBC AT ");
@@ -312,7 +315,7 @@ public class JdbcAdapter {
         return jdbcImportQuery.toString();
     }
 
-    protected static String getCredentialsForJDBCImport(ExaMetadata exaMeta, SchemaMetadataInfo meta) {
+    protected static String getCredentialsForJDBCImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         String credentials = "";
         if (JdbcAdapterProperties.isUserSpecifiedConnection(meta.getProperties())) {
             credentials = JdbcAdapterProperties.getConnectionName(meta.getProperties());
@@ -324,7 +327,7 @@ public class JdbcAdapter {
         return credentials;
     }
 
-    protected static String getCredentialsForORAImport(ExaMetadata exaMeta, SchemaMetadataInfo meta) {
+    protected static String getCredentialsForORAImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         String credentials = "";
         if (!JdbcAdapterProperties.isUserSpecifiedConnection(meta.getProperties())) {
             credentials = getUserAndPasswordForImport(exaMeta, meta);
@@ -332,11 +335,11 @@ public class JdbcAdapter {
         return credentials;
     }
 
-    protected static String getCredentialsForEXAImport(ExaMetadata exaMeta, SchemaMetadataInfo meta) {
+    protected static String getCredentialsForEXAImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         return getUserAndPasswordForImport(exaMeta, meta);
     }
 
-    private static String getUserAndPasswordForImport(ExaMetadata exaMeta, SchemaMetadataInfo meta) {
+    private static String getUserAndPasswordForImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         String credentials = "";
         final ExaConnectionInformation connection = JdbcAdapterProperties.getConnectionInformation(meta.getProperties(),
                     exaMeta);
@@ -351,16 +354,17 @@ public class JdbcAdapter {
         final ExaConnectionInformation connectionInformation = JdbcAdapterProperties
                 .getConnectionInformation(meta.getProperties(), exaMeta);
         try {
-            Connection connection = establishConnection(connectionInformation);
+            final Connection connection = establishConnection(connectionInformation);
             logger.fine(() -> "createColumnDescription: " + pushdownQuery);
             ResultSetMetaData metadata = null;
-            try (PreparedStatement ps = connection.prepareStatement(pushdownQuery)) {
+            try (final PreparedStatement ps = connection.prepareStatement(pushdownQuery)) {
                 metadata = ps.getMetaData();
                 if (metadata == null) {
                     ps.execute();
                     metadata = ps.getMetaData();
                     if (metadata == null) {
-                        throw new SQLException("getMetaData() failed");
+                        throw new SQLException("Unable to read source metadata trying to create description for " +
+                              "source columns.");
                     }
                 }
             }

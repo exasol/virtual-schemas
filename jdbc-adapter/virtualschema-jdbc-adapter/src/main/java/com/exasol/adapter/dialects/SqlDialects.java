@@ -126,16 +126,21 @@ public final class SqlDialects {
     }
 
     private SqlDialect instantiateDialect(final String name, final Optional<Class<? extends SqlDialect>> foundDialect,
-            final SqlDialectContext context) throws SqlDialectsRegistryException {
+          final SqlDialectContext context) throws SqlDialectsRegistryException {
+        if (foundDialect.isPresent()) {
+            return instantiateExistingDialect(name, foundDialect, context);
+        } else {
+            throw new SqlDialectsRegistryException("The dialect \"" + name + "\" does not exist."//
+                  + "Please, select the dialect from the next list: " + supportedDialects.toString());
+        }
+    }
+
+    private SqlDialect instantiateExistingDialect(String name, Optional<Class<? extends SqlDialect>> foundDialect,
+          SqlDialectContext context) {
         try {
-            if (foundDialect.isPresent()) {
-                final Class<? extends SqlDialect> dialectClass = foundDialect.get();
-                return dialectClass.getConstructor(SqlDialectContext.class).newInstance(context);
-            } else {
-                throw new InstantiationException();
-            }
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                | NoSuchMethodException | SecurityException e) {
+            final Class<? extends SqlDialect> dialectClass = foundDialect.get();
+            return dialectClass.getConstructor(SqlDialectContext.class).newInstance(context);
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             throw new SqlDialectsRegistryException("Unable to instanciate SQL dialect \"" + name + "\".", e);
         }
     }
