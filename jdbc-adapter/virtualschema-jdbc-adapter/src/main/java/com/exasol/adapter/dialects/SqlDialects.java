@@ -127,15 +127,17 @@ public final class SqlDialects {
 
     private SqlDialect instantiateDialect(final String name, final Optional<Class<? extends SqlDialect>> foundDialect,
             final SqlDialectContext context) throws SqlDialectsRegistryException {
-        SqlDialect instance;
         try {
-            final Class<? extends SqlDialect> dialectClass = foundDialect.get();
-            instance = dialectClass.getConstructor(SqlDialectContext.class).newInstance(context);
+            if (foundDialect.isPresent()) {
+                final Class<? extends SqlDialect> dialectClass = foundDialect.get();
+                return dialectClass.getConstructor(SqlDialectContext.class).newInstance(context);
+            } else {
+                throw new InstantiationException();
+            }
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             throw new SqlDialectsRegistryException("Unable to instanciate SQL dialect \"" + name + "\".", e);
         }
-        return instance;
     }
 
     /**

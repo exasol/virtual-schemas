@@ -13,7 +13,7 @@ public class KerberosUtils {
     private static final String KRB_KEY = "ExaAuthType=Kerberos;";
 
     public static boolean isKerberosAuth(String pass) {
-        if (pass==null) {
+        if (pass == null) {
             return false;
         }
         return pass.indexOf(KRB_KEY) == 0;
@@ -33,29 +33,20 @@ public class KerberosUtils {
         krbDir.delete();
         krbDir.mkdir();
         krbDir.deleteOnExit();
-        String krbConfPath = writeKrbConf(krbDir, confKeytab[0]);
-        String keytabPath = writeKeytab(krbDir, confKeytab[1]);
+        String krbConfPath = writePath(krbDir, confKeytab[0], "krb_", ".conf");
+        String keytabPath = writePath(krbDir, confKeytab[1], "kt_", ".keytab");
         String jaasConfigPath = writeJaasConfig(krbDir, user, keytabPath);
         System.setProperty("java.security.auth.login.config", jaasConfigPath);
         System.setProperty("java.security.krb5.conf", krbConfPath);
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
     }
 
-    private static String writeKrbConf(File krbDir, String base64Conf) throws Exception {
-        File file = File.createTempFile("krb_", ".conf", krbDir);
+    private static String writePath(File krbDir, String confKeyTab, String prefix, String suffix) throws Exception {
+        File file = File.createTempFile(prefix, suffix, krbDir);
         file.deleteOnExit();
-        FileOutputStream os = new FileOutputStream(file);
-        os.write(DatatypeConverter.parseBase64Binary(base64Conf));
-        os.close();
-        return file.getCanonicalPath();
-    }
-
-    private static String writeKeytab(File krbDir, String base64Keytab) throws Exception {
-        File file = File.createTempFile("kt_", ".keytab", krbDir);
-        file.deleteOnExit();
-        FileOutputStream os = new FileOutputStream(file);
-        os.write(DatatypeConverter.parseBase64Binary(base64Keytab));
-        os.close();
+        try (FileOutputStream os = new FileOutputStream(file);) {
+            os.write(DatatypeConverter.parseBase64Binary(confKeyTab));
+        }
         return file.getCanonicalPath();
     }
 
@@ -63,7 +54,7 @@ public class KerberosUtils {
         File file = File.createTempFile("jaas_", ".conf", krbDir);
         file.deleteOnExit();
         String jaasData;
-        jaasData  = "Client {\n";
+        jaasData = "Client {\n";
         jaasData += "com.sun.security.auth.module.Krb5LoginModule required\n";
         jaasData += "principal=\"" + princ + "\"\n";
         jaasData += "useKeyTab=true\n";
@@ -79,9 +70,9 @@ public class KerberosUtils {
         jaasData += "doNotPrompt=true\n";
         jaasData += "useTicketCache=false;\n";
         jaasData += "};\n";
-        FileOutputStream os = new FileOutputStream(file);
-        os.write(jaasData.getBytes(Charset.forName("UTF-8")));
-        os.close();
+        try (FileOutputStream os = new FileOutputStream(file)) {
+            os.write(jaasData.getBytes(Charset.forName("UTF-8")));
+        }
         return file.getCanonicalPath();
     }
 }
