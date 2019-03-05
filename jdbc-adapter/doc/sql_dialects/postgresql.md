@@ -42,6 +42,11 @@ In contrast to EXASOL, PostgreSQL does not treat identifiers as specified in the
 
 ### Automatic Identifier conversion
 
+This is the default mode for handling identifiers, but can also be set explicitly by the following property:
+```sql
+ALTER VIRTUAL SCHEMA postgres SET POSTGRESQL_IDENTIFIER_MAPPING = 'CONVERT_TO_UPPER';
+```
+
 In this mode you don't have to care about identifier handling. Everything will work out of the box as long as you **don't use quoted identifiers** (in the PostgreSQL Schema as well as in the EXASOL Virtual Schema). More specifically everything will work as long as there are no identifiers in the PostgreSQL database that contain upper case characters. If that is the case an error will be thrown when creating or refreshing the virtual schema.
 In order to create or refresh the virtual schema regrardlessly, you can specifiy that the adapter should ignore this specific error:
 ```sql
@@ -84,7 +89,7 @@ CREATE VIRTUAL SCHEMA postgres
 	CATALOG_NAME = 'postgres'
 	SCHEMA_NAME = 'public'
 	CONNECTION_NAME = 'POSTGRES_DOCKER'
-	IDENTIFIER_HANDLING = 'POSTGRESQL_STYLE'
+	POSTGRESQL_IDENTIFIER_MAPPING = 'PRESERVE_ORIGINAL_CASE'
 ;
 -- Open Schema and see what tables are there
 open schema postgres;
