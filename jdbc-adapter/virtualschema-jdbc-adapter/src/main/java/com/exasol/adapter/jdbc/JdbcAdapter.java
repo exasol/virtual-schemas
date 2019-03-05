@@ -1,11 +1,5 @@
 package com.exasol.adapter.jdbc;
 
-import java.io.OutputStream;
-import java.sql.*;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.*;
-
 import com.exasol.ExaConnectionInformation;
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
@@ -13,11 +7,22 @@ import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.json.RequestJsonParser;
 import com.exasol.adapter.json.ResponseJsonSerializer;
-import com.exasol.adapter.metadata.*;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.SchemaMetadata;
+import com.exasol.adapter.metadata.SchemaMetadataInfo;
 import com.exasol.adapter.request.*;
 import com.exasol.logging.CompactFormatter;
 import com.exasol.utils.JsonHelper;
 import com.exasol.utils.UdfUtils;
+
+import java.io.OutputStream;
+import java.sql.*;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Formatter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.StreamHandler;
 
 public class JdbcAdapter {
     public static final int MAX_STRING_CHAR_LENGTH = 2000000;
@@ -67,7 +72,7 @@ public class JdbcAdapter {
         } catch (final AdapterException e) {
             throw e;
         } catch (final Exception e) {
-            String stacktrace = UdfUtils.traceToString(e);
+            final String stacktrace = UdfUtils.traceToString(e);
             throw new Exception("Unexpected error in adapter: " + e.getMessage() + "\nFor following request: " + input + "\nResponse: " + result + "\nAdapter stack trace: " + stacktrace,
                     e);
         }
@@ -141,7 +146,7 @@ public class JdbcAdapter {
 
     private static String handleRefresh(final RefreshRequest request, final ExaMetadata meta)
             throws SQLException, AdapterException {
-        SchemaMetadata remoteMeta;
+        final SchemaMetadata remoteMeta;
         JdbcAdapterProperties.checkPropertyConsistency(request.getSchemaMetadataInfo().getProperties());
         if (request.isRefreshForTables()) {
             final List<String> tables = request.getTables();
@@ -342,22 +347,22 @@ public class JdbcAdapter {
     }
 
     private static String createColumnDescription(final ExaMetadata exaMeta, final SchemaMetadataInfo meta,
-            final String pushdownQuery, final SqlDialect dialect) throws AdapterException {
-        PreparedStatement ps = null;
+            final String pushdownQuery, final SqlDialect dialect) {
         final ExaConnectionInformation connectionInformation = JdbcAdapterProperties
                 .getConnectionInformation(meta.getProperties(), exaMeta);
-
-        Connection connection = null;
         try {
-            connection = establishConnection(connectionInformation);
+            final Connection connection = establishConnection(connectionInformation);
             logger.fine(() -> "createColumnDescription: " + pushdownQuery);
-            ps = connection.prepareStatement(pushdownQuery);
-            ResultSetMetaData metadata = ps.getMetaData();
-            if (metadata == null) {
-                ps.execute();
+            ResultSetMetaData metadata = null;
+            try (final PreparedStatement ps = connection.prepareStatement(pushdownQuery)) {
                 metadata = ps.getMetaData();
                 if (metadata == null) {
-                    throw new SQLException("getMetaData() failed");
+                    ps.execute();
+                    metadata = ps.getMetaData();
+                    if (metadata == null) {
+                        throw new SQLException("Unable to read source metadata trying to create description for " +
+                              "source columns.");
+                    }
                 }
             }
             final DataType[] internalTypes = new DataType[metadata.getColumnCount()];

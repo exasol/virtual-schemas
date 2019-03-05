@@ -12,58 +12,49 @@ public class KerberosUtils {
 
     private static final String KRB_KEY = "ExaAuthType=Kerberos;";
 
-    public static boolean isKerberosAuth(String pass) {
-        if (pass==null) {
+    public static boolean isKerberosAuth(final String pass) {
+        if (pass == null) {
             return false;
         }
         return pass.indexOf(KRB_KEY) == 0;
     }
 
-    public static void configKerberos(String user, String pass) throws Exception {
+    public static void configKerberos(final String user, String pass) throws Exception {
         try {
             pass = pass.replaceFirst(KRB_KEY, "");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException("Could not find " + KRB_KEY + " in password: " + e.getMessage());
         }
-        String[] confKeytab = pass.split(";");
+        final String[] confKeytab = pass.split(";");
         if (confKeytab.length != 2)
             throw new RuntimeException("Invalid Kerberos conf/keytab");
-        File kerberosBaseDir = new File("/tmp");
-        File krbDir = File.createTempFile("kerberos_", null, kerberosBaseDir);
+        final File kerberosBaseDir = new File("/tmp");
+        final File krbDir = File.createTempFile("kerberos_", null, kerberosBaseDir);
         krbDir.delete();
         krbDir.mkdir();
         krbDir.deleteOnExit();
-        String krbConfPath = writeKrbConf(krbDir, confKeytab[0]);
-        String keytabPath = writeKeytab(krbDir, confKeytab[1]);
-        String jaasConfigPath = writeJaasConfig(krbDir, user, keytabPath);
+        final String krbConfPath = writePath(krbDir, confKeytab[0], "krb_", ".conf");
+        final String keytabPath = writePath(krbDir, confKeytab[1], "kt_", ".keytab");
+        final String jaasConfigPath = writeJaasConfig(krbDir, user, keytabPath);
         System.setProperty("java.security.auth.login.config", jaasConfigPath);
         System.setProperty("java.security.krb5.conf", krbConfPath);
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
     }
 
-    private static String writeKrbConf(File krbDir, String base64Conf) throws Exception {
-        File file = File.createTempFile("krb_", ".conf", krbDir);
+    private static String writePath(final File krbDir, final String confKeyTab, final String prefix, final String suffix) throws Exception {
+        final File file = File.createTempFile(prefix, suffix, krbDir);
         file.deleteOnExit();
-        FileOutputStream os = new FileOutputStream(file);
-        os.write(DatatypeConverter.parseBase64Binary(base64Conf));
-        os.close();
+        try (final FileOutputStream os = new FileOutputStream(file);) {
+            os.write(DatatypeConverter.parseBase64Binary(confKeyTab));
+        }
         return file.getCanonicalPath();
     }
 
-    private static String writeKeytab(File krbDir, String base64Keytab) throws Exception {
-        File file = File.createTempFile("kt_", ".keytab", krbDir);
-        file.deleteOnExit();
-        FileOutputStream os = new FileOutputStream(file);
-        os.write(DatatypeConverter.parseBase64Binary(base64Keytab));
-        os.close();
-        return file.getCanonicalPath();
-    }
-
-    private static String writeJaasConfig(File krbDir, String princ, String keytabPath) throws Exception {
-        File file = File.createTempFile("jaas_", ".conf", krbDir);
+    private static String writeJaasConfig(final File krbDir, final String princ, final String keytabPath) throws Exception {
+        final File file = File.createTempFile("jaas_", ".conf", krbDir);
         file.deleteOnExit();
         String jaasData;
-        jaasData  = "Client {\n";
+        jaasData = "Client {\n";
         jaasData += "com.sun.security.auth.module.Krb5LoginModule required\n";
         jaasData += "principal=\"" + princ + "\"\n";
         jaasData += "useKeyTab=true\n";
@@ -79,9 +70,9 @@ public class KerberosUtils {
         jaasData += "doNotPrompt=true\n";
         jaasData += "useTicketCache=false;\n";
         jaasData += "};\n";
-        FileOutputStream os = new FileOutputStream(file);
-        os.write(jaasData.getBytes(Charset.forName("UTF-8")));
-        os.close();
+        try (final FileOutputStream os = new FileOutputStream(file)) {
+            os.write(jaasData.getBytes(Charset.forName("UTF-8")));
+        }
         return file.getCanonicalPath();
     }
 }

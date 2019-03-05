@@ -87,10 +87,10 @@ public final class SqlDialects {
     }
 
     private String getNameForDialectClass(final Class<? extends SqlDialect> dialect) {
-        String dialectName;
+        final String dialectName;
         try {
             dialectName = (String) dialect.getMethod(GET_PUBLIC_NAME_METHOD).invoke(null);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+        } catch (final IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
                 | SecurityException e) {
             throw new SqlDialectsRegistryException(
                     "Unable to invoke " + GET_PUBLIC_NAME_METHOD + " trying to determine SQL dialect name");
@@ -126,16 +126,23 @@ public final class SqlDialects {
     }
 
     private SqlDialect instantiateDialect(final String name, final Optional<Class<? extends SqlDialect>> foundDialect,
-            final SqlDialectContext context) throws SqlDialectsRegistryException {
-        SqlDialect instance;
+          final SqlDialectContext context) throws SqlDialectsRegistryException {
+        if (foundDialect.isPresent()) {
+            return instantiateExistingDialect(name, foundDialect, context);
+        } else {
+            throw new SqlDialectsRegistryException("The dialect \"" + name + "\" does not exist."//
+                  + "Please, select the dialect from the next list: " + getDialectsString());
+        }
+    }
+
+    private SqlDialect instantiateExistingDialect(final String name, final Optional<Class<? extends SqlDialect>> foundDialect,
+          final SqlDialectContext context) {
         try {
             final Class<? extends SqlDialect> dialectClass = foundDialect.get();
-            instance = dialectClass.getConstructor(SqlDialectContext.class).newInstance(context);
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                | NoSuchMethodException | SecurityException e) {
+            return dialectClass.getConstructor(SqlDialectContext.class).newInstance(context);
+        } catch (final InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             throw new SqlDialectsRegistryException("Unable to instanciate SQL dialect \"" + name + "\".", e);
         }
-        return instance;
     }
 
     /**
