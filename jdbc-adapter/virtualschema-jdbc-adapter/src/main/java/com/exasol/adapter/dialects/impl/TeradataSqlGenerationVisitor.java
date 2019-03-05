@@ -1,10 +1,7 @@
 package com.exasol.adapter.dialects.impl;
 
 import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationHelper;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
@@ -17,61 +14,72 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-
 public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
+    private static final String CAST = "CAST(";
+    private static final List<String> TYPE_NAMES_REQUIRING_CAST =
+          ImmutableList.of("SYSUDTLIB.ST_GEOMETRY", "XML", "JSON", "TIME", "TIME WITH TIME ZONE", "CLOB");
+    private static final List<String> TYPE_NAME_NOT_SUPPORTED = ImmutableList.of("BYTE", "VARBYTE", "BLOB");
+    private final Predicate<SqlNode> nodeRequiresCast = node -> {
+        try {
+            if (node.getType() == SqlNodeType.COLUMN) {
+                SqlColumn column = (SqlColumn) node;
+                String typeName = ColumnAdapterNotes
+                      .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName())
+                      .getTypeName();
+                return TYPE_NAMES_REQUIRING_CAST.contains(typeName) || TYPE_NAME_NOT_SUPPORTED.contains(typeName) ||
+                      (typeName.startsWith("NUMBER") &&
+                            column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.DOUBLE ||
+                            typeName.startsWith("INTERVAL") || typeName.startsWith("PERIOD") ||
+                            typeName.startsWith("SYSUDTLIB"));
+            }
+            return false;
+        } catch (AdapterException adapterException) {
+            throw new SqlGenerationVisitorException("Deserialization failed.", adapterException);
+        }
+    };
 
-    public TeradataSqlGenerationVisitor(SqlDialect dialect, SqlGenerationContext context) {
+    public TeradataSqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         super(dialect, context);
-
     }
 
     @Override
-    public String visit(SqlSelectList selectList) throws AdapterException {
+    public String visit(final SqlSelectList selectList) throws AdapterException {
         if (selectList.isRequestAnyColumn()) {
-            // The system requested any column
             return "1";
         }
-        List<String> selectListElements = new ArrayList<>();
+        final List<String> selectListElements = new ArrayList<>();
         if (selectList.isSelectStar()) {
             if (SqlGenerationHelper.selectListRequiresCasts(selectList, nodeRequiresCast)) {
-
-                // Do as if the user has all columns in select list
-                SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
-                
+                final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
                 int columnId = 0;
-                List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
-                SqlGenerationHelper.getMetadataFrom(select.getFromClause(), tableMetadata );
-                for (TableMetadata tableMeta : tableMetadata) {
-                    for (ColumnMetadata columnMeta : tableMeta.getColumns()) {
-                        SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-                        selectListElements.add( getColumnProjectionStringNoCheck(sqlColumn,  super.visit(sqlColumn)  )   );
+                final List<TableMetadata> tableMetadata = new ArrayList<>();
+                SqlGenerationHelper.getMetadataFrom(select.getFromClause(), tableMetadata);
+                for (final TableMetadata tableMeta : tableMetadata) {
+                    for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
+                        final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
+                        selectListElements.add(getColumnProjectionStringNoCheck(sqlColumn, super.visit(sqlColumn)));
                         ++columnId;
                     }
                 }
-                
             } else {
                 selectListElements.add("*");
             }
         } else {
-            for (SqlNode node : selectList.getExpressions()) {
+            for (final SqlNode node : selectList.getExpressions()) {
                 selectListElements.add(node.accept(this));
             }
         }
-       
         return Joiner.on(", ").join(selectListElements);
     }
-    
-    
+
     @Override
-    public String visit(SqlStatementSelect select) throws AdapterException {
+    public String visit(final SqlStatementSelect select) throws AdapterException {
         if (!select.hasLimit()) {
             return super.visit(select);
         } else {
-            SqlLimit limit = select.getLimit();
-         
-            StringBuilder sql = new StringBuilder();
-            sql.append("SELECT TOP "+limit.getLimit()+ " ");
-            
+            final SqlLimit limit = select.getLimit();
+            final StringBuilder sql = new StringBuilder();
+            sql.append("SELECT TOP ").append(limit.getLimit()).append(" ");
             sql.append(select.getSelectList().accept(this));
             sql.append(" FROM ");
             sql.append(select.getFromClause().accept(this));
@@ -91,107 +99,61 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
                 sql.append(" ");
                 sql.append(select.getOrderBy().accept(this));
             }
-
-            return sql.toString();   
+            return sql.toString();
         }
     }
-    
-    
+
     @Override
-    public String visit(SqlColumn column) throws AdapterException {
+    public String visit(final SqlColumn column) throws AdapterException {
         return getColumnProjectionString(column, super.visit(column));
     }
 
-    private String getColumnProjectionString(SqlColumn column, String projString) throws AdapterException {
-        boolean isDirectlyInSelectList = (column.hasParent() && column.getParent().getType() == SqlNodeType.SELECT_LIST);
+    private String getColumnProjectionString(final SqlColumn column, final String projString) throws AdapterException {
+        final boolean isDirectlyInSelectList =
+              (column.hasParent() && column.getParent().getType() == SqlNodeType.SELECT_LIST);
         if (!isDirectlyInSelectList) {
             return projString;
         }
-        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+        final String typeName =
+              ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName())
+                    .getTypeName();
         return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
-       
+
     }
 
-    
-    private String getColumnProjectionStringNoCheck(SqlColumn column, String projString) throws AdapterException {
-        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+    private String getColumnProjectionStringNoCheck(final SqlColumn column, final String projString)
+          throws AdapterException {
+        final String typeName =
+              ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName())
+                    .getTypeName();
         return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
-        
+
     }
-    
 
-    private String getColumnProjectionStringNoCheckImpl(String typeName, SqlColumn column, String projString) {
-    	
-    	if ( typeName.startsWith("SYSUDTLIB.ST_GEOMETRY") ||typeName.startsWith("JSON")  ) {
-    		
-            projString = "CAST(" + projString + "  as VARCHAR("+TeradataSqlDialect.maxTeradataVarcharSize+") )";
-            
+    private String getColumnProjectionStringNoCheckImpl(final String typeName, final SqlColumn column,
+          String projString) {
+        if (typeName.startsWith("SYSUDTLIB.ST_GEOMETRY") || typeName.startsWith("JSON")) {
+            projString = CAST + projString + "  as VARCHAR(" + TeradataSqlDialect.maxTeradataVarcharSize + ") )";
+        } else if (typeName.startsWith("XML")) {
+            projString =
+                  "XMLSERIALIZE(DOCUMENT " + projString + " as VARCHAR(" + TeradataSqlDialect.maxTeradataVarcharSize +
+                        ") INCLUDING XMLDECLARATION) ";
+        } else if (typeName.startsWith("NUMBER") &&
+              column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.DOUBLE) {
+            projString = CAST + projString + "  as DOUBLE PRECISION)";
+        } else if (typeName.equals("TIME") || typeName.equals("TIME WITH TIME ZONE")) {
+            projString = CAST + projString + "  as VARCHAR(21) )";
+        } else if (typeName.startsWith("INTERVAL")) {
+            projString = CAST + projString + "  as VARCHAR(30) )";
+        } else if (typeName.startsWith("PERIOD")) {
+            projString = CAST + projString + "  as VARCHAR(100) )";
+        } else if (typeName.startsWith("CLOB")) {
+            projString = CAST + projString + "  as VARCHAR(" + TeradataSqlDialect.maxTeradataVarcharSize + ") )";
+        } else if (TYPE_NAME_NOT_SUPPORTED.contains(typeName)) {
+            projString = "'" + typeName + " NOT SUPPORTED'";
+        } else if (typeName.startsWith("SYSUDTLIB")) {
+            projString = "'" + typeName + " NOT SUPPORTED'";
         }
-        else if (typeName.startsWith("XML") ) {
-        	
-            projString = "XMLSERIALIZE(DOCUMENT " + projString + " as VARCHAR("+TeradataSqlDialect.maxTeradataVarcharSize+") INCLUDING XMLDECLARATION) ";
-	
-        }
-        else if (typeName.startsWith("NUMBER")  &&  column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.DOUBLE  ){
-        	
-        	projString = "CAST(" + projString + "  as DOUBLE PRECISION)";
-        	
-        }
-        else if (typeName.equals("TIME") || typeName.equals("TIME WITH TIME ZONE") ) {
-        	
-        	projString = "CAST(" + projString + "  as VARCHAR(21) )";
-        	
-        }
-        else if ( typeName.startsWith("INTERVAL") ) {
-        	
-        	projString = "CAST(" + projString + "  as VARCHAR(30) )";
-        	
-        }
-        else if ( typeName.startsWith("PERIOD") ) {
-        	
-        	projString = "CAST(" + projString + "  as VARCHAR(100) )";
-        	
-        }
-        else if ( typeName.startsWith("CLOB") ) {
-        	
-        	projString = "CAST(" + projString + "  as VARCHAR("+TeradataSqlDialect.maxTeradataVarcharSize+") )";
-        	
-        }
-        else if (TYPE_NAME_NOT_SUPPORTED.contains(typeName)){
-        	
-        	projString = "'"+typeName+" NOT SUPPORTED'"; //returning a string constant for unsupported data types
-        	
-
-        }else if (typeName.startsWith("SYSUDTLIB")){
-        	
-        	projString = "'"+typeName+" NOT SUPPORTED'"; //returning a string constant for unsupported data types
-
-        }
-        	
         return projString;
     }
-    
-    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("SYSUDTLIB.ST_GEOMETRY","XML","JSON","TIME","TIME WITH TIME ZONE","CLOB");
-    
-
-    private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("BYTE","VARBYTE","BLOB"); 
-
-    private Predicate<SqlNode> nodeRequiresCast = node -> {
-        try {
-            if (node.getType() == SqlNodeType.COLUMN) {
-                SqlColumn column = (SqlColumn)node;
-                String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-                return TYPE_NAMES_REQUIRING_CAST.contains(typeName) || 
-                        TYPE_NAME_NOT_SUPPORTED.contains(typeName) ||  
-                        (typeName.startsWith("NUMBER")  &&  column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.DOUBLE ||
-                        typeName.startsWith("INTERVAL")	|| 
-                        typeName.startsWith("PERIOD") || 
-                        typeName.startsWith("SYSUDTLIB")  //user defined type
-                        );
-            }
-            return false;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    };
 }
