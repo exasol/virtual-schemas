@@ -41,8 +41,12 @@ public final class JdbcAdapterProperties {
     static final String PROP_EXCEPTION_HANDLING = "EXCEPTION_HANDLING";
     static final String PROP_LOG_LEVEL = "LOG_LEVEL";
     static final String PROP_IGNORE_ERROR_LIST = "IGNORE_ERRORS";
+    static final String PROP_POSTGRESQL_IDENTIFIER_MAPPING = "POSTGRESQL_IDENTIFIER_MAPPING";
 
     private static final String DEFAULT_LOG_LEVEL = "INFO";
+    private static final String VALUE_SQL_DIALECT_POSTGRESQL = "POSTGRESQL";
+    private static final String VALUE_POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE = "PRESERVE_ORIGINAL_CASE";
+    private static final String VALUE_POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER = "CONVERT_TO_UPPER";
 
     private JdbcAdapterProperties() {
         // prevent instantiation of static helper class
@@ -54,7 +58,7 @@ public final class JdbcAdapterProperties {
     }
 
     private static String getProperty(final Map<String, String> properties, final String name,
-            final String defaultValue) {
+                                      final String defaultValue) {
         if (properties.containsKey(name)) {
             return properties.get(name);
         } else {
@@ -64,6 +68,10 @@ public final class JdbcAdapterProperties {
 
     private static String getProperty(final Map<String, String> properties, final String name) {
         return getProperty(properties, name, "");
+    }
+
+    public static String getPostgreSQLIdentifierMapping(final Map<String, String> properties) {
+        return getProperty(properties, PROP_POSTGRESQL_IDENTIFIER_MAPPING, "CONVERT_TO_UPPER");
     }
 
     public static List<String> getIgnoreErrorList(final Map<String, String> properties) {
@@ -103,7 +111,7 @@ public final class JdbcAdapterProperties {
      * to access the connection .
      */
     public static ExaConnectionInformation getConnectionInformation(final Map<String, String> properties,
-            final ExaMetadata exaMeta) {
+                                                                    final ExaMetadata exaMeta) {
         final String connName = getProperty(properties, PROP_CONNECTION_NAME);
         if (connName != null && !connName.isEmpty()) {
             try {
@@ -127,6 +135,23 @@ public final class JdbcAdapterProperties {
         checkImportPropertyConsistency(properties, PROP_IMPORT_FROM_EXA, PROP_EXA_CONNECTION_STRING);
         checkImportPropertyConsistency(properties, PROP_IMPORT_FROM_ORA, PROP_ORA_CONNECTION_NAME);
         checkIgnoreErrors(properties);
+        checkPostgreSQLIdentifierPropertyConsistency(properties);
+    }
+
+    private static void checkPostgreSQLIdentifierPropertyConsistency(Map<String, String> properties) throws InvalidPropertyException {
+        if (properties.containsKey(PROP_POSTGRESQL_IDENTIFIER_MAPPING)) {
+            final String dialectName = getProperty(properties, PROP_SQL_DIALECT);
+            if (!dialectName.equals(VALUE_SQL_DIALECT_POSTGRESQL)) {
+                throw new InvalidPropertyException(PROP_POSTGRESQL_IDENTIFIER_MAPPING + " can be used only with " + VALUE_SQL_DIALECT_POSTGRESQL + " dialect.");
+            }
+            String propertyValue = properties.get(PROP_POSTGRESQL_IDENTIFIER_MAPPING);
+            if (!propertyValue.equals(VALUE_POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE) &&
+                    !propertyValue.equals(VALUE_POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER)) {
+                throw new InvalidPropertyException("Value for " + PROP_POSTGRESQL_IDENTIFIER_MAPPING + " must be "
+                        + VALUE_POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE + " or "
+                        + VALUE_POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER);
+            }
+        }
     }
 
     private static void checkIgnoreErrors(final Map<String, String> properties) throws InvalidPropertyException {
@@ -142,7 +167,7 @@ public final class JdbcAdapterProperties {
     }
 
     private static void checkImportPropertyConsistency(final Map<String, String> properties,
-            final String propImportFromX, final String propConnection) throws InvalidPropertyException {
+                                                       final String propImportFromX, final String propConnection) throws InvalidPropertyException {
         final boolean isImport = getProperty(properties, propImportFromX).toUpperCase().equals("TRUE");
         final boolean connectionIsEmpty = getProperty(properties, propConnection).isEmpty();
         if (isImport) {
@@ -356,7 +381,7 @@ public final class JdbcAdapterProperties {
      * changes to the existing (old) set of properties.
      */
     public static Map<String, String> getNewProperties(final Map<String, String> oldProperties,
-            final Map<String, String> changedProperties) {
+                                                       final Map<String, String> changedProperties) {
         final Map<String, String> newCompleteProperties = new HashMap<>(oldProperties);
         for (final Map.Entry<String, String> changedProperty : changedProperties.entrySet()) {
             if (changedProperty.getValue() == null) {
