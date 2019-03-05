@@ -71,7 +71,7 @@ public final class JdbcAdapterProperties {
     }
 
     public static String getPostgreSQLIdentifierMapping(final Map<String, String> properties) {
-        return getProperty(properties, PROP_POSTGRESQL_IDENTIFIER_MAPPING, "CONVERT_TO_UPPER");
+        return getProperty(properties, PROP_POSTGRESQL_IDENTIFIER_MAPPING, VALUE_POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER);
     }
 
     public static List<String> getIgnoreErrorList(final Map<String, String> properties) {
