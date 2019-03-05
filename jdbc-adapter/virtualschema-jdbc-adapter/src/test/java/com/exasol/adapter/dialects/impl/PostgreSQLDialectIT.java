@@ -138,9 +138,9 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
             stmt.execute(String.format("INSERT INTO %s.%s(mysmallint) VALUES(100)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(mytext) VALUES('skldfjgkl jsdklfgjklsdjfg jsklfdjg')", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(mytime) VALUES('11:11:11')", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
-            stmt.execute(String.format("INSERT INTO %s.%s(mytimeWithTimeZone) VALUES('11:11:11')", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
+            stmt.execute(String.format("INSERT INTO %s.%s(mytimeWithTimeZone) VALUES('11:11:11 +01:00')", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(mytimestamp) VALUES('2010-01-01 11:11:11')", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
-            stmt.execute(String.format("INSERT INTO %s.%s(mytimestampwithtimezone) VALUES('2010-01-01 11:11:11')", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
+            stmt.execute(String.format("INSERT INTO %s.%s(mytimestampwithtimezone) VALUES('2010-01-01 11:11:11 +01:00')", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(mytsquery) VALUES('fat & rat'::tsquery)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(mytsvector) VALUES(to_tsvector('english', 'The Fat Rats'))", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(myuuid) VALUES('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'::uuid)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
