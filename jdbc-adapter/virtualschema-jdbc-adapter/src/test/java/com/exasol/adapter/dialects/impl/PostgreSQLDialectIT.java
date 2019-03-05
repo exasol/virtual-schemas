@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
@@ -210,6 +211,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     public void testQueryLowerCaseTable() throws SQLException, ClassNotFoundException, FileNotFoundException {
         final String query = String.format("SELECT x FROM  %s.lower_t", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
         final ResultSet result = executeQuery(query);
+        assertFalse(result.next());
     }
 
     @Test
@@ -245,18 +247,21 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     public void testPreserveCaseQueryLowerCaseTableWithQuotes() throws SQLException, ClassNotFoundException, FileNotFoundException {
         final String query = String.format("SELECT \"x\" FROM  %s.\"lower_t\"", VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE);
         final ResultSet result = executeQuery(query);
+        assertFalse(result.next());
     }
 
     @Test
     public void testPreserveCaseQueryUpperCaseTableWithQuotes() throws SQLException, ClassNotFoundException, FileNotFoundException {
         final String query = String.format("SELECT \"Y\" FROM  %s.\"UPPer_t\"", VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE);
         final ResultSet result = executeQuery(query);
+        assertFalse(result.next());
     }
 
     @Test
     public void testPreserveCaseQueryUpperCaseTableWithQuotesLowerCaseColumn() throws SQLException, ClassNotFoundException, FileNotFoundException {
         final String query = String.format("SELECT \"x\" FROM  %s.\"UPPer_t\"", VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE);
         final ResultSet result = executeQuery(query);
+        assertFalse(result.next());
     }
 
     // Datatype tests ---------------------------------------------------------
