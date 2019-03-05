@@ -1,5 +1,10 @@
 package com.exasol.adapter.dialects.impl;
 
+import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.sql.ScalarFunction;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -7,32 +12,14 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import com.exasol.adapter.capabilities.AggregateFunctionCapability;
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.capabilities.LiteralCapability;
-import com.exasol.adapter.capabilities.MainCapability;
-import com.exasol.adapter.capabilities.PredicateCapability;
-import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.sql.ScalarFunction;
-
 public class PostgreSQLSqlDialect extends AbstractSqlDialect {
-
-    public static final String POSTGRES_IGNORE_UPPERCASE_TABLES = "POSTGRESQL_UPPERCASE_TABLES";
+    private static final int MAX_POSTGRES_SQL_VARCHAR_SIZE_BASED_ON_EXASOL_LIMIT = 2000000;
+    private static final String POSTGRES_IGNORE_UPPERCASE_TABLES = "POSTGRESQL_UPPERCASE_TABLES";
+    private static final String NAME = "POSTGRESQL";
 
     public PostgreSQLSqlDialect(final SqlDialectContext context) {
         super(context);
     }
-
-    private static final String NAME = "POSTGRESQL";
-
-    public static int maxPostgresSQLVarcharSize = 2000000; // Postgres limit actually is 1 GB, so we use as max the
-                                                           // EXASOL limit
 
     public static String getPublicName() {
         return NAME;
@@ -40,7 +27,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Capabilities getCapabilities() {
-
         final Capabilities cap = new Capabilities();
 
         cap.supportMainCapability(MainCapability.SELECTLIST_PROJECTION);
@@ -56,7 +42,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         cap.supportMainCapability(MainCapability.LIMIT);
         cap.supportMainCapability(MainCapability.LIMIT_WITH_OFFSET);
 
-        // Predicates
         cap.supportPredicate(PredicateCapability.AND);
         cap.supportPredicate(PredicateCapability.OR);
         cap.supportPredicate(PredicateCapability.NOT);
@@ -72,8 +57,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         cap.supportPredicate(PredicateCapability.IS_NULL);
         cap.supportPredicate(PredicateCapability.IS_NOT_NULL);
 
-        // Literals
-        // BOOL is not supported
         cap.supportLiteral(LiteralCapability.BOOL);
         cap.supportLiteral(LiteralCapability.NULL);
         cap.supportLiteral(LiteralCapability.DATE);
@@ -82,9 +65,7 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         cap.supportLiteral(LiteralCapability.DOUBLE);
         cap.supportLiteral(LiteralCapability.EXACTNUMERIC);
         cap.supportLiteral(LiteralCapability.STRING);
-        // cap.supportLiteral(LiteralCapability.INTERVAL);
 
-        // Aggregate functions
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT);
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_STAR);
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_DISTINCT);
@@ -114,19 +95,15 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_SAMP);
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_SAMP_DISTINCT);
 
-        cap.supportAggregateFunction(AggregateFunctionCapability.GROUP_CONCAT); // translated to string_agg
+        cap.supportAggregateFunction(AggregateFunctionCapability.GROUP_CONCAT);
 
-        // math functions
-        // Standard Arithmetic Operators
         cap.supportScalarFunction(ScalarFunctionCapability.ADD);
         cap.supportScalarFunction(ScalarFunctionCapability.SUB);
         cap.supportScalarFunction(ScalarFunctionCapability.MULT);
         cap.supportScalarFunction(ScalarFunctionCapability.FLOAT_DIV);
 
-        // Unary prefix operators
         cap.supportScalarFunction(ScalarFunctionCapability.NEG);
 
-        // Numeric functions
         cap.supportScalarFunction(ScalarFunctionCapability.ABS);
         cap.supportScalarFunction(ScalarFunctionCapability.ACOS);
         cap.supportScalarFunction(ScalarFunctionCapability.ASIN);
@@ -157,33 +134,23 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.TANH);
         cap.supportScalarFunction(ScalarFunctionCapability.TRUNC);
 
-        // String Functions
         cap.supportScalarFunction(ScalarFunctionCapability.ASCII);
         cap.supportScalarFunction(ScalarFunctionCapability.BIT_LENGTH);
         cap.supportScalarFunction(ScalarFunctionCapability.CHR);
-        // cap.supportScalarFunction(ScalarFunctionCapability.COLOGNE_PHONETIC);
         cap.supportScalarFunction(ScalarFunctionCapability.CONCAT);
-        // cap.supportScalarFunction(ScalarFunctionCapability.DUMP);
-        // cap.supportScalarFunction(ScalarFunctionCapability.EDIT_DISTANCE);
-        // cap.supportScalarFunction(ScalarFunctionCapability.INSERT);
         cap.supportScalarFunction(ScalarFunctionCapability.INSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.LENGTH);
-        // cap.supportScalarFunction(ScalarFunctionCapability.LOCATE);
         cap.supportScalarFunction(ScalarFunctionCapability.LOWER);
         cap.supportScalarFunction(ScalarFunctionCapability.LPAD);
         cap.supportScalarFunction(ScalarFunctionCapability.LTRIM);
         cap.supportScalarFunction(ScalarFunctionCapability.OCTET_LENGTH);
-        // cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_INSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_REPLACE);
-        // cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_SUBSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.REPEAT);
         cap.supportScalarFunction(ScalarFunctionCapability.REPLACE);
         cap.supportScalarFunction(ScalarFunctionCapability.REVERSE);
         cap.supportScalarFunction(ScalarFunctionCapability.RIGHT);
         cap.supportScalarFunction(ScalarFunctionCapability.RPAD);
         cap.supportScalarFunction(ScalarFunctionCapability.RTRIM);
-        // cap.supportScalarFunction(ScalarFunctionCapability.SOUNDEX);
-        // cap.supportScalarFunction(ScalarFunctionCapability.SPACE);
         cap.supportScalarFunction(ScalarFunctionCapability.SUBSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.TRANSLATE);
         cap.supportScalarFunction(ScalarFunctionCapability.TRIM);
@@ -191,9 +158,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.UNICODECHR);
         cap.supportScalarFunction(ScalarFunctionCapability.UPPER);
 
-        // Date/Time Functions
-
-        // The following functions will be rewrited to + operator in the Visitor
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_DAYS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_HOURS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_MINUTES);
@@ -202,10 +166,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_WEEKS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_YEARS);
 
-        // cap.supportScalarFunction(ScalarFunctionCapability.CONVERT_TZ);
-
-        // handled via Visitor and transformed to e.g.
-        // date_part('day',age('2012-03-05','2010-04-01' ))
         cap.supportScalarFunction(ScalarFunctionCapability.SECONDS_BETWEEN);
         cap.supportScalarFunction(ScalarFunctionCapability.MINUTES_BETWEEN);
         cap.supportScalarFunction(ScalarFunctionCapability.HOURS_BETWEEN);
@@ -213,7 +173,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.MONTHS_BETWEEN);
         cap.supportScalarFunction(ScalarFunctionCapability.YEARS_BETWEEN);
 
-        // handled via Visitor and transformed to e.g. date_part
         cap.supportScalarFunction(ScalarFunctionCapability.MINUTE);
         cap.supportScalarFunction(ScalarFunctionCapability.SECOND);
         cap.supportScalarFunction(ScalarFunctionCapability.DAY);
@@ -225,53 +184,15 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_TIMESTAMP);
         cap.supportScalarFunction(ScalarFunctionCapability.DATE_TRUNC);
 
-        // cap.supportScalarFunction(ScalarFunctionCapability.DBTIMEZONE);
         cap.supportScalarFunction(ScalarFunctionCapability.EXTRACT);
         cap.supportScalarFunction(ScalarFunctionCapability.LOCALTIMESTAMP);
-        // cap.supportScalarFunction(ScalarFunctionCapability.NUMTODSINTERVAL);
-        // cap.supportScalarFunction(ScalarFunctionCapability.NUMTOYMINTERVAL);
-        cap.supportScalarFunction(ScalarFunctionCapability.POSIX_TIME); // converted to extract(epoche
-        // cap.supportScalarFunction(ScalarFunctionCapability.SESSIONTIMEZONE);
-        // cap.supportScalarFunction(ScalarFunctionCapability.SYSDATE);
-        // cap.supportScalarFunction(ScalarFunctionCapability.SYSTIMESTAMP);
+        cap.supportScalarFunction(ScalarFunctionCapability.POSIX_TIME);
 
-        // Conversion functions
-//        cap.supportScalarFunction(ScalarFunctionCapability.IS_NUMBER);
-//        cap.supportScalarFunction(ScalarFunctionCapability.IS_BOOLEAN);
-//        cap.supportScalarFunction(ScalarFunctionCapability.IS_DATE);
-//        cap.supportScalarFunction(ScalarFunctionCapability.IS_DSINTERVAL);
-//        cap.supportScalarFunction(ScalarFunctionCapability.IS_YMINTERVAL);
-//        cap.supportScalarFunction(ScalarFunctionCapability.IS_TIMESTAMP);
         cap.supportScalarFunction(ScalarFunctionCapability.TO_CHAR);
-//        cap.supportScalarFunction(ScalarFunctionCapability.TO_DATE);
-//        cap.supportScalarFunction(ScalarFunctionCapability.TO_DSINTERVAL);
-//        cap.supportScalarFunction(ScalarFunctionCapability.TO_YMINTERVAL);
-//        cap.supportScalarFunction(ScalarFunctionCapability.TO_NUMBER);
-//        cap.supportScalarFunction(ScalarFunctionCapability.TO_TIMESTAMP);
 
-        // Bitwise functions
-//        cap.supportScalarFunction(ScalarFunctionCapability.BIT_AND);
-//        cap.supportScalarFunction(ScalarFunctionCapability.BIT_CHECK);
-//        cap.supportScalarFunction(ScalarFunctionCapability.BIT_NOT);
-//        cap.supportScalarFunction(ScalarFunctionCapability.BIT_OR);
-//        cap.supportScalarFunction(ScalarFunctionCapability.BIT_SET);
-//        cap.supportScalarFunction(ScalarFunctionCapability.BIT_TO_NUM);
-//        cap.supportScalarFunction(ScalarFunctionCapability.BIT_XOR);
-
-        // Other functions
         cap.supportScalarFunction(ScalarFunctionCapability.CASE);
-//        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_SCHEMA);
-//        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_SESSION);
-//        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_STATEMENT);
-//        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_USER);
-        cap.supportScalarFunction(ScalarFunctionCapability.HASH_MD5);
-//        cap.supportScalarFunction(ScalarFunctionCapability.HASH_SHA);
-//        cap.supportScalarFunction(ScalarFunctionCapability.HASH_SHA1);
-//        cap.supportScalarFunction(ScalarFunctionCapability.HASH_TIGER);
-//        cap.supportScalarFunction(ScalarFunctionCapability.NULLIFZERO);
-//        cap.supportScalarFunction(ScalarFunctionCapability.SYS_GUID);
-//        cap.supportScalarFunction(ScalarFunctionCapability.ZEROIFNULL);
 
+        cap.supportScalarFunction(ScalarFunctionCapability.HASH_MD5);
         return cap;
     }
 
@@ -279,24 +200,24 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
         DataType colType = null;
         final int jdbcType = jdbcTypeDescription.getJdbcType();
-
         switch (jdbcType) {
         case Types.OTHER:
             final String columnTypeName = jdbcTypeDescription.getTypeName();
-
             if (columnTypeName.equals("varbit")) {
                 final int n = jdbcTypeDescription.getPrecisionOrSize();
                 colType = DataType.createVarChar(n, DataType.ExaCharset.UTF8);
             } else {
-                colType = DataType.createVarChar(PostgreSQLSqlDialect.maxPostgresSQLVarcharSize,
-                        DataType.ExaCharset.UTF8);
+                colType = DataType
+                      .createVarChar(PostgreSQLSqlDialect.MAX_POSTGRES_SQL_VARCHAR_SIZE_BASED_ON_EXASOL_LIMIT,
+                            DataType.ExaCharset.UTF8);
             }
             break;
         case Types.SQLXML:
-            colType = DataType.createVarChar(PostgreSQLSqlDialect.maxPostgresSQLVarcharSize, DataType.ExaCharset.UTF8);
-            break;
         case Types.DISTINCT:
-            colType = DataType.createVarChar(PostgreSQLSqlDialect.maxPostgresSQLVarcharSize, DataType.ExaCharset.UTF8);
+            colType = DataType.createVarChar(PostgreSQLSqlDialect.MAX_POSTGRES_SQL_VARCHAR_SIZE_BASED_ON_EXASOL_LIMIT,
+                  DataType.ExaCharset.UTF8);
+            break;
+        default:
             break;
         }
 
