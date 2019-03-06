@@ -420,7 +420,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         final SchemaMetadata meta = JdbcMetadataReader.readRemoteMetadata("jdbc:exa:" + getConfig().getExasolAddress(),
                 getConfig().getExasolUser(), getConfig().getExasolPassword(), "EXA_DB", "JDBC_ADAPTER_TEST_SCHEMA",
                 tables, ExasolSqlDialect.getPublicName(), getConfig().getExceptionHandlingMode(), Collections.emptyList(),
-                PostgreSQLIdentifierMapping.POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER);
+                PostgreSQLIdentifierMapping.CONVERT_TO_UPPER);
         if (getConfig().isDebugOn()) {
             System.out.println("Meta: " + SchemaMetadataSerializer.serialize(meta).build().toString());
         }

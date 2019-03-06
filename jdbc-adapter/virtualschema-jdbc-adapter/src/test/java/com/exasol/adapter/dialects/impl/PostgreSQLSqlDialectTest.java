@@ -1,11 +1,14 @@
 package com.exasol.adapter.dialects.impl;
 
 import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.dialects.PostgreSQLIdentifierMapping;
 import com.exasol.adapter.dialects.SqlDialectContext;
 import com.exasol.adapter.metadata.DataType;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,12 +22,14 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class PostgreSQLSqlDialectTest {
     @Mock private SqlDialectContext sqlDialectContext;
     private PostgreSQLSqlDialect postgresDialect;
 
     @Before
     public void setUp() {
+        when(sqlDialectContext.getPostgreSQLIdentifierMapping()).thenReturn(PostgreSQLIdentifierMapping.CONVERT_TO_UPPER);
         postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
     }
 

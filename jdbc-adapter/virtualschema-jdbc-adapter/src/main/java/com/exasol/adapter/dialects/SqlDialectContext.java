@@ -11,7 +11,7 @@ public class SqlDialectContext {
 
     public SqlDialectContext(SchemaAdapterNotes schemaAdapterNotes) {
         this.schemaAdapterNotes = schemaAdapterNotes;
-        this.postgreSQLIdentifierMapping = PostgreSQLIdentifierMapping.POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER;
+        this.postgreSQLIdentifierMapping = PostgreSQLIdentifierMapping.CONVERT_TO_UPPER;
     }
 
     public SqlDialectContext(SchemaAdapterNotes schemaAdapterNotes, PostgreSQLIdentifierMapping postgreSQLIdentifierMapping) {
