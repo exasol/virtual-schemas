@@ -1,22 +1,13 @@
 package com.exasol.adapter.dialects.impl;
 
+import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.sql.ScalarFunction;
+
 import java.sql.SQLException;
 import java.util.EnumMap;
 import java.util.Map;
-
-import com.exasol.adapter.capabilities.AggregateFunctionCapability;
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.capabilities.LiteralCapability;
-import com.exasol.adapter.capabilities.MainCapability;
-import com.exasol.adapter.capabilities.PredicateCapability;
-import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.sql.ScalarFunction;
 
 /**
  * Dialect for Hive, using the Cloudera Hive JDBC Driver/Connector (developed by
@@ -138,8 +129,6 @@ public class HiveSqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.SECOND);
         cap.supportScalarFunction(ScalarFunctionCapability.WEEK);
 
-        /* hive doesn't support geospatial functions */
-
         cap.supportScalarFunction(ScalarFunctionCapability.CAST);
 
         cap.supportScalarFunction(ScalarFunctionCapability.BIT_AND);
@@ -181,15 +170,11 @@ public class HiveSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuote(final String identifier) {
-        // If identifier contains double quotation marks ", it needs to be escaped by
-        // another double quotation mark. E.g. "a""b" is the identifier a"b in the db.
         return "`" + identifier + "`";
     }
 
     @Override
     public String applyQuoteIfNeeded(final String identifier) {
-        // We need to apply quotes only in case of reserved keywords. Since we don't
-        // know these (could look up in JDBC Metadata...) we always quote.
         return applyQuote(identifier);
     }
 
@@ -205,7 +190,6 @@ public class HiveSqlDialect extends AbstractSqlDialect {
         // and b) if we don't have the schema in the jdbc connection string (like
         // "jdbc:exa:localhost:5555;schema=native")
         return true;
-        // return context.isLocal();
     }
 
     @Override
@@ -220,7 +204,6 @@ public class HiveSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String getStringLiteral(final String value) {
-        // Don't forget to escape single quote
         return "'" + value.replace("'", "''") + "'";
     }
 
@@ -231,21 +214,16 @@ public class HiveSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Map<ScalarFunction, String> getScalarFunctionAliases() {
-
         final Map<ScalarFunction, String> scalarAliases = new EnumMap<>(ScalarFunction.class);
-
         scalarAliases.put(ScalarFunction.ADD_DAYS, "DATE_ADD");
         scalarAliases.put(ScalarFunction.DAYS_BETWEEN, "DATEDIFF");
         scalarAliases.put(ScalarFunction.WEEK, "WEEKOFYEAR");
         scalarAliases.put(ScalarFunction.CURRENT_USER, "CURRENT_USER()");
-
         return scalarAliases;
-
     }
 
     @Override
     public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
         return null;
     }
-
 }

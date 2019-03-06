@@ -1,27 +1,17 @@
 package com.exasol.adapter.dialects.impl;
 
+import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.sql.AggregateFunction;
+import com.exasol.adapter.sql.ScalarFunction;
+
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.EnumMap;
 import java.util.Map;
 
-import com.exasol.adapter.capabilities.AggregateFunctionCapability;
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.capabilities.LiteralCapability;
-import com.exasol.adapter.capabilities.MainCapability;
-import com.exasol.adapter.capabilities.PredicateCapability;
-import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.sql.AggregateFunction;
-import com.exasol.adapter.sql.ScalarFunction;
-
 public class RedshiftSqlDialect extends AbstractSqlDialect {
-
     public RedshiftSqlDialect(final SqlDialectContext context) {
         super(context);
     }
@@ -34,7 +24,6 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Capabilities getCapabilities() {
-
         final Capabilities cap = new Capabilities();
 
         cap.supportMainCapability(MainCapability.SELECTLIST_PROJECTION);
@@ -50,7 +39,6 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
         cap.supportMainCapability(MainCapability.LIMIT);
         cap.supportMainCapability(MainCapability.LIMIT_WITH_OFFSET);
 
-        // Predicates
         cap.supportPredicate(PredicateCapability.AND);
         cap.supportPredicate(PredicateCapability.OR);
         cap.supportPredicate(PredicateCapability.NOT);
@@ -66,8 +54,6 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
         cap.supportPredicate(PredicateCapability.IS_NULL);
         cap.supportPredicate(PredicateCapability.IS_NOT_NULL);
 
-        // Literals
-        // BOOL is not supported
         cap.supportLiteral(LiteralCapability.BOOL);
         cap.supportLiteral(LiteralCapability.NULL);
         cap.supportLiteral(LiteralCapability.DATE);
@@ -78,7 +64,6 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
         cap.supportLiteral(LiteralCapability.STRING);
         cap.supportLiteral(LiteralCapability.INTERVAL);
 
-        // Aggregate functions
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT);
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_STAR);
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_DISTINCT);
@@ -106,7 +91,6 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_SAMP);
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_SAMP_DISTINCT);
 
-        // math functions
         cap.supportScalarFunction(ScalarFunctionCapability.CEIL);
         cap.supportScalarFunction(ScalarFunctionCapability.DIV);
         cap.supportScalarFunction(ScalarFunctionCapability.FLOOR);
@@ -164,11 +148,9 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.TRIM);
         cap.supportScalarFunction(ScalarFunctionCapability.UPPER);
 
-        // Bit functions
         cap.supportScalarFunction(ScalarFunctionCapability.BIT_AND);
         cap.supportScalarFunction(ScalarFunctionCapability.BIT_OR);
 
-        // Date and Time Functions
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_MONTHS);
         cap.supportScalarFunction(ScalarFunctionCapability.MONTHS_BETWEEN);
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_DATE);
@@ -179,20 +161,16 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.YEAR);
         cap.supportScalarFunction(ScalarFunctionCapability.EXTRACT);
 
-        // Convertion functions
         cap.supportScalarFunction(ScalarFunctionCapability.CAST);
         cap.supportScalarFunction(ScalarFunctionCapability.TO_NUMBER);
         cap.supportScalarFunction(ScalarFunctionCapability.TO_TIMESTAMP);
         cap.supportScalarFunction(ScalarFunctionCapability.TO_DATE);
 
-        // hash functions
         cap.supportScalarFunction(ScalarFunctionCapability.HASH_MD5);
         cap.supportScalarFunction(ScalarFunctionCapability.HASH_SHA1);
 
-        // system information functions
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_SCHEMA);
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_USER);
-
         return cap;
     }
 
@@ -204,39 +182,30 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
         case Types.NUMERIC:
             final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
             final int decimalScale = jdbcTypeDescription.getDecimalScale();
-
             if (decimalPrec <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
                 colType = DataType.createDecimal(decimalPrec, decimalScale);
             } else {
                 colType = DataType.createDouble();
             }
             break;
-
         }
         return colType;
     }
 
     @Override
     public Map<ScalarFunction, String> getScalarFunctionAliases() {
-
         final Map<ScalarFunction, String> scalarAliases = new EnumMap<>(ScalarFunction.class);
-
         scalarAliases.put(ScalarFunction.YEAR, "DATE_PART_YEAR");
         scalarAliases.put(ScalarFunction.CONVERT_TZ, "CONVERT_TIMEZONE");
         scalarAliases.put(ScalarFunction.HASH_MD5, "MD5");
         scalarAliases.put(ScalarFunction.HASH_SHA1, "FUNC_SHA1");
-
         scalarAliases.put(ScalarFunction.SUBSTR, "SUBSTRING");
-
         return scalarAliases;
-
     }
 
     @Override
     public Map<AggregateFunction, String> getAggregateFunctionAliases() {
-        final Map<AggregateFunction, String> aggregationAliases = new EnumMap<>(AggregateFunction.class);
-
-        return aggregationAliases;
+        return new EnumMap<>(AggregateFunction.class);
     }
 
     @Override
@@ -266,7 +235,6 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuoteIfNeeded(final String identifier) {
-        // This is a simplified rule, which quotes all identifiers although not needed
         return applyQuote(identifier);
     }
 
@@ -294,5 +262,4 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
     public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new RedshiftSqlGenerationVisitor(this, context);
     }
-
 }

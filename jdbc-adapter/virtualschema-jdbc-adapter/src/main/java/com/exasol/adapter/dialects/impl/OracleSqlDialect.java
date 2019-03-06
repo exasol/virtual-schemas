@@ -1,26 +1,17 @@
 package com.exasol.adapter.dialects.impl;
 
+import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.sql.AggregateFunction;
+import com.exasol.adapter.sql.ScalarFunction;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-
-import com.exasol.adapter.capabilities.AggregateFunctionCapability;
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.capabilities.LiteralCapability;
-import com.exasol.adapter.capabilities.MainCapability;
-import com.exasol.adapter.capabilities.PredicateCapability;
-import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.sql.AggregateFunction;
-import com.exasol.adapter.sql.ScalarFunction;
 
 /**
  * Work in Progress
@@ -53,7 +44,6 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     public Capabilities getCapabilities() {
         final Capabilities cap = new Capabilities();
 
-        // Capabilities
         cap.supportMainCapability(MainCapability.SELECTLIST_PROJECTION);
         cap.supportMainCapability(MainCapability.SELECTLIST_EXPRESSIONS);
         cap.supportMainCapability(MainCapability.FILTER_EXPRESSIONS);
@@ -67,7 +57,6 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         cap.supportMainCapability(MainCapability.LIMIT);
         cap.supportMainCapability(MainCapability.LIMIT_WITH_OFFSET);
 
-        // Predicates
         cap.supportPredicate(PredicateCapability.AND);
         cap.supportPredicate(PredicateCapability.OR);
         cap.supportPredicate(PredicateCapability.NOT);
@@ -83,8 +72,6 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         cap.supportPredicate(PredicateCapability.IS_NULL);
         cap.supportPredicate(PredicateCapability.IS_NOT_NULL);
 
-        // Literals
-        // BOOL is not supported
         cap.supportLiteral(LiteralCapability.NULL);
         cap.supportLiteral(LiteralCapability.DATE);
         cap.supportLiteral(LiteralCapability.TIMESTAMP);
@@ -94,19 +81,14 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         cap.supportLiteral(LiteralCapability.STRING);
         cap.supportLiteral(LiteralCapability.INTERVAL);
 
-        // Aggregate functions
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT);
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_STAR);
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.GROUP_CONCAT);
-        // GROUP_CONCAT_DISTINCT is not supported
         cap.supportAggregateFunction(AggregateFunctionCapability.GROUP_CONCAT_SEPARATOR);
         cap.supportAggregateFunction(AggregateFunctionCapability.GROUP_CONCAT_ORDER_BY);
-        // GEO_INTERSECTION_AGGREGATE is not supported
-        // GEO_UNION_AGGREGATE is not supported
         // APPROXIMATE_COUNT_DISTINCT supported with version >= 12.1.0.2
         if (this.castAggFuncToFloat) {
-            // Cast result to FLOAT because result set precision = 0, scale = 0
             cap.supportAggregateFunction(AggregateFunctionCapability.SUM);
             cap.supportAggregateFunction(AggregateFunctionCapability.SUM_DISTINCT);
             cap.supportAggregateFunction(AggregateFunctionCapability.MIN);
@@ -119,28 +101,17 @@ public class OracleSqlDialect extends AbstractSqlDialect {
             cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV);
             cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_DISTINCT);
             cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_POP);
-            // STDDEV_POP_DISTINCT
             cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_SAMP);
-            // STDDEV_SAMP_DISTINCT
             cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE);
             cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE_DISTINCT);
             cap.supportAggregateFunction(AggregateFunctionCapability.VAR_POP);
-            // VAR_POP_DISTINCT
             cap.supportAggregateFunction(AggregateFunctionCapability.VAR_SAMP);
-            // VAR_SAMP_DISTINCT
         }
-
-        // Scalar functions
         cap.supportScalarFunction(ScalarFunctionCapability.CEIL);
         cap.supportScalarFunction(ScalarFunctionCapability.DIV);
         cap.supportScalarFunction(ScalarFunctionCapability.FLOOR);
-        // ROUND is not supported. DATETIME could be pushed down, NUMBER would have to
-        // be rounded.
         cap.supportScalarFunction(ScalarFunctionCapability.SIGN);
-        // TRUNC is not supported. DATETIME could be pushed down, NUMBER would have to
-        // be rounded.
         if (this.castScalarFuncToFloat) {
-            // Cast result to FLOAT because result set precision = 0, scale = 0
             cap.supportScalarFunction(ScalarFunctionCapability.ADD);
             cap.supportScalarFunction(ScalarFunctionCapability.SUB);
             cap.supportScalarFunction(ScalarFunctionCapability.MULT);
@@ -163,7 +134,6 @@ public class OracleSqlDialect extends AbstractSqlDialect {
             cap.supportScalarFunction(ScalarFunctionCapability.MOD);
             cap.supportScalarFunction(ScalarFunctionCapability.POWER);
             cap.supportScalarFunction(ScalarFunctionCapability.RADIANS);
-            // RAND is not supported (constant arguments in EXA, will not be pushed down)
             cap.supportScalarFunction(ScalarFunctionCapability.SIN);
             cap.supportScalarFunction(ScalarFunctionCapability.SINH);
             cap.supportScalarFunction(ScalarFunctionCapability.SQRT);
@@ -171,38 +141,25 @@ public class OracleSqlDialect extends AbstractSqlDialect {
             cap.supportScalarFunction(ScalarFunctionCapability.TANH);
         }
         cap.supportScalarFunction(ScalarFunctionCapability.ASCII);
-        // BIT_LENGTH is not supported. Can be different for Unicode characters.
         cap.supportScalarFunction(ScalarFunctionCapability.CHR);
-        // COLOGNE_PHONETIC is not supported.
-        // CONCAT is not supported. Number of arguments can be different.
-        // DUMP is not supported. Output is different.
-        // EDIT_DISTANCE is not supported. Output is different. UTL_MATCH.EDIT_DISTANCE
-        // returns -1 with NULL argument.
-        // INSERT is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.INSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.LENGTH);
         cap.supportScalarFunction(ScalarFunctionCapability.LOCATE);
         cap.supportScalarFunction(ScalarFunctionCapability.LOWER);
         cap.supportScalarFunction(ScalarFunctionCapability.LPAD);
         cap.supportScalarFunction(ScalarFunctionCapability.LTRIM);
-        // OCTET_LENGTH is not supported. Can be different for Unicode characters.
         cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_INSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_REPLACE);
         cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_SUBSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.REPEAT);
         cap.supportScalarFunction(ScalarFunctionCapability.REPLACE);
         cap.supportScalarFunction(ScalarFunctionCapability.REVERSE);
-        // RIGHT is not supported. Possible solution with SUBSTRING (must handle corner
-        // cases correctly).
         cap.supportScalarFunction(ScalarFunctionCapability.RPAD);
         cap.supportScalarFunction(ScalarFunctionCapability.RTRIM);
         cap.supportScalarFunction(ScalarFunctionCapability.SOUNDEX);
-        // SPACE is not supported. Parameter = 0 has different results from RPAD.
         cap.supportScalarFunction(ScalarFunctionCapability.SUBSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.TRANSLATE);
         cap.supportScalarFunction(ScalarFunctionCapability.TRIM);
-        // UNICODE is not supported.
-        // UNICODECHR is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.UPPER);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_DAYS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_HOURS);
@@ -211,78 +168,16 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_SECONDS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_WEEKS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_YEARS);
-        // CONVERT_TZ is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_DATE);
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_TIMESTAMP);
-        // DATE_TRUNC is not supported. Format options for TRUNCATE are different.
-        // DAY is not supported. EXTRACT does not work on strings.
-        // DAYS_BETWEEN is not supported. EXTRACT does not work on strings.
         cap.supportScalarFunction(ScalarFunctionCapability.DBTIMEZONE);
-        // EXTRACT is not supported. SECOND must be cast to DOUBLE.
-        // HOURS_BETWEEN is not supported. EXTRACT does not work on strings.
         cap.supportScalarFunction(ScalarFunctionCapability.LOCALTIMESTAMP);
-        // MINUTE is not supported. EXTRACT does not work on strings.
-        // MINUTES_BETWEEN is not supported. EXTRACT does not work on strings.
-        // MONTH is not supported. EXTRACT does not work on strings.
-        // MONTHS_BETWEEN is not supported. EXTRACT does not work on strings.
         cap.supportScalarFunction(ScalarFunctionCapability.NUMTODSINTERVAL);
         cap.supportScalarFunction(ScalarFunctionCapability.NUMTOYMINTERVAL);
-        // POSIX_TIME is not supported. Does not work on strings.
-        // SECOND is not supported. EXTRACT does not work on strings.
-        // SECONDS_BETWEEN is not supported. EXTRACT does not work on strings.
         cap.supportScalarFunction(ScalarFunctionCapability.SESSIONTIMEZONE);
         cap.supportScalarFunction(ScalarFunctionCapability.SYSDATE);
         cap.supportScalarFunction(ScalarFunctionCapability.SYSTIMESTAMP);
-        // WEEK is not supported.
-        // YEAR is not supported. EXTRACT does not work on strings.
-        // YEARS_BETWEEN is not supported. EXTRACT does not work on strings.
-        // ST_X is not supported.
-        // ST_Y is not supported.
-        // ST_ENDPOINT is not supported.
-        // ST_ISCLOSED is not supported.
-        // ST_ISRING is not supported.
-        // ST_LENGTH is not supported.
-        // ST_NUMPOINTS is not supported.
-        // ST_POINTN is not supported.
-        // ST_STARTPOINT is not supported.
-        // ST_AREA is not supported.
-        // ST_EXTERIORRING is not supported.
-        // ST_INTERIORRINGN is not supported.
-        // ST_NUMINTERIORRINGS is not supported.
-        // ST_GEOMETRYN is not supported.
-        // ST_NUMGEOMETRIES is not supported.
-        // ST_BOUNDARY is not supported.
-        // ST_BUFFER is not supported.
-        // ST_CENTROID is not supported.
-        // ST_CONTAINS is not supported.
-        // ST_CONVEXHULL is not supported.
-        // ST_CROSSES is not supported.
-        // ST_DIFFERENCE is not supported.
-        // ST_DIMENSION is not supported.
-        // ST_DISJOINT is not supported.
-        // ST_DISTANCE is not supported.
-        // ST_ENVELOPE is not supported.
-        // ST_EQUALS is not supported.
-        // ST_FORCE2D is not supported.
-        // ST_GEOMETRYTYPE is not supported.
-        // ST_INTERSECTION is not supported.
-        // ST_INTERSECTS is not supported.
-        // ST_ISEMPTY is not supported.
-        // ST_ISSIMPLE is not supported.
-        // ST_OVERLAPS is not supported.
-        // ST_SETSRID is not supported.
-        // ST_SYMDIFFERENCE is not supported.
-        // ST_TOUCHES is not supported.
-        // ST_TRANSFORM is not supported.
-        // ST_UNION is not supported.
-        // ST_WITHIN is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.CAST);
-        // IS_NUMBER is not supported.
-        // IS_BOOLEAN is not supported.
-        // IS_DATE is not supported.
-        // IS_DSINTERVAL is not supported.
-        // IS_YMINTERVAL is not supported.
-        // IS_TIMESTAMP is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.TO_CHAR);
         cap.supportScalarFunction(ScalarFunctionCapability.TO_DATE);
         cap.supportScalarFunction(ScalarFunctionCapability.TO_DSINTERVAL);
@@ -290,35 +185,19 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.TO_NUMBER);
         cap.supportScalarFunction(ScalarFunctionCapability.TO_TIMESTAMP);
         cap.supportScalarFunction(ScalarFunctionCapability.BIT_AND);
-        // BIT_CHECK is not supported.
-        // BIT_NOT is not supported.
-        // BIT_OR is not supported.
-        // BIT_SET is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.BIT_TO_NUM);
-        // BIT_XOR is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.CASE);
-        // CURRENT_SCHEMA is not supported.
-        // CURRENT_SESSION is not supported.
-        // CURRENT_STATEMENT is not supported.
-        // CURRENT_USER is not supported.
-        // HASH_MD5 is not supported.
-        // HASH_SHA is not supported.
-        // HASH_SHA1 is not supported.
-        // HASH_TIGER is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.NULLIFZERO);
-        // SYS_GUID is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.ZEROIFNULL);
-
         return cap;
     }
 
     @Override
     public Map<AggregateFunction, String> getAggregateFunctionAliases() {
-        final Map<AggregateFunction, String> aggregationAliases = new EnumMap<>(AggregateFunction.class);
         // APPROXIMATE_COUNT_DISTINCT supported with version >= 12.1.0.2
         // aggregationAliases.put(AggregateFunction.APPROXIMATE_COUNT_DISTINCT,
         // "APPROX_COUNT_DISTINCT");
-        return aggregationAliases;
+        return new EnumMap<>(AggregateFunction.class);
     }
 
     @Override

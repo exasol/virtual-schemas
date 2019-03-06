@@ -1,21 +1,12 @@
 package com.exasol.adapter.dialects.impl;
 
-import java.sql.SQLException;
-import java.sql.Types;
-
-import com.exasol.adapter.capabilities.AggregateFunctionCapability;
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.capabilities.LiteralCapability;
-import com.exasol.adapter.capabilities.MainCapability;
-import com.exasol.adapter.capabilities.PredicateCapability;
-import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.JdbcAdapterProperties;
 import com.exasol.adapter.metadata.DataType;
+
+import java.sql.SQLException;
+import java.sql.Types;
 
 public class TeradataSqlDialect extends AbstractSqlDialect {
     public final static int maxTeradataVarcharSize = 32000;
@@ -31,7 +22,6 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Capabilities getCapabilities() {
-
         final Capabilities cap = new Capabilities();
 
         cap.supportMainCapability(MainCapability.SELECTLIST_PROJECTION);
@@ -46,7 +36,6 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
         cap.supportMainCapability(MainCapability.ORDER_BY_EXPRESSION);
         cap.supportMainCapability(MainCapability.LIMIT);
 
-        // Predicates
         cap.supportPredicate(PredicateCapability.AND);
         cap.supportPredicate(PredicateCapability.OR);
         cap.supportPredicate(PredicateCapability.NOT);
@@ -62,8 +51,6 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
         cap.supportPredicate(PredicateCapability.IS_NULL);
         cap.supportPredicate(PredicateCapability.IS_NOT_NULL);
 
-        // Literals
-        // BOOL is not supported
         cap.supportLiteral(LiteralCapability.NULL);
         cap.supportLiteral(LiteralCapability.DATE);
         cap.supportLiteral(LiteralCapability.TIMESTAMP);
@@ -73,14 +60,9 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
         cap.supportLiteral(LiteralCapability.STRING);
         cap.supportLiteral(LiteralCapability.INTERVAL);
 
-        // Aggregate functions
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT);
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_STAR);
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_DISTINCT);
-        // GROUP_CONCAT is not supported
-        // GEO_INTERSECTION_AGGREGATE is not supported
-        // GEO_UNION_AGGREGATE is not supported
-        // APPROXIMATE_COUNT_DISTINCT not supported
 
         cap.supportAggregateFunction(AggregateFunctionCapability.SUM);
         cap.supportAggregateFunction(AggregateFunctionCapability.SUM_DISTINCT);
@@ -91,18 +73,10 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
         cap.supportAggregateFunction(AggregateFunctionCapability.MEDIAN);
         cap.supportAggregateFunction(AggregateFunctionCapability.FIRST_VALUE);
         cap.supportAggregateFunction(AggregateFunctionCapability.LAST_VALUE);
-        // cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV);
-        // cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_POP);
-        // STDDEV_POP_DISTINCT
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_SAMP);
-        // STDDEV_SAMP_DISTINCT
-        // cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE);
-        // cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_POP);
-        // VAR_POP_DISTINCT
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_SAMP);
-        // VAR_SAMP_DISTINCT
 
         cap.supportScalarFunction(ScalarFunctionCapability.CEIL);
         cap.supportScalarFunction(ScalarFunctionCapability.DIV);
@@ -133,7 +107,6 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.MOD);
         cap.supportScalarFunction(ScalarFunctionCapability.POWER);
         cap.supportScalarFunction(ScalarFunctionCapability.RADIANS);
-        // RAND is not supported (constant arguments in EXA, will not be pushed down)
         cap.supportScalarFunction(ScalarFunctionCapability.SIN);
         cap.supportScalarFunction(ScalarFunctionCapability.SINH);
         cap.supportScalarFunction(ScalarFunctionCapability.SQRT);
@@ -141,38 +114,25 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.TANH);
 
         cap.supportScalarFunction(ScalarFunctionCapability.ASCII);
-        // BIT_LENGTH is not supported. Can be different for Unicode characters.
         cap.supportScalarFunction(ScalarFunctionCapability.CHR);
-        // COLOGNE_PHONETIC is not supported.
-        // CONCAT is not supported. Number of arguments can be different.
-        // DUMP is not supported. Output is different.
-        // EDIT_DISTANCE is not supported. Output is different. UTL_MATCH.EDIT_DISTANCE
-        // returns -1 with NULL argument.
-        // INSERT is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.INSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.LENGTH);
         cap.supportScalarFunction(ScalarFunctionCapability.LOCATE);
         cap.supportScalarFunction(ScalarFunctionCapability.LOWER);
         cap.supportScalarFunction(ScalarFunctionCapability.LPAD);
         cap.supportScalarFunction(ScalarFunctionCapability.LTRIM);
-        // OCTET_LENGTH is not supported. Can be different for Unicode characters.
         cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_INSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_REPLACE);
         cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_SUBSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.REPEAT);
         cap.supportScalarFunction(ScalarFunctionCapability.REPLACE);
         cap.supportScalarFunction(ScalarFunctionCapability.REVERSE);
-        // RIGHT is not supported. Possible solution with SUBSTRING (must handle corner
-        // cases correctly).
         cap.supportScalarFunction(ScalarFunctionCapability.RPAD);
         cap.supportScalarFunction(ScalarFunctionCapability.RTRIM);
         cap.supportScalarFunction(ScalarFunctionCapability.SOUNDEX);
-        // SPACE is not supported. Parameter = 0 has different results from RPAD.
         cap.supportScalarFunction(ScalarFunctionCapability.SUBSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.TRANSLATE);
         cap.supportScalarFunction(ScalarFunctionCapability.TRIM);
-        // UNICODE is not supported.
-        // UNICODECHR is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.UPPER);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_DAYS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_HOURS);
@@ -181,13 +141,10 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_SECONDS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_WEEKS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_YEARS);
-
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_DATE);
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_TIMESTAMP);
-
         cap.supportScalarFunction(ScalarFunctionCapability.NULLIFZERO);
         cap.supportScalarFunction(ScalarFunctionCapability.ZEROIFNULL);
-
         return cap;
     }
 
@@ -219,22 +176,19 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
                 colType = DataType.createVarChar(jdbcTypeDescription.getPrecisionOrSize(), DataType.ExaCharset.UTF8);
             } else if (columnTypeName.startsWith("INTERVAL")) {
                 colType = DataType.createVarChar(30, DataType.ExaCharset.UTF8); // TODO verify that varchar 30 is
-                                                                                // sufficient in all cases
+                // sufficient in all cases
             } else if (columnTypeName.startsWith("PERIOD")) {
                 colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8);
             } else {
                 colType = DataType.createVarChar(TeradataSqlDialect.maxTeradataVarcharSize, DataType.ExaCharset.UTF8);
             }
             break;
-
         case Types.SQLXML:
             colType = DataType.createVarChar(TeradataSqlDialect.maxTeradataVarcharSize, DataType.ExaCharset.UTF8);
             break;
-
         case Types.CLOB:
             colType = DataType.createVarChar(TeradataSqlDialect.maxTeradataVarcharSize, DataType.ExaCharset.UTF8);
             break;
-
         case Types.BLOB:
         case Types.VARBINARY:
         case Types.BINARY:
@@ -279,7 +233,6 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuoteIfNeeded(final String identifier) {
-        // This is a simplified rule, which quotes all identifiers although not needed
         return applyQuote(identifier);
     }
 
@@ -305,13 +258,12 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
 
     @Override
     public void handleException(final SQLException exception,
-            final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
+          final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
         if (exceptionMode == JdbcAdapterProperties.ExceptionHandlingMode.IGNORE_INVALID_VIEWS) {
             if (exception.getMessage().contains("Teradata Database") && exception.getMessage().contains("Error 3807")) {
                 return;
             }
         }
         throw exception;
-    };
-
+    }
 }

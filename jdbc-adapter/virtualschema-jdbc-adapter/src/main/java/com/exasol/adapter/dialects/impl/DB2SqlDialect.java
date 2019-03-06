@@ -1,27 +1,17 @@
 package com.exasol.adapter.dialects.impl;
 
+import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.metadata.DataType;
+
 import java.sql.SQLException;
 import java.sql.Types;
-
-import com.exasol.adapter.capabilities.AggregateFunctionCapability;
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.capabilities.LiteralCapability;
-import com.exasol.adapter.capabilities.MainCapability;
-import com.exasol.adapter.capabilities.PredicateCapability;
-import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
-import com.exasol.adapter.metadata.DataType;
 
 /**
  * Dialect for DB2 using the DB2 Connector JDBC driver.
  *
  * @author Karl Griesser (fullref@gmail.com)
  */
-
 public class DB2SqlDialect extends AbstractSqlDialect {
     private static final String NAME = "DB2";
 
@@ -36,7 +26,6 @@ public class DB2SqlDialect extends AbstractSqlDialect {
     @Override
     public Capabilities getCapabilities() {
         final Capabilities cap = new Capabilities();
-        // Capabilities
         cap.supportMainCapability(MainCapability.SELECTLIST_PROJECTION);
         cap.supportMainCapability(MainCapability.SELECTLIST_EXPRESSIONS);
         cap.supportMainCapability(MainCapability.FILTER_EXPRESSIONS);
@@ -49,7 +38,6 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         cap.supportMainCapability(MainCapability.ORDER_BY_EXPRESSION);
         cap.supportMainCapability(MainCapability.LIMIT);
 
-        // Predicates
         cap.supportPredicate(PredicateCapability.AND);
         cap.supportPredicate(PredicateCapability.OR);
         cap.supportPredicate(PredicateCapability.NOT);
@@ -59,14 +47,11 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         cap.supportPredicate(PredicateCapability.LESSEQUAL);
         cap.supportPredicate(PredicateCapability.LIKE);
         cap.supportPredicate(PredicateCapability.LIKE_ESCAPE);
-        // not supported cap.supportPredicate(PredicateCapability.REGEXP_LIKE);
         cap.supportPredicate(PredicateCapability.BETWEEN);
         cap.supportPredicate(PredicateCapability.IN_CONSTLIST);
         cap.supportPredicate(PredicateCapability.IS_NULL);
         cap.supportPredicate(PredicateCapability.IS_NOT_NULL);
 
-        // Literals
-        // BOOL is not supported
         cap.supportLiteral(LiteralCapability.NULL);
         cap.supportLiteral(LiteralCapability.DATE);
         cap.supportLiteral(LiteralCapability.TIMESTAMP);
@@ -76,16 +61,13 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         cap.supportLiteral(LiteralCapability.STRING);
         cap.supportLiteral(LiteralCapability.INTERVAL);
 
-        // Aggregate functions
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT);
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_STAR);
         cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.GROUP_CONCAT);
-        // GROUP_CONCAT_DISTINCT is supported
         cap.supportAggregateFunction(AggregateFunctionCapability.GROUP_CONCAT_SEPARATOR);
         cap.supportAggregateFunction(AggregateFunctionCapability.GROUP_CONCAT_ORDER_BY);
-        // GEO_INTERSECTION_AGGREGATE is not supported
-        // GEO_UNION_AGGREGATE is not supported
+
         // APPROXIMATE_COUNT_DISTINCT supported with version >= 12.1.0.2
         // Cast result to FLOAT because result set precision = 0, scale = 0
         cap.supportAggregateFunction(AggregateFunctionCapability.SUM);
@@ -98,20 +80,13 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         cap.supportAggregateFunction(AggregateFunctionCapability.FIRST_VALUE);
         cap.supportAggregateFunction(AggregateFunctionCapability.LAST_VALUE);
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV);
-        // not supported
-        // cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_POP);
-        // STDDEV_POP_DISTINCT
         cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_SAMP);
-        // STDDEV_SAMP_DISTINCT
         cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE);
         cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE_DISTINCT);
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_POP);
-        // VAR_POP_DISTINCT
         cap.supportAggregateFunction(AggregateFunctionCapability.VAR_SAMP);
-        // VAR_SAMP_DISTINCT
 
-        // Scalar functions
         cap.supportScalarFunction(ScalarFunctionCapability.CEIL);
         cap.supportScalarFunction(ScalarFunctionCapability.DIV);
         cap.supportScalarFunction(ScalarFunctionCapability.FLOOR);
@@ -121,6 +96,7 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.MULT);
         cap.supportScalarFunction(ScalarFunctionCapability.FLOAT_DIV);
         cap.supportScalarFunction(ScalarFunctionCapability.NEG);
+
         cap.supportScalarFunction(ScalarFunctionCapability.ABS);
         cap.supportScalarFunction(ScalarFunctionCapability.ACOS);
         cap.supportScalarFunction(ScalarFunctionCapability.ASIN);
@@ -138,38 +114,22 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.MOD);
         cap.supportScalarFunction(ScalarFunctionCapability.POWER);
         cap.supportScalarFunction(ScalarFunctionCapability.RADIANS);
-        // RAND is not supported (constant arguments in EXA, will not be pushed down)
         cap.supportScalarFunction(ScalarFunctionCapability.SIN);
         cap.supportScalarFunction(ScalarFunctionCapability.SINH);
         cap.supportScalarFunction(ScalarFunctionCapability.SQRT);
         cap.supportScalarFunction(ScalarFunctionCapability.TAN);
         cap.supportScalarFunction(ScalarFunctionCapability.TANH);
-        cap.supportScalarFunction(ScalarFunctionCapability.ASCII);
-        // BIT_LENGTH is not supported. Can be different for Unicode characters.
-        cap.supportScalarFunction(ScalarFunctionCapability.CHR);
-        // COLOGNE_PHONETIC is not supported.
 
-        // CONCAT is not supported. Number of arguments can be different.
-        // DUMP is not supported. Output is different.
-        // EDIT_DISTANCE is not supported. Output is different. UTL_MATCH.EDIT_DISTANCE
-        // returns -1 with NULL argument.
-        // INSERT is not supported.
+        cap.supportScalarFunction(ScalarFunctionCapability.ASCII);
+        cap.supportScalarFunction(ScalarFunctionCapability.CHR);
         cap.supportScalarFunction(ScalarFunctionCapability.INSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.LENGTH);
         cap.supportScalarFunction(ScalarFunctionCapability.LOCATE);
         cap.supportScalarFunction(ScalarFunctionCapability.LOWER);
         cap.supportScalarFunction(ScalarFunctionCapability.LPAD);
         cap.supportScalarFunction(ScalarFunctionCapability.LTRIM);
-        // OCTET_LENGTH is not supported. Can be different for Unicode characters.
-        // not supported
-        // cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_INSTR);
-        // not supported
-        // cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_REPLACE);
-        // not supported
-        // cap.supportScalarFunction(ScalarFunctionCapability.REGEXP_SUBSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.REPEAT);
         cap.supportScalarFunction(ScalarFunctionCapability.REPLACE);
-        // REVERSE is not supported
         cap.supportScalarFunction(ScalarFunctionCapability.RIGHT);
         cap.supportScalarFunction(ScalarFunctionCapability.RPAD);
         cap.supportScalarFunction(ScalarFunctionCapability.RTRIM);
@@ -178,8 +138,6 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.SUBSTR);
         cap.supportScalarFunction(ScalarFunctionCapability.TRANSLATE);
         cap.supportScalarFunction(ScalarFunctionCapability.TRIM);
-        // UNICODE is not supported.
-        // UNICODECHR is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.UPPER);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_DAYS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_HOURS);
@@ -188,94 +146,23 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_SECONDS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_WEEKS);
         cap.supportScalarFunction(ScalarFunctionCapability.ADD_YEARS);
-        // CONVERT_TZ is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_DATE);
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_TIMESTAMP);
-        // DATE_TRUNC is not supported. Format options for TRUNCATE are different.
-        // DAY is not supported. EXTRACT does not work on strings.
-        // DAYS_BETWEEN is not supported. EXTRACT does not work on strings.
-        // not supported cap.supportScalarFunction(ScalarFunctionCapability.DBTIMEZONE);
-        // EXTRACT is not supported. SECOND must be cast to DOUBLE.
-        // HOURS_BETWEEN is not supported. EXTRACT does not work on strings.
         cap.supportScalarFunction(ScalarFunctionCapability.LOCALTIMESTAMP);
-        // MINUTE is not supported. EXTRACT does not work on strings.
-        // MINUTES_BETWEEN is not supported. EXTRACT does not work on strings.
-        // MONTH is not supported. EXTRACT does not work on strings.
-        // MONTHS_BETWEEN is not supported. EXTRACT does not work on strings.
-        // cap.supportScalarFunction(ScalarFunctionCapability.NUMTODSINTERVAL);
-        // cap.supportScalarFunction(ScalarFunctionCapability.NUMTOYMINTERVAL);
-        // POSIX_TIME is not supported. Does not work on strings.
-        // SECOND is not supported. EXTRACT does not work on strings.
-        // SECONDS_BETWEEN is not supported. EXTRACT does not work on strings.
-        // SESSIONTIMEZONE is not supported
         cap.supportScalarFunction(ScalarFunctionCapability.SYSDATE);
         cap.supportScalarFunction(ScalarFunctionCapability.SYSTIMESTAMP);
-        // WEEK is not supported.
-        // YEAR is not supported. EXTRACT does not work on strings.
-        // YEARS_BETWEEN is not supported. EXTRACT does not work on strings.
-        // ST_X is not supported.
-        // ST_Y is not supported.
-        // ST_ENDPOINT is not supported.
-        // ST_ISCLOSED is not supported.
-        // ST_ISRING is not supported.
-        // ST_LENGTH is not supported.
-        // ST_NUMPOINTS is not supported.
-        // ST_POINTN is not supported.
-        // ST_STARTPOINT is not supported.
-        // ST_AREA is not supported.
-        // ST_EXTERIORRING is not supported.
-        // ST_INTERIORRINGN is not supported.
-        // ST_NUMINTERIORRINGS is not supported.
-        // ST_GEOMETRYN is not supported.
-        // ST_NUMGEOMETRIES is not supported.
-        // ST_BOUNDARY is not supported.
-        // ST_BUFFER is not supported.
-        // ST_CENTROID is not supported.
-        // ST_CONTAINS is not supported.
-        // ST_CONVEXHULL is not supported.
-        // ST_CROSSES is not supported.
-        // ST_DIFFERENCE is not supported.
-        // ST_DIMENSION is not supported.
-        // ST_DISJOINT is not supported.
-        // ST_DISTANCE is not supported.
-        // ST_ENVELOPE is not supported.
-        // ST_EQUALS is not supported.
-        // ST_FORCE2D is not supported.
-        // ST_GEOMETRYTYPE is not supported.
-        // ST_INTERSECTION is not supported.
-        // ST_INTERSECTS is not supported.
-        // ST_ISEMPTY is not supported.
-        // ST_ISSIMPLE is not supported.
-        // ST_OVERLAPS is not supported.
-        // ST_SETSRID is not supported.
-        // ST_SYMDIFFERENCE is not supported.
-        // ST_TOUCHES is not supported.
-        // ST_TRANSFORM is not supported.
-        // ST_UNION is not supported.
-        // ST_WITHIN is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.CAST);
-        // IS_NUMBER is not supported.
-        // IS_BOOLEAN is not supported.
-        // IS_DATE is not supported.
-        // IS_DSINTERVAL is not supported.
-        // IS_YMINTERVAL is not supported.
-        // IS_TIMESTAMP is not supported.
+
         cap.supportScalarFunction(ScalarFunctionCapability.TO_CHAR);
         cap.supportScalarFunction(ScalarFunctionCapability.TO_DATE);
         cap.supportScalarFunction(ScalarFunctionCapability.TO_NUMBER);
         cap.supportScalarFunction(ScalarFunctionCapability.TO_TIMESTAMP);
-        // BIT_CHECK is not supported.
-        // BIT_NOT is not supported.
-        // BIT_OR is not supported.
-        // BIT_SET is not supported.
-        // BIT_XOR is not supported.
+
         cap.supportScalarFunction(ScalarFunctionCapability.CASE);
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_SCHEMA);
         cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_USER);
         cap.supportScalarFunction(ScalarFunctionCapability.NULLIFZERO);
-        // SYS_GUID is not supported.
         cap.supportScalarFunction(ScalarFunctionCapability.ZEROIFNULL);
-
         return cap;
     }
 
@@ -301,20 +188,16 @@ public class DB2SqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuote(final String identifier) {
-        // If identifier contains double quotation marks ", it needs to be espaced by
-        // another double quotation mark. E.g. "a""b" is the identifier a"b in the db.
         return "\"" + identifier.replace("\"", "\"\"") + "\"";
     }
 
     @Override
     public String applyQuoteIfNeeded(final String identifier) {
-        // This is a simplified rule, which quotes all identifiers although not needed
         return applyQuote(identifier);
     }
 
     @Override
     public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
-        // DB2 does not know catalogs
         return false;
     }
 
@@ -330,13 +213,11 @@ public class DB2SqlDialect extends AbstractSqlDialect {
 
     @Override
     public NullSorting getDefaultNullSorting() {
-        // default db2 behaviour is to set nulls to the end of the result
         return NullSorting.NULLS_SORTED_AT_END;
     }
 
     @Override
     public String getStringLiteral(final String value) {
-        // Don't forget to escape single quote
         return "'" + value.replace("'", "''") + "'";
     }
 
@@ -352,14 +233,9 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         case 1111:
             colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
             break;
-        // set timestamp to varchar as db2 offers a much higher precision than exasol
-        // however java timestamp only supports nanoseconds -> varchar(32)
         case Types.TIMESTAMP:
             colType = DataType.createVarChar(32, DataType.ExaCharset.UTF8);
             break;
-
-        // db2 driver always delivers UTF8 Characters no matter what encoding is
-        // specified for var + char data
         case Types.VARCHAR:
         case Types.NVARCHAR:
         case Types.LONGVARCHAR:
@@ -375,16 +251,13 @@ public class DB2SqlDialect extends AbstractSqlDialect {
             }
             break;
         }
-
-        // VARCHAR and CHAR for bit data -> will be converted to hex string so we have
-        // to double the size
         case -2:
             colType = DataType.createChar(jdbcTypeDescription.getPrecisionOrSize() * 2, DataType.ExaCharset.ASCII);
+            break;
         case -3:
             colType = DataType.createVarChar(jdbcTypeDescription.getPrecisionOrSize() * 2, DataType.ExaCharset.ASCII);
             break;
         }
         return colType;
     }
-
 }
