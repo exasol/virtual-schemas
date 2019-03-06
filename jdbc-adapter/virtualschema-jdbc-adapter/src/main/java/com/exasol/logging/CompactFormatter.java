@@ -43,7 +43,7 @@ public class CompactFormatter extends Formatter {
 
     private void appendNonEmptyClassName(final String className, final StringBuilder builder) {
         int lastPosition = -1;
-        int position = className.indexOf(".");
+        int position = className.indexOf('.');
         while (position > 0) {
             final String characterAfterDot = className.substring(lastPosition + 1, lastPosition + 2);
             if (!characterAfterDot.equals(".")) {
@@ -51,7 +51,7 @@ public class CompactFormatter extends Formatter {
             }
             builder.append(".");
             lastPosition = position;
-            position = className.indexOf(".", position + 1);
+            position = className.indexOf('.', position + 1);
         }
         if (lastPosition < className.length()) {
             builder.append(className.substring(lastPosition + 1));

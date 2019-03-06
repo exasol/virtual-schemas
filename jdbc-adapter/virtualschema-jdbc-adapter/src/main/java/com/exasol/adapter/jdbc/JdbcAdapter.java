@@ -27,7 +27,7 @@ public class JdbcAdapter {
      * This method gets called by the database during interactions with the virtual
      * schema.
      *
-     * @param meta Metadata object
+     * @param meta  Metadata object
      * @param input JSON request, as defined in the Adapter Script API
      * @return JSON response, as defined in the Adapter Script API
      */
@@ -67,9 +67,9 @@ public class JdbcAdapter {
         } catch (final AdapterException e) {
             throw e;
         } catch (final Exception e) {
-            String stacktrace = UdfUtils.traceToString(e);
-            throw new Exception("Unexpected error in adapter: " + e.getMessage() + "\nFor following request: " + input + "\nResponse: " + result + "\nAdapter stack trace: " + stacktrace,
-                    e);
+            final String stacktrace = UdfUtils.traceToString(e);
+            throw new Exception("Unexpected error in adapter: " + e.getMessage() + "\nFor following request: " + input
+                    + "\nResponse: " + result + "\nAdapter stack trace: " + stacktrace, e);
         }
     }
 
@@ -141,7 +141,7 @@ public class JdbcAdapter {
 
     private static String handleRefresh(final RefreshRequest request, final ExaMetadata meta)
             throws SQLException, AdapterException {
-        SchemaMetadata remoteMeta;
+        final SchemaMetadata remoteMeta;
         JdbcAdapterProperties.checkPropertyConsistency(request.getSchemaMetadataInfo().getProperties());
         if (request.isRefreshForTables()) {
             final List<String> tables = request.getTables();
@@ -203,12 +203,13 @@ public class JdbcAdapter {
                 excludedCapabilities.supportLiteral(LiteralCapability.valueOf(literalCap));
             } else if (capability.startsWith(ResponseJsonSerializer.AGGREGATE_FUNCTION_PREFIX)) {
                 // Aggregate functions must be checked before scalar functions
-                final String aggregateFunctionCap = capability.replaceFirst(ResponseJsonSerializer.AGGREGATE_FUNCTION_PREFIX,
-                        "");
+                final String aggregateFunctionCap = capability
+                        .replaceFirst(ResponseJsonSerializer.AGGREGATE_FUNCTION_PREFIX, "");
                 excludedCapabilities
                         .supportAggregateFunction(AggregateFunctionCapability.valueOf(aggregateFunctionCap));
             } else if (capability.startsWith(ResponseJsonSerializer.SCALAR_FUNCTION_PREFIX)) {
-                final String scalarFunctionCap = capability.replaceFirst(ResponseJsonSerializer.SCALAR_FUNCTION_PREFIX, "");
+                final String scalarFunctionCap = capability.replaceFirst(ResponseJsonSerializer.SCALAR_FUNCTION_PREFIX,
+                        "");
                 excludedCapabilities.supportScalarFunction(ScalarFunctionCapability.valueOf(scalarFunctionCap));
             } else {
                 // High Level Capability
@@ -230,17 +231,17 @@ public class JdbcAdapter {
         final SqlGenerationContext context = new SqlGenerationContext(
                 JdbcAdapterProperties.getCatalog(meta.getProperties()),
                 JdbcAdapterProperties.getSchema(meta.getProperties()),
-                JdbcAdapterProperties.isLocal(meta.getProperties()),
-                hasMoreThanOneTable);
+                JdbcAdapterProperties.isLocal(meta.getProperties()), hasMoreThanOneTable);
         final SqlGenerationVisitor sqlGeneratorVisitor = dialect.getSqlGenerationVisitor(context);
         final String pushdownQuery = request.getSelect().accept(sqlGeneratorVisitor);
 
-        String sql = generateImportQueryForPushdownQuery(exaMeta, meta, dialect, pushdownQuery);
+        final String sql = generateImportQueryForPushdownQuery(exaMeta, meta, dialect, pushdownQuery);
 
         return ResponseJsonSerializer.makePushdownResponse(sql);
     }
 
-    private static String generateImportQueryForPushdownQuery(ExaMetadata exaMeta, SchemaMetadataInfo meta, SqlDialect dialect, String pushdownQuery) throws AdapterException {
+    private static String generateImportQueryForPushdownQuery(final ExaMetadata exaMeta, final SchemaMetadataInfo meta,
+            final SqlDialect dialect, final String pushdownQuery) throws AdapterException {
         String sql = "";
         if (JdbcAdapterProperties.isLocal(meta.getProperties())) {
             sql = generateLocalQuery(pushdownQuery);
@@ -258,42 +259,45 @@ public class JdbcAdapter {
         return pushdownQuery;
     }
 
-    private static String generateExasolImportQuery(ExaMetadata exaMeta, SchemaMetadataInfo meta, String pushdownQuery) {
-        String credentials = getCredentialsForEXAImport(exaMeta, meta);
-        StringBuilder exasolImportQuery = new StringBuilder();
+    private static String generateExasolImportQuery(final ExaMetadata exaMeta, final SchemaMetadataInfo meta,
+            final String pushdownQuery) {
+        final String credentials = getCredentialsForEXAImport(exaMeta, meta);
+        final StringBuilder exasolImportQuery = new StringBuilder();
         exasolImportQuery.append("IMPORT FROM EXA AT '");
         exasolImportQuery.append(JdbcAdapterProperties.getExaConnectionString(meta.getProperties()));
         exasolImportQuery.append("' ");
         exasolImportQuery.append(credentials);
         exasolImportQuery.append(" STATEMENT '");
-        exasolImportQuery.append( pushdownQuery.replace("'", "''"));
+        exasolImportQuery.append(pushdownQuery.replace("'", "''"));
         exasolImportQuery.append("'");
         return exasolImportQuery.toString();
     }
 
-    private static String generateOracleImportQuery(ExaMetadata exaMeta, SchemaMetadataInfo meta, String pushdownQuery) {
-        String credentials = getCredentialsForORAImport(exaMeta, meta);
-        StringBuilder oracleImportQuery = new StringBuilder();
+    private static String generateOracleImportQuery(final ExaMetadata exaMeta, final SchemaMetadataInfo meta,
+            final String pushdownQuery) {
+        final String credentials = getCredentialsForORAImport(exaMeta, meta);
+        final StringBuilder oracleImportQuery = new StringBuilder();
         oracleImportQuery.append("IMPORT FROM ORA AT ");
         oracleImportQuery.append(JdbcAdapterProperties.getOraConnectionName(meta.getProperties()));
         oracleImportQuery.append(" ");
         oracleImportQuery.append(credentials);
         oracleImportQuery.append(" STATEMENT '");
-        oracleImportQuery.append( pushdownQuery.replace("'", "''"));
+        oracleImportQuery.append(pushdownQuery.replace("'", "''"));
         oracleImportQuery.append("'");
         return oracleImportQuery.toString();
     }
 
-    private static String generateJDBCImportQuery(ExaMetadata exaMeta, SchemaMetadataInfo meta, SqlDialect dialect, String pushdownQuery) throws AdapterException {
-        String credentials = getCredentialsForJDBCImport(exaMeta, meta);
+    private static String generateJDBCImportQuery(final ExaMetadata exaMeta, final SchemaMetadataInfo meta,
+            final SqlDialect dialect, final String pushdownQuery) {
+        final String credentials = getCredentialsForJDBCImport(exaMeta, meta);
 
-        StringBuilder jdbcImportQuery = new StringBuilder();
+        final StringBuilder jdbcImportQuery = new StringBuilder();
         final String columnDescription = createColumnDescription(exaMeta, meta, pushdownQuery, dialect);
         if (columnDescription == null) {
             jdbcImportQuery.append("IMPORT FROM JDBC AT ");
             jdbcImportQuery.append(credentials);
             jdbcImportQuery.append(" STATEMENT '");
-            jdbcImportQuery.append( pushdownQuery.replace("'", "''"));
+            jdbcImportQuery.append(pushdownQuery.replace("'", "''"));
             jdbcImportQuery.append("'");
         } else {
             jdbcImportQuery.append("IMPORT INTO ");
@@ -301,25 +305,26 @@ public class JdbcAdapter {
             jdbcImportQuery.append(" FROM JDBC AT ");
             jdbcImportQuery.append(credentials);
             jdbcImportQuery.append(" STATEMENT '");
-            jdbcImportQuery.append( pushdownQuery.replace("'", "''"));
+            jdbcImportQuery.append(pushdownQuery.replace("'", "''"));
             jdbcImportQuery.append("'");
         }
         return jdbcImportQuery.toString();
     }
 
-    protected static String getCredentialsForJDBCImport(ExaMetadata exaMeta, SchemaMetadataInfo meta) {
+    protected static String getCredentialsForJDBCImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         String credentials = "";
         if (JdbcAdapterProperties.isUserSpecifiedConnection(meta.getProperties())) {
             credentials = JdbcAdapterProperties.getConnectionName(meta.getProperties());
         } else {
             credentials = getUserAndPasswordForImport(exaMeta, meta);
-            final ExaConnectionInformation connection = JdbcAdapterProperties.getConnectionInformation(meta.getProperties(), exaMeta);
+            final ExaConnectionInformation connection = JdbcAdapterProperties
+                    .getConnectionInformation(meta.getProperties(), exaMeta);
             credentials = "'" + connection.getAddress() + "' " + credentials;
         }
         return credentials;
     }
 
-    protected static String getCredentialsForORAImport(ExaMetadata exaMeta, SchemaMetadataInfo meta) {
+    protected static String getCredentialsForORAImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         String credentials = "";
         if (!JdbcAdapterProperties.isUserSpecifiedConnection(meta.getProperties())) {
             credentials = getUserAndPasswordForImport(exaMeta, meta);
@@ -327,37 +332,37 @@ public class JdbcAdapter {
         return credentials;
     }
 
-    protected static String getCredentialsForEXAImport(ExaMetadata exaMeta, SchemaMetadataInfo meta) {
+    protected static String getCredentialsForEXAImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         return getUserAndPasswordForImport(exaMeta, meta);
     }
 
-    private static String getUserAndPasswordForImport(ExaMetadata exaMeta, SchemaMetadataInfo meta) {
+    private static String getUserAndPasswordForImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         String credentials = "";
         final ExaConnectionInformation connection = JdbcAdapterProperties.getConnectionInformation(meta.getProperties(),
-                    exaMeta);
-        if (connection.getUser() != null || connection.getPassword() != null) {
+                exaMeta);
+        if ((connection.getUser() != null) || (connection.getPassword() != null)) {
             credentials = "USER '" + connection.getUser() + "' IDENTIFIED BY '" + connection.getPassword() + "'";
         }
         return credentials;
     }
 
     private static String createColumnDescription(final ExaMetadata exaMeta, final SchemaMetadataInfo meta,
-            final String pushdownQuery, final SqlDialect dialect) throws AdapterException {
-        PreparedStatement ps = null;
+            final String pushdownQuery, final SqlDialect dialect) {
         final ExaConnectionInformation connectionInformation = JdbcAdapterProperties
                 .getConnectionInformation(meta.getProperties(), exaMeta);
-
-        Connection connection = null;
         try {
-            connection = establishConnection(connectionInformation);
+            final Connection connection = establishConnection(connectionInformation);
             logger.fine(() -> "createColumnDescription: " + pushdownQuery);
-            ps = connection.prepareStatement(pushdownQuery);
-            ResultSetMetaData metadata = ps.getMetaData();
-            if (metadata == null) {
-                ps.execute();
+            ResultSetMetaData metadata = null;
+            try (final PreparedStatement ps = connection.prepareStatement(pushdownQuery)) {
                 metadata = ps.getMetaData();
                 if (metadata == null) {
-                    throw new SQLException("getMetaData() failed");
+                    ps.execute();
+                    metadata = ps.getMetaData();
+                    if (metadata == null) {
+                        throw new SQLException(
+                                "Unable to read source metadata trying to create description for " + "source columns.");
+                    }
                 }
             }
             final DataType[] internalTypes = new DataType[metadata.getColumnCount()];
@@ -376,7 +381,7 @@ public class JdbcAdapter {
                 buffer.append(i);
                 buffer.append(" ");
                 buffer.append(internalTypes[i].toString());
-                if (i < internalTypes.length - 1) {
+                if (i < (internalTypes.length - 1)) {
                     buffer.append(",");
                 }
             }
