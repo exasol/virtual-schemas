@@ -5,7 +5,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.Socket;
 
-public class UdfUtils {
+public final class UdfUtils {
+    private UdfUtils() {
+        //Intentionally left blank
+    }
+
     public static OutputStream tryAttachToOutputService(final String ip, final int port) {
         try (final Socket socket = new Socket(ip, port)) {
             return socket.getOutputStream();

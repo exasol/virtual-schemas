@@ -1,74 +1,93 @@
 package com.exasol.adapter.dialects.impl;
 
+import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.dialects.SqlDialectContext;
+import com.exasol.adapter.metadata.DataType;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
+import static com.exasol.adapter.metadata.DataType.ExaDataType.VARCHAR;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class PostgreSQLSqlDialectTest {
-    @Mock
-    SqlDialectContext sqlDialectContext;
+    @Mock private SqlDialectContext sqlDialectContext;
+    private PostgreSQLSqlDialect postgresDialect;
 
     @Before
-    public void setUp() throws SQLException {
-
+    public void setUp() {
+        postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
     }
 
     @Test
     public void testApplyQuoteOnUpperCase() {
-        PostgreSQLSqlDialect postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
         assertEquals("\"abc\"", postgresDialect.applyQuote("ABC"));
     }
 
     @Test
     public void testApplyQuoteOnMixedCase() {
-        PostgreSQLSqlDialect postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
         assertEquals("\"abcde\"", postgresDialect.applyQuote("AbCde"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testMapTableWithUpperCaseCharactersAndNoErrorIgnoredThrowsException() throws SQLException {
-        ResultSet resultSet = mock(ResultSet.class);
+        final ResultSet resultSet = mock(ResultSet.class);
         when(resultSet.getString("TABLE_NAME")).thenReturn("uPPer");
-        PostgreSQLSqlDialect postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
         postgresDialect.mapTable(resultSet, Collections.emptyList());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testMapTableWithRussianUpperCaseCharactersAndNoErrorIgnoredThrowsException() throws SQLException {
-        ResultSet resultSet = mock(ResultSet.class);
+        final ResultSet resultSet = mock(ResultSet.class);
         when(resultSet.getString("TABLE_NAME")).thenReturn("аППер");
-        PostgreSQLSqlDialect postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
         postgresDialect.mapTable(resultSet, Collections.emptyList());
     }
 
     @Test
     public void testMapTableWithLowerCaseCharacters() throws SQLException {
-        ResultSet resultSet = mock(ResultSet.class);
+        final ResultSet resultSet = mock(ResultSet.class);
         when(resultSet.getString("TABLE_NAME")).thenReturn("lower");
-        PostgreSQLSqlDialect postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
         postgresDialect.mapTable(resultSet, Collections.emptyList());
     }
 
     @Test
     public void testMapTableWithIgnoreUppercaseCharactersError() throws SQLException {
-        ResultSet resultSet = mock(ResultSet.class);
+        final ResultSet resultSet = mock(ResultSet.class);
         when(resultSet.getString("TABLE_NAME")).thenReturn("Upper");
-        List<String> ignoreList = new ArrayList<>();
+        final List<String> ignoreList = new ArrayList<>();
         ignoreList.add("Dummy_Error");
         ignoreList.add("POSTGRESQL_UPPERCASE_TABLES");
-        PostgreSQLSqlDialect postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
         postgresDialect.mapTable(resultSet, ignoreList);
+    }
+
+    @Test
+    public void testDialectSpecificMapJdbcTypeDistinct() throws SQLException {
+        final JdbcTypeDescription jdbcTypeDescription = mock(JdbcTypeDescription.class);
+        when(jdbcTypeDescription.getJdbcType()).thenReturn(Types.DISTINCT);
+        assertVarcharDataType(jdbcTypeDescription);
+    }
+
+    @Test
+    public void testDialectSpecificMapJdbcTypeSQLXML() throws SQLException {
+        final JdbcTypeDescription jdbcTypeDescription = mock(JdbcTypeDescription.class);
+        when(jdbcTypeDescription.getJdbcType()).thenReturn(Types.SQLXML);
+        assertVarcharDataType(jdbcTypeDescription);
+    }
+
+    private void assertVarcharDataType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
+        final DataType dataType = postgresDialect.dialectSpecificMapJdbcType(jdbcTypeDescription);
+
+        assertEquals(DataType.ExaCharset.UTF8, dataType.getCharset());
+        assertEquals(2000000, dataType.getSize());
+        assertEquals(VARCHAR, dataType.getExaDataType());
     }
 }
