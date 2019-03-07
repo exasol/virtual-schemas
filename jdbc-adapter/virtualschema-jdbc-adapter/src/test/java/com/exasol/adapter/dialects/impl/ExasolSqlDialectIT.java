@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.exasol.adapter.dialects.PostgreSQLIdentifierMapping;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -418,7 +419,8 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         final List<String> tables = new ArrayList<>(Arrays.asList(tableNames));
         final SchemaMetadata meta = JdbcMetadataReader.readRemoteMetadata("jdbc:exa:" + getConfig().getExasolAddress(),
                 getConfig().getExasolUser(), getConfig().getExasolPassword(), "EXA_DB", "JDBC_ADAPTER_TEST_SCHEMA",
-                tables, ExasolSqlDialect.getPublicName(), getConfig().getExceptionHandlingMode(), Collections.emptyList());
+                tables, ExasolSqlDialect.getPublicName(), getConfig().getExceptionHandlingMode(), Collections.emptyList(),
+                PostgreSQLIdentifierMapping.CONVERT_TO_UPPER);
         if (getConfig().isDebugOn()) {
             System.out.println("Meta: " + SchemaMetadataSerializer.serialize(meta).build().toString());
         }

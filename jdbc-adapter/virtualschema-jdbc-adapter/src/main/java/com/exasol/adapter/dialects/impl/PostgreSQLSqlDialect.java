@@ -201,24 +201,24 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         DataType colType = null;
         final int jdbcType = jdbcTypeDescription.getJdbcType();
         switch (jdbcType) {
-        case Types.OTHER:
-            final String columnTypeName = jdbcTypeDescription.getTypeName();
-            if (columnTypeName.equals("varbit")) {
-                final int n = jdbcTypeDescription.getPrecisionOrSize();
-                colType = DataType.createVarChar(n, DataType.ExaCharset.UTF8);
-            } else {
-                colType = DataType
-                      .createVarChar(PostgreSQLSqlDialect.MAX_POSTGRES_SQL_VARCHAR_SIZE_BASED_ON_EXASOL_LIMIT,
-                            DataType.ExaCharset.UTF8);
-            }
-            break;
-        case Types.SQLXML:
-        case Types.DISTINCT:
-            colType = DataType.createVarChar(PostgreSQLSqlDialect.MAX_POSTGRES_SQL_VARCHAR_SIZE_BASED_ON_EXASOL_LIMIT,
-                  DataType.ExaCharset.UTF8);
-            break;
-        default:
-            break;
+            case Types.OTHER:
+                final String columnTypeName = jdbcTypeDescription.getTypeName();
+                if (columnTypeName.equals("varbit")) {
+                    final int n = jdbcTypeDescription.getPrecisionOrSize();
+                    colType = DataType.createVarChar(n, DataType.ExaCharset.UTF8);
+                } else {
+                    colType = DataType
+                            .createVarChar(PostgreSQLSqlDialect.MAX_POSTGRES_SQL_VARCHAR_SIZE_BASED_ON_EXASOL_LIMIT,
+                                    DataType.ExaCharset.UTF8);
+                }
+                break;
+            case Types.SQLXML:
+            case Types.DISTINCT:
+                colType = DataType.createVarChar(PostgreSQLSqlDialect.MAX_POSTGRES_SQL_VARCHAR_SIZE_BASED_ON_EXASOL_LIMIT,
+                        DataType.ExaCharset.UTF8);
+                break;
+            default:
+                break;
         }
 
         return colType;
@@ -227,7 +227,9 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     @Override
     public MappedTable mapTable(final ResultSet tables, final List<String> ignoreErrorList) throws SQLException {
         final String tableName = tables.getString("TABLE_NAME");
-        if (!ignoreErrorList.contains(POSTGRES_IGNORE_UPPERCASE_TABLES) && containsUppercaseCharacter(tableName)) {
+        if (getContext().getPostgreSQLIdentifierMapping() == PostgreSQLIdentifierMapping.CONVERT_TO_UPPER &&
+                !ignoreErrorList.contains(POSTGRES_IGNORE_UPPERCASE_TABLES) &&
+                containsUppercaseCharacter(tableName)) {
             throw new IllegalArgumentException("Table " + tableName + " cannot be used in virtual schema. " +
                     "Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation.");
         } else {
@@ -263,15 +265,14 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String changeIdentifierCaseIfNeeded(final String identifier) {
+        if (getContext().getPostgreSQLIdentifierMapping() != PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE) {
+            final boolean isSimplePostgresIdentifier = identifier.matches("^[a-z][0-9a-z_]*");
 
-        final boolean isSimplePostgresIdentifier = identifier.matches("^[a-z][0-9a-z_]*");
-
-        if (isSimplePostgresIdentifier) {
-            return identifier.toUpperCase();
-        } else {
-            return identifier;
+            if (isSimplePostgresIdentifier) {
+                return identifier.toUpperCase();
+            }
         }
-
+        return identifier;
     }
 
     @Override
@@ -286,8 +287,11 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuote(final String identifier) {
-        final String lowercaseIdentifier = convertIdentifierToLowerCase(identifier);
-        return "\"" + lowercaseIdentifier.replace("\"", "\"\"") + "\"";
+        String postgreSQLIdentifier = identifier;
+        if (getContext().getPostgreSQLIdentifierMapping() != PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE) {
+            postgreSQLIdentifier = convertIdentifierToLowerCase(postgreSQLIdentifier);
+        }
+        return "\"" + postgreSQLIdentifier.replace("\"", "\"\"") + "\"";
     }
 
     private String convertIdentifierToLowerCase(final String identifier) {

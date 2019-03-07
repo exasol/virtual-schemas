@@ -136,7 +136,8 @@ public class JdbcAdapter {
                 connection.getPassword(), catalog, schema, tables,
                 JdbcAdapterProperties.getSqlDialectName(meta.getProperties()),
                 JdbcAdapterProperties.getExceptionHandlingMode(meta.getProperties()),
-                JdbcAdapterProperties.getIgnoreErrorList(meta.getProperties()));
+                JdbcAdapterProperties.getIgnoreErrorList(meta.getProperties()),
+                getPostgreSQLIdentifierMapping(meta.getProperties()));
     }
 
     private static String handleRefresh(final RefreshRequest request, final ExaMetadata meta)
@@ -167,7 +168,8 @@ public class JdbcAdapter {
                     JdbcAdapterProperties.getSchema(newSchemaMeta), tableFilter,
                     JdbcAdapterProperties.getSqlDialectName(newSchemaMeta),
                     JdbcAdapterProperties.getExceptionHandlingMode(newSchemaMeta),
-                    JdbcAdapterProperties.getIgnoreErrorList(newSchemaMeta));
+                    JdbcAdapterProperties.getIgnoreErrorList(newSchemaMeta),
+                    getPostgreSQLIdentifierMapping(newSchemaMeta));
             return ResponseJsonSerializer.makeSetPropertiesResponse(remoteMeta);
         }
         return ResponseJsonSerializer.makeSetPropertiesResponse(null);
@@ -223,8 +225,10 @@ public class JdbcAdapter {
             throws AdapterException {
         // Generate SQL pushdown query
         final SchemaMetadataInfo meta = request.getSchemaMetadataInfo();
+        PostgreSQLIdentifierMapping postgreSQLIdentifierMapping = getPostgreSQLIdentifierMapping(meta.getProperties());
         final SqlDialectContext dialectContext = new SqlDialectContext(SchemaAdapterNotes.deserialize(
-                request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()));
+                request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()),
+                postgreSQLIdentifierMapping);
         final SqlDialect dialect = JdbcAdapterProperties.getSqlDialect(request.getSchemaMetadataInfo().getProperties(),
                 dialectContext);
         final boolean hasMoreThanOneTable = request.getInvolvedTablesMetadata().size() > 1;
@@ -238,6 +242,11 @@ public class JdbcAdapter {
         final String sql = generateImportQueryForPushdownQuery(exaMeta, meta, dialect, pushdownQuery);
 
         return ResponseJsonSerializer.makePushdownResponse(sql);
+    }
+
+    private static PostgreSQLIdentifierMapping getPostgreSQLIdentifierMapping(Map<String, String> properties) {
+        final String postgreSQLIdentifierMapping =  JdbcAdapterProperties.getPostgreSQLIdentifierMapping(properties);
+        return PostgreSQLIdentifierMapping.valueOf(postgreSQLIdentifierMapping);
     }
 
     private static String generateImportQueryForPushdownQuery(final ExaMetadata exaMeta, final SchemaMetadataInfo meta,
