@@ -6,6 +6,7 @@ import java.sql.Types;
 import java.util.*;
 
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
+import com.exasol.adapter.jdbc.ConnectionInformation;
 import com.exasol.adapter.jdbc.JdbcAdapterProperties;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
@@ -301,4 +302,17 @@ public abstract class AbstractSqlDialect implements SqlDialect {
             final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
         throw exception;
     };
+
+    @Override
+    public String generatePushdownSql(ConnectionInformation connectionInformation, String columnDescription, String pushdownSql) {
+        final StringBuilder jdbcImportQuery = new StringBuilder();
+        if (columnDescription == null) {
+            jdbcImportQuery.append("IMPORT FROM JDBC AT ").append(connectionInformation.getCredentials());
+        } else {
+            jdbcImportQuery.append("IMPORT INTO ").append(columnDescription);
+            jdbcImportQuery.append(" FROM JDBC AT ").append(connectionInformation.getCredentials());
+        }
+        jdbcImportQuery.append(" STATEMENT '").append(pushdownSql.replace("'", "''")).append("'");
+        return jdbcImportQuery.toString();
+    }
 }
