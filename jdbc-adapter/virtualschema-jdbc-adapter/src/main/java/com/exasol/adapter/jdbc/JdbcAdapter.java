@@ -244,7 +244,7 @@ public class JdbcAdapter {
         if (getImportType(meta) == ImportType.JDBC) {
             columnDescription = createColumnDescription(exaMeta, meta, pushdownQuery, dialect);
         }
-        final String sql = dialect.generatePushdownSql(meta, connectionInformation, columnDescription, pushdownQuery);
+        final String sql = dialect.generatePushdownSql(connectionInformation, columnDescription, pushdownQuery);
 
         return ResponseJsonSerializer.makePushdownResponse(sql);
     }

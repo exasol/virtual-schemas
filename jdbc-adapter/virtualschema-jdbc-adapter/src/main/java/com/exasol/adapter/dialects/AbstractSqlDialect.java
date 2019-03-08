@@ -10,7 +10,6 @@ import com.exasol.adapter.jdbc.ConnectionInformation;
 import com.exasol.adapter.jdbc.JdbcAdapterProperties;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.metadata.SchemaMetadataInfo;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
@@ -305,7 +304,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     };
 
     @Override
-    public String generatePushdownSql(final SchemaMetadataInfo meta, ConnectionInformation connectionInformation, String columnDescription, String pushdownSql) {
+    public String generatePushdownSql(ConnectionInformation connectionInformation, String columnDescription, String pushdownSql) {
         final StringBuilder jdbcImportQuery = new StringBuilder();
         if (columnDescription == null) {
             jdbcImportQuery.append("IMPORT FROM JDBC AT ").append(connectionInformation.getCredentials());

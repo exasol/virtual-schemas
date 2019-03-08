@@ -6,7 +6,6 @@ import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionInformation;
 import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.metadata.SchemaMetadataInfo;
 import com.exasol.adapter.sql.ScalarFunction;
 
 /**
@@ -136,10 +135,10 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String generatePushdownSql(final SchemaMetadataInfo meta, ConnectionInformation connectionInformation, String columnDescription, String pushdownSql) {
+    public String generatePushdownSql(ConnectionInformation connectionInformation, String columnDescription, String pushdownSql) {
         ImportType importType = getContext().getImportType();
         if (importType == ImportType.JDBC) {
-            return super.generatePushdownSql(meta, connectionInformation, columnDescription, pushdownSql);
+            return super.generatePushdownSql(connectionInformation, columnDescription, pushdownSql);
         } else if (importType == ImportType.LOCAL) {
             return pushdownSql;
         } else {
