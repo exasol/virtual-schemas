@@ -305,7 +305,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     };
 
     @Override
-    public String generatePushdownSql(final SchemaMetadataInfo meta, ConnectionInformation connectionInformation, String columnDescription, String sql) {
+    public String generatePushdownSql(final SchemaMetadataInfo meta, ConnectionInformation connectionInformation, String columnDescription, String pushdownSql) {
         final StringBuilder jdbcImportQuery = new StringBuilder();
         if (columnDescription == null) {
             jdbcImportQuery.append("IMPORT FROM JDBC AT ").append(connectionInformation.getCredentials());
@@ -313,7 +313,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
             jdbcImportQuery.append("IMPORT INTO ").append(columnDescription);
             jdbcImportQuery.append(" FROM JDBC AT ").append(connectionInformation.getCredentials());
         }
-        jdbcImportQuery.append(" STATEMENT '").append(sql.replace("'", "''")).append("'");
+        jdbcImportQuery.append(" STATEMENT '").append(pushdownSql.replace("'", "''")).append("'");
         return jdbcImportQuery.toString();
     }
 }
