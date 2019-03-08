@@ -3,11 +3,10 @@ package com.exasol.adapter.dialects.impl;
 import java.sql.SQLException;
 
 import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.ConnectionInformation;
 import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.SchemaMetadataInfo;
 import com.exasol.adapter.sql.ScalarFunction;
 
 /**
@@ -134,6 +133,23 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     public String getStringLiteral(final String value) {
         // Don't forget to escape single quote
         return "'" + value.replace("'", "''") + "'";
+    }
+
+    @Override
+    public String generatePushdownSql(final SchemaMetadataInfo meta, ConnectionInformation connectionInformation, String columnDescription, String sql) {
+        ImportType importType = getContext().getImportType();
+        if (importType == ImportType.JDBC) {
+            return super.generatePushdownSql(meta, connectionInformation, columnDescription, sql);
+        } else if (importType == ImportType.LOCAL) {
+            return sql;
+        } else {
+            if ((importType != ImportType.EXA)) throw new AssertionError("ExasolSqlDialect has wrong ImportType");
+            final StringBuilder exasolImportQuery = new StringBuilder();
+            exasolImportQuery.append("IMPORT FROM EXA AT '").append(connectionInformation.getExaConnectionString()).append("' ");
+            exasolImportQuery.append(connectionInformation.getCredentials());
+            exasolImportQuery.append(" STATEMENT '").append(sql.replace("'", "''")).append("'");
+            return exasolImportQuery.toString();
+        }
     }
 
 }
