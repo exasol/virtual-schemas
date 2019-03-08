@@ -438,12 +438,14 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String generatePushdownSql(ConnectionInformation connectionInformation, String columnDescription, String pushdownSql) {
-        ImportType importType = getContext().getImportType();
+    public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription, final String pushdownSql) {
+        final ImportType importType = getContext().getImportType();
         if (importType == ImportType.JDBC) {
             return super.generatePushdownSql(connectionInformation, columnDescription, pushdownSql);
         } else {
-            if ((importType != ImportType.ORA)) throw new AssertionError("OracleSqlDialect has wrong ImportType");
+            if ((importType != ImportType.ORA)) {
+                throw new AssertionError("OracleSqlDialect has wrong ImportType");
+            }
             final StringBuilder oracleImportQuery = new StringBuilder();
             oracleImportQuery.append("IMPORT FROM ORA AT ").append(connectionInformation.getOraConnectionName()).append(" ");
             oracleImportQuery.append(connectionInformation.getCredentials());

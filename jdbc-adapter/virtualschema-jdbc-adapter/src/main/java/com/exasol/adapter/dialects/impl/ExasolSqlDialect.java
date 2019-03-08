@@ -135,14 +135,16 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String generatePushdownSql(ConnectionInformation connectionInformation, String columnDescription, String pushdownSql) {
-        ImportType importType = getContext().getImportType();
+    public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription, final String pushdownSql) {
+        final ImportType importType = getContext().getImportType();
         if (importType == ImportType.JDBC) {
             return super.generatePushdownSql(connectionInformation, columnDescription, pushdownSql);
         } else if (importType == ImportType.LOCAL) {
             return pushdownSql;
         } else {
-            if ((importType != ImportType.EXA)) throw new AssertionError("ExasolSqlDialect has wrong ImportType");
+            if ((importType != ImportType.EXA)) {
+                throw new AssertionError("ExasolSqlDialect has wrong ImportType");
+            }
             final StringBuilder exasolImportQuery = new StringBuilder();
             exasolImportQuery.append("IMPORT FROM EXA AT '").append(connectionInformation.getExaConnectionString()).append("' ");
             exasolImportQuery.append(connectionInformation.getCredentials());

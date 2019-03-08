@@ -225,7 +225,7 @@ public class JdbcAdapter {
             throws AdapterException {
         // Generate SQL pushdown query
         final SchemaMetadataInfo meta = request.getSchemaMetadataInfo();
-        PostgreSQLIdentifierMapping postgreSQLIdentifierMapping = getPostgreSQLIdentifierMapping(meta.getProperties());
+        final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping = getPostgreSQLIdentifierMapping(meta.getProperties());
         final SqlDialectContext dialectContext = new SqlDialectContext(SchemaAdapterNotes.deserialize(
                 request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()),
                 postgreSQLIdentifierMapping, getImportType(meta));
@@ -239,7 +239,7 @@ public class JdbcAdapter {
         final SqlGenerationVisitor sqlGeneratorVisitor = dialect.getSqlGenerationVisitor(context);
         final String pushdownQuery = request.getSelect().accept(sqlGeneratorVisitor);
 
-        ConnectionInformation connectionInformation = getConnectionInformation(exaMeta, meta);
+        final ConnectionInformation connectionInformation = getConnectionInformation(exaMeta, meta);
         String columnDescription = "";
         if (getImportType(meta) == ImportType.JDBC) {
             columnDescription = createColumnDescription(exaMeta, meta, pushdownQuery, dialect);
@@ -249,14 +249,14 @@ public class JdbcAdapter {
         return ResponseJsonSerializer.makePushdownResponse(sql);
     }
 
-    private static ConnectionInformation getConnectionInformation(ExaMetadata exaMeta, SchemaMetadataInfo meta) {
-        String credentials = getCredentialsForPushdownQuery(exaMeta, meta);
-        String exaConnectionString = JdbcAdapterProperties.getExaConnectionString(meta.getProperties());
-        String oraConnectionName = JdbcAdapterProperties.getOraConnectionName(meta.getProperties());
+    private static ConnectionInformation getConnectionInformation(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
+        final String credentials = getCredentialsForPushdownQuery(exaMeta, meta);
+        final String exaConnectionString = JdbcAdapterProperties.getExaConnectionString(meta.getProperties());
+        final String oraConnectionName = JdbcAdapterProperties.getOraConnectionName(meta.getProperties());
         return new ConnectionInformation(credentials, exaConnectionString, oraConnectionName);
     }
 
-    private static PostgreSQLIdentifierMapping getPostgreSQLIdentifierMapping(Map<String, String> properties) {
+    private static PostgreSQLIdentifierMapping getPostgreSQLIdentifierMapping(final Map<String, String> properties) {
         final String postgreSQLIdentifierMapping =  JdbcAdapterProperties.getPostgreSQLIdentifierMapping(properties);
         return PostgreSQLIdentifierMapping.valueOf(postgreSQLIdentifierMapping);
     }
