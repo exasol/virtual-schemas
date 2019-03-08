@@ -239,10 +239,7 @@ public class JdbcAdapter {
         final SqlGenerationVisitor sqlGeneratorVisitor = dialect.getSqlGenerationVisitor(context);
         final String pushdownQuery = request.getSelect().accept(sqlGeneratorVisitor);
 
-        String credentials = getCredentialsForPushdownQuery(exaMeta, meta);
-        String exaConnectionString = JdbcAdapterProperties.getExaConnectionString(meta.getProperties());
-        String oraConnectionName = JdbcAdapterProperties.getOraConnectionName(meta.getProperties());
-        ConnectionInformation connectionInformation = new ConnectionInformation(credentials, exaConnectionString, oraConnectionName);
+        ConnectionInformation connectionInformation = getConnectionInformation(exaMeta, meta);
         String columnDescription = "";
         if (getImportType(meta) == ImportType.JDBC) {
             columnDescription = createColumnDescription(exaMeta, meta, pushdownQuery, dialect);
@@ -250,6 +247,13 @@ public class JdbcAdapter {
         final String sql = dialect.generatePushdownSql(meta, connectionInformation, columnDescription, pushdownQuery);
 
         return ResponseJsonSerializer.makePushdownResponse(sql);
+    }
+
+    private static ConnectionInformation getConnectionInformation(ExaMetadata exaMeta, SchemaMetadataInfo meta) {
+        String credentials = getCredentialsForPushdownQuery(exaMeta, meta);
+        String exaConnectionString = JdbcAdapterProperties.getExaConnectionString(meta.getProperties());
+        String oraConnectionName = JdbcAdapterProperties.getOraConnectionName(meta.getProperties());
+        return new ConnectionInformation(credentials, exaConnectionString, oraConnectionName);
     }
 
     private static PostgreSQLIdentifierMapping getPostgreSQLIdentifierMapping(Map<String, String> properties) {
