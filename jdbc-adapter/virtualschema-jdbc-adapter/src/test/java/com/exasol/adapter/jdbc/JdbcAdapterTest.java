@@ -18,8 +18,9 @@ import static org.mockito.Mockito.when;
 public class JdbcAdapterTest {
     private ExaConnectionInformation exaConnectionInformation;
     private ExaMetadata exaMetadata;
-    private SchemaMetadataInfo schemaMetadataInfoConnectionStringUserPassword;
-    private SchemaMetadataInfo schemaMetadataInfoConnectionName;
+
+    private Map<String, String> propertiesConnectionName;
+    private Map<String, String> propertiesConnectionStringUserPassword;
 
 
     @Before
@@ -32,50 +33,65 @@ public class JdbcAdapterTest {
         when(exaConnectionInformation.getAddress()).thenReturn("testConnAddress");
         when(exaMetadata.getConnection(any())).thenReturn(exaConnectionInformation);
 
-        Map<String, String> propertiesConnectionStringUserPassword = new HashMap<>();
+        propertiesConnectionStringUserPassword = new HashMap<>();
         propertiesConnectionStringUserPassword.put("CONNECTION_STRING", "testConnectionString");
         propertiesConnectionStringUserPassword.put("USERNAME", "testUsername");
         propertiesConnectionStringUserPassword.put("PASSWORD", "testPassword");
-        schemaMetadataInfoConnectionStringUserPassword = new SchemaMetadataInfo("", "", propertiesConnectionStringUserPassword);
 
-        Map<String, String> propertiesConnectionName = new HashMap<>();
+        propertiesConnectionName = new HashMap<>();
         propertiesConnectionName.put("CONNECTION_NAME", "CONN_NAME");
-        schemaMetadataInfoConnectionName = new SchemaMetadataInfo("", "", propertiesConnectionName);
+
+
     }
 
     @Test
     public void getCredentialsForJDBCImportWithConnectionNameGiven() {
-        final String credentials = JdbcAdapter.getCredentialsForJDBCImport(exaMetadata, schemaMetadataInfoConnectionName);
+        final SchemaMetadataInfo schemaMetadataInfoConnectionName = new SchemaMetadataInfo("", "", propertiesConnectionName);
+        final String credentials = JdbcAdapter.getCredentialsForPushdownQuery(exaMetadata, schemaMetadataInfoConnectionName);
         assertEquals("CONN_NAME", credentials);
     }
 
     @Test
     public void getCredentialsForORAImportWithConnectionNameGiven() {
-        final String credentials = JdbcAdapter.getCredentialsForORAImport(exaMetadata, schemaMetadataInfoConnectionName);
+        Map<String, String> oraPropertiesConnectionName = new HashMap<>(propertiesConnectionName);
+        oraPropertiesConnectionName.put("IMPORT_FROM_ORA","true");
+        final SchemaMetadataInfo oraSchemaMetadataInfoConnectionName = new SchemaMetadataInfo("", "", oraPropertiesConnectionName);
+        final String credentials = JdbcAdapter.getCredentialsForPushdownQuery(exaMetadata, oraSchemaMetadataInfoConnectionName);
         assertEquals("", credentials);
     }
 
     @Test
     public void getCredentialsForEXAImportWithConnectionNameGiven() {
-        final String credentials = JdbcAdapter.getCredentialsForEXAImport(exaMetadata, schemaMetadataInfoConnectionName);
+        Map<String, String> exaPropertiesConnectionName = new HashMap<>(propertiesConnectionName);
+        exaPropertiesConnectionName.put("IMPORT_FROM_EXA","true");
+        final SchemaMetadataInfo exaSchemaMetadataInfoConnectionName = new SchemaMetadataInfo("", "", exaPropertiesConnectionName);
+
+        final String credentials = JdbcAdapter.getCredentialsForPushdownQuery(exaMetadata, exaSchemaMetadataInfoConnectionName);
         assertEquals("USER 'testCommUser' IDENTIFIED BY 'testConnPassword'", credentials);
     }
 
     @Test
     public void getCredentialsForJDBCImportWithConnectionStringUsernamePasswordGiven() {
-        final String credentials = JdbcAdapter.getCredentialsForJDBCImport(exaMetadata, schemaMetadataInfoConnectionStringUserPassword);
+        final SchemaMetadataInfo  schemaMetadataInfoConnectionStringUserPassword = new SchemaMetadataInfo("", "", propertiesConnectionStringUserPassword);
+        final String credentials = JdbcAdapter.getCredentialsForPushdownQuery(exaMetadata, schemaMetadataInfoConnectionStringUserPassword);
         assertEquals("'testConnectionString' USER 'testUsername' IDENTIFIED BY 'testPassword'", credentials);
     }
 
     @Test
     public void getCredentialsForORAImportWithConnectionStringUsernamePasswordGiven() {
-        final String credentials = JdbcAdapter.getCredentialsForORAImport(exaMetadata, schemaMetadataInfoConnectionStringUserPassword);
+        Map<String, String> oraPropertiesConnectionStringUserPassword = new HashMap<>(propertiesConnectionStringUserPassword);
+        oraPropertiesConnectionStringUserPassword.put("IMPORT_FROM_ORA","true");
+        final SchemaMetadataInfo  oraSchemaMetadataInfoConnectionStringUserPassword = new SchemaMetadataInfo("", "", oraPropertiesConnectionStringUserPassword);
+        final String credentials = JdbcAdapter.getCredentialsForPushdownQuery(exaMetadata, oraSchemaMetadataInfoConnectionStringUserPassword);
         assertEquals("USER 'testUsername' IDENTIFIED BY 'testPassword'", credentials);
     }
 
     @Test
     public void getCredentialsForEXAImportWithConnectionStringUsernamePasswordGiven() {
-        final String credentials = JdbcAdapter.getCredentialsForEXAImport(exaMetadata, schemaMetadataInfoConnectionStringUserPassword);
+        Map<String, String> exaPropertiesConnectionStringUserPassword = new HashMap<>(propertiesConnectionStringUserPassword);
+        exaPropertiesConnectionStringUserPassword.put("IMPORT_FROM_EXA","true");
+        final SchemaMetadataInfo  exaSchemaMetadataInfoConnectionStringUserPassword = new SchemaMetadataInfo("", "", exaPropertiesConnectionStringUserPassword);
+        final String credentials = JdbcAdapter.getCredentialsForPushdownQuery(exaMetadata, exaSchemaMetadataInfoConnectionStringUserPassword);
         assertEquals("USER 'testUsername' IDENTIFIED BY 'testPassword'", credentials);
     }
 }
