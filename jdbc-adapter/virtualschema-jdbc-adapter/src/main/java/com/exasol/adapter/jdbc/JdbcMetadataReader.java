@@ -20,7 +20,8 @@ public class JdbcMetadataReader {
 
     public static SchemaMetadata readRemoteMetadata(final String connectionString, final String user,
                                                     final String password, String catalog, String schema, final List<String> tableFilter,
-                                                    final String dialectName, final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, final List<String> ignoreErrorList)
+                                                    final String dialectName, final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, final List<String> ignoreErrorList,
+                                                    PostgreSQLIdentifierMapping postgreSQLIdentifierMapping)
             throws SQLException, AdapterException {
         assert (catalog != null);
         assert (schema != null);
@@ -38,7 +39,7 @@ public class JdbcMetadataReader {
                     dbMeta.nullsAreSortedAtStart(), dbMeta.nullsAreSortedHigh(), dbMeta.nullsAreSortedLow());
 
             final SqlDialect dialect = SqlDialects.getInstance().getDialectInstanceForNameWithContext(dialectName,
-                    new SqlDialectContext(schemaAdapterNotes));
+                    new SqlDialectContext(schemaAdapterNotes, postgreSQLIdentifierMapping));
 
             catalog = findCatalog(catalog, dbMeta, dialect);
 

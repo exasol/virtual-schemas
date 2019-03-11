@@ -267,4 +267,54 @@ public class JdbcAdapterPropertiesTest {
         properties.put("dialect", "postgresql");
         JdbcAdapterProperties.checkPropertyConsistency(properties);
     }
+
+    @Test
+    public void testGetDefaultPostgreSQLIdentifierMapping() {
+        Map<String, String> properties = new HashMap<>();
+        String val = JdbcAdapterProperties.getPostgreSQLIdentifierMapping(properties);
+        assertEquals("CONVERT_TO_UPPER", val);
+    }
+
+    @Test
+    public void testGetPreserveCasePostgreSQLIdentifierMapping() {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "PRESERVE_ORIGINAL_CASE");
+        String val = JdbcAdapterProperties.getPostgreSQLIdentifierMapping(properties);
+        assertEquals("PRESERVE_ORIGINAL_CASE", val);
+    }
+
+    @Test
+    public void testGetConverToUpperPostgreSQLIdentifierMapping() {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT_TO_UPPER");
+        String val = JdbcAdapterProperties.getPostgreSQLIdentifierMapping(properties);
+        assertEquals("CONVERT_TO_UPPER", val);
+    }
+
+    @Test(expected = InvalidPropertyException.class)
+    public void checkPostgreSQLIdentifierMappingConsistencyThrowsException() throws AdapterException {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT_TO_UPPER");
+        properties.put("SQL_DIALECT", "ORACLE");
+        properties.put("CONNECTION_NAME", "CONN1");
+        JdbcAdapterProperties.checkPropertyConsistency(properties);
+    }
+
+    @Test
+    public void checkPostgreSQLIdentifierMappingConsistency() throws AdapterException {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT_TO_UPPER");
+        properties.put("SQL_DIALECT", "POSTGRESQL");
+        properties.put("CONNECTION_NAME", "CONN1");
+        JdbcAdapterProperties.checkPropertyConsistency(properties);
+    }
+
+    @Test(expected = InvalidPropertyException.class)
+    public void checkPostgreSQLIdentifierMappingInvalidPropertyValueThrowsException() throws AdapterException {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT");
+        properties.put("SQL_DIALECT", "POSTGRESQL");
+        properties.put("CONNECTION_NAME", "CONN1");
+        JdbcAdapterProperties.checkPropertyConsistency(properties);
+    }
 }

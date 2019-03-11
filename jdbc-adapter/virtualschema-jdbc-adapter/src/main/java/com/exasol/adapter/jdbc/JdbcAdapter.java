@@ -136,7 +136,8 @@ public class JdbcAdapter {
                 connection.getPassword(), catalog, schema, tables,
                 JdbcAdapterProperties.getSqlDialectName(meta.getProperties()),
                 JdbcAdapterProperties.getExceptionHandlingMode(meta.getProperties()),
-                JdbcAdapterProperties.getIgnoreErrorList(meta.getProperties()));
+                JdbcAdapterProperties.getIgnoreErrorList(meta.getProperties()),
+                getPostgreSQLIdentifierMapping(meta.getProperties()));
     }
 
     private static String handleRefresh(final RefreshRequest request, final ExaMetadata meta)
@@ -167,7 +168,8 @@ public class JdbcAdapter {
                     JdbcAdapterProperties.getSchema(newSchemaMeta), tableFilter,
                     JdbcAdapterProperties.getSqlDialectName(newSchemaMeta),
                     JdbcAdapterProperties.getExceptionHandlingMode(newSchemaMeta),
-                    JdbcAdapterProperties.getIgnoreErrorList(newSchemaMeta));
+                    JdbcAdapterProperties.getIgnoreErrorList(newSchemaMeta),
+                    getPostgreSQLIdentifierMapping(newSchemaMeta));
             return ResponseJsonSerializer.makeSetPropertiesResponse(remoteMeta);
         }
         return ResponseJsonSerializer.makeSetPropertiesResponse(null);
@@ -223,8 +225,10 @@ public class JdbcAdapter {
             throws AdapterException {
         // Generate SQL pushdown query
         final SchemaMetadataInfo meta = request.getSchemaMetadataInfo();
+        final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping = getPostgreSQLIdentifierMapping(meta.getProperties());
         final SqlDialectContext dialectContext = new SqlDialectContext(SchemaAdapterNotes.deserialize(
-                request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()));
+                request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()),
+                postgreSQLIdentifierMapping, getImportType(meta));
         final SqlDialect dialect = JdbcAdapterProperties.getSqlDialect(request.getSchemaMetadataInfo().getProperties(),
                 dialectContext);
         final boolean hasMoreThanOneTable = request.getInvolvedTablesMetadata().size() > 1;
@@ -235,83 +239,53 @@ public class JdbcAdapter {
         final SqlGenerationVisitor sqlGeneratorVisitor = dialect.getSqlGenerationVisitor(context);
         final String pushdownQuery = request.getSelect().accept(sqlGeneratorVisitor);
 
-        final String sql = generateImportQueryForPushdownQuery(exaMeta, meta, dialect, pushdownQuery);
+        final ConnectionInformation connectionInformation = getConnectionInformation(exaMeta, meta);
+        String columnDescription = "";
+        if (getImportType(meta) == ImportType.JDBC) {
+            columnDescription = createColumnDescription(exaMeta, meta, pushdownQuery, dialect);
+        }
+        final String sql = dialect.generatePushdownSql(connectionInformation, columnDescription, pushdownQuery);
 
         return ResponseJsonSerializer.makePushdownResponse(sql);
     }
 
-    private static String generateImportQueryForPushdownQuery(final ExaMetadata exaMeta, final SchemaMetadataInfo meta,
-            final SqlDialect dialect, final String pushdownQuery) throws AdapterException {
-        String sql = "";
+    private static ConnectionInformation getConnectionInformation(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
+        final String credentials = getCredentialsForPushdownQuery(exaMeta, meta);
+        final String exaConnectionString = JdbcAdapterProperties.getExaConnectionString(meta.getProperties());
+        final String oraConnectionName = JdbcAdapterProperties.getOraConnectionName(meta.getProperties());
+        return new ConnectionInformation(credentials, exaConnectionString, oraConnectionName);
+    }
+
+    private static PostgreSQLIdentifierMapping getPostgreSQLIdentifierMapping(final Map<String, String> properties) {
+        final String postgreSQLIdentifierMapping =  JdbcAdapterProperties.getPostgreSQLIdentifierMapping(properties);
+        return PostgreSQLIdentifierMapping.valueOf(postgreSQLIdentifierMapping);
+    }
+
+    private static ImportType getImportType(final SchemaMetadataInfo meta) {
+        ImportType importType = ImportType.JDBC;
         if (JdbcAdapterProperties.isLocal(meta.getProperties())) {
-            sql = generateLocalQuery(pushdownQuery);
+            importType = ImportType.LOCAL;
         } else if (JdbcAdapterProperties.isImportFromExa(meta.getProperties())) {
-            sql = generateExasolImportQuery(exaMeta, meta, pushdownQuery);
+            importType = ImportType.EXA;
         } else if (JdbcAdapterProperties.isImportFromOra(meta.getProperties())) {
-            sql = generateOracleImportQuery(exaMeta, meta, pushdownQuery);
-        } else {
-            sql = generateJDBCImportQuery(exaMeta, meta, dialect, pushdownQuery);
+            importType = ImportType.ORA;
         }
-        return sql;
+        return importType;
     }
 
-    private static String generateLocalQuery(final String pushdownQuery) {
-        return pushdownQuery;
-    }
-
-    private static String generateExasolImportQuery(final ExaMetadata exaMeta, final SchemaMetadataInfo meta,
-            final String pushdownQuery) {
-        final String credentials = getCredentialsForEXAImport(exaMeta, meta);
-        final StringBuilder exasolImportQuery = new StringBuilder();
-        exasolImportQuery.append("IMPORT FROM EXA AT '");
-        exasolImportQuery.append(JdbcAdapterProperties.getExaConnectionString(meta.getProperties()));
-        exasolImportQuery.append("' ");
-        exasolImportQuery.append(credentials);
-        exasolImportQuery.append(" STATEMENT '");
-        exasolImportQuery.append(pushdownQuery.replace("'", "''"));
-        exasolImportQuery.append("'");
-        return exasolImportQuery.toString();
-    }
-
-    private static String generateOracleImportQuery(final ExaMetadata exaMeta, final SchemaMetadataInfo meta,
-            final String pushdownQuery) {
-        final String credentials = getCredentialsForORAImport(exaMeta, meta);
-        final StringBuilder oracleImportQuery = new StringBuilder();
-        oracleImportQuery.append("IMPORT FROM ORA AT ");
-        oracleImportQuery.append(JdbcAdapterProperties.getOraConnectionName(meta.getProperties()));
-        oracleImportQuery.append(" ");
-        oracleImportQuery.append(credentials);
-        oracleImportQuery.append(" STATEMENT '");
-        oracleImportQuery.append(pushdownQuery.replace("'", "''"));
-        oracleImportQuery.append("'");
-        return oracleImportQuery.toString();
-    }
-
-    private static String generateJDBCImportQuery(final ExaMetadata exaMeta, final SchemaMetadataInfo meta,
-            final SqlDialect dialect, final String pushdownQuery) {
-        final String credentials = getCredentialsForJDBCImport(exaMeta, meta);
-
-        final StringBuilder jdbcImportQuery = new StringBuilder();
-        final String columnDescription = createColumnDescription(exaMeta, meta, pushdownQuery, dialect);
-        if (columnDescription == null) {
-            jdbcImportQuery.append("IMPORT FROM JDBC AT ");
-            jdbcImportQuery.append(credentials);
-            jdbcImportQuery.append(" STATEMENT '");
-            jdbcImportQuery.append(pushdownQuery.replace("'", "''"));
-            jdbcImportQuery.append("'");
+    protected static String getCredentialsForPushdownQuery(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
+        String credentials = "";
+        if (JdbcAdapterProperties.isImportFromExa(meta.getProperties())) {
+            credentials = getCredentialsForEXAImport(exaMeta, meta);
+        } else if (JdbcAdapterProperties.isImportFromOra(meta.getProperties())) {
+            credentials = getCredentialsForORAImport(exaMeta, meta);
         } else {
-            jdbcImportQuery.append("IMPORT INTO ");
-            jdbcImportQuery.append(columnDescription);
-            jdbcImportQuery.append(" FROM JDBC AT ");
-            jdbcImportQuery.append(credentials);
-            jdbcImportQuery.append(" STATEMENT '");
-            jdbcImportQuery.append(pushdownQuery.replace("'", "''"));
-            jdbcImportQuery.append("'");
+            credentials = getCredentialsForJDBCImport(exaMeta, meta);
         }
-        return jdbcImportQuery.toString();
+        return credentials;
     }
 
-    protected static String getCredentialsForJDBCImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
+    private static String getCredentialsForJDBCImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         String credentials = "";
         if (JdbcAdapterProperties.isUserSpecifiedConnection(meta.getProperties())) {
             credentials = JdbcAdapterProperties.getConnectionName(meta.getProperties());
@@ -324,7 +298,7 @@ public class JdbcAdapter {
         return credentials;
     }
 
-    protected static String getCredentialsForORAImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
+    private static String getCredentialsForORAImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         String credentials = "";
         if (!JdbcAdapterProperties.isUserSpecifiedConnection(meta.getProperties())) {
             credentials = getUserAndPasswordForImport(exaMeta, meta);
@@ -332,7 +306,7 @@ public class JdbcAdapter {
         return credentials;
     }
 
-    protected static String getCredentialsForEXAImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
+    private static String getCredentialsForEXAImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         return getUserAndPasswordForImport(exaMeta, meta);
     }
 

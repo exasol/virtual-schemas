@@ -2,6 +2,7 @@ package com.exasol.adapter.dialects.impl;
 
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.dialects.PostgreSQLIdentifierMapping;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectContext;
 import com.exasol.adapter.metadata.DataType;
@@ -31,15 +32,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class PostgreSQLSqlDialectTest {
-    @Mock
-    private SqlDialectContext sqlDialectContext;
     private PostgreSQLSqlDialect postgresDialect;
     private SqlDialect dialect;
 
     @BeforeEach
     void beforeEach() {
+        final SqlDialectContext sqlDialectContext = mock(SqlDialectContext.class);
+        when(sqlDialectContext.getPostgreSQLIdentifierMapping())
+              .thenReturn(PostgreSQLIdentifierMapping.CONVERT_TO_UPPER);
         this.dialect = new PostgreSQLSqlDialect(null);
-        this.postgresDialect = new PostgreSQLSqlDialect(this.sqlDialectContext);
+        this.postgresDialect = new PostgreSQLSqlDialect(sqlDialectContext);
     }
 
     @Test

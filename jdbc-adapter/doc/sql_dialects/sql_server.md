@@ -17,8 +17,8 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.sql_server_jdbc_adapter
 
   // This will add the adapter jar to the classpath so that it can be used inside the adapter script
   // Replace the names of the bucketfs and the bucket with the ones you used.
-  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.6.0.jar;
-
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.6.1.jar;
+									 
   // You have to add all files of the data source jdbc driver here 
   %jar /buckets/bucketfs1/bucket1/jtds.jar;
 /
