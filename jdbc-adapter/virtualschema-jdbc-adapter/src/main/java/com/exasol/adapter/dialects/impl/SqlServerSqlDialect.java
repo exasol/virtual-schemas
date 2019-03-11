@@ -1,6 +1,6 @@
 package com.exasol.adapter.dialects.impl;
 
-import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
@@ -10,6 +10,12 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.EnumMap;
 import java.util.Map;
+
+import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
+import static com.exasol.adapter.capabilities.LiteralCapability.*;
+import static com.exasol.adapter.capabilities.MainCapability.*;
+import static com.exasol.adapter.capabilities.PredicateCapability.*;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 public class SqlServerSqlDialect extends AbstractSqlDialect {
     // Tested SQL Server versions: SQL Server 2014
@@ -28,195 +34,29 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Capabilities getCapabilities() {
-        final Capabilities cap = new Capabilities();
-
-        cap.supportMainCapability(MainCapability.SELECTLIST_PROJECTION);
-        cap.supportMainCapability(MainCapability.SELECTLIST_EXPRESSIONS);
-        cap.supportMainCapability(MainCapability.FILTER_EXPRESSIONS);
-        cap.supportMainCapability(MainCapability.AGGREGATE_SINGLE_GROUP);
-        cap.supportMainCapability(MainCapability.AGGREGATE_GROUP_BY_COLUMN);
-        cap.supportMainCapability(MainCapability.AGGREGATE_GROUP_BY_EXPRESSION);
-        cap.supportMainCapability(MainCapability.AGGREGATE_GROUP_BY_TUPLE);
-        cap.supportMainCapability(MainCapability.AGGREGATE_HAVING);
-        cap.supportMainCapability(MainCapability.ORDER_BY_COLUMN);
-        cap.supportMainCapability(MainCapability.ORDER_BY_EXPRESSION);
-        cap.supportMainCapability(MainCapability.LIMIT);
-
-        cap.supportPredicate(PredicateCapability.AND);
-        cap.supportPredicate(PredicateCapability.OR);
-        cap.supportPredicate(PredicateCapability.NOT);
-        cap.supportPredicate(PredicateCapability.EQUAL);
-        cap.supportPredicate(PredicateCapability.NOTEQUAL);
-        cap.supportPredicate(PredicateCapability.LESS);
-        cap.supportPredicate(PredicateCapability.LESSEQUAL);
-        cap.supportPredicate(PredicateCapability.LIKE);
-        cap.supportPredicate(PredicateCapability.LIKE_ESCAPE);
-        cap.supportPredicate(PredicateCapability.REGEXP_LIKE);
-        cap.supportPredicate(PredicateCapability.BETWEEN);
-        cap.supportPredicate(PredicateCapability.IN_CONSTLIST);
-        cap.supportPredicate(PredicateCapability.IS_NULL);
-        cap.supportPredicate(PredicateCapability.IS_NOT_NULL);
-
-        cap.supportLiteral(LiteralCapability.BOOL);
-        cap.supportLiteral(LiteralCapability.NULL);
-        cap.supportLiteral(LiteralCapability.DATE);
-        cap.supportLiteral(LiteralCapability.TIMESTAMP);
-        cap.supportLiteral(LiteralCapability.TIMESTAMP_UTC);
-        cap.supportLiteral(LiteralCapability.DOUBLE);
-        cap.supportLiteral(LiteralCapability.EXACTNUMERIC);
-        cap.supportLiteral(LiteralCapability.STRING);
-        cap.supportLiteral(LiteralCapability.INTERVAL);
-
-        cap.supportAggregateFunction(AggregateFunctionCapability.COUNT);
-        cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_STAR);
-        cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_DISTINCT);
-
-        cap.supportAggregateFunction(AggregateFunctionCapability.SUM);
-        cap.supportAggregateFunction(AggregateFunctionCapability.SUM_DISTINCT);
-        cap.supportAggregateFunction(AggregateFunctionCapability.MIN);
-        cap.supportAggregateFunction(AggregateFunctionCapability.MAX);
-        cap.supportAggregateFunction(AggregateFunctionCapability.AVG);
-        cap.supportAggregateFunction(AggregateFunctionCapability.AVG_DISTINCT);
-        cap.supportAggregateFunction(AggregateFunctionCapability.MEDIAN);
-        cap.supportAggregateFunction(AggregateFunctionCapability.FIRST_VALUE);
-        cap.supportAggregateFunction(AggregateFunctionCapability.LAST_VALUE);
-
-        cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV);
-        cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_DISTINCT);
-        cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_POP);
-        cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_POP_DISTINCT);
-
-        cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE);
-        cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE_DISTINCT);
-
-        cap.supportAggregateFunction(AggregateFunctionCapability.VAR_POP);
-        cap.supportAggregateFunction(AggregateFunctionCapability.VAR_POP_DISTINCT);
-
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD);
-        cap.supportScalarFunction(ScalarFunctionCapability.SUB);
-        cap.supportScalarFunction(ScalarFunctionCapability.MULT);
-        cap.supportScalarFunction(ScalarFunctionCapability.FLOAT_DIV);
-
-        cap.supportScalarFunction(ScalarFunctionCapability.NEG);
-
-        cap.supportScalarFunction(ScalarFunctionCapability.ABS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ACOS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ASIN);
-        cap.supportScalarFunction(ScalarFunctionCapability.ATAN);
-        cap.supportScalarFunction(ScalarFunctionCapability.ATAN2);
-        cap.supportScalarFunction(ScalarFunctionCapability.CEIL);
-        cap.supportScalarFunction(ScalarFunctionCapability.COS);
-        cap.supportScalarFunction(ScalarFunctionCapability.COT);
-        cap.supportScalarFunction(ScalarFunctionCapability.DEGREES);
-        cap.supportScalarFunction(ScalarFunctionCapability.EXP);
-        cap.supportScalarFunction(ScalarFunctionCapability.FLOOR);
-        cap.supportScalarFunction(ScalarFunctionCapability.LOG);
-        cap.supportScalarFunction(ScalarFunctionCapability.MOD);
-        cap.supportScalarFunction(ScalarFunctionCapability.POWER);
-        cap.supportScalarFunction(ScalarFunctionCapability.RADIANS);
-        cap.supportScalarFunction(ScalarFunctionCapability.RAND);
-        cap.supportScalarFunction(ScalarFunctionCapability.ROUND);
-        cap.supportScalarFunction(ScalarFunctionCapability.SIGN);
-        cap.supportScalarFunction(ScalarFunctionCapability.SIN);
-        cap.supportScalarFunction(ScalarFunctionCapability.SQRT);
-        cap.supportScalarFunction(ScalarFunctionCapability.TAN);
-        cap.supportScalarFunction(ScalarFunctionCapability.TRUNC);
-
-        cap.supportScalarFunction(ScalarFunctionCapability.ASCII);
-        cap.supportScalarFunction(ScalarFunctionCapability.CHR);
-        cap.supportScalarFunction(ScalarFunctionCapability.CONCAT);
-        cap.supportScalarFunction(ScalarFunctionCapability.INSTR);
-        cap.supportScalarFunction(ScalarFunctionCapability.LENGTH);
-        cap.supportScalarFunction(ScalarFunctionCapability.LOCATE);
-        cap.supportScalarFunction(ScalarFunctionCapability.LOWER);
-        cap.supportScalarFunction(ScalarFunctionCapability.LPAD);
-        cap.supportScalarFunction(ScalarFunctionCapability.LTRIM);
-        cap.supportScalarFunction(ScalarFunctionCapability.REPEAT);
-        cap.supportScalarFunction(ScalarFunctionCapability.REPLACE);
-        cap.supportScalarFunction(ScalarFunctionCapability.REVERSE);
-        cap.supportScalarFunction(ScalarFunctionCapability.RIGHT);
-        cap.supportScalarFunction(ScalarFunctionCapability.RPAD);
-        cap.supportScalarFunction(ScalarFunctionCapability.RTRIM);
-        cap.supportScalarFunction(ScalarFunctionCapability.SOUNDEX);
-        cap.supportScalarFunction(ScalarFunctionCapability.SPACE);
-        cap.supportScalarFunction(ScalarFunctionCapability.SUBSTR);
-        cap.supportScalarFunction(ScalarFunctionCapability.TRIM);
-        cap.supportScalarFunction(ScalarFunctionCapability.UNICODE);
-        cap.supportScalarFunction(ScalarFunctionCapability.UPPER);
-
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD_DAYS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD_HOURS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD_MINUTES);
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD_MONTHS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD_SECONDS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD_WEEKS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD_YEARS);
-
-        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_DATE);
-        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_TIMESTAMP);
-
-        cap.supportScalarFunction(ScalarFunctionCapability.DAY);
-        cap.supportScalarFunction(ScalarFunctionCapability.SECONDS_BETWEEN);
-        cap.supportScalarFunction(ScalarFunctionCapability.MINUTES_BETWEEN);
-        cap.supportScalarFunction(ScalarFunctionCapability.HOURS_BETWEEN);
-        cap.supportScalarFunction(ScalarFunctionCapability.DAYS_BETWEEN);
-        cap.supportScalarFunction(ScalarFunctionCapability.MONTHS_BETWEEN);
-        cap.supportScalarFunction(ScalarFunctionCapability.YEARS_BETWEEN);
-        cap.supportScalarFunction(ScalarFunctionCapability.MONTH);
-        cap.supportScalarFunction(ScalarFunctionCapability.SYSDATE);
-        cap.supportScalarFunction(ScalarFunctionCapability.SYSTIMESTAMP);
-        cap.supportScalarFunction(ScalarFunctionCapability.YEAR);
-
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_X);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_Y);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_ENDPOINT);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_ISCLOSED);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_ISRING);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_LENGTH);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_NUMPOINTS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_POINTN);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_STARTPOINT);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_AREA);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_EXTERIORRING);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_INTERIORRINGN);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_NUMINTERIORRINGS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_GEOMETRYN);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_NUMGEOMETRIES);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_BOUNDARY);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_BUFFER);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_CENTROID);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_CONTAINS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_CONVEXHULL);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_CROSSES);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_DIFFERENCE);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_DIMENSION);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_DISJOINT);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_DISTANCE);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_ENVELOPE);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_EQUALS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_GEOMETRYTYPE);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_INTERSECTION);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_INTERSECTS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_ISEMPTY);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_ISSIMPLE);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_OVERLAPS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_SYMDIFFERENCE);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_TOUCHES);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_UNION);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_WITHIN);
-
-        cap.supportScalarFunction(ScalarFunctionCapability.BIT_AND);
-        cap.supportScalarFunction(ScalarFunctionCapability.BIT_NOT);
-        cap.supportScalarFunction(ScalarFunctionCapability.BIT_OR);
-        cap.supportScalarFunction(ScalarFunctionCapability.BIT_XOR);
-
-        cap.supportScalarFunction(ScalarFunctionCapability.CASE);
-        cap.supportScalarFunction(ScalarFunctionCapability.HASH_MD5);
-        cap.supportScalarFunction(ScalarFunctionCapability.HASH_SHA);
-        cap.supportScalarFunction(ScalarFunctionCapability.HASH_SHA1);
-        cap.supportScalarFunction(ScalarFunctionCapability.NULLIFZERO);
-        cap.supportScalarFunction(ScalarFunctionCapability.ZEROIFNULL);
-        return cap;
+        final Capabilities.Builder builder = Capabilities.builder();
+        builder.addMain(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS, AGGREGATE_SINGLE_GROUP,
+              AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_GROUP_BY_EXPRESSION, AGGREGATE_GROUP_BY_TUPLE, AGGREGATE_HAVING,
+              ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT);
+        builder.addPredicate(AND, OR, NOT, EQUAL, NOTEQUAL, LESS, LESSEQUAL, LIKE, LIKE_ESCAPE, BETWEEN, REGEXP_LIKE,
+              IN_CONSTLIST, IS_NULL, IS_NOT_NULL);
+        builder.addLiteral(BOOL, NULL, DATE, TIMESTAMP, TIMESTAMP_UTC, DOUBLE, EXACTNUMERIC, STRING, INTERVAL);
+        builder.addAggregateFunction(COUNT, COUNT_STAR, COUNT_DISTINCT, SUM, SUM_DISTINCT, MIN, MAX, AVG, AVG_DISTINCT,
+              MEDIAN, FIRST_VALUE, LAST_VALUE, STDDEV, STDDEV_DISTINCT, STDDEV_POP, STDDEV_POP_DISTINCT, VARIANCE,
+              VARIANCE_DISTINCT, VAR_POP, VAR_POP_DISTINCT);
+        builder.addScalarFunction(ADD, SUB, MULT, FLOAT_DIV, NEG, ABS, ACOS, ASIN, ATAN, ATAN2, CEIL, COS, COT, DEGREES,
+              EXP, FLOOR, LOG, MOD, POWER, RADIANS, RAND, ROUND, SIGN, SIN, SQRT, TAN, TRUNC, ASCII, CHR, CONCAT, INSTR,
+              LENGTH, LOCATE, LOWER, LPAD, LTRIM, REPEAT, REPLACE, REVERSE, RIGHT, RPAD, RTRIM, SOUNDEX, SPACE, SUBSTR,
+              TRIM, UNICODE, UPPER, ADD_DAYS, ADD_HOURS, ADD_MINUTES, ADD_MONTHS, ADD_SECONDS, ADD_WEEKS, ADD_YEARS,
+              SECONDS_BETWEEN, MINUTES_BETWEEN, HOURS_BETWEEN, DAYS_BETWEEN, MONTHS_BETWEEN, YEARS_BETWEEN, DAY, MONTH,
+              YEAR, SYSDATE, SYSTIMESTAMP, CURRENT_DATE, CURRENT_TIMESTAMP, ST_X, ST_Y, ST_ENDPOINT, ST_ISCLOSED,
+              ST_ISRING, ST_LENGTH, ST_NUMPOINTS, ST_POINTN, ST_STARTPOINT, ST_AREA, ST_EXTERIORRING, ST_INTERIORRINGN,
+              ST_NUMINTERIORRINGS, ST_GEOMETRYN, ST_NUMGEOMETRIES, ST_BOUNDARY, ST_BUFFER, ST_CENTROID, ST_CONTAINS,
+              ST_CONVEXHULL, ST_CROSSES, ST_DIFFERENCE, ST_DIMENSION, ST_DISJOINT, ST_DISTANCE, ST_ENVELOPE, ST_EQUALS,
+              ST_GEOMETRYTYPE, ST_INTERSECTION, ST_INTERSECTS, ST_ISEMPTY, ST_ISSIMPLE, ST_OVERLAPS, ST_SYMDIFFERENCE,
+              ST_TOUCHES, ST_UNION, ST_WITHIN, BIT_AND, BIT_NOT, BIT_OR, BIT_XOR, CASE, HASH_MD5, HASH_SHA, HASH_SHA1,
+              NULLIFZERO, ZEROIFNULL);
+        return builder.build();
     }
 
     @Override

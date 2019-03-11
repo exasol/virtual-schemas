@@ -1,10 +1,15 @@
 package com.exasol.adapter.dialects.impl;
 
-import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.metadata.DataType;
 
 import java.sql.SQLException;
+
+import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
+import static com.exasol.adapter.capabilities.LiteralCapability.*;
+import static com.exasol.adapter.capabilities.MainCapability.*;
+import static com.exasol.adapter.capabilities.PredicateCapability.*;
 
 /**
  * Dialect for Impala, using the Cloudera Impala JDBC Driver/Connector
@@ -26,54 +31,18 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Capabilities getCapabilities() {
-        final Capabilities cap = new Capabilities();
-        cap.supportMainCapability(MainCapability.SELECTLIST_PROJECTION);
-        cap.supportMainCapability(MainCapability.SELECTLIST_EXPRESSIONS);
-        cap.supportMainCapability(MainCapability.FILTER_EXPRESSIONS);
-        cap.supportMainCapability(MainCapability.AGGREGATE_SINGLE_GROUP);
-        cap.supportMainCapability(MainCapability.AGGREGATE_GROUP_BY_COLUMN);
-        cap.supportMainCapability(MainCapability.AGGREGATE_GROUP_BY_EXPRESSION);
-        cap.supportMainCapability(MainCapability.AGGREGATE_GROUP_BY_TUPLE);
-        cap.supportMainCapability(MainCapability.AGGREGATE_HAVING);
-        cap.supportMainCapability(MainCapability.ORDER_BY_COLUMN);
-        cap.supportMainCapability(MainCapability.ORDER_BY_EXPRESSION);
-        cap.supportMainCapability(MainCapability.LIMIT);
-        cap.supportMainCapability(MainCapability.LIMIT_WITH_OFFSET);
-
-        cap.supportLiteral(LiteralCapability.STRING);
-        cap.supportLiteral(LiteralCapability.BOOL);
-        cap.supportLiteral(LiteralCapability.EXACTNUMERIC);
-        cap.supportLiteral(LiteralCapability.DOUBLE);
-        cap.supportLiteral(LiteralCapability.NULL);
+        final Capabilities.Builder builder = Capabilities.builder();
+        builder.addMain(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS, AGGREGATE_SINGLE_GROUP,
+              AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_GROUP_BY_EXPRESSION, AGGREGATE_GROUP_BY_TUPLE, AGGREGATE_HAVING,
+              ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT, LIMIT_WITH_OFFSET);
+        builder.addLiteral(NULL, DOUBLE, EXACTNUMERIC, STRING, BOOL);
         // TODO Implement timestamp literal
-
-        cap.supportPredicate(PredicateCapability.AND);
-        cap.supportPredicate(PredicateCapability.OR);
-        cap.supportPredicate(PredicateCapability.NOT);
-        cap.supportPredicate(PredicateCapability.EQUAL);
-        cap.supportPredicate(PredicateCapability.NOTEQUAL);
-        cap.supportPredicate(PredicateCapability.LESS);
-        cap.supportPredicate(PredicateCapability.LESSEQUAL);
-        cap.supportPredicate(PredicateCapability.LIKE);
-        cap.supportPredicate(PredicateCapability.REGEXP_LIKE);
-        cap.supportPredicate(PredicateCapability.BETWEEN);
-        cap.supportPredicate(PredicateCapability.IN_CONSTLIST);
-        cap.supportPredicate(PredicateCapability.IS_NULL);
-        cap.supportPredicate(PredicateCapability.IS_NOT_NULL);
-
-        cap.supportAggregateFunction(AggregateFunctionCapability.AVG);
-        cap.supportAggregateFunction(AggregateFunctionCapability.COUNT);
-        cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_STAR);
-        cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_DISTINCT);
-        cap.supportAggregateFunction(AggregateFunctionCapability.GROUP_CONCAT);
-        cap.supportAggregateFunction(AggregateFunctionCapability.GROUP_CONCAT_SEPARATOR);
-        cap.supportAggregateFunction(AggregateFunctionCapability.MAX);
-        cap.supportAggregateFunction(AggregateFunctionCapability.MIN);
-        cap.supportAggregateFunction(AggregateFunctionCapability.SUM);
-        cap.supportAggregateFunction(AggregateFunctionCapability.SUM_DISTINCT);
-
+        builder.addPredicate(AND, OR, NOT, EQUAL, NOTEQUAL, LESS, LESSEQUAL, LIKE, REGEXP_LIKE, BETWEEN, IN_CONSTLIST,
+              IS_NULL, IS_NOT_NULL);
+        builder.addAggregateFunction(COUNT, COUNT_STAR, COUNT_DISTINCT, GROUP_CONCAT, GROUP_CONCAT_SEPARATOR, SUM,
+              SUM_DISTINCT, MIN, MAX, AVG);
         // TODO Scalar Functions
-        return cap;
+        return builder.build();
     }
 
     @Override

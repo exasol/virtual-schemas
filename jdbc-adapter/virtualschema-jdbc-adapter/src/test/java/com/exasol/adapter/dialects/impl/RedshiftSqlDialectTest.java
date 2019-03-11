@@ -32,7 +32,8 @@ class RedshiftSqlDialectTest {
                     LIMIT_WITH_OFFSET)),//
               () -> assertThat(capabilities.getLiteralCapabilities(),
                     containsInAnyOrder(BOOL, NULL, DATE, TIMESTAMP, TIMESTAMP_UTC, DOUBLE, EXACTNUMERIC, STRING,
-                          INTERVAL)), () -> assertThat(capabilities.getPredicateCapabilities(),
+                          INTERVAL)), //
+              () -> assertThat(capabilities.getPredicateCapabilities(),
                     containsInAnyOrder(AND, OR, NOT, EQUAL, NOTEQUAL, LESS, LESSEQUAL, LIKE, LIKE_ESCAPE, BETWEEN,
                           REGEXP_LIKE, IN_CONSTLIST, IS_NULL, IS_NOT_NULL)),
               () -> assertThat(capabilities.getAggregateFunctionCapabilities(),
