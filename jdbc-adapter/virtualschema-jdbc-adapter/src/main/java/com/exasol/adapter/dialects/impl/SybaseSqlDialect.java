@@ -1,24 +1,21 @@
 package com.exasol.adapter.dialects.impl;
 
+import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.sql.AggregateFunction;
+import com.exasol.adapter.sql.ScalarFunction;
+
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.EnumMap;
 import java.util.Map;
 
-import com.exasol.adapter.capabilities.AggregateFunctionCapability;
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.capabilities.LiteralCapability;
-import com.exasol.adapter.capabilities.MainCapability;
-import com.exasol.adapter.capabilities.PredicateCapability;
-import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.sql.AggregateFunction;
-import com.exasol.adapter.sql.ScalarFunction;
+import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
+import static com.exasol.adapter.capabilities.LiteralCapability.*;
+import static com.exasol.adapter.capabilities.MainCapability.*;
+import static com.exasol.adapter.capabilities.PredicateCapability.*;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 public class SybaseSqlDialect extends AbstractSqlDialect {
     // The Sybase dialect started as a copy of the SQL Server dialect.
@@ -41,298 +38,29 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Capabilities getCapabilities() {
-
-        final Capabilities cap = new Capabilities();
-
-        cap.supportMainCapability(MainCapability.SELECTLIST_PROJECTION);
-        cap.supportMainCapability(MainCapability.SELECTLIST_EXPRESSIONS);
-        cap.supportMainCapability(MainCapability.FILTER_EXPRESSIONS);
-        cap.supportMainCapability(MainCapability.AGGREGATE_SINGLE_GROUP);
-        cap.supportMainCapability(MainCapability.AGGREGATE_GROUP_BY_COLUMN);
-        cap.supportMainCapability(MainCapability.AGGREGATE_GROUP_BY_EXPRESSION);
-        cap.supportMainCapability(MainCapability.AGGREGATE_GROUP_BY_TUPLE);
-        cap.supportMainCapability(MainCapability.AGGREGATE_HAVING);
-        cap.supportMainCapability(MainCapability.ORDER_BY_COLUMN);
-        cap.supportMainCapability(MainCapability.ORDER_BY_EXPRESSION);
-        cap.supportMainCapability(MainCapability.LIMIT); // LIMIT will be translated to TOP in
-                                                         // SybaseSqlGenerationVisitor.java
-
-        // Predicates
-        cap.supportPredicate(PredicateCapability.AND);
-        cap.supportPredicate(PredicateCapability.OR);
-        cap.supportPredicate(PredicateCapability.NOT);
-        cap.supportPredicate(PredicateCapability.EQUAL);
-        cap.supportPredicate(PredicateCapability.NOTEQUAL);
-        cap.supportPredicate(PredicateCapability.LESS);
-        cap.supportPredicate(PredicateCapability.LESSEQUAL);
-        cap.supportPredicate(PredicateCapability.LIKE);
-        cap.supportPredicate(PredicateCapability.LIKE_ESCAPE);
-        cap.supportPredicate(PredicateCapability.REGEXP_LIKE);
-        cap.supportPredicate(PredicateCapability.BETWEEN);
-        cap.supportPredicate(PredicateCapability.IN_CONSTLIST);
-        cap.supportPredicate(PredicateCapability.IS_NULL);
-        cap.supportPredicate(PredicateCapability.IS_NOT_NULL);
-
-        // Literals
-        cap.supportLiteral(LiteralCapability.BOOL);
-        cap.supportLiteral(LiteralCapability.NULL);
-        cap.supportLiteral(LiteralCapability.DATE);
-        cap.supportLiteral(LiteralCapability.TIMESTAMP);
-        cap.supportLiteral(LiteralCapability.TIMESTAMP_UTC);
-        cap.supportLiteral(LiteralCapability.DOUBLE);
-        cap.supportLiteral(LiteralCapability.EXACTNUMERIC);
-        cap.supportLiteral(LiteralCapability.STRING);
-        cap.supportLiteral(LiteralCapability.INTERVAL);
-
-        // Aggregate functions
-        cap.supportAggregateFunction(AggregateFunctionCapability.COUNT);
-        cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_STAR);
-        cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_DISTINCT);
-
-        cap.supportAggregateFunction(AggregateFunctionCapability.SUM); // works
-        cap.supportAggregateFunction(AggregateFunctionCapability.SUM_DISTINCT);
-        cap.supportAggregateFunction(AggregateFunctionCapability.MIN);
-        cap.supportAggregateFunction(AggregateFunctionCapability.MAX);
-        cap.supportAggregateFunction(AggregateFunctionCapability.AVG);
-        cap.supportAggregateFunction(AggregateFunctionCapability.AVG_DISTINCT);
-        cap.supportAggregateFunction(AggregateFunctionCapability.MEDIAN);
-        cap.supportAggregateFunction(AggregateFunctionCapability.FIRST_VALUE);
-        cap.supportAggregateFunction(AggregateFunctionCapability.LAST_VALUE);
-
-        cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV);
-        cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_DISTINCT);
-        cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_POP);
-        cap.supportAggregateFunction(AggregateFunctionCapability.STDDEV_POP_DISTINCT);
-
-        // STDDEV_SAMP
-        // STDDEV_SAMP_DISTINCT
-
-        cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE);
-        cap.supportAggregateFunction(AggregateFunctionCapability.VARIANCE_DISTINCT);
-
-        cap.supportAggregateFunction(AggregateFunctionCapability.VAR_POP);
-        cap.supportAggregateFunction(AggregateFunctionCapability.VAR_POP_DISTINCT);
-
-        // GROUP_CONCAT,
-        // GROUP_CONCAT_DISTINCT (AggregateFunction.GROUP_CONCAT),
-        // GROUP_CONCAT_SEPARATOR (AggregateFunction.GROUP_CONCAT),
-        // GROUP_CONCAT_ORDER_BY (AggregateFunction.GROUP_CONCAT),
-        //
-        // GEO_INTERSECTION_AGGREGATE,
-        // GEO_UNION_AGGREGATE,
-        //
-        // APPROXIMATE_COUNT_DISTINCT;
-
-        // Standard Arithmetic Operators
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD); // works
-        cap.supportScalarFunction(ScalarFunctionCapability.SUB);
-        cap.supportScalarFunction(ScalarFunctionCapability.MULT);
-        cap.supportScalarFunction(ScalarFunctionCapability.FLOAT_DIV);
-
-        // Unary prefix operators
-        cap.supportScalarFunction(ScalarFunctionCapability.NEG);
-
-        // Numeric functions
-        // https://msdn.microsoft.com/en-us/library/ms177516(v=sql.110).aspx
-        cap.supportScalarFunction(ScalarFunctionCapability.ABS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ACOS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ASIN);
-        cap.supportScalarFunction(ScalarFunctionCapability.ATAN);
-        cap.supportScalarFunction(ScalarFunctionCapability.ATAN2); // added alias ATN2
-        cap.supportScalarFunction(ScalarFunctionCapability.CEIL); // alias CEILING
-        cap.supportScalarFunction(ScalarFunctionCapability.COS);
-        // COSH
-        cap.supportScalarFunction(ScalarFunctionCapability.COT);
-        cap.supportScalarFunction(ScalarFunctionCapability.DEGREES);
-        // DIV,
-        cap.supportScalarFunction(ScalarFunctionCapability.EXP);
-        cap.supportScalarFunction(ScalarFunctionCapability.FLOOR);
-        // GREATEST,
-        // LEAST,
-        // LN,
-        cap.supportScalarFunction(ScalarFunctionCapability.LOG);
-        cap.supportScalarFunction(ScalarFunctionCapability.MOD);
-        cap.supportScalarFunction(ScalarFunctionCapability.POWER);
-        cap.supportScalarFunction(ScalarFunctionCapability.RADIANS);
-        cap.supportScalarFunction(ScalarFunctionCapability.RAND);
-        cap.supportScalarFunction(ScalarFunctionCapability.ROUND);
-        cap.supportScalarFunction(ScalarFunctionCapability.SIGN);
-        cap.supportScalarFunction(ScalarFunctionCapability.SIN);
-        // SINH,
-        cap.supportScalarFunction(ScalarFunctionCapability.SQRT);
-        cap.supportScalarFunction(ScalarFunctionCapability.TAN);
-        // TANH,
-        cap.supportScalarFunction(ScalarFunctionCapability.TRUNC);
-
-        // String Functions
-        cap.supportScalarFunction(ScalarFunctionCapability.ASCII);
-        // BIT_LENGTH,
-        cap.supportScalarFunction(ScalarFunctionCapability.CHR); // CHAR
-        // COLOGNE_PHONETIC,
-        cap.supportScalarFunction(ScalarFunctionCapability.CONCAT);
-        // DUMP,
-        // EDIT_DISTANCE,
-        // INSERT,
-        cap.supportScalarFunction(ScalarFunctionCapability.INSTR); // translated to CHARINDEX in Visitor with Argument
-                                                                   // switch
-        cap.supportScalarFunction(ScalarFunctionCapability.LENGTH); // alias LEN
-        cap.supportScalarFunction(ScalarFunctionCapability.LOCATE); // CHARINDEX alias
-        cap.supportScalarFunction(ScalarFunctionCapability.LOWER);
-        cap.supportScalarFunction(ScalarFunctionCapability.LPAD); // transformed in Visitor
-        cap.supportScalarFunction(ScalarFunctionCapability.LTRIM);
-        // OCTET_LENGTH,
-        // REGEXP_INSTR,
-        // REGEXP_REPLACE,
-        // REGEXP_SUBSTR,
-        cap.supportScalarFunction(ScalarFunctionCapability.REPEAT); // REPLICATE
-        cap.supportScalarFunction(ScalarFunctionCapability.REPLACE);
-        cap.supportScalarFunction(ScalarFunctionCapability.REVERSE);
-        cap.supportScalarFunction(ScalarFunctionCapability.RIGHT);
-        cap.supportScalarFunction(ScalarFunctionCapability.RPAD);
-        cap.supportScalarFunction(ScalarFunctionCapability.RTRIM);
-        cap.supportScalarFunction(ScalarFunctionCapability.SOUNDEX);
-        cap.supportScalarFunction(ScalarFunctionCapability.SPACE);
-        cap.supportScalarFunction(ScalarFunctionCapability.SUBSTR); // SUBSTRING
-        // TRANSLATE,
-        cap.supportScalarFunction(ScalarFunctionCapability.TRIM);
-        cap.supportScalarFunction(ScalarFunctionCapability.UNICODE);
-        // UNICODECHR,
-        cap.supportScalarFunction(ScalarFunctionCapability.UPPER);
-
-        // Date/Time Functions
-
-        // the following functions are translated to DATEADD(datepart,number,date) in
-        // Visitor
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD_DAYS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD_HOURS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD_MINUTES);
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD_MONTHS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD_SECONDS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD_WEEKS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ADD_YEARS);
-
-        // CONVERT_TZ,
-
-        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_DATE);
-        cap.supportScalarFunction(ScalarFunctionCapability.CURRENT_TIMESTAMP);
-
-        // DATE_TRUNC,
-        cap.supportScalarFunction(ScalarFunctionCapability.DAY);
-
-        // the following functions are translated to DATEDIFF in Visitor
-        cap.supportScalarFunction(ScalarFunctionCapability.SECONDS_BETWEEN);
-        cap.supportScalarFunction(ScalarFunctionCapability.MINUTES_BETWEEN);
-        cap.supportScalarFunction(ScalarFunctionCapability.HOURS_BETWEEN);
-        cap.supportScalarFunction(ScalarFunctionCapability.DAYS_BETWEEN);
-        cap.supportScalarFunction(ScalarFunctionCapability.MONTHS_BETWEEN);
-        cap.supportScalarFunction(ScalarFunctionCapability.YEARS_BETWEEN);
-
-//        DBTIMEZONE,
-//        EXTRACT,
-//        LOCALTIMESTAMP,
-//        MINUTE,
-
-        cap.supportScalarFunction(ScalarFunctionCapability.MONTH);
-
-//        NUMTODSINTERVAL,
-//        NUMTOYMINTERVAL,
-//        POSIX_TIME,
-//        SECOND,
-
-//        SESSIONTIMEZONE,
-        cap.supportScalarFunction(ScalarFunctionCapability.SYSDATE);
-        cap.supportScalarFunction(ScalarFunctionCapability.SYSTIMESTAMP);
-
-//        WEEK,
-
-        cap.supportScalarFunction(ScalarFunctionCapability.YEAR);
-
-        // Geospatial
-        // - Point Functions
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_X);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_Y);
-//        // - (Multi-)LineString Functions
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_ENDPOINT);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_ISCLOSED);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_ISRING);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_LENGTH);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_NUMPOINTS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_POINTN);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_STARTPOINT);
-//        // - (Multi-)Polygon Functions
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_AREA);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_EXTERIORRING);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_INTERIORRINGN);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_NUMINTERIORRINGS);
-//        // - GeometryCollection Functions
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_GEOMETRYN);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_NUMGEOMETRIES);
-//        // - General Functions
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_BOUNDARY);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_BUFFER);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_CENTROID);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_CONTAINS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_CONVEXHULL);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_CROSSES);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_DIFFERENCE);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_DIMENSION);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_DISJOINT);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_DISTANCE);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_ENVELOPE);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_EQUALS);
-        // cap.supportScalarFunction(ScalarFunctionCapability.ST_FORCE2D);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_GEOMETRYTYPE);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_INTERSECTION);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_INTERSECTS);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_ISEMPTY);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_ISSIMPLE);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_OVERLAPS);
-        // cap.supportScalarFunction(ScalarFunctionCapability.ST_SETSRID);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_SYMDIFFERENCE);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_TOUCHES);
-        // cap.supportScalarFunction(ScalarFunctionCapability.ST_TRANSFORM);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_UNION);
-        cap.supportScalarFunction(ScalarFunctionCapability.ST_WITHIN);
-
-        // Conversion functions
-//        CAST,  // Has alias CONVERT
-//      IS_NUMBER
-//        IS_BOOLEAN,
-//        IS_DATE,
-//        IS_DSINTERVAL,
-//        IS_YMINTERVAL,
-//        IS_TIMESTAMP,
-//        TO_CHAR,
-//        TO_DATE,
-//        TO_DSINTERVAL,
-//        TO_YMINTERVAL,
-//        TO_NUMBER,
-//        TO_TIMESTAMP,
-
-        // Bitwise functions
-        cap.supportScalarFunction(ScalarFunctionCapability.BIT_AND);
-//        BIT_CHECK,
-        cap.supportScalarFunction(ScalarFunctionCapability.BIT_NOT);
-        cap.supportScalarFunction(ScalarFunctionCapability.BIT_OR);
-//        BIT_SET,
-//        BIT_TO_NUM,
-        cap.supportScalarFunction(ScalarFunctionCapability.BIT_XOR);
-
-        // Other functions
-        cap.supportScalarFunction(ScalarFunctionCapability.CASE);
-//        CURRENT_SCHEMA,
-//        CURRENT_SESSION,
-//        CURRENT_STATEMENT,
-//        CURRENT_USER,
-        cap.supportScalarFunction(ScalarFunctionCapability.HASH_MD5); // translated to HASHBYTES
-        cap.supportScalarFunction(ScalarFunctionCapability.HASH_SHA); // translated to HASHBYTES
-        cap.supportScalarFunction(ScalarFunctionCapability.HASH_SHA1); // translated to HASHBYTES
-//        HASH_TIGER,
-        cap.supportScalarFunction(ScalarFunctionCapability.NULLIFZERO); // alias NULLIF
-//        SYS_GUID,
-        cap.supportScalarFunction(ScalarFunctionCapability.ZEROIFNULL); // translated to ISNULL(exp1, exp2) in Visitor
-
-        return cap;
+        final Capabilities.Builder builder = Capabilities.builder();
+        builder.addMain(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS, AGGREGATE_SINGLE_GROUP,
+              AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_GROUP_BY_EXPRESSION, AGGREGATE_GROUP_BY_TUPLE, AGGREGATE_HAVING,
+              ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT);
+        builder.addPredicate(AND, OR, NOT, EQUAL, NOTEQUAL, LESS, LESSEQUAL, LIKE, LIKE_ESCAPE, BETWEEN, REGEXP_LIKE,
+              IN_CONSTLIST, IS_NULL, IS_NOT_NULL);
+        builder.addLiteral(BOOL, NULL, DATE, TIMESTAMP, TIMESTAMP_UTC, DOUBLE, EXACTNUMERIC, STRING, INTERVAL);
+        builder.addAggregateFunction(COUNT, COUNT_STAR, COUNT_DISTINCT, SUM, SUM_DISTINCT, MIN, MAX, AVG, AVG_DISTINCT,
+              MEDIAN, FIRST_VALUE, LAST_VALUE, STDDEV, STDDEV_DISTINCT, STDDEV_POP, STDDEV_POP_DISTINCT, VARIANCE,
+              VARIANCE_DISTINCT, VAR_POP, VAR_POP_DISTINCT);
+        builder.addScalarFunction(ADD, SUB, MULT, FLOAT_DIV, NEG, ABS, ACOS, ASIN, ATAN, ATAN2, CEIL, COS, COT, DEGREES,
+              EXP, FLOOR, LOG, MOD, POWER, RADIANS, RAND, ROUND, SIGN, SIN, SQRT, TAN, TRUNC, ASCII, CHR, CONCAT, INSTR,
+              LENGTH, LOCATE, LOWER, LPAD, LTRIM, REPEAT, REPLACE, REVERSE, RIGHT, RPAD, RTRIM, SOUNDEX, SPACE, SUBSTR,
+              TRIM, UNICODE, UPPER, ADD_DAYS, ADD_HOURS, ADD_MINUTES, ADD_MONTHS, ADD_SECONDS, ADD_WEEKS, ADD_YEARS,
+              SECONDS_BETWEEN, MINUTES_BETWEEN, HOURS_BETWEEN, DAYS_BETWEEN, MONTHS_BETWEEN, YEARS_BETWEEN, DAY, MONTH,
+              YEAR, SYSDATE, SYSTIMESTAMP, CURRENT_DATE, CURRENT_TIMESTAMP, ST_X, ST_Y, ST_ENDPOINT, ST_ISCLOSED,
+              ST_ISRING, ST_LENGTH, ST_NUMPOINTS, ST_POINTN, ST_STARTPOINT, ST_AREA, ST_EXTERIORRING, ST_INTERIORRINGN,
+              ST_NUMINTERIORRINGS, ST_GEOMETRYN, ST_NUMGEOMETRIES, ST_BOUNDARY, ST_BUFFER, ST_CENTROID, ST_CONTAINS,
+              ST_CONVEXHULL, ST_CROSSES, ST_DIFFERENCE, ST_DIMENSION, ST_DISJOINT, ST_DISTANCE, ST_ENVELOPE, ST_EQUALS,
+              ST_GEOMETRYTYPE, ST_INTERSECTION, ST_INTERSECTS, ST_ISEMPTY, ST_ISSIMPLE, ST_OVERLAPS, ST_SYMDIFFERENCE,
+              ST_TOUCHES, ST_UNION, ST_WITHIN, BIT_AND, BIT_NOT, BIT_OR, BIT_XOR, CASE, HASH_MD5, HASH_SHA, HASH_SHA1,
+              NULLIFZERO, ZEROIFNULL);
+        return builder.build();
     }
 
     @Override
@@ -342,16 +70,12 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
         final String columnTypeName = jdbcTypeDescription.getTypeName();
 
         switch (jdbcType) {
-
         case Types.VARCHAR: // the JTDS JDBC Type for date, time, datetime2, datetimeoffset is 12
             if (columnTypeName.equalsIgnoreCase("date")) {
                 colType = DataType.createDate();
             } else if (columnTypeName.equalsIgnoreCase("datetime2")) {
                 colType = DataType.createTimestamp(false);
             }
-
-            // note: time and datetimeoffset are converted to varchar by default mapping
-
             break;
         case Types.TIME:
             colType = DataType.createVarChar(210, DataType.ExaCharset.UTF8);
@@ -412,9 +136,7 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Map<ScalarFunction, String> getScalarFunctionAliases() {
-
         final Map<ScalarFunction, String> scalarAliases = new EnumMap<>(ScalarFunction.class);
-
         scalarAliases.put(ScalarFunction.ATAN2, "ATN2");
         scalarAliases.put(ScalarFunction.CEIL, "CEILING");
         scalarAliases.put(ScalarFunction.CHR, "CHAR");
@@ -423,23 +145,16 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
         scalarAliases.put(ScalarFunction.REPEAT, "REPLICATE");
         scalarAliases.put(ScalarFunction.SUBSTR, "SUBSTRING");
         scalarAliases.put(ScalarFunction.NULLIFZERO, "NULLIF");
-
         return scalarAliases;
-
     }
 
     @Override
     public Map<AggregateFunction, String> getAggregateFunctionAliases() {
         final Map<AggregateFunction, String> aggregationAliases = new EnumMap<>(AggregateFunction.class);
-
         aggregationAliases.put(AggregateFunction.STDDEV, "STDEV");
-
         aggregationAliases.put(AggregateFunction.STDDEV_POP, "STDEVP");
-
         aggregationAliases.put(AggregateFunction.VARIANCE, "VAR");
-
         aggregationAliases.put(AggregateFunction.VAR_POP, "VARP");
-
         return aggregationAliases;
     }
 
@@ -475,7 +190,6 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuoteIfNeeded(final String identifier) {
-        // This is a simplified rule, which quotes all identifiers although not needed
         return applyQuote(identifier);
     }
 
@@ -498,5 +212,4 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
     public String getStringLiteral(final String value) {
         return "'" + value.replace("'", "''") + "'";
     }
-
 }

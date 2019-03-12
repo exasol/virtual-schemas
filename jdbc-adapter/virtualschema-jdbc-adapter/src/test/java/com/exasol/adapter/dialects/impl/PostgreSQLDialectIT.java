@@ -21,13 +21,14 @@ import org.junit.Test;
 
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Integration test for the PostgreSQL SQL dialect
  *
  */
 public class PostgreSQLDialectIT extends AbstractIntegrationTest {
-
     private static final String VIRTUAL_SCHEMA = "PG";
     private static final String VIRTUAL_SCHEMA_UPPERCASE_TABLE = "PG_UPPER";
     private static final String VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE = "PG_PRESERVE_CASE";
@@ -68,7 +69,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
         final String password = getConfig().getPostgresqlPassword();
         final String postgresConnectionString = getConfig().getPostgresqlJdbcConnectionString();
         Class.forName("org.postgresql.Driver");
-        try (Connection conn = DriverManager.getConnection(postgresConnectionString, user, password))
+        try (final Connection conn = DriverManager.getConnection(postgresConnectionString, user, password))
         {
             final Statement stmt = conn.createStatement();
             stmt.execute(String.format("create table %s.t(x int)", POSTGRES_SCHEMA));
@@ -159,7 +160,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
         final String password = getConfig().getPostgresqlPassword();
         final String postgresConnectionString = getConfig().getPostgresqlJdbcConnectionString();
         Class.forName("org.postgresql.Driver");
-        try (Connection conn = DriverManager.getConnection(postgresConnectionString, user, password))
+        try (final Connection conn = DriverManager.getConnection(postgresConnectionString, user, password))
         {
             final Statement stmt = conn.createStatement();
             stmt.execute(String.format("create schema %s", POSTGRES_SCHEMA_UPPERCASE_TABLE));
@@ -184,8 +185,8 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     // Identifier Test - CONVERT_TO_UPPER mode --------------------------------
     @Test
     public void testCreateSchemaWithUpperCaseTables() throws SQLException, ClassNotFoundException, FileNotFoundException {
-        expectedEx.expect(DataException.class);
-        expectedEx.expectMessage("Table UPPer_t cannot be used in virtual schema. Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation.");
+        this.expectedEx.expect(DataException.class);
+        this.expectedEx.expectMessage("Table UPPer_t cannot be used in virtual schema. Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation.");
         createVirtualSchema("FOO", PostgreSQLSqlDialect.getPublicName(), POSTGRES_CATALOG, POSTGRES_SCHEMA_UPPERCASE_TABLE, "",
                 getConfig().getPostgresqlUser(), getConfig().getPostgresqlPassword(), "ADAPTER.JDBC_ADAPTER",
                 getConfig().getPostgresqlDockerJdbcConnectionString(), IS_LOCAL, getConfig().debugAddress(), "", null, "JOIN");
@@ -193,16 +194,16 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
 
     @Test
     public void testQueryUpperCaseTableQuoted() throws SQLException, ClassNotFoundException, FileNotFoundException {
-        expectedEx.expect(DataException.class);
-        expectedEx.expectMessage("Cannot resolve column types");
+        this.expectedEx.expect(DataException.class);
+        this.expectedEx.expectMessage("Cannot resolve column types");
         final String query = String.format("SELECT x FROM  %s.\"UPPer_t\"", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
         final ResultSet result = executeQuery(query);
     }
 
     @Test
     public void testQueryUpperCaseTable() throws SQLException, ClassNotFoundException, FileNotFoundException {
-        expectedEx.expect(SQLException.class);
-        expectedEx.expectMessage("object PG_UPPER.UPPER_T not found");
+        this.expectedEx.expect(SQLException.class);
+        this.expectedEx.expectMessage("object PG_UPPER.UPPER_T not found");
         final String query = String.format("SELECT x FROM  %s.UPPer_t", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
         final ResultSet result = executeQuery(query);
     }
@@ -216,8 +217,8 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
 
     @Test
     public void testUnsetIgnoreUpperCaseTablesAndRefresh() throws SQLException, ClassNotFoundException, FileNotFoundException {
-        expectedEx.expect(DataException.class);
-        expectedEx.expectMessage("Table UPPer_t cannot be used in virtual schema. Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation.");
+        this.expectedEx.expect(DataException.class);
+        this.expectedEx.expectMessage("Table UPPer_t cannot be used in virtual schema. Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation.");
         final String alter_schema_query = String.format("ALTER VIRTUAL SCHEMA %s set ignore_errors=''", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
         execute(alter_schema_query);
         final String alter_schema_query_identifier_mapping = String.format("ALTER VIRTUAL SCHEMA %s set POSTGRESQL_IDENTIFIER_MAPPING = 'CONVERT_TO_UPPER'", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
@@ -237,8 +238,8 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     // Identifier Test - PRESERVE_ORIGINAL_CASE mode --------------------------------
     @Test
     public void testPreserveCaseQueryLowerCaseTableFails() throws SQLException, ClassNotFoundException, FileNotFoundException {
-        expectedEx.expect(SQLException.class);
-        expectedEx.expectMessage("object PG_PRESERVE_CASE.LOWER_T not found");
+        this.expectedEx.expect(SQLException.class);
+        this.expectedEx.expectMessage("object PG_PRESERVE_CASE.LOWER_T not found");
         final String query = String.format("SELECT x FROM  %s.lower_t", VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE);
         final ResultSet result = executeQuery(query);
     }
@@ -417,7 +418,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     }
 
     public void testDatatype(final String columnName, final Object expectedValue, final String expectedType) throws SQLException {
-        StringBuilder query = new StringBuilder();
+        final StringBuilder query = new StringBuilder();
         query.append("SELECT ").append(columnName);
         query.append(" FROM ").append(VIRTUAL_SCHEMA).append(".").append(POSTGRES_TABLE_DATATYPES);
         query.append(" WHERE ").append(columnName).append(" IS NOT NULL");

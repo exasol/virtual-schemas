@@ -1,57 +1,60 @@
 package com.exasol.adapter.dialects.impl;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
 import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.capabilities.PredicateCapability;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.sql.SqlNode;
-import org.junit.Test;
+
 import utils.SqlTestUtil;
 
-import static org.junit.Assert.assertEquals;
-
-public class ExasolSqlDialectTest {
-
-    @Test
-    public void testApplyQuoteIfNeeded() {
-        ExasolSqlDialect dialect = new ExasolSqlDialect(DialectTestData.getExasolDialectContext());
-        // Regular Identifiers
-        assertEquals("\"A1\"", dialect.applyQuoteIfNeeded("A1"));
-        assertEquals("\"A_1\"", dialect.applyQuoteIfNeeded("A_1"));
-        assertEquals("\"A\"", dialect.applyQuoteIfNeeded("A"));
-        
-        // Irregular Identifiers
-        assertEquals("\"A_a_1\"", dialect.applyQuoteIfNeeded("A_a_1"));
-        assertEquals("\"1\"", dialect.applyQuoteIfNeeded("1"));
-        assertEquals("\"1a\"", dialect.applyQuoteIfNeeded("1a"));
-        assertEquals("\"a\"\"b\"", dialect.applyQuoteIfNeeded("a\"b"));
+class ExasolSqlDialectTest {
+    @CsvSource({ "A1, \"A1\"", //
+            "A_1, \"A_1\"", //
+            "A,\"A\"", //
+            "A_a_1, \"A_a_1\"", //
+            "1, \"1\"", //
+            "1a, \"1a\", \"1a\"", //
+            "'a\"b', \"a\"\"b\"" })
+    @ParameterizedTest
+    void testApplyQuoteIfNeeded(final String identifier, final String expectedQuotingResult) {
+        final ExasolSqlDialect dialect = new ExasolSqlDialect(DialectTestData.getExasolDialectContext());
+        assertThat(dialect.applyQuoteIfNeeded(identifier), equalTo(expectedQuotingResult));
     }
 
     @Test
-    public void testCapabilities() {
-        // Test if EXASOL dialect really has all capabilities
-        ExasolSqlDialect dialect = new ExasolSqlDialect(DialectTestData.getExasolDialectContext());
-        Capabilities caps = dialect.getCapabilities();
-        assertEquals(PredicateCapability.values().length, caps.getPredicateCapabilities().size());
-    }
-    
-    @Test
-    public void testSqlGenerator() throws AdapterException {
-        SqlNode node = DialectTestData.getTestSqlNode();
-        String schemaName = "SCHEMA";
-        String expectedSql = "SELECT \"USER_ID\", COUNT(\"URL\") FROM \"" + schemaName + "\".\"CLICKS\"" +
-        " WHERE 1 < \"USER_ID\"" +
-        " GROUP BY \"USER_ID\"" +
-        " HAVING 1 < COUNT(\"URL\")" +
-        " ORDER BY \"USER_ID\"" +
-        " LIMIT 10";
-        SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, false);
-        SqlDialect dialect = new ExasolSqlDialect(DialectTestData.getExasolDialectContext());
-        SqlGenerationVisitor generator = dialect.getSqlGenerationVisitor(context);
-        String actualSql = node.accept(generator);
-        assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
+    void testExasolSqlDialectSupportsAllCapabilities() {
+        final ExasolSqlDialect dialect = new ExasolSqlDialect(DialectTestData.getExasolDialectContext());
+        final Capabilities capabilities = dialect.getCapabilities();
+        assertAll(() -> assertThat(capabilities.getMainCapabilities(), containsInAnyOrder(MainCapability.values())),
+                () -> assertThat(capabilities.getLiteralCapabilities(), containsInAnyOrder(LiteralCapability.values())),
+                () -> assertThat(capabilities.getPredicateCapabilities(),
+                        containsInAnyOrder(PredicateCapability.values())),
+                () -> assertThat(capabilities.getScalarFunctionCapabilities(),
+                        containsInAnyOrder(ScalarFunctionCapability.values())),
+                () -> assertThat(capabilities.getAggregateFunctionCapabilities(),
+                        containsInAnyOrder(AggregateFunctionCapability.values())));
     }
 
+    @Test
+    void testSqlGenerator() throws AdapterException {
+        final SqlNode node = DialectTestData.getTestSqlNode();
+        final String schemaName = "SCHEMA";
+        final String expectedSql = "SELECT \"USER_ID\", COUNT(\"URL\") FROM \"" + schemaName + "\".\"CLICKS\""
+                + " WHERE 1 < \"USER_ID\"" + " GROUP BY \"USER_ID\"" + " HAVING 1 < COUNT(\"URL\")"
+                + " ORDER BY \"USER_ID\"" + " LIMIT 10";
+        final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, false);
+        final SqlDialect dialect = new ExasolSqlDialect(DialectTestData.getExasolDialectContext());
+        final SqlGenerationVisitor generator = dialect.getSqlGenerationVisitor(context);
+        final String actualSql = node.accept(generator);
+        assertThat(SqlTestUtil.normalizeSql(actualSql), equalTo(SqlTestUtil.normalizeSql(expectedSql)));
+    }
 }
