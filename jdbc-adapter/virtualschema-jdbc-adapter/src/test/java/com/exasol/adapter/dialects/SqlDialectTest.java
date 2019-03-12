@@ -9,10 +9,10 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import com.exasol.adapter.capabilities.*;
 import org.junit.Test;
 
 import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
@@ -168,9 +168,13 @@ public class SqlDialectTest {
 
         @Override
         public Capabilities getCapabilities() {
-            final Capabilities caps = new Capabilities();
-            caps.supportAllCapabilities();
-            return caps;
+            final Capabilities.Builder builder = Capabilities.builder();
+            builder.addMain(MainCapability.values());
+            builder.addLiteral(LiteralCapability.values());
+            builder.addPredicate(PredicateCapability.values());
+            builder.addAggregateFunction(AggregateFunctionCapability.values());
+            builder.addScalarFunction(ScalarFunctionCapability.values());
+            return builder.build();
         }
 
         @Override
