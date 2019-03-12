@@ -8,7 +8,6 @@ import com.exasol.adapter.dialects.SqlDialectContext;
 import com.exasol.adapter.metadata.DataType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -104,7 +103,7 @@ class PostgreSQLSqlDialectTest {
     void testMapTableWithLowerCaseCharacters() throws SQLException {
         final ResultSet resultSet = mock(ResultSet.class);
         when(resultSet.getString("TABLE_NAME")).thenReturn("lower");
-        this.postgresDialect.mapTable(resultSet, Collections.emptyList());
+        assertAll(() -> this.postgresDialect.mapTable(resultSet, Collections.emptyList()));
     }
 
     @Test
@@ -114,7 +113,7 @@ class PostgreSQLSqlDialectTest {
         final List<String> ignoreList = new ArrayList<>();
         ignoreList.add("Dummy_Error");
         ignoreList.add("POSTGRESQL_UPPERCASE_TABLES");
-        this.postgresDialect.mapTable(resultSet, ignoreList);
+        assertAll(() -> this.postgresDialect.mapTable(resultSet, ignoreList));
     }
 
     @Test
