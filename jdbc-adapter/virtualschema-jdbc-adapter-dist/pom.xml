@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>com.exasol</groupId>
 			<artifactId>virtual-schema-common-java</artifactId>
-			<version>1.0.2</version>
+			<version>2.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.exasol</groupId>
