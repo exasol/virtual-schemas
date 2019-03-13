@@ -540,7 +540,11 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
             if (typeName.equals("NUMBER") && column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.VARCHAR) {
                 return true;
             } else {
-                return TYPE_NAMES_REQUIRING_CAST.contains(typeName);
+                for (String typeRequiringCast : TYPE_NAMES_REQUIRING_CAST) {
+                    if (typeName.startsWith(typeRequiringCast)) {
+                        return true;
+                    }
+                }
             }
         }
         return false;
