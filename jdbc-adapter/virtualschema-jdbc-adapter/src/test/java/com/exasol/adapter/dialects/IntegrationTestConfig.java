@@ -134,6 +134,10 @@ public class IntegrationTestConfig {
         return getProperty("oracle", "jdbcDriverPath");
     }
 
+    public String getOracleDockerJdbcConnectionString() {
+        return getProperty("oracle", "dockerConnectionString");
+    }
+
     public String getOracleJdbcConnectionString() {
         return getProperty("oracle", "connectionString");
     }

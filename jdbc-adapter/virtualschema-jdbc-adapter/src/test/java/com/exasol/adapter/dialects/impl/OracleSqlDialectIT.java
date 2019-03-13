@@ -30,7 +30,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
 
     private static final String VIRTUAL_SCHEMA_JDBC = "VS_ORACLE_JDBC";
     private static final String VIRTUAL_SCHEMA_IMPORT = "VS_ORACLE_IMPORT";
-    private static final String ORACLE_SCHEMA = "LOADER";
+    private static final String ORACLE_SCHEMA = "SYSTEM";
     private static final String TEST_TABLE = "TYPE_TEST";
 
     private static final String EXA_TABLE_JDBC = VIRTUAL_SCHEMA_JDBC + "." + TEST_TABLE;
@@ -54,14 +54,14 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
         createVirtualSchema(VIRTUAL_SCHEMA_JDBC, OracleSqlDialect.getPublicName(), "", ORACLE_SCHEMA, "",
                 getConfig().getOracleUser(), getConfig().getOraclePassword(),
                 // "ADAPTER.JDBC_ORACLE_DEBUG",
-                "ADAPTER.JDBC_ORACLE", getConfig().getOracleJdbcConnectionString(), IS_LOCAL,
+                "ADAPTER.JDBC_ADAPTER", getConfig().getOracleDockerJdbcConnectionString(), IS_LOCAL,
                 getConfig().debugAddress(), TEST_TABLE, null,"");
 
         // create IMPORT FROM ORA virtual schema
         createVirtualSchema(VIRTUAL_SCHEMA_IMPORT, OracleSqlDialect.getPublicName(), "", ORACLE_SCHEMA, "",
                 getConfig().getOracleUser(), getConfig().getOraclePassword(),
                 // "ADAPTER.JDBC_ORACLE_DEBUG",
-                "ADAPTER.JDBC_ORACLE", getConfig().getOracleJdbcConnectionString(), IS_LOCAL,
+                "ADAPTER.JDBC_ADAPTER", getConfig().getOracleDockerJdbcConnectionString(), IS_LOCAL,
                 getConfig().debugAddress(), TEST_TABLE, "IMPORT_FROM_ORA='true' ORA_CONNECTION_NAME='CONN_ORACLE'","");
     }
 
