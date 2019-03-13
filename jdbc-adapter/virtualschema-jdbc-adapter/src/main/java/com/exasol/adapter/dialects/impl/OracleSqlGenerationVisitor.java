@@ -1,10 +1,7 @@
 package com.exasol.adapter.dialects.impl;
 
 import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationHelper;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
@@ -511,8 +508,9 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         if (!isDirectlyInSelectList) {
             return projString;
         }
+        AbstractSqlDialect dialect = (AbstractSqlDialect) getDialect();
         String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        if (typeName.startsWith("TIMESTAMP") ||
+        if ((typeName.startsWith("TIMESTAMP") && dialect.getContext().getImportType() == ImportType.JDBC) ||
             typeName.startsWith("INTERVAL") ||
             typeName.equals("BINARY_FLOAT") ||
             typeName.equals("BINARY_DOUBLE") ||
