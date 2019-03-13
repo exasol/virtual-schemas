@@ -324,6 +324,7 @@ public class JdbcAdapter {
             final String pushdownQuery, final SqlDialect dialect) {
         final ExaConnectionInformation connectionInformation = JdbcAdapterProperties
                 .getConnectionInformation(meta.getProperties(), exaMeta);
+        final StringBuffer columnDescriptionBuffer = new StringBuffer();
         try {
             final Connection connection = establishConnection(connectionInformation);
             logger.fine(() -> "createColumnDescription: " + pushdownQuery);
@@ -338,32 +339,33 @@ public class JdbcAdapter {
                                 "Unable to read source metadata trying to create description for " + "source columns.");
                     }
                 }
-            }
-            final DataType[] internalTypes = new DataType[metadata.getColumnCount()];
-            for (int col = 1; col <= metadata.getColumnCount(); ++col) {
-                final int jdbcType = metadata.getColumnType(col);
-                final int jdbcPrecisions = metadata.getPrecision(col);
-                final int jdbcScales = metadata.getScale(col);
-                final JdbcTypeDescription description = new JdbcTypeDescription(jdbcType, jdbcScales, jdbcPrecisions, 0,
-                        metadata.getColumnTypeName(col));
-                internalTypes[col - 1] = dialect.mapJdbcType(description);
-            }
-            final StringBuffer buffer = new StringBuffer();
-            buffer.append('(');
-            for (int i = 0; i < internalTypes.length; i++) {
-                buffer.append("c");
-                buffer.append(i);
-                buffer.append(" ");
-                buffer.append(internalTypes[i].toString());
-                if (i < (internalTypes.length - 1)) {
-                    buffer.append(",");
-                }
-            }
 
-            buffer.append(')');
-            return buffer.toString();
+                final DataType[] internalTypes = new DataType[metadata.getColumnCount()];
+                for (int col = 1; col <= metadata.getColumnCount(); ++col) {
+                    final int jdbcType = metadata.getColumnType(col);
+                    final int jdbcPrecisions = metadata.getPrecision(col);
+                    final int jdbcScales = metadata.getScale(col);
+                    final JdbcTypeDescription description = new JdbcTypeDescription(jdbcType, jdbcScales, jdbcPrecisions, 0,
+                            metadata.getColumnTypeName(col));
+                    internalTypes[col - 1] = dialect.mapJdbcType(description);
+                }
+
+                columnDescriptionBuffer.append('(');
+                for (int i = 0; i < internalTypes.length; i++) {
+                    columnDescriptionBuffer.append("c");
+                    columnDescriptionBuffer.append(i);
+                    columnDescriptionBuffer.append(" ");
+                    columnDescriptionBuffer.append(internalTypes[i].toString());
+                    if (i < (internalTypes.length - 1)) {
+                        columnDescriptionBuffer.append(",");
+                    }
+                }
+
+                columnDescriptionBuffer.append(')');
+            }
+            return columnDescriptionBuffer.toString();
         } catch (final SQLException e) {
-            throw new RuntimeException("Cannot resolve column types.", e);
+            throw new RuntimeException("Cannot resolve column types. " + e.getMessage(), e);
         }
     }
 
