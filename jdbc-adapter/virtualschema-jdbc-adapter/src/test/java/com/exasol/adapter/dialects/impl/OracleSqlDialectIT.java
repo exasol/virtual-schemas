@@ -35,7 +35,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
 
     private static final String EXA_TABLE_JDBC = VIRTUAL_SCHEMA_JDBC + "." + TEST_TABLE;
     private static final String EXA_TABLE_IMPORT = VIRTUAL_SCHEMA_IMPORT + "." + TEST_TABLE;
-    private static final String ORA_TABLE = ORACLE_SCHEMA + "." + TEST_TABLE;
+    private static final String ORA_TABLE = ORACLE_SCHEMA + "\".\"" + TEST_TABLE;
 
     private static final boolean IS_LOCAL = false;
 
@@ -91,7 +91,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     private static void createOracleConnection() throws SQLException, FileNotFoundException {
-        final URI conn = getConfig().getOracleConnectionInformation();
+        final URI conn = getConfig().getOracleDockerConnectionInformation();
         final String connectionString = String.format(
                 "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST = %s)(PORT = %d)))(CONNECT_DATA = (SERVICE_NAME = %s)))",
                 conn.getHost(), conn.getPort(), conn.getPath().substring(1));
@@ -479,4 +479,5 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
         runMatchSingleRowExplain(query, "SELECT TO_CHAR(\"C17\") FROM \"" + ORA_TABLE + "\"");
         assertEquals("VARCHAR(2000000) UTF8", getColumnType("C17"));
     }
+
 }

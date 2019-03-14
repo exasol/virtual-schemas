@@ -143,9 +143,17 @@ public class IntegrationTestConfig {
     }
 
     public URI getOracleConnectionInformation() {
-        Matcher matcher = jdbcConnectionStringRegEx.matcher(getOracleJdbcConnectionString());
+        return getURIFor(getOracleJdbcConnectionString());
+    }
+
+    public URI getOracleDockerConnectionInformation() {
+        return getURIFor(getOracleDockerJdbcConnectionString());
+    }
+
+    public URI getURIFor(final String connectionString) {
+        Matcher matcher = jdbcConnectionStringRegEx.matcher(connectionString);
         if (!matcher.find()) {
-            throw new RuntimeException("oracle.connectionString '" + getOracleJdbcConnectionString() + "' could not be parsed");
+            throw new RuntimeException("oracle.connectionString '" + connectionString + "' could not be parsed");
         }
 
         String host = matcher.group(1);
@@ -162,7 +170,7 @@ public class IntegrationTestConfig {
         try {
             return new URI(null, null, host, port, path, null, null);
         } catch (URISyntaxException e) {
-            throw new RuntimeException("oracle.connectionString '" + getOracleJdbcConnectionString() + "' could not be parsed: " + e.getMessage());
+            throw new RuntimeException("oracle.connectionString '" + connectionString + "' could not be parsed: " + e.getMessage());
         }
     }
 

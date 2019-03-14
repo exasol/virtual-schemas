@@ -47,6 +47,10 @@ deploy_jdbc_drivers() {
 	    db_driver=$(basename $d)
 	    find $jdbc_driver_dir/$db_driver -type f -exec curl -X PUT -T {} $bucket_fs_upload_url/$db_driver/ \;
 	done
+	#curl -X PUT -T /home/sn/Downloads/instantclient-basic-linux.x64-12.1.0.2.0.zip http://w:write@127.0.0.1:6594/default/drivers/oracle/
+	#workaround for https://github.com/exasol/docker-db/issues/26
+	docker exec -d exasoldb mkdir -p /exa/data/bucketfs/default/drivers
+	docker exec -d exasoldb ln -s /exa/data/bucketfs/bfsdefault/.dest/default/drivers/jdbc /exa/data/bucketfs/default/drivers/jdbc
 }
 
 replace_hosts_with_ips_in_config() {
