@@ -33,3 +33,4 @@ oracle:
   password:               myorapwd
   dockerName:             myora
   dockerConnectionString: jdbc:oracle:thin:@DBHOST:1521/XE
+  instantclientDir:       /home/sn/Downloads/
