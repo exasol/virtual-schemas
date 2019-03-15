@@ -1,16 +1,16 @@
 package com.exasol.adapter.dialects.impl;
 
-import java.sql.SQLException;
-
-import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionInformation;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.ScalarFunction;
 
+import java.sql.SQLException;
+
 /**
  * This class is work-in-progress
- *
+ * <p>
  * TODO The precision of interval type columns is hardcoded, because it cannot
  * be retrieved via JDBC. Should be retrieved from system table.<br>
  * TODO The srid of geometry type columns is hardcoded, because it cannot be
@@ -78,10 +78,13 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Capabilities getCapabilities() {
-        // Supports all capabilities
-        final Capabilities cap = new Capabilities();
-        cap.supportAllCapabilities();
-        return cap;
+        final Capabilities.Builder builder = Capabilities.builder();
+        builder.addMain(MainCapability.values());
+        builder.addLiteral(LiteralCapability.values());
+        builder.addPredicate(PredicateCapability.values());
+        builder.addAggregateFunction(AggregateFunctionCapability.values());
+        builder.addScalarFunction(ScalarFunctionCapability.values());
+        return builder.build();
     }
 
     @Override
@@ -135,7 +138,8 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription, final String pushdownSql) {
+    public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription,
+          final String pushdownSql) {
         final ImportType importType = getContext().getImportType();
         if (importType == ImportType.JDBC) {
             return super.generatePushdownSql(connectionInformation, columnDescription, pushdownSql);
@@ -146,7 +150,8 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
                 throw new AssertionError("ExasolSqlDialect has wrong ImportType");
             }
             final StringBuilder exasolImportQuery = new StringBuilder();
-            exasolImportQuery.append("IMPORT FROM EXA AT '").append(connectionInformation.getExaConnectionString()).append("' ");
+            exasolImportQuery.append("IMPORT FROM EXA AT '").append(connectionInformation.getExaConnectionString())
+                  .append("' ");
             exasolImportQuery.append(connectionInformation.getCredentials());
             exasolImportQuery.append(" STATEMENT '").append(pushdownSql.replace("'", "''")).append("'");
             return exasolImportQuery.toString();

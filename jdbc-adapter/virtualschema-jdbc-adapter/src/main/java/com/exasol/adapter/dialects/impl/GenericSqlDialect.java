@@ -1,7 +1,5 @@
 package com.exasol.adapter.dialects.impl;
 
-import java.sql.SQLException;
-
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.AbstractSqlDialect;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
@@ -9,6 +7,8 @@ import com.exasol.adapter.dialects.SqlDialectContext;
 import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 import com.exasol.adapter.metadata.DataType;
+
+import java.sql.SQLException;
 
 /**
  * This dialect can be used for data sources where a custom dialect
@@ -28,8 +28,8 @@ public class GenericSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Capabilities getCapabilities() {
-        final Capabilities cap = new Capabilities();
-        return cap;
+        final Capabilities.Builder builder = Capabilities.builder();
+        return builder.build();
     }
 
     @Override
@@ -58,7 +58,7 @@ public class GenericSqlDialect extends AbstractSqlDialect {
                 return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
             } else {
                 throw new RuntimeException(
-                        "Unexpected quote behavior. Adapternotes: " + SchemaAdapterNotes.serialize(adapterNotes));
+                      "Unexpected quote behavior. Adapternotes: " + SchemaAdapterNotes.serialize(adapterNotes));
             }
         }
     }
@@ -79,7 +79,7 @@ public class GenericSqlDialect extends AbstractSqlDialect {
                 return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
             } else {
                 throw new RuntimeException(
-                        "Unexpected quote behavior. Adapternotes: " + SchemaAdapterNotes.serialize(adapterNotes));
+                      "Unexpected quote behavior. Adapternotes: " + SchemaAdapterNotes.serialize(adapterNotes));
             }
         }
     }

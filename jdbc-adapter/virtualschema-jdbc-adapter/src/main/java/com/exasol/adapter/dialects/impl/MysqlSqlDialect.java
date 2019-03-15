@@ -1,7 +1,5 @@
 package com.exasol.adapter.dialects.impl;
 
-import java.sql.SQLException;
-
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.AbstractSqlDialect;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
@@ -9,9 +7,11 @@ import com.exasol.adapter.dialects.SqlDialectContext;
 import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.metadata.DataType;
 
+import java.sql.SQLException;
+
 /**
  * Dialect for MySQL using the MySQL Connector jdbc driver.
- *
+ * <p>
  * TODO Finish implementation of this dialect and add as a supported dialect
  */
 public class MysqlSqlDialect extends AbstractSqlDialect {
@@ -27,8 +27,8 @@ public class MysqlSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Capabilities getCapabilities() {
-        final Capabilities cap = new Capabilities();
-        return cap;
+        final Capabilities.Builder builder = Capabilities.builder();
+        return builder.build();
     }
 
     @Override
