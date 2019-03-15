@@ -1,23 +1,20 @@
 package com.exasol.adapter.dialects.impl;
 
+import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.metadata.DataType;
+
 import java.sql.SQLException;
 
-import com.exasol.adapter.capabilities.AggregateFunctionCapability;
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.capabilities.LiteralCapability;
-import com.exasol.adapter.capabilities.MainCapability;
-import com.exasol.adapter.capabilities.PredicateCapability;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
-import com.exasol.adapter.metadata.DataType;
+import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
+import static com.exasol.adapter.capabilities.LiteralCapability.*;
+import static com.exasol.adapter.capabilities.MainCapability.*;
+import static com.exasol.adapter.capabilities.PredicateCapability.*;
 
 /**
  * Dialect for Impala, using the Cloudera Impala JDBC Driver/Connector
  * (developed by Simba).
- *
+ * <p>
  * See
  * http://www.cloudera.com/documentation/enterprise/latest/topics/impala_langref.html
  */
@@ -34,63 +31,18 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Capabilities getCapabilities() {
-        // Main capabilities
-        final Capabilities cap = new Capabilities();
-        cap.supportMainCapability(MainCapability.SELECTLIST_PROJECTION);
-        cap.supportMainCapability(MainCapability.SELECTLIST_EXPRESSIONS);
-        cap.supportMainCapability(MainCapability.FILTER_EXPRESSIONS);
-        cap.supportMainCapability(MainCapability.AGGREGATE_SINGLE_GROUP);
-        cap.supportMainCapability(MainCapability.AGGREGATE_GROUP_BY_COLUMN);
-        cap.supportMainCapability(MainCapability.AGGREGATE_GROUP_BY_EXPRESSION);
-        cap.supportMainCapability(MainCapability.AGGREGATE_GROUP_BY_TUPLE);
-        cap.supportMainCapability(MainCapability.AGGREGATE_HAVING);
-        cap.supportMainCapability(MainCapability.ORDER_BY_COLUMN);
-        cap.supportMainCapability(MainCapability.ORDER_BY_EXPRESSION);
-        cap.supportMainCapability(MainCapability.LIMIT);
-        cap.supportMainCapability(MainCapability.LIMIT_WITH_OFFSET);
-
-        // Literals
-        cap.supportLiteral(LiteralCapability.STRING);
-        cap.supportLiteral(LiteralCapability.BOOL);
-        cap.supportLiteral(LiteralCapability.EXACTNUMERIC);
-        cap.supportLiteral(LiteralCapability.DOUBLE);
-        cap.supportLiteral(LiteralCapability.NULL);
+        final Capabilities.Builder builder = Capabilities.builder();
+        builder.addMain(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS, AGGREGATE_SINGLE_GROUP,
+              AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_GROUP_BY_EXPRESSION, AGGREGATE_GROUP_BY_TUPLE, AGGREGATE_HAVING,
+              ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT, LIMIT_WITH_OFFSET);
+        builder.addLiteral(NULL, DOUBLE, EXACTNUMERIC, STRING, BOOL);
         // TODO Implement timestamp literal
-
-        // Predicates
-        cap.supportPredicate(PredicateCapability.AND);
-        cap.supportPredicate(PredicateCapability.OR);
-        cap.supportPredicate(PredicateCapability.NOT);
-        cap.supportPredicate(PredicateCapability.EQUAL);
-        cap.supportPredicate(PredicateCapability.NOTEQUAL);
-        cap.supportPredicate(PredicateCapability.LESS);
-        cap.supportPredicate(PredicateCapability.LESSEQUAL);
-        cap.supportPredicate(PredicateCapability.LIKE);
-        // LIKE_ESCAPE is not supported
-        cap.supportPredicate(PredicateCapability.REGEXP_LIKE);
-        cap.supportPredicate(PredicateCapability.BETWEEN);
-        cap.supportPredicate(PredicateCapability.IN_CONSTLIST);
-        cap.supportPredicate(PredicateCapability.IS_NULL);
-        cap.supportPredicate(PredicateCapability.IS_NOT_NULL);
-
-        // Aggregate Functions
-        // Unsupported by EXASOL: APPX_MEDIAN (approximate median)
-        // With Alias: NDV (approximate count distinct)
-        cap.supportAggregateFunction(AggregateFunctionCapability.AVG);
-        cap.supportAggregateFunction(AggregateFunctionCapability.COUNT);
-        cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_STAR);
-        cap.supportAggregateFunction(AggregateFunctionCapability.COUNT_DISTINCT);
-        // GROUP_CONCAT with DISTINCT not supported
-        cap.supportAggregateFunction(AggregateFunctionCapability.GROUP_CONCAT);
-        cap.supportAggregateFunction(AggregateFunctionCapability.GROUP_CONCAT_SEPARATOR);
-        cap.supportAggregateFunction(AggregateFunctionCapability.MAX);
-        cap.supportAggregateFunction(AggregateFunctionCapability.MIN);
-        cap.supportAggregateFunction(AggregateFunctionCapability.SUM);
-        cap.supportAggregateFunction(AggregateFunctionCapability.SUM_DISTINCT);
-
+        builder.addPredicate(AND, OR, NOT, EQUAL, NOTEQUAL, LESS, LESSEQUAL, LIKE, REGEXP_LIKE, BETWEEN, IN_CONSTLIST,
+              IS_NULL, IS_NOT_NULL);
+        builder.addAggregateFunction(COUNT, COUNT_STAR, COUNT_DISTINCT, GROUP_CONCAT, GROUP_CONCAT_SEPARATOR, SUM,
+              SUM_DISTINCT, MIN, MAX, AVG);
         // TODO Scalar Functions
-
-        return cap;
+        return builder.build();
     }
 
     @Override
@@ -122,15 +74,11 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuote(final String identifier) {
-        // If identifier contains double quotation marks ", it needs to be espaced by
-        // another double quotation mark. E.g. "a""b" is the identifier a"b in the db.
         return "`" + identifier + "`";
     }
 
     @Override
     public String applyQuoteIfNeeded(final String identifier) {
-        // We need to apply quotes only in case of reserved keywords. Since we don't
-        // know these (could look up in JDBC Metadata...) we always quote.
         return applyQuote(identifier);
     }
 
@@ -146,7 +94,6 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
         // and b) if we don't have the schema in the jdbc connection string (like
         // "jdbc:exa:localhost:5555;schema=native")
         return true;
-        // return context.isLocal();
     }
 
     @Override
@@ -173,7 +120,6 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String getStringLiteral(final String value) {
-        // Don't forget to escape single quote
         return "'" + value.replace("'", "''") + "'";
     }
 

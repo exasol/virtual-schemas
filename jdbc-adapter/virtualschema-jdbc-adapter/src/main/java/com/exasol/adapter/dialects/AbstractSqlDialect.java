@@ -110,12 +110,11 @@ public abstract class AbstractSqlDialect implements SqlDialect {
             columnTypeName = "";
         }
         final String adapterNotes = ColumnAdapterNotes.serialize(new ColumnAdapterNotes(jdbcType, columnTypeName));
-        ;
         return new ColumnMetadata(colName, adapterNotes, colType, isNullable, isIdentity, defaultValue, comment);
     }
 
     private static DataType getExaTypeFromJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
-        DataType colType;
+        final DataType colType;
         switch (jdbcTypeDescription.getJdbcType()) {
         case Types.TINYINT:
         case Types.SMALLINT:
@@ -304,7 +303,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     };
 
     @Override
-    public String generatePushdownSql(ConnectionInformation connectionInformation, String columnDescription, String pushdownSql) {
+    public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription, final String pushdownSql) {
         final StringBuilder jdbcImportQuery = new StringBuilder();
         if (columnDescription == null) {
             jdbcImportQuery.append("IMPORT FROM JDBC AT ").append(connectionInformation.getCredentials());

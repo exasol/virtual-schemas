@@ -194,7 +194,7 @@ public class JdbcAdapter {
     private static Capabilities parseExcludedCapabilities(final String excludedCapabilitiesStr) {
         logger.info(() -> "Excluded Capabilities: "
                 + (excludedCapabilitiesStr.isEmpty() ? "none" : excludedCapabilitiesStr));
-        final Capabilities excludedCapabilities = new Capabilities();
+        final Capabilities.Builder builder = Capabilities.builder();
         for (String capability : excludedCapabilitiesStr.split(",")) {
             capability = capability.trim();
             if (capability.isEmpty()) {
@@ -202,23 +202,21 @@ public class JdbcAdapter {
             }
             if (capability.startsWith(ResponseJsonSerializer.LITERAL_PREFIX)) {
                 final String literalCap = capability.replaceFirst(ResponseJsonSerializer.LITERAL_PREFIX, "");
-                excludedCapabilities.supportLiteral(LiteralCapability.valueOf(literalCap));
+                builder.addLiteral(LiteralCapability.valueOf(literalCap));
             } else if (capability.startsWith(ResponseJsonSerializer.AGGREGATE_FUNCTION_PREFIX)) {
                 // Aggregate functions must be checked before scalar functions
                 final String aggregateFunctionCap = capability
                         .replaceFirst(ResponseJsonSerializer.AGGREGATE_FUNCTION_PREFIX, "");
-                excludedCapabilities
-                        .supportAggregateFunction(AggregateFunctionCapability.valueOf(aggregateFunctionCap));
+                builder.addAggregateFunction(AggregateFunctionCapability.valueOf(aggregateFunctionCap));
             } else if (capability.startsWith(ResponseJsonSerializer.SCALAR_FUNCTION_PREFIX)) {
                 final String scalarFunctionCap = capability.replaceFirst(ResponseJsonSerializer.SCALAR_FUNCTION_PREFIX,
                         "");
-                excludedCapabilities.supportScalarFunction(ScalarFunctionCapability.valueOf(scalarFunctionCap));
+                builder.addScalarFunction(ScalarFunctionCapability.valueOf(scalarFunctionCap));
             } else {
-                // High Level Capability
-                excludedCapabilities.supportMainCapability(MainCapability.valueOf(capability));
+                builder.addMain(MainCapability.valueOf(capability));
             }
         }
-        return excludedCapabilities;
+        return builder.build();
     }
 
     private static String handlePushdownRequest(final PushdownRequest request, final ExaMetadata exaMeta)
