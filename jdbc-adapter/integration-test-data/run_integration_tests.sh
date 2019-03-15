@@ -59,6 +59,7 @@ replace_hosts_with_ips_in_config() {
 
 start_remote_dbs() {
 	$docker_helper --run $config
+	sleep 10
 }
 
 cleanup_remote_dbs() {
