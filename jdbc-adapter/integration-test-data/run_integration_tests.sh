@@ -61,7 +61,7 @@ deploy_jdbc_drivers() {
 	instantclient_dir=$(awk '/instantclientDir/{print $NF}' $config)
 	instantclient_path=$instantclient_dir/instantclient-basic-linux.x64-12.1.0.2.0.zip
 	if [ -f $instantclient_path ]; then
-	    curl -X PUT -T $instantclient_path $bucket_fs_upload_url/drivers/oracle/
+	    curl -X PUT -T $instantclient_path $bucket_fs_upload_url/oracle/
 	fi
 	#workaround for https://github.com/exasol/docker-db/issues/26
 	docker exec -d exasoldb mkdir -p /exa/data/bucketfs/default/drivers
