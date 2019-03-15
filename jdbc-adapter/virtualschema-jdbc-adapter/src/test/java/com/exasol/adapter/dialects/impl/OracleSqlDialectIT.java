@@ -57,14 +57,14 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
                 getConfig().getOracleUser(), getConfig().getOraclePassword(),
                 // "ADAPTER.JDBC_ORACLE_DEBUG",
                 "ADAPTER.JDBC_ADAPTER", getConfig().getOracleDockerJdbcConnectionString(), IS_LOCAL,
-                getConfig().debugAddress(), TEST_TABLE, null,"");
+                getConfig().debugAddress(), "", null,"");
 
         // create IMPORT FROM ORA virtual schema
         createVirtualSchema(VIRTUAL_SCHEMA_ORA, OracleSqlDialect.getPublicName(), "", ORACLE_SCHEMA, "",
                 getConfig().getOracleUser(), getConfig().getOraclePassword(),
                 // "ADAPTER.JDBC_ORACLE_DEBUG",
                 "ADAPTER.JDBC_ADAPTER", getConfig().getOracleDockerJdbcConnectionString(), IS_LOCAL,
-                getConfig().debugAddress(), TEST_TABLE, "IMPORT_FROM_ORA='true' ORA_CONNECTION_NAME='CONN_ORACLE'","");
+                getConfig().debugAddress(), "", "IMPORT_FROM_ORA='true' ORA_CONNECTION_NAME='CONN_ORACLE'","");
     }
 
     private static void createOracleJDBCAdapter() throws SQLException, FileNotFoundException {
@@ -541,4 +541,12 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
         assertEquals("VARCHAR(2000000) UTF8", getColumnType("C17"));
     }
 
+    @Test
+    public void testSelectAllTimestampColumns() throws SQLException {
+        final String query = "SELECT * FROM %s.%s";
+        ResultSet resultJDBC = runQueryJDBC(String.format(query, VIRTUAL_SCHEMA_JDBC, "TS_T"));
+        matchNextRow(resultJDBC, "01-JAN-18 11.00.00.000000 AM", "01-JAN-18 10.00.00.000000 AM", "01-JAN-18 11.00.00.000000 AM EUROPE/BERLIN");
+        ResultSet resultORA = runQueryORA(String.format(query, VIRTUAL_SCHEMA_ORA, "TS_T"));
+        matchNextRow(resultORA,Timestamp.valueOf("2018-01-01 11:00:00.000"), Timestamp.valueOf("2018-01-01 11:00:00.000"), Timestamp.valueOf("2018-01-01 11:00:00.000"));
+    }
 }
