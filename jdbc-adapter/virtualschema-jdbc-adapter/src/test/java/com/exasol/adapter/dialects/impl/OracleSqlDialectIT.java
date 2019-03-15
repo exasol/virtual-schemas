@@ -543,10 +543,11 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
 
     @Test
     public void testSelectAllTimestampColumns() throws SQLException {
+        executeUpdate("ALTER SESSION SET TIME_ZONE = 'UTC'");
         final String query = "SELECT * FROM %s.%s";
         ResultSet resultJDBC = runQueryJDBC(String.format(query, VIRTUAL_SCHEMA_JDBC, "TS_T"));
-        matchNextRow(resultJDBC, "01-JAN-18 11.00.00.000000 AM", "01-JAN-18 10.00.00.000000 AM", "01-JAN-18 11.00.00.000000 AM EUROPE/BERLIN");
+        matchNextRow(resultJDBC, "01-JAN-18 11.00.00.000000 AM", "01-JAN-18 10.00.00.000000 AM", "01-JAN-18 11.00.00.000000 AM +01:00");
         ResultSet resultORA = runQueryORA(String.format(query, VIRTUAL_SCHEMA_ORA, "TS_T"));
-        matchNextRow(resultORA,Timestamp.valueOf("2018-01-01 11:00:00.000"), Timestamp.valueOf("2018-01-01 11:00:00.000"), Timestamp.valueOf("2018-01-01 11:00:00.000"));
+        matchNextRow(resultORA,Timestamp.valueOf("2018-01-01 11:00:00.000"), Timestamp.valueOf("2018-01-01 10:00:00.000"), Timestamp.valueOf("2018-01-01 10:00:00.000"));
     }
 }
