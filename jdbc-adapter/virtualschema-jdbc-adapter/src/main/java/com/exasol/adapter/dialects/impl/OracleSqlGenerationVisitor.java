@@ -508,8 +508,8 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         if (!isDirectlyInSelectList) {
             return projString;
         }
-        AbstractSqlDialect dialect = (AbstractSqlDialect) getDialect();
-        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+        final AbstractSqlDialect dialect = (AbstractSqlDialect) getDialect();
+        final String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
         if ((typeName.startsWith("TIMESTAMP") && dialect.getContext().getImportType() == ImportType.JDBC) ||
             typeName.startsWith("INTERVAL") ||
             typeName.equals("BINARY_FLOAT") ||
@@ -538,7 +538,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
             if (typeName.equals("NUMBER") && column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.VARCHAR) {
                 return true;
             } else {
-                for (String typeRequiringCast : TYPE_NAMES_REQUIRING_CAST) {
+                for (final String typeRequiringCast : TYPE_NAMES_REQUIRING_CAST) {
                     if (typeName.startsWith(typeRequiringCast)) {
                         return true;
                     }
