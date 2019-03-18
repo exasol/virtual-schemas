@@ -226,7 +226,8 @@
                             }
                         ],
                         "type": "select"
-                    }
+                    },
+                    "type" : "pushdown"
                 }
             ],
             "expectedPushdownResponse": {
@@ -454,7 +455,8 @@
                             }
                         ],
                         "type": "select"
-                    }
+                    },
+                    "type" : "pushdown"
                 }
             ],
             "expectedPushdownResponse": {
@@ -523,7 +525,8 @@
                                 "type": "column"
                             }
                         ]
-                    }
+                    },
+                    "type" : "pushdown"
                 },
                 {
                     "involvedTables": [
@@ -580,7 +583,8 @@
                                 "type": "column"
                             }
                         ]
-                    }
+                    },
+                    "type" : "pushdown"
                 },
                 {
                     "involvedTables": [
@@ -637,7 +641,8 @@
                                 "type": "column"
                             }
                         ]
-                    }
+                    },
+                    "type" : "pushdown"
                 },
                 {
                     "involvedTables": [
@@ -688,7 +693,8 @@
                                 "type": "column"
                             }
                         ]
-                    }
+                    },
+                    "type" : "pushdown"
                 }
             ],
             "expectedPushdownResponse": {
@@ -939,7 +945,8 @@
                             }
                         ],
                         "type": "select"
-                    }
+                    },
+                    "type" : "pushdown"
                 }
             ],
             "expectedPushdownResponse": {
@@ -1112,7 +1119,8 @@
                             }
                         ],
                         "type": "select"
-                    }
+                    },
+                    "type" : "pushdown"
                 }
             ],
             "expectedPushdownResponse": {
@@ -1176,7 +1184,8 @@
                             }
                         ],
                         "type": "select"
-                    }
+                    },
+                    "type" : "pushdown"
                 },
                 {
                     "pushdownRequest": {
@@ -1222,7 +1231,8 @@
                             }
                         ],
                         "type": "select"
-                    }
+                    },
+                    "type" : "pushdown"
                 }
             ],
             "expectedPushdownResponse": {
