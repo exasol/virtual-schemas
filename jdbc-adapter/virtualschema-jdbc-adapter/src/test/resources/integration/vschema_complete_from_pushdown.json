@@ -1135,6 +1135,72 @@
             "testDescription": "Some queries are not pushed as written because Exasol places subqueries in them",
             "expectedPushdownRequest": [
                 {
+                    "involvedTables": [
+                        {
+                            "columns": [
+                                {
+                                    "adapterNotes": "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType": {
+                                        "precision": 18,
+                                        "scale": 0,
+                                        "type": "DECIMAL"
+                                    },
+                                    "name": "C1_1"
+                                },
+                                {
+                                    "adapterNotes": "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType": {
+                                        "precision": 18,
+                                        "scale": 0,
+                                        "type": "DECIMAL"
+                                    },
+                                    "name": "C1_2"
+                                },
+                                {
+                                    "adapterNotes": "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType": {
+                                        "precision": 18,
+                                        "scale": 0,
+                                        "type": "DECIMAL"
+                                    },
+                                    "name": "C1_3"
+                                }
+                            ],
+                            "name": "T1"
+                        },
+                        {
+                            "columns": [
+                                {
+                                    "adapterNotes": "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType": {
+                                        "precision": 18,
+                                        "scale": 0,
+                                        "type": "DECIMAL"
+                                    },
+                                    "name": "C2_1"
+                                },
+                                {
+                                    "adapterNotes": "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType": {
+                                        "precision": 18,
+                                        "scale": 0,
+                                        "type": "DECIMAL"
+                                    },
+                                    "name": "C2_2"
+                                },
+                                {
+                                    "adapterNotes": "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType": {
+                                        "precision": 18,
+                                        "scale": 0,
+                                        "type": "DECIMAL"
+                                    },
+                                    "name": "C2_3"
+                                }
+                            ],
+                            "name": "T2"
+                        }
+                    ],
                     "pushdownRequest": {
                         "from": {
                             "condition": {
@@ -1188,6 +1254,72 @@
                     "type" : "pushdown"
                 },
                 {
+                    "involvedTables": [
+                        {
+                            "columns": [
+                                {
+                                    "adapterNotes": "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType": {
+                                        "precision": 18,
+                                        "scale": 0,
+                                        "type": "DECIMAL"
+                                    },
+                                    "name": "C3_1"
+                                },
+                                {
+                                    "adapterNotes": "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType": {
+                                        "precision": 18,
+                                        "scale": 0,
+                                        "type": "DECIMAL"
+                                    },
+                                    "name": "C3_2"
+                                },
+                                {
+                                    "adapterNotes": "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType": {
+                                        "precision": 18,
+                                        "scale": 0,
+                                        "type": "DECIMAL"
+                                    },
+                                    "name": "C3_3"
+                                }
+                            ],
+                            "name": "T3"
+                        },
+                        {
+                            "columns": [
+                                {
+                                    "adapterNotes": "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType": {
+                                        "precision": 18,
+                                        "scale": 0,
+                                        "type": "DECIMAL"
+                                    },
+                                    "name": "C4_1"
+                                },
+                                {
+                                    "adapterNotes": "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType": {
+                                        "precision": 18,
+                                        "scale": 0,
+                                        "type": "DECIMAL"
+                                    },
+                                    "name": "C4_2"
+                                },
+                                {
+                                    "adapterNotes": "{\"jdbcDataType\":3,\"typeName\":\"DECIMAL\"}",
+                                    "dataType": {
+                                        "precision": 18,
+                                        "scale": 0,
+                                        "type": "DECIMAL"
+                                    },
+                                    "name": "C4_3"
+                                }
+                            ],
+                            "name": "T4"
+                        }
+                    ],
                     "pushdownRequest": {
                         "from": {
                             "condition": {
