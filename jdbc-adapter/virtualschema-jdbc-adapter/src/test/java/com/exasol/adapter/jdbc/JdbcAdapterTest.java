@@ -3,6 +3,7 @@ package com.exasol.adapter.jdbc;
 import com.exasol.ExaConnectionAccessException;
 import com.exasol.ExaConnectionInformation;
 import com.exasol.ExaMetadata;
+import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.metadata.SchemaMetadataInfo;
 import org.junit.Before;
 import org.junit.Test;
@@ -104,5 +105,14 @@ public class JdbcAdapterTest {
         final String credentials = JdbcAdapter
               .getCredentialsForPushdownQuery(this.exaMetadata, exaSchemaMetadataInfoConnectionStringUserPassword);
         assertEquals("USER 'testUsername' IDENTIFIED BY 'testPassword'", credentials);
+    }
+
+    @Test
+    public void buildColumnDescription() {
+        DataType[] types = new DataType[3];
+        types[0] = DataType.createBool();
+        types[1] = DataType.createDecimal(10,2);
+        types[2] = DataType.createTimestamp(false);
+        assertEquals("(c0 BOOLEAN,c1 DECIMAL(10, 2),c2 TIMESTAMP)", JdbcAdapter.buildColumnDescriptionFrom(types));
     }
 }

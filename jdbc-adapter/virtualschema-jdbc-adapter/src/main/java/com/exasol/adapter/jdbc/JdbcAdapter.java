@@ -322,13 +322,12 @@ public class JdbcAdapter {
             final String pushdownQuery, final SqlDialect dialect) {
         final ExaConnectionInformation connectionInformation = JdbcAdapterProperties
                 .getConnectionInformation(meta.getProperties(), exaMeta);
-        final StringBuffer columnDescriptionBuffer = new StringBuffer();
         try {
             final Connection connection = establishConnection(connectionInformation);
             logger.fine(() -> "createColumnDescription: " + pushdownQuery);
-            ResultSetMetaData metadata = null;
+            DataType[] internalTypes = null;
             try (final PreparedStatement ps = connection.prepareStatement(pushdownQuery)) {
-                metadata = ps.getMetaData();
+                ResultSetMetaData metadata = ps.getMetaData();
                 if (metadata == null) {
                     ps.execute();
                     metadata = ps.getMetaData();
@@ -338,7 +337,7 @@ public class JdbcAdapter {
                     }
                 }
 
-                final DataType[] internalTypes = new DataType[metadata.getColumnCount()];
+                internalTypes = new DataType[metadata.getColumnCount()];
                 for (int col = 1; col <= metadata.getColumnCount(); ++col) {
                     final int jdbcType = metadata.getColumnType(col);
                     final int jdbcPrecisions = metadata.getPrecision(col);
@@ -347,24 +346,27 @@ public class JdbcAdapter {
                             metadata.getColumnTypeName(col));
                     internalTypes[col - 1] = dialect.mapJdbcType(description);
                 }
-
-                columnDescriptionBuffer.append('(');
-                for (int i = 0; i < internalTypes.length; i++) {
-                    columnDescriptionBuffer.append("c");
-                    columnDescriptionBuffer.append(i);
-                    columnDescriptionBuffer.append(" ");
-                    columnDescriptionBuffer.append(internalTypes[i].toString());
-                    if (i < (internalTypes.length - 1)) {
-                        columnDescriptionBuffer.append(",");
-                    }
-                }
-
-                columnDescriptionBuffer.append(')');
             }
-            return columnDescriptionBuffer.toString();
+            return buildColumnDescriptionFrom(internalTypes);
         } catch (final SQLException e) {
-            throw new RuntimeException("Cannot resolve column types. " + e.getMessage(), e);
+            throw new RetrieveMetadataException("Cannot resolve column types. " + e.getMessage(), e);
         }
+    }
+
+    protected static String buildColumnDescriptionFrom(DataType[] internalTypes) {
+        final StringBuilder columnDescription = new StringBuilder();
+        columnDescription.append('(');
+        for (int i = 0; i < internalTypes.length; i++) {
+            columnDescription.append("c");
+            columnDescription.append(i);
+            columnDescription.append(" ");
+            columnDescription.append(internalTypes[i].toString());
+            if (i < (internalTypes.length - 1)) {
+                columnDescription.append(",");
+            }
+        }
+        columnDescription.append(')');
+        return columnDescription.toString();
     }
 
     private static Connection establishConnection(final ExaConnectionInformation connection) throws SQLException {
