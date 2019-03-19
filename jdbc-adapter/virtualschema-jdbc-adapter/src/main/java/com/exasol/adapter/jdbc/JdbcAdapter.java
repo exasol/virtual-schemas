@@ -339,11 +339,7 @@ public class JdbcAdapter {
 
                 internalTypes = new DataType[metadata.getColumnCount()];
                 for (int col = 1; col <= metadata.getColumnCount(); ++col) {
-                    final int jdbcType = metadata.getColumnType(col);
-                    final int jdbcPrecisions = metadata.getPrecision(col);
-                    final int jdbcScales = metadata.getScale(col);
-                    final JdbcTypeDescription description = new JdbcTypeDescription(jdbcType, jdbcScales, jdbcPrecisions, 0,
-                            metadata.getColumnTypeName(col));
+                    final JdbcTypeDescription description = getJdbcTypeDescription(metadata, col);
                     internalTypes[col - 1] = dialect.mapJdbcType(description);
                 }
             }
@@ -351,6 +347,14 @@ public class JdbcAdapter {
         } catch (final SQLException e) {
             throw new RetrieveMetadataException("Cannot resolve column types. " + e.getMessage(), e);
         }
+    }
+
+    protected static JdbcTypeDescription getJdbcTypeDescription(ResultSetMetaData metadata, int col) throws SQLException {
+        final int jdbcType = metadata.getColumnType(col);
+        final int jdbcPrecisions = metadata.getPrecision(col);
+        final int jdbcScales = metadata.getScale(col);
+        return new JdbcTypeDescription(jdbcType, jdbcScales, jdbcPrecisions, 0,
+                metadata.getColumnTypeName(col));
     }
 
     protected static String buildColumnDescriptionFrom(DataType[] internalTypes) {
