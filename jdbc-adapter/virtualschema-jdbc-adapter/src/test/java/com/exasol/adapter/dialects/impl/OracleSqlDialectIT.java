@@ -549,11 +549,14 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
         matchNextRow(resultJDBC, "01-JAN-18 11.00.00.000000 AM", "01-JAN-18 10.00.00.000000 AM", "01-JAN-18 11.00.00.000000 AM +01:00");
         ResultSet resultORA = runQueryORA(String.format(query, VIRTUAL_SCHEMA_ORA, "TS_T"));
         matchNextRow(resultORA,Timestamp.valueOf("2018-01-01 11:00:00.000"), Timestamp.valueOf("2018-01-01 10:00:00.000"), Timestamp.valueOf("2018-01-01 10:00:00.000"));
-        assertEquals("VARCHAR(2000000) UTF8", getColumnTypeJDBC("A"));
-        assertEquals("VARCHAR(2000000) UTF8", getColumnTypeORA("A"));
-        assertEquals("VARCHAR(2000000) UTF8", getColumnTypeJDBC("B"));
-        assertEquals("VARCHAR(2000000) UTF8", getColumnTypeORA("B"));
-        assertEquals("VARCHAR(2000000) UTF8", getColumnTypeJDBC("C"));
-        assertEquals("VARCHAR(2000000) UTF8", getColumnTypeORA("C"));
+        Map<String, String> columnTypesJDBC = getColumnTypesOfTable(VIRTUAL_SCHEMA_JDBC + ".TS_T");
+        Map<String, String> columnTypesORA = getColumnTypesOfTable(VIRTUAL_SCHEMA_ORA + ".TS_T");
+
+        assertEquals("TIMESTAMP", columnTypesJDBC.get("A"));
+        assertEquals("TIMESTAMP", columnTypesORA.get("A"));
+        assertEquals("VARCHAR(2000000) UTF8",  columnTypesJDBC.get("B"));
+        assertEquals("VARCHAR(2000000) UTF8", columnTypesORA.get("B"));
+        assertEquals("VARCHAR(2000000) UTF8",  columnTypesJDBC.get("C"));
+        assertEquals("VARCHAR(2000000) UTF8", columnTypesORA.get("C"));
     }
 }

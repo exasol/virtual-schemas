@@ -2,6 +2,7 @@ package com.exasol.adapter.dialects.impl;
 
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.ConnectionInformation;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
@@ -201,6 +202,23 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     @Override
     public String getStringLiteral(final String value) {
         return "'" + value.replace("'", "''") + "'";
+    }
+
+    @Override
+    public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription, final String pushdownSql) {
+        final ImportType importType = getContext().getImportType();
+        if (importType == ImportType.JDBC) {
+            return super.generatePushdownSql(connectionInformation, columnDescription, pushdownSql);
+        } else {
+            if ((importType != ImportType.ORA)) {
+                throw new AssertionError("OracleSqlDialect has wrong ImportType");
+            }
+            final StringBuilder oracleImportQuery = new StringBuilder();
+            oracleImportQuery.append("IMPORT FROM ORA AT ").append(connectionInformation.getOraConnectionName()).append(" ");
+            oracleImportQuery.append(connectionInformation.getCredentials());
+            oracleImportQuery.append(" STATEMENT '").append(pushdownSql.replace("'", "''")).append("'");
+            return oracleImportQuery.toString();
+        }
     }
 
 }
