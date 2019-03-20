@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.impl;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.FileNotFoundException;
@@ -82,6 +83,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
     private static final String TEST_SCHEMA_MIXED_CASE = "NATIVE_EXA_IT_Mixed_Case";
     private static final String VIRTUAL_SCHEMA = "VS_EXA_IT";
     private static final String VIRTUAL_SCHEMA_MIXED_CASE = "VS_EXA_IT_MIXED_CASE";
+    private static final String VIRTUAL_SCHEMA_JDBC = "VS_EXA_IT_JDBC";
     private static final boolean IS_LOCAL = true;
 
     @BeforeClass
@@ -102,6 +104,9 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         createVirtualSchema(VIRTUAL_SCHEMA_MIXED_CASE, ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA_MIXED_CASE, "",
                 getConfig().getExasolUser(), getConfig().getExasolPassword(), "ADAPTER.JDBC_ADAPTER", connectionString,
                 IS_LOCAL, getConfig().debugAddress(), "", null, "");
+        createVirtualSchema(VIRTUAL_SCHEMA_JDBC, ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "",
+                getConfig().getExasolUser(), getConfig().getExasolPassword(), "ADAPTER.JDBC_ADAPTER", connectionString,
+                false, getConfig().debugAddress(), "", null, "");
     }
 
     private static void createTestSchema() throws SQLException {
@@ -133,6 +138,11 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         stmt.execute("CREATE TABLE SIMPLE_VALUES (a int, b varchar(100), c double)");
         stmt.execute("INSERT INTO SIMPLE_VALUES VALUES " + " (1, 'a', 1.1)," + " (2, 'b', 2.2)," + " (3, 'c', 3.3),"
                 + " (1, 'd', 4.4)," + " (2, 'e', 5.5)," + " (3, 'f', 6.6)," + " (null, null, null)");
+
+        stmt.execute(String.format("create table %s.t1(x int, y varchar(100))", TEST_SCHEMA));
+        stmt.execute(String.format("insert into %s.t1 values (1,'aaa'), (2,'bbb');", TEST_SCHEMA));
+        stmt.execute(String.format("create table %s.t2(x int, y varchar(100))", TEST_SCHEMA));
+        stmt.execute(String.format("insert into %s.t2 values (2,'bbb'), (3,'ccc');", TEST_SCHEMA));
 
         // Create schema, table and column with mixed case identifiers (to test correct
         // mapping, and correct sql generation of adapter)
@@ -401,6 +411,51 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         matchNextRow(result, new Short("1"));
         matchSingleRowExplain(query, "IMPORT FROM EXA AT 'localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
+    }
+
+    // Join Tests -------------------------------------------------------------
+    @Test
+    public void innerJoin() throws SQLException {
+        final String query = String.format("SELECT * FROM  %1$s.t1 a INNER JOIN  %1$s.t2 b ON a.x=b.x", VIRTUAL_SCHEMA_JDBC);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
+        assertFalse(result.next());
+    }
+
+    @Test
+    public void innerJoinWithProjection() throws SQLException {
+        final String query = String.format("SELECT b.y || %1$s.t1.y FROM  %1$s.t1 INNER JOIN  %1$s.t2 b ON %1$s.t1.x=b.x", VIRTUAL_SCHEMA_JDBC);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, "bbbbbb");
+        assertFalse(result.next());
+    }
+
+    @Test
+    public void leftJoin() throws SQLException {
+        final String query = String.format("SELECT * FROM  %1$s.t1 a LEFT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_JDBC);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, (long) 1, "aaa", null ,null);
+        matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
+        assertFalse(result.next());
+    }
+
+    @Test
+    public void rightJoin() throws SQLException {
+        final String query = String.format("SELECT * FROM  %1$s.t1 a RIGHT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_JDBC);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
+        matchNextRow(result, null, null, (long) 3 ,"ccc");
+        assertFalse(result.next());
+    }
+
+    @Test
+    public void fullOuterJoin() throws SQLException {
+        final String query = String.format("SELECT * FROM  %1$s.t1 a FULL OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_JDBC);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, (long) 1, "aaa", null ,null);
+        matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
+        matchNextRow(result, null, null, (long) 3 ,"ccc");
+        assertFalse(result.next());
     }
 
 
