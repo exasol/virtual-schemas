@@ -1,11 +1,12 @@
 # Configuration file for integration tests run by `run_integration_tests.sh`
 
 general:
-  debug:            false
-  debugAddress:     ''
-  bucketFsUrl:      http://127.0.0.1:6594/default
-  bucketFsPassword: write
-  jdbcAdapterPath:  /buckets/bfsdefault/default/virtualschema-jdbc-adapter-dist-1.7.2.jar
+  debug:                   false
+  debugAddress:            ''
+  bucketFsUrl:             http://127.0.0.1:6594/default
+  bucketFsPassword:        write
+  jdbcAdapterPath:         /buckets/bfsdefault/default/virtualschema-jdbc-adapter-dist-1.8.1.jar
+  additionalJDBCDriverDir: /var/tmp/vstest/drivers/
 
 exasol:
   runIntegrationTests: true
@@ -24,3 +25,13 @@ postgresql:
   dockerPortMapping:      45432:5432
   dockerName:             testpg
   dockerConnectionString: jdbc:postgresql://DBHOST:5432/postgres
+
+oracle:
+  runIntegrationTests:    false
+  jdbcDriverPath:         /buckets/bfsdefault/default/drivers/jdbc/ORACLE/ojdbc7.jar;
+  connectionString:       jdbc:oracle:thin:@localhost:1521/XE
+  user:                   system
+  password:               myorapwd
+  dockerName:             myora
+  dockerConnectionString: jdbc:oracle:thin:@DBHOST:1521/XE
+  instantclientDir:       /var/tmp/vstest/instantclient/

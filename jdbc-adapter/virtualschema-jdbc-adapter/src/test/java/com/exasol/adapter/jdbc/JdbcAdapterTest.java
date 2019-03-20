@@ -3,10 +3,16 @@ package com.exasol.adapter.jdbc;
 import com.exasol.ExaConnectionAccessException;
 import com.exasol.ExaConnectionInformation;
 import com.exasol.ExaMetadata;
+import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.metadata.SchemaMetadataInfo;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -104,5 +110,30 @@ public class JdbcAdapterTest {
         final String credentials = JdbcAdapter
               .getCredentialsForPushdownQuery(this.exaMetadata, exaSchemaMetadataInfoConnectionStringUserPassword);
         assertEquals("USER 'testUsername' IDENTIFIED BY 'testPassword'", credentials);
+    }
+
+    @Test
+    public void buildColumnDescription() {
+        DataType[] types = new DataType[3];
+        types[0] = DataType.createBool();
+        types[1] = DataType.createDecimal(10,2);
+        types[2] = DataType.createTimestamp(false);
+        assertEquals("(c0 BOOLEAN,c1 DECIMAL(10, 2),c2 TIMESTAMP)", JdbcAdapter.buildColumnDescriptionFrom(types));
+    }
+
+    @Test
+    public void buildJdbcTypeDescriptionFromResultSetMetadata() throws SQLException {
+        ResultSetMetaData metadata = Mockito.mock(ResultSetMetaData.class);
+        when(metadata.getColumnType(0)).thenReturn(Types.SMALLINT);
+        when(metadata.getPrecision(0)).thenReturn(9);
+        when(metadata.getScale(0)).thenReturn(0);
+        when(metadata.getColumnTypeName(0)).thenReturn("SMALLINT");
+
+        JdbcTypeDescription type = JdbcAdapter.getJdbcTypeDescription(metadata, 0);
+        assertEquals(Types.SMALLINT, type.getJdbcType());
+        assertEquals(9, type.getPrecisionOrSize());
+        assertEquals(0, type.getDecimalScale());
+        assertEquals("SMALLINT", type.getTypeName());
+        assertEquals(0, type.getCharOctedLength());
     }
 }
