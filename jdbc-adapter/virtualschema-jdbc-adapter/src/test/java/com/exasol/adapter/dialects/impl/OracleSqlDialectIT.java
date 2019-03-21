@@ -1,8 +1,5 @@
 package com.exasol.adapter.dialects.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -20,6 +17,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
+
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Tested with Oracle 12
@@ -157,6 +157,52 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
         }
     }
 
+    // Join Tests -------------------------------------------------------------
+    @Test
+    public void innerJoin() throws SQLException {
+        final String query = String.format("SELECT * FROM  %1$s.t1 a INNER JOIN  %1$s.t2 b ON a.x=b.x", VIRTUAL_SCHEMA_ORA);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, "2", "bbb", "2" ,"bbb");
+        assertFalse(result.next());
+    }
+
+    @Test
+    public void innerJoinWithProjection() throws SQLException {
+        final String query = String.format("SELECT b.y || %1$s.t1.y FROM  %1$s.t1 INNER JOIN  %1$s.t2 b ON %1$s.t1.x=b.x", VIRTUAL_SCHEMA_JDBC);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, "bbbbbb");
+        assertFalse(result.next());
+    }
+
+    @Test
+    public void leftJoin() throws SQLException {
+        final String query = String.format("SELECT * FROM  %1$s.t1 a LEFT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_ORA);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, "1", "aaa", null ,null);
+        matchNextRow(result, "2", "bbb", "2" ,"bbb");
+        assertFalse(result.next());
+    }
+
+    @Test
+    public void rightJoin() throws SQLException {
+        final String query = String.format("SELECT * FROM  %1$s.t1 a RIGHT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_JDBC);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, "2", "bbb", "2" ,"bbb");
+        matchNextRow(result, null, null, "3" ,"ccc");
+        assertFalse(result.next());
+    }
+
+    @Test
+    public void fullOuterJoin() throws SQLException {
+        final String query = String.format("SELECT * FROM  %1$s.t1 a FULL OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_ORA);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, "1", "aaa", null ,null);
+        matchNextRow(result, "2", "bbb", "2" ,"bbb");
+        matchNextRow(result, null, null, "3" ,"ccc");
+        assertFalse(result.next());
+    }
+
+    // Type Tests -------------------------------------------------------------
     @Test
     public void testColumnTypeEquivalence() throws SQLException {
         final Map<String, String> jdbcColumnTypes = getColumnTypesOfTable(EXA_TABLE_JDBC);
