@@ -3,6 +3,8 @@ change 2 in dev
 
 # Virtual Schemas
 
+change between 1 in dev
+
 [![Build Status](https://travis-ci.org/EXASOL/virtual-schemas.svg?branch=master)](https://travis-ci.org/EXASOL/virtual-schemas)
 
 <p style="border: 1px solid black;padding: 10px; background-color: #FFFFCC;"><span style="font-size:200%">&#9888;</span> Please note that this is an open source project which is officially supported by Exasol. For any question, you can contact our support team.</p>
