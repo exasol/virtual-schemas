@@ -1,6 +1,7 @@
 change 1 in dev
 change 2 in dev
 change 1 in feature/test
+change 2 in feature/test
 
 # Virtual Schemas
 
