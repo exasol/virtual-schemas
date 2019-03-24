@@ -1,11 +1,5 @@
-change 1 in dev
-change 2 in dev
-change 1 in feature/test
-change 2 in feature/test
 
 # Virtual Schemas
-
-change between 1 in dev
 
 [![Build Status](https://travis-ci.org/EXASOL/virtual-schemas.svg?branch=master)](https://travis-ci.org/EXASOL/virtual-schemas)
 
