@@ -10,10 +10,7 @@ import com.exasol.adapter.sql.*;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
@@ -517,9 +514,15 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
             typeName.equals("CLOB") ||
             typeName.equals("NCLOB")) {
             projString = "TO_CHAR(" + projString + ")";
-        } else if (typeName.equals("NUMBER") &&
-                   column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.VARCHAR) {
-            projString = "TO_CHAR(" + projString + ")";
+        } else if (typeName.equals("NUMBER")) {
+            if (column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.VARCHAR) {
+                projString = "TO_CHAR(" + projString + ")";
+            } else {
+                if (column.getMetadata().getType().getPrecision() > DataType.MAX_EXASOL_DECIMAL_PRECISION) {
+                    DataType decimalType = dialect.getContext().getOracleCastNumberToDecimal();
+                    projString = "CAST(" + projString + " AS DECIMAL(" + decimalType.getPrecision() + "," + decimalType.getScale() + " ))";
+                }
+            }
         } else if (typeName.equals("ROWID") ||
                    typeName.equals("UROWID")) {
             projString = "ROWIDTOCHAR(" + projString + ")";
@@ -531,6 +534,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
 
     private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("TIMESTAMP","INTERVAL","BINARY_FLOAT","BINARY_DOUBLE","CLOB","NCLOB","ROWID", "UROWID", "BLOB");
 
+    //@todo: fix this for NUMBERs
     private boolean nodeRequiresCast(SqlNode node) throws AdapterException {
         if (node.getType() == SqlNodeType.COLUMN) {
             SqlColumn column = (SqlColumn)node;

@@ -1,12 +1,16 @@
 package com.exasol.adapter.jdbc;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.exasol.adapter.metadata.DataType;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -315,6 +319,32 @@ public class JdbcAdapterPropertiesTest {
         properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT");
         properties.put("SQL_DIALECT", "POSTGRESQL");
         properties.put("CONNECTION_NAME", "CONN1");
+        JdbcAdapterProperties.checkPropertyConsistency(properties);
+    }
+
+    @Test
+    public void testGetOracleCastNumberToDecimal() {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("SQL_DIALECT", "ORACLE");
+        properties.put("ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE", "12,9");
+        DataType type = JdbcAdapterProperties.getOracleCastNumberToDecimal(properties);
+        assertAll(() -> assertThat(type.getPrecision(), equalTo(12)),
+                () -> assertThat(type.getScale(), equalTo(9)));
+    }
+
+    @Test
+    public void testGetOracleCastNumberToDecimalDefault() {
+        Map<String, String> properties = new HashMap<>();
+        DataType type = JdbcAdapterProperties.getOracleCastNumberToDecimal(properties);
+        assertAll(() -> assertThat(type.getSize(), equalTo(DataType.MAX_EXASOL_VARCHAR_SIZE)),
+                () -> assertThat(type.getCharset(), equalTo(DataType.ExaCharset.UTF8)));
+    }
+
+    @Test(expected = InvalidPropertyException.class)
+    public void testGetOracleCastNumberToDecimalWithWrongDialect() throws AdapterException {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("SQL_DIALECT", "EXASOL");
+        properties.put("ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE", "12,9");
         JdbcAdapterProperties.checkPropertyConsistency(properties);
     }
 }

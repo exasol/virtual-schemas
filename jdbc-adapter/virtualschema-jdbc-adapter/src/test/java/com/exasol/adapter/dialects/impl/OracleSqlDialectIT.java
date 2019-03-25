@@ -201,7 +201,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
         matchNextRow(result, null, null, "3" ,"ccc");
         assertFalse(result.next());
     }
-
+/*
     // Type Tests -------------------------------------------------------------
     @Test
     public void testColumnTypeEquivalence() throws SQLException {
@@ -605,4 +605,5 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
         assertEquals("VARCHAR(2000000) UTF8",  columnTypesJDBC.get("C"));
         assertEquals("VARCHAR(2000000) UTF8", columnTypesORA.get("C"));
     }
+    */
 }

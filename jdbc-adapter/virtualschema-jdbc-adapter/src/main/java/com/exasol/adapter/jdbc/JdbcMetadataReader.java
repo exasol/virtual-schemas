@@ -3,6 +3,7 @@ package com.exasol.adapter.jdbc;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterException;
@@ -21,7 +22,7 @@ public class JdbcMetadataReader {
     public static SchemaMetadata readRemoteMetadata(final String connectionString, final String user,
                                                     final String password, String catalog, String schema, final List<String> tableFilter,
                                                     final String dialectName, final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, final List<String> ignoreErrorList,
-                                                    PostgreSQLIdentifierMapping postgreSQLIdentifierMapping)
+                                                    PostgreSQLIdentifierMapping postgreSQLIdentifierMapping, DataType oracleCastNumberToDecimal)
             throws SQLException, AdapterException {
         assert (catalog != null);
         assert (schema != null);
@@ -39,7 +40,7 @@ public class JdbcMetadataReader {
                     dbMeta.nullsAreSortedAtStart(), dbMeta.nullsAreSortedHigh(), dbMeta.nullsAreSortedLow());
 
             final SqlDialect dialect = SqlDialects.getInstance().getDialectInstanceForNameWithContext(dialectName,
-                    new SqlDialectContext(schemaAdapterNotes, postgreSQLIdentifierMapping));
+                    new SqlDialectContext(schemaAdapterNotes, postgreSQLIdentifierMapping, oracleCastNumberToDecimal));
 
             catalog = findCatalog(catalog, dbMeta, dialect);
 
@@ -286,7 +287,7 @@ public class JdbcMetadataReader {
                     tables.add(new TableMetadata(table.getTableName(), "", columns, table.getTableComment()));
                 }
             } catch (final Exception ex) {
-                throw new RuntimeException("Exception for table " + table.getOriginalTableName(), ex);
+                throw new RuntimeException("Exception for table " + table.getOriginalTableName() + ": " + ex.getMessage(), ex);
             }
         }
         return tables;

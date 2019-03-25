@@ -12,6 +12,7 @@ import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectContext;
 import com.exasol.adapter.dialects.SqlDialects;
+import com.exasol.adapter.metadata.DataType;
 
 /**
  * Class to expose a nice interface to properties. Casts to the correct data
@@ -42,9 +43,11 @@ public final class JdbcAdapterProperties {
     static final String PROP_LOG_LEVEL = "LOG_LEVEL";
     static final String PROP_IGNORE_ERROR_LIST = "IGNORE_ERRORS";
     static final String PROP_POSTGRESQL_IDENTIFIER_MAPPING = "POSTGRESQL_IDENTIFIER_MAPPING";
+    static final String PROP_ORACLE_CAST_NUMBER_TO_DECIMAL = "ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE";
 
     private static final String DEFAULT_LOG_LEVEL = "INFO";
     private static final String VALUE_SQL_DIALECT_POSTGRESQL = "POSTGRESQL";
+    private static final String VALUE_SQL_DIALECT_ORACLE = "ORACLE";
     private static final String VALUE_POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE = "PRESERVE_ORIGINAL_CASE";
     private static final String VALUE_POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER = "CONVERT_TO_UPPER";
 
@@ -68,6 +71,18 @@ public final class JdbcAdapterProperties {
 
     private static String getProperty(final Map<String, String> properties, final String name) {
         return getProperty(properties, name, "");
+    }
+
+    public static DataType getOracleCastNumberToDecimal(final Map<String, String> properties) {
+        final String precisionAndScale = getProperty(properties, PROP_ORACLE_CAST_NUMBER_TO_DECIMAL);
+        if (precisionAndScale.trim().isEmpty()) {
+            return DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+        }
+        List <String> precisionAndScaleList =  Arrays.
+                stream(precisionAndScale.split(",")).
+                map(String::trim).
+                collect(Collectors.toList());
+        return DataType.createDecimal(Integer.valueOf(precisionAndScaleList.get(0)), Integer.valueOf(precisionAndScaleList.get(1)));
     }
 
     public static String getPostgreSQLIdentifierMapping(final Map<String, String> properties) {
@@ -136,6 +151,16 @@ public final class JdbcAdapterProperties {
         checkImportPropertyConsistency(properties, PROP_IMPORT_FROM_ORA, PROP_ORA_CONNECTION_NAME);
         checkIgnoreErrors(properties);
         checkPostgreSQLIdentifierPropertyConsistency(properties);
+        checkOracleSpecificPropertyConsistency(properties);
+    }
+
+    private static void checkOracleSpecificPropertyConsistency(Map<String, String> properties) throws InvalidPropertyException{
+        if (properties.containsKey(PROP_ORACLE_CAST_NUMBER_TO_DECIMAL)) {
+            final String dialectName = getProperty(properties, PROP_SQL_DIALECT);
+            if (!dialectName.equals(VALUE_SQL_DIALECT_ORACLE)) {
+                throw new InvalidPropertyException(PROP_ORACLE_CAST_NUMBER_TO_DECIMAL + " can be used only with " + VALUE_SQL_DIALECT_ORACLE + " dialect.");
+            }
+        }
     }
 
     private static void checkPostgreSQLIdentifierPropertyConsistency(Map<String, String> properties) throws InvalidPropertyException {
