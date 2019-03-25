@@ -1,159 +1,55 @@
 package com.exasol.adapter.jdbc;
 
-import java.io.OutputStream;
 import java.sql.*;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.*;
+import java.util.logging.Logger;
 
 import com.exasol.ExaConnectionInformation;
 import com.exasol.ExaMetadata;
-import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.*;
 import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.json.RequestJsonParser;
-import com.exasol.adapter.json.ResponseJsonSerializer;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.request.*;
-import com.exasol.logging.CompactFormatter;
-import com.exasol.utils.JsonHelper;
-import com.exasol.utils.UdfUtils;
+import com.exasol.adapter.response.*;
 
-public class JdbcAdapter {
+public class JdbcAdapter implements VirtualSchemaAdapter {
     public static final int MAX_STRING_CHAR_LENGTH = 2000000;
     private static Logger logger = null;
 
     /**
-     * This method gets called by the database during interactions with the virtual
-     * schema.
+     * This method gets called by the database during interactions with the virtual schema.
      *
-     * @param meta  Metadata object
-     * @param input JSON request, as defined in the Adapter Script API
+     * @param metadata   Metadata object
+     * @param rawRequest JSON request, as defined in the Adapter Script API
      * @return JSON response, as defined in the Adapter Script API
+     * @throws AdapterException in case the request is not recognized
+     * @deprecated As of Virtual Schema version 1.8.0 you should use
+     *             {@link com.exasol.adapter.RequestDispatcher#adapterCall(ExaMetadata,String)} as entry point instead.
      */
-    public static String adapterCall(final ExaMetadata meta, final String input) throws Exception {
-        String result = "";
-        try {
-            final AdapterRequest request = new RequestJsonParser().parseRequest(input);
-            final SchemaMetadataInfo schemaMetadata = request.getSchemaMetadataInfo();
-            configureLogOutput(schemaMetadata);
-            logger.fine(() -> "Adapter request:\n" + input);
-
-            switch (request.getType()) {
-            case CREATE_VIRTUAL_SCHEMA:
-                result = handleCreateVirtualSchema((CreateVirtualSchemaRequest) request, meta);
-                break;
-            case DROP_VIRTUAL_SCHEMA:
-                result = handleDropVirtualSchema((DropVirtualSchemaRequest) request);
-                break;
-            case REFRESH:
-                result = handleRefresh((RefreshRequest) request, meta);
-                break;
-            case SET_PROPERTIES:
-                result = handleSetProperty((SetPropertiesRequest) request, meta);
-                break;
-            case GET_CAPABILITIES:
-                result = handleGetCapabilities((GetCapabilitiesRequest) request);
-                break;
-            case PUSHDOWN:
-                result = handlePushdownRequest((PushdownRequest) request, meta);
-                break;
-            default:
-                throw new RuntimeException("Request Type not supported: " + request.getType());
-            }
-            assert (result.isEmpty());
-            logger.fine("Response:\n" + JsonHelper.prettyJson(JsonHelper.getJsonObject(result)));
-            return result;
-        } catch (final AdapterException e) {
-            throw e;
-        } catch (final Exception e) {
-            final String stacktrace = UdfUtils.traceToString(e);
-            throw new Exception("Unexpected error in adapter: " + e.getMessage() + "\nFor following request: " + input
-                    + "\nResponse: " + result + "\nAdapter stack trace: " + stacktrace, e);
-        }
+    @Deprecated
+    public static String adapterCall(final ExaMetadata metadata, final String rawRequest) throws AdapterException {
+        final VirtualSchemaAdapter adapter = new JdbcAdapter();
+        registerAdapterForSqlDialect(adapter, "DB2"); // FIXME: replace this hard-coded registration
+        registerAdapterForSqlDialect(adapter, "EXASOL"); // FIXME: replace this hard-coded registration
+        registerAdapterForSqlDialect(adapter, "GENERIC"); // FIXME: replace this hard-coded registration
+        registerAdapterForSqlDialect(adapter, "IMPALA"); // FIXME: replace this hard-coded registration
+        registerAdapterForSqlDialect(adapter, "MYSQL"); // FIXME: replace this hard-coded registration
+        registerAdapterForSqlDialect(adapter, "ORACLE"); // FIXME: replace this hard-coded registration
+        registerAdapterForSqlDialect(adapter, "POSTGRESQL"); // FIXME: replace this hard-coded registration
+        registerAdapterForSqlDialect(adapter, "REDSHIFT"); // FIXME: replace this hard-coded registration
+        registerAdapterForSqlDialect(adapter, "SQLSERVER"); // FIXME: replace this hard-coded registration
+        registerAdapterForSqlDialect(adapter, "SYBASE"); // FIXME: replace this hard-coded registration
+        registerAdapterForSqlDialect(adapter, "TERADATA"); // FIXME: replace this hard-coded registration
+        return RequestDispatcher.adapterCall(metadata, rawRequest);
     }
 
-    private static void configureLogOutput(final SchemaMetadataInfo schemaMetadata)
-            throws AdapterException, InvalidPropertyException {
-        final OutputStream out = tryAttachToOutputService(schemaMetadata);
-        if (out == null) {
-            // Fall back to regular STDOUT in case the socket output stream is not
-            // available. In most cases (except unit test scenarios) this will mean that
-            // logs will not be available.
-            configureLogger(System.out, schemaMetadata.getProperties());
-        } else {
-            configureLogger(out, schemaMetadata.getProperties());
-        }
-
+    private static void registerAdapterForSqlDialect(final VirtualSchemaAdapter adapter, final String dialectName) {
+        AdapterRegistry.getInstance().registerAdapter(dialectName, adapter);
     }
 
-    private static synchronized void configureLogger(final OutputStream out, final Map<String, String> properties)
-            throws InvalidPropertyException {
-        if (logger == null) {
-            final Level logLevel = determineLogLevel(properties);
-            final Formatter formatter = new CompactFormatter();
-            final StreamHandler handler = new StreamHandler(out, formatter);
-            handler.setFormatter(formatter);
-            handler.setLevel(logLevel);
-            final Logger baseLogger = Logger.getLogger("com.exasol");
-            baseLogger.setLevel(logLevel);
-            baseLogger.addHandler(handler);
-            logger = Logger.getLogger(JdbcAdapter.class.getName());
-            logger.info(() -> "Attached to output service with log level " + logLevel + ".");
-        }
-    }
-
-    private static Level determineLogLevel(final Map<String, String> properties) throws InvalidPropertyException {
-        return (JdbcAdapterProperties.getLogLevel(properties) == null) //
-                ? Level.INFO //
-                : JdbcAdapterProperties.getLogLevel(properties);
-    }
-
-    private static String handleCreateVirtualSchema(final CreateVirtualSchemaRequest request, final ExaMetadata meta)
-            throws SQLException, AdapterException {
-        final SchemaMetadataInfo schemaMetadata = request.getSchemaMetadataInfo();
-        final Map<String, String> properties = schemaMetadata.getProperties();
-        configureLogOutput(schemaMetadata);
-        JdbcAdapterProperties.checkPropertyConsistency(properties);
-        final SchemaMetadata remoteMeta = readMetadata(schemaMetadata, meta);
-        return ResponseJsonSerializer.makeCreateVirtualSchemaResponse(remoteMeta);
-    }
-
-    private static SchemaMetadata readMetadata(final SchemaMetadataInfo schemaMeta, final ExaMetadata meta)
-            throws SQLException, AdapterException {
-        final List<String> tables = JdbcAdapterProperties.getTableFilter(schemaMeta.getProperties());
-        return readMetadata(schemaMeta, tables, meta);
-    }
-
-    private static SchemaMetadata readMetadata(final SchemaMetadataInfo meta, final List<String> tables,
-            final ExaMetadata exaMeta) throws SQLException, AdapterException {
-        // Connect via JDBC and read metadata
-        final ExaConnectionInformation connection = JdbcAdapterProperties.getConnectionInformation(meta.getProperties(),
-                exaMeta);
-        final String catalog = JdbcAdapterProperties.getCatalog(meta.getProperties());
-        final String schema = JdbcAdapterProperties.getSchema(meta.getProperties());
-        return JdbcMetadataReader.readRemoteMetadata(connection.getAddress(), connection.getUser(),
-                connection.getPassword(), catalog, schema, tables,
-                JdbcAdapterProperties.getSqlDialectName(meta.getProperties()),
-                JdbcAdapterProperties.getExceptionHandlingMode(meta.getProperties()),
-                JdbcAdapterProperties.getIgnoreErrorList(meta.getProperties()),
-                getPostgreSQLIdentifierMapping(meta.getProperties()));
-    }
-
-    private static String handleRefresh(final RefreshRequest request, final ExaMetadata meta)
-            throws SQLException, AdapterException {
-        final SchemaMetadata remoteMeta;
-        JdbcAdapterProperties.checkPropertyConsistency(request.getSchemaMetadataInfo().getProperties());
-        if (request.isRefreshForTables()) {
-            final List<String> tables = request.getTables();
-            remoteMeta = readMetadata(request.getSchemaMetadataInfo(), tables, meta);
-        } else {
-            remoteMeta = readMetadata(request.getSchemaMetadataInfo(), meta);
-        }
-        return ResponseJsonSerializer.makeRefreshResponse(remoteMeta);
-    }
-
-    private static String handleSetProperty(final SetPropertiesRequest request, final ExaMetadata exaMeta)
+    private String handleSetProperty(final SetPropertiesRequest request, final ExaMetadata exaMeta)
             throws SQLException, AdapterException {
         final Map<String, String> changedProperties = request.getProperties();
         final Map<String, String> newSchemaMeta = JdbcAdapterProperties
@@ -175,11 +71,11 @@ public class JdbcAdapter {
         return ResponseJsonSerializer.makeSetPropertiesResponse(null);
     }
 
-    private static String handleDropVirtualSchema(final DropVirtualSchemaRequest request) {
+    private String handleDropVirtualSchema(final DropVirtualSchemaRequest request) {
         return ResponseJsonSerializer.makeDropVirtualSchemaResponse();
     }
 
-    public static String handleGetCapabilities(final GetCapabilitiesRequest request) throws AdapterException {
+    public String handleGetCapabilities(final GetCapabilitiesRequest request) throws AdapterException {
         final SqlDialectContext dialectContext = new SqlDialectContext(SchemaAdapterNotes.deserialize(
                 request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()));
         final SqlDialect dialect = JdbcAdapterProperties.getSqlDialect(request.getSchemaMetadataInfo().getProperties(),
@@ -191,7 +87,7 @@ public class JdbcAdapter {
         return ResponseJsonSerializer.makeGetCapabilitiesResponse(capabilities);
     }
 
-    private static Capabilities parseExcludedCapabilities(final String excludedCapabilitiesStr) {
+    private Capabilities parseExcludedCapabilities(final String excludedCapabilitiesStr) {
         logger.info(() -> "Excluded Capabilities: "
                 + (excludedCapabilitiesStr.isEmpty() ? "none" : excludedCapabilitiesStr));
         final Capabilities.Builder builder = Capabilities.builder();
@@ -219,13 +115,15 @@ public class JdbcAdapter {
         return builder.build();
     }
 
-    private static String handlePushdownRequest(final PushdownRequest request, final ExaMetadata exaMeta)
+    private String handlePushDownRequest(final PushDownRequest request, final ExaMetadata exaMeta)
             throws AdapterException {
         // Generate SQL pushdown query
         final SchemaMetadataInfo meta = request.getSchemaMetadataInfo();
-        final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping = getPostgreSQLIdentifierMapping(meta.getProperties());
-        final SqlDialectContext dialectContext = new SqlDialectContext(SchemaAdapterNotes.deserialize(
-                request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()),
+        final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping = getPostgreSQLIdentifierMapping(
+                meta.getProperties());
+        final SqlDialectContext dialectContext = new SqlDialectContext(
+                SchemaAdapterNotes.deserialize(request.getSchemaMetadataInfo().getAdapterNotes(),
+                        request.getSchemaMetadataInfo().getSchemaName()),
                 postgreSQLIdentifierMapping, getImportType(meta));
         final SqlDialect dialect = JdbcAdapterProperties.getSqlDialect(request.getSchemaMetadataInfo().getProperties(),
                 dialectContext);
@@ -247,15 +145,15 @@ public class JdbcAdapter {
         return ResponseJsonSerializer.makePushdownResponse(sql);
     }
 
-    private static ConnectionInformation getConnectionInformation(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
+    private ConnectionInformation getConnectionInformation(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         final String credentials = getCredentialsForPushdownQuery(exaMeta, meta);
         final String exaConnectionString = JdbcAdapterProperties.getExaConnectionString(meta.getProperties());
         final String oraConnectionName = JdbcAdapterProperties.getOraConnectionName(meta.getProperties());
         return new ConnectionInformation(credentials, exaConnectionString, oraConnectionName);
     }
 
-    private static PostgreSQLIdentifierMapping getPostgreSQLIdentifierMapping(final Map<String, String> properties) {
-        final String postgreSQLIdentifierMapping =  JdbcAdapterProperties.getPostgreSQLIdentifierMapping(properties);
+    private PostgreSQLIdentifierMapping getPostgreSQLIdentifierMapping(final Map<String, String> properties) {
+        final String postgreSQLIdentifierMapping = JdbcAdapterProperties.getPostgreSQLIdentifierMapping(properties);
         return PostgreSQLIdentifierMapping.valueOf(postgreSQLIdentifierMapping);
     }
 
@@ -271,7 +169,7 @@ public class JdbcAdapter {
         return importType;
     }
 
-    protected static String getCredentialsForPushdownQuery(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
+    protected String getCredentialsForPushdownQuery(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         String credentials = "";
         if (JdbcAdapterProperties.isImportFromExa(meta.getProperties())) {
             credentials = getCredentialsForEXAImport(exaMeta, meta);
@@ -283,7 +181,7 @@ public class JdbcAdapter {
         return credentials;
     }
 
-    private static String getCredentialsForJDBCImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
+    private String getCredentialsForJDBCImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         String credentials = "";
         if (JdbcAdapterProperties.isUserSpecifiedConnection(meta.getProperties())) {
             credentials = JdbcAdapterProperties.getConnectionName(meta.getProperties());
@@ -296,7 +194,7 @@ public class JdbcAdapter {
         return credentials;
     }
 
-    private static String getCredentialsForORAImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
+    private String getCredentialsForORAImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         String credentials = "";
         if (!JdbcAdapterProperties.isUserSpecifiedConnection(meta.getProperties())) {
             credentials = getUserAndPasswordForImport(exaMeta, meta);
@@ -304,11 +202,11 @@ public class JdbcAdapter {
         return credentials;
     }
 
-    private static String getCredentialsForEXAImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
+    private String getCredentialsForEXAImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         return getUserAndPasswordForImport(exaMeta, meta);
     }
 
-    private static String getUserAndPasswordForImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
+    private String getUserAndPasswordForImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         String credentials = "";
         final ExaConnectionInformation connection = JdbcAdapterProperties.getConnectionInformation(meta.getProperties(),
                 exaMeta);
@@ -318,7 +216,7 @@ public class JdbcAdapter {
         return credentials;
     }
 
-    private static String createColumnDescription(final ExaMetadata exaMeta, final SchemaMetadataInfo meta,
+    private String createColumnDescription(final ExaMetadata exaMeta, final SchemaMetadataInfo meta,
             final String pushdownQuery, final SqlDialect dialect) {
         final ExaConnectionInformation connectionInformation = JdbcAdapterProperties
                 .getConnectionInformation(meta.getProperties(), exaMeta);
@@ -365,7 +263,7 @@ public class JdbcAdapter {
         }
     }
 
-    private static Connection establishConnection(final ExaConnectionInformation connection) throws SQLException {
+    private Connection establishConnection(final ExaConnectionInformation connection) throws SQLException {
         final String connectionString = connection.getAddress();
         final String user = connection.getUser();
         final String password = connection.getPassword();
@@ -389,19 +287,83 @@ public class JdbcAdapter {
         return DriverManager.getConnection(connectionString, info);
     }
 
-    // Forward stdout to an external output service
-    private static OutputStream tryAttachToOutputService(final SchemaMetadataInfo meta) throws AdapterException {
-        final String debugAddress = JdbcAdapterProperties.getDebugAddress(meta.getProperties());
-        if (!debugAddress.isEmpty()) {
-            try {
-                final String debugHost = debugAddress.split(":")[0];
-                final int debugPort = Integer.parseInt(debugAddress.split(":")[1]);
-                return UdfUtils.tryAttachToOutputService(debugHost, debugPort);
-            } catch (final Exception ex) {
-                throw new AdapterException(
-                        "You have to specify a valid hostname and port for the udf debug service, e.g. 'hostname:3000'");
-            }
+    @Override
+    public CreateVirtualSchemaResponse createVirtualSchema(final ExaMetadata metadata,
+            final CreateVirtualSchemaRequest request) throws AdapterException {
+        final SchemaMetadataInfo schemaMetadataInfo = request.getSchemaMetadataInfo();
+        JdbcAdapterProperties.checkPropertyConsistency(schemaMetadataInfo.getProperties());
+        try {
+            final SchemaMetadata remoteMeta = readMetadata(schemaMetadataInfo, metadata);
+            return CreateVirtualSchemaResponse.builder().schemaMetadata(remoteMeta).build();
+        } catch (final SQLException exception) {
+            throw new AdapterException("Unable create Virtual Schema \"" + schemaMetadataInfo.getSchemaName() + "\".",
+                    exception);
         }
+    }
+
+    private SchemaMetadata readMetadata(final SchemaMetadataInfo schemaMeta, final ExaMetadata meta)
+            throws SQLException, AdapterException {
+        final List<String> tables = JdbcAdapterProperties.getTableFilter(schemaMeta.getProperties());
+        return readMetadata(schemaMeta, tables, meta);
+    }
+
+    private SchemaMetadata readMetadata(final SchemaMetadataInfo meta, final List<String> tables,
+            final ExaMetadata exaMeta) throws SQLException, AdapterException {
+        // Connect via JDBC and read metadata
+        final ExaConnectionInformation connection = JdbcAdapterProperties.getConnectionInformation(meta.getProperties(),
+                exaMeta);
+        final String catalog = JdbcAdapterProperties.getCatalog(meta.getProperties());
+        final String schema = JdbcAdapterProperties.getSchema(meta.getProperties());
+        return JdbcMetadataReader.readRemoteMetadata(connection.getAddress(), connection.getUser(),
+                connection.getPassword(), catalog, schema, tables,
+                JdbcAdapterProperties.getSqlDialectName(meta.getProperties()),
+                JdbcAdapterProperties.getExceptionHandlingMode(meta.getProperties()),
+                JdbcAdapterProperties.getIgnoreErrorList(meta.getProperties()),
+                getPostgreSQLIdentifierMapping(meta.getProperties()));
+    }
+
+    @Override
+    public DropVirtualSchemaResponse dropVirtualSchema(final ExaMetadata metadata,
+            final DropVirtualSchemaRequest request) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public RefreshResponse refresh(final ExaMetadata metadata, final RefreshRequest request) throws AdapterException {
+        final SchemaMetadataInfo schemaMetadataInfo = request.getSchemaMetadataInfo();
+        JdbcAdapterProperties.checkPropertyConsistency(schemaMetadataInfo.getProperties());
+        SchemaMetadata remoteMeta;
+        try {
+            if (request.refreshesOnlySelectedTables()) {
+                final List<String> tables = request.getTables();
+                remoteMeta = readMetadata(request.getSchemaMetadataInfo(), tables, metadata);
+            } else {
+                remoteMeta = readMetadata(request.getSchemaMetadataInfo(), metadata);
+            }
+            return RefreshResponse.builder().schemaMetadata(remoteMeta).build();
+        } catch (final SQLException exception) {
+            throw new AdapterException(
+                    "Unable refresh metadata of Virtual Schema \"" + schemaMetadataInfo.getSchemaName() + "\".",
+                    exception);
+        }
+    }
+
+    @Override
+    public SetPropertiesResponse setProperties(final ExaMetadata metadata, final SetPropertiesRequest request) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public GetCapabilitiesResponse getCapabilities(final ExaMetadata metadata, final GetCapabilitiesRequest request) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public PushDownResponse pushdown(final ExaMetadata metadata, final PushDownRequest request) {
+        // TODO Auto-generated method stub
         return null;
     }
 }

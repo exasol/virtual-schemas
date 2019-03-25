@@ -4,38 +4,24 @@ import static org.junit.Assert.assertEquals;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import com.exasol.adapter.capabilities.*;
 import org.junit.Test;
 
 import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.metadata.MetadataException;
-import com.exasol.adapter.metadata.TableMetadata;
-import com.exasol.adapter.sql.AggregateFunction;
-import com.exasol.adapter.sql.ScalarFunction;
-import com.exasol.adapter.sql.SqlColumn;
-import com.exasol.adapter.sql.SqlFunctionAggregate;
-import com.exasol.adapter.sql.SqlFunctionScalar;
-import com.exasol.adapter.sql.SqlLiteralExactnumeric;
-import com.exasol.adapter.sql.SqlNode;
-import com.exasol.adapter.sql.SqlSelectList;
-import com.exasol.adapter.sql.SqlStatementSelect;
-import com.exasol.adapter.sql.SqlTable;
+import com.exasol.adapter.metadata.*;
+import com.exasol.adapter.sql.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+
 import utils.SqlTestUtil;
 
 public class SqlDialectTest {
 
     @Test
-    public void testAggregateFunctionAliases() throws AdapterException, MetadataException {
+    public void testAggregateFunctionAliases() throws AdapterException {
         final TableMetadata clicksMeta = getTestTableMetadata();
         final SqlTable fromClause = new SqlTable("TEST", clicksMeta);
         final SqlColumn col1 = new SqlColumn(1, clicksMeta.getColumns().get(0));
@@ -68,7 +54,7 @@ public class SqlDialectTest {
     }
 
     @Test
-    public void testScalarFunctionAliases() throws AdapterException, MetadataException {
+    public void testScalarFunctionAliases() throws AdapterException {
         final TableMetadata clicksMeta = getTestTableMetadata();
         final SqlTable fromClause = new SqlTable("TEST", clicksMeta);
         final SqlColumn col1 = new SqlColumn(1, clicksMeta.getColumns().get(0));
@@ -142,7 +128,7 @@ public class SqlDialectTest {
         }
     }
 
-    private TableMetadata getTestTableMetadata() throws MetadataException {
+    private TableMetadata getTestTableMetadata() {
         final List<ColumnMetadata> columns = new ArrayList<>();
         columns.add(new ColumnMetadata("C1", "", DataType.createBool(), true, false, "", ""));
         return new TableMetadata("TEST", "", columns, "");
