@@ -52,12 +52,6 @@
                         [
                             {
                                 "type": "column",
-                                "tableName": "U",
-                                "name": "Y",
-                                "columnNr": 0
-                            },
-                            {
-                                "type": "column",
                                 "tableName": "T",
                                 "name": "X",
                                 "columnNr": 0
@@ -104,19 +98,19 @@
             {
                 "Exasol": 
                 [
-                    "SELECT \"U\".\"Y\", \"T\".\"X\" FROM \"LS\".\"U\" LEFT OUTER JOIN \"LS\".\"T\" ON \"T\".\"X\" = \"U\".\"Y\""
+                    "SELECT \"T\".\"X\" FROM \"LS\".\"U\" LEFT OUTER JOIN \"LS\".\"T\" ON \"T\".\"X\" = \"U\".\"Y\""
                 ],
                 "PostgreSQL":
                 [
-                    "SELECT \"u\".\"y\", \"t\".\"x\" FROM \"ls\".\"u\" LEFT OUTER JOIN \"ls\".\"t\" ON \"t\".\"x\" = \"u\".\"y\""
+                    "SELECT \"t\".\"x\" FROM \"ls\".\"u\" LEFT OUTER JOIN \"ls\".\"t\" ON \"t\".\"x\" = \"u\".\"y\""
                 ],
                 "Oracle":
                 [
-                    "SELECT \"U\".\"Y\", \"T\".\"X\" FROM \"LS\".\"U\" LEFT OUTER JOIN \"LS\".\"T\" ON \"T\".\"X\" = \"U\".\"Y\""
+                    "SELECT \"T\".\"X\" FROM \"LS\".\"U\" LEFT OUTER JOIN \"LS\".\"T\" ON \"T\".\"X\" = \"U\".\"Y\""
                 ],
                 "Hive":
                 [
-                    "SELECT `U`.`Y`, `T`.`X` FROM `LS`.`U` LEFT OUTER JOIN `LS`.`T` ON `T`.`X` = `U`.`Y`"
+                    "SELECT `T`.`X` FROM `LS`.`U` LEFT OUTER JOIN `LS`.`T` ON `T`.`X` = `U`.`Y`"
                 ]
             }
         }

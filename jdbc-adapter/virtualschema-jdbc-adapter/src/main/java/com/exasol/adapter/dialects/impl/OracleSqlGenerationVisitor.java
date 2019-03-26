@@ -1,10 +1,7 @@
 package com.exasol.adapter.dialects.impl;
 
 import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationHelper;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
@@ -511,8 +508,9 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         if (!isDirectlyInSelectList) {
             return projString;
         }
-        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        if (typeName.startsWith("TIMESTAMP") ||
+        final AbstractSqlDialect dialect = (AbstractSqlDialect) getDialect();
+        final String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+        if ((typeName.startsWith("TIMESTAMP") && dialect.getContext().getImportType() == ImportType.JDBC) ||
             typeName.startsWith("INTERVAL") ||
             typeName.equals("BINARY_FLOAT") ||
             typeName.equals("BINARY_DOUBLE") ||
@@ -540,7 +538,11 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
             if (typeName.equals("NUMBER") && column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.VARCHAR) {
                 return true;
             } else {
-                return TYPE_NAMES_REQUIRING_CAST.contains(typeName);
+                for (final String typeRequiringCast : TYPE_NAMES_REQUIRING_CAST) {
+                    if (typeName.startsWith(typeRequiringCast)) {
+                        return true;
+                    }
+                }
             }
         }
         return false;

@@ -152,6 +152,11 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
             stmt.execute(String.format("INSERT INTO %s.%s(mytsvector) VALUES(to_tsvector('english', 'The Fat Rats'))", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(myuuid) VALUES('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'::uuid)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(myxml) VALUES(XMLPARSE (DOCUMENT '<?xml version=\"1.0\"?><book><title>Manual</title><chapter>...</chapter></book>'))", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
+
+            stmt.execute(String.format("create table %s.t1(x int, y varchar(100))", POSTGRES_SCHEMA));
+            stmt.execute(String.format("insert into %s.t1 values (1,'aaa'), (2,'bbb');", POSTGRES_SCHEMA));
+            stmt.execute(String.format("create table %s.t2(x int, y varchar(100))", POSTGRES_SCHEMA));
+            stmt.execute(String.format("insert into %s.t2 values (2,'bbb'), (3,'ccc');", POSTGRES_SCHEMA));
         }
     }
 
@@ -170,21 +175,66 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testOpenVirtualSchema() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    public void testOpenVirtualSchema() throws SQLException {
         final String open_schema_query = String.format("OPEN SCHEMA %s", VIRTUAL_SCHEMA);
         execute(open_schema_query);
     }
 
     @Test
-    public void testSelectSingleColumn() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    public void testSelectSingleColumn() throws SQLException {
         final String query = String.format("SELECT x FROM %s.t", VIRTUAL_SCHEMA);
         final ResultSet result = executeQuery(query);
         matchNextRow(result, 1L);
     }
 
+    // Join Tests -------------------------------------------------------------
+    @Test
+    public void innerJoin() throws SQLException {
+        final String query = String.format("SELECT * FROM  %1$s.t1 a INNER JOIN  %1$s.t2 b ON a.x=b.x", VIRTUAL_SCHEMA);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
+        assertFalse(result.next());
+    }
+
+    @Test
+    public void innerJoinWithProjection() throws SQLException {
+        final String query = String.format("SELECT b.y || %1$s.t1.y FROM  %1$s.t1 INNER JOIN  %1$s.t2 b ON %1$s.t1.x=b.x", VIRTUAL_SCHEMA);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, "bbbbbb");
+        assertFalse(result.next());
+    }
+
+    @Test
+    public void leftJoin() throws SQLException {
+        final String query = String.format("SELECT * FROM  %1$s.t1 a LEFT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, (long) 1, "aaa", null ,null);
+        matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
+        assertFalse(result.next());
+    }
+
+    @Test
+    public void rightJoin() throws SQLException {
+        final String query = String.format("SELECT * FROM  %1$s.t1 a RIGHT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
+        matchNextRow(result, null, null, (long) 3 ,"ccc");
+        assertFalse(result.next());
+    }
+
+    @Test
+    public void fullOuterJoin() throws SQLException {
+        final String query = String.format("SELECT * FROM  %1$s.t1 a FULL OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, (long) 1, "aaa", null ,null);
+        matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
+        matchNextRow(result, null, null, (long) 3 ,"ccc");
+        assertFalse(result.next());
+    }
+
     // Identifier Test - CONVERT_TO_UPPER mode --------------------------------
     @Test
-    public void testCreateSchemaWithUpperCaseTables() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    public void testCreateSchemaWithUpperCaseTables() throws SQLException, FileNotFoundException {
         this.expectedEx.expect(DataException.class);
         this.expectedEx.expectMessage("Table UPPer_t cannot be used in virtual schema. Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation.");
         createVirtualSchema("FOO", PostgreSQLSqlDialect.getPublicName(), POSTGRES_CATALOG, POSTGRES_SCHEMA_UPPERCASE_TABLE, "",
@@ -193,7 +243,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testQueryUpperCaseTableQuoted() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    public void testQueryUpperCaseTableQuoted() throws SQLException {
         this.expectedEx.expect(DataException.class);
         this.expectedEx.expectMessage("Cannot resolve column types");
         final String query = String.format("SELECT x FROM  %s.\"UPPer_t\"", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
@@ -201,7 +251,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testQueryUpperCaseTable() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    public void testQueryUpperCaseTable() throws SQLException {
         this.expectedEx.expect(SQLException.class);
         this.expectedEx.expectMessage("object PG_UPPER.UPPER_T not found");
         final String query = String.format("SELECT x FROM  %s.UPPer_t", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
@@ -209,14 +259,14 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testQueryLowerCaseTable() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    public void testQueryLowerCaseTable() throws SQLException {
         final String query = String.format("SELECT x FROM  %s.lower_t", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
         final ResultSet result = executeQuery(query);
         assertFalse(result.next());
     }
 
     @Test
-    public void testUnsetIgnoreUpperCaseTablesAndRefresh() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    public void testUnsetIgnoreUpperCaseTablesAndRefresh() throws SQLException {
         this.expectedEx.expect(DataException.class);
         this.expectedEx.expectMessage("Table UPPer_t cannot be used in virtual schema. Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation.");
         final String alter_schema_query = String.format("ALTER VIRTUAL SCHEMA %s set ignore_errors=''", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
@@ -228,7 +278,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testSetIgnoreUpperCaseTablesAndRefresh() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    public void testSetIgnoreUpperCaseTablesAndRefresh() throws SQLException {
         final String alter_schema_query = String.format("ALTER VIRTUAL SCHEMA %s set ignore_errors='POSTGRESQL_UPPERCASE_TABLES'", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
         execute(alter_schema_query);
         final String refresh_schema_query = String.format("ALTER VIRTUAL SCHEMA %s REFRESH", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
@@ -237,7 +287,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
 
     // Identifier Test - PRESERVE_ORIGINAL_CASE mode --------------------------------
     @Test
-    public void testPreserveCaseQueryLowerCaseTableFails() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    public void testPreserveCaseQueryLowerCaseTableFails() throws SQLException {
         this.expectedEx.expect(SQLException.class);
         this.expectedEx.expectMessage("object PG_PRESERVE_CASE.LOWER_T not found");
         final String query = String.format("SELECT x FROM  %s.lower_t", VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE);
@@ -245,21 +295,21 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testPreserveCaseQueryLowerCaseTableWithQuotes() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    public void testPreserveCaseQueryLowerCaseTableWithQuotes() throws SQLException {
         final String query = String.format("SELECT \"x\" FROM  %s.\"lower_t\"", VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE);
         final ResultSet result = executeQuery(query);
         assertFalse(result.next());
     }
 
     @Test
-    public void testPreserveCaseQueryUpperCaseTableWithQuotes() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    public void testPreserveCaseQueryUpperCaseTableWithQuotes() throws SQLException {
         final String query = String.format("SELECT \"Y\" FROM  %s.\"UPPer_t\"", VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE);
         final ResultSet result = executeQuery(query);
         assertFalse(result.next());
     }
 
     @Test
-    public void testPreserveCaseQueryUpperCaseTableWithQuotesLowerCaseColumn() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    public void testPreserveCaseQueryUpperCaseTableWithQuotesLowerCaseColumn() throws SQLException {
         final String query = String.format("SELECT \"x\" FROM  %s.\"UPPer_t\"", VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE);
         final ResultSet result = executeQuery(query);
         assertFalse(result.next());

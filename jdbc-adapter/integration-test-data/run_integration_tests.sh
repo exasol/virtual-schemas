@@ -41,12 +41,31 @@ deploy_jdbc_drivers() {
 	bucket_fs_url=$(awk '/bucketFsUrl/{print $NF}' $config)
 	bfs_url_no_http=$(echo $bucket_fs_url | awk -F/ '{for(i=3;i<=NF;++i)printf "%s/",$i}')
 	bucket_fs_pwd=$(awk '/bucketFsPassword/{print $NF}' $config)
-	bucket_fs_upload_url=http://w:$bucket_fs_pwd@$bfs_url_no_http/drivers/jdbc/
+	bucket_fs_upload_url=http://w:$bucket_fs_pwd@$bfs_url_no_http/drivers/
+	#upload drivers that are part of the repository
 	for d in $jdbc_driver_dir/*
 	do
 	    db_driver=$(basename $d)
-	    find $jdbc_driver_dir/$db_driver -type f -exec curl -X PUT -T {} $bucket_fs_upload_url/$db_driver/ \;
+	    find $jdbc_driver_dir/$db_driver -type f -exec curl -X PUT -T {} $bucket_fs_upload_url/jdbc/$db_driver/ \;
 	done
+	#upload additional (local) drivers
+	additional_jdbc_driver_dir=$(awk '/additionalJDBCDriverDir/{print $NF}' $config)
+	if [ -d "$additional_jdbc_driver_dir" ]; then
+	    for d in $additional_jdbc_driver_dir/*
+	    do
+	        db_driver=$(basename $d)
+	        find $additional_jdbc_driver_dir/$db_driver -type f -exec curl -X PUT -T {} $bucket_fs_upload_url/jdbc/$db_driver/ \;
+	    done
+	fi
+	#deploy oracle instantclient
+	instantclient_dir=$(awk '/instantclientDir/{print $NF}' $config)
+	instantclient_path=$instantclient_dir/instantclient-basic-linux.x64-12.1.0.2.0.zip
+	if [ -f $instantclient_path ]; then
+	    curl -X PUT -T $instantclient_path $bucket_fs_upload_url/oracle/
+	fi
+	#workaround for https://github.com/exasol/docker-db/issues/26
+	docker exec -d exasoldb mkdir -p /exa/data/bucketfs/default/drivers
+	docker exec -d exasoldb ln -s /exa/data/bucketfs/bfsdefault/.dest/default/drivers/jdbc /exa/data/bucketfs/default/drivers/jdbc
 }
 
 replace_hosts_with_ips_in_config() {
@@ -55,6 +74,7 @@ replace_hosts_with_ips_in_config() {
 
 start_remote_dbs() {
 	$docker_helper --run $config
+	sleep 10
 }
 
 cleanup_remote_dbs() {

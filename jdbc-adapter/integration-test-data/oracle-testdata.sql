@@ -91,3 +91,13 @@ INSERT INTO LOADER.TYPE_TEST (c3, c5, c7, c_binfloat, c17) VALUES (
   -- c_float126
   -- c_long
 );
+
+create table ts_t(a timestamp, b timestamp with local time zone, c timestamp with time zone);
+insert into ts_t values (timestamp '2018-01-01 11:00:00', timestamp '2018-01-01 11:00:00 +01:00', timestamp '2018-01-01 11:00:00 +01:00');
+
+create table t1(x int, y varchar(100));
+insert into t1 values (1,'aaa');
+insert into t1 values (2,'bbb');
+create table t2(x int, y varchar(100));
+insert into t2 values (2,'bbb');
+insert into t2 values (3,'ccc');

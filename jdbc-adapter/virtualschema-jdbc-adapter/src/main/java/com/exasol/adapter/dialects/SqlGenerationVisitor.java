@@ -82,6 +82,10 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         checkDialectAliases();
     }
 
+    protected SqlDialect getDialect() {
+        return dialect;
+    }
+
     protected void checkDialectAliases() {
         // Check if dialect provided invalid aliases, which would never be applied.
         for (final ScalarFunction function : this.dialect.getScalarFunctionAliases().keySet()) {

@@ -7,21 +7,31 @@ import json
 
 def docker_run(config):
     for db, properties in config.items():
-        if 'dockerImage' in properties:
-            cmd = "docker run -d -p {port_map} --name {name} {image}:{version}".format(
-                port_map = properties['dockerPortMapping'],
-                name = properties['dockerName'],
-                image = properties['dockerImage'],
-                version = properties['dockerImageVersion'])
-            print(cmd)
-            run(cmd)
+        if properties.get('runIntegrationTests', False):
+            if 'dockerImage' in properties:
+                cmd = "docker run -d -p {port_map} --name {name} {image}:{version}".format(
+                    port_map = properties['dockerPortMapping'],
+                    name = properties['dockerName'],
+                    image = properties['dockerImage'],
+                    version = properties['dockerImageVersion'])
+                print(cmd)
+                run(cmd)
+            elif 'dockerName' in properties:
+                cmd = "docker start {name}".format(name = properties['dockerName'])
+                print(cmd)
+                run(cmd)
 
 def docker_rm(config):
     for db, properties in config.items():
-        if 'dockerImage' in properties:
-            cmd = "docker rm -f {name}".format(name = properties['dockerName'])
-            print(cmd)
-            run(cmd)
+        if properties.get('runIntegrationTests', False):
+            if 'dockerImage' in properties:
+                cmd = "docker rm -f {name}".format(name = properties['dockerName'])
+                print(cmd)
+                run(cmd)
+            elif 'dockerName' in properties:
+                cmd = "docker stop {name}".format(name = properties['dockerName'])
+                print(cmd)
+                run(cmd)
 
 def run(cmd):
     try: 
@@ -45,11 +55,12 @@ def run(cmd):
 
 def replace_hosts_in(config):
     for db, properties in config.items():
-        if 'dockerImage' in properties:
-            container_ip = get_ip_for(properties['dockerName'])
-            conn_string_with_ip = properties['dockerConnectionString'].replace(
-                'DBHOST',container_ip)
-            properties['dockerConnectionString'] = conn_string_with_ip
+        if properties.get('runIntegrationTests', False):
+            if 'dockerName' in properties:
+                container_ip = get_ip_for(properties['dockerName'])
+                conn_string_with_ip = properties['dockerConnectionString'].replace(
+                    'DBHOST',container_ip)
+                properties['dockerConnectionString'] = conn_string_with_ip
     return yaml.dump(config, default_flow_style=False)
 
 def get_ip_for(docker_name):
