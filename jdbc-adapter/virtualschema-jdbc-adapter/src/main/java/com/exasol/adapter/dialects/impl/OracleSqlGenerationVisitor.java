@@ -518,9 +518,11 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
             if (column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.VARCHAR) {
                 projString = "TO_CHAR(" + projString + ")";
             } else {
-                if (column.getMetadata().getType().getPrecision() > DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-                    DataType decimalType = dialect.getContext().getOracleCastNumberToDecimal();
-                    projString = "CAST(" + projString + " AS DECIMAL(" + decimalType.getPrecision() + "," + decimalType.getScale() + " ))";
+                DataType columnType = column.getMetadata().getType();
+                DataType castNumberToDecimalType = dialect.getContext().getOracleCastNumberToDecimal();
+                if (columnType.getPrecision() == castNumberToDecimalType.getPrecision() &&
+                columnType.getScale() == castNumberToDecimalType.getScale()) {
+                    projString = "CAST(" + projString + " AS DECIMAL(" + castNumberToDecimalType.getPrecision() + "," + castNumberToDecimalType.getScale() + "))";
                 }
             }
         } else if (typeName.equals("ROWID") ||

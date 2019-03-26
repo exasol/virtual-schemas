@@ -102,3 +102,6 @@ insert into t1 values (2,'bbb');
 create table t2(x int, y varchar(100));
 insert into t2 values (2,'bbb');
 insert into t2 values (3,'ccc');
+
+create table number_t(a number, b number(38, 10), c number(36,2));
+insert into number_t values (1234567890123456789012345678901234.56, 1234567890123456789012345678.9012345678, 1234567890123456789012345678901234.56);

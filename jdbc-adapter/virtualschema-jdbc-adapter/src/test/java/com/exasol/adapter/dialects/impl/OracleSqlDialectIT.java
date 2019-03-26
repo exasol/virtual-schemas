@@ -31,12 +31,21 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
 
     private static final String VIRTUAL_SCHEMA_JDBC = "VS_ORACLE_JDBC";
     private static final String VIRTUAL_SCHEMA_ORA = "VS_ORACLE_IMPORT";
+    private static final String VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL = "VS_ORACLE_JDBC_NUMBER_TO_DECIMAL";
+    private static final String VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL = "VS_ORACLE_ORA_NUMBER_TO_DECIMAL";
     private static final String ORACLE_SCHEMA = "LOADER";
     private static final String TEST_TABLE = "TYPE_TEST";
+    private static final String NUMBER_TABLE = "NUMBER_T";
+
 
     private static final String EXA_TABLE_JDBC = VIRTUAL_SCHEMA_JDBC + "." + TEST_TABLE;
     private static final String EXA_TABLE_ORA = VIRTUAL_SCHEMA_ORA + "." + TEST_TABLE;
     private static final String ORA_TABLE = ORACLE_SCHEMA + "\".\"" + TEST_TABLE;
+    private static final String ORA_NUMBER_TABLE = ORACLE_SCHEMA + "\".\"" + NUMBER_TABLE;
+    private static final String EXA_TABLE_JDBC_NUMBER_TO_DECIMAL = VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL + "." + TEST_TABLE;
+    private static final String ORA_TABLE_ORA_NUMBER_TO_DECIMAL = VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL + "." + TEST_TABLE;
+    private static final String EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL = VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL + "." + NUMBER_TABLE;
+    private static final String ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL = VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL + "." + NUMBER_TABLE;
 
     private static final boolean IS_LOCAL = false;
 
@@ -65,6 +74,20 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
                 // "ADAPTER.JDBC_ORACLE_DEBUG",
                 "ADAPTER.JDBC_ADAPTER", getConfig().getOracleDockerJdbcConnectionString(), IS_LOCAL,
                 getConfig().debugAddress(), "", "IMPORT_FROM_ORA='true' ORA_CONNECTION_NAME='CONN_ORACLE'","");
+
+        // create JDBC virtual schema with special NUMBER handling
+        createVirtualSchema(VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL, OracleSqlDialect.getPublicName(), "", ORACLE_SCHEMA, "",
+                getConfig().getOracleUser(), getConfig().getOraclePassword(),
+                // "ADAPTER.JDBC_ORACLE_DEBUG",
+                "ADAPTER.JDBC_ADAPTER", getConfig().getOracleDockerJdbcConnectionString(), IS_LOCAL,
+                getConfig().debugAddress(), "", "oracle_cast_number_to_decimal_with_precision_and_scale='36,1'","");
+
+        // create IMPORT FROM ORA virtual schema with special NUMBER handling
+        createVirtualSchema(VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL, OracleSqlDialect.getPublicName(), "", ORACLE_SCHEMA, "",
+                getConfig().getOracleUser(), getConfig().getOraclePassword(),
+                // "ADAPTER.JDBC_ORACLE_DEBUG",
+                "ADAPTER.JDBC_ADAPTER", getConfig().getOracleDockerJdbcConnectionString(), IS_LOCAL,
+                getConfig().debugAddress(), "", "IMPORT_FROM_ORA='true' ORA_CONNECTION_NAME='CONN_ORACLE' oracle_cast_number_to_decimal_with_precision_and_scale='36,1'","");
     }
 
     private static void createOracleJDBCAdapter() throws SQLException, FileNotFoundException {
@@ -111,11 +134,14 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
                 conn.getHost(), conn.getPort(), conn.getPath().substring(1));
         createConnection("CONN_ORACLE", connectionString, getConfig().getOracleUser(), getConfig().getOraclePassword());
     }
-
     private List<ResultSet> runQuery(final String query) throws SQLException {
+        return runQuery(query, EXA_TABLE_JDBC, EXA_TABLE_ORA);
+    }
+
+    private List<ResultSet> runQuery(final String query, final String jdbcTable, final String oraTable) throws SQLException {
         final ArrayList<ResultSet> result = new ArrayList<>();
-        result.add(runQueryJDBC(query));
-        result.add(runQueryORA(query));
+        result.add(runQueryJDBC(query, jdbcTable));
+        result.add(runQueryORA(query, oraTable));
         return result;
     }
 
@@ -125,6 +151,14 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
 
     private ResultSet runQueryORA(final String query) throws SQLException {
         return executeQuery(String.format(query, EXA_TABLE_ORA));
+    }
+
+    private ResultSet runQueryJDBC(final String query, final String table) throws SQLException {
+        return executeQuery(String.format(query, table));
+    }
+
+    private ResultSet runQueryORA(final String query, final String table) throws SQLException {
+        return executeQuery(String.format(query, table));
     }
 
     private void runMatchSingleRowExplain(final String query, final String expectedExplain) throws SQLException {
@@ -155,6 +189,108 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
             final BigDecimal actual = result.getBigDecimal(i).stripTrailingZeros();
             assertEquals(expected, actual);
         }
+    }
+    // Number handling --------------------------------------------------------
+    @Test(expected = SQLException.class)
+    public void testNumberToDecimal() throws SQLException {
+        final String query = "SELECT C5 FROM %s";
+        for (final ResultSet result : runQuery(query, EXA_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+            result.next();
+            final BigDecimal expected = new BigDecimal("123456789012345678901234567890123456");
+            final BigDecimal actual = result.getBigDecimal("C5");
+            assertEquals(expected, actual);
+        }
+    }
+
+    @Test
+    public void testNumber36ToDecimal() throws SQLException {
+        final String query = "SELECT c_number36 FROM %s";
+        for (final ResultSet result : runQuery(query, EXA_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+            result.next();
+            final BigDecimal expected = new BigDecimal("123456789012345678901234567890123456");
+            final BigDecimal actual = result.getBigDecimal("c_number36");
+            assertEquals(expected, actual);
+        }
+        assertEquals("DECIMAL(36,0)", getColumnType("C_NUMBER36"));
+    }
+
+    @Test(expected = SQLException.class)
+    public void testNumber38ToDecimal() throws SQLException {
+        final String query = "SELECT C6 FROM %s";
+        for (final ResultSet result : runQuery(query, EXA_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+            result.next();
+            final BigDecimal expected = new BigDecimal("12345678901234567890123456789012345678");
+            final BigDecimal actual = result.getBigDecimal("C6");
+            assertEquals(expected, actual);
+        }
+    }
+
+    @Test
+    public void testNumber10S5ToDecimal() throws SQLException {
+        final String query = "SELECT C7 FROM %s";
+        for (final ResultSet result : runQuery(query, EXA_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+            result.next();
+            final BigDecimal expected = new BigDecimal("12345.12345");
+            final BigDecimal actual = result.getBigDecimal("C7").stripTrailingZeros();
+            assertEquals(expected, actual);
+        }
+        assertEquals("DECIMAL(10,5)", getColumnType("C7"));
+    }
+
+    @Test
+    public void testSelectAllColsNumber() throws SQLException {
+        final String query = "SELECT * FROM %s";
+        //for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+        //    matchNextRowDecimal(result, "1234567890123456789012345678901234.5","1234567890123456789012345678.9","1234567890123456789012345678901234.56");
+        //}
+        //runMatchSingleRowExplain(query, "SELECT CAST(\"A\" AS DECIMAL(36,1), CAST(\"B\" AS DECIMAL(36,1), \"C\" FROM \"" + ORA_NUMBER_TABLE + "\"");
+
+        Map<String, String> columnTypesJDBC = getColumnTypesOfTable(EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL);
+        Map<String, String> columnTypesORA = getColumnTypesOfTable(ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL);
+
+        assertEquals("DECIMAL(36,1)", columnTypesJDBC.get("A"));
+        assertEquals("DECIMAL(36,1)", columnTypesORA.get("A"));
+        assertEquals("DECIMAL(36,1)",  columnTypesJDBC.get("B"));
+        assertEquals("DECIMAL(36,1)", columnTypesORA.get("B"));
+        assertEquals("DECIMAL(36,2)",  columnTypesJDBC.get("C"));
+        assertEquals("DECIMAL(36,2)", columnTypesORA.get("C"));
+    }
+
+    @Test
+    public void testSelectNumber() throws SQLException {
+        final String query = "SELECT a FROM %s";
+        //for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+        //    matchNextRowDecimal(result, "1234567890123456789012345678901234.5");
+        //}
+        matchSingleRowExplain(String.format(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL),
+                "SELECT CAST(\"A\" AS DECIMAL(36,1)) FROM \"" + ORA_NUMBER_TABLE + "\"");
+        matchSingleRowExplain(String.format(query, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL),
+                "SELECT CAST(\"A\" AS DECIMAL(36,1)) FROM \"" + ORA_NUMBER_TABLE + "\"");
+    }
+
+    @Test
+    public void testSelectNumber3810() throws SQLException {
+        final String query = "SELECT b FROM %s";
+        //for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+        //    matchNextRowDecimal(result, "1234567890123456789012345678.9");
+        //}
+        matchSingleRowExplain(String.format(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL),
+                "SELECT CAST(\"B\" AS DECIMAL(36,1)) FROM \"" + ORA_NUMBER_TABLE + "\"");
+        matchSingleRowExplain(String.format(query, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL),
+                "SELECT CAST(\"B\" AS DECIMAL(36,1)) FROM \"" + ORA_NUMBER_TABLE + "\"");
+    }
+
+    @Test
+    public void testSelectNumber3602() throws SQLException {
+        final String query = "SELECT c FROM %s";
+        //for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+        //    matchNextRowDecimal(result, "1234567890123456789012345678901234.56");
+        //}
+
+        matchSingleRowExplain(String.format(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL),
+                "SELECT \"C\" FROM \"" + ORA_NUMBER_TABLE + "\"");
+        matchSingleRowExplain(String.format(query, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL),
+                "SELECT \"C\" FROM \"" + ORA_NUMBER_TABLE + "\"");
     }
 
     // Join Tests -------------------------------------------------------------
