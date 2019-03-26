@@ -31,7 +31,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
 
     private static final String VIRTUAL_SCHEMA_JDBC = "VS_ORACLE_JDBC";
     private static final String VIRTUAL_SCHEMA_ORA = "VS_ORACLE_IMPORT";
-    private static final String ORACLE_SCHEMA = "SYSTEM";
+    private static final String ORACLE_SCHEMA = "LOADER";
     private static final String TEST_TABLE = "TYPE_TEST";
 
     private static final String EXA_TABLE_JDBC = VIRTUAL_SCHEMA_JDBC + "." + TEST_TABLE;
@@ -201,7 +201,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
         matchNextRow(result, null, null, "3" ,"ccc");
         assertFalse(result.next());
     }
-/*
+
     // Type Tests -------------------------------------------------------------
     @Test
     public void testColumnTypeEquivalence() throws SQLException {
@@ -605,5 +605,4 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
         assertEquals("VARCHAR(2000000) UTF8",  columnTypesJDBC.get("C"));
         assertEquals("VARCHAR(2000000) UTF8", columnTypesORA.get("C"));
     }
-    */
 }
