@@ -1,5 +1,6 @@
 -- ORACLE 12
 
+alter session set "_ORACLE_SCRIPT"=true;
 CREATE USER loader IDENTIFIED BY loader;
 
 GRANT CONNECT TO loader;

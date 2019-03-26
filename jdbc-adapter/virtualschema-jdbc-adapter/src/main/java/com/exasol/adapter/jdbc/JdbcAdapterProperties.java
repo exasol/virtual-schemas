@@ -156,7 +156,7 @@ public final class JdbcAdapterProperties {
 
     private static void checkOracleSpecificPropertyConsistency(Map<String, String> properties) throws InvalidPropertyException{
         if (properties.containsKey(PROP_ORACLE_CAST_NUMBER_TO_DECIMAL)) {
-            final String dialectName = getProperty(properties, PROP_SQL_DIALECT);
+            final String dialectName = getProperty(properties, PROP_SQL_DIALECT).toUpperCase();
             if (!dialectName.equals(VALUE_SQL_DIALECT_ORACLE)) {
                 throw new InvalidPropertyException(PROP_ORACLE_CAST_NUMBER_TO_DECIMAL + " can be used only with " + VALUE_SQL_DIALECT_ORACLE + " dialect.");
             }

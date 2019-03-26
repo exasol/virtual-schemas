@@ -227,7 +227,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     public void testFilterExpression() throws SQLException {
         final String query = "SELECT C7 FROM %s WHERE C7 > 12346";
         ResultSet resultJDBC = runQueryJDBC(query);
-        matchNextRow(resultJDBC, "12355.12345");
+        matchNextRow(resultJDBC, new BigDecimal("12355.12345"));
         ResultSet resultORA = runQueryORA(query);
         matchNextRow(resultORA, "01.2355123450E4");
 
@@ -301,8 +301,8 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     public void testOrderByExpression() throws SQLException {
         final String query = "SELECT C7 FROM %s ORDER BY ABS(C7) DESC NULLS FIRST";
         ResultSet resultJDBC = runQueryJDBC(query);
-        matchNextRow(resultJDBC, "12355.12345");
-        matchNextRow(resultJDBC, "12345.12345");
+        matchNextRow(resultJDBC, new BigDecimal("12355.12345"));
+        matchNextRow(resultJDBC, new BigDecimal("12345.12345"));
         ResultSet resultORA = runQueryORA(query);
         matchNextRow(resultORA, "01.2355123450E4");
         matchNextRow(resultORA, "01.2345123450E4");
@@ -314,8 +314,8 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     public void testLimit() throws SQLException {
         final String query = "SELECT C7 FROM %s ORDER BY C7 LIMIT 2";
         ResultSet resultJDBC = runQueryJDBC(query);
-        matchNextRow(resultJDBC, "12345.12345");
-        matchNextRow(resultJDBC, "12355.12345");
+        matchNextRow(resultJDBC, new BigDecimal("12345.12345"));
+        matchNextRow(resultJDBC, new BigDecimal("12355.12345"));
         ResultSet resultORA = runQueryORA(query);
         matchNextRow(resultORA, "01.2345123450E4");
         matchNextRow(resultORA, "01.2355123450E4");
@@ -328,7 +328,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     public void testLimitOffset() throws SQLException {
         final String query = "SELECT C7 FROM %s ORDER BY C7 LIMIT 1 OFFSET 1";
         ResultSet resultJDBC = runQueryJDBC(query);
-        matchNextRow(resultJDBC, "12355.12345");
+        matchNextRow(resultJDBC, new BigDecimal("12355.12345"));
         ResultSet resultORA = runQueryORA(query);
         matchNextRow(resultORA, "01.2355123450E4");
 
@@ -352,7 +352,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
         for (final ResultSet result : runQuery(query)) {
             matchNextRow(result, "bbbbbbbbbbbbbbbbbbbb                              ");
         }
-        assertEquals("VARCHAR(2000000) UTF8", getColumnType("C2"));
+        assertEquals("CHAR(50) UTF8", getColumnType("C2"));
     }
 
     @Test
@@ -370,7 +370,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
         for (final ResultSet result : runQuery(query)) {
             matchNextRow(result, "dddddddddddddddddddd");
         }
-        assertEquals("VARCHAR(2000000) UTF8", getColumnType("C4"));
+        assertEquals("VARCHAR(50) UTF8", getColumnType("C4"));
     }
 
     @Test
@@ -505,8 +505,8 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
 
         runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(\"C11\") FROM \"" + ORA_TABLE + "\"");
         runMatchSingleRowExplainORA(query, "SELECT \"C11\" FROM \"" + ORA_TABLE + "\"");
-        assertEquals("VARCHAR(2000000) UTF8", getColumnTypeJDBC("C11"));
-        assertEquals("VARCHAR(2000000) UTF8", getColumnTypeORA("C11"));
+        assertEquals("TIMESTAMP", getColumnTypeJDBC("C11"));
+        assertEquals("TIMESTAMP", getColumnTypeORA("C11"));
     }
 
     @Test
@@ -533,8 +533,8 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
 
         runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(\"C13\") FROM \"" + ORA_TABLE + "\"");
         runMatchSingleRowExplainORA(query, "SELECT \"C13\" FROM \"" + ORA_TABLE + "\"");
-        assertEquals("VARCHAR(2000000) UTF8", getColumnTypeJDBC("C13"));
-        assertEquals("VARCHAR(2000000) UTF8", getColumnTypeORA("C13"));
+        assertEquals("TIMESTAMP", getColumnTypeJDBC("C13"));
+        assertEquals("TIMESTAMP", getColumnTypeORA("C13"));
     }
 
     @Test

@@ -116,6 +116,7 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         final int jdbcType = jdbcTypeDescription.getJdbcType();
         switch (jdbcType) {
         case Types.DECIMAL:
+        case Types.NUMERIC:
             final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
             final int decimalScale = jdbcTypeDescription.getDecimalScale();
             if (decimalScale == -127) {
