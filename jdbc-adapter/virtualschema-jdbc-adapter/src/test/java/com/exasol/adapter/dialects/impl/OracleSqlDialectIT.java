@@ -240,10 +240,10 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     @Test
     public void testSelectAllColsNumber() throws SQLException {
         final String query = "SELECT * FROM %s";
-        //for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
-        //    matchNextRowDecimal(result, "1234567890123456789012345678901234.5","1234567890123456789012345678.9","1234567890123456789012345678901234.56");
-        //}
-        //runMatchSingleRowExplain(query, "SELECT CAST(\"A\" AS DECIMAL(36,1), CAST(\"B\" AS DECIMAL(36,1), \"C\" FROM \"" + ORA_NUMBER_TABLE + "\"");
+        for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+            matchNextRowDecimal(result, "1234567890123456789012345678901234.5","1234567890123456789012345678.9","1234567890123456789012345678901234.56");
+        }
+        runMatchSingleRowExplain(query, "SELECT CAST(\"A\" AS DECIMAL(36,1), CAST(\"B\" AS DECIMAL(36,1), \"C\" FROM \"" + ORA_NUMBER_TABLE + "\"");
 
         Map<String, String> columnTypesJDBC = getColumnTypesOfTable(EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL);
         Map<String, String> columnTypesORA = getColumnTypesOfTable(ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL);
@@ -259,9 +259,9 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     @Test
     public void testSelectNumber() throws SQLException {
         final String query = "SELECT a FROM %s";
-        //for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
-        //    matchNextRowDecimal(result, "1234567890123456789012345678901234.5");
-        //}
+        for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+            matchNextRowDecimal(result, "1234567890123456789012345678901234.6");
+        }
         matchSingleRowExplain(String.format(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL),
                 "SELECT CAST(\"A\" AS DECIMAL(36,1)) FROM \"" + ORA_NUMBER_TABLE + "\"");
         matchSingleRowExplain(String.format(query, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL),
@@ -271,9 +271,9 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     @Test
     public void testSelectNumber3810() throws SQLException {
         final String query = "SELECT b FROM %s";
-        //for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
-        //    matchNextRowDecimal(result, "1234567890123456789012345678.9");
-        //}
+        for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+            matchNextRowDecimal(result, "1234567890123456789012345678.9");
+        }
         matchSingleRowExplain(String.format(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL),
                 "SELECT CAST(\"B\" AS DECIMAL(36,1)) FROM \"" + ORA_NUMBER_TABLE + "\"");
         matchSingleRowExplain(String.format(query, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL),
@@ -283,9 +283,9 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     @Test
     public void testSelectNumber3602() throws SQLException {
         final String query = "SELECT c FROM %s";
-        //for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
-        //    matchNextRowDecimal(result, "1234567890123456789012345678901234.56");
-        //}
+        for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+            matchNextRowDecimal(result, "1234567890123456789012345678901234.56");
+        }
 
         matchSingleRowExplain(String.format(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL),
                 "SELECT \"C\" FROM \"" + ORA_NUMBER_TABLE + "\"");
