@@ -1,10 +1,5 @@
 package com.exasol.adapter.dialects;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.*;
-
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.jdbc.ConnectionInformation;
 import com.exasol.adapter.jdbc.JdbcAdapterProperties;
@@ -12,6 +7,11 @@ import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.*;
 
 /**
  * Abstract implementation of a dialect. We recommend that every dialect should
@@ -110,7 +110,8 @@ public abstract class AbstractSqlDialect implements SqlDialect {
             columnTypeName = "";
         }
         final String adapterNotes = ColumnAdapterNotes.serialize(new ColumnAdapterNotes(jdbcType, columnTypeName));
-        return new ColumnMetadata(colName, adapterNotes, colType, isNullable, isIdentity, defaultValue, comment);
+        return ColumnMetadata.builder().name(colName).adapterNotes(adapterNotes).type(colType).nullable(isNullable)
+              .identity(isIdentity).defaultValue(defaultValue).comment(comment).build();
     }
 
     private static DataType getExaTypeFromJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
