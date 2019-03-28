@@ -518,7 +518,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
             if (column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.VARCHAR) {
                 projString = "TO_CHAR(" + projString + ")";
             } else {
-                if (needToCastNumber(column)) {
+                if (needToCastNumberToDecimal(column)) {
                     final DataType castNumberToDecimalType = dialect.getContext().getOracleCastNumberToType();
                     projString = "CAST(" + projString + " AS DECIMAL(" + castNumberToDecimalType.getPrecision() + "," + castNumberToDecimalType.getScale() + "))";
                 }
@@ -542,7 +542,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                 if (column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.VARCHAR) {
                     return true;
                 } else {
-                    return needToCastNumber(column);
+                    return needToCastNumberToDecimal(column);
                 }
             } else {
                 for (final String typeRequiringCast : TYPE_NAMES_REQUIRING_CAST) {
@@ -555,7 +555,18 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         return false;
     }
 
-    private boolean needToCastNumber(SqlColumn column) {
+    /**
+     * This method determines if a NUMBER column needs to be casted to the DECIMAL type specified in
+     * the oracle_cast_number_to_decimal_with_precision_and_scale property.
+     * This is done by checking if the target type is the type specified in the property, assuming
+     * that this type was set according to the property.
+     * This method is not exact and will also add CASTs to columns that have the exact same type
+     * as specified in the property.
+     *
+     * @param column a NUMBER column
+     * @return true if a cast is necessary for the NUMBER column
+     */
+    private boolean needToCastNumberToDecimal(SqlColumn column) {
         final AbstractSqlDialect dialect = (AbstractSqlDialect) getDialect();
         final DataType columnType = column.getMetadata().getType();
         final DataType castNumberToDecimalType = dialect.getContext().getOracleCastNumberToType();
