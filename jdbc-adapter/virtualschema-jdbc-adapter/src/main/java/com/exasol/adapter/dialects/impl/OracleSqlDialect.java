@@ -124,13 +124,13 @@ public class OracleSqlDialect extends AbstractSqlDialect {
                 // without scale and precision. Convert to VARCHAR.
                 // See http://docs.oracle.com/cd/B28359_01/server.111/b28318/datatype.htm#i16209
                 // and https://docs.oracle.com/cd/E19501-01/819-3659/gcmaz/
-                colType = getContext().getOracleCastNumberToDecimal();
+                colType = getContext().getOracleCastNumberToType();
                 break;
             }
             if (decimalPrec <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
                 colType = DataType.createDecimal(decimalPrec, decimalScale);
             } else {
-                colType = getContext().getOracleCastNumberToDecimal();
+                colType = getContext().getOracleCastNumberToType();
             }
             break;
         case Types.OTHER:

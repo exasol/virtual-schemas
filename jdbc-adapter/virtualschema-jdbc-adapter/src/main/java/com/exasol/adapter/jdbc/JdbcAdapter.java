@@ -138,7 +138,7 @@ public class JdbcAdapter {
                 JdbcAdapterProperties.getExceptionHandlingMode(meta.getProperties()),
                 JdbcAdapterProperties.getIgnoreErrorList(meta.getProperties()),
                 getPostgreSQLIdentifierMapping(meta.getProperties()),
-                JdbcAdapterProperties.getOracleCastNumberToDecimal(meta.getProperties()));
+                JdbcAdapterProperties.getOracleCastNumberToType(meta.getProperties()));
     }
 
     private static String handleRefresh(final RefreshRequest request, final ExaMetadata meta)
@@ -171,7 +171,7 @@ public class JdbcAdapter {
                     JdbcAdapterProperties.getExceptionHandlingMode(newSchemaMeta),
                     JdbcAdapterProperties.getIgnoreErrorList(newSchemaMeta),
                     getPostgreSQLIdentifierMapping(newSchemaMeta),
-                    JdbcAdapterProperties.getOracleCastNumberToDecimal(newSchemaMeta));
+                    JdbcAdapterProperties.getOracleCastNumberToType(newSchemaMeta));
             return ResponseJsonSerializer.makeSetPropertiesResponse(remoteMeta);
         }
         return ResponseJsonSerializer.makeSetPropertiesResponse(null);
@@ -228,7 +228,7 @@ public class JdbcAdapter {
         final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping = getPostgreSQLIdentifierMapping(meta.getProperties());
         final SqlDialectContext dialectContext = new SqlDialectContext(SchemaAdapterNotes.deserialize(
                 request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()),
-                postgreSQLIdentifierMapping, getImportType(meta), JdbcAdapterProperties.getOracleCastNumberToDecimal(meta.getProperties()));
+                postgreSQLIdentifierMapping, getImportType(meta), JdbcAdapterProperties.getOracleCastNumberToType(meta.getProperties()));
         final SqlDialect dialect = JdbcAdapterProperties.getSqlDialect(request.getSchemaMetadataInfo().getProperties(),
                 dialectContext);
         final boolean hasMoreThanOneTable = request.getInvolvedTablesMetadata().size() > 1;

@@ -519,7 +519,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                 projString = "TO_CHAR(" + projString + ")";
             } else {
                 if (needToCastNumber(column)) {
-                    final DataType castNumberToDecimalType = dialect.getContext().getOracleCastNumberToDecimal();
+                    final DataType castNumberToDecimalType = dialect.getContext().getOracleCastNumberToType();
                     projString = "CAST(" + projString + " AS DECIMAL(" + castNumberToDecimalType.getPrecision() + "," + castNumberToDecimalType.getScale() + "))";
                 }
             }
@@ -558,7 +558,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     private boolean needToCastNumber(SqlColumn column) {
         final AbstractSqlDialect dialect = (AbstractSqlDialect) getDialect();
         final DataType columnType = column.getMetadata().getType();
-        final DataType castNumberToDecimalType = dialect.getContext().getOracleCastNumberToDecimal();
+        final DataType castNumberToDecimalType = dialect.getContext().getOracleCastNumberToType();
         if (columnType.getPrecision() == castNumberToDecimalType.getPrecision() &&
                 columnType.getScale() == castNumberToDecimalType.getScale()) {
             return true;

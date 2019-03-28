@@ -3,10 +3,6 @@ package com.exasol.adapter.dialects;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 import com.exasol.adapter.metadata.DataType;
 
-import javax.xml.crypto.Data;
-import java.util.Collections;
-import java.util.Map;
-
 /**
  * Context information required by {@link SqlDialect}
  */
@@ -14,7 +10,7 @@ public class SqlDialectContext {
     private SchemaAdapterNotes schemaAdapterNotes;
     private ImportType importType;
     private PostgreSQLIdentifierMapping postgreSQLIdentifierMapping;
-    private DataType oracleCastNumberToDecimal;
+    private DataType oracleCastNumberToType;
 
     public SqlDialectContext(SchemaAdapterNotes schemaAdapterNotes) {
         this(schemaAdapterNotes, PostgreSQLIdentifierMapping.CONVERT_TO_UPPER, ImportType.JDBC);
@@ -28,15 +24,15 @@ public class SqlDialectContext {
         this(schemaAdapterNotes, postgreSQLIdentifierMapping, importType, DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8));
     }
 
-    public SqlDialectContext(SchemaAdapterNotes schemaAdapterNotes, PostgreSQLIdentifierMapping postgreSQLIdentifierMapping, DataType oracleCastNumberToDecimal) {
-        this(schemaAdapterNotes, postgreSQLIdentifierMapping, ImportType.JDBC, oracleCastNumberToDecimal);
+    public SqlDialectContext(SchemaAdapterNotes schemaAdapterNotes, PostgreSQLIdentifierMapping postgreSQLIdentifierMapping, DataType oracleCastNumberToType) {
+        this(schemaAdapterNotes, postgreSQLIdentifierMapping, ImportType.JDBC, oracleCastNumberToType);
     }
 
-    public SqlDialectContext(SchemaAdapterNotes schemaAdapterNotes, PostgreSQLIdentifierMapping postgreSQLIdentifierMapping, ImportType importType, DataType oracleCastNumberToDecimal) {
+    public SqlDialectContext(SchemaAdapterNotes schemaAdapterNotes, PostgreSQLIdentifierMapping postgreSQLIdentifierMapping, ImportType importType, DataType oracleCastNumberToType) {
         this.schemaAdapterNotes = schemaAdapterNotes;
         this.postgreSQLIdentifierMapping = postgreSQLIdentifierMapping;
         this.importType = importType;
-        this.oracleCastNumberToDecimal = oracleCastNumberToDecimal;
+        this.oracleCastNumberToType = oracleCastNumberToType;
     }
 
     public SchemaAdapterNotes getSchemaAdapterNotes() {
@@ -49,7 +45,7 @@ public class SqlDialectContext {
         return postgreSQLIdentifierMapping;
     }
 
-    public DataType getOracleCastNumberToDecimal() {
-        return oracleCastNumberToDecimal;
+    public DataType getOracleCastNumberToType() {
+        return oracleCastNumberToType;
     }
 }

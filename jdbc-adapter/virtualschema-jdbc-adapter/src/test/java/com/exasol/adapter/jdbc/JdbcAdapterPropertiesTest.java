@@ -327,7 +327,7 @@ public class JdbcAdapterPropertiesTest {
         Map<String, String> properties = new HashMap<>();
         properties.put("SQL_DIALECT", "ORACLE");
         properties.put("ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE", "12,9");
-        DataType type = JdbcAdapterProperties.getOracleCastNumberToDecimal(properties);
+        DataType type = JdbcAdapterProperties.getOracleCastNumberToType(properties);
         assertAll(() -> assertThat(type.getPrecision(), equalTo(12)),
                 () -> assertThat(type.getScale(), equalTo(9)));
     }
@@ -335,7 +335,7 @@ public class JdbcAdapterPropertiesTest {
     @Test
     public void testGetOracleCastNumberToDecimalDefault() {
         Map<String, String> properties = new HashMap<>();
-        DataType type = JdbcAdapterProperties.getOracleCastNumberToDecimal(properties);
+        DataType type = JdbcAdapterProperties.getOracleCastNumberToType(properties);
         assertAll(() -> assertThat(type.getSize(), equalTo(DataType.MAX_EXASOL_VARCHAR_SIZE)),
                 () -> assertThat(type.getCharset(), equalTo(DataType.ExaCharset.UTF8)));
     }

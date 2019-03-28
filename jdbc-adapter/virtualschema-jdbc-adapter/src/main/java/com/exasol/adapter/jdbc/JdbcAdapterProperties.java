@@ -73,7 +73,7 @@ public final class JdbcAdapterProperties {
         return getProperty(properties, name, "");
     }
 
-    public static DataType getOracleCastNumberToDecimal(final Map<String, String> properties) {
+    public static DataType getOracleCastNumberToType(final Map<String, String> properties) {
         final String precisionAndScale = getProperty(properties, PROP_ORACLE_CAST_NUMBER_TO_DECIMAL);
         if (precisionAndScale.trim().isEmpty()) {
             return DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
