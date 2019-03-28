@@ -11,17 +11,19 @@ import com.exasol.adapter.metadata.*;
 import com.google.common.base.Joiner;
 
 /**
- * TODO Find good solutions to handle tables with unsupported data types, or
- * tables that generate exceptions. Ideas: Skip such tables by adding a boolean
- * property like IGNORE_INVALID_TABLES.
+ * TODO Find good solutions to handle tables with unsupported data types, or tables that generate exceptions. Ideas:
+ * Skip such tables by adding a boolean property like IGNORE_INVALID_TABLES.
+ * 
+ * @deprecated Use MetadataReader instead
  */
+@Deprecated
 public class JdbcMetadataReader {
     private static final Logger LOGGER = Logger.getLogger(JdbcMetadataReader.class.getName());
 
     public static SchemaMetadata readRemoteMetadata(final String connectionString, final String user,
-                                                    final String password, String catalog, String schema, final List<String> tableFilter,
-                                                    final String dialectName, final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, final List<String> ignoreErrorList,
-                                                    PostgreSQLIdentifierMapping postgreSQLIdentifierMapping)
+            final String password, String catalog, String schema, final List<String> tableFilter,
+            final String dialectName, final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode,
+            final List<String> ignoreErrorList, final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping)
             throws SQLException, AdapterException {
         assert (catalog != null);
         assert (schema != null);
@@ -45,7 +47,8 @@ public class JdbcMetadataReader {
 
             schema = findSchema(schema, dbMeta, dialect);
 
-            final List<TableMetadata> tables = findTables(catalog, schema, tableFilter, dbMeta, dialect, exceptionMode, ignoreErrorList);
+            final List<TableMetadata> tables = findTables(catalog, schema, tableFilter, dbMeta, dialect, exceptionMode,
+                    ignoreErrorList);
 
             return new SchemaMetadata(SchemaAdapterNotes.serialize(schemaAdapterNotes), tables);
         } catch (final SQLException e) {
@@ -55,7 +58,7 @@ public class JdbcMetadataReader {
     }
 
     private static Connection establishConnection(final String connectionString, final String user,
-                                                  final String password) throws SQLException {
+            final String password) throws SQLException {
         LOGGER.fine(() -> "Establishing connection with paramters: " + connectionString);
         final java.util.Properties info = new java.util.Properties();
         if (user != null) {
@@ -115,8 +118,8 @@ public class JdbcMetadataReader {
                 res.close();
             }
         }
-        if (dialect.supportsJdbcCatalogs() == SqlDialect.SchemaOrCatalogSupport.SUPPORTED
-                || dialect.supportsJdbcCatalogs() == SqlDialect.SchemaOrCatalogSupport.UNKNOWN) {
+        if ((dialect.supportsJdbcCatalogs() == SqlDialect.SchemaOrCatalogSupport.SUPPORTED)
+                || (dialect.supportsJdbcCatalogs() == SqlDialect.SchemaOrCatalogSupport.UNKNOWN)) {
             if (foundCatalog) {
                 return catalog;
             } else {
@@ -199,8 +202,8 @@ public class JdbcMetadataReader {
             }
         }
 
-        if (dialect.supportsJdbcSchemas() == SqlDialect.SchemaOrCatalogSupport.SUPPORTED
-                || dialect.supportsJdbcSchemas() == SqlDialect.SchemaOrCatalogSupport.UNKNOWN) {
+        if ((dialect.supportsJdbcSchemas() == SqlDialect.SchemaOrCatalogSupport.SUPPORTED)
+                || (dialect.supportsJdbcSchemas() == SqlDialect.SchemaOrCatalogSupport.UNKNOWN)) {
             if (foundSchema) {
                 return schema;
             } else {
@@ -241,11 +244,12 @@ public class JdbcMetadataReader {
     }
 
     private static List<TableMetadata> findTables(final String catalog, final String schema,
-                                                  final List<String> tableFilter, final DatabaseMetaData dbMeta, final SqlDialect dialect,
-                                                  final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, List<String> ignoreErrorList) throws SQLException {
+            final List<String> tableFilter, final DatabaseMetaData dbMeta, final SqlDialect dialect,
+            final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, final List<String> ignoreErrorList)
+            throws SQLException {
         final List<TableMetadata> tables = new ArrayList<>();
 
-        final String[] supportedTableTypes = {"TABLE", "VIEW", "SYSTEM TABLE"};
+        final String[] supportedTableTypes = { "TABLE", "VIEW", "SYSTEM TABLE" };
 
         final List<SqlDialect.MappedTable> tablesMapped = new ArrayList<>();
         try (final ResultSet resTables = dbMeta.getTables(catalog, schema, null, supportedTableTypes)) {
@@ -293,13 +297,13 @@ public class JdbcMetadataReader {
     }
 
     private static boolean identifiersAreCaseInsensitive(final SqlDialect dialect) {
-        return (dialect.getQuotedIdentifierHandling() == dialect.getUnquotedIdentifierHandling())
-                && dialect.getQuotedIdentifierHandling() != SqlDialect.IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
+        return (dialect.getQuotedIdentifierHandling() == dialect.getUnquotedIdentifierHandling()) && (dialect
+                .getQuotedIdentifierHandling() != SqlDialect.IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE);
     }
 
     private static List<ColumnMetadata> readColumns(final DatabaseMetaData dbMeta, final String catalog,
-                                                    final String schema, final String table, final SqlDialect dialect,
-                                                    final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
+            final String schema, final String table, final SqlDialect dialect,
+            final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
         final List<ColumnMetadata> columns = new ArrayList<>();
         try {
             final ResultSet cols = dbMeta.getColumns(catalog, schema, table, null);
