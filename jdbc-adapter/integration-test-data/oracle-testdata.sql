@@ -93,15 +93,15 @@ INSERT INTO LOADER.TYPE_TEST (c3, c5, c7, c_binfloat, c17) VALUES (
   -- c_long
 );
 
-create table ts_t(a timestamp, b timestamp with local time zone, c timestamp with time zone);
-insert into ts_t values (timestamp '2018-01-01 11:00:00', timestamp '2018-01-01 11:00:00 +01:00', timestamp '2018-01-01 11:00:00 +01:00');
+create table loader.ts_t(a timestamp, b timestamp with local time zone, c timestamp with time zone);
+insert into loader.ts_t values (timestamp '2018-01-01 11:00:00', timestamp '2018-01-01 11:00:00 +01:00', timestamp '2018-01-01 11:00:00 +01:00');
 
-create table t1(x int, y varchar(100));
-insert into t1 values (1,'aaa');
-insert into t1 values (2,'bbb');
-create table t2(x int, y varchar(100));
-insert into t2 values (2,'bbb');
-insert into t2 values (3,'ccc');
+create table loader.t1(x int, y varchar(100));
+insert into loader.t1 values (1,'aaa');
+insert into loader.t1 values (2,'bbb');
+create table loader.t2(x int, y varchar(100));
+insert into loader.t2 values (2,'bbb');
+insert into loader.t2 values (3,'ccc');
 
-create table number_t(a number, b number(38, 10), c number(36,2));
-insert into number_t values (1234567890123456789012345678901234.56, 1234567890123456789012345678.9012345678, 1234567890123456789012345678901234.56);
+create table loader.number_t(a number, b number(38, 10), c number(36,2));
+insert into loader.number_t values (1234567890123456789012345678901234.56, 1234567890123456789012345678.9012345678, 1234567890123456789012345678901234.56);

@@ -518,10 +518,8 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
             if (column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.VARCHAR) {
                 projString = "TO_CHAR(" + projString + ")";
             } else {
-                final DataType columnType = column.getMetadata().getType();
-                final DataType castNumberToDecimalType = dialect.getContext().getOracleCastNumberToDecimal();
-                if (columnType.getPrecision() == castNumberToDecimalType.getPrecision() &&
-                columnType.getScale() == castNumberToDecimalType.getScale()) {
+                if (needToCastNumber(column)) {
+                    final DataType castNumberToDecimalType = dialect.getContext().getOracleCastNumberToDecimal();
                     projString = "CAST(" + projString + " AS DECIMAL(" + castNumberToDecimalType.getPrecision() + "," + castNumberToDecimalType.getScale() + "))";
                 }
             }
@@ -544,13 +542,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                 if (column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.VARCHAR) {
                     return true;
                 } else {
-                    final AbstractSqlDialect dialect = (AbstractSqlDialect) getDialect();
-                    final DataType columnType = column.getMetadata().getType();
-                    final DataType castNumberToDecimalType = dialect.getContext().getOracleCastNumberToDecimal();
-                    if (columnType.getPrecision() == castNumberToDecimalType.getPrecision() &&
-                            columnType.getScale() == castNumberToDecimalType.getScale()) {
-                        return true;
-                    }
+                    return needToCastNumber(column);
                 }
             } else {
                 for (final String typeRequiringCast : TYPE_NAMES_REQUIRING_CAST) {
@@ -559,6 +551,17 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                     }
                 }
             }
+        }
+        return false;
+    }
+
+    private boolean needToCastNumber(SqlColumn column) {
+        final AbstractSqlDialect dialect = (AbstractSqlDialect) getDialect();
+        final DataType columnType = column.getMetadata().getType();
+        final DataType castNumberToDecimalType = dialect.getContext().getOracleCastNumberToDecimal();
+        if (columnType.getPrecision() == castNumberToDecimalType.getPrecision() &&
+                columnType.getScale() == castNumberToDecimalType.getScale()) {
+            return true;
         }
         return false;
     }
