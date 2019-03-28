@@ -25,7 +25,7 @@ public class RemoteMetadataReader {
         this.connection = connection;
     }
 
-    public SchemaMetadata readRemoteSchemaMetadata() throws RemoteMetadataReaderException {
+    public SchemaMetadata readRemoteSchemaMetadata() {
         try {
             final DatabaseMetaData remoteMetadata = this.connection.getMetaData();
             final String adapterNotes = null;
@@ -53,11 +53,15 @@ public class RemoteMetadataReader {
     }
 
     private TableMetadata mapTable(final ResultSet remoteTable) throws SQLException {
-        final String tableName = remoteTable.getString(TABLE_NAME_COLUMN);
+        final String tableName = readTableName(remoteTable);
         LOGGER.info(() -> "Mapping metadata for table \"" + tableName + "\"");
         final String adapterNotes = null;
         final List<ColumnMetadata> columns = new ColumnMetadataReader(this.connection).mapColumns(tableName);
         final String comment = null;
         return new TableMetadata(tableName, adapterNotes, columns, comment);
+    }
+
+    private String readTableName(final ResultSet remoteTable) throws SQLException {
+        return remoteTable.getString(TABLE_NAME_COLUMN);
     }
 }
