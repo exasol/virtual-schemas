@@ -3,6 +3,7 @@ package com.exasol.adapter.jdbc;
 /**
  * This class provides runtime exceptions for metadata retrieval.
  */
+@Deprecated
 public class RetrieveMetadataException extends RuntimeException {
     private static final long serialVersionUID = -2971883064471515520L;
 

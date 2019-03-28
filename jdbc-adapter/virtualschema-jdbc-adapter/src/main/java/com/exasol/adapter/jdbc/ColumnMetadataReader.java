@@ -6,18 +6,19 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.metadata.DataType.ExaCharset;
 
 public class ColumnMetadataReader {
-    public static final int COLUMN_NAME = 4;
-    public static final int DATA_TYPE = 5;
-    public static final int COLUMN_SIZE = 7;
+    public static final String COLUMN_NAME = "COLUMN_NAME";
+    public static final String DATA_TYPE = "DATA_TYPE";
+    public static final String COLUMN_SIZE = "COLUMN_SIZE";
     private final Connection connection;
+    private final SqlDialect sqlDialect;
 
-    public ColumnMetadataReader(final Connection connection) {
+    public ColumnMetadataReader(final Connection connection, final SqlDialect sqlDialect) {
         this.connection = connection;
+        this.sqlDialect = sqlDialect;
     }
 
     public List<ColumnMetadata> mapColumns(final String tableName) {
@@ -29,52 +30,57 @@ public class ColumnMetadataReader {
                 columns.add(metadata);
             }
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException("Unable to read table metadata from remote", exception);
+            throw new RemoteMetadataReaderException("Unable to read column metadata from remote", exception);
         }
         return columns;
     }
 
     private ColumnMetadata mapColumn(final ResultSet remoteColumn) throws SQLException {
-        return ColumnMetadata.builder() //
-                .name(readColumnName(remoteColumn)) //
-                .type(mapDatatype(remoteColumn)) //
-                .build();
+        return this.sqlDialect.mapColumn(remoteColumn);
+//        return ColumnMetadata.builder() //
+//                .name(readColumnName(remoteColumn)) //
+//                .type(mapDatatype(remoteColumn)) //
+//                .build();
     }
 
-    private String readColumnName(final ResultSet remoteColumn) {
-        try {
-            return remoteColumn.getString(COLUMN_NAME);
-        } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException("Unable to read remote column name.", exception);
-        }
-    }
-
-    /**
-     * Parse the data type from a string
-     *
-     * @param string data type name
-     * @return data type
-     */
-    public DataType mapDatatype(final ResultSet remoteColumn) throws SQLException {
-        final String datatypeName = readDatatypeName(remoteColumn);
-        switch (datatypeName) {
-        case "BOOLEAN":
-            return DataType.createBool();
-        case "CHAR":
-            return DataType.createChar(readColumnSize(remoteColumn), ExaCharset.UTF8);
-        case "DOUBLE":
-            return DataType.createDouble();
-        default:
-            throw new IllegalArgumentException("Unable to map \"" + datatypeName + "\" into an Exasol data type.");
-        }
-
-    }
-
-    private int readColumnSize(final ResultSet remoteColumn) throws SQLException {
-        return remoteColumn.getInt(COLUMN_SIZE);
-    }
-
-    private String readDatatypeName(final ResultSet remoteColumn) throws SQLException {
-        return remoteColumn.getString(DATA_TYPE);
-    }
+//    private String readColumnName(final ResultSet remoteColumn) throws SQLException {
+//        return remoteColumn.getString(COLUMN_NAME);
+//    }
+//
+//    /**
+//     * Parse the data type from a string
+//     *
+//     * @param string data type name
+//     * @return data type
+//     */
+//    public DataType mapDatatype(final ResultSet remoteColumn) throws SQLException {
+//        final String datatypeName = readDatatypeName(remoteColumn);
+//        switch (datatypeName) {
+//        case "BOOLEAN":
+//            return DataType.createBool();
+//        case "CHAR":
+//            return DataType.createChar(readColumnSize(remoteColumn), ExaCharset.UTF8);
+//        case "DATE":
+//            return DataType.createDate();
+//        case "DOUBLE":
+//            return DataType.createDouble();
+//        case "TIMESTAMP":
+//            return DataType.createTimestamp(false);
+//        case "TIMESTAMP WITH LOCAL TIME ZONE":
+//            return DataType.createTimestamp(true);
+//        case "VARCHAR":
+//            return DataType.createVarChar(readColumnSize(remoteColumn), ExaCharset.UTF8);
+//        default:
+//            throw new IllegalArgumentException("Unable to map \"" + datatypeName + "\" into an Exasol data type.");
+//        }
+//
+//    }
+//
+//    private int readColumnSize(final ResultSet remoteColumn) throws SQLException {
+//        return remoteColumn.getInt(COLUMN_SIZE);
+//    }
+//
+//    private String readDatatypeName(final ResultSet remoteColumn) throws SQLException {
+//        return remoteColumn.getString(DATA_TYPE);
+//    }
 }

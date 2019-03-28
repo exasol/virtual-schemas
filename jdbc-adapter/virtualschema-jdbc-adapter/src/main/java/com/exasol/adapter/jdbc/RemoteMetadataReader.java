@@ -3,11 +3,12 @@ package com.exasol.adapter.jdbc;
 import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.*;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
-import com.exasol.adapter.metadata.*;
+import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.metadata.SchemaMetadata;
+import com.exasol.adapter.metadata.TableMetadata;
 
 /**
  * This class implements basic reading of database metadata from JDBC
@@ -18,11 +19,12 @@ import com.exasol.adapter.metadata.*;
 public class RemoteMetadataReader {
     private static final Logger LOGGER = Logger.getLogger(RemoteMetadataReader.class.getName());
     private static final String TABLE_NAME_COLUMN = "TABLE_NAME";
-
     private final Connection connection;
+    private final SqlDialect sqlDialect;
 
-    public RemoteMetadataReader(final Connection connection) {
+    public RemoteMetadataReader(final Connection connection, final SqlDialect sqlDialect) {
         this.connection = connection;
+        this.sqlDialect = sqlDialect;
     }
 
     public SchemaMetadata readRemoteSchemaMetadata() {
@@ -53,15 +55,14 @@ public class RemoteMetadataReader {
     }
 
     private TableMetadata mapTable(final ResultSet remoteTable) throws SQLException {
-        final String tableName = readTableName(remoteTable);
-        LOGGER.info(() -> "Mapping metadata for table \"" + tableName + "\"");
-        final String adapterNotes = null;
-        final List<ColumnMetadata> columns = new ColumnMetadataReader(this.connection).mapColumns(tableName);
-        final String comment = null;
-        return new TableMetadata(tableName, adapterNotes, columns, comment);
+        this.sqlDialect.mapTable(remoteTable, Collections.emptyList()); // FIXME: use real list.
     }
-
-    private String readTableName(final ResultSet remoteTable) throws SQLException {
-        return remoteTable.getString(TABLE_NAME_COLUMN);
-    }
+//        final String tableName = readTableName(remoteTable);
+//        LOGGER.info(() -> "Mapping metadata for table \"" + tableName + "\"");
+//        final String adapterNotes = null;
+//        final List<ColumnMetadata> columns = new ColumnMetadataReader(this.connection, this.sqlDialect)
+//                .mapColumns(tableName);
+//        final String comment = null;
+//        return new TableMetadata(tableName, adapterNotes, columns, comment);
+//    }
 }

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
+import com.exasol.adapter.dialects.impl.ExasolSqlDialect;
 import com.exasol.adapter.metadata.*;
 
 class RemoteMetadataReaderTest {
@@ -29,9 +30,12 @@ class RemoteMetadataReaderTest {
     @Test
     void testReadEmptyRemoteMetadata() throws RemoteMetadataReaderException, SQLException {
         mockGetAllTablesReturnsEmptyList();
-        final RemoteMetadataReader reader = new RemoteMetadataReader(this.connectionMock);
-        final SchemaMetadata metadata = reader.readRemoteSchemaMetadata();
-        assertThat(metadata.getTables(), emptyIterableOf(TableMetadata.class));
+        assertThat(readMockedSchemaMetadata().getTables(), emptyIterableOf(TableMetadata.class));
+    }
+
+    private SchemaMetadata readMockedSchemaMetadata() {
+        final RemoteMetadataReader reader = new RemoteMetadataReader(this.connectionMock, new ExasolSqlDialect(null));
+        return reader.readRemoteSchemaMetadata();
     }
 
     private void mockGetAllTablesReturnsEmptyList() throws SQLException {
@@ -44,8 +48,7 @@ class RemoteMetadataReaderTest {
     void testReadRemoteMetadata() throws RemoteMetadataReaderException, SQLException {
         mockGetColumnsCalls();
         mockGetTableCalls();
-        final RemoteMetadataReader reader = new RemoteMetadataReader(this.connectionMock);
-        final SchemaMetadata metadata = reader.readRemoteSchemaMetadata();
+        final SchemaMetadata metadata = readMockedSchemaMetadata();
         final List<TableMetadata> tables = metadata.getTables();
         final TableMetadata tableAMetadata = tables.get(0);
         final TableMetadata tableBMetadata = tables.get(1);
