@@ -130,7 +130,8 @@ public class SqlDialectTest {
 
     private TableMetadata getTestTableMetadata() {
         final List<ColumnMetadata> columns = new ArrayList<>();
-        columns.add(new ColumnMetadata("C1", "", DataType.createBool(), true, false, "", ""));
+        columns.add(ColumnMetadata.builder().name("C1").adapterNotes("").type(DataType.createBool()).nullable(true)
+              .identity(false).defaultValue("").comment("").build());
         return new TableMetadata("TEST", "", columns, "");
     }
 

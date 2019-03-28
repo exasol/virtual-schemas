@@ -1,26 +1,34 @@
 package com.exasol.adapter.dialects;
 
+import com.exasol.adapter.metadata.ColumnMetadata;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.TableMetadata;
+import com.exasol.adapter.sql.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.exasol.adapter.dialects.SqlGenerationHelper.getMetadataFrom;
 import static org.junit.Assert.assertEquals;
 
-import java.util.*;
-
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.TableMetadata;
-import com.exasol.adapter.sql.*;
-
-public class SqlGenerationHelperTest {
+class SqlGenerationHelperTest {
     private static final String TABLE_NAME_1 = "TABLE_NAME_1";
     private static final String TABLE_NAME_2 = "TABLE_NAME_2";
     private static final String TABLE_NAME_3 = "TABLE_NAME_3";
     private static final String TABLE_NAME_4 = "TABLE_NAME_4";
-    private final List<ColumnMetadata> columns = Collections.singletonList(Mockito.mock(ColumnMetadata.class));
+    private List<ColumnMetadata> columns;
+
+    @BeforeEach
+    void setUp() {
+        this.columns = new ArrayList<>();
+        this.columns.add(ColumnMetadata.builder().name("column1").type(DataType.createBool()).build());
+    }
 
     @Test
-    public void testGetMetadataFromTable() {
+    void testGetMetadataFromTable() {
         final TableMetadata metadataT1 = new TableMetadata(TABLE_NAME_1, "", this.columns, "");
         final SqlNode t1 = new SqlTable(TABLE_NAME_1, metadataT1);
         final List<TableMetadata> allMetadata = new ArrayList<>();
@@ -30,7 +38,7 @@ public class SqlGenerationHelperTest {
     }
 
     @Test
-    public void testGetMetadataFromSimpleJoin() {
+    void testGetMetadataFromSimpleJoin() {
         final TableMetadata metadataT1 = new TableMetadata(TABLE_NAME_1, "", this.columns, "");
         final TableMetadata metadataT2 = new TableMetadata(TABLE_NAME_2, "", this.columns, "");
 
@@ -46,7 +54,7 @@ public class SqlGenerationHelperTest {
     }
 
     @Test
-    public void testGetMetadataFromNestedJoin() {
+    void testGetMetadataFromNestedJoin() {
         final TableMetadata metadataT1 = new TableMetadata(TABLE_NAME_1, "", this.columns, "");
         final TableMetadata metadataT2 = new TableMetadata(TABLE_NAME_2, "", this.columns, "");
         final TableMetadata metadataT3 = new TableMetadata(TABLE_NAME_3, "", this.columns, "");
@@ -66,7 +74,7 @@ public class SqlGenerationHelperTest {
     }
 
     @Test
-    public void testGetMetadataFromTwoNestedJoins() {
+    void testGetMetadataFromTwoNestedJoins() {
         final TableMetadata metadataT1 = new TableMetadata(TABLE_NAME_1, "", this.columns, "");
         final TableMetadata metadataT2 = new TableMetadata(TABLE_NAME_2, "", this.columns, "");
         final TableMetadata metadataT3 = new TableMetadata(TABLE_NAME_3, "", this.columns, "");

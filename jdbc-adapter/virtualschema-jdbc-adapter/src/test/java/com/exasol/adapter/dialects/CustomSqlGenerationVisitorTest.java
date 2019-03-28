@@ -1,21 +1,21 @@
 package com.exasol.adapter.dialects;
 
-import static org.junit.Assert.assertEquals;
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.dialects.impl.ExasolSqlDialect;
+import com.exasol.adapter.jdbc.SchemaAdapterNotes;
+import com.exasol.adapter.metadata.ColumnMetadata;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.TableMetadata;
+import com.exasol.adapter.sql.*;
+import com.google.common.collect.ImmutableList;
+import org.junit.Test;
+import org.mockito.Mockito;
+import utils.SqlTestUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.dialects.impl.ExasolSqlDialect;
-import com.exasol.adapter.jdbc.SchemaAdapterNotes;
-import com.exasol.adapter.metadata.*;
-import com.exasol.adapter.sql.*;
-import com.google.common.collect.ImmutableList;
-
-import utils.SqlTestUtil;
+import static org.junit.Assert.assertEquals;
 
 public class CustomSqlGenerationVisitorTest {
 
@@ -30,8 +30,8 @@ public class CustomSqlGenerationVisitorTest {
         final String expectedSql = "SELECT NOT_CUSTOM (NOT_CUSTOM (\"C1\")) FROM \"" + schemaName + "\".\"TEST\"";
         final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, false);
         final SqlDialectContext dialectContext = new SqlDialectContext(Mockito.mock(SchemaAdapterNotes.class));
-        final SqlGenerationVisitor generator = new TestSqlGenerationVisitor(new ExasolSqlDialect(dialectContext),
-                context);
+        final SqlGenerationVisitor generator =
+              new TestSqlGenerationVisitor(new ExasolSqlDialect(dialectContext), context);
         final String actualSql = node.accept(generator);
         assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
     }
@@ -40,13 +40,14 @@ public class CustomSqlGenerationVisitorTest {
         final TableMetadata clicksMeta = getTestTableMetadata();
         final SqlTable fromClause = new SqlTable("TEST", clicksMeta);
         final SqlSelectList selectList = SqlSelectList.createRegularSelectList(ImmutableList.<SqlNode>of(
-                new SqlPredicateNot(new SqlPredicateNot(new SqlColumn(1, clicksMeta.getColumns().get(0))))));
+              new SqlPredicateNot(new SqlPredicateNot(new SqlColumn(1, clicksMeta.getColumns().get(0))))));
         return new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
     }
 
     private TableMetadata getTestTableMetadata() {
         final List<ColumnMetadata> columns = new ArrayList<>();
-        columns.add(new ColumnMetadata("C1", "", DataType.createBool(), true, false, "", ""));
+        columns.add(ColumnMetadata.builder().name("C1").adapterNotes("").type(DataType.createBool()).nullable(true)
+              .identity(false).defaultValue("").comment("").build());
         return new TableMetadata("TEST", "", columns, "");
     }
 
