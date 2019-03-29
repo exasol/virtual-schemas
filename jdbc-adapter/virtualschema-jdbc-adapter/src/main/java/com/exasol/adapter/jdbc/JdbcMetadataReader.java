@@ -1,14 +1,19 @@
 package com.exasol.adapter.jdbc;
 
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.dialects.PostgreSQLIdentifierMapping;
+import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.dialects.SqlDialectContext;
+import com.exasol.adapter.dialects.SqlDialects;
+import com.exasol.adapter.metadata.ColumnMetadata;
+import com.exasol.adapter.metadata.SchemaMetadata;
+import com.exasol.adapter.metadata.TableMetadata;
+import com.google.common.base.Joiner;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
-import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.*;
-import com.google.common.base.Joiner;
 
 /**
  * TODO Find good solutions to handle tables with unsupported data types, or
@@ -21,7 +26,7 @@ public class JdbcMetadataReader {
     public static SchemaMetadata readRemoteMetadata(final String connectionString, final String user,
                                                     final String password, String catalog, String schema, final List<String> tableFilter,
                                                     final String dialectName, final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, final List<String> ignoreErrorList,
-                                                    PostgreSQLIdentifierMapping postgreSQLIdentifierMapping)
+                                                    final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping)
             throws SQLException, AdapterException {
         assert (catalog != null);
         assert (schema != null);
@@ -30,14 +35,22 @@ public class JdbcMetadataReader {
 
             // Retrieve relevant parts of DatabaseMetadata. Will be cached in adapternotes
             // of the schema.
-            final SchemaAdapterNotes schemaAdapterNotes = new SchemaAdapterNotes(dbMeta.getCatalogSeparator(),
-                    dbMeta.getIdentifierQuoteString(), dbMeta.storesLowerCaseIdentifiers(),
-                    dbMeta.storesUpperCaseIdentifiers(), dbMeta.storesMixedCaseIdentifiers(),
-                    dbMeta.supportsMixedCaseIdentifiers(), dbMeta.storesLowerCaseQuotedIdentifiers(),
-                    dbMeta.storesUpperCaseQuotedIdentifiers(), dbMeta.storesMixedCaseQuotedIdentifiers(),
-                    dbMeta.supportsMixedCaseQuotedIdentifiers(), dbMeta.nullsAreSortedAtEnd(),
-                    dbMeta.nullsAreSortedAtStart(), dbMeta.nullsAreSortedHigh(), dbMeta.nullsAreSortedLow());
-
+            final SchemaAdapterNotes schemaAdapterNotes = SchemaAdapterNotes.builder() //
+                  .catalogSeparator(dbMeta.getCatalogSeparator()) //
+                  .identifierQuoteString(dbMeta.getIdentifierQuoteString()) //
+                  .storesLowerCaseIdentifiers(dbMeta.storesLowerCaseIdentifiers()) //
+                  .storesUpperCaseIdentifiers(dbMeta.storesUpperCaseIdentifiers()) //
+                  .storesMixedCaseIdentifiers(dbMeta.storesMixedCaseIdentifiers()) //
+                  .supportsMixedCaseIdentifiers(dbMeta.supportsMixedCaseIdentifiers()) //
+                  .storesLowerCaseQuotedIdentifiers(dbMeta.storesLowerCaseQuotedIdentifiers()) //
+                  .storesUpperCaseQuotedIdentifiers(dbMeta.storesUpperCaseQuotedIdentifiers()) //
+                  .storesMixedCaseQuotedIdentifiers(dbMeta.storesMixedCaseQuotedIdentifiers()) //
+                  .supportsMixedCaseQuotedIdentifiers(dbMeta.supportsMixedCaseQuotedIdentifiers()) //
+                  .nullsAreSortedAtEnd(dbMeta.nullsAreSortedAtEnd()) //
+                  .nullsAreSortedAtStart(dbMeta.nullsAreSortedAtStart()) //
+                  .nullsAreSortedHigh(dbMeta.nullsAreSortedHigh()) //
+                  .nullsAreSortedLow(dbMeta.nullsAreSortedLow()) //
+                  .build();
             final SqlDialect dialect = SqlDialects.getInstance().getDialectInstanceForNameWithContext(dialectName,
                     new SqlDialectContext(schemaAdapterNotes, postgreSQLIdentifierMapping));
 
@@ -242,7 +255,7 @@ public class JdbcMetadataReader {
 
     private static List<TableMetadata> findTables(final String catalog, final String schema,
                                                   final List<String> tableFilter, final DatabaseMetaData dbMeta, final SqlDialect dialect,
-                                                  final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, List<String> ignoreErrorList) throws SQLException {
+                                                  final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, final List<String> ignoreErrorList) throws SQLException {
         final List<TableMetadata> tables = new ArrayList<>();
 
         final String[] supportedTableTypes = {"TABLE", "VIEW", "SYSTEM TABLE"};
