@@ -7,45 +7,45 @@ import com.exasol.adapter.metadata.DataType;
  * Context information required by {@link SqlDialect}
  */
 public class SqlDialectContext {
-    private SchemaAdapterNotes schemaAdapterNotes;
-    private ImportType importType;
-    private PostgreSQLIdentifierMapping postgreSQLIdentifierMapping;
-    private DataType oracleCastNumberToType;
+    private final SchemaAdapterNotes schemaAdapterNotes;
+    private final ImportType importType;
+    private final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping;
+    private final DataType oracleNumberTargetType;
 
-    public SqlDialectContext(SchemaAdapterNotes schemaAdapterNotes) {
+    public SqlDialectContext(final SchemaAdapterNotes schemaAdapterNotes) {
         this(schemaAdapterNotes, PostgreSQLIdentifierMapping.CONVERT_TO_UPPER, ImportType.JDBC);
     }
 
-    public SqlDialectContext(SchemaAdapterNotes schemaAdapterNotes, PostgreSQLIdentifierMapping postgreSQLIdentifierMapping) {
+    public SqlDialectContext(final SchemaAdapterNotes schemaAdapterNotes, final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping) {
         this(schemaAdapterNotes, postgreSQLIdentifierMapping, ImportType.JDBC);
     }
 
-    public SqlDialectContext(SchemaAdapterNotes schemaAdapterNotes, PostgreSQLIdentifierMapping postgreSQLIdentifierMapping, ImportType importType) {
+    public SqlDialectContext(final SchemaAdapterNotes schemaAdapterNotes, final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping, final ImportType importType) {
         this(schemaAdapterNotes, postgreSQLIdentifierMapping, importType, DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8));
     }
 
-    public SqlDialectContext(SchemaAdapterNotes schemaAdapterNotes, PostgreSQLIdentifierMapping postgreSQLIdentifierMapping, DataType oracleCastNumberToType) {
-        this(schemaAdapterNotes, postgreSQLIdentifierMapping, ImportType.JDBC, oracleCastNumberToType);
+    public SqlDialectContext(final SchemaAdapterNotes schemaAdapterNotes, final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping, final DataType oracleNumberTargetType) {
+        this(schemaAdapterNotes, postgreSQLIdentifierMapping, ImportType.JDBC, oracleNumberTargetType);
     }
 
-    public SqlDialectContext(SchemaAdapterNotes schemaAdapterNotes, PostgreSQLIdentifierMapping postgreSQLIdentifierMapping, ImportType importType, DataType oracleCastNumberToType) {
+    public SqlDialectContext(final SchemaAdapterNotes schemaAdapterNotes, final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping, final ImportType importType, final DataType oracleNumberTargetType) {
         this.schemaAdapterNotes = schemaAdapterNotes;
         this.postgreSQLIdentifierMapping = postgreSQLIdentifierMapping;
         this.importType = importType;
-        this.oracleCastNumberToType = oracleCastNumberToType;
+        this.oracleNumberTargetType = oracleNumberTargetType;
     }
 
     public SchemaAdapterNotes getSchemaAdapterNotes() {
-        return schemaAdapterNotes;
+        return this.schemaAdapterNotes;
     }
 
-    public ImportType getImportType() { return importType; }
+    public ImportType getImportType() { return this.importType; }
 
     public PostgreSQLIdentifierMapping getPostgreSQLIdentifierMapping() {
-        return postgreSQLIdentifierMapping;
+        return this.postgreSQLIdentifierMapping;
     }
 
-    public DataType getOracleCastNumberToType() {
-        return oracleCastNumberToType;
+    public DataType getOracleNumberTargetType() {
+        return this.oracleNumberTargetType;
     }
 }

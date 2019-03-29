@@ -254,9 +254,9 @@ public class JdbcAdapterPropertiesTest {
 
     @Test
     public void getIgnoreErrors() {
-        Map<String, String> properties = new HashMap<>();
+        final Map<String, String> properties = new HashMap<>();
         properties.put("IGNORE_ERRORS", "ERrror_foo, error_bar    ,  another_error, уккщк");
-        List<String> expectedErrorList = new ArrayList<>();
+        final List<String> expectedErrorList = new ArrayList<>();
         expectedErrorList.add("ERRROR_FOO");
         expectedErrorList.add("ERROR_BAR");
         expectedErrorList.add("ANOTHER_ERROR");
@@ -266,7 +266,7 @@ public class JdbcAdapterPropertiesTest {
 
     @Test(expected = InvalidPropertyException.class)
     public void checkIgnoreErrorsConsistency() throws AdapterException {
-        Map<String, String> properties = new HashMap<>();
+        final Map<String, String> properties = new HashMap<>();
         properties.put("IGNORE_ERRORS", "ORACLE_ERROR");
         properties.put("dialect", "postgresql");
         JdbcAdapterProperties.checkPropertyConsistency(properties);
@@ -274,30 +274,30 @@ public class JdbcAdapterPropertiesTest {
 
     @Test
     public void testGetDefaultPostgreSQLIdentifierMapping() {
-        Map<String, String> properties = new HashMap<>();
-        String val = JdbcAdapterProperties.getPostgreSQLIdentifierMapping(properties);
+        final Map<String, String> properties = new HashMap<>();
+        final String val = JdbcAdapterProperties.getPostgreSQLIdentifierMapping(properties);
         assertEquals("CONVERT_TO_UPPER", val);
     }
 
     @Test
     public void testGetPreserveCasePostgreSQLIdentifierMapping() {
-        Map<String, String> properties = new HashMap<>();
+        final Map<String, String> properties = new HashMap<>();
         properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "PRESERVE_ORIGINAL_CASE");
-        String val = JdbcAdapterProperties.getPostgreSQLIdentifierMapping(properties);
+        final String val = JdbcAdapterProperties.getPostgreSQLIdentifierMapping(properties);
         assertEquals("PRESERVE_ORIGINAL_CASE", val);
     }
 
     @Test
     public void testGetConverToUpperPostgreSQLIdentifierMapping() {
-        Map<String, String> properties = new HashMap<>();
+        final Map<String, String> properties = new HashMap<>();
         properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT_TO_UPPER");
-        String val = JdbcAdapterProperties.getPostgreSQLIdentifierMapping(properties);
+        final String val = JdbcAdapterProperties.getPostgreSQLIdentifierMapping(properties);
         assertEquals("CONVERT_TO_UPPER", val);
     }
 
     @Test(expected = InvalidPropertyException.class)
     public void checkPostgreSQLIdentifierMappingConsistencyThrowsException() throws AdapterException {
-        Map<String, String> properties = new HashMap<>();
+        final Map<String, String> properties = new HashMap<>();
         properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT_TO_UPPER");
         properties.put("SQL_DIALECT", "ORACLE");
         properties.put("CONNECTION_NAME", "CONN1");
@@ -306,7 +306,7 @@ public class JdbcAdapterPropertiesTest {
 
     @Test
     public void checkPostgreSQLIdentifierMappingConsistency() throws AdapterException {
-        Map<String, String> properties = new HashMap<>();
+        final Map<String, String> properties = new HashMap<>();
         properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT_TO_UPPER");
         properties.put("SQL_DIALECT", "POSTGRESQL");
         properties.put("CONNECTION_NAME", "CONN1");
@@ -315,7 +315,7 @@ public class JdbcAdapterPropertiesTest {
 
     @Test(expected = InvalidPropertyException.class)
     public void checkPostgreSQLIdentifierMappingInvalidPropertyValueThrowsException() throws AdapterException {
-        Map<String, String> properties = new HashMap<>();
+        final Map<String, String> properties = new HashMap<>();
         properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT");
         properties.put("SQL_DIALECT", "POSTGRESQL");
         properties.put("CONNECTION_NAME", "CONN1");
@@ -324,25 +324,25 @@ public class JdbcAdapterPropertiesTest {
 
     @Test
     public void testGetOracleCastNumberToDecimal() {
-        Map<String, String> properties = new HashMap<>();
+        final Map<String, String> properties = new HashMap<>();
         properties.put("SQL_DIALECT", "ORACLE");
         properties.put("ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE", "12,9");
-        DataType type = JdbcAdapterProperties.getOracleCastNumberToType(properties);
+        final DataType type = JdbcAdapterProperties.getOracleNumberTargetType(properties);
         assertAll(() -> assertThat(type.getPrecision(), equalTo(12)),
                 () -> assertThat(type.getScale(), equalTo(9)));
     }
 
     @Test
     public void testGetOracleCastNumberToDecimalDefault() {
-        Map<String, String> properties = new HashMap<>();
-        DataType type = JdbcAdapterProperties.getOracleCastNumberToType(properties);
+        final Map<String, String> properties = new HashMap<>();
+        final DataType type = JdbcAdapterProperties.getOracleNumberTargetType(properties);
         assertAll(() -> assertThat(type.getSize(), equalTo(DataType.MAX_EXASOL_VARCHAR_SIZE)),
                 () -> assertThat(type.getCharset(), equalTo(DataType.ExaCharset.UTF8)));
     }
 
     @Test(expected = InvalidPropertyException.class)
     public void testGetOracleCastNumberToDecimalWithWrongDialect() throws AdapterException {
-        Map<String, String> properties = new HashMap<>();
+        final Map<String, String> properties = new HashMap<>();
         properties.put("SQL_DIALECT", "EXASOL");
         properties.put("ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE", "12,9");
         JdbcAdapterProperties.checkPropertyConsistency(properties);

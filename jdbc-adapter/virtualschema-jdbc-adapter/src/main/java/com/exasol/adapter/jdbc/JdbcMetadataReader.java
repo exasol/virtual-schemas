@@ -22,7 +22,7 @@ public class JdbcMetadataReader {
     public static SchemaMetadata readRemoteMetadata(final String connectionString, final String user,
                                                     final String password, String catalog, String schema, final List<String> tableFilter,
                                                     final String dialectName, final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, final List<String> ignoreErrorList,
-                                                    PostgreSQLIdentifierMapping postgreSQLIdentifierMapping, DataType oracleCastNumberToType)
+                                                    final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping, final DataType oracleNumberTargetType)
             throws SQLException, AdapterException {
         assert (catalog != null);
         assert (schema != null);
@@ -40,7 +40,7 @@ public class JdbcMetadataReader {
                     dbMeta.nullsAreSortedAtStart(), dbMeta.nullsAreSortedHigh(), dbMeta.nullsAreSortedLow());
 
             final SqlDialect dialect = SqlDialects.getInstance().getDialectInstanceForNameWithContext(dialectName,
-                    new SqlDialectContext(schemaAdapterNotes, postgreSQLIdentifierMapping, oracleCastNumberToType));
+                    new SqlDialectContext(schemaAdapterNotes, postgreSQLIdentifierMapping, oracleNumberTargetType));
 
             catalog = findCatalog(catalog, dbMeta, dialect);
 
@@ -243,7 +243,7 @@ public class JdbcMetadataReader {
 
     private static List<TableMetadata> findTables(final String catalog, final String schema,
                                                   final List<String> tableFilter, final DatabaseMetaData dbMeta, final SqlDialect dialect,
-                                                  final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, List<String> ignoreErrorList) throws SQLException {
+                                                  final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, final List<String> ignoreErrorList) throws SQLException {
         final List<TableMetadata> tables = new ArrayList<>();
 
         final String[] supportedTableTypes = {"TABLE", "VIEW", "SYSTEM TABLE"};
@@ -287,7 +287,7 @@ public class JdbcMetadataReader {
                     tables.add(new TableMetadata(table.getTableName(), "", columns, table.getTableComment()));
                 }
             } catch (final Exception ex) {
-                throw new RuntimeException("Exception for table " + table.getOriginalTableName() + ": " + ex.getMessage(), ex);
+                throw new RetrieveMetadataException("Exception for table " + table.getOriginalTableName() + ": " + ex.getMessage(), ex);
             }
         }
         return tables;

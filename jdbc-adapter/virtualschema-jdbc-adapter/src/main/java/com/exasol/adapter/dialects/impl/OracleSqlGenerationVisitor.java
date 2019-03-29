@@ -20,50 +20,50 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
 
         if (dialect instanceof OracleSqlDialect &&
                 ((OracleSqlDialect)dialect).getCastAggFuncToFloat()) {
-            aggregateFunctionsCast.add(AggregateFunction.SUM);
-            aggregateFunctionsCast.add(AggregateFunction.MIN);
-            aggregateFunctionsCast.add(AggregateFunction.MAX);
-            aggregateFunctionsCast.add(AggregateFunction.AVG);
-            aggregateFunctionsCast.add(AggregateFunction.MEDIAN);
-            aggregateFunctionsCast.add(AggregateFunction.FIRST_VALUE);
-            aggregateFunctionsCast.add(AggregateFunction.LAST_VALUE);
-            aggregateFunctionsCast.add(AggregateFunction.STDDEV);
-            aggregateFunctionsCast.add(AggregateFunction.STDDEV_POP);
-            aggregateFunctionsCast.add(AggregateFunction.STDDEV_SAMP);
-            aggregateFunctionsCast.add(AggregateFunction.VARIANCE);
-            aggregateFunctionsCast.add(AggregateFunction.VAR_POP);
-            aggregateFunctionsCast.add(AggregateFunction.VAR_SAMP);
+            this.aggregateFunctionsCast.add(AggregateFunction.SUM);
+            this.aggregateFunctionsCast.add(AggregateFunction.MIN);
+            this.aggregateFunctionsCast.add(AggregateFunction.MAX);
+            this.aggregateFunctionsCast.add(AggregateFunction.AVG);
+            this.aggregateFunctionsCast.add(AggregateFunction.MEDIAN);
+            this.aggregateFunctionsCast.add(AggregateFunction.FIRST_VALUE);
+            this.aggregateFunctionsCast.add(AggregateFunction.LAST_VALUE);
+            this.aggregateFunctionsCast.add(AggregateFunction.STDDEV);
+            this.aggregateFunctionsCast.add(AggregateFunction.STDDEV_POP);
+            this.aggregateFunctionsCast.add(AggregateFunction.STDDEV_SAMP);
+            this.aggregateFunctionsCast.add(AggregateFunction.VARIANCE);
+            this.aggregateFunctionsCast.add(AggregateFunction.VAR_POP);
+            this.aggregateFunctionsCast.add(AggregateFunction.VAR_SAMP);
         }
 
         if (dialect instanceof OracleSqlDialect &&
                 ((OracleSqlDialect)dialect).getCastScalarFuncToFloat()) {
-            scalarFunctionsCast.add(ScalarFunction.ADD);
-            scalarFunctionsCast.add(ScalarFunction.SUB);
-            scalarFunctionsCast.add(ScalarFunction.MULT);
-            scalarFunctionsCast.add(ScalarFunction.FLOAT_DIV);
-            scalarFunctionsCast.add(ScalarFunction.NEG);
-            scalarFunctionsCast.add(ScalarFunction.ABS);
-            scalarFunctionsCast.add(ScalarFunction.ACOS);
-            scalarFunctionsCast.add(ScalarFunction.ASIN);
-            scalarFunctionsCast.add(ScalarFunction.ATAN);
-            scalarFunctionsCast.add(ScalarFunction.ATAN2);
-            scalarFunctionsCast.add(ScalarFunction.COS);
-            scalarFunctionsCast.add(ScalarFunction.COSH);
-            scalarFunctionsCast.add(ScalarFunction.COT);
-            scalarFunctionsCast.add(ScalarFunction.DEGREES);
-            scalarFunctionsCast.add(ScalarFunction.EXP);
-            scalarFunctionsCast.add(ScalarFunction.GREATEST);
-            scalarFunctionsCast.add(ScalarFunction.LEAST);
-            scalarFunctionsCast.add(ScalarFunction.LN);
-            scalarFunctionsCast.add(ScalarFunction.LOG);
-            scalarFunctionsCast.add(ScalarFunction.MOD);
-            scalarFunctionsCast.add(ScalarFunction.POWER);
-            scalarFunctionsCast.add(ScalarFunction.RADIANS);
-            scalarFunctionsCast.add(ScalarFunction.SIN);
-            scalarFunctionsCast.add(ScalarFunction.SINH);
-            scalarFunctionsCast.add(ScalarFunction.SQRT);
-            scalarFunctionsCast.add(ScalarFunction.TAN);
-            scalarFunctionsCast.add(ScalarFunction.TANH);
+            this.scalarFunctionsCast.add(ScalarFunction.ADD);
+            this.scalarFunctionsCast.add(ScalarFunction.SUB);
+            this.scalarFunctionsCast.add(ScalarFunction.MULT);
+            this.scalarFunctionsCast.add(ScalarFunction.FLOAT_DIV);
+            this.scalarFunctionsCast.add(ScalarFunction.NEG);
+            this.scalarFunctionsCast.add(ScalarFunction.ABS);
+            this.scalarFunctionsCast.add(ScalarFunction.ACOS);
+            this.scalarFunctionsCast.add(ScalarFunction.ASIN);
+            this.scalarFunctionsCast.add(ScalarFunction.ATAN);
+            this.scalarFunctionsCast.add(ScalarFunction.ATAN2);
+            this.scalarFunctionsCast.add(ScalarFunction.COS);
+            this.scalarFunctionsCast.add(ScalarFunction.COSH);
+            this.scalarFunctionsCast.add(ScalarFunction.COT);
+            this.scalarFunctionsCast.add(ScalarFunction.DEGREES);
+            this.scalarFunctionsCast.add(ScalarFunction.EXP);
+            this.scalarFunctionsCast.add(ScalarFunction.GREATEST);
+            this.scalarFunctionsCast.add(ScalarFunction.LEAST);
+            this.scalarFunctionsCast.add(ScalarFunction.LN);
+            this.scalarFunctionsCast.add(ScalarFunction.LOG);
+            this.scalarFunctionsCast.add(ScalarFunction.MOD);
+            this.scalarFunctionsCast.add(ScalarFunction.POWER);
+            this.scalarFunctionsCast.add(ScalarFunction.RADIANS);
+            this.scalarFunctionsCast.add(ScalarFunction.SIN);
+            this.scalarFunctionsCast.add(ScalarFunction.SINH);
+            this.scalarFunctionsCast.add(ScalarFunction.SQRT);
+            this.scalarFunctionsCast.add(ScalarFunction.TAN);
+            this.scalarFunctionsCast.add(ScalarFunction.TANH);
         }
     }
 
@@ -71,8 +71,8 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     // Can be refactored if we find a better way to implement it
     private boolean requiresSelectListAliasesForLimit = false;
 
-    private Set<AggregateFunction> aggregateFunctionsCast = new HashSet<>();
-    private Set<ScalarFunction> scalarFunctionsCast = new HashSet<>();
+    private final Set<AggregateFunction> aggregateFunctionsCast = new HashSet<>();
+    private final Set<ScalarFunction> scalarFunctionsCast = new HashSet<>();
 
     /**
      * ORACLE Syntax (before 12c) for LIMIT 10:</br>
@@ -165,7 +165,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                     ++columnId;
                 }
             }
-            if (!requiresSelectListAliasesForLimit && !selectListRequiresCasts) {
+            if (!this.requiresSelectListAliasesForLimit && !selectListRequiresCasts) {
                 selectListElements.clear();
                 selectListElements.add("*");
             }
@@ -174,7 +174,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                 selectListElements.add(node.accept(this));
             }
         }
-        if (requiresSelectListAliasesForLimit) {
+        if (this.requiresSelectListAliasesForLimit) {
             // Add aliases to select list elements
             for (int i=0; i<selectListElements.size(); i++) {
                 selectListElements.set(i, selectListElements.get(i) + " AS c" + i);
@@ -263,7 +263,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     public String visit(final SqlFunctionAggregate function) throws AdapterException {
         String sql = super.visit(function);
         final boolean isDirectlyInSelectList = (function.hasParent() && function.getParent().getType() == SqlNodeType.SELECT_LIST);
-        if (isDirectlyInSelectList && aggregateFunctionsCast.contains(function.getFunction())) {
+        if (isDirectlyInSelectList && this.aggregateFunctionsCast.contains(function.getFunction())) {
             // Cast to FLOAT because result set metadata has precision = 0, scale = 0
             sql = "CAST("  + sql + " AS FLOAT)";
         }
@@ -492,7 +492,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         }
 
         final boolean isDirectlyInSelectList = (function.hasParent() && function.getParent().getType() == SqlNodeType.SELECT_LIST);
-        if (isDirectlyInSelectList && scalarFunctionsCast.contains(function.getFunction())) {
+        if (isDirectlyInSelectList && this.scalarFunctionsCast.contains(function.getFunction())) {
             // Cast to FLOAT because result set metadata has precision = 0, scale = 0
             sql = "CAST("  + sql + " AS FLOAT)";
         }
@@ -519,7 +519,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                 projString = "TO_CHAR(" + projString + ")";
             } else {
                 if (needToCastNumberToDecimal(column)) {
-                    final DataType castNumberToDecimalType = dialect.getContext().getOracleCastNumberToType();
+                    final DataType castNumberToDecimalType = dialect.getContext().getOracleNumberTargetType();
                     projString = "CAST(" + projString + " AS DECIMAL(" + castNumberToDecimalType.getPrecision() + "," + castNumberToDecimalType.getScale() + "))";
                 }
             }
@@ -566,10 +566,10 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
      * @param column a NUMBER column
      * @return true if a cast is necessary for the NUMBER column
      */
-    private boolean needToCastNumberToDecimal(SqlColumn column) {
+    private boolean needToCastNumberToDecimal(final SqlColumn column) {
         final AbstractSqlDialect dialect = (AbstractSqlDialect) getDialect();
         final DataType columnType = column.getMetadata().getType();
-        final DataType castNumberToDecimalType = dialect.getContext().getOracleCastNumberToType();
+        final DataType castNumberToDecimalType = dialect.getContext().getOracleNumberTargetType();
         if (columnType.getPrecision() == castNumberToDecimalType.getPrecision() &&
                 columnType.getScale() == castNumberToDecimalType.getScale()) {
             return true;

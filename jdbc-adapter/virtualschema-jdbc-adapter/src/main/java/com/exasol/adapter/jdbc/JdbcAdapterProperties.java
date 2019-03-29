@@ -73,12 +73,12 @@ public final class JdbcAdapterProperties {
         return getProperty(properties, name, "");
     }
 
-    public static DataType getOracleCastNumberToType(final Map<String, String> properties) {
+    public static DataType getOracleNumberTargetType(final Map<String, String> properties) {
         final String precisionAndScale = getProperty(properties, PROP_ORACLE_CAST_NUMBER_TO_DECIMAL);
         if (precisionAndScale.trim().isEmpty()) {
             return DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
         }
-        List <String> precisionAndScaleList =  Arrays.
+        final List <String> precisionAndScaleList =  Arrays.
                 stream(precisionAndScale.split(",")).
                 map(String::trim).
                 collect(Collectors.toList());
@@ -154,7 +154,7 @@ public final class JdbcAdapterProperties {
         checkOracleSpecificPropertyConsistency(properties);
     }
 
-    private static void checkOracleSpecificPropertyConsistency(Map<String, String> properties) throws InvalidPropertyException{
+    private static void checkOracleSpecificPropertyConsistency(final Map<String, String> properties) throws InvalidPropertyException{
         if (properties.containsKey(PROP_ORACLE_CAST_NUMBER_TO_DECIMAL)) {
             final String dialectName = getProperty(properties, PROP_SQL_DIALECT).toUpperCase();
             if (!dialectName.equals(VALUE_SQL_DIALECT_ORACLE)) {
@@ -163,13 +163,13 @@ public final class JdbcAdapterProperties {
         }
     }
 
-    private static void checkPostgreSQLIdentifierPropertyConsistency(Map<String, String> properties) throws InvalidPropertyException {
+    private static void checkPostgreSQLIdentifierPropertyConsistency(final Map<String, String> properties) throws InvalidPropertyException {
         if (properties.containsKey(PROP_POSTGRESQL_IDENTIFIER_MAPPING)) {
             final String dialectName = getProperty(properties, PROP_SQL_DIALECT);
             if (!dialectName.equals(VALUE_SQL_DIALECT_POSTGRESQL)) {
                 throw new InvalidPropertyException(PROP_POSTGRESQL_IDENTIFIER_MAPPING + " can be used only with " + VALUE_SQL_DIALECT_POSTGRESQL + " dialect.");
             }
-            String propertyValue = properties.get(PROP_POSTGRESQL_IDENTIFIER_MAPPING);
+            final String propertyValue = properties.get(PROP_POSTGRESQL_IDENTIFIER_MAPPING);
             if (!propertyValue.equals(VALUE_POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE) &&
                     !propertyValue.equals(VALUE_POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER)) {
                 throw new InvalidPropertyException("Value for " + PROP_POSTGRESQL_IDENTIFIER_MAPPING + " must be "
@@ -181,8 +181,8 @@ public final class JdbcAdapterProperties {
 
     private static void checkIgnoreErrors(final Map<String, String> properties) throws InvalidPropertyException {
         final String dialect = getSqlDialectName(properties);
-        List<String> errorsToIgnore = getIgnoreErrorList(properties);
-        for (String errorToIgnore : errorsToIgnore) {
+        final List<String> errorsToIgnore = getIgnoreErrorList(properties);
+        for (final String errorToIgnore : errorsToIgnore) {
             if (!errorToIgnore.startsWith(dialect)) {
                 throw new InvalidPropertyException(
                         "Error " + errorToIgnore + " cannot be ignored in " + dialect + " dialect."
@@ -356,7 +356,7 @@ public final class JdbcAdapterProperties {
         final String levelAsText = getProperty(properties, PROP_LOG_LEVEL, DEFAULT_LOG_LEVEL);
         try {
             return Level.parse(levelAsText);
-        } catch (IllegalArgumentException | NullPointerException e) {
+        } catch (final IllegalArgumentException | NullPointerException e) {
             throw new InvalidPropertyException("Unable to set log level \"" + levelAsText + "\"");
         }
     }
