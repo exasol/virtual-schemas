@@ -9,11 +9,12 @@ def docker_run(config):
     for db, properties in config.items():
         if properties.get('runIntegrationTests', False):
             if 'dockerImage' in properties:
-                cmd = "docker run -d -p {port_map} --name {name} {image}:{version}".format(
+                cmd = "docker run -d -p {port_map} --network {net} --name {name} {image}:{version}".format(
                     port_map = properties['dockerPortMapping'],
                     name = properties['dockerName'],
                     image = properties['dockerImage'],
-                    version = properties['dockerImageVersion'])
+                    version = properties['dockerImageVersion'],
+                    net='exasoldb_priv')
                 print(cmd)
                 run(cmd)
             elif 'dockerName' in properties:
@@ -64,7 +65,7 @@ def replace_hosts_in(config):
     return yaml.dump(config, default_flow_style=False)
 
 def get_ip_for(docker_name):
-    cmd = "docker network inspect bridge"
+    cmd = "docker network inspect exasoldb_priv"
     docker_bridge_json = run(cmd)
     bridge_info = json.loads(docker_bridge_json)
     containers = bridge_info[0]['Containers']
