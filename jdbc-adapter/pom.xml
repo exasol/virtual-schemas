@@ -10,13 +10,13 @@
         <module>virtualschema-jdbc-adapter-dist</module>
     </modules>
     <properties>
-        <product.version>1.8.2</product.version>
+        <product.version>1.9.1</product.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
         <junit.version>5.4.0</junit.version>
         <junit.platform.version>1.3.2</junit.platform.version>
-        <maven.surefire.version>2.22.1</maven.surefire.version>
+        <maven.surefire.version>3.0.0-M3</maven.surefire.version>
     </properties>
     <distributionManagement>
         <repository>
@@ -114,6 +114,30 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.3</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.version}</version>
             </plugin>
         </plugins>
     </build>

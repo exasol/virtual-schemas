@@ -28,7 +28,7 @@ CREATE JAVA ADAPTER SCRIPT adapter.jdbc_oracle AS
 
   // You need to replace `your-bucket-fs` and `your-bucket` to match the actual location
   // of the adapter jar.
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.8.2.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.9.1.jar;
 
   // Add the oracle jdbc driver to the classpath
   %jar /buckets/bucketfs1/bucket1/ojdbc7-12.1.0.2.jar
