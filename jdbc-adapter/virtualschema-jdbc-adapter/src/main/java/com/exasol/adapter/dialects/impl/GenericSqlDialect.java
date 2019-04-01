@@ -6,6 +6,7 @@ import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.dialects.SqlDialectContext;
 import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
+import com.exasol.adapter.jdbc.SchemaAdapterNotesJsonConverter;
 import com.exasol.adapter.metadata.DataType;
 
 import java.sql.SQLException;
@@ -57,8 +58,8 @@ public class GenericSqlDialect extends AbstractSqlDialect {
                 // This case is a bit strange - case insensitive, but still stores it mixed case
                 return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
             } else {
-                throw new RuntimeException(
-                      "Unexpected quote behavior. Adapternotes: " + SchemaAdapterNotes.serialize(adapterNotes));
+                throw new UnsupportedOperationException("Unexpected quote behavior. Adapter notes: " //
+                      + SchemaAdapterNotesJsonConverter.getInstance().convertToJson(adapterNotes));
             }
         }
     }
@@ -78,8 +79,8 @@ public class GenericSqlDialect extends AbstractSqlDialect {
                 // This case is a bit strange - case insensitive, but still stores it mixed case
                 return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
             } else {
-                throw new RuntimeException(
-                      "Unexpected quote behavior. Adapternotes: " + SchemaAdapterNotes.serialize(adapterNotes));
+                throw new UnsupportedOperationException("Unexpected quote behavior. Adapter notes: " //
+                      + SchemaAdapterNotesJsonConverter.getInstance().convertToJson(adapterNotes));
             }
         }
     }

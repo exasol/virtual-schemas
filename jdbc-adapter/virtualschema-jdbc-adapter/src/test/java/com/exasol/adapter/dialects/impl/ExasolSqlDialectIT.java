@@ -35,8 +35,8 @@ import com.google.common.collect.ImmutableList;
 public class ExasolSqlDialectIT extends AbstractIntegrationTest {
 
     public static class ConnectionBuilder {
-        private String connectionName;
-        private String connectionString;
+        private final String connectionName;
+        private final String connectionString;
         private String connectionUser;
         private String connectionPassword;
 
@@ -60,7 +60,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         }
 
         public String getCreateConnection() {
-            StringBuilder createConnection = new StringBuilder();
+            final StringBuilder createConnection = new StringBuilder();
             createConnection.append("CREATE CONNECTION ");
             createConnection.append(this.connectionName);
             createConnection.append(" TO '");
@@ -355,7 +355,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
     @Test
     public void testVirtualSchemaImportFromJDBCWithConnectionName() throws SQLException, FileNotFoundException {
         final String connectionString = "jdbc:exa:localhost:" + getPortOfConnectedDatabase();
-        ConnectionBuilder JDBCConnection = new ConnectionBuilder(
+        final ConnectionBuilder JDBCConnection = new ConnectionBuilder(
                 "VS_JDBC_WITH_CONNNAME_CONNECTION", connectionString).
                 user(getConfig().getExasolUser()).
                 password(getConfig().getExasolPassword());
@@ -373,7 +373,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
     @Test
     public void testVirtualSchemaImportFromEXAWithConnectionName() throws SQLException, FileNotFoundException {
         final String connectionString = "jdbc:exa:localhost:" + getPortOfConnectedDatabase();
-        ConnectionBuilder EXAConnection = new ConnectionBuilder(
+        final ConnectionBuilder EXAConnection = new ConnectionBuilder(
                 "VS_EXA_WITH_CONNNAME_CONNECTION", connectionString).
                 user(getConfig().getExasolUser()).
                 password(getConfig().getExasolPassword());
@@ -467,7 +467,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
     @Ignore
     @Test
     public void testDifferentDataTypes()
-            throws SQLException, FileNotFoundException, AdapterException {
+            throws SQLException, FileNotFoundException {
         final Statement stmt = getConnection().createStatement();
         createOrReplaceSchema(stmt);
         createTables(stmt);
