@@ -1,19 +1,14 @@
 package com.exasol.adapter.jdbc;
 
-import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.dialects.PostgreSQLIdentifierMapping;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlDialects;
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.SchemaMetadata;
-import com.exasol.adapter.metadata.TableMetadata;
-import com.google.common.base.Joiner;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.metadata.*;
+import com.google.common.base.Joiner;
 
 /**
  * TODO Find good solutions to handle tables with unsupported data types, or
@@ -26,7 +21,7 @@ public class JdbcMetadataReader {
     public static SchemaMetadata readRemoteMetadata(final String connectionString, final String user,
                                                     final String password, String catalog, String schema, final List<String> tableFilter,
                                                     final String dialectName, final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, final List<String> ignoreErrorList,
-                                                    final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping)
+                                                    final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping, final DataType oracleNumberTargetType)
             throws SQLException, AdapterException {
         assert (catalog != null);
         assert (schema != null);
@@ -52,7 +47,7 @@ public class JdbcMetadataReader {
                   .nullsAreSortedLow(dbMeta.nullsAreSortedLow()) //
                   .build();
             final SqlDialect dialect = SqlDialects.getInstance().getDialectInstanceForNameWithContext(dialectName,
-                    new SqlDialectContext(schemaAdapterNotes, postgreSQLIdentifierMapping));
+                    new SqlDialectContext(schemaAdapterNotes, postgreSQLIdentifierMapping, oracleNumberTargetType));
 
             catalog = findCatalog(catalog, dbMeta, dialect);
 
@@ -299,7 +294,7 @@ public class JdbcMetadataReader {
                     tables.add(new TableMetadata(table.getTableName(), "", columns, table.getTableComment()));
                 }
             } catch (final Exception ex) {
-                throw new RuntimeException("Exception for table " + table.getOriginalTableName(), ex);
+                throw new RetrieveMetadataException("Exception for table " + table.getOriginalTableName() + ": " + ex.getMessage(), ex);
             }
         }
         return tables;

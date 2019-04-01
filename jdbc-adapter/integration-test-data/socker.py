@@ -74,7 +74,7 @@ def get_ip_for(docker_name):
 
 def read_config(config_file):
     with open(config_file) as config:
-        return yaml.load(config)
+        return yaml.load(config, Loader=yaml.Loader)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
