@@ -5,7 +5,7 @@ general:
   debugAddress:            ''
   bucketFsUrl:             http://127.0.0.1:6594/default
   bucketFsPassword:        write
-  jdbcAdapterPath:         /buckets/bfsdefault/default/virtualschema-jdbc-adapter-dist-1.8.2.jar
+  jdbcAdapterPath:         /buckets/bfsdefault/default/virtualschema-jdbc-adapter-dist-1.9.0.jar
   additionalJDBCDriverDir: /var/tmp/vstest/drivers/
 
 exasol:
@@ -28,10 +28,10 @@ postgresql:
 
 oracle:
   runIntegrationTests:    false
-  jdbcDriverPath:         /buckets/bfsdefault/default/drivers/jdbc/ORACLE/ojdbc7.jar;
+  jdbcDriverPath:         /buckets/bfsdefault/default/drivers/jdbc/ORACLE/ojdbc8.jar;
   connectionString:       jdbc:oracle:thin:@localhost:1521/XE
-  user:                   system
-  password:               myorapwd
+  user:                   loader
+  password:               loader
   dockerName:             myora
   dockerConnectionString: jdbc:oracle:thin:@DBHOST:1521/XE
   instantclientDir:       /var/tmp/vstest/instantclient/

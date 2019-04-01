@@ -137,7 +137,8 @@ public class JdbcAdapter {
                 JdbcAdapterProperties.getSqlDialectName(meta.getProperties()),
                 JdbcAdapterProperties.getExceptionHandlingMode(meta.getProperties()),
                 JdbcAdapterProperties.getIgnoreErrorList(meta.getProperties()),
-                getPostgreSQLIdentifierMapping(meta.getProperties()));
+                getPostgreSQLIdentifierMapping(meta.getProperties()),
+                JdbcAdapterProperties.getOracleNumberTargetType(meta.getProperties()));
     }
 
     private static String handleRefresh(final RefreshRequest request, final ExaMetadata meta)
@@ -169,7 +170,8 @@ public class JdbcAdapter {
                     JdbcAdapterProperties.getSqlDialectName(newSchemaMeta),
                     JdbcAdapterProperties.getExceptionHandlingMode(newSchemaMeta),
                     JdbcAdapterProperties.getIgnoreErrorList(newSchemaMeta),
-                    getPostgreSQLIdentifierMapping(newSchemaMeta));
+                    getPostgreSQLIdentifierMapping(newSchemaMeta),
+                    JdbcAdapterProperties.getOracleNumberTargetType(newSchemaMeta));
             return ResponseJsonSerializer.makeSetPropertiesResponse(remoteMeta);
         }
         return ResponseJsonSerializer.makeSetPropertiesResponse(null);
@@ -226,7 +228,7 @@ public class JdbcAdapter {
         final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping = getPostgreSQLIdentifierMapping(meta.getProperties());
         final SqlDialectContext dialectContext = new SqlDialectContext(SchemaAdapterNotes.deserialize(
                 request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()),
-                postgreSQLIdentifierMapping, getImportType(meta));
+                postgreSQLIdentifierMapping, getImportType(meta), JdbcAdapterProperties.getOracleNumberTargetType(meta.getProperties()));
         final SqlDialect dialect = JdbcAdapterProperties.getSqlDialect(request.getSchemaMetadataInfo().getProperties(),
                 dialectContext);
         final boolean hasMoreThanOneTable = request.getInvolvedTablesMetadata().size() > 1;
@@ -349,7 +351,7 @@ public class JdbcAdapter {
         }
     }
 
-    protected static JdbcTypeDescription getJdbcTypeDescription(ResultSetMetaData metadata, int col) throws SQLException {
+    protected static JdbcTypeDescription getJdbcTypeDescription(final ResultSetMetaData metadata, final int col) throws SQLException {
         final int jdbcType = metadata.getColumnType(col);
         final int jdbcPrecisions = metadata.getPrecision(col);
         final int jdbcScales = metadata.getScale(col);
@@ -357,7 +359,7 @@ public class JdbcAdapter {
                 metadata.getColumnTypeName(col));
     }
 
-    protected static String buildColumnDescriptionFrom(DataType[] internalTypes) {
+    protected static String buildColumnDescriptionFrom(final DataType[] internalTypes) {
         final StringBuilder columnDescription = new StringBuilder();
         columnDescription.append('(');
         for (int i = 0; i < internalTypes.length; i++) {
