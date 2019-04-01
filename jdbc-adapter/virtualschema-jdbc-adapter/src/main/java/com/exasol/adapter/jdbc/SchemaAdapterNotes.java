@@ -11,7 +11,7 @@ import javax.json.JsonObjectBuilder;
  * Holds the schema adapter notes specific to the JDBC Adapter. Also includes functionality to serialize and
  * deserialize.
  */
-public class SchemaAdapterNotes {
+public final class SchemaAdapterNotes {
     private static final String CATALOG_SEPARATOR = "catalogSeparator";
     private static final String IDENTIFIER_QUOTE_STRING = "identifierQuoteString";
     private static final String STORES_LOWER_CASE_IDENTIFIERS = "storesLowerCaseIdentifiers";
@@ -29,48 +29,17 @@ public class SchemaAdapterNotes {
 
     private final String catalogSeparator;
     private final String identifierQuoteString;
-
-    // treats mixed case unquoted SQL identifiers as case insensitive and stores them in lower case.
     private final boolean storesLowerCaseIdentifiers;
-
-    // treats mixed case unquoted SQL identifiers as case insensitive and stores them in upper case. TRUE for EXASOL
-    // & Oracle
     private final boolean storesUpperCaseIdentifiers;
-
-    // treats mixed case unquoted SQL identifiers as case insensitive and stores them in mixed case.
     private final boolean storesMixedCaseIdentifiers;
-
-    // treats mixed case unquoted SQL identifiers as case sensitive and as a result stores them in mixed case. TRUE
-    // for EXASOL.
-    // Seems to be a bug that this is true for EXASOL.
     private final boolean supportsMixedCaseIdentifiers;
-
-    // treats mixed case quoted SQL identifiers as case insensitive and stores them in lower case.
     private final boolean storesLowerCaseQuotedIdentifiers;
-
-    // treats mixed case quoted SQL identifiers as case insensitive and stores them in upper case.
     private final boolean storesUpperCaseQuotedIdentifiers;
-
-    // treats mixed case quoted SQL identifiers as case insensitive and stores them in mixed case. TRUE for Oracle.
-    // Oracle has this also true (only difference to EXASOL) which is in conflict with
-    // supportsMixedCaseQuotedIdentifiers
-    // which states that mixed case quoted identifiers are treated case sensitive.
     private final boolean storesMixedCaseQuotedIdentifiers;
-
-    // treats mixed case quoted SQL identifiers as case sensitive and as a result stores them in mixed case. TRUE for
-    // EXASOL & Oracle.
     private final boolean supportsMixedCaseQuotedIdentifiers;
-
-    // NULL values are sorted at the end regardless of sort order
     private final boolean nullsAreSortedAtEnd;
-
-    // NULL values are sorted at the start regardless of sort order
     private final boolean nullsAreSortedAtStart;
-
-    // NULL values are sorted high
     private final boolean nullsAreSortedHigh;
-
-    // NULL values are sorted low
     private final boolean nullsAreSortedLow;
 
     private SchemaAdapterNotes(final Builder builder) {
@@ -90,69 +59,118 @@ public class SchemaAdapterNotes {
         this.nullsAreSortedLow = builder.nullsAreSortedLow;
     }
 
+    /**
+     * Create a new builder for {@link SchemaAdapterNotes}
+     *
+     * @return builder instance
+     */
     public static Builder builder() {
         return new Builder();
     }
 
     /**
-     * @return string that this database uses as the separator between a catalog and table name
+     * @return string that this database uses as the separator between a catalog and table name.
      */
     public String getCatalogSeparator() {
         return this.catalogSeparator;
     }
 
     /**
-     * @return string used to quote SQL identifiers
+     * @return string that used to quote SQL identifiers.
      */
     public String getIdentifierQuoteString() {
         return this.identifierQuoteString;
     }
 
-    public boolean isSupportsMixedCaseIdentifiers() {
+    /**
+     * @return true if remote database treats mixed case unquoted SQL identifiers as case sensitive
+     * and as a result stores them in mixed case.
+     */
+    public boolean supportsMixedCaseIdentifiers() {
         return this.supportsMixedCaseIdentifiers;
     }
 
-    public boolean isSupportsMixedCaseQuotedIdentifiers() {
+    /**
+     * @return true if remote database treats mixed case quoted SQL identifiers as case sensitive
+     * and as a result stores them in mixed case. TRUE for EXASOL & Oracle.
+     */
+    public boolean supportsMixedCaseQuotedIdentifiers() {
         return this.supportsMixedCaseQuotedIdentifiers;
     }
 
-    public boolean isStoresLowerCaseIdentifiers() {
+    /**
+     * @return true if remote database treats mixed case unquoted SQL identifiers
+     * as case insensitive and stores them in lower case.
+     */
+    public boolean storesLowerCaseIdentifiers() {
         return this.storesLowerCaseIdentifiers;
     }
 
-    public boolean isStoresUpperCaseIdentifiers() {
+    /**
+     * @return true if remote database treats mixed case unquoted SQL identifiers
+     * as case insensitive and stores them in upper case. TRUE for EXASOL & Oracle
+     */
+    public boolean storesUpperCaseIdentifiers() {
         return this.storesUpperCaseIdentifiers;
     }
 
-    public boolean isStoresMixedCaseIdentifiers() {
+    /**
+     * @return true if remote database treats mixed case unquoted SQL identifiers
+     * as case insensitive and stores them in mixed case.
+     */
+    public boolean storesMixedCaseIdentifiers() {
         return this.storesMixedCaseIdentifiers;
     }
 
-    public boolean isStoresLowerCaseQuotedIdentifiers() {
+    /**
+     * @return true if remote database treats mixed case quoted SQL identifiers as case insensitive
+     * and stores them in lower case.
+     */
+    public boolean storesLowerCaseQuotedIdentifiers() {
         return this.storesLowerCaseQuotedIdentifiers;
     }
 
-    public boolean isStoresUpperCaseQuotedIdentifiers() {
+    /**
+     * @return true if remote database treats mixed case quoted SQL identifiers as case insensitive
+     * and stores them in upper case.
+     */
+    public boolean storesUpperCaseQuotedIdentifiers() {
         return this.storesUpperCaseQuotedIdentifiers;
     }
 
-    public boolean isStoresMixedCaseQuotedIdentifiers() {
+    /**
+     * @return true if remote database treats mixed case quoted SQL identifiers as case insensitive
+     * and stores them in mixed case. TRUE for Oracle.
+     */
+    public boolean storesMixedCaseQuotedIdentifiers() {
         return this.storesMixedCaseQuotedIdentifiers;
     }
 
-    public boolean isNullsAreSortedAtEnd() {
+    /**
+     * @return true if NULL values are sorted at the end regardless of sort order.
+     */
+    public boolean nullsAreSortedAtEnd() {
         return this.nullsAreSortedAtEnd;
     }
 
-    public boolean isNullsAreSortedAtStart() {
+    /**
+     * @return true if NULL values are sorted at the start regardless of sort order.
+     */
+    public boolean nullsAreSortedAtStart() {
         return this.nullsAreSortedAtStart;
     }
 
-    public boolean isNullsAreSortedHigh() {
+    /**
+     * @return true if NULL values are sorted high.
+     */
+    public boolean nullsAreSortedHigh() {
         return this.nullsAreSortedHigh;
     }
 
-    public boolean isNullsAreSortedLow() {
+    /**
+     * @return true if NULL values are sorted low.
+     */
+    public boolean nullsAreSortedLow() {
         return this.nullsAreSortedLow;
     }
 
@@ -161,18 +179,18 @@ public class SchemaAdapterNotes {
         final JsonObjectBuilder builder =
               factory.createObjectBuilder().add(CATALOG_SEPARATOR, notes.getCatalogSeparator())
                     .add(IDENTIFIER_QUOTE_STRING, notes.getIdentifierQuoteString())
-                    .add(STORES_LOWER_CASE_IDENTIFIERS, notes.isStoresLowerCaseIdentifiers())
-                    .add(STORES_UPPER_CASE_IDENTIFIERS, notes.isStoresUpperCaseIdentifiers())
-                    .add(STORES_MIXED_CASE_IDENTIFIERS, notes.isStoresMixedCaseIdentifiers())
-                    .add(SUPPORTS_MIXED_CASE_IDENTIFIERS, notes.isSupportsMixedCaseIdentifiers())
-                    .add(STORES_LOWER_CASE_QUOTED_IDENTIFIERS, notes.isStoresLowerCaseQuotedIdentifiers())
-                    .add(STORES_UPPER_CASE_QUOTED_IDENTIFIERS, notes.isStoresUpperCaseQuotedIdentifiers())
-                    .add(STORES_MIXED_CASE_QUOTED_IDENTIFIERS, notes.isStoresMixedCaseQuotedIdentifiers())
-                    .add(SUPPORTS_MIXED_CASE_QUOTED_IDENTIFIERS, notes.isSupportsMixedCaseQuotedIdentifiers())
-                    .add(NULLS_ARE_SORTED_AT_END, notes.isNullsAreSortedAtEnd())
-                    .add(NULLS_ARE_SORTED_AT_START, notes.isNullsAreSortedAtStart())
-                    .add(NULLS_ARE_SORTED_HIGH, notes.isNullsAreSortedHigh())
-                    .add(NULLS_ARE_SORTED_LOW, notes.isNullsAreSortedLow());
+                    .add(STORES_LOWER_CASE_IDENTIFIERS, notes.storesLowerCaseIdentifiers())
+                    .add(STORES_UPPER_CASE_IDENTIFIERS, notes.storesUpperCaseIdentifiers())
+                    .add(STORES_MIXED_CASE_IDENTIFIERS, notes.storesMixedCaseIdentifiers())
+                    .add(SUPPORTS_MIXED_CASE_IDENTIFIERS, notes.supportsMixedCaseIdentifiers())
+                    .add(STORES_LOWER_CASE_QUOTED_IDENTIFIERS, notes.storesLowerCaseQuotedIdentifiers())
+                    .add(STORES_UPPER_CASE_QUOTED_IDENTIFIERS, notes.storesUpperCaseQuotedIdentifiers())
+                    .add(STORES_MIXED_CASE_QUOTED_IDENTIFIERS, notes.storesMixedCaseQuotedIdentifiers())
+                    .add(SUPPORTS_MIXED_CASE_QUOTED_IDENTIFIERS, notes.supportsMixedCaseQuotedIdentifiers())
+                    .add(NULLS_ARE_SORTED_AT_END, notes.nullsAreSortedAtEnd())
+                    .add(NULLS_ARE_SORTED_AT_START, notes.nullsAreSortedAtStart())
+                    .add(NULLS_ARE_SORTED_HIGH, notes.nullsAreSortedHigh())
+                    .add(NULLS_ARE_SORTED_LOW, notes.nullsAreSortedLow());
         return builder.build().toString();
     }
 
@@ -234,20 +252,20 @@ public class SchemaAdapterNotes {
      * Builder for {@link SchemaAdapterNotes}
      */
     public static class Builder {
-        private String catalogSeparator;
-        private String identifierQuoteString;
-        private boolean storesLowerCaseIdentifiers;
-        private boolean storesUpperCaseIdentifiers;
-        private boolean storesMixedCaseIdentifiers;
-        private boolean supportsMixedCaseIdentifiers;
-        private boolean storesLowerCaseQuotedIdentifiers;
-        private boolean storesUpperCaseQuotedIdentifiers;
-        private boolean storesMixedCaseQuotedIdentifiers;
-        private boolean supportsMixedCaseQuotedIdentifiers;
-        private boolean nullsAreSortedAtEnd;
-        private boolean nullsAreSortedAtStart;
-        private boolean nullsAreSortedHigh;
-        private boolean nullsAreSortedLow;
+        private String catalogSeparator = ".";
+        private String identifierQuoteString = "\"";
+        private boolean storesLowerCaseIdentifiers = false;
+        private boolean storesUpperCaseIdentifiers = false;
+        private boolean storesMixedCaseIdentifiers = false;
+        private boolean supportsMixedCaseIdentifiers = false;
+        private boolean storesLowerCaseQuotedIdentifiers = false;
+        private boolean storesUpperCaseQuotedIdentifiers = false;
+        private boolean storesMixedCaseQuotedIdentifiers = false;
+        private boolean supportsMixedCaseQuotedIdentifiers = false;
+        private boolean nullsAreSortedAtEnd = false;
+        private boolean nullsAreSortedAtStart = false;
+        private boolean nullsAreSortedHigh = false;
+        private boolean nullsAreSortedLow = false;
 
         /**
          * Set the catalog separator
