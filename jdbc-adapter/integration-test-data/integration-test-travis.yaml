@@ -27,7 +27,7 @@ postgresql:
   dockerConnectionString: jdbc:postgresql://DBHOST:5432/postgres
 
 oracle:
-  runIntegrationTests:    true
+  runIntegrationTests:    false
   jdbcDriverPath:         /buckets/bfsdefault/default/drivers/jdbc/ORACLE/ojdbc8.jar;
   connectionString:       jdbc:oracle:thin:@localhost:1521/XE
   user:                   loader
