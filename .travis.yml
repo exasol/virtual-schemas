@@ -16,7 +16,9 @@ addons:
   sonarcloud:
     organization: exasol
 
-before_script: ./jdbc-adapter/tools/version.sh verify
+before_script:
+  - pip install pipenv
+  - ./jdbc-adapter/tools/version.sh verify
 
 script:
   - ./jdbc-adapter/integration-test-data/run_integration_tests.sh
