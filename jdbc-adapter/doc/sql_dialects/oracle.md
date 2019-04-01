@@ -6,7 +6,11 @@ The Oracle dialect does not support all capabilities. A complete list can be fou
 
 Oracle data types are mapped to their equivalents in Exasol. The following exceptions apply:
 
-- `NUMBER`, `NUMBER with precision > 36` and `LONG` are casted to `VARCHAR` to prevent a loss of precision.
+- `NUMBER`, `NUMBER with precision > 36` and `LONG` are casted to `VARCHAR` to prevent a loss of precision. <br>
+  If you want to return a DECIMAL type for these types you can set the property ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE: <br>
+  `ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE='36,20'` <br>
+  This will cast NUMBER with precision > 36, NUMBER without precision and LONG to DECIMAL(36,20).
+  Keep in mind that this will yield errors if the data in the Oracle database does not fit into the specified DECIMAL type.
 - `DATE` is casted to `TIMESTAMP`. This data type is only supported for positive year values, i.e., years > 0001.
 - `TIMESTAMP WITH [LOCAL] TIME ZONE` is casted to `VARCHAR`. Exasol does not support timestamps with time zone information.
 - `INTERVAL` is casted to `VARCHAR`.
@@ -28,7 +32,7 @@ CREATE JAVA ADAPTER SCRIPT adapter.jdbc_oracle AS
 
   // You need to replace `your-bucket-fs` and `your-bucket` to match the actual location
   // of the adapter jar.
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.8.2.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.9.0.jar;
 
   // Add the oracle jdbc driver to the classpath
   %jar /buckets/bucketfs1/bucket1/ojdbc7-12.1.0.2.jar
