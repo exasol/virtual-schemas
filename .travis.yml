@@ -17,7 +17,7 @@ addons:
     organization: exasol
 
 before_script:
-  - pip install pipenv
+  - sudo pip install pipenv
   - ./jdbc-adapter/tools/version.sh verify
 
 script:
