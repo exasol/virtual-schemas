@@ -19,9 +19,9 @@ readonly config_with_ips="$(pwd)/integration-test-data/integration-test-travis_w
 readonly exaconf=$tmp/cluster/EXAConf
 
 function cleanup() {
+    cleanup_remote_dbs || true
 	cleanup_docker $tmp || true
     sudo rm -rf "$tmp" || true
-	cleanup_remote_dbs || true
 }
 trap cleanup EXIT
 
