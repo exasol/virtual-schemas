@@ -110,7 +110,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                     return "1";
                 } else if (select.getSelectList().isSelectStar()) {
                     int numberOfColumns = 0;
-                    final List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
+                    final List<TableMetadata> tableMetadata = new ArrayList<>();
                     SqlGenerationHelper.getMetadataFrom(select.getFromClause(), tableMetadata );
                     for (final TableMetadata tableMeta : tableMetadata) {
                         numberOfColumns += tableMeta.getColumns().size();
@@ -152,19 +152,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         if (selectList.isSelectStar()) {
             // Do as if the user has all columns in select list
             final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
-            boolean selectListRequiresCasts = false;
-            int columnId = 0;
-            final List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
-            SqlGenerationHelper.getMetadataFrom(select.getFromClause(), tableMetadata );
-            for (final TableMetadata tableMeta : tableMetadata) {
-                for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
-                    final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-                    sqlColumn.setParent(selectList);
-                    selectListRequiresCasts |= nodeRequiresCast(sqlColumn);
-                    selectListElements.add(sqlColumn.accept(this));
-                    ++columnId;
-                }
-            }
+            final boolean selectListRequiresCasts = isSelectListRequiresCasts(selectList, selectListElements, select);
             if (!this.requiresSelectListAliasesForLimit && !selectListRequiresCasts) {
                 selectListElements.clear();
                 selectListElements.add("*");
@@ -181,6 +169,23 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
             }
         }
         return Joiner.on(", ").join(selectListElements);
+    }
+
+    private boolean isSelectListRequiresCasts(final SqlSelectList selectList, final List<String> selectListElements, final SqlStatementSelect select) throws AdapterException {
+        boolean selectListRequiresCasts = false;
+        int columnId = 0;
+        final List<TableMetadata> tableMetadata = new ArrayList<>();
+        SqlGenerationHelper.getMetadataFrom(select.getFromClause(), tableMetadata );
+        for (final TableMetadata tableMeta : tableMetadata) {
+            for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
+                final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
+                sqlColumn.setParent(selectList);
+                selectListRequiresCasts |= nodeRequiresCast(sqlColumn);
+                selectListElements.add(sqlColumn.accept(this));
+                ++columnId;
+            }
+        }
+        return selectListRequiresCasts;
     }
 
     @Override
@@ -570,10 +575,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         final AbstractSqlDialect dialect = (AbstractSqlDialect) getDialect();
         final DataType columnType = column.getMetadata().getType();
         final DataType castNumberToDecimalType = dialect.getContext().getOracleNumberTargetType();
-        if (columnType.getPrecision() == castNumberToDecimalType.getPrecision() &&
-                columnType.getScale() == castNumberToDecimalType.getScale()) {
-            return true;
-        }
-        return false;
+        return columnType.getPrecision() == castNumberToDecimalType.getPrecision() &&
+                columnType.getScale() == castNumberToDecimalType.getScale();
     }
 }
