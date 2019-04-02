@@ -1,10 +1,7 @@
 package com.exasol.adapter.dialects.impl;
 
 import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 import com.exasol.adapter.jdbc.SchemaAdapterNotesJsonConverter;
 import com.exasol.adapter.metadata.DataType;
@@ -59,7 +56,7 @@ public class GenericSqlDialect extends AbstractSqlDialect {
                 return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
             } else {
                 throw new UnsupportedOperationException("Unexpected quote behavior. Adapter notes: " //
-                      + SchemaAdapterNotesJsonConverter.getInstance().convertToJson(adapterNotes));
+                      + adapterNotes.toString());
             }
         }
     }
@@ -80,7 +77,7 @@ public class GenericSqlDialect extends AbstractSqlDialect {
                 return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
             } else {
                 throw new UnsupportedOperationException("Unexpected quote behavior. Adapter notes: " //
-                      + SchemaAdapterNotesJsonConverter.getInstance().convertToJson(adapterNotes));
+                      + adapterNotes.toString());
             }
         }
     }
@@ -114,14 +111,14 @@ public class GenericSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         final SchemaAdapterNotes notes = getContext().getSchemaAdapterNotes();
-        if (notes.nullsAreSortedAtEnd()) {
+        if (notes.areNullsSortedAtEnd()) {
             return NullSorting.NULLS_SORTED_AT_END;
-        } else if (notes.nullsAreSortedAtStart()) {
+        } else if (notes.areNullsSortedAtStart()) {
             return NullSorting.NULLS_SORTED_AT_START;
-        } else if (notes.nullsAreSortedLow()) {
+        } else if (notes.areNullsSortedLow()) {
             return NullSorting.NULLS_SORTED_LOW;
         } else {
-            assert (notes.nullsAreSortedHigh());
+            assert (notes.areNullsSortedHigh());
             return NullSorting.NULLS_SORTED_HIGH;
         }
     }

@@ -3,9 +3,7 @@ package com.exasol.adapter.jdbc;
 import com.exasol.adapter.AdapterException;
 import com.exasol.utils.JsonHelper;
 
-import javax.json.JsonBuilderFactory;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import javax.json.*;
 
 /**
  * Converts schema adapter Notes into JSON format and back
@@ -21,52 +19,74 @@ public final class SchemaAdapterNotesJsonConverter {
     private static final String STORES_UPPER_CASE_QUOTED_IDENTIFIERS = "storesUpperCaseQuotedIdentifiers";
     private static final String STORES_MIXED_CASE_QUOTED_IDENTIFIERS = "storesMixedCaseQuotedIdentifiers";
     private static final String SUPPORTS_MIXED_CASE_QUOTED_IDENTIFIERS = "supportsMixedCaseQuotedIdentifiers";
-    private static final String NULLS_ARE_SORTED_AT_END = "nullsAreSortedAtEnd";
-    private static final String NULLS_ARE_SORTED_AT_START = "nullsAreSortedAtStart";
-    private static final String NULLS_ARE_SORTED_HIGH = "nullsAreSortedHigh";
-    private static final String NULLS_ARE_SORTED_LOW = "nullsAreSortedLow";
+    private static final String NULLS_ARE_SORTED_AT_END = "areNullsSortedAtEnd";
+    private static final String NULLS_ARE_SORTED_AT_START = "areNullsSortedAtStart";
+    private static final String NULLS_ARE_SORTED_HIGH = "areNullsSortedHigh";
+    private static final String NULLS_ARE_SORTED_LOW = "areNullsSortedLow";
+    private static final SchemaAdapterNotesJsonConverter SCHEMA_ADAPTER_NOTES_JSON_CONVERTER =
+          new SchemaAdapterNotesJsonConverter();
 
+    /**
+     * Returns instance of {@link SchemaAdapterNotesJsonConverter} singleton class
+     *
+     * @return {@link SchemaAdapterNotesJsonConverter} instance
+     */
     public static SchemaAdapterNotesJsonConverter getInstance() {
-        return new SchemaAdapterNotesJsonConverter();
+        return SCHEMA_ADAPTER_NOTES_JSON_CONVERTER;
     }
 
-    private SchemaAdapterNotesJsonConverter(){
+    private SchemaAdapterNotesJsonConverter() {
+        //intentionally left blank
     }
 
-
-    public String convertToJson(final SchemaAdapterNotes notes) {
+    /**
+     * Converts schema adapter notes into a JSON format
+     *
+     * @param schemaAdapterNotes instance
+     * @return string representation of a JSON Object
+     */
+    public String convertToJson(final SchemaAdapterNotes schemaAdapterNotes) {
         final JsonBuilderFactory factory = JsonHelper.getBuilderFactory();
         final JsonObjectBuilder builder =
-              factory.createObjectBuilder().add(CATALOG_SEPARATOR, notes.getCatalogSeparator())
-                    .add(IDENTIFIER_QUOTE_STRING, notes.getIdentifierQuoteString())
-                    .add(STORES_LOWER_CASE_IDENTIFIERS, notes.storesLowerCaseIdentifiers())
-                    .add(STORES_UPPER_CASE_IDENTIFIERS, notes.storesUpperCaseIdentifiers())
-                    .add(STORES_MIXED_CASE_IDENTIFIERS, notes.storesMixedCaseIdentifiers())
-                    .add(SUPPORTS_MIXED_CASE_IDENTIFIERS, notes.supportsMixedCaseIdentifiers())
-                    .add(STORES_LOWER_CASE_QUOTED_IDENTIFIERS, notes.storesLowerCaseQuotedIdentifiers())
-                    .add(STORES_UPPER_CASE_QUOTED_IDENTIFIERS, notes.storesUpperCaseQuotedIdentifiers())
-                    .add(STORES_MIXED_CASE_QUOTED_IDENTIFIERS, notes.storesMixedCaseQuotedIdentifiers())
-                    .add(SUPPORTS_MIXED_CASE_QUOTED_IDENTIFIERS, notes.supportsMixedCaseQuotedIdentifiers())
-                    .add(NULLS_ARE_SORTED_AT_END, notes.nullsAreSortedAtEnd())
-                    .add(NULLS_ARE_SORTED_AT_START, notes.nullsAreSortedAtStart())
-                    .add(NULLS_ARE_SORTED_HIGH, notes.nullsAreSortedHigh())
-                    .add(NULLS_ARE_SORTED_LOW, notes.nullsAreSortedLow());
+              factory.createObjectBuilder().add(CATALOG_SEPARATOR, schemaAdapterNotes.getCatalogSeparator())
+                    .add(IDENTIFIER_QUOTE_STRING, schemaAdapterNotes.getIdentifierQuoteString())
+                    .add(STORES_LOWER_CASE_IDENTIFIERS, schemaAdapterNotes.storesLowerCaseIdentifiers())
+                    .add(STORES_UPPER_CASE_IDENTIFIERS, schemaAdapterNotes.storesUpperCaseIdentifiers())
+                    .add(STORES_MIXED_CASE_IDENTIFIERS, schemaAdapterNotes.storesMixedCaseIdentifiers())
+                    .add(SUPPORTS_MIXED_CASE_IDENTIFIERS, schemaAdapterNotes.supportsMixedCaseIdentifiers())
+                    .add(STORES_LOWER_CASE_QUOTED_IDENTIFIERS, schemaAdapterNotes.storesLowerCaseQuotedIdentifiers())
+                    .add(STORES_UPPER_CASE_QUOTED_IDENTIFIERS, schemaAdapterNotes.storesUpperCaseQuotedIdentifiers())
+                    .add(STORES_MIXED_CASE_QUOTED_IDENTIFIERS, schemaAdapterNotes.storesMixedCaseQuotedIdentifiers())
+                    .add(SUPPORTS_MIXED_CASE_QUOTED_IDENTIFIERS,
+                          schemaAdapterNotes.supportsMixedCaseQuotedIdentifiers())
+                    .add(NULLS_ARE_SORTED_AT_END, schemaAdapterNotes.areNullsSortedAtEnd())
+                    .add(NULLS_ARE_SORTED_AT_START, schemaAdapterNotes.areNullsSortedAtStart())
+                    .add(NULLS_ARE_SORTED_HIGH, schemaAdapterNotes.areNullsSortedHigh())
+                    .add(NULLS_ARE_SORTED_LOW, schemaAdapterNotes.areNullsSortedLow());
         return builder.build().toString();
     }
 
+    /**
+     * Converts JSON representation of schema adapter notes
+     * into instance of {@link SchemaAdapterNotesJsonConverter} class
+     *
+     * @param adapterNotes JSON representation of schema adapter notes
+     * @param schemaName   name of virtual schema
+     * @return instance of {@link SchemaAdapterNotesJsonConverter}
+     */
     public SchemaAdapterNotes convertFromJsonToSchemaAdapterNotes(final String adapterNotes, final String schemaName)
           throws AdapterException {
         if (adapterNotes == null || adapterNotes.isEmpty()) {
-            throw new AdapterException(
-                  "Adapter notes for schema " + schemaName + " are empty or null. Please refresh the virtual schema");
+            throw new AdapterException("Adapter notes for virtual schema " + schemaName + " are empty or null. " //
+                  + "Please refresh the virtual schema");
         }
         final JsonObject root;
         try {
             root = JsonHelper.getJsonObject(adapterNotes);
         } catch (final Exception ex) {
             throw new AdapterException(
-                  "Could not parse the json which is expected to be stored in the adapter notes of schema " + schemaName
-                        + ". Please refresh the virtual schema");
+                  "Could not parse the json which is expected to be stored in the adapter notes of virtual schema "
+                        + schemaName + ". Please refresh the virtual schema");
         }
         checkKey(root, CATALOG_SEPARATOR, schemaName);
         checkKey(root, IDENTIFIER_QUOTE_STRING, schemaName);
@@ -93,17 +113,17 @@ public final class SchemaAdapterNotesJsonConverter {
               .storesUpperCaseQuotedIdentifiers(root.getBoolean(STORES_UPPER_CASE_QUOTED_IDENTIFIERS)) //
               .storesMixedCaseQuotedIdentifiers(root.getBoolean(STORES_MIXED_CASE_QUOTED_IDENTIFIERS)) //
               .supportsMixedCaseQuotedIdentifiers(root.getBoolean(SUPPORTS_MIXED_CASE_QUOTED_IDENTIFIERS))//
-              .nullsAreSortedAtEnd(root.getBoolean(NULLS_ARE_SORTED_AT_END)) //
-              .nullsAreSortedAtStart(root.getBoolean(NULLS_ARE_SORTED_AT_START)) //
-              .nullsAreSortedHigh(root.getBoolean(NULLS_ARE_SORTED_HIGH)) //
-              .nullsAreSortedLow(root.getBoolean(NULLS_ARE_SORTED_LOW)) //
+              .areNullsSortedAtEnd(root.getBoolean(NULLS_ARE_SORTED_AT_END)) //
+              .areNullsSortedAtStart(root.getBoolean(NULLS_ARE_SORTED_AT_START)) //
+              .areNullsSortedHigh(root.getBoolean(NULLS_ARE_SORTED_HIGH)) //
+              .areNullsSortedLow(root.getBoolean(NULLS_ARE_SORTED_LOW)) //
               .build();
     }
 
     private static void checkKey(final JsonObject root, final String key, final String schemaName)
           throws AdapterException {
         if (!root.containsKey(key)) {
-            throw new AdapterException("Adapter notes of schema " + schemaName + " don't have the key " + key
+            throw new AdapterException("Adapter notes of virtual schema " + schemaName + " don't have the key " + key
                   + ". Please refresh the virtual schema");
         }
     }

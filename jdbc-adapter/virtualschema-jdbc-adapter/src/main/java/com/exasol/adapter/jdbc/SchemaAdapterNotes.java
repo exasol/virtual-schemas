@@ -17,10 +17,10 @@ public final class SchemaAdapterNotes {
     private final boolean storesUpperCaseQuotedIdentifiers;
     private final boolean storesMixedCaseQuotedIdentifiers;
     private final boolean supportsMixedCaseQuotedIdentifiers;
-    private final boolean nullsAreSortedAtEnd;
-    private final boolean nullsAreSortedAtStart;
-    private final boolean nullsAreSortedHigh;
-    private final boolean nullsAreSortedLow;
+    private final boolean areNullsSortedAtEnd;
+    private final boolean areNullsSortedAtStart;
+    private final boolean areNullsSortedHigh;
+    private final boolean areNullsSortedLow;
 
     private SchemaAdapterNotes(final Builder builder) {
         this.catalogSeparator = builder.catalogSeparator;
@@ -33,10 +33,10 @@ public final class SchemaAdapterNotes {
         this.storesUpperCaseQuotedIdentifiers = builder.storesUpperCaseQuotedIdentifiers;
         this.storesMixedCaseQuotedIdentifiers = builder.storesMixedCaseQuotedIdentifiers;
         this.supportsMixedCaseQuotedIdentifiers = builder.supportsMixedCaseQuotedIdentifiers;
-        this.nullsAreSortedAtEnd = builder.nullsAreSortedAtEnd;
-        this.nullsAreSortedAtStart = builder.nullsAreSortedAtStart;
-        this.nullsAreSortedHigh = builder.nullsAreSortedHigh;
-        this.nullsAreSortedLow = builder.nullsAreSortedLow;
+        this.areNullsSortedAtEnd = builder.areNullsSortedAtEnd;
+        this.areNullsSortedAtStart = builder.areNullsSortedAtStart;
+        this.areNullsSortedHigh = builder.areNullsSortedHigh;
+        this.areNullsSortedLow = builder.areNullsSortedLow;
     }
 
     /**
@@ -129,29 +129,29 @@ public final class SchemaAdapterNotes {
     /**
      * @return true if NULL values are sorted at the end regardless of sort order.
      */
-    public boolean nullsAreSortedAtEnd() {
-        return this.nullsAreSortedAtEnd;
+    public boolean areNullsSortedAtEnd() {
+        return this.areNullsSortedAtEnd;
     }
 
     /**
      * @return true if NULL values are sorted at the start regardless of sort order.
      */
-    public boolean nullsAreSortedAtStart() {
-        return this.nullsAreSortedAtStart;
+    public boolean areNullsSortedAtStart() {
+        return this.areNullsSortedAtStart;
     }
 
     /**
      * @return true if NULL values are sorted high.
      */
-    public boolean nullsAreSortedHigh() {
-        return this.nullsAreSortedHigh;
+    public boolean areNullsSortedHigh() {
+        return this.areNullsSortedHigh;
     }
 
     /**
      * @return true if NULL values are sorted low.
      */
-    public boolean nullsAreSortedLow() {
-        return this.nullsAreSortedLow;
+    public boolean areNullsSortedLow() {
+        return this.areNullsSortedLow;
     }
 
     @Override
@@ -171,9 +171,9 @@ public final class SchemaAdapterNotes {
               && this.storesUpperCaseQuotedIdentifiers == that.storesUpperCaseQuotedIdentifiers
               && this.storesMixedCaseQuotedIdentifiers == that.storesMixedCaseQuotedIdentifiers
               && this.supportsMixedCaseQuotedIdentifiers == that.supportsMixedCaseQuotedIdentifiers
-              && this.nullsAreSortedAtEnd == that.nullsAreSortedAtEnd
-              && this.nullsAreSortedAtStart == that.nullsAreSortedAtStart
-              && this.nullsAreSortedHigh == that.nullsAreSortedHigh && this.nullsAreSortedLow == that.nullsAreSortedLow
+              && this.areNullsSortedAtEnd == that.areNullsSortedAtEnd
+              && this.areNullsSortedAtStart == that.areNullsSortedAtStart
+              && this.areNullsSortedHigh == that.areNullsSortedHigh && this.areNullsSortedLow == that.areNullsSortedLow
               && Objects.equals(this.catalogSeparator, that.catalogSeparator) && Objects
               .equals(this.identifierQuoteString, that.identifierQuoteString);
     }
@@ -183,8 +183,31 @@ public final class SchemaAdapterNotes {
         return Objects.hash(this.catalogSeparator, this.identifierQuoteString, this.storesLowerCaseIdentifiers,
               this.storesUpperCaseIdentifiers, this.storesMixedCaseIdentifiers, this.supportsMixedCaseIdentifiers,
               this.storesLowerCaseQuotedIdentifiers, this.storesUpperCaseQuotedIdentifiers,
-              this.storesMixedCaseQuotedIdentifiers, this.supportsMixedCaseQuotedIdentifiers, this.nullsAreSortedAtEnd,
-              this.nullsAreSortedAtStart, this.nullsAreSortedHigh, this.nullsAreSortedLow);
+              this.storesMixedCaseQuotedIdentifiers, this.supportsMixedCaseQuotedIdentifiers, this.areNullsSortedAtEnd,
+              this.areNullsSortedAtStart, this.areNullsSortedHigh, this.areNullsSortedLow);
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("SchemaAdapterNotes{\n");
+        builder.append("catalogSeparator='").append(this.catalogSeparator).append("\',\n");
+        builder.append("identifierQuoteString='").append(this.identifierQuoteString).append("\',\n");
+        builder.append("storesLowerCaseIdentifiers=").append(this.storesLowerCaseIdentifiers).append(",\n");
+        builder.append("storesUpperCaseIdentifiers=").append(this.storesLowerCaseIdentifiers).append(",\n");
+        builder.append("storesMixedCaseIdentifiers=").append(this.storesMixedCaseIdentifiers).append(",\n");
+        builder.append("supportsMixedCaseIdentifiers=").append(this.supportsMixedCaseIdentifiers).append(",\n");
+        builder.append("storesUpperCaseQuotedIdentifiers=").append(this.storesUpperCaseQuotedIdentifiers).append(",\n");
+        builder.append("storesLowerCaseQuotedIdentifiers=").append(this.storesLowerCaseQuotedIdentifiers).append(",\n");
+        builder.append("storesMixedCaseQuotedIdentifiers=").append(this.storesMixedCaseQuotedIdentifiers).append(",\n");
+        builder.append("supportsMixedCaseQuotedIdentifiers=").append(this.supportsMixedCaseQuotedIdentifiers)
+              .append(",\n");
+        builder.append("areNullsSortedAtEnd=").append(this.areNullsSortedAtEnd).append(",\n");
+        builder.append("areNullsSortedAtStart=").append(this.areNullsSortedAtStart).append(",\n");
+        builder.append("areNullsSortedHigh=").append(this.areNullsSortedHigh).append(",\n");
+        builder.append("areNullsSortedLow=").append(this.areNullsSortedLow).append("\n");
+        builder.append('}');
+        return builder.toString();
     }
 
     /**
@@ -201,10 +224,10 @@ public final class SchemaAdapterNotes {
         private boolean storesUpperCaseQuotedIdentifiers = false;
         private boolean storesMixedCaseQuotedIdentifiers = false;
         private boolean supportsMixedCaseQuotedIdentifiers = false;
-        private boolean nullsAreSortedAtEnd = false;
-        private boolean nullsAreSortedAtStart = false;
-        private boolean nullsAreSortedHigh = false;
-        private boolean nullsAreSortedLow = false;
+        private boolean areNullsSortedAtEnd = false;
+        private boolean areNullsSortedAtStart = false;
+        private boolean areNullsSortedHigh = false;
+        private boolean areNullsSortedLow = false;
 
         /**
          * Set the catalog separator
@@ -322,8 +345,8 @@ public final class SchemaAdapterNotes {
          * @param nullsAreSortedAtEnd true if nulls are sorted at end
          * @return builder instance for fluent programming
          */
-        public Builder nullsAreSortedAtEnd(final boolean nullsAreSortedAtEnd) {
-            this.nullsAreSortedAtEnd = nullsAreSortedAtEnd;
+        public Builder areNullsSortedAtEnd(final boolean nullsAreSortedAtEnd) {
+            this.areNullsSortedAtEnd = nullsAreSortedAtEnd;
             return this;
         }
 
@@ -333,8 +356,8 @@ public final class SchemaAdapterNotes {
          * @param nullsAreSortedAtStart true if nulls are sorted at start
          * @return builder instance for fluent programming
          */
-        public Builder nullsAreSortedAtStart(final boolean nullsAreSortedAtStart) {
-            this.nullsAreSortedAtStart = nullsAreSortedAtStart;
+        public Builder areNullsSortedAtStart(final boolean nullsAreSortedAtStart) {
+            this.areNullsSortedAtStart = nullsAreSortedAtStart;
             return this;
         }
 
@@ -344,8 +367,8 @@ public final class SchemaAdapterNotes {
          * @param nullsAreSortedHigh true if nulls are sorted high
          * @return builder instance for fluent programming
          */
-        public Builder nullsAreSortedHigh(final boolean nullsAreSortedHigh) {
-            this.nullsAreSortedHigh = nullsAreSortedHigh;
+        public Builder areNullsSortedHigh(final boolean nullsAreSortedHigh) {
+            this.areNullsSortedHigh = nullsAreSortedHigh;
             return this;
         }
 
@@ -355,11 +378,16 @@ public final class SchemaAdapterNotes {
          * @param nullsAreSortedLow true if nulls are sorted low
          * @return builder instance for fluent programming
          */
-        public Builder nullsAreSortedLow(final boolean nullsAreSortedLow) {
-            this.nullsAreSortedLow = nullsAreSortedLow;
+        public Builder areNullsSortedLow(final boolean nullsAreSortedLow) {
+            this.areNullsSortedLow = nullsAreSortedLow;
             return this;
         }
 
+        /**
+         * Builds and returns instance of {@link SchemaAdapterNotes} class
+         *
+         * @return instance of {@link SchemaAdapterNotes} class
+         */
         public SchemaAdapterNotes build() {
             return new SchemaAdapterNotes(this);
         }

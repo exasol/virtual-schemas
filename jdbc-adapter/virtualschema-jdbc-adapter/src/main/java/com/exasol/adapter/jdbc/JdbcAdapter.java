@@ -7,9 +7,7 @@ import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.json.RequestJsonParser;
 import com.exasol.adapter.json.ResponseJsonSerializer;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.metadata.SchemaMetadata;
-import com.exasol.adapter.metadata.SchemaMetadataInfo;
+import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.request.*;
 import com.exasol.logging.CompactFormatter;
 import com.exasol.utils.JsonHelper;
@@ -19,10 +17,7 @@ import java.io.OutputStream;
 import java.sql.*;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Formatter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.StreamHandler;
+import java.util.logging.*;
 
 public class JdbcAdapter {
     public static final int MAX_STRING_CHAR_LENGTH = 2000000;

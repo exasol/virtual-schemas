@@ -42,10 +42,10 @@ class SchemaAdapterNotesTest {
               .storesUpperCaseQuotedIdentifiers(STORES_UPPER_CASE_QUOTED_IDENTIFIERS) //
               .storesMixedCaseQuotedIdentifiers(STORES_MIXED_CASE_QUOTED_IDENTIFIERS) //
               .supportsMixedCaseQuotedIdentifiers(SUPPORTS_MIXED_CASE_QUOTED_IDENTIFIERS) //
-              .nullsAreSortedAtEnd(NULLS_ARE_SORTED_AT_END) //
-              .nullsAreSortedAtStart(NULLS_ARE_SORTED_AT_START) //
-              .nullsAreSortedHigh(NULLS_ARE_SORTED_HIGH) //
-              .nullsAreSortedLow(NULLS_ARE_SORTED_LOW) //
+              .areNullsSortedAtEnd(NULLS_ARE_SORTED_AT_END) //
+              .areNullsSortedAtStart(NULLS_ARE_SORTED_AT_START) //
+              .areNullsSortedHigh(NULLS_ARE_SORTED_HIGH) //
+              .areNullsSortedLow(NULLS_ARE_SORTED_LOW) //
               .build();
         assertAll(() -> assertThat(schemaAdapterNotes.getCatalogSeparator(), equalTo(CATALOG_SEPARATOR)),
               () -> assertThat(schemaAdapterNotes.getIdentifierQuoteString(), equalTo(IDENTIFIER_QUOTE_STRING)),
@@ -62,9 +62,9 @@ class SchemaAdapterNotesTest {
                     equalTo(STORES_MIXED_CASE_QUOTED_IDENTIFIERS)),
               () -> assertThat(schemaAdapterNotes.supportsMixedCaseQuotedIdentifiers(),
                     equalTo(SUPPORTS_MIXED_CASE_QUOTED_IDENTIFIERS)),
-              () -> assertThat(schemaAdapterNotes.nullsAreSortedAtEnd(), equalTo(NULLS_ARE_SORTED_AT_END)),
-              () -> assertThat(schemaAdapterNotes.nullsAreSortedAtStart(), equalTo(NULLS_ARE_SORTED_AT_START)),
-              () -> assertThat(schemaAdapterNotes.nullsAreSortedHigh(), equalTo(NULLS_ARE_SORTED_HIGH)),
-              () -> assertThat(schemaAdapterNotes.nullsAreSortedLow(), equalTo(NULLS_ARE_SORTED_LOW)));
+              () -> assertThat(schemaAdapterNotes.areNullsSortedAtEnd(), equalTo(NULLS_ARE_SORTED_AT_END)),
+              () -> assertThat(schemaAdapterNotes.areNullsSortedAtStart(), equalTo(NULLS_ARE_SORTED_AT_START)),
+              () -> assertThat(schemaAdapterNotes.areNullsSortedHigh(), equalTo(NULLS_ARE_SORTED_HIGH)),
+              () -> assertThat(schemaAdapterNotes.areNullsSortedLow(), equalTo(NULLS_ARE_SORTED_LOW)));
     }
 }

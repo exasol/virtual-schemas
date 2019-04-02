@@ -58,7 +58,7 @@ public class DialectTestData {
               .storesUpperCaseIdentifiers(true) //
               .supportsMixedCaseIdentifiers(true) //
               .supportsMixedCaseQuotedIdentifiers(true) //
-              .nullsAreSortedHigh(true) //
+              .areNullsSortedHigh(true) //
               .build());
     }
 
@@ -66,6 +66,6 @@ public class DialectTestData {
         return new SqlDialectContext(SchemaAdapterNotes.builder() //
               .catalogSeparator(".") //
               .identifierQuoteString("\"") //
-              .nullsAreSortedHigh(true).build());
+              .areNullsSortedHigh(true).build());
     }
 }

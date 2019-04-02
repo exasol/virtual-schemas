@@ -161,7 +161,7 @@ public class SqlDialectTest {
             super(new SqlDialectContext(SchemaAdapterNotes.builder() //
                   .catalogSeparator(".") //
                   .identifierQuoteString("\"") //
-                  .nullsAreSortedHigh(true).build()));
+                  .areNullsSortedHigh(true).build()));
             this.aggregationAliases = aggregationAliases;
             this.scalarAliases = scalarAliases;
             this.infixAliases = infixAliases;

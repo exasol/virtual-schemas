@@ -1,8 +1,10 @@
 package com.exasol.adapter.jdbc;
 
 import com.exasol.adapter.AdapterException;
+import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -26,15 +28,15 @@ class SchemaAdapterNotesJsonConverterTest {
           + "\"storesUpperCaseQuotedIdentifiers\":false," //
           + "\"storesMixedCaseQuotedIdentifiers\":false," //
           + "\"supportsMixedCaseQuotedIdentifiers\":false," //
-          + "\"nullsAreSortedAtEnd\":false," //
-          + "\"nullsAreSortedAtStart\":false," //
-          + "\"nullsAreSortedHigh\":false," //
-          + "\"nullsAreSortedLow\":false}";
+          + "\"areNullsSortedAtEnd\":false," //
+          + "\"areNullsSortedAtStart\":false," //
+          + "\"areNullsSortedHigh\":false," //
+          + "\"areNullsSortedLow\":false}";
 
     @Test
-    void convertToJsonWithDefaultValues() {
-        assertThat(this.schemaAdapterNotesJsonConverter.convertToJson(SchemaAdapterNotes.builder().build()),
-              equalTo(SERIALIZED_STRING));
+    void convertToJsonWithDefaultValues() throws JSONException {
+        JSONAssert.assertEquals(SERIALIZED_STRING,
+              this.schemaAdapterNotesJsonConverter.convertToJson(SchemaAdapterNotes.builder().build()), false);
     }
 
     @Test

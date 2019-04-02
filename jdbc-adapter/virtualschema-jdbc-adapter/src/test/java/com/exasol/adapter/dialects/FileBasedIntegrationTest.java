@@ -138,10 +138,10 @@ public class FileBasedIntegrationTest {
             final String schemaName = "LS";
             final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, multipleTables);
             final SchemaAdapterNotes notes = SchemaAdapterNotes.builder() //
-                  .nullsAreSortedAtEnd(false) //
-                  .nullsAreSortedAtStart(false) //
-                  .nullsAreSortedHigh(true) //
-                  .nullsAreSortedLow(false) //
+                  .areNullsSortedAtEnd(false) //
+                  .areNullsSortedAtStart(false) //
+                  .areNullsSortedHigh(true) //
+                  .areNullsSortedLow(false) //
                   .build();
             final SqlDialectContext dialectContext = new SqlDialectContext(notes);
             final Class dialectClass = Class.forName("com.exasol.adapter.dialects.impl." + dialect + "SqlDialect");

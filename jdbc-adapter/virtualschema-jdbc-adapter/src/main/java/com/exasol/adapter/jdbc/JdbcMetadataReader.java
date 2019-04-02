@@ -46,10 +46,10 @@ public class JdbcMetadataReader {
                   .storesUpperCaseQuotedIdentifiers(dbMeta.storesUpperCaseQuotedIdentifiers()) //
                   .storesMixedCaseQuotedIdentifiers(dbMeta.storesMixedCaseQuotedIdentifiers()) //
                   .supportsMixedCaseQuotedIdentifiers(dbMeta.supportsMixedCaseQuotedIdentifiers()) //
-                  .nullsAreSortedAtEnd(dbMeta.nullsAreSortedAtEnd()) //
-                  .nullsAreSortedAtStart(dbMeta.nullsAreSortedAtStart()) //
-                  .nullsAreSortedHigh(dbMeta.nullsAreSortedHigh()) //
-                  .nullsAreSortedLow(dbMeta.nullsAreSortedLow()) //
+                  .areNullsSortedAtEnd(dbMeta.nullsAreSortedAtEnd()) //
+                  .areNullsSortedAtStart(dbMeta.nullsAreSortedAtStart()) //
+                  .areNullsSortedHigh(dbMeta.nullsAreSortedHigh()) //
+                  .areNullsSortedLow(dbMeta.nullsAreSortedLow()) //
                   .build();
             final SqlDialect dialect = SqlDialects.getInstance().getDialectInstanceForNameWithContext(dialectName,
                     new SqlDialectContext(schemaAdapterNotes, postgreSQLIdentifierMapping, oracleNumberTargetType));
