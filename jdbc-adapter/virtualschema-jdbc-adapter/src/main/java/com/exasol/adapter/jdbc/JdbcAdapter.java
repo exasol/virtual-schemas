@@ -1,11 +1,5 @@
 package com.exasol.adapter.jdbc;
 
-import java.io.OutputStream;
-import java.sql.*;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.*;
-
 import com.exasol.ExaConnectionInformation;
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
@@ -18,6 +12,12 @@ import com.exasol.adapter.request.*;
 import com.exasol.logging.CompactFormatter;
 import com.exasol.utils.JsonHelper;
 import com.exasol.utils.UdfUtils;
+
+import java.io.OutputStream;
+import java.sql.*;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.*;
 
 public class JdbcAdapter {
     public static final int MAX_STRING_CHAR_LENGTH = 2000000;
@@ -110,7 +110,7 @@ public class JdbcAdapter {
     }
 
     private static String handleCreateVirtualSchema(final CreateVirtualSchemaRequest request, final ExaMetadata meta)
-            throws SQLException, AdapterException {
+            throws AdapterException {
         final SchemaMetadataInfo schemaMetadata = request.getSchemaMetadataInfo();
         final Map<String, String> properties = schemaMetadata.getProperties();
         configureLogOutput(schemaMetadata);
@@ -119,14 +119,13 @@ public class JdbcAdapter {
         return ResponseJsonSerializer.makeCreateVirtualSchemaResponse(remoteMeta);
     }
 
-    private static SchemaMetadata readMetadata(final SchemaMetadataInfo schemaMeta, final ExaMetadata meta)
-            throws SQLException, AdapterException {
+    private static SchemaMetadata readMetadata(final SchemaMetadataInfo schemaMeta, final ExaMetadata meta) {
         final List<String> tables = JdbcAdapterProperties.getTableFilter(schemaMeta.getProperties());
         return readMetadata(schemaMeta, tables, meta);
     }
 
     private static SchemaMetadata readMetadata(final SchemaMetadataInfo meta, final List<String> tables,
-            final ExaMetadata exaMeta) throws SQLException, AdapterException {
+            final ExaMetadata exaMeta) {
         // Connect via JDBC and read metadata
         final ExaConnectionInformation connection = JdbcAdapterProperties.getConnectionInformation(meta.getProperties(),
                 exaMeta);
@@ -142,7 +141,7 @@ public class JdbcAdapter {
     }
 
     private static String handleRefresh(final RefreshRequest request, final ExaMetadata meta)
-            throws SQLException, AdapterException {
+            throws AdapterException {
         final SchemaMetadata remoteMeta;
         JdbcAdapterProperties.checkPropertyConsistency(request.getSchemaMetadataInfo().getProperties());
         if (request.isRefreshForTables()) {
@@ -155,7 +154,7 @@ public class JdbcAdapter {
     }
 
     private static String handleSetProperty(final SetPropertiesRequest request, final ExaMetadata exaMeta)
-            throws SQLException, AdapterException {
+            throws AdapterException {
         final Map<String, String> changedProperties = request.getProperties();
         final Map<String, String> newSchemaMeta = JdbcAdapterProperties
                 .getNewProperties(request.getSchemaMetadataInfo().getProperties(), changedProperties);
@@ -182,13 +181,16 @@ public class JdbcAdapter {
     }
 
     public static String handleGetCapabilities(final GetCapabilitiesRequest request) throws AdapterException {
-        final SqlDialectContext dialectContext = new SqlDialectContext(SchemaAdapterNotes.deserialize(
-                request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()));
-        final SqlDialect dialect = JdbcAdapterProperties.getSqlDialect(request.getSchemaMetadataInfo().getProperties(),
-                dialectContext);
+        final SchemaMetadataInfo schemaMetadataInfo = request.getSchemaMetadataInfo();
+        final SchemaAdapterNotes schemaAdapterNotes = SchemaAdapterNotesJsonConverter.getInstance()
+              .convertFromJsonToSchemaAdapterNotes(schemaMetadataInfo.getAdapterNotes(),
+                    schemaMetadataInfo.getSchemaName());
+        final SqlDialectContext dialectContext = new SqlDialectContext(schemaAdapterNotes);
+        final SqlDialect dialect =
+              JdbcAdapterProperties.getSqlDialect(schemaMetadataInfo.getProperties(), dialectContext);
         final Capabilities capabilities = dialect.getCapabilities();
         final Capabilities excludedCapabilities = parseExcludedCapabilities(
-                JdbcAdapterProperties.getExcludedCapabilities(request.getSchemaMetadataInfo().getProperties()));
+              JdbcAdapterProperties.getExcludedCapabilities(schemaMetadataInfo.getProperties()));
         capabilities.subtractCapabilities(excludedCapabilities);
         return ResponseJsonSerializer.makeGetCapabilitiesResponse(capabilities);
     }
@@ -222,27 +224,31 @@ public class JdbcAdapter {
     }
 
     private static String handlePushdownRequest(final PushdownRequest request, final ExaMetadata exaMeta)
-            throws AdapterException {
+          throws AdapterException {
         // Generate SQL pushdown query
-        final SchemaMetadataInfo meta = request.getSchemaMetadataInfo();
-        final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping = getPostgreSQLIdentifierMapping(meta.getProperties());
-        final SqlDialectContext dialectContext = new SqlDialectContext(SchemaAdapterNotes.deserialize(
-                request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()),
-                postgreSQLIdentifierMapping, getImportType(meta), JdbcAdapterProperties.getOracleNumberTargetType(meta.getProperties()));
-        final SqlDialect dialect = JdbcAdapterProperties.getSqlDialect(request.getSchemaMetadataInfo().getProperties(),
-                dialectContext);
+        final SchemaMetadataInfo schemaMetadataInfo = request.getSchemaMetadataInfo();
+        final Map<String, String> schemaMetadataInfoProperties = schemaMetadataInfo.getProperties();
+        final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping =
+              getPostgreSQLIdentifierMapping(schemaMetadataInfoProperties);
+        final SchemaAdapterNotes schemaAdapterNotes = SchemaAdapterNotesJsonConverter.getInstance()
+              .convertFromJsonToSchemaAdapterNotes(schemaMetadataInfo.getAdapterNotes(),
+                    schemaMetadataInfo.getSchemaName());
+        final SqlDialectContext dialectContext =
+              new SqlDialectContext(schemaAdapterNotes, postgreSQLIdentifierMapping, getImportType(schemaMetadataInfo),
+                    JdbcAdapterProperties.getOracleNumberTargetType(schemaMetadataInfoProperties));
+        final SqlDialect dialect = JdbcAdapterProperties.getSqlDialect(schemaMetadataInfoProperties, dialectContext);
         final boolean hasMoreThanOneTable = request.getInvolvedTablesMetadata().size() > 1;
-        final SqlGenerationContext context = new SqlGenerationContext(
-                JdbcAdapterProperties.getCatalog(meta.getProperties()),
-                JdbcAdapterProperties.getSchema(meta.getProperties()),
-                JdbcAdapterProperties.isLocal(meta.getProperties()), hasMoreThanOneTable);
+        final SqlGenerationContext context =
+              new SqlGenerationContext(JdbcAdapterProperties.getCatalog(schemaMetadataInfoProperties),
+                    JdbcAdapterProperties.getSchema(schemaMetadataInfoProperties),
+                    JdbcAdapterProperties.isLocal(schemaMetadataInfoProperties), hasMoreThanOneTable);
         final SqlGenerationVisitor sqlGeneratorVisitor = dialect.getSqlGenerationVisitor(context);
         final String pushdownQuery = request.getSelect().accept(sqlGeneratorVisitor);
 
-        final ConnectionInformation connectionInformation = getConnectionInformation(exaMeta, meta);
+        final ConnectionInformation connectionInformation = getConnectionInformation(exaMeta, schemaMetadataInfo);
         String columnDescription = "";
-        if (getImportType(meta) == ImportType.JDBC) {
-            columnDescription = createColumnDescription(exaMeta, meta, pushdownQuery, dialect);
+        if (getImportType(schemaMetadataInfo) == ImportType.JDBC) {
+            columnDescription = createColumnDescription(exaMeta, schemaMetadataInfo, pushdownQuery, dialect);
         }
         final String sql = dialect.generatePushdownSql(connectionInformation, columnDescription, pushdownQuery);
 
