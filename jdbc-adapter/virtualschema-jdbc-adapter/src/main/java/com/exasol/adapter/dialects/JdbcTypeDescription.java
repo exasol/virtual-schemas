@@ -7,14 +7,8 @@ public class JdbcTypeDescription {
     private final int charOctedLength;
     private final String typeName;
 
-    public JdbcTypeDescription(int jdbcType, int decimalScale, int precisionOrSize,
-                               int charOctedLength
-    ) {
-        this(jdbcType, decimalScale, precisionOrSize, charOctedLength, null);
-    }
-
-    public JdbcTypeDescription(int jdbcType, int decimalScale, int precisionOrSize, int charOctedLength,
-                               String typeName) {
+    public JdbcTypeDescription(final int jdbcType, final int decimalScale, final int precisionOrSize,
+            final int charOctedLength, final String typeName) {
         this.jdbcType = jdbcType;
         this.decimalScale = decimalScale;
         this.precisionOrSize = precisionOrSize;
@@ -23,22 +17,22 @@ public class JdbcTypeDescription {
     }
 
     public int getJdbcType() {
-        return jdbcType;
+        return this.jdbcType;
     }
 
     public int getDecimalScale() {
-        return decimalScale;
+        return this.decimalScale;
     }
 
     public int getPrecisionOrSize() {
-        return precisionOrSize;
+        return this.precisionOrSize;
     }
 
     public int getCharOctedLength() {
-        return charOctedLength;
+        return this.charOctedLength;
     }
 
     public String getTypeName() {
-        return typeName;
+        return this.typeName;
     }
 }

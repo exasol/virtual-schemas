@@ -1,25 +1,19 @@
 package com.exasol.adapter.dialects;
 
-import com.exasol.adapter.jdbc.ColumnAdapterNotes;
-import com.exasol.adapter.jdbc.ConnectionInformation;
-import com.exasol.adapter.jdbc.JdbcAdapterProperties;
+import java.sql.*;
+import java.util.*;
+
+import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.*;
-
 /**
- * Abstract implementation of a dialect. We recommend that every dialect should
- * extend this abstract class.
+ * Abstract implementation of a dialect. We recommend that every dialect should extend this abstract class.
  *
- * TODO Find solution to handle unsupported types (e.g. exceeding varchar size).
- * E.g. skip column or always truncate or add const-null column or throw error
- * or make configurable
+ * TODO Find solution to handle unsupported types (e.g. exceeding varchar size). E.g. skip column or always truncate or
+ * add const-null column or throw error or make configurable
  */
 public abstract class AbstractSqlDialect implements SqlDialect {
 
@@ -63,7 +57,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         boolean isNullable = true;
         try {
             final String nullable = columns.getString("IS_NULLABLE");
-            if (nullable != null && nullable.toLowerCase().equals("no")) {
+            if ((nullable != null) && nullable.toLowerCase().equals("no")) {
                 isNullable = false;
             }
         } catch (final SQLException ex) {
@@ -75,7 +69,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         boolean isIdentity = false;
         try {
             final String identity = columns.getString("IS_AUTOINCREMENT");
-            if (identity != null && identity.toLowerCase().equals("yes")) {
+            if ((identity != null) && identity.toLowerCase().equals("yes")) {
                 isIdentity = true;
             }
         } catch (final SQLException ex) {
@@ -97,7 +91,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         String comment = "";
         try {
             final String commentString = columns.getString("REMARKS");
-            if (commentString != null && !commentString.isEmpty()) {
+            if ((commentString != null) && !commentString.isEmpty()) {
                 comment = commentString;
             }
         } catch (final SQLException ex) {
@@ -111,7 +105,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         }
         final String adapterNotes = ColumnAdapterNotes.serialize(new ColumnAdapterNotes(jdbcType, columnTypeName));
         return ColumnMetadata.builder().name(colName).adapterNotes(adapterNotes).type(colType).nullable(isNullable)
-              .identity(isIdentity).defaultValue(defaultValue).comment(comment).build();
+                .identity(isIdentity).defaultValue(defaultValue).comment(comment).build();
     }
 
     private static DataType getExaTypeFromJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
@@ -301,10 +295,11 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     public void handleException(final SQLException exception,
             final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
         throw exception;
-    };
+    }
 
     @Override
-    public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription, final String pushdownSql) {
+    public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription,
+            final String pushdownSql) {
         final StringBuilder jdbcImportQuery = new StringBuilder();
         if (columnDescription == null) {
             jdbcImportQuery.append("IMPORT FROM JDBC AT ").append(connectionInformation.getCredentials());

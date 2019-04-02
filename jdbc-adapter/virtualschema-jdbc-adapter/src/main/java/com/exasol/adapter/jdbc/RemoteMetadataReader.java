@@ -3,8 +3,8 @@ package com.exasol.adapter.jdbc;
 import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.*;
 
 import java.sql.*;
-import java.util.*;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.metadata.SchemaMetadata;
@@ -17,14 +17,10 @@ import com.exasol.adapter.metadata.TableMetadata;
  * See <a href="https://docs.oracle.com/javase/8/docs/api/java/sql/DatabaseMetaData.html">java.sql.DatabaseMetaData</a>
  */
 public class RemoteMetadataReader {
-    private static final Logger LOGGER = Logger.getLogger(RemoteMetadataReader.class.getName());
-    private static final String TABLE_NAME_COLUMN = "TABLE_NAME";
     private final Connection connection;
-    private final SqlDialect sqlDialect;
 
     public RemoteMetadataReader(final Connection connection, final SqlDialect sqlDialect) {
         this.connection = connection;
-        this.sqlDialect = sqlDialect;
     }
 
     public SchemaMetadata readRemoteSchemaMetadata() {
@@ -55,14 +51,6 @@ public class RemoteMetadataReader {
     }
 
     private TableMetadata mapTable(final ResultSet remoteTable) throws SQLException {
-        this.sqlDialect.mapTable(remoteTable, Collections.emptyList()); // FIXME: use real list.
+        throw new RuntimeException("Not implemented yet"); // FIXME: implement
     }
-//        final String tableName = readTableName(remoteTable);
-//        LOGGER.info(() -> "Mapping metadata for table \"" + tableName + "\"");
-//        final String adapterNotes = null;
-//        final List<ColumnMetadata> columns = new ColumnMetadataReader(this.connection, this.sqlDialect)
-//                .mapColumns(tableName);
-//        final String comment = null;
-//        return new TableMetadata(tableName, adapterNotes, columns, comment);
-//    }
 }

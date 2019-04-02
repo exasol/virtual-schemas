@@ -16,4 +16,13 @@ public class RemoteMetadataReaderException extends RuntimeException {
     public RemoteMetadataReaderException(final String message, final Throwable cause) {
         super(message, cause);
     }
+
+    /**
+     * Create a new {@link RemoteMetadataReaderException}
+     *
+     * @param message error message
+     */
+    public RemoteMetadataReaderException(final String message) {
+        super(message);
+    }
 }
