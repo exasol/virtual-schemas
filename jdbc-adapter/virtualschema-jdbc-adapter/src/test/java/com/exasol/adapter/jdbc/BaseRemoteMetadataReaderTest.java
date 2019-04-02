@@ -15,7 +15,7 @@ import org.mockito.*;
 import com.exasol.adapter.dialects.impl.ExasolSqlDialect;
 import com.exasol.adapter.metadata.*;
 
-class RemoteMetadataReaderTest {
+class BaseRemoteMetadataReaderTest {
     @Mock
     private Connection connectionMock;
     @Mock
@@ -34,7 +34,7 @@ class RemoteMetadataReaderTest {
     }
 
     private SchemaMetadata readMockedSchemaMetadata() {
-        final RemoteMetadataReader reader = new RemoteMetadataReader(this.connectionMock, new ExasolSqlDialect(null));
+        final RemoteMetadataReader reader = new BaseRemoteMetadataReader(this.connectionMock, new ExasolSqlDialect(null));
         return reader.readRemoteSchemaMetadata();
     }
 
