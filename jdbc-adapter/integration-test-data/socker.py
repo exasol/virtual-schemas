@@ -21,6 +21,11 @@ def docker_run(config):
                 cmd = "docker start {name}".format(name = properties['dockerName'])
                 print(cmd)
                 run(cmd)
+                cmd = "docker network connect exasoldb_priv {name}".format(
+                    name = properties['dockerName']
+                )
+                print(cmd)
+                run(cmd)
 
 def docker_rm(config):
     for db, properties in config.items():
@@ -31,6 +36,11 @@ def docker_rm(config):
                 run(cmd)
             elif 'dockerName' in properties:
                 cmd = "docker stop {name}".format(name = properties['dockerName'])
+                print(cmd)
+                run(cmd)
+                cmd = "docker network disconnect exasoldb_priv {name}".format(
+                    name = properties['dockerName']
+                )
                 print(cmd)
                 run(cmd)
 
