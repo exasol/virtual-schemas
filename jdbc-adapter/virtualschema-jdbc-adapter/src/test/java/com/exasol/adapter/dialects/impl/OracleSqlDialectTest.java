@@ -35,7 +35,7 @@ class OracleSqlDialectTest {
     @BeforeEach
     void beforeEach() throws MetadataException {
         this.node = DialectTestData.getTestSqlNode();
-        this.dialect = new OracleSqlDialect(new SqlDialectContext(Mockito.mock(SchemaAdapterNotes.class)));
+        this.dialect = new OracleSqlDialect(new SqlDialectContext(SchemaAdapterNotes.builder().build()));
         final SqlGenerationContext context = new SqlGenerationContext("", SCHEMA_NAME, false, false);
         this.generator = this.dialect.getSqlGenerationVisitor(context);
     }

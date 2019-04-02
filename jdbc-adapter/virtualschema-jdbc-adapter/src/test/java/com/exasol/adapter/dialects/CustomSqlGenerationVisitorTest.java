@@ -26,24 +26,24 @@ public class CustomSqlGenerationVisitorTest {
      */
     @Test
     public void testSqlGenerator() throws AdapterException {
-        SqlNode node = getTestSqlNode();
-        String schemaName = "SCHEMA";
-        String expectedSql = "SELECT NOT_CUSTOM (NOT_CUSTOM (\"C1\")) FROM \"" + schemaName
+        final SqlNode node = getTestSqlNode();
+        final String schemaName = "SCHEMA";
+        final String expectedSql = "SELECT NOT_CUSTOM (NOT_CUSTOM (\"C1\")) FROM \"" + schemaName
                 + "\".\"TEST\"";
-        SqlGenerationContext context = new SqlGenerationContext("", schemaName,
+        final SqlGenerationContext context = new SqlGenerationContext("", schemaName,
                 false, false);
-        SqlDialectContext dialectContext = new SqlDialectContext(Mockito.mock(SchemaAdapterNotes.class));
-        SqlGenerationVisitor generator = new TestSqlGenerationVisitor(
+        final SqlDialectContext dialectContext = new SqlDialectContext(SchemaAdapterNotes.builder().build());
+        final SqlGenerationVisitor generator = new TestSqlGenerationVisitor(
                 new ExasolSqlDialect(dialectContext), context);
-        String actualSql = node.accept(generator);
+        final String actualSql = node.accept(generator);
         assertEquals(SqlTestUtil.normalizeSql(expectedSql),
                 SqlTestUtil.normalizeSql(actualSql));
     }
 
     private SqlNode getTestSqlNode() throws MetadataException {
-        TableMetadata clicksMeta = getTestTableMetadata();
-        SqlTable fromClause = new SqlTable("TEST", clicksMeta);
-        SqlSelectList selectList = SqlSelectList.createRegularSelectList(
+        final TableMetadata clicksMeta = getTestTableMetadata();
+        final SqlTable fromClause = new SqlTable("TEST", clicksMeta);
+        final SqlSelectList selectList = SqlSelectList.createRegularSelectList(
                 ImmutableList.<SqlNode>of(new SqlPredicateNot(
                         new SqlPredicateNot(new SqlColumn(1, clicksMeta
                                 .getColumns().get(0))))));
@@ -52,7 +52,7 @@ public class CustomSqlGenerationVisitorTest {
     }
 
     private TableMetadata getTestTableMetadata() throws MetadataException {
-        List<ColumnMetadata> columns = new ArrayList<>();
+        final List<ColumnMetadata> columns = new ArrayList<>();
         columns.add(new ColumnMetadata("C1", "", DataType.createBool(), true,
                 false, "", ""));
         return new TableMetadata("TEST", "", columns, "");
@@ -60,13 +60,13 @@ public class CustomSqlGenerationVisitorTest {
 
     public static class TestSqlGenerationVisitor extends SqlGenerationVisitor {
 
-        public TestSqlGenerationVisitor(SqlDialect dialect,
-                SqlGenerationContext context) {
+        public TestSqlGenerationVisitor(final SqlDialect dialect,
+                final SqlGenerationContext context) {
             super(dialect, context);
         }
 
         @Override
-        public String visit(SqlPredicateNot predicate) throws AdapterException {
+        public String visit(final SqlPredicateNot predicate) throws AdapterException {
             return "NOT_CUSTOM (" + predicate.getExpression().accept(this) + ")";
         }
 

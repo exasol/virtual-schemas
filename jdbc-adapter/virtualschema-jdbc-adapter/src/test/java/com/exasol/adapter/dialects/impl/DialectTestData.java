@@ -23,32 +23,49 @@ public class DialectTestData {
         // HAVING 1 < COUNT(URL)
         // ORDER BY USER_ID
         // LIMIT 10;
-        TableMetadata clicksMeta = getClicksTableMetadata();
-        SqlTable fromClause = new SqlTable("CLICKS", clicksMeta);
-        SqlSelectList selectList = SqlSelectList.createRegularSelectList(ImmutableList.of(
-                new SqlColumn(0, clicksMeta.getColumns().get(0)),
-                new SqlFunctionAggregate(AggregateFunction.COUNT, ImmutableList.<SqlNode>of(new SqlColumn(1, clicksMeta.getColumns().get(1))), false)));
-        SqlNode whereClause = new SqlPredicateLess(new SqlLiteralExactnumeric(BigDecimal.ONE), new SqlColumn(0, clicksMeta.getColumns().get(0)));
-        SqlExpressionList groupBy = new SqlGroupBy(ImmutableList.<SqlNode>of(new SqlColumn(0, clicksMeta.getColumns().get(0))));
-        SqlNode countUrl = new SqlFunctionAggregate(AggregateFunction.COUNT, ImmutableList.<SqlNode>of(new SqlColumn(1, clicksMeta.getColumns().get(1))), false);
-        SqlNode having = new SqlPredicateLess(new SqlLiteralExactnumeric(BigDecimal.ONE), countUrl);
-        SqlOrderBy orderBy = new SqlOrderBy(ImmutableList.<SqlNode>of(new SqlColumn(0, clicksMeta.getColumns().get(0))), ImmutableList.of(true), ImmutableList.of(true));
-        SqlLimit limit = new SqlLimit(10);
+        final TableMetadata clicksMeta = getClicksTableMetadata();
+        final SqlTable fromClause = new SqlTable("CLICKS", clicksMeta);
+        final SqlSelectList selectList = SqlSelectList.createRegularSelectList(ImmutableList
+              .of(new SqlColumn(0, clicksMeta.getColumns().get(0)), new SqlFunctionAggregate(AggregateFunction.COUNT,
+                    ImmutableList.<SqlNode>of(new SqlColumn(1, clicksMeta.getColumns().get(1))), false)));
+        final SqlNode whereClause = new SqlPredicateLess(new SqlLiteralExactnumeric(BigDecimal.ONE),
+              new SqlColumn(0, clicksMeta.getColumns().get(0)));
+        final SqlExpressionList groupBy =
+              new SqlGroupBy(ImmutableList.<SqlNode>of(new SqlColumn(0, clicksMeta.getColumns().get(0))));
+        final SqlNode countUrl = new SqlFunctionAggregate(AggregateFunction.COUNT,
+              ImmutableList.<SqlNode>of(new SqlColumn(1, clicksMeta.getColumns().get(1))), false);
+        final SqlNode having = new SqlPredicateLess(new SqlLiteralExactnumeric(BigDecimal.ONE), countUrl);
+        final SqlOrderBy orderBy =
+              new SqlOrderBy(ImmutableList.<SqlNode>of(new SqlColumn(0, clicksMeta.getColumns().get(0))),
+                    ImmutableList.of(true), ImmutableList.of(true));
+        final SqlLimit limit = new SqlLimit(10);
         return new SqlStatementSelect(fromClause, selectList, whereClause, groupBy, having, orderBy, limit);
     }
 
     public static TableMetadata getClicksTableMetadata() throws MetadataException {
-        List<ColumnMetadata> columns = new ArrayList<>();
-        columns.add(new ColumnMetadata("USER_ID", ColumnAdapterNotes.serialize(new ColumnAdapterNotes(3, "DECIMAL")), DataType.createDecimal(18, 0), true, false, "", ""));
-        columns.add(new ColumnMetadata("URL", ColumnAdapterNotes.serialize(new ColumnAdapterNotes(12, "VARCHAR")), DataType.createVarChar(10000, DataType.ExaCharset.UTF8), true, false, "", ""));
+        final List<ColumnMetadata> columns = new ArrayList<>();
+        columns.add(new ColumnMetadata("USER_ID", ColumnAdapterNotes.serialize(new ColumnAdapterNotes(3, "DECIMAL")),
+              DataType.createDecimal(18, 0), true, false, "", ""));
+        columns.add(new ColumnMetadata("URL", ColumnAdapterNotes.serialize(new ColumnAdapterNotes(12, "VARCHAR")),
+              DataType.createVarChar(10000, DataType.ExaCharset.UTF8), true, false, "", ""));
         return new TableMetadata("CLICKS", "", columns, "");
     }
 
     public static SqlDialectContext getExasolDialectContext() {
-        return new SqlDialectContext(new SchemaAdapterNotes(".", "\"", false, true, false, true, false, false, false, true, false, false, true, false));
+        return new SqlDialectContext(SchemaAdapterNotes.builder() //
+              .catalogSeparator(".") //
+              .identifierQuoteString("\"") //
+              .storesUpperCaseIdentifiers(true) //
+              .supportsMixedCaseIdentifiers(true) //
+              .supportsMixedCaseQuotedIdentifiers(true) //
+              .areNullsSortedHigh(true) //
+              .build());
     }
 
     public static SqlDialectContext getOracleDialectContext() {
-        return new SqlDialectContext(new SchemaAdapterNotes(".", "\"", false, false, false, false, false, false, false, false, false, false, true, false));
+        return new SqlDialectContext(SchemaAdapterNotes.builder() //
+              .catalogSeparator(".") //
+              .identifierQuoteString("\"") //
+              .areNullsSortedHigh(true).build());
     }
 }
