@@ -5,6 +5,8 @@ import subprocess
 import yaml
 import json
 
+DOCKER_NETWORK = 'exasoldb_priv'
+
 def docker_run(config):
     for db, properties in config.items():
         if properties.get('runIntegrationTests', False):
@@ -14,15 +16,16 @@ def docker_run(config):
                     name = properties['dockerName'],
                     image = properties['dockerImage'],
                     version = properties['dockerImageVersion'],
-                    net='exasoldb_priv')
+                    net=DOCKER_NETWORK)
                 print(cmd)
                 run(cmd)
             elif 'dockerName' in properties:
                 cmd = "docker start {name}".format(name = properties['dockerName'])
                 print(cmd)
                 run(cmd)
-                cmd = "docker network connect exasoldb_priv {name}".format(
-                    name = properties['dockerName']
+                cmd = "docker network connect {network} {name}".format(
+                    name = properties['dockerName'],
+                    network = DOCKER_NETWORK
                 )
                 print(cmd)
                 run(cmd)
@@ -38,8 +41,9 @@ def docker_rm(config):
                 cmd = "docker stop {name}".format(name = properties['dockerName'])
                 print(cmd)
                 run(cmd)
-                cmd = "docker network disconnect exasoldb_priv {name}".format(
-                    name = properties['dockerName']
+                cmd = "docker network disconnect {network} {name}".format(
+                    name = properties['dockerName'],
+                    network = DOCKER_NETWORK
                 )
                 print(cmd)
                 run(cmd)
@@ -75,7 +79,9 @@ def replace_hosts_in(config):
     return yaml.dump(config, default_flow_style=False)
 
 def get_ip_for(docker_name):
-    cmd = "docker network inspect exasoldb_priv"
+    cmd = "docker network inspect {network}".format(
+        network = DOCKER_NETWORK
+    )
     docker_bridge_json = run(cmd)
     bridge_info = json.loads(docker_bridge_json)
     containers = bridge_info[0]['Containers']
