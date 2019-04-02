@@ -84,7 +84,8 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
                 JdbcAdapterProperties.getSqlDialectName(meta.getProperties()),
                 JdbcAdapterProperties.getExceptionHandlingMode(meta.getProperties()),
                 JdbcAdapterProperties.getIgnoreErrorList(meta.getProperties()),
-                getPostgreSQLIdentifierMapping(meta.getProperties()));
+                getPostgreSQLIdentifierMapping(meta.getProperties()),
+                JdbcAdapterProperties.getOracleNumberTargetType(meta.getProperties()));
     }
 
     @Override
@@ -133,7 +134,8 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
                         JdbcAdapterProperties.getSqlDialectName(newSchemaMeta),
                         JdbcAdapterProperties.getExceptionHandlingMode(newSchemaMeta),
                         JdbcAdapterProperties.getIgnoreErrorList(newSchemaMeta),
-                        getPostgreSQLIdentifierMapping(newSchemaMeta));
+                        getPostgreSQLIdentifierMapping(newSchemaMeta),
+                        JdbcAdapterProperties.getOracleNumberTargetType(newSchemaMeta));
             } catch (final SQLException exception) {
                 throw new AdapterException(
                         "Unable set properties of Virtual Schema \"" + schemaMetadataInfo.getSchemaName() + "\".",
@@ -194,10 +196,12 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
         final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping = getPostgreSQLIdentifierMapping(
                 schemaMetadataInfo.getProperties());
         final ImportType importType = getImportType(schemaMetadataInfo);
+
         final SqlDialectContext dialectContext = new SqlDialectContext(
                 SchemaAdapterNotes.deserialize(request.getSchemaMetadataInfo().getAdapterNotes(),
                         request.getSchemaMetadataInfo().getSchemaName()),
-                postgreSQLIdentifierMapping, importType);
+                postgreSQLIdentifierMapping, getImportType(schemaMetadataInfo),
+                JdbcAdapterProperties.getOracleNumberTargetType(schemaMetadataInfo.getProperties()));
         final SqlDialect dialect = JdbcAdapterProperties.getSqlDialect(request.getSchemaMetadataInfo().getProperties(),
                 dialectContext);
         final boolean hasMoreThanOneTable = request.getInvolvedTablesMetadata().size() > 1;

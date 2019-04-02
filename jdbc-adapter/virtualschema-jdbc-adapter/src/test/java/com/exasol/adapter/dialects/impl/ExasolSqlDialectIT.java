@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.exasol.adapter.dialects.PostgreSQLIdentifierMapping;
+import com.exasol.adapter.metadata.DataType;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -475,7 +476,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         final SchemaMetadata meta = JdbcMetadataReader.readRemoteMetadata("jdbc:exa:" + getConfig().getExasolAddress(),
                 getConfig().getExasolUser(), getConfig().getExasolPassword(), "EXA_DB", "JDBC_ADAPTER_TEST_SCHEMA",
                 tables, ExasolSqlDialect.getPublicName(), getConfig().getExceptionHandlingMode(), Collections.emptyList(),
-                PostgreSQLIdentifierMapping.CONVERT_TO_UPPER);
+                PostgreSQLIdentifierMapping.CONVERT_TO_UPPER, DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8));
         if (getConfig().isDebugOn()) {
             System.out.println("Meta: " + SchemaMetadataSerializer.serialize(meta).build().toString());
         }

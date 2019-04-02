@@ -116,6 +116,7 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         final int jdbcType = jdbcTypeDescription.getJdbcType();
         switch (jdbcType) {
         case Types.DECIMAL:
+        case Types.NUMERIC:
             final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
             final int decimalScale = jdbcTypeDescription.getDecimalScale();
             if (decimalScale == -127) {
@@ -123,13 +124,13 @@ public class OracleSqlDialect extends AbstractSqlDialect {
                 // without scale and precision. Convert to VARCHAR.
                 // See http://docs.oracle.com/cd/B28359_01/server.111/b28318/datatype.htm#i16209
                 // and https://docs.oracle.com/cd/E19501-01/819-3659/gcmaz/
-                colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+                colType = getContext().getOracleNumberTargetType();
                 break;
             }
             if (decimalPrec <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
                 colType = DataType.createDecimal(decimalPrec, decimalScale);
             } else {
-                colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+                colType = getContext().getOracleNumberTargetType();
             }
             break;
         case Types.OTHER:

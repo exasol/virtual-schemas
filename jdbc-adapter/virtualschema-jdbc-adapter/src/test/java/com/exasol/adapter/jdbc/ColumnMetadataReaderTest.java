@@ -17,7 +17,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.exasol.adapter.dialects.impl.ExasolSqlDialect;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.metadata.DataType.ExaCharset;
@@ -68,8 +67,7 @@ class ColumnMetadataReaderTest {
     private List<ColumnMetadata> mapMockedColumns(final ResultSet columnsMock)
             throws RemoteMetadataReaderException, SQLException {
         when(this.remoteMetadataMock.getColumns(null, null, "THE_TABLE", "%")).thenReturn(columnsMock);
-        final List<ColumnMetadata> columns = new ColumnMetadataReader(this.connectionMock, new ExasolSqlDialect(null))
-                .mapColumns("THE_TABLE");
+        final List<ColumnMetadata> columns = new ColumnMetadataReader(this.connectionMock).mapColumns("THE_TABLE");
         return columns;
     }
 
@@ -304,7 +302,7 @@ class ColumnMetadataReaderTest {
     }
 
     private void mockColumnAutoIncrement(final String jdbcAutoIncrement) throws SQLException {
-        when(this.columnsMock.getString(jdbcAutoIncrement)).thenReturn(RemoteMetadataReaderConstants.JDBC_TRUE);
+        when(this.columnsMock.getString(ColumnMetadataReader.AUTOINCREMENT_COLUMN)).thenReturn(jdbcAutoIncrement);
     }
 
     @Test
@@ -348,10 +346,16 @@ class ColumnMetadataReaderTest {
         when(this.columnsMock.getString(ColumnMetadataReader.DEFAULT_VALUE_COLUMN)).thenThrow(FAKE_SQL_EXCEPTION);
     }
 
-    @CsvSource({ "Comment, Comment", "'', ''", "" })
+    @CsvSource({ "Comment, Comment", "'', ''" })
     @ParameterizedTest
     void testMapColumnWithComment(final String input, final String expected) throws SQLException {
         mockComment(input);
+        mockDatatype(Types.VARCHAR);
+        assertThat(mapSingleMockedColumn().getComment(), equalTo(expected));
+    }
+
+    @Test
+    void testMapColumnWithTypeNameNull() throws SQLException {
         mockDatatype(Types.VARCHAR);
         assertThat(mapSingleMockedColumn().getComment(), equalTo(expected));
     }
@@ -376,5 +380,12 @@ class ColumnMetadataReaderTest {
 
     private void mockReadingCommentThrowsSqlException() throws SQLException {
         when(this.columnsMock.getString(ColumnMetadataReader.REMARKS_COLUMN)).thenThrow(FAKE_SQL_EXCEPTION);
+    }
+
+    @Test
+    void testMapColumnsWrapsSqlException() throws SQLException {
+        final ColumnMetadataReader columnMetadataReader = new ColumnMetadataReader(this.connectionMock);
+        when(this.connectionMock.getMetaData()).thenThrow(FAKE_SQL_EXCEPTION);
+        assertThrows(RemoteMetadataReaderException.class, () -> columnMetadataReader.mapColumns(""));
     }
 }

@@ -22,6 +22,7 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
     // Tested JDBC drivers: jtds-1.3.1 (https://sourceforge.net/projects/jtds/)
     public final static int maxSqlServerVarcharSize = 8000;
     public final static int maxSqlServerNVarcharSize = 4000;
+    public final static int maxSqlServerClob = 2000000;
     private static final String NAME = "SQLSERVER";
 
     public SqlServerSqlDialect(final SqlDialectContext context) {
@@ -89,6 +90,7 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
                 colType = DataType.createDouble();
             }
             break;
+            
         case Types.OTHER:
             // TODO
             colType = DataType.createVarChar(SqlServerSqlDialect.maxSqlServerVarcharSize, DataType.ExaCharset.UTF8);
@@ -97,7 +99,7 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
             colType = DataType.createVarChar(SqlServerSqlDialect.maxSqlServerVarcharSize, DataType.ExaCharset.UTF8);
             break;
         case Types.CLOB: // xml type in SQL Server
-            colType = DataType.createVarChar(SqlServerSqlDialect.maxSqlServerNVarcharSize, DataType.ExaCharset.UTF8);
+            colType = DataType.createVarChar(SqlServerSqlDialect.maxSqlServerClob, DataType.ExaCharset.UTF8);
             break;
         case Types.BLOB:
             if (columnTypeName.equalsIgnoreCase("hierarchyid")) {

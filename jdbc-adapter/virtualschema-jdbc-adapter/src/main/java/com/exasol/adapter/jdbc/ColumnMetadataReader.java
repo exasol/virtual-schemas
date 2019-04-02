@@ -8,10 +8,13 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 
+/**
+ * This class implements a mapper that reads column metadata from the remote database and converts it into JDBC
+ * information.
+ */
 public class ColumnMetadataReader {
     public static final Logger LOGGER = Logger.getLogger(ColumnMetadataReader.class.getName());
     public static final String NAME_COLUMN = "COLUMN_NAME";
@@ -28,10 +31,21 @@ public class ColumnMetadataReader {
     private static final boolean DEFAULT_NULLABLE = true;
     private final Connection connection;
 
-    public ColumnMetadataReader(final Connection connection, final SqlDialect sqlDialect) {
+    /**
+     * Create a new instance of a {@link ColumnMetadataReader}
+     *
+     * @param connection JDBC connection through which the column metadata is read from the remote database
+     */
+    public ColumnMetadataReader(final Connection connection) {
         this.connection = connection;
     }
 
+    /**
+     * Map a metadata for a list of columns to Exasol metadata
+     *
+     * @param tableName the table for which the columns are mapped
+     * @return list of Exasol column metadata objects
+     */
     public List<ColumnMetadata> mapColumns(final String tableName) {
         final List<ColumnMetadata> columns = new ArrayList<>();
         try (final ResultSet remoteColumns = this.connection.getMetaData().getColumns(ANY_CATALOG, ANY_SCHEMA,
@@ -103,7 +117,7 @@ public class ColumnMetadataReader {
             } else {
                 return "";
             }
-        } catch (final SQLException ex) {
+        } catch (final SQLException exception) {
             return "";
         }
     }
@@ -116,38 +130,30 @@ public class ColumnMetadataReader {
             } else {
                 return "";
             }
-        } catch (final SQLException ex) {
-            // ignore me
+        } catch (final SQLException exception) {
             return "";
         }
     }
 
     private String readColumnTypeName(final ResultSet remoteColumn) throws SQLException {
-        String columnTypeName = remoteColumn.getString(TYPE_NAME_COLUMN);
-        if (columnTypeName == null) {
-            columnTypeName = "";
-        }
-        return columnTypeName;
+        final String columnTypeName = remoteColumn.getString(TYPE_NAME_COLUMN);
+        return (columnTypeName == null) ? "" : columnTypeName;
     }
 
     protected String readColumnName(final ResultSet columns) throws SQLException {
         return columns.getString(NAME_COLUMN);
     }
 
-    public final DataType mapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
-        DataType type = dialectSpecificMapJdbcType(jdbcType);
-        if (type == null) {
-            type = mapJdbcToExasolDataType(jdbcType);
-        }
-        return type;
-    }
-
-    @Deprecated
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
-        return null; // FIXME: replace
-    }
-
-    private static DataType mapJdbcToExasolDataType(final JdbcTypeDescription jdbcTypeDescription) {
+    /**
+     * Map type information from JDBC to the Exasol type information.
+     * <p>
+     * Override this method in a dedicated mapper if you need dialect specific behavior.
+     * </p>
+     *
+     * @param jdbcTypeDescription parameter object describing the type from the JDBC perspective
+     * @return Exasol data type information
+     */
+    public final DataType mapJdbcType(final JdbcTypeDescription jdbcTypeDescription) {
         switch (jdbcTypeDescription.getJdbcType()) {
         case Types.TINYINT:
         case Types.SMALLINT:

@@ -13,7 +13,7 @@ import com.google.common.base.Joiner;
 /**
  * TODO Find good solutions to handle tables with unsupported data types, or tables that generate exceptions. Ideas:
  * Skip such tables by adding a boolean property like IGNORE_INVALID_TABLES.
- * 
+ *
  * @deprecated Use MetadataReader instead
  */
 @Deprecated
@@ -21,10 +21,11 @@ public class JdbcMetadataReader {
     private static final Logger LOGGER = Logger.getLogger(JdbcMetadataReader.class.getName());
 
     public static SchemaMetadata readRemoteMetadata(final String connectionString, final String user,
+
             final String password, String catalog, String schema, final List<String> tableFilter,
             final String dialectName, final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode,
-            final List<String> ignoreErrorList, final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping)
-            throws SQLException, AdapterException {
+            final List<String> ignoreErrorList, final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping,
+            final DataType oracleNumberTargetType) throws SQLException, AdapterException {
         assert (catalog != null);
         assert (schema != null);
         try (final Connection conn = establishConnection(connectionString, user, password);) {
@@ -41,7 +42,7 @@ public class JdbcMetadataReader {
                     dbMeta.nullsAreSortedAtStart(), dbMeta.nullsAreSortedHigh(), dbMeta.nullsAreSortedLow());
 
             final SqlDialect dialect = SqlDialects.getInstance().getDialectInstanceForNameWithContext(dialectName,
-                    new SqlDialectContext(schemaAdapterNotes, postgreSQLIdentifierMapping));
+                    new SqlDialectContext(schemaAdapterNotes, postgreSQLIdentifierMapping, oracleNumberTargetType));
 
             catalog = findCatalog(catalog, dbMeta, dialect);
 
@@ -244,6 +245,7 @@ public class JdbcMetadataReader {
     }
 
     private static List<TableMetadata> findTables(final String catalog, final String schema,
+
             final List<String> tableFilter, final DatabaseMetaData dbMeta, final SqlDialect dialect,
             final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, final List<String> ignoreErrorList)
             throws SQLException {
@@ -290,7 +292,8 @@ public class JdbcMetadataReader {
                     tables.add(new TableMetadata(table.getTableName(), "", columns, table.getTableComment()));
                 }
             } catch (final Exception ex) {
-                throw new RuntimeException("Exception for table " + table.getOriginalTableName(), ex);
+                throw new RetrieveMetadataException(
+                        "Exception for table " + table.getOriginalTableName() + ": " + ex.getMessage(), ex);
             }
         }
         return tables;
