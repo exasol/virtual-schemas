@@ -1,17 +1,17 @@
 package com.exasol.adapter.dialects;
 
-import java.sql.*;
-import java.util.*;
-
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
+import java.sql.*;
+import java.util.*;
+
 /**
  * Abstract implementation of a dialect. We recommend that every dialect should extend this abstract class.
- *
+ * <p>
  * TODO Find solution to handle unsupported types (e.g. exceeding varchar size). E.g. skip column or always truncate or
  * add const-null column or throw error or make configurable
  */
@@ -19,10 +19,16 @@ public abstract class AbstractSqlDialect implements SqlDialect {
 
     protected Set<ScalarFunction> omitParenthesesMap = new HashSet<>();
 
-    private final SqlDialectContext context;
+    private final SqlDialectContext context = null; //FIXME: remove context
+    private RemoteMetadataReader remoteMetadataReader;
+    private Map<String, String> properties;
 
-    public AbstractSqlDialect(final SqlDialectContext context) {
-        this.context = context;
+    public AbstractSqlDialect() {
+    }
+
+    public AbstractSqlDialect(final RemoteMetadataReader remoteMetadataReader, final Map<String, String> properties) {
+        this.remoteMetadataReader = remoteMetadataReader;
+        this.properties = properties;
     }
 
     @Override
@@ -48,8 +54,8 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         final int precisionOrSize = columns.getInt("COLUMN_SIZE");
         final int charOctedLength = columns.getInt("CHAR_OCTET_LENGTH");
         final String typeName = columns.getString("TYPE_NAME");
-        final JdbcTypeDescription jdbcTypeDescription = new JdbcTypeDescription(jdbcType, decimalScale, precisionOrSize,
-                charOctedLength, typeName);
+        final JdbcTypeDescription jdbcTypeDescription =
+              new JdbcTypeDescription(jdbcType, decimalScale, precisionOrSize, charOctedLength, typeName);
         // Check if dialect want's to handle this row
         final DataType colType = mapJdbcType(jdbcTypeDescription);
 
@@ -105,120 +111,123 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         }
         final String adapterNotes = ColumnAdapterNotes.serialize(new ColumnAdapterNotes(jdbcType, columnTypeName));
         return ColumnMetadata.builder().name(colName).adapterNotes(adapterNotes).type(colType).nullable(isNullable)
-                .identity(isIdentity).defaultValue(defaultValue).comment(comment).build();
+              .identity(isIdentity).defaultValue(defaultValue).comment(comment).build();
     }
 
     private static DataType getExaTypeFromJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
         final DataType colType;
         switch (jdbcTypeDescription.getJdbcType()) {
-        case Types.TINYINT:
-        case Types.SMALLINT:
-            if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-                final int precision = jdbcTypeDescription.getPrecisionOrSize() == 0 ? 9
-                        : jdbcTypeDescription.getPrecisionOrSize();
-                colType = DataType.createDecimal(precision, 0);
-            } else {
-                colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            }
-            break;
-        case Types.INTEGER:
-            if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-                final int precision = jdbcTypeDescription.getPrecisionOrSize() == 0 ? 18
-                        : jdbcTypeDescription.getPrecisionOrSize();
-                colType = DataType.createDecimal(precision, 0);
-            } else {
-                colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            }
-            break;
-        case Types.BIGINT: // Java type long
-            if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-                final int precision = jdbcTypeDescription.getPrecisionOrSize() == 0 ? 36
-                        : jdbcTypeDescription.getPrecisionOrSize();
-                colType = DataType.createDecimal(precision, 0);
-            } else {
-                colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            }
-            break;
-        case Types.DECIMAL:
+            case Types.TINYINT:
+            case Types.SMALLINT:
+                if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
+                    final int precision =
+                          jdbcTypeDescription.getPrecisionOrSize() == 0 ? 9 : jdbcTypeDescription.getPrecisionOrSize();
+                    colType = DataType.createDecimal(precision, 0);
+                } else {
+                    colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+                }
+                break;
+            case Types.INTEGER:
+                if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
+                    final int precision =
+                          jdbcTypeDescription.getPrecisionOrSize() == 0 ? 18 : jdbcTypeDescription.getPrecisionOrSize();
+                    colType = DataType.createDecimal(precision, 0);
+                } else {
+                    colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+                }
+                break;
+            case Types.BIGINT: // Java type long
+                if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
+                    final int precision =
+                          jdbcTypeDescription.getPrecisionOrSize() == 0 ? 36 : jdbcTypeDescription.getPrecisionOrSize();
+                    colType = DataType.createDecimal(precision, 0);
+                } else {
+                    colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+                }
+                break;
+            case Types.DECIMAL:
 
-            if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-                colType = DataType.createDecimal(jdbcTypeDescription.getPrecisionOrSize(),
-                        jdbcTypeDescription.getDecimalScale());
-            } else {
+                if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
+                    colType = DataType.createDecimal(jdbcTypeDescription.getPrecisionOrSize(),
+                          jdbcTypeDescription.getDecimalScale());
+                } else {
+                    colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+                }
+                break;
+            case Types.NUMERIC: // Java BigInteger
                 colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            }
-            break;
-        case Types.NUMERIC: // Java BigInteger
-            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            break;
-        case Types.REAL:
-        case Types.FLOAT:
-        case Types.DOUBLE:
-            colType = DataType.createDouble();
-            break;
-        case Types.VARCHAR:
-        case Types.NVARCHAR:
-        case Types.LONGVARCHAR:
-        case Types.LONGNVARCHAR: {
-            final DataType.ExaCharset charset = (jdbcTypeDescription.getCharOctedLength() == jdbcTypeDescription
-                    .getPrecisionOrSize()) ? DataType.ExaCharset.ASCII : DataType.ExaCharset.UTF8;
-            if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_VARCHAR_SIZE) {
-                final int precision = jdbcTypeDescription.getPrecisionOrSize() == 0 ? DataType.MAX_EXASOL_VARCHAR_SIZE
-                        : jdbcTypeDescription.getPrecisionOrSize();
-                colType = DataType.createVarChar(precision, charset);
-            } else {
-                colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, charset);
-            }
-            break;
-        }
-        case Types.CHAR:
-        case Types.NCHAR: {
-            final DataType.ExaCharset charset = (jdbcTypeDescription.getCharOctedLength() == jdbcTypeDescription
-                    .getPrecisionOrSize()) ? DataType.ExaCharset.ASCII : DataType.ExaCharset.UTF8;
-            if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_CHAR_SIZE) {
-                colType = DataType.createChar(jdbcTypeDescription.getPrecisionOrSize(), charset);
-            } else {
+                break;
+            case Types.REAL:
+            case Types.FLOAT:
+            case Types.DOUBLE:
+                colType = DataType.createDouble();
+                break;
+            case Types.VARCHAR:
+            case Types.NVARCHAR:
+            case Types.LONGVARCHAR:
+            case Types.LONGNVARCHAR: {
+                final DataType.ExaCharset charset =
+                      (jdbcTypeDescription.getCharOctedLength() == jdbcTypeDescription.getPrecisionOrSize()) ?
+                            DataType.ExaCharset.ASCII : DataType.ExaCharset.UTF8;
                 if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_VARCHAR_SIZE) {
-                    colType = DataType.createVarChar(jdbcTypeDescription.getPrecisionOrSize(), charset);
+                    final int precision =
+                          jdbcTypeDescription.getPrecisionOrSize() == 0 ? DataType.MAX_EXASOL_VARCHAR_SIZE :
+                                jdbcTypeDescription.getPrecisionOrSize();
+                    colType = DataType.createVarChar(precision, charset);
                 } else {
                     colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, charset);
                 }
+                break;
             }
-            break;
-        }
-        case Types.DATE:
-            colType = DataType.createDate();
-            break;
-        case Types.TIMESTAMP:
-            colType = DataType.createTimestamp(false);
-            break;
-        case Types.TIME:
-            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            break;
-        case Types.BIT:
-        case Types.BOOLEAN:
-            colType = DataType.createBool();
-            break;
-        case Types.BINARY:
-        case Types.VARBINARY:
-        case Types.LONGVARBINARY:
-        case Types.BLOB:
-        case Types.CLOB:
-        case Types.NCLOB:
-            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            break;
-        case Types.OTHER:
-        case Types.JAVA_OBJECT:
-        case Types.DISTINCT:
-        case Types.STRUCT:
-        case Types.ARRAY:
-        case Types.REF:
-        case Types.DATALINK:
-        case Types.SQLXML:
-        case Types.NULL:
-        default:
-            throw new RuntimeException("Unsupported data type (" + jdbcTypeDescription.getJdbcType()
-                    + ") found in source system, should never happen");
+            case Types.CHAR:
+            case Types.NCHAR: {
+                final DataType.ExaCharset charset =
+                      (jdbcTypeDescription.getCharOctedLength() == jdbcTypeDescription.getPrecisionOrSize()) ?
+                            DataType.ExaCharset.ASCII : DataType.ExaCharset.UTF8;
+                if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_CHAR_SIZE) {
+                    colType = DataType.createChar(jdbcTypeDescription.getPrecisionOrSize(), charset);
+                } else {
+                    if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_VARCHAR_SIZE) {
+                        colType = DataType.createVarChar(jdbcTypeDescription.getPrecisionOrSize(), charset);
+                    } else {
+                        colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, charset);
+                    }
+                }
+                break;
+            }
+            case Types.DATE:
+                colType = DataType.createDate();
+                break;
+            case Types.TIMESTAMP:
+                colType = DataType.createTimestamp(false);
+                break;
+            case Types.TIME:
+                colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+                break;
+            case Types.BIT:
+            case Types.BOOLEAN:
+                colType = DataType.createBool();
+                break;
+            case Types.BINARY:
+            case Types.VARBINARY:
+            case Types.LONGVARBINARY:
+            case Types.BLOB:
+            case Types.CLOB:
+            case Types.NCLOB:
+                colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+                break;
+            case Types.OTHER:
+            case Types.JAVA_OBJECT:
+            case Types.DISTINCT:
+            case Types.STRUCT:
+            case Types.ARRAY:
+            case Types.REF:
+            case Types.DATALINK:
+            case Types.SQLXML:
+            case Types.NULL:
+            default:
+                throw new RuntimeException("Unsupported data type (" + jdbcTypeDescription.getJdbcType()
+                      + ") found in source system, should never happen");
         }
         assert (colType != null);
         return colType;
@@ -293,13 +302,13 @@ public abstract class AbstractSqlDialect implements SqlDialect {
 
     @Override
     public void handleException(final SQLException exception,
-            final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
+          final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
         throw exception;
     }
 
     @Override
     public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription,
-            final String pushdownSql) {
+          final String pushdownSql) {
         final StringBuilder jdbcImportQuery = new StringBuilder();
         if (columnDescription == null) {
             jdbcImportQuery.append("IMPORT FROM JDBC AT ").append(connectionInformation.getCredentials());

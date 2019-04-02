@@ -11,7 +11,7 @@ import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlDialects;
+import com.exasol.adapter.dialects.SqlDialectRegistry;
 import com.exasol.adapter.metadata.DataType;
 
 /**
@@ -258,12 +258,12 @@ public final class JdbcAdapterProperties {
     }
 
     private static void checkMandatoryProperties(final Map<String, String> properties) throws AdapterException {
-        final String availableDialects = "Available dialects: " + SqlDialects.getInstance().getDialectsString();
+        final String availableDialects = "Available dialects: " + SqlDialectRegistry.getInstance().getDialectsString();
         if (!properties.containsKey(PROP_SQL_DIALECT)) {
             throw new InvalidPropertyException(
                     "You have to specify the SQL dialect (" + PROP_SQL_DIALECT + "). " + availableDialects);
         }
-        if (!SqlDialects.getInstance().isSupported(properties.get(PROP_SQL_DIALECT))) {
+        if (!SqlDialectRegistry.getInstance().isSupported(properties.get(PROP_SQL_DIALECT))) {
             throw new InvalidPropertyException(
                     "SQL Dialect \"" + properties.get(PROP_SQL_DIALECT) + "\" is not supported. " + availableDialects);
         }
@@ -330,11 +330,11 @@ public final class JdbcAdapterProperties {
     public static SqlDialect getSqlDialect(final Map<String, String> properties, final SqlDialectContext dialectContext)
             throws InvalidPropertyException {
         final String dialectName = getProperty(properties, PROP_SQL_DIALECT);
-        final SqlDialect dialect = SqlDialects.getInstance().getDialectInstanceForNameWithContext(dialectName,
+        final SqlDialect dialect = SqlDialectRegistry.getInstance().getDialectInstanceForNameWithContext(dialectName,
                 dialectContext);
         if (dialect == null) {
             throw new InvalidPropertyException("SQL Dialect not supported: " + dialectName + " - all dialects: "
-                    + SqlDialects.getInstance().getDialectsString());
+                    + SqlDialectRegistry.getInstance().getDialectsString());
         }
         return dialect;
     }

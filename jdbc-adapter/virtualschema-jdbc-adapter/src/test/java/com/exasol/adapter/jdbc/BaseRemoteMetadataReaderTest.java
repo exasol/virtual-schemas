@@ -34,7 +34,7 @@ class BaseRemoteMetadataReaderTest {
     }
 
     private SchemaMetadata readMockedSchemaMetadata() {
-        final RemoteMetadataReader reader = new BaseRemoteMetadataReader(this.connectionMock, new ExasolSqlDialect(null));
+        final RemoteMetadataReader reader = new BaseRemoteMetadataReader(this.connectionMock, new ExasolSqlDialect(/*null*/)); //FIXME: broken test
         return reader.readRemoteSchemaMetadata();
     }
 

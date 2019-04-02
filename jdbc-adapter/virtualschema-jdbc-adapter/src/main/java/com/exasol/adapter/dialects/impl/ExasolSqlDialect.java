@@ -19,8 +19,8 @@ import java.sql.SQLException;
 public class ExasolSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "EXASOL";
 
-    public ExasolSqlDialect(final SqlDialectContext context) {
-        super(context);
+    public ExasolSqlDialect() {
+        super();
         this.omitParenthesesMap.add(ScalarFunction.SYSDATE);
         this.omitParenthesesMap.add(ScalarFunction.SYSTIMESTAMP);
         this.omitParenthesesMap.add(ScalarFunction.CURRENT_SCHEMA);

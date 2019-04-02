@@ -41,7 +41,7 @@ public class JdbcMetadataReader {
                     dbMeta.supportsMixedCaseQuotedIdentifiers(), dbMeta.nullsAreSortedAtEnd(),
                     dbMeta.nullsAreSortedAtStart(), dbMeta.nullsAreSortedHigh(), dbMeta.nullsAreSortedLow());
 
-            final SqlDialect dialect = SqlDialects.getInstance().getDialectInstanceForNameWithContext(dialectName,
+            final SqlDialect dialect = SqlDialectRegistry.getInstance().getDialectInstanceForNameWithContext(dialectName,
                     new SqlDialectContext(schemaAdapterNotes, postgreSQLIdentifierMapping, oracleNumberTargetType));
 
             catalog = findCatalog(catalog, dbMeta, dialect);

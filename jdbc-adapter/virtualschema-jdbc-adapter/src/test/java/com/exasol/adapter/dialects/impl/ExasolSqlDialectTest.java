@@ -26,13 +26,13 @@ class ExasolSqlDialectTest {
             "'a\"b', \"a\"\"b\"" })
     @ParameterizedTest
     void testApplyQuoteIfNeeded(final String identifier, final String expectedQuotingResult) {
-        final ExasolSqlDialect dialect = new ExasolSqlDialect(DialectTestData.getExasolDialectContext());
+        final ExasolSqlDialect dialect = new ExasolSqlDialect(/*DialectTestData.getExasolDialectContext()*/); //FIXME: broken test
         assertThat(dialect.applyQuoteIfNeeded(identifier), equalTo(expectedQuotingResult));
     }
 
     @Test
     void testExasolSqlDialectSupportsAllCapabilities() {
-        final ExasolSqlDialect dialect = new ExasolSqlDialect(DialectTestData.getExasolDialectContext());
+        final ExasolSqlDialect dialect = new ExasolSqlDialect(/*DialectTestData.getExasolDialectContext()*/);  //FIXME: broken test
         final Capabilities capabilities = dialect.getCapabilities();
         assertAll(() -> assertThat(capabilities.getMainCapabilities(), containsInAnyOrder(MainCapability.values())),
                 () -> assertThat(capabilities.getLiteralCapabilities(), containsInAnyOrder(LiteralCapability.values())),
@@ -52,7 +52,7 @@ class ExasolSqlDialectTest {
                 + " WHERE 1 < \"USER_ID\"" + " GROUP BY \"USER_ID\"" + " HAVING 1 < COUNT(\"URL\")"
                 + " ORDER BY \"USER_ID\"" + " LIMIT 10";
         final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, false);
-        final SqlDialect dialect = new ExasolSqlDialect(DialectTestData.getExasolDialectContext());
+        final SqlDialect dialect = new ExasolSqlDialect(/*DialectTestData.getExasolDialectContext()*/); //FIXME: broken test
         final SqlGenerationVisitor generator = dialect.getSqlGenerationVisitor(context);
         final String actualSql = node.accept(generator);
         assertThat(SqlTestUtil.normalizeSql(actualSql), equalTo(SqlTestUtil.normalizeSql(expectedSql)));

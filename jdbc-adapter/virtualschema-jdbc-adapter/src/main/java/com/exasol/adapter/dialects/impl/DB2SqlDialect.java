@@ -22,7 +22,7 @@ public class DB2SqlDialect extends AbstractSqlDialect {
     private static final String NAME = "DB2";
 
     public DB2SqlDialect(final SqlDialectContext context) {
-        super(context);
+        super();
     }
 
     public static String getPublicName() {

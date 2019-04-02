@@ -23,7 +23,7 @@ import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
  */
 public class HiveSqlDialect extends AbstractSqlDialect {
     public HiveSqlDialect(final SqlDialectContext context) {
-        super(context);
+        super();
     }
 
     public static String getPublicName() {

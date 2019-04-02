@@ -19,7 +19,7 @@ import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 public class RedshiftSqlDialect extends AbstractSqlDialect {
     public RedshiftSqlDialect(final SqlDialectContext context) {
-        super(context);
+        super();
     }
 
     private static final String NAME = "REDSHIFT";

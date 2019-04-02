@@ -16,7 +16,7 @@ import java.sql.SQLException;
  */
 public class MysqlSqlDialect extends AbstractSqlDialect {
     public MysqlSqlDialect(final SqlDialectContext context) {
-        super(context);
+        super();
     }
 
     private static final String NAME = "MYSQL";

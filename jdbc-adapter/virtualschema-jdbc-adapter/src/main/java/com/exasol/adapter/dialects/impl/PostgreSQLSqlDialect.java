@@ -24,7 +24,7 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "POSTGRESQL";
 
     public PostgreSQLSqlDialect(final SqlDialectContext context) {
-        super(context);
+        super();
     }
 
     public static String getPublicName() {

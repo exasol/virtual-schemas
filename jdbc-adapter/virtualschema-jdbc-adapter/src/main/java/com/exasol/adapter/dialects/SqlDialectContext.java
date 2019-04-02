@@ -6,6 +6,7 @@ import com.exasol.adapter.metadata.DataType;
 /**
  * Context information required by {@link SqlDialect}
  */
+@Deprecated
 public class SqlDialectContext {
     private final SchemaAdapterNotes schemaAdapterNotes;
     private final ImportType importType;

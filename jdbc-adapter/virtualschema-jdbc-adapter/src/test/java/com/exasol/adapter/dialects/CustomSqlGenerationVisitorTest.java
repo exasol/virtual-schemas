@@ -31,7 +31,7 @@ public class CustomSqlGenerationVisitorTest {
         final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, false);
         final SqlDialectContext dialectContext = new SqlDialectContext(Mockito.mock(SchemaAdapterNotes.class));
         final SqlGenerationVisitor generator =
-              new TestSqlGenerationVisitor(new ExasolSqlDialect(dialectContext), context);
+              new TestSqlGenerationVisitor(new ExasolSqlDialect(/*dialectContext*/), context); //FIXME: broken test
         final String actualSql = node.accept(generator);
         assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
     }

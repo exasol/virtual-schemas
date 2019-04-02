@@ -3,45 +3,42 @@ package com.exasol.adapter.dialects;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
  * This class implements a registry for supported SQL dialects.
  */
-public final class SqlDialects {
+public final class SqlDialectRegistry {
     public static final String SQL_DIALECTS_PROPERTY = "com.exasol.adapter.dialects.supported";
     private static final String GET_PUBLIC_NAME_METHOD = "getPublicName";
     private static final String DIALECTS_PROPERTIES_FILE = "sql_dialects.properties";
-    private static SqlDialects instance = null;
+    private static SqlDialectRegistry instance = null;
     private final Set<Class<? extends SqlDialect>> supportedDialects = new HashSet<>();
-    private static final Logger LOGGER = Logger.getLogger(SqlDialects.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SqlDialectRegistry.class.getName());
 
     /**
-     * Get an instance of the {@link SqlDialects} class
+     * Get an instance of the {@link SqlDialectRegistry} class
      *
      * @return the instance
      */
-    public static synchronized SqlDialects getInstance() {
+    public static synchronized SqlDialectRegistry getInstance() {
         if (instance == null) {
-            instance = new SqlDialects();
+            instance = new SqlDialectRegistry();
             instance.registerDialectsFromProperty();
         }
         return instance;
     }
 
-    private SqlDialects() {
+    private SqlDialectRegistry() {
         // prevent instantiation outside of singleton.
     }
 
     private void registerDialectsFromProperty() {
-        final String sqlDialects = (System.getProperty(SQL_DIALECTS_PROPERTY) == null)
-                ? readDialectListFromPropertyFile()
-                : System.getProperty(SQL_DIALECTS_PROPERTY);
+        final String sqlDialects =
+              (System.getProperty(SQL_DIALECTS_PROPERTY) == null) ? readDialectListFromPropertyFile() :
+                    System.getProperty(SQL_DIALECTS_PROPERTY);
         registerDialects(sqlDialects);
     }
 
@@ -53,7 +50,7 @@ public final class SqlDialects {
             return properties.getProperty(SQL_DIALECTS_PROPERTY);
         } catch (final IOException e) {
             throw new SqlDialectsRegistryException(
-                    "Unable to load list of SQL dialect from " + DIALECTS_PROPERTIES_FILE);
+                  "Unable to load list of SQL dialect from " + DIALECTS_PROPERTIES_FILE);
         }
     }
 
@@ -63,7 +60,7 @@ public final class SqlDialects {
         }
     }
 
-    private void registerDialect(final String className) {
+    public void registerDialect(final String className) {
         try {
             @SuppressWarnings("unchecked")
             final Class<? extends SqlDialect> dialect = (Class<? extends SqlDialect>) Class.forName(className);
@@ -90,10 +87,9 @@ public final class SqlDialects {
         final String dialectName;
         try {
             dialectName = (String) dialect.getMethod(GET_PUBLIC_NAME_METHOD).invoke(null);
-        } catch (final IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-                | SecurityException e) {
+        } catch (final IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             throw new SqlDialectsRegistryException(
-                    "Unable to invoke " + GET_PUBLIC_NAME_METHOD + " trying to determine SQL dialect name");
+                  "Unable to invoke " + GET_PUBLIC_NAME_METHOD + " trying to determine SQL dialect name");
         }
         return dialectName;
     }
@@ -105,24 +101,20 @@ public final class SqlDialects {
      * @param name    name of the dialect to be instantiated
      * @param context the context to be handed to the instance.
      * @return a new instance of the dialect
-     *
      * @throws SqlDialectsRegistryException if the dialect is not found or cannot be
      *                                      instantiated.
      */
+    @Deprecated
     public SqlDialect getDialectInstanceForNameWithContext(final String name, final SqlDialectContext context)
-            throws SqlDialectsRegistryException {
+          throws SqlDialectsRegistryException {
         final Optional<Class<? extends SqlDialect>> foundDialect = findDialectByName(name);
         return instantiateDialect(name, foundDialect, context);
     }
 
     private Optional<Class<? extends SqlDialect>> findDialectByName(final String name) {
-        final Optional<Class<? extends SqlDialect>> foundDialect = this.supportedDialects.stream()
-                .filter(dialect -> getNameForDialectClass(dialect).equalsIgnoreCase(name)) //
-                .findFirst();
-        if (!foundDialect.isPresent()) {
-            throw new SqlDialectsRegistryException("SQL dialect \"" + name + "\" not found in the dialects registry.");
-        }
-        return foundDialect;
+        return this.supportedDialects.stream()
+              .filter(dialect -> getNameForDialectClass(dialect).equalsIgnoreCase(name)) //
+              .findFirst();
     }
 
     private SqlDialect instantiateDialect(final String name, final Optional<Class<? extends SqlDialect>> foundDialect,
@@ -147,9 +139,9 @@ public final class SqlDialects {
      */
     public String getDialectsString() {
         return this.supportedDialects.stream() //
-                .map(dialect -> getNameForDialectClass(dialect)) //
-                .sorted() //
-                .collect(Collectors.joining(", "));
+              .map(dialect -> getNameForDialectClass(dialect)) //
+              .sorted() //
+              .collect(Collectors.joining(", "));
     }
 
     /**
@@ -157,5 +149,20 @@ public final class SqlDialects {
      */
     public static void deleteInstance() {
         instance = null;
+    }
+
+    /**
+     * Get SQL dialect class for name
+     *
+     * @param name name of the SQL dialect
+     * @return subclass of {@link SqlDialect} according to the name
+     */
+    public Class<? extends SqlDialect> getSqlDialectClassForName(final String name) {
+        final Optional<Class<? extends SqlDialect>> foundDialect = findDialectByName(name);
+        if (foundDialect.isPresent()) {
+            return foundDialect.get();
+        } else {
+            throw new IllegalArgumentException("Could not find dialect with the name \"" + name + "\".");
+        }
     }
 }

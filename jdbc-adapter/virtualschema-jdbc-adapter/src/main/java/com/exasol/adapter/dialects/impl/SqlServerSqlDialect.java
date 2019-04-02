@@ -26,7 +26,7 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "SQLSERVER";
 
     public SqlServerSqlDialect(final SqlDialectContext context) {
-        super(context);
+        super();
     }
 
     public static String getPublicName() {

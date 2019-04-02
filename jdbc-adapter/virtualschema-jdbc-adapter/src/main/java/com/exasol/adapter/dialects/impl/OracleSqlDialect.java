@@ -28,7 +28,7 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     private final boolean castScalarFuncToFloat = true;
 
     public OracleSqlDialect(final SqlDialectContext context) {
-        super(context);
+        super();
         this.omitParenthesesMap.add(ScalarFunction.SYSDATE);
         this.omitParenthesesMap.add(ScalarFunction.SYSTIMESTAMP);
     }

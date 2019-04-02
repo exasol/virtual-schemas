@@ -20,7 +20,7 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
  */
 public class ImpalaSqlDialect extends AbstractSqlDialect {
     public ImpalaSqlDialect(final SqlDialectContext context) {
-        super(context);
+        super();
     }
 
     private static final String NAME = "IMPALA";

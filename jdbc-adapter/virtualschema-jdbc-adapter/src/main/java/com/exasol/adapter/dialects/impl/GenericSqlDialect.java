@@ -17,7 +17,7 @@ import java.sql.SQLException;
  */
 public class GenericSqlDialect extends AbstractSqlDialect {
     public GenericSqlDialect(final SqlDialectContext context) {
-        super(context);
+        super();
     }
 
     private static final String NAME = "GENERIC";
