@@ -12,7 +12,7 @@ You have to specify the following settings when adding the JDBC driver via EXAOp
 * Main: `com.cloudera.hive.jdbc41.HS2Driver`
 * Prefix: `jdbc:hive2:`
 
-Make sure you upload **all files** of the JDBC driver (over 10 at the time of writing) in EXAOperation **and** to the bucket.
+Make sure you upload **all files** of the JDBC driver (one at the time of writing) in EXAOperation **and** to the bucket.
 
 ## Adapter Script
 
@@ -25,17 +25,7 @@ CREATE  JAVA  ADAPTER SCRIPT jdbc_adapter AS
 
   %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.9.1.jar;
 
-  %jar /buckets/bucketfs1/bucket1/hive_metastore.jar;
-  %jar /buckets/bucketfs1/bucket1/hive_service.jar;
   %jar /buckets/bucketfs1/bucket1/HiveJDBC41.jar;
-  %jar /buckets/bucketfs1/bucket1/libfb303-0.9.0.jar;
-  %jar /buckets/bucketfs1/bucket1/libthrift-0.9.0.jar;
-  %jar /buckets/bucketfs1/bucket1/log4j-1.2.14.jar;
-  %jar /buckets/bucketfs1/bucket1/ql.jar;
-  %jar /buckets/bucketfs1/bucket1/slf4j-api-1.5.11.jar;
-  %jar /buckets/bucketfs1/bucket1/slf4j-log4j12-1.5.11.jar;
-  %jar /buckets/bucketfs1/bucket1/TCLIServiceClient.jar;
-  %jar /buckets/bucketfs1/bucket1/zookeeper-3.4.6.jar;
 /
 ```
 
