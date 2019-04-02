@@ -74,8 +74,8 @@ public class ColumnMetadataReader {
         final boolean isIdentity = isAutoIncrementColmun(remoteColumn, columnName);
         final String defaultValue = readDefaultValue(remoteColumn);
         final String comment = readComment(remoteColumn);
-        final String columnTypeName = readColumnTypeName(remoteColumn);
-        final String adapterNotes = ColumnAdapterNotes.serialize(new ColumnAdapterNotes(jdbcType, columnTypeName));
+        final String originalTypeName = readColumnTypeName(remoteColumn);
+        final String adapterNotes = ColumnAdapterNotes.serialize(new ColumnAdapterNotes(jdbcType, originalTypeName));
         return ColumnMetadata.builder() //
                 .name(columnName) //
                 .adapterNotes(adapterNotes) //
@@ -83,7 +83,9 @@ public class ColumnMetadataReader {
                 .nullable(isNullable) //
                 .identity(isIdentity) //
                 .defaultValue(defaultValue) //
-                .comment(comment).build();
+                .comment(comment) //
+                .originalTypeName(originalTypeName) //
+                .build();
     }
 
     private boolean isRemoteColumnNullable(final ResultSet remoteColumn, final String columnName) {

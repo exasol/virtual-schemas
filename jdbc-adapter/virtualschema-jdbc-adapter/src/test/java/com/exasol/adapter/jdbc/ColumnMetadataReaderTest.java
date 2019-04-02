@@ -357,7 +357,8 @@ class ColumnMetadataReaderTest {
     @Test
     void testMapColumnWithTypeNameNull() throws SQLException {
         mockDatatype(Types.VARCHAR);
-        assertThat(mapSingleMockedColumn().getComment(), equalTo(expected));
+        when(this.columnsMock.getString(ColumnMetadataReader.TYPE_NAME_COLUMN)).thenReturn(null);
+        assertThat(mapSingleMockedColumn().getOriginalTypeName(), equalTo(""));
     }
 
     private void mockComment(final String comment) throws SQLException {
