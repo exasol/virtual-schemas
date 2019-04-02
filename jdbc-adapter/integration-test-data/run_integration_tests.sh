@@ -63,7 +63,7 @@ deploy_jdbc_drivers() {
 	    curl -X PUT -T $instantclient_path $bucket_fs_upload_url/drivers/oracle/
 	fi
 	#deploy adapter jar
-	adapter_jar=`awk '/jdbcAdapterPath/{ split($0,a,"/"); print a[5];}' $config`
+	adapter_jar=`awk '/jdbcAdapterPath/{ n=split($0,a,"/"); print a[n];}' $config`
 	adapter_path=./virtualschema-jdbc-adapter-dist/target/$adapter_jar
 	curl -X PUT -T $adapter_path $bucket_fs_upload_url
 }
@@ -83,23 +83,20 @@ cleanup_remote_dbs() {
 
 prepare_docker() {
 	docker pull "$docker_image"
-	current_dir=`pwd`
-	cd $1
-	git clone https://github.com/EXASOL/docker-db.git $docker_name
-	cd $docker_name
+	git clone https://github.com/EXASOL/docker-db.git $1/$docker_name
+	pushd $1/$docker_name
 	pipenv install -r exadt_requirements.txt
 	pipenv run ./exadt create-cluster --root $1/cluster --create-root $docker_name
 	pipenv run ./exadt init-cluster --image $docker_image --license ./license/license.xml --auto-storage $docker_name
-	cd $current_dir
+	popd
 }
 
 init_docker() {
-	current_dir=`pwd`
-	cd $1/$docker_name
+	pushd $1/$docker_name
 	pipenv run ./exadt start-cluster $docker_name
 	exa_container_name=`docker ps --filter ancestor=exasol/docker-db:6.1.2-d1 --format "{{.Names}}"`
 	docker logs -f "$exa_container_name" &
-	cd $current_dir
+	popd
 }
 
 check_docker_ready() {
@@ -110,11 +107,10 @@ check_docker_ready() {
 }
 
 cleanup_docker() {
-	current_dir=`pwd`
-	cd $1/$docker_name
+	pushd $1/$docker_name
 	pipenv run ./exadt --yes stop-cluster $docker_name || true
 	pipenv run ./exadt --yes delete-cluster $docker_name || true
-	cd $current_dir
+	popd
 }
 
 build() {
