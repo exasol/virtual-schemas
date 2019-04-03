@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
-import com.exasol.adapter.dialects.impl.ExasolSqlDialect;
 import com.exasol.adapter.metadata.*;
 
 class BaseRemoteMetadataReaderTest {
@@ -34,7 +33,7 @@ class BaseRemoteMetadataReaderTest {
     }
 
     private SchemaMetadata readMockedSchemaMetadata() {
-        final RemoteMetadataReader reader = new BaseRemoteMetadataReader(this.connectionMock, new ExasolSqlDialect(/*null*/)); //FIXME: broken test
+        final RemoteMetadataReader reader = new BaseRemoteMetadataReader(this.connectionMock);
         return reader.readRemoteSchemaMetadata();
     }
 

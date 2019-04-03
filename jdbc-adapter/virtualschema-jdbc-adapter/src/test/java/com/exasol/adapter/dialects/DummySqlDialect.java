@@ -1,31 +1,27 @@
 package com.exasol.adapter.dialects;
 
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.jdbc.ConnectionInformation;
-import com.exasol.adapter.jdbc.JdbcAdapterProperties;
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.sql.AggregateFunction;
-import com.exasol.adapter.sql.ScalarFunction;
-import com.sun.xml.internal.ws.api.databinding.MetadataReader;
-
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
 
-public class DummySqlDialect implements SqlDialect {
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.metadata.DataType;
 
+public class DummySqlDialect extends AbstractSqlDialect {
     public static String getPublicName() {
         return "dummy dialect";
     }
 
-    public Map<String, String> getProperties() {
-        return null;
+    public DummySqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
+        super(remoteMetadataReader, properties);
     }
 
-    public MetadataReader getMetadataReader() {
-        return null;
+    public AdapterProperties getProperties() {
+        return this.properties;
+    }
+
+    public RemoteMetadataReader getRemoteMetadataReader() {
+        return this.remoteMetadataReader;
     }
 
     @Override
@@ -40,26 +36,6 @@ public class DummySqlDialect implements SqlDialect {
 
     @Override
     public SchemaOrCatalogSupport supportsJdbcSchemas() {
-        return null;
-    }
-
-    @Override
-    public MappedTable mapTable(final ResultSet tables, final List<String> ignoreErrorList) throws SQLException {
-        return null;
-    }
-
-    @Override
-    public ColumnMetadata mapColumn(final ResultSet columns) throws SQLException {
-        return null;
-    }
-
-    @Override
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
-        return null;
-    }
-
-    @Override
-    public DataType mapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
         return null;
     }
 
@@ -94,11 +70,6 @@ public class DummySqlDialect implements SqlDialect {
     }
 
     @Override
-    public String getTableCatalogAndSchemaSeparator() {
-        return null;
-    }
-
-    @Override
     public NullSorting getDefaultNullSorting() {
         return null;
     }
@@ -109,44 +80,7 @@ public class DummySqlDialect implements SqlDialect {
     }
 
     @Override
-    public Map<ScalarFunction, String> getScalarFunctionAliases() {
-        return null;
-    }
-
-    @Override
-    public Map<ScalarFunction, String> getBinaryInfixFunctionAliases() {
-        return null;
-    }
-
-    @Override
-    public Map<ScalarFunction, String> getPrefixFunctionAliases() {
-        return null;
-    }
-
-    @Override
-    public Map<AggregateFunction, String> getAggregateFunctionAliases() {
-        return null;
-    }
-
-    @Override
-    public boolean omitParentheses(final ScalarFunction function) {
-        return false;
-    }
-
-    @Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
-        return null;
-    }
-
-    @Override
-    public void handleException(final SQLException exception,
-          final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
-
-    }
-
-    @Override
-    public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription,
-          final String pushdownSql) {
+    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
         return null;
     }
 }

@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.capabilities.*;
-import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
 import com.google.common.collect.ImmutableList;
@@ -131,7 +130,7 @@ public class SqlDialectTest {
     private TableMetadata getTestTableMetadata() {
         final List<ColumnMetadata> columns = new ArrayList<>();
         columns.add(ColumnMetadata.builder().name("C1").adapterNotes("").type(DataType.createBool()).nullable(true)
-              .identity(false).defaultValue("").comment("").build());
+                .identity(false).defaultValue("").comment("").build());
         return new TableMetadata("TEST", "", columns, "");
     }
 
@@ -145,7 +144,8 @@ public class SqlDialectTest {
         public AliasesSqlDialect(final Map<AggregateFunction, String> aggregationAliases,
                 final Map<ScalarFunction, String> scalarAliases, final Map<ScalarFunction, String> infixAliases,
                 final Map<ScalarFunction, String> prefixAliases) {
-            super(); //FIXME: fix test  super(new SqlDialectContext(new SchemaAdapterNotes(".", "\"", false, false, false, false, false, false, false, false, false, false, true, false)));
+            super(); // FIXME: fix test super(new SqlDialectContext(new SchemaAdapterNotes(".", "\"", false, false,
+                     // false, false, false, false, false, false, false, false, true, false)));
 
             this.aggregationAliases = aggregationAliases;
             this.scalarAliases = scalarAliases;

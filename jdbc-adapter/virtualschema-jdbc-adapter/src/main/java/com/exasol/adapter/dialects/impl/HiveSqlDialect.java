@@ -1,7 +1,9 @@
 package com.exasol.adapter.dialects.impl;
 
+import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.ScalarFunction;
 
@@ -22,8 +24,8 @@ import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
  * supported dialect
  */
 public class HiveSqlDialect extends AbstractSqlDialect {
-    public HiveSqlDialect(final SqlDialectContext context) {
-        super();
+    public HiveSqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
+        super(remoteMetadataReader, properties);
     }
 
     public static String getPublicName() {

@@ -1,30 +1,28 @@
 package com.exasol.adapter.dialects.impl;
 
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.sql.ScalarFunction;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
+import java.sql.*;
+import java.util.*;
+
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.sql.ScalarFunction;
+
 public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     private static final int MAX_POSTGRES_SQL_VARCHAR_SIZE_BASED_ON_EXASOL_LIMIT = 2000000;
     private static final String POSTGRES_IGNORE_UPPERCASE_TABLES = "POSTGRESQL_UPPERCASE_TABLES";
     private static final String NAME = "POSTGRESQL";
 
-    public PostgreSQLSqlDialect(final SqlDialectContext context) {
-        super();
+    public PostgreSQLSqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
+        super(remoteMetadataReader, properties);
     }
 
     public static String getPublicName() {
@@ -35,23 +33,23 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     public Capabilities getCapabilities() {
         final Capabilities.Builder builder = Capabilities.builder();
         builder.addMain(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS, AGGREGATE_SINGLE_GROUP,
-              AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_GROUP_BY_EXPRESSION, AGGREGATE_GROUP_BY_TUPLE, AGGREGATE_HAVING,
-              ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT, LIMIT_WITH_OFFSET);
+                AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_GROUP_BY_EXPRESSION, AGGREGATE_GROUP_BY_TUPLE, AGGREGATE_HAVING,
+                ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT, LIMIT_WITH_OFFSET);
         builder.addPredicate(AND, OR, NOT, EQUAL, NOTEQUAL, LESS, LESSEQUAL, LIKE, LIKE_ESCAPE, BETWEEN, REGEXP_LIKE,
-              IN_CONSTLIST, IS_NULL, IS_NOT_NULL);
+                IN_CONSTLIST, IS_NULL, IS_NOT_NULL);
         builder.addLiteral(BOOL, NULL, DATE, TIMESTAMP, TIMESTAMP_UTC, DOUBLE, EXACTNUMERIC, STRING);
         builder.addAggregateFunction(COUNT, COUNT_STAR, COUNT_DISTINCT, SUM, SUM_DISTINCT, MIN, MAX, AVG, AVG_DISTINCT,
-              MEDIAN, FIRST_VALUE, LAST_VALUE, STDDEV, STDDEV_DISTINCT, STDDEV_POP, STDDEV_POP_DISTINCT, STDDEV_SAMP,
-              STDDEV_SAMP_DISTINCT, VARIANCE, VARIANCE_DISTINCT, VAR_POP, VAR_POP_DISTINCT, VAR_SAMP, VAR_SAMP_DISTINCT,
-              GROUP_CONCAT);
+                MEDIAN, FIRST_VALUE, LAST_VALUE, STDDEV, STDDEV_DISTINCT, STDDEV_POP, STDDEV_POP_DISTINCT, STDDEV_SAMP,
+                STDDEV_SAMP_DISTINCT, VARIANCE, VARIANCE_DISTINCT, VAR_POP, VAR_POP_DISTINCT, VAR_SAMP,
+                VAR_SAMP_DISTINCT, GROUP_CONCAT);
         builder.addScalarFunction(ADD, SUB, MULT, FLOAT_DIV, NEG, ABS, ACOS, ASIN, ATAN, ATAN2, CEIL, COS, COSH, COT,
-              DEGREES, DIV, EXP, FLOOR, GREATEST, LEAST, LN, LOG, MOD, POWER, RADIANS, RAND, ROUND, SIGN, SIN, SINH,
-              SQRT, TAN, TANH, TRUNC, ASCII, BIT_LENGTH, CHR, CONCAT, INSTR, LENGTH, LOWER, LPAD, LTRIM, OCTET_LENGTH,
-              REGEXP_REPLACE, REPEAT, REPLACE, REVERSE, RIGHT, RPAD, RTRIM, SUBSTR, TRANSLATE, TRIM, UNICODE,
-              UNICODECHR, UPPER, ADD_DAYS, ADD_HOURS, ADD_MINUTES, ADD_MONTHS, ADD_SECONDS, ADD_WEEKS, ADD_YEARS,
-              SECONDS_BETWEEN, MINUTES_BETWEEN, HOURS_BETWEEN, DAYS_BETWEEN, MONTHS_BETWEEN, YEARS_BETWEEN, MINUTE,
-              SECOND, DAY, WEEK, MONTH, YEAR, CURRENT_DATE, CURRENT_TIMESTAMP, DATE_TRUNC, EXTRACT, LOCALTIMESTAMP,
-              POSIX_TIME, TO_CHAR, CASE, HASH_MD5);
+                DEGREES, DIV, EXP, FLOOR, GREATEST, LEAST, LN, LOG, MOD, POWER, RADIANS, RAND, ROUND, SIGN, SIN, SINH,
+                SQRT, TAN, TANH, TRUNC, ASCII, BIT_LENGTH, CHR, CONCAT, INSTR, LENGTH, LOWER, LPAD, LTRIM, OCTET_LENGTH,
+                REGEXP_REPLACE, REPEAT, REPLACE, REVERSE, RIGHT, RPAD, RTRIM, SUBSTR, TRANSLATE, TRIM, UNICODE,
+                UNICODECHR, UPPER, ADD_DAYS, ADD_HOURS, ADD_MINUTES, ADD_MONTHS, ADD_SECONDS, ADD_WEEKS, ADD_YEARS,
+                SECONDS_BETWEEN, MINUTES_BETWEEN, HOURS_BETWEEN, DAYS_BETWEEN, MONTHS_BETWEEN, YEARS_BETWEEN, MINUTE,
+                SECOND, DAY, WEEK, MONTH, YEAR, CURRENT_DATE, CURRENT_TIMESTAMP, DATE_TRUNC, EXTRACT, LOCALTIMESTAMP,
+                POSIX_TIME, TO_CHAR, CASE, HASH_MD5);
         return builder.build();
     }
 
@@ -66,15 +64,15 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
                 final int n = jdbcTypeDescription.getPrecisionOrSize();
                 colType = DataType.createVarChar(n, DataType.ExaCharset.UTF8);
             } else {
-                colType = DataType
-                      .createVarChar(PostgreSQLSqlDialect.MAX_POSTGRES_SQL_VARCHAR_SIZE_BASED_ON_EXASOL_LIMIT,
-                            DataType.ExaCharset.UTF8);
+                colType = DataType.createVarChar(
+                        PostgreSQLSqlDialect.MAX_POSTGRES_SQL_VARCHAR_SIZE_BASED_ON_EXASOL_LIMIT,
+                        DataType.ExaCharset.UTF8);
             }
             break;
         case Types.SQLXML:
         case Types.DISTINCT:
             colType = DataType.createVarChar(PostgreSQLSqlDialect.MAX_POSTGRES_SQL_VARCHAR_SIZE_BASED_ON_EXASOL_LIMIT,
-                  DataType.ExaCharset.UTF8);
+                    DataType.ExaCharset.UTF8);
             break;
         default:
             break;
@@ -86,10 +84,11 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     @Override
     public MappedTable mapTable(final ResultSet tables, final List<String> ignoreErrorList) throws SQLException {
         final String tableName = tables.getString("TABLE_NAME");
-        if (getContext().getPostgreSQLIdentifierMapping() == PostgreSQLIdentifierMapping.CONVERT_TO_UPPER &&
-              !ignoreErrorList.contains(POSTGRES_IGNORE_UPPERCASE_TABLES) && containsUppercaseCharacter(tableName)) {
-            throw new IllegalArgumentException("Table " + tableName + " cannot be used in virtual schema. " +
-                  "Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation.");
+        if ((getContext().getPostgreSQLIdentifierMapping() == PostgreSQLIdentifierMapping.CONVERT_TO_UPPER)
+                && !ignoreErrorList.contains(POSTGRES_IGNORE_UPPERCASE_TABLES)
+                && containsUppercaseCharacter(tableName)) {
+            throw new IllegalArgumentException("Table " + tableName + " cannot be used in virtual schema. "
+                    + "Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation.");
         } else {
             return super.mapTable(tables, ignoreErrorList);
         }

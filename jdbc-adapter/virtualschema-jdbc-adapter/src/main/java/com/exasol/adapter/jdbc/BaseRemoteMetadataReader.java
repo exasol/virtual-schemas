@@ -6,7 +6,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.metadata.TableMetadata;
 
@@ -19,7 +18,7 @@ import com.exasol.adapter.metadata.TableMetadata;
 public class BaseRemoteMetadataReader implements RemoteMetadataReader {
     private final Connection connection;
 
-    public BaseRemoteMetadataReader(final Connection connection, final SqlDialect sqlDialect) {
+    public BaseRemoteMetadataReader(final Connection connection) {
         this.connection = connection;
     }
 

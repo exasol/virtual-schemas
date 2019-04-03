@@ -1,23 +1,21 @@
 package com.exasol.adapter.dialects.impl;
 
+import java.sql.SQLException;
+
+import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 import com.exasol.adapter.metadata.DataType;
 
-import java.sql.SQLException;
-
 /**
- * This dialect can be used for data sources where a custom dialect
- * implementation does not yet exists. It will obtain all information from the
- * JDBC Metadata.
+ * This dialect can be used for data sources where a custom dialect implementation does not yet exists. It will obtain
+ * all information from the JDBC Metadata.
  */
 public class GenericSqlDialect extends AbstractSqlDialect {
-    public GenericSqlDialect(final SqlDialectContext context) {
-        super();
+    public GenericSqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
+        super(remoteMetadataReader, properties);
     }
 
     private static final String NAME = "GENERIC";
@@ -58,7 +56,7 @@ public class GenericSqlDialect extends AbstractSqlDialect {
                 return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
             } else {
                 throw new RuntimeException(
-                      "Unexpected quote behavior. Adapternotes: " + SchemaAdapterNotes.serialize(adapterNotes));
+                        "Unexpected quote behavior. Adapternotes: " + SchemaAdapterNotes.serialize(adapterNotes));
             }
         }
     }
@@ -79,7 +77,7 @@ public class GenericSqlDialect extends AbstractSqlDialect {
                 return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
             } else {
                 throw new RuntimeException(
-                      "Unexpected quote behavior. Adapternotes: " + SchemaAdapterNotes.serialize(adapterNotes));
+                        "Unexpected quote behavior. Adapternotes: " + SchemaAdapterNotes.serialize(adapterNotes));
             }
         }
     }

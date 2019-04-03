@@ -1,22 +1,19 @@
 package com.exasol.adapter.dialects.impl;
 
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.SqlDialectContext;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.metadata.DataType;
-
 import java.sql.SQLException;
 
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.metadata.DataType;
+
 /**
- * Dialect for MySQL using the MySQL Connector jdbc driver.
- * <p>
- * TODO Finish implementation of this dialect and add as a supported dialect
+ * Dialect for MySQL using the MySQL Connector JDBC driver.
  */
 public class MysqlSqlDialect extends AbstractSqlDialect {
-    public MysqlSqlDialect(final SqlDialectContext context) {
-        super();
+    public MysqlSqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
+        super(remoteMetadataReader, properties);
     }
 
     private static final String NAME = "MYSQL";

@@ -1,24 +1,22 @@
 package com.exasol.adapter.dialects.impl;
 
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.ConnectionInformation;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.sql.AggregateFunction;
-import com.exasol.adapter.sql.ScalarFunction;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+
+import java.sql.*;
+import java.util.*;
+
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.ConnectionInformation;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.sql.AggregateFunction;
+import com.exasol.adapter.sql.ScalarFunction;
 
 /**
  * Work in Progress
@@ -27,8 +25,8 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     private final boolean castAggFuncToFloat = true;
     private final boolean castScalarFuncToFloat = true;
 
-    public OracleSqlDialect(final SqlDialectContext context) {
-        super();
+    public OracleSqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
+        super(remoteMetadataReader, properties);
         this.omitParenthesesMap.add(ScalarFunction.SYSDATE);
         this.omitParenthesesMap.add(ScalarFunction.SYSTIMESTAMP);
     }
@@ -51,29 +49,29 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     public Capabilities getCapabilities() {
         final Capabilities.Builder builder = Capabilities.builder();
         builder.addMain(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS, AGGREGATE_SINGLE_GROUP,
-              AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_GROUP_BY_EXPRESSION, AGGREGATE_GROUP_BY_TUPLE, AGGREGATE_HAVING,
-              ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT, LIMIT_WITH_OFFSET);
+                AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_GROUP_BY_EXPRESSION, AGGREGATE_GROUP_BY_TUPLE, AGGREGATE_HAVING,
+                ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT, LIMIT_WITH_OFFSET);
         builder.addPredicate(AND, OR, NOT, EQUAL, NOTEQUAL, LESS, LESSEQUAL, LIKE, LIKE_ESCAPE, REGEXP_LIKE, BETWEEN,
-              IN_CONSTLIST, IS_NULL, IS_NOT_NULL);
+                IN_CONSTLIST, IS_NULL, IS_NOT_NULL);
         builder.addLiteral(NULL, DATE, TIMESTAMP, TIMESTAMP_UTC, DOUBLE, EXACTNUMERIC, STRING, INTERVAL);
         builder.addAggregateFunction(COUNT, COUNT_STAR, COUNT_DISTINCT, GROUP_CONCAT, GROUP_CONCAT_SEPARATOR,
-              GROUP_CONCAT_ORDER_BY);
+                GROUP_CONCAT_ORDER_BY);
         if (this.castAggFuncToFloat) {
             builder.addAggregateFunction(SUM, SUM_DISTINCT, MIN, MAX, AVG, AVG_DISTINCT, MEDIAN, FIRST_VALUE, //
-                  LAST_VALUE, STDDEV, STDDEV_DISTINCT, STDDEV_POP, STDDEV_SAMP, VARIANCE, VARIANCE_DISTINCT, VAR_POP,
-                  VAR_SAMP);
+                    LAST_VALUE, STDDEV, STDDEV_DISTINCT, STDDEV_POP, STDDEV_SAMP, VARIANCE, VARIANCE_DISTINCT, VAR_POP,
+                    VAR_SAMP);
         }
         builder.addScalarFunction(CEIL, DIV, FLOOR, SIGN);
         if (this.castScalarFuncToFloat) {
             builder.addScalarFunction(ADD, SUB, MULT, FLOAT_DIV, NEG, ABS, ACOS, ASIN, ATAN, ATAN2, COS, COSH, COT,
-                  DEGREES, EXP, GREATEST, LEAST, LN, LOG, MOD, POWER, RADIANS, SIN, SINH, SQRT, TAN, TANH);
+                    DEGREES, EXP, GREATEST, LEAST, LN, LOG, MOD, POWER, RADIANS, SIN, SINH, SQRT, TAN, TANH);
         }
         builder.addScalarFunction(ASCII, CHR, INSTR, LENGTH, LOCATE, LOWER, LPAD, LTRIM, REGEXP_INSTR, REGEXP_REPLACE,
-              REGEXP_SUBSTR, REPEAT, REPLACE, REVERSE, RPAD, RTRIM, SOUNDEX, SUBSTR, TRANSLATE, TRIM, UPPER, ADD_DAYS,
-              ADD_HOURS, ADD_MINUTES, ADD_MONTHS, ADD_SECONDS, ADD_WEEKS, ADD_YEARS, CURRENT_DATE, CURRENT_TIMESTAMP,
-              DBTIMEZONE, LOCALTIMESTAMP, NUMTODSINTERVAL, NUMTOYMINTERVAL, SESSIONTIMEZONE, SYSDATE, SYSTIMESTAMP,
-              CAST, TO_CHAR, TO_DATE, TO_DSINTERVAL, TO_YMINTERVAL, TO_NUMBER, TO_TIMESTAMP, BIT_AND, BIT_TO_NUM, CASE,
-              NULLIFZERO, ZEROIFNULL);
+                REGEXP_SUBSTR, REPEAT, REPLACE, REVERSE, RPAD, RTRIM, SOUNDEX, SUBSTR, TRANSLATE, TRIM, UPPER, ADD_DAYS,
+                ADD_HOURS, ADD_MINUTES, ADD_MONTHS, ADD_SECONDS, ADD_WEEKS, ADD_YEARS, CURRENT_DATE, CURRENT_TIMESTAMP,
+                DBTIMEZONE, LOCALTIMESTAMP, NUMTODSINTERVAL, NUMTOYMINTERVAL, SESSIONTIMEZONE, SYSDATE, SYSTIMESTAMP,
+                CAST, TO_CHAR, TO_DATE, TO_DSINTERVAL, TO_YMINTERVAL, TO_NUMBER, TO_TIMESTAMP, BIT_AND, BIT_TO_NUM,
+                CASE, NULLIFZERO, ZEROIFNULL);
         return builder.build();
     }
 
@@ -206,7 +204,8 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription, final String pushdownSql) {
+    public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription,
+            final String pushdownSql) {
         final ImportType importType = getContext().getImportType();
         if (importType == ImportType.JDBC) {
             return super.generatePushdownSql(connectionInformation, columnDescription, pushdownSql);
@@ -215,7 +214,8 @@ public class OracleSqlDialect extends AbstractSqlDialect {
                 throw new AssertionError("OracleSqlDialect has wrong ImportType");
             }
             final StringBuilder oracleImportQuery = new StringBuilder();
-            oracleImportQuery.append("IMPORT FROM ORA AT ").append(connectionInformation.getOraConnectionName()).append(" ");
+            oracleImportQuery.append("IMPORT FROM ORA AT ").append(connectionInformation.getOraConnectionName())
+                    .append(" ");
             oracleImportQuery.append(connectionInformation.getCredentials());
             oracleImportQuery.append(" STATEMENT '").append(pushdownSql.replace("'", "''")).append("'");
             return oracleImportQuery.toString();

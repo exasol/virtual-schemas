@@ -1,34 +1,37 @@
 package com.exasol.adapter.dialects;
 
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.junit.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
+import java.sql.Connection;
+import java.util.Collections;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.sql.Connection;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.junit.MatcherAssert.assertThat;
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
 
 @ExtendWith(MockitoExtension.class)
 class SqlDialectFactoryTest {
     private static final String DIALECT_NAME = "dummy dialect";
+    private SqlDialectRegistry sqlDialectRegistry;
+    private final AdapterProperties dummyProperties = new AdapterProperties(Collections.emptyMap());
+    private SqlDialectFactory sqlDialectFactory;
     @Mock
     private Connection mockConnection;
-    private SqlDialect dummySqlDialect;
-    private SqlDialectRegistry sqlDialectRegistry;
-    private final Map<String, String> dummyProperties = new HashMap<>();
-    private SqlDialectFactory sqlDialectFactory;
 
     @BeforeEach
     void beforeEach() {
-        this.sqlDialectFactory = new SqlDialectFactory(this.mockConnection, this.sqlDialectRegistry, this.dummyProperties);
-        this.dummySqlDialect = new DummySqlDialect();
         this.sqlDialectRegistry = SqlDialectRegistry.getInstance();
-        this.sqlDialectRegistry.registerDialect(this.dummySqlDialect.getClass().getName());
+        this.sqlDialectRegistry.registerDialect(DummySqlDialect.class.getName());
+        this.sqlDialectFactory = new SqlDialectFactory(this.mockConnection, this.sqlDialectRegistry,
+                this.dummyProperties);
     }
 
     @Test
@@ -38,6 +41,10 @@ class SqlDialectFactoryTest {
 
     @Test
     void testInjectConstructorParameters() {
-
+        final SqlDialect dialect = this.sqlDialectFactory.createSqlDialect(DIALECT_NAME);
+        assertAll(() -> assertThat(dialect, instanceOf(DummySqlDialect.class)),
+                () -> assertThat(((DummySqlDialect) dialect).getProperties(), sameInstance(this.dummyProperties)),
+                () -> assertThat(((DummySqlDialect) dialect).getRemoteMetadataReader(),
+                        instanceOf(BaseRemoteMetadataReader.class)));
     }
 }

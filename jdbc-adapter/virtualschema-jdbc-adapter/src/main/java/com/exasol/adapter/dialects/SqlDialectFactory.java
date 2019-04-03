@@ -2,33 +2,37 @@ package com.exasol.adapter.dialects;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
-import java.util.Map;
+
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 
 public class SqlDialectFactory {
-    private final Connection connection;
     private final SqlDialectRegistry sqlDialectRegistry;
-    private final Map<String, String> properties;
+    private final AdapterProperties properties;
+    private final RemoteMetadataReader remoteMetadataReader;
 
     public SqlDialectFactory(final Connection connection, final SqlDialectRegistry sqlDialectRegistry,
-          final Map<String, String> properties) {
-        this.connection = connection;
+            final AdapterProperties properties) {
         this.sqlDialectRegistry = sqlDialectRegistry;
         this.properties = properties;
+        this.remoteMetadataReader = new BaseRemoteMetadataReader(connection);
     }
 
     public SqlDialect createSqlDialect(final String dialectName) {
-        final Class<? extends SqlDialect> sqlDialectClass =
-              this.sqlDialectRegistry.getSqlDialectClassForName(dialectName);
+        final Class<? extends SqlDialect> sqlDialectClass = this.sqlDialectRegistry
+                .getSqlDialectClassForName(dialectName);
         return instantiateDialect(sqlDialectClass, dialectName);
     }
 
     private SqlDialect instantiateDialect(final Class<? extends SqlDialect> dialectClass, final String dialectName) {
         try {
-            return dialectClass.getConstructor()
-                  .newInstance(); //FIXME: instantiate with correct parameters
-        } catch (final InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException exception) {
+            return dialectClass.getConstructor(RemoteMetadataReader.class, AdapterProperties.class)
+                    .newInstance(this.remoteMetadataReader, this.properties);
+        } catch (final InstantiationException | IllegalAccessException | InvocationTargetException
+                | NoSuchMethodException exception) {
             throw new SqlDialectFactoryException("Unable to instantiate SQL dialect \"" + dialectName + "\".",
-                  exception);
+                    exception);
         }
     }
 }

@@ -1,26 +1,26 @@
 package com.exasol.adapter.dialects.impl;
 
+import java.sql.SQLException;
+
+import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionInformation;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.ScalarFunction;
 
-import java.sql.SQLException;
-
 /**
- * This class is work-in-progress
- * <p>
- * TODO The precision of interval type columns is hardcoded, because it cannot
- * be retrieved via JDBC. Should be retrieved from system table.<br>
- * TODO The srid of geometry type columns is hardcoded, because it cannot be
- * retrieved via JDBC. Should be retrieved from system table.<br>
+ * Exasol SQL dialect
  */
 public class ExasolSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "EXASOL";
+    static final String LOCAL_IMPORT_PROPERTY = "IS_LOCAL";
+    static final String EXASOL_IMPORT_PROPERTY = "IMPORT_FROM_EXA";
+    static final String ORACLE_IMPORT_PROPERTY = "IMPORT_FROM_ORA";
 
-    public ExasolSqlDialect() {
-        super();
+    public ExasolSqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
+        super(remoteMetadataReader, properties);
         this.omitParenthesesMap.add(ScalarFunction.SYSDATE);
         this.omitParenthesesMap.add(ScalarFunction.SYSTIMESTAMP);
         this.omitParenthesesMap.add(ScalarFunction.CURRENT_SCHEMA);
@@ -133,29 +133,43 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String getStringLiteral(final String value) {
-        // Don't forget to escape single quote
         return "'" + value.replace("'", "''") + "'";
     }
 
     @Override
     public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription,
-          final String pushdownSql) {
-        final ImportType importType = getContext().getImportType();
-        if (importType == ImportType.JDBC) {
+            final String pushdownSql) {
+        if (getImportType() == ImportType.JDBC) {
             return super.generatePushdownSql(connectionInformation, columnDescription, pushdownSql);
-        } else if (importType == ImportType.LOCAL) {
+        } else if (getImportType() == ImportType.LOCAL) {
             return pushdownSql;
         } else {
-            if ((importType != ImportType.EXA)) {
+            if ((getImportType() != ImportType.EXA)) {
                 throw new AssertionError("ExasolSqlDialect has wrong ImportType");
             }
             final StringBuilder exasolImportQuery = new StringBuilder();
             exasolImportQuery.append("IMPORT FROM EXA AT '").append(connectionInformation.getExaConnectionString())
-                  .append("' ");
+                    .append("' ");
             exasolImportQuery.append(connectionInformation.getCredentials());
             exasolImportQuery.append(" STATEMENT '").append(pushdownSql.replace("'", "''")).append("'");
             return exasolImportQuery.toString();
         }
     }
 
+    /**
+     * Return the type of import the Exasol dialect uses
+     *
+     * @return import type
+     */
+    public ImportType getImportType() {
+        if (this.properties.isEnabled(LOCAL_IMPORT_PROPERTY)) {
+            return ImportType.LOCAL;
+        } else if (this.properties.isEnabled(EXASOL_IMPORT_PROPERTY)) {
+            return ImportType.EXA;
+        } else if (this.properties.isEnabled(ORACLE_IMPORT_PROPERTY)) {
+            return ImportType.ORA;
+        } else {
+            return ImportType.JDBC;
+        }
+    }
 }

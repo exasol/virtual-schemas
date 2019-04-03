@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.SqlDialect;
 
@@ -20,7 +21,7 @@ class DB2SqlDialectTest {
 
     @BeforeEach
     void beforeEach() {
-        this.dialect = new DB2SqlDialect(null);
+        this.dialect = new DB2SqlDialect(null, AdapterProperties.emptyProperties());
     }
 
     @Test
