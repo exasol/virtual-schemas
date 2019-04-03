@@ -54,14 +54,21 @@ public class DialectTestData {
     }
 
     public static SqlDialectContext getExasolDialectContext() {
-        return new SqlDialectContext(
-              new SchemaAdapterNotes(".", "\"", false, true, false, true, false, false, false, true, false, false, true,
-                    false));
+
+        return new SqlDialectContext(SchemaAdapterNotes.builder() //
+              .catalogSeparator(".") //
+              .identifierQuoteString("\"") //
+              .storesUpperCaseIdentifiers(true) //
+              .supportsMixedCaseIdentifiers(true) //
+              .supportsMixedCaseQuotedIdentifiers(true) //
+              .areNullsSortedHigh(true) //
+              .build());
     }
 
     public static SqlDialectContext getOracleDialectContext() {
-        return new SqlDialectContext(
-              new SchemaAdapterNotes(".", "\"", false, false, false, false, false, false, false, false, false, false,
-                    true, false));
+        return new SqlDialectContext(SchemaAdapterNotes.builder() //
+              .catalogSeparator(".") //
+              .identifierQuoteString("\"") //
+              .areNullsSortedHigh(true).build());
     }
 }

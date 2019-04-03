@@ -43,20 +43,20 @@ public class GenericSqlDialect extends AbstractSqlDialect {
     @Override
     public IdentifierCaseHandling getUnquotedIdentifierHandling() {
         final SchemaAdapterNotes adapterNotes = getContext().getSchemaAdapterNotes();
-        if (adapterNotes.isSupportsMixedCaseIdentifiers()) {
+        if (adapterNotes.supportsMixedCaseIdentifiers()) {
             // Unquoted identifiers are treated case-sensitive and stored mixed case
             return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
         } else {
-            if (adapterNotes.isStoresLowerCaseIdentifiers()) {
+            if (adapterNotes.storesLowerCaseIdentifiers()) {
                 return IdentifierCaseHandling.INTERPRET_AS_LOWER;
-            } else if (adapterNotes.isStoresUpperCaseIdentifiers()) {
+            } else if (adapterNotes.storesUpperCaseIdentifiers()) {
                 return IdentifierCaseHandling.INTERPRET_AS_UPPER;
-            } else if (adapterNotes.isStoresMixedCaseIdentifiers()) {
+            } else if (adapterNotes.storesMixedCaseIdentifiers()) {
                 // This case is a bit strange - case insensitive, but still stores it mixed case
                 return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
             } else {
-                throw new RuntimeException(
-                        "Unexpected quote behavior. Adapternotes: " + SchemaAdapterNotes.serialize(adapterNotes));
+                throw new UnsupportedOperationException("Unexpected quote behavior. Adapter notes: " //
+                      + adapterNotes.toString());
             }
         }
     }
@@ -64,20 +64,20 @@ public class GenericSqlDialect extends AbstractSqlDialect {
     @Override
     public IdentifierCaseHandling getQuotedIdentifierHandling() {
         final SchemaAdapterNotes adapterNotes = getContext().getSchemaAdapterNotes();
-        if (adapterNotes.isSupportsMixedCaseQuotedIdentifiers()) {
+        if (adapterNotes.supportsMixedCaseQuotedIdentifiers()) {
             // Quoted identifiers are treated case-sensitive and stored mixed case
             return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
         } else {
-            if (adapterNotes.isStoresLowerCaseQuotedIdentifiers()) {
+            if (adapterNotes.storesLowerCaseQuotedIdentifiers()) {
                 return IdentifierCaseHandling.INTERPRET_AS_LOWER;
-            } else if (adapterNotes.isStoresUpperCaseQuotedIdentifiers()) {
+            } else if (adapterNotes.storesUpperCaseQuotedIdentifiers()) {
                 return IdentifierCaseHandling.INTERPRET_AS_UPPER;
-            } else if (adapterNotes.isStoresMixedCaseQuotedIdentifiers()) {
+            } else if (adapterNotes.storesMixedCaseQuotedIdentifiers()) {
                 // This case is a bit strange - case insensitive, but still stores it mixed case
                 return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
             } else {
-                throw new RuntimeException(
-                        "Unexpected quote behavior. Adapternotes: " + SchemaAdapterNotes.serialize(adapterNotes));
+                throw new UnsupportedOperationException("Unexpected quote behavior. Adapter notes: " //
+                      + adapterNotes.toString());
             }
         }
     }
@@ -111,14 +111,14 @@ public class GenericSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         final SchemaAdapterNotes notes = getContext().getSchemaAdapterNotes();
-        if (notes.isNullsAreSortedAtEnd()) {
+        if (notes.areNullsSortedAtEnd()) {
             return NullSorting.NULLS_SORTED_AT_END;
-        } else if (notes.isNullsAreSortedAtStart()) {
+        } else if (notes.areNullsSortedAtStart()) {
             return NullSorting.NULLS_SORTED_AT_START;
-        } else if (notes.isNullsAreSortedLow()) {
+        } else if (notes.areNullsSortedLow()) {
             return NullSorting.NULLS_SORTED_LOW;
         } else {
-            assert (notes.isNullsAreSortedHigh());
+            assert (notes.areNullsSortedHigh());
             return NullSorting.NULLS_SORTED_HIGH;
         }
     }
