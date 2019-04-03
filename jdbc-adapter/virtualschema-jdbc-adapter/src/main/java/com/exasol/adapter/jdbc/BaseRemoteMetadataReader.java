@@ -1,13 +1,13 @@
 package com.exasol.adapter.jdbc;
 
-import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.*;
+import com.exasol.adapter.metadata.SchemaMetadata;
+import com.exasol.adapter.metadata.TableMetadata;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.exasol.adapter.metadata.SchemaMetadata;
-import com.exasol.adapter.metadata.TableMetadata;
+import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.*;
 
 /**
  * This class implements basic reading of database metadata from JDBC
@@ -59,8 +59,21 @@ public class BaseRemoteMetadataReader implements RemoteMetadataReader {
         try {
             final DatabaseMetaData metadata = this.connection.getMetaData();
             return SchemaAdapterNotes.builder() //
-                    .catalogSeparator(metadata.getCatalogSeparator()) //
-                    .build();
+                  .catalogSeparator(metadata.getCatalogSeparator()) //
+                  .identifierQuoteString(metadata.getIdentifierQuoteString()) //
+                  .storesLowerCaseIdentifiers(metadata.storesLowerCaseIdentifiers()) //
+                  .storesUpperCaseIdentifiers(metadata.storesUpperCaseIdentifiers()) //
+                  .storesMixedCaseIdentifiers(metadata.storesMixedCaseIdentifiers()) //
+                  .supportsMixedCaseIdentifiers(metadata.supportsMixedCaseIdentifiers()) //
+                  .storesLowerCaseQuotedIdentifiers(metadata.storesLowerCaseQuotedIdentifiers()) //
+                  .storesUpperCaseQuotedIdentifiers(metadata.storesUpperCaseQuotedIdentifiers()) //
+                  .storesMixedCaseQuotedIdentifiers(metadata.storesMixedCaseQuotedIdentifiers()) //
+                  .supportsMixedCaseQuotedIdentifiers(metadata.supportsMixedCaseQuotedIdentifiers()) //
+                  .areNullsSortedAtEnd(metadata.nullsAreSortedAtEnd()) //
+                  .areNullsSortedAtStart(metadata.nullsAreSortedAtStart()) //
+                  .areNullsSortedHigh(metadata.nullsAreSortedHigh()) //
+                  .areNullsSortedLow(metadata.nullsAreSortedLow()) //
+                  .build();
         } catch (final SQLException exception) {
             throw new RemoteMetadataReaderException("Unable to create schema adapte notes from remote schema.",
                     exception);
