@@ -1,5 +1,7 @@
 package com.exasol.adapter.jdbc;
 
+import java.sql.DatabaseMetaData;
+
 import com.exasol.adapter.metadata.SchemaMetadata;
 
 /**
@@ -12,4 +14,11 @@ public interface RemoteMetadataReader {
      * @return remote schema metadata
      */
     public SchemaMetadata readRemoteSchemaMetadata();
+
+    /**
+     * Create the schema adapter notes from database metadata.
+     *
+     * @return schema adapter notes
+     */
+    public SchemaAdapterNotes createSchemaAdapterNotes(final DatabaseMetaData metadata);
 }

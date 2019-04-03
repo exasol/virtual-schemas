@@ -91,4 +91,12 @@ class BaseRemoteMetadataReaderTest {
     private void mockGetAllTables(final ResultSet tables) throws SQLException {
         when(this.remoteMetadataMock.getTables(null, null, "%", null)).thenReturn(tables);
     }
+
+    @Test
+    void testCreateSchemaAdapterNotes() throws SQLException {
+        final RemoteMetadataReader reader = new BaseRemoteMetadataReader(this.connectionMock);
+        when(this.remoteMetadataMock.getCatalogSeparator()).thenReturn("catalog-separator");
+        final SchemaAdapterNotes notes = reader.createSchemaAdapterNotes(this.remoteMetadataMock);
+        assertAll(() -> assertThat(notes.getCatalogSeparator(), equalTo("catalog-separator")));
+    }
 }

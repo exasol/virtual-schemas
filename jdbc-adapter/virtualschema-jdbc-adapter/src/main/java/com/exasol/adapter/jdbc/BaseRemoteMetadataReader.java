@@ -53,4 +53,10 @@ public class BaseRemoteMetadataReader implements RemoteMetadataReader {
     private TableMetadata mapTable(final ResultSet remoteTable) throws SQLException {
         throw new RuntimeException("Not implemented yet"); // FIXME: implement
     }
+
+    @Override
+    public SchemaAdapterNotes createSchemaAdapterNotes(final DatabaseMetaData metadata) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
