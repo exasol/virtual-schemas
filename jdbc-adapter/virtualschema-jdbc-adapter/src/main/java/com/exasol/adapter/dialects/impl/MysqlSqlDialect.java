@@ -77,7 +77,7 @@ public class MysqlSqlDialect extends AbstractSqlDialect {
         // http://stackoverflow.com/questions/2051602/mysql-orderby-a-number-nulls-last
         // and also
         // http://stackoverflow.com/questions/9307613/mysql-order-by-null-first-and-desc-after
-        assert (getContext().getSchemaAdapterNotes().areNullsSortedLow());
+        assert (this.remoteMetadataReader.getSchemaAdapterNotes().areNullsSortedLow());
         return NullSorting.NULLS_SORTED_LOW;
     }
 

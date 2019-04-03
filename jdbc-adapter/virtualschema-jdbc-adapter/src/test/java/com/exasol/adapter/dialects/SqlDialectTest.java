@@ -9,6 +9,7 @@ import java.util.*;
 import org.junit.Test;
 
 import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
@@ -144,8 +145,9 @@ public class SqlDialectTest {
         public AliasesSqlDialect(final Map<AggregateFunction, String> aggregationAliases,
                 final Map<ScalarFunction, String> scalarAliases, final Map<ScalarFunction, String> infixAliases,
                 final Map<ScalarFunction, String> prefixAliases) {
-            super(); // FIXME: fix test super(new SqlDialectContext(new SchemaAdapterNotes(".", "\"", false, false,
-                     // false, false, false, false, false, false, false, false, true, false)));
+            super(null, AdapterProperties.emptyProperties()); // FIXME: fix test super(new SqlDialectContext(new
+                                                              // SchemaAdapterNotes(".", "\"", false, false,
+            // false, false, false, false, false, false, false, false, true, false)));
 
             this.aggregationAliases = aggregationAliases;
             this.scalarAliases = scalarAliases;

@@ -96,7 +96,8 @@ class BaseRemoteMetadataReaderTest {
     void testCreateSchemaAdapterNotes() throws SQLException {
         final RemoteMetadataReader reader = new BaseRemoteMetadataReader(this.connectionMock);
         when(this.remoteMetadataMock.getCatalogSeparator()).thenReturn("catalog-separator");
-        final SchemaAdapterNotes notes = reader.createSchemaAdapterNotes(this.remoteMetadataMock);
+        // FIXME: add all attributes of the adapter notes
+        final SchemaAdapterNotes notes = reader.getSchemaAdapterNotes();
         assertAll(() -> assertThat(notes.getCatalogSeparator(), equalTo("catalog-separator")));
     }
 }

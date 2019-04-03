@@ -42,7 +42,7 @@ public class GenericSqlDialect extends AbstractSqlDialect {
 
     @Override
     public IdentifierCaseHandling getUnquotedIdentifierHandling() {
-        final SchemaAdapterNotes adapterNotes = getContext().getSchemaAdapterNotes();
+        final SchemaAdapterNotes adapterNotes = this.remoteMetadataReader.getSchemaAdapterNotes();
         if (adapterNotes.supportsMixedCaseIdentifiers()) {
             // Unquoted identifiers are treated case-sensitive and stored mixed case
             return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
@@ -63,7 +63,7 @@ public class GenericSqlDialect extends AbstractSqlDialect {
 
     @Override
     public IdentifierCaseHandling getQuotedIdentifierHandling() {
-        final SchemaAdapterNotes adapterNotes = getContext().getSchemaAdapterNotes();
+        final SchemaAdapterNotes adapterNotes = this.remoteMetadataReader.getSchemaAdapterNotes();
         if (adapterNotes.supportsMixedCaseQuotedIdentifiers()) {
             // Quoted identifiers are treated case-sensitive and stored mixed case
             return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
@@ -84,7 +84,7 @@ public class GenericSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuote(final String identifier) {
-        final String quoteString = getContext().getSchemaAdapterNotes().getIdentifierQuoteString();
+        final String quoteString = this.remoteMetadataReader.getSchemaAdapterNotes().getIdentifierQuoteString();
         return quoteString + identifier + quoteString;
     }
 
@@ -110,7 +110,7 @@ public class GenericSqlDialect extends AbstractSqlDialect {
 
     @Override
     public NullSorting getDefaultNullSorting() {
-        final SchemaAdapterNotes notes = getContext().getSchemaAdapterNotes();
+        final SchemaAdapterNotes notes = this.remoteMetadataReader.getSchemaAdapterNotes();
         if (notes.areNullsSortedAtEnd()) {
             return NullSorting.NULLS_SORTED_AT_END;
         } else if (notes.areNullsSortedAtStart()) {

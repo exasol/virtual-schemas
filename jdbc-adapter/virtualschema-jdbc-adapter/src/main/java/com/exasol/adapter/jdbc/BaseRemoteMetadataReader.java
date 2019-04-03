@@ -55,8 +55,9 @@ public class BaseRemoteMetadataReader implements RemoteMetadataReader {
     }
 
     @Override
-    public SchemaAdapterNotes createSchemaAdapterNotes(final DatabaseMetaData metadata) {
+    public SchemaAdapterNotes getSchemaAdapterNotes() {
         try {
+            final DatabaseMetaData metadata = this.connection.getMetaData();
             return SchemaAdapterNotes.builder() //
                     .catalogSeparator(metadata.getCatalogSeparator()) //
                     .build();
