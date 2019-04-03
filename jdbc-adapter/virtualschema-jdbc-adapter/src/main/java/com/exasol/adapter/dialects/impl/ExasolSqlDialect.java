@@ -17,7 +17,6 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "EXASOL";
     static final String LOCAL_IMPORT_PROPERTY = "IS_LOCAL";
     static final String EXASOL_IMPORT_PROPERTY = "IMPORT_FROM_EXA";
-    static final String ORACLE_IMPORT_PROPERTY = "IMPORT_FROM_ORA";
 
     public ExasolSqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
         super(remoteMetadataReader, properties);
@@ -166,8 +165,6 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
             return ImportType.LOCAL;
         } else if (this.properties.isEnabled(EXASOL_IMPORT_PROPERTY)) {
             return ImportType.EXA;
-        } else if (this.properties.isEnabled(ORACLE_IMPORT_PROPERTY)) {
-            return ImportType.ORA;
         } else {
             return ImportType.JDBC;
         }

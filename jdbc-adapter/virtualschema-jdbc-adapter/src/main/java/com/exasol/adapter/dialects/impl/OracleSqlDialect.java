@@ -8,6 +8,8 @@ import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
@@ -19,9 +21,13 @@ import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
 /**
- * Work in Progress
+ * This class implements the Oracle SQL dialect
  */
 public class OracleSqlDialect extends AbstractSqlDialect {
+    static final String ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY = "ORACLE_CAST_NUMBER_TO_DECIMAL";
+    static final String LOCAL_IMPORT_PROPERTY = "IS_LOCAL";
+    static final String ORACLE_IMPORT_PROPERTY = "IMPORT_FROM_ORA";
+    static final int ORACLE_MAGIC_NUMBER_SCALE = -127;
     private final boolean castAggFuncToFloat = true;
     private final boolean castScalarFuncToFloat = true;
 
@@ -117,18 +123,14 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         case Types.NUMERIC:
             final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
             final int decimalScale = jdbcTypeDescription.getDecimalScale();
-            if (decimalScale == -127) {
-                // Oracle JDBC driver returns scale -127 if NUMBER data type was specified
-                // without scale and precision. Convert to VARCHAR.
-                // See http://docs.oracle.com/cd/B28359_01/server.111/b28318/datatype.htm#i16209
-                // and https://docs.oracle.com/cd/E19501-01/819-3659/gcmaz/
-                colType = getContext().getOracleNumberTargetType();
+            if (decimalScale == ORACLE_MAGIC_NUMBER_SCALE) {
+                colType = workAroundNumberWithoutScaleAndPrecision();
                 break;
             }
             if (decimalPrec <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
                 colType = DataType.createDecimal(decimalPrec, decimalScale);
             } else {
-                colType = getContext().getOracleNumberTargetType();
+                colType = workAroundNumberWithoutScaleAndPrecision();
             }
             break;
         case Types.OTHER:
@@ -153,6 +155,37 @@ public class OracleSqlDialect extends AbstractSqlDialect {
             break;
         }
         return colType;
+    }
+
+    // Oracle JDBC driver returns scale -127 if NUMBER data type was specified
+    // without scale and precision. Convert to VARCHAR.
+    // See http://docs.oracle.com/cd/B28359_01/server.111/b28318/datatype.htm#i16209
+    // and https://docs.oracle.com/cd/E19501-01/819-3659/gcmaz/
+    private DataType workAroundNumberWithoutScaleAndPrecision() {
+        return getOracleNumberTargetType();
+    }
+
+    DataType getOracleNumberTargetType() {
+        if (this.properties.containsKey(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY)) {
+            return getOracleNumberTypeFromProperty();
+        } else {
+            return DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+        }
+    }
+
+    private DataType getOracleNumberTypeFromProperty() {
+        final Pattern pattern = Pattern.compile("\\s*(\\d+)\\s*,\\s*(\\d+)\\s*");
+        final String oraclePrecisionAndScale = this.properties.get(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY);
+        final Matcher matcher = pattern.matcher(oraclePrecisionAndScale);
+        if (matcher.matches()) {
+            final int precision = Integer.parseInt(matcher.group(1));
+            final int scale = Integer.parseInt(matcher.group(2));
+            return DataType.createDecimal(precision, scale);
+        } else {
+            throw new IllegalArgumentException("Unable to parse adapter property "
+                    + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " value \"" + oraclePrecisionAndScale
+                    + " into a number precison and scale. The required format is \"<precsion>.<scale>\", where both are integer numbers.");
+        }
     }
 
     @Override
@@ -206,7 +239,7 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     @Override
     public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription,
             final String pushdownSql) {
-        final ImportType importType = getContext().getImportType();
+        final ImportType importType = getImportType();
         if (importType == ImportType.JDBC) {
             return super.generatePushdownSql(connectionInformation, columnDescription, pushdownSql);
         } else {
@@ -222,4 +255,18 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         }
     }
 
+    /**
+     * Return the type of import the Oracle dialect uses
+     *
+     * @return import type
+     */
+    public ImportType getImportType() {
+        if (this.properties.isEnabled(LOCAL_IMPORT_PROPERTY)) {
+            return ImportType.LOCAL;
+        } else if (this.properties.isEnabled(ORACLE_IMPORT_PROPERTY)) {
+            return ImportType.ORA;
+        } else {
+            return ImportType.JDBC;
+        }
+    }
 }

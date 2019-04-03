@@ -8,8 +8,8 @@ import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Map;
 
+import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
@@ -21,7 +21,7 @@ import com.exasol.adapter.metadata.DataType;
 public class DB2SqlDialect extends AbstractSqlDialect {
     private static final String NAME = "DB2";
 
-    public DB2SqlDialect(final RemoteMetadataReader remoteMetadataReader, final Map<String, String> properties) {
+    public DB2SqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
         super(remoteMetadataReader, properties);
     }
 

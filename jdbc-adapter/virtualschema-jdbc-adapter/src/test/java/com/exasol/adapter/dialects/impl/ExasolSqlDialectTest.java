@@ -13,6 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.sql.SqlNode;
@@ -29,17 +30,17 @@ class ExasolSqlDialectTest {
             "'a\"b', \"a\"\"b\"" })
     @ParameterizedTest
     void testApplyQuoteIfNeeded(final String identifier, final String expectedQuotingResult) {
-        final ExasolSqlDialect dialect = new ExasolSqlDialect(/* DialectTestData.getExasolDialectContext() */); // FIXME:
-                                                                                                                // broken
-                                                                                                                // test
+        final ExasolSqlDialect dialect = new ExasolSqlDialect(null, AdapterProperties.emptyProperties()); // FIXME:
+                                                                                                          // broken
+                                                                                                          // test
         assertThat(dialect.applyQuoteIfNeeded(identifier), equalTo(expectedQuotingResult));
     }
 
     @Test
     void testExasolSqlDialectSupportsAllCapabilities() {
-        final ExasolSqlDialect dialect = new ExasolSqlDialect(/* DialectTestData.getExasolDialectContext() */); // FIXME:
-                                                                                                                // broken
-                                                                                                                // test
+        final ExasolSqlDialect dialect = new ExasolSqlDialect(null, AdapterProperties.emptyProperties()); // FIXME:
+                                                                                                          // broken
+                                                                                                          // test
         final Capabilities capabilities = dialect.getCapabilities();
         assertAll(() -> assertThat(capabilities.getMainCapabilities(), containsInAnyOrder(MainCapability.values())),
                 () -> assertThat(capabilities.getLiteralCapabilities(), containsInAnyOrder(LiteralCapability.values())),
@@ -59,25 +60,22 @@ class ExasolSqlDialectTest {
                 + " WHERE 1 < \"USER_ID\"" + " GROUP BY \"USER_ID\"" + " HAVING 1 < COUNT(\"URL\")"
                 + " ORDER BY \"USER_ID\"" + " LIMIT 10";
         final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, false);
-        final SqlDialect dialect = new ExasolSqlDialect(/* DialectTestData.getExasolDialectContext() */); // FIXME:
-                                                                                                          // broken test
+        final SqlDialect dialect = new ExasolSqlDialect(null, AdapterProperties.emptyProperties()); // FIXME:
+                                                                                                    // broken test
         final SqlGenerationVisitor generator = dialect.getSqlGenerationVisitor(context);
         final String actualSql = node.accept(generator);
         assertThat(SqlTestUtil.normalizeSql(actualSql), equalTo(SqlTestUtil.normalizeSql(expectedSql)));
     }
 
-    @CsvSource({ "FALSE, FALSE, FALSE, JDBC", //
-            "TRUE, FALSE, FALSE, LOCAL", //
-            "FALSE, TRUE, FALSE, EXA", //
-            "FALSE, FALSE, TRUE, ORA" })
+    @CsvSource({ "FALSE, FALSE, JDBC", //
+            "TRUE, FALSE, LOCAL", //
+            "FALSE, TRUE, EXA" })
     @ParameterizedTest
-    void testGetImportTypeLocal(final String local, final String fromExasol, final String fromOracle,
-            final String expectedImportType) {
-        final Map<String, String> properties = new HashMap<>();
-        properties.put(ExasolSqlDialect.LOCAL_IMPORT_PROPERTY, local);
-        properties.put(ExasolSqlDialect.EXASOL_IMPORT_PROPERTY, fromExasol);
-        properties.put(ExasolSqlDialect.ORACLE_IMPORT_PROPERTY, fromOracle);
-        final ExasolSqlDialect dialect = new ExasolSqlDialect(null, properties);
+    void testGetImportTypeLocal(final String local, final String fromExasol, final String expectedImportType) {
+        final Map<String, String> rawProperties = new HashMap<>();
+        rawProperties.put(ExasolSqlDialect.LOCAL_IMPORT_PROPERTY, local);
+        rawProperties.put(ExasolSqlDialect.EXASOL_IMPORT_PROPERTY, fromExasol);
+        final ExasolSqlDialect dialect = new ExasolSqlDialect(null, new AdapterProperties(rawProperties));
         assertThat(dialect.getImportType().toString(), equalTo(expectedImportType));
     }
 }

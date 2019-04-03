@@ -17,9 +17,10 @@ import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.ScalarFunction;
 
 public class PostgreSQLSqlDialect extends AbstractSqlDialect {
+    private static final String NAME = "POSTGRESQL";
     private static final int MAX_POSTGRES_SQL_VARCHAR_SIZE_BASED_ON_EXASOL_LIMIT = 2000000;
     private static final String POSTGRES_IGNORE_UPPERCASE_TABLES = "POSTGRESQL_UPPERCASE_TABLES";
-    private static final String NAME = "POSTGRESQL";
+    static final String POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY = "POSTGRESQL_IDENTIFIER_MAPPING";
 
     public PostgreSQLSqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
         super(remoteMetadataReader, properties);
@@ -84,7 +85,7 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     @Override
     public MappedTable mapTable(final ResultSet tables, final List<String> ignoreErrorList) throws SQLException {
         final String tableName = tables.getString("TABLE_NAME");
-        if ((getContext().getPostgreSQLIdentifierMapping() == PostgreSQLIdentifierMapping.CONVERT_TO_UPPER)
+        if ((getIdentifierMapping() == PostgreSQLIdentifierMapping.CONVERT_TO_UPPER)
                 && !ignoreErrorList.contains(POSTGRES_IGNORE_UPPERCASE_TABLES)
                 && containsUppercaseCharacter(tableName)) {
             throw new IllegalArgumentException("Table " + tableName + " cannot be used in virtual schema. "
@@ -92,6 +93,10 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         } else {
             return super.mapTable(tables, ignoreErrorList);
         }
+    }
+
+    private PostgreSQLIdentifierMapping getIdentifierMapping() {
+        return PostgreSQLIdentifierMapping.parse(this.properties.get(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY));
     }
 
     private boolean containsUppercaseCharacter(final String tableName) {
@@ -122,7 +127,7 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String changeIdentifierCaseIfNeeded(final String identifier) {
-        if (getContext().getPostgreSQLIdentifierMapping() != PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE) {
+        if (getIdentifierMapping() != PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE) {
             final boolean isSimplePostgresIdentifier = identifier.matches("^[a-z][0-9a-z_]*");
 
             if (isSimplePostgresIdentifier) {
@@ -145,7 +150,7 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     @Override
     public String applyQuote(final String identifier) {
         String postgreSQLIdentifier = identifier;
-        if (getContext().getPostgreSQLIdentifierMapping() != PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE) {
+        if (getIdentifierMapping() != PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE) {
             postgreSQLIdentifier = convertIdentifierToLowerCase(postgreSQLIdentifier);
         }
         return "\"" + postgreSQLIdentifier.replace("\"", "\"\"") + "\"";
