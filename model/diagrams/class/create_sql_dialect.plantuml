@@ -1,0 +1,31 @@
+@startuml
+
+class JdbcAdapter {
++createConnection(connection : Connection, properties: AdapterProperties, dialectRegistry : SqlDialectRegistry)
+}
+
+class SqlDialectFactory
+
+interface RemoteMetadataReader
+
+class BaseRemoteMetadataReader
+
+class TeradataMetadataReader
+
+interface SqlDialect
+
+abstract class AbstractSqlDialect
+
+class TeradataSqldialect
+
+JdbcAdapter -d--> SqlDialectFactory
+BaseRemoteMetadataReader .u..|> RemoteMetadataReader
+TeradataMetadataReader -u--|>  BaseRemoteMetadataReader
+SqlDialectFactory -r--> BaseRemoteMetadataReader : create connection
+SqlDialectFactory -r--> SqlDialect : create metadata reader
+AbstractSqlDialect .u..|> SqlDialect
+AbstractSqlDialect -l--> BaseRemoteMetadataReader
+TeradataSqldialect -l--> TeradataMetadataReader : @Override
+TeradataSqldialect -u--|> AbstractSqlDialect
+
+@enduml
