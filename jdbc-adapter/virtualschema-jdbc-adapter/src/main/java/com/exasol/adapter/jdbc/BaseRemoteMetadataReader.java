@@ -56,7 +56,13 @@ public class BaseRemoteMetadataReader implements RemoteMetadataReader {
 
     @Override
     public SchemaAdapterNotes createSchemaAdapterNotes(final DatabaseMetaData metadata) {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            return SchemaAdapterNotes.builder() //
+                    .catalogSeparator(metadata.getCatalogSeparator()) //
+                    .build();
+        } catch (final SQLException exception) {
+            throw new RemoteMetadataReaderException("Unable to create schema adapte notes from remote schema.",
+                    exception);
+        }
     }
 }
