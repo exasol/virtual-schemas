@@ -126,7 +126,7 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
 
     @Override
     public NullSorting getDefaultNullSorting() {
-        assert (getContext().getSchemaAdapterNotes().isNullsAreSortedHigh());
+        assert (getContext().getSchemaAdapterNotes().areNullsSortedHigh());
         return NullSorting.NULLS_SORTED_HIGH;
     }
 

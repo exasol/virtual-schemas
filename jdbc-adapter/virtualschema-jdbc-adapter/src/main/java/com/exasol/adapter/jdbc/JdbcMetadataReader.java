@@ -1,14 +1,17 @@
 package com.exasol.adapter.jdbc;
 
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.metadata.ColumnMetadata;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.SchemaMetadata;
+import com.exasol.adapter.metadata.TableMetadata;
+import com.google.common.base.Joiner;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
-import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.*;
-import com.google.common.base.Joiner;
 
 /**
  * TODO Find good solutions to handle tables with unsupported data types, or tables that generate exceptions. Ideas:
@@ -21,26 +24,32 @@ public class JdbcMetadataReader {
     private static final Logger LOGGER = Logger.getLogger(JdbcMetadataReader.class.getName());
 
     public static SchemaMetadata readRemoteMetadata(final String connectionString, final String user,
-
-            final String password, String catalog, String schema, final List<String> tableFilter,
-            final String dialectName, final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode,
-            final List<String> ignoreErrorList, final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping,
-            final DataType oracleNumberTargetType) throws SQLException, AdapterException {
+                                                    final String password, String catalog, String schema, final List<String> tableFilter,
+                                                    final String dialectName, final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode, final List<String> ignoreErrorList,
+                                                    final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping, final DataType oracleNumberTargetType) {
         assert (catalog != null);
         assert (schema != null);
-        try (final Connection conn = establishConnection(connectionString, user, password);) {
+        try (final Connection conn = establishConnection(connectionString, user, password)) {
             final DatabaseMetaData dbMeta = conn.getMetaData();
 
             // Retrieve relevant parts of DatabaseMetadata. Will be cached in adapternotes
             // of the schema.
-            final SchemaAdapterNotes schemaAdapterNotes = new SchemaAdapterNotes(dbMeta.getCatalogSeparator(),
-                    dbMeta.getIdentifierQuoteString(), dbMeta.storesLowerCaseIdentifiers(),
-                    dbMeta.storesUpperCaseIdentifiers(), dbMeta.storesMixedCaseIdentifiers(),
-                    dbMeta.supportsMixedCaseIdentifiers(), dbMeta.storesLowerCaseQuotedIdentifiers(),
-                    dbMeta.storesUpperCaseQuotedIdentifiers(), dbMeta.storesMixedCaseQuotedIdentifiers(),
-                    dbMeta.supportsMixedCaseQuotedIdentifiers(), dbMeta.nullsAreSortedAtEnd(),
-                    dbMeta.nullsAreSortedAtStart(), dbMeta.nullsAreSortedHigh(), dbMeta.nullsAreSortedLow());
-
+            final SchemaAdapterNotes schemaAdapterNotes = SchemaAdapterNotes.builder() //
+                  .catalogSeparator(dbMeta.getCatalogSeparator()) //
+                  .identifierQuoteString(dbMeta.getIdentifierQuoteString()) //
+                  .storesLowerCaseIdentifiers(dbMeta.storesLowerCaseIdentifiers()) //
+                  .storesUpperCaseIdentifiers(dbMeta.storesUpperCaseIdentifiers()) //
+                  .storesMixedCaseIdentifiers(dbMeta.storesMixedCaseIdentifiers()) //
+                  .supportsMixedCaseIdentifiers(dbMeta.supportsMixedCaseIdentifiers()) //
+                  .storesLowerCaseQuotedIdentifiers(dbMeta.storesLowerCaseQuotedIdentifiers()) //
+                  .storesUpperCaseQuotedIdentifiers(dbMeta.storesUpperCaseQuotedIdentifiers()) //
+                  .storesMixedCaseQuotedIdentifiers(dbMeta.storesMixedCaseQuotedIdentifiers()) //
+                  .supportsMixedCaseQuotedIdentifiers(dbMeta.supportsMixedCaseQuotedIdentifiers()) //
+                  .areNullsSortedAtEnd(dbMeta.nullsAreSortedAtEnd()) //
+                  .areNullsSortedAtStart(dbMeta.nullsAreSortedAtStart()) //
+                  .areNullsSortedHigh(dbMeta.nullsAreSortedHigh()) //
+                  .areNullsSortedLow(dbMeta.nullsAreSortedLow()) //
+                  .build();
             final SqlDialect dialect = SqlDialectRegistry.getInstance().getDialectInstanceForNameWithContext(dialectName,
                     new SqlDialectContext(schemaAdapterNotes, postgreSQLIdentifierMapping, oracleNumberTargetType));
 
@@ -51,10 +60,10 @@ public class JdbcMetadataReader {
             final List<TableMetadata> tables = findTables(catalog, schema, tableFilter, dbMeta, dialect, exceptionMode,
                     ignoreErrorList);
 
-            return new SchemaMetadata(SchemaAdapterNotes.serialize(schemaAdapterNotes), tables);
-        } catch (final SQLException e) {
-            e.printStackTrace();
-            throw e;
+            return new SchemaMetadata(SchemaAdapterNotesJsonConverter.getInstance() //
+                  .convertToJson(schemaAdapterNotes), tables);
+        } catch (final SQLException | AdapterException exception) {
+            throw new RetrieveMetadataException("Unable to read remote metadata. Caused by: ", exception);
         }
     }
 

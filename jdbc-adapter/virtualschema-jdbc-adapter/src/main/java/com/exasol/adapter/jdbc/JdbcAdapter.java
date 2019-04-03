@@ -127,20 +127,14 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
                     metadata);
             final List<String> tableFilter = JdbcAdapterProperties.getTableFilter(newSchemaMeta);
             final SchemaMetadata remoteMeta;
-            try {
-                remoteMeta = JdbcMetadataReader.readRemoteMetadata(connection.getAddress(), connection.getUser(),
-                        connection.getPassword(), JdbcAdapterProperties.getCatalog(newSchemaMeta),
-                        JdbcAdapterProperties.getSchema(newSchemaMeta), tableFilter,
-                        JdbcAdapterProperties.getSqlDialectName(newSchemaMeta),
-                        JdbcAdapterProperties.getExceptionHandlingMode(newSchemaMeta),
-                        JdbcAdapterProperties.getIgnoreErrorList(newSchemaMeta),
-                        getPostgreSQLIdentifierMapping(newSchemaMeta),
-                        JdbcAdapterProperties.getOracleNumberTargetType(newSchemaMeta));
-            } catch (final SQLException exception) {
-                throw new AdapterException(
-                        "Unable set properties of Virtual Schema \"" + schemaMetadataInfo.getSchemaName() + "\".",
-                        exception);
-            }
+            remoteMeta = JdbcMetadataReader.readRemoteMetadata(connection.getAddress(), connection.getUser(),
+                    connection.getPassword(), JdbcAdapterProperties.getCatalog(newSchemaMeta),
+                    JdbcAdapterProperties.getSchema(newSchemaMeta), tableFilter,
+                    JdbcAdapterProperties.getSqlDialectName(newSchemaMeta),
+                    JdbcAdapterProperties.getExceptionHandlingMode(newSchemaMeta),
+                    JdbcAdapterProperties.getIgnoreErrorList(newSchemaMeta),
+                    getPostgreSQLIdentifierMapping(newSchemaMeta),
+                    JdbcAdapterProperties.getOracleNumberTargetType(newSchemaMeta));
             return SetPropertiesResponse.builder().schemaMetadata(remoteMeta).build();
         }
         return SetPropertiesResponse.builder().schemaMetadata(null).build();
@@ -149,7 +143,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     @Override
     public GetCapabilitiesResponse getCapabilities(final ExaMetadata metadata, final GetCapabilitiesRequest request)
             throws AdapterException {
-        final SqlDialectContext dialectContext = new SqlDialectContext(SchemaAdapterNotes.deserialize(
+        final SqlDialectContext dialectContext = new SqlDialectContext(SchemaAdapterNotesJsonConverter.getInstance().convertFromJsonToSchemaAdapterNotes(
                 request.getSchemaMetadataInfo().getAdapterNotes(), request.getSchemaMetadataInfo().getSchemaName()));
         final SqlDialect dialect = JdbcAdapterProperties.getSqlDialect(request.getSchemaMetadataInfo().getProperties(),
                 dialectContext);
@@ -198,7 +192,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
         final ImportType importType = getImportType(schemaMetadataInfo);
 
         final SqlDialectContext dialectContext = new SqlDialectContext(
-                SchemaAdapterNotes.deserialize(request.getSchemaMetadataInfo().getAdapterNotes(),
+                SchemaAdapterNotesJsonConverter.getInstance().convertFromJsonToSchemaAdapterNotes(request.getSchemaMetadataInfo().getAdapterNotes(),
                         request.getSchemaMetadataInfo().getSchemaName()),
                 postgreSQLIdentifierMapping, getImportType(schemaMetadataInfo),
                 JdbcAdapterProperties.getOracleNumberTargetType(schemaMetadataInfo.getProperties()));
