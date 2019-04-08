@@ -8,35 +8,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assume;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
+import com.exasol.adapter.dialects.IntegrationTestConfigurationCondition;
 
 /**
  * Integration test for the Hive SQL dialect
  *
  * Testdata: ALL_HIVE_DATA_TYPES
  */
+@ExtendWith(IntegrationTestConfigurationCondition.class)
 public class HiveSqlDialectIT extends AbstractIntegrationTest {
-
     private static final String VIRTUAL_SCHEMA = "VS_HIVE";
     private static final String HIVE_SCHEMA = "xperience";
     private static final boolean IS_LOCAL = false;
 
-    @BeforeClass
-    public static void setUpClass() throws FileNotFoundException, SQLException, ClassNotFoundException {
+    @BeforeAll
+    static void beforeAll() throws FileNotFoundException, SQLException, ClassNotFoundException {
         Assume.assumeTrue(getConfig().hiveTestsRequested());
         setConnection(connectToExa());
 
         createHiveJDBCAdapter();
         createVirtualSchema(VIRTUAL_SCHEMA, HiveSqlDialect.getPublicName(), "", HIVE_SCHEMA, "", "hdfs", "hdfs",
                 "ADAPTER.JDBC_ADAPTER", getConfig().getHiveJdbcConnectionString(), IS_LOCAL, getConfig().debugAddress(),
-                "ALL_HIVE_DATA_TYPES", null,"");
+                "ALL_HIVE_DATA_TYPES", null, "");
     }
 
     @Test
-    public void testTypeMapping() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    void testTypeMapping() throws SQLException {
         final ResultSet result = executeQuery(
                 "SELECT COLUMN_NAME, COLUMN_TYPE, COLUMN_MAXSIZE, COLUMN_NUM_PREC, COLUMN_NUM_SCALE, COLUMN_DEFAULT FROM EXA_DBA_COLUMNS WHERE COLUMN_SCHEMA = '"
                         + VIRTUAL_SCHEMA + "' AND COLUMN_TABLE='ALL_HIVE_DATA_TYPES' ORDER BY COLUMN_ORDINAL_POSITION");
@@ -60,7 +62,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testSelectWithAllTypes() throws SQLException {
+    void testSelectWithAllTypes() throws SQLException {
         final ResultSet result = executeQuery("SELECT * from " + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES");
         matchNextRow(result, "[\"etet\",\"ettee\"]", new BigDecimal("56"), true, "2", (long) 53, 56.3,
                 5.199999809265137, (long) 85, "{\"jkljj\":5}", 2, "tshg", "{\"a\":\"value\",\"b\":{\"c\":8}}",
@@ -68,7 +70,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testProjection() throws SQLException {
+    void testProjection() throws SQLException {
         final String query = "SELECT BIGINTEGER FROM " + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new BigDecimal("56"));
@@ -76,7 +78,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testRewrittenProjection() throws SQLException {
+    void testRewrittenProjection() throws SQLException {
         final String query = "SELECT BINARYCOL FROM " + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "MTAxMA==");
@@ -84,7 +86,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testAggregateGroupByColumn() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    void testAggregateGroupByColumn() throws SQLException {
         final String query = "SELECT boolcolumn, min(biginteger) FROM " + VIRTUAL_SCHEMA
                 + ".ALL_HIVE_DATA_TYPES GROUP BY boolcolumn";
         final ResultSet result = executeQuery(query);
@@ -95,7 +97,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testAggregateHaving() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    void testAggregateHaving() throws SQLException {
         final String query = "SELECT boolcolumn, min(biginteger) FROM " + VIRTUAL_SCHEMA
                 + ".ALL_HIVE_DATA_TYPES GROUP BY boolcolumn having min(biginteger)<56";
         final ResultSet result = executeQuery(query);
@@ -105,7 +107,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testComparisonPredicates() throws SQLException {
+    void testComparisonPredicates() throws SQLException {
         // =, !=, <, <=, >, >=
         final String query = "select biginteger, biginteger=60, biginteger!=60, biginteger<60, biginteger<=60, biginteger>60, biginteger>=60 from "
                 + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES where intcol = 85";
@@ -117,7 +119,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testLogicalPredicates() throws SQLException {
+    void testLogicalPredicates() throws SQLException {
         // NOT, AND, OR
         final String query = "select biginteger from " + VIRTUAL_SCHEMA
                 + ".ALL_HIVE_DATA_TYPES where (biginteger < 56 or biginteger > 56) and not (biginteger is null)";
@@ -129,7 +131,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testLikePredicates() throws SQLException {
+    void testLikePredicates() throws SQLException {
         // LIKE, LIKE ESCAPE (not pushed down)
         final String query = "select varcharcol, varcharcol like 't%' escape 't' from " + VIRTUAL_SCHEMA
                 + ".ALL_HIVE_DATA_TYPES where (varcharcol like 't%')";
@@ -140,7 +142,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testLikePredicatesRewritten() throws SQLException {
+    void testLikePredicatesRewritten() throws SQLException {
         // REGEXP_LIKE rewritten to REGEXP
         final String query = "select varcharcol from " + VIRTUAL_SCHEMA
                 + ".ALL_HIVE_DATA_TYPES where varcharcol REGEXP_LIKE 'a+'";
@@ -151,7 +153,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testMiscPredicates() throws SQLException {
+    void testMiscPredicates() throws SQLException {
         // BETWEEN, IN, IS NULL, !=NULL(rewritten to "IS NOT NULL")
         final String query = "select biginteger, biginteger in (56, 61), biginteger is null, biginteger != null from "
                 + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES WHERE biginteger between 51 and 60";
@@ -163,7 +165,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testCountSumAggregateFunction() throws SQLException {
+    void testCountSumAggregateFunction() throws SQLException {
         final String query = "SELECT COUNT(biginteger), COUNT(*), COUNT(DISTINCT biginteger), SUM(biginteger), SUM(DISTINCT biginteger) from "
                 + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
@@ -173,7 +175,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testAvgMinMaxAggregateFunction() throws SQLException {
+    void testAvgMinMaxAggregateFunction() throws SQLException {
         final String query = "SELECT AVG(biginteger), MIN(biginteger), MAX(biginteger) from " + VIRTUAL_SCHEMA
                 + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
@@ -183,7 +185,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testCastedStringFunctions() throws SQLException {
+    void testCastedStringFunctions() throws SQLException {
         final String query = "select concat(upper(varcharcol),lower(repeat(varcharcol,2))) from " + VIRTUAL_SCHEMA
                 + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
@@ -194,7 +196,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testRewrittenDivAndModFunctions() throws SQLException {
+    void testRewrittenDivAndModFunctions() throws SQLException {
         final String query = "select DIV(biginteger,biginteger), mod(biginteger,biginteger) from " + VIRTUAL_SCHEMA
                 + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
@@ -204,7 +206,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testRewrittenSubStringFunction() throws SQLException {
+    void testRewrittenSubStringFunction() throws SQLException {
         final String query = "select substring(stringcol FROM 1 FOR 2) from " + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "ts");
@@ -247,5 +249,4 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         }
         createJDBCAdapter(hiveIncludes);
     }
-
 }

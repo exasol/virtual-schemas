@@ -9,17 +9,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assume;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
+import com.exasol.adapter.dialects.IntegrationTestConfigurationCondition;
 
-public class GenericSqlDialectIT extends AbstractIntegrationTest {
-
+@ExtendWith(IntegrationTestConfigurationCondition.class)
+class GenericSqlDialectIT extends AbstractIntegrationTest {
     private static final boolean IS_LOCAL = false;
 
-    @BeforeClass
-    public static void setUpClass() throws FileNotFoundException, SQLException, ClassNotFoundException {
+    @BeforeAll
+    static void beforeAll() throws FileNotFoundException, SQLException, ClassNotFoundException {
         Assume.assumeTrue(getConfig().genericTestsRequested());
 
         final String connectionString = getConfig().getGenericJdbcConnectionString();
@@ -29,11 +31,11 @@ public class GenericSqlDialectIT extends AbstractIntegrationTest {
         final String schemaName = "";
         createVirtualSchema("VS_GENERIC_MYSQL", GenericSqlDialect.getPublicName(), catalogName, schemaName, "",
                 getConfig().getGenericUser(), getConfig().getGenericPassword(), "ADAPTER.JDBC_ADAPTER",
-                connectionString, IS_LOCAL, getConfig().debugAddress(), "", null,"");
+                connectionString, IS_LOCAL, getConfig().debugAddress(), "", null, "");
     }
 
     @Test
-    public void testVirtualSchema() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    void testVirtualSchema() throws SQLException, ClassNotFoundException, FileNotFoundException {
         final ResultSet result = executeQuery("SELECT * FROM \"customers\" ORDER BY id");
         result.next();
         assertEquals("1", result.getString(1));

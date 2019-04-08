@@ -3,32 +3,30 @@ package com.exasol.adapter.dialects.impl;
 import static org.junit.Assert.assertEquals;
 
 import java.io.FileNotFoundException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assume;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
+import com.exasol.adapter.dialects.IntegrationTestConfigurationCondition;
 
 /**
- * Integration test for JDBC drivers requiring Kerberos authentication. This is
- * currently only tested for the Cloudera Hive JDBC driver developed by Simba
- * (probably also works for the Cloudera Impala Driver developed by Simba)
+ * Integration test for JDBC drivers requiring Kerberos authentication. This is currently only tested for the Cloudera
+ * Hive JDBC driver developed by Simba (probably also works for the Cloudera Impala Driver developed by Simba)
  */
-public class KerberosIT extends AbstractIntegrationTest {
-
+@ExtendWith(IntegrationTestConfigurationCondition.class)
+class KerberosIT extends AbstractIntegrationTest {
     private static final String VIRTUAL_SCHEMA = "VS_KERBEROS_IT";
     private static final String CONNECTION_NAME = "krb_conn";
     private static final boolean IS_LOCAL = false;
 
-    @BeforeClass
-    public static void setUpClass() throws FileNotFoundException, SQLException, ClassNotFoundException {
+    @BeforeAll
+    static void beforeAll() throws FileNotFoundException, SQLException, ClassNotFoundException {
         Assume.assumeTrue(getConfig().kerberosTestsRequested());
         final String kerberosConnectionString = getConfig().getKerberosJdbcConnectionString();
         final String kerberosUser = getConfig().getKerberosUser();
@@ -40,9 +38,9 @@ public class KerberosIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testKerberosVirtualSchema() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    void testKerberosVirtualSchema() throws SQLException, FileNotFoundException {
         createVirtualSchema(VIRTUAL_SCHEMA, ExasolSqlDialect.getPublicName(), "", "default", CONNECTION_NAME, "", "",
-                "ADAPTER.JDBC_ADAPTER", "", IS_LOCAL, getConfig().debugAddress(), "", null,"");
+                "ADAPTER.JDBC_ADAPTER", "", IS_LOCAL, getConfig().debugAddress(), "", null, "");
         final Statement stmt = getConnection().createStatement();
         final ResultSet result = stmt.executeQuery("SELECT * FROM \"sample_07\"");
         result.next();
@@ -50,8 +48,7 @@ public class KerberosIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testKerberosVirtualSchemaGrantConnection()
-            throws SQLException, ClassNotFoundException, FileNotFoundException {
+    void testKerberosVirtualSchemaGrantConnection() throws SQLException, ClassNotFoundException, FileNotFoundException {
         // Create Kerberos Virtual Schema using a different user, which has the
         // appropriate privileges for the connection
         final String userName = "user1";
@@ -69,7 +66,7 @@ public class KerberosIT extends AbstractIntegrationTest {
         final Connection conn2 = connectToExa(userName, userName);
         final Statement stmt2 = conn2.createStatement();
         createVirtualSchema(conn2, VIRTUAL_SCHEMA, ExasolSqlDialect.getPublicName(), "", "default", CONNECTION_NAME, "",
-                "", adapterName, "", false, getConfig().debugAddress(), "", null,"");
+                "", adapterName, "", false, getConfig().debugAddress(), "", null, "");
         final ResultSet result = stmt2.executeQuery("SELECT * FROM \"sample_07\"");
         result.next();
         assertEquals("00-0000", result.getString(1));
@@ -86,5 +83,4 @@ public class KerberosIT extends AbstractIntegrationTest {
         }
         createJDBCAdapter(kerberosIncludes);
     }
-
 }

@@ -1,34 +1,30 @@
 package com.exasol.adapter.dialects.impl;
 
+import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.net.URI;
+import java.sql.*;
 import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.junit.Assume;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
-
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertFalse;
+import com.exasol.adapter.dialects.IntegrationTestConfigurationCondition;
 
 /**
  * Tested with Oracle 12
  *
- * TODO Add tests for data types TODO Test Expanding of SELECT * if elements of
- * select list require casting
+ * TODO Add tests for data types TODO Test Expanding of SELECT * if elements of select list require casting
  */
-public class OracleSqlDialectIT extends AbstractIntegrationTest {
-
+@ExtendWith(IntegrationTestConfigurationCondition.class)
+class OracleSqlDialectIT extends AbstractIntegrationTest {
     private static final String VIRTUAL_SCHEMA_JDBC = "VS_ORACLE_JDBC";
     private static final String VIRTUAL_SCHEMA_ORA = "VS_ORACLE_IMPORT";
     private static final String VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL = "VS_ORACLE_JDBC_NUMBER_TO_DECIMAL";
@@ -37,15 +33,18 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     private static final String TEST_TABLE = "TYPE_TEST";
     private static final String NUMBER_TABLE = "NUMBER_T";
 
-
     private static final String EXA_TABLE_JDBC = VIRTUAL_SCHEMA_JDBC + "." + TEST_TABLE;
     private static final String EXA_TABLE_ORA = VIRTUAL_SCHEMA_ORA + "." + TEST_TABLE;
     private static final String ORA_TABLE = ORACLE_SCHEMA + "\".\"" + TEST_TABLE;
     private static final String ORA_NUMBER_TABLE = ORACLE_SCHEMA + "\".\"" + NUMBER_TABLE;
-    private static final String EXA_TABLE_JDBC_NUMBER_TO_DECIMAL = VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL + "." + TEST_TABLE;
-    private static final String ORA_TABLE_ORA_NUMBER_TO_DECIMAL = VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL + "." + TEST_TABLE;
-    private static final String EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL = VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL + "." + NUMBER_TABLE;
-    private static final String ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL = VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL + "." + NUMBER_TABLE;
+    private static final String EXA_TABLE_JDBC_NUMBER_TO_DECIMAL = VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL + "."
+            + TEST_TABLE;
+    private static final String ORA_TABLE_ORA_NUMBER_TO_DECIMAL = VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL + "."
+            + TEST_TABLE;
+    private static final String EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL = VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL + "."
+            + NUMBER_TABLE;
+    private static final String ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL = VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL + "."
+            + NUMBER_TABLE;
 
     private static final boolean IS_LOCAL = false;
 
@@ -53,11 +52,10 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     private Map<String, String> columnTypesJDBC;
     private Map<String, String> columnTypesORA;
 
-    @BeforeClass
-    public static void beforeMethod() throws FileNotFoundException, SQLException, ClassNotFoundException {
+    @BeforeAll
+    static void beforeMethod() throws FileNotFoundException, SQLException, ClassNotFoundException {
         Assume.assumeTrue(getConfig().oracleTestsRequested());
         setConnection(connectToExa());
-
         createOracleJDBCAdapter();
         createOracleConnection();
 
@@ -66,28 +64,30 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
                 getConfig().getOracleUser(), getConfig().getOraclePassword(),
                 // "ADAPTER.JDBC_ORACLE_DEBUG",
                 "ADAPTER.JDBC_ADAPTER", getConfig().getOracleDockerJdbcConnectionString(), IS_LOCAL,
-                getConfig().debugAddress(), "", null,"");
+                getConfig().debugAddress(), "", null, "");
 
         // create IMPORT FROM ORA virtual schema
         createVirtualSchema(VIRTUAL_SCHEMA_ORA, OracleSqlDialect.getPublicName(), "", ORACLE_SCHEMA, "",
                 getConfig().getOracleUser(), getConfig().getOraclePassword(),
                 // "ADAPTER.JDBC_ORACLE_DEBUG",
                 "ADAPTER.JDBC_ADAPTER", getConfig().getOracleDockerJdbcConnectionString(), IS_LOCAL,
-                getConfig().debugAddress(), "", "IMPORT_FROM_ORA='true' ORA_CONNECTION_NAME='CONN_ORACLE'","");
+                getConfig().debugAddress(), "", "IMPORT_FROM_ORA='true' ORA_CONNECTION_NAME='CONN_ORACLE'", "");
 
         // create JDBC virtual schema with special NUMBER handling
-        createVirtualSchema(VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL, OracleSqlDialect.getPublicName(), "", ORACLE_SCHEMA, "",
-                getConfig().getOracleUser(), getConfig().getOraclePassword(),
+        createVirtualSchema(VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL, OracleSqlDialect.getPublicName(), "", ORACLE_SCHEMA,
+                "", getConfig().getOracleUser(), getConfig().getOraclePassword(),
                 // "ADAPTER.JDBC_ORACLE_DEBUG",
                 "ADAPTER.JDBC_ADAPTER", getConfig().getOracleDockerJdbcConnectionString(), IS_LOCAL,
-                getConfig().debugAddress(), "", "oracle_cast_number_to_decimal_with_precision_and_scale='36,1'","");
+                getConfig().debugAddress(), "", "oracle_cast_number_to_decimal_with_precision_and_scale='36,1'", "");
 
         // create IMPORT FROM ORA virtual schema with special NUMBER handling
-        createVirtualSchema(VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL, OracleSqlDialect.getPublicName(), "", ORACLE_SCHEMA, "",
-                getConfig().getOracleUser(), getConfig().getOraclePassword(),
+        createVirtualSchema(VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL, OracleSqlDialect.getPublicName(), "", ORACLE_SCHEMA,
+                "", getConfig().getOracleUser(), getConfig().getOraclePassword(),
                 // "ADAPTER.JDBC_ORACLE_DEBUG",
                 "ADAPTER.JDBC_ADAPTER", getConfig().getOracleDockerJdbcConnectionString(), IS_LOCAL,
-                getConfig().debugAddress(), "", "IMPORT_FROM_ORA='true' ORA_CONNECTION_NAME='CONN_ORACLE' oracle_cast_number_to_decimal_with_precision_and_scale='36,1'","");
+                getConfig().debugAddress(), "",
+                "IMPORT_FROM_ORA='true' ORA_CONNECTION_NAME='CONN_ORACLE' oracle_cast_number_to_decimal_with_precision_and_scale='36,1'",
+                "");
     }
 
     private static void createOracleJDBCAdapter() throws SQLException, FileNotFoundException {
@@ -117,7 +117,6 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
         return this.columnTypesORA.get(column.toUpperCase());
     }
 
-
     private Map<String, String> getColumnTypesOfTable(final String table) throws SQLException {
         final Map<String, String> map = new HashMap<>();
         final ResultSet result = executeQuery("DESCRIBE " + table);
@@ -134,11 +133,13 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
                 conn.getHost(), conn.getPort(), conn.getPath().substring(1));
         createConnection("CONN_ORACLE", connectionString, getConfig().getOracleUser(), getConfig().getOraclePassword());
     }
+
     private List<ResultSet> runQuery(final String query) throws SQLException {
         return runQuery(query, EXA_TABLE_JDBC, EXA_TABLE_ORA);
     }
 
-    private List<ResultSet> runQuery(final String query, final String jdbcTable, final String oraTable) throws SQLException {
+    private List<ResultSet> runQuery(final String query, final String jdbcTable, final String oraTable)
+            throws SQLException {
         final ArrayList<ResultSet> result = new ArrayList<>();
         result.add(runQueryJDBC(query, jdbcTable));
         result.add(runQueryORA(query, oraTable));
@@ -190,22 +191,20 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
             assertEquals(expected, actual);
         }
     }
+
     // Number handling --------------------------------------------------------
-    @Test(expected = SQLException.class)
-    public void testNumberToDecimal() throws SQLException {
+    @Test
+    void testNumberToDecimal() {
         final String query = "SELECT C5 FROM %s";
-        for (final ResultSet result : runQuery(query, EXA_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_TABLE_ORA_NUMBER_TO_DECIMAL)) {
-            result.next();
-            final BigDecimal expected = new BigDecimal("123456789012345678901234567890123456");
-            final BigDecimal actual = result.getBigDecimal("C5");
-            assertEquals(expected, actual);
-        }
+        assertThrows(SQLException.class,
+                () -> runQuery(query, EXA_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_TABLE_ORA_NUMBER_TO_DECIMAL));
     }
 
     @Test
-    public void testNumber36ToDecimal() throws SQLException {
+    void testNumber36ToDecimal() throws SQLException {
         final String query = "SELECT c_number36 FROM %s";
-        for (final ResultSet result : runQuery(query, EXA_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+        for (final ResultSet result : runQuery(query, EXA_TABLE_JDBC_NUMBER_TO_DECIMAL,
+                ORA_TABLE_ORA_NUMBER_TO_DECIMAL)) {
             result.next();
             final BigDecimal expected = new BigDecimal("123456789012345678901234567890123456");
             final BigDecimal actual = result.getBigDecimal("c_number36");
@@ -214,21 +213,18 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
         assertEquals("DECIMAL(36,0)", getColumnType("C_NUMBER36"));
     }
 
-    @Test(expected = SQLException.class)
-    public void testNumber38ToDecimal() throws SQLException {
+    @Test
+    void testNumber38ToDecimal() {
         final String query = "SELECT C6 FROM %s";
-        for (final ResultSet result : runQuery(query, EXA_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_TABLE_ORA_NUMBER_TO_DECIMAL)) {
-            result.next();
-            final BigDecimal expected = new BigDecimal("12345678901234567890123456789012345678");
-            final BigDecimal actual = result.getBigDecimal("C6");
-            assertEquals(expected, actual);
-        }
+        assertThrows(SQLException.class,
+                () -> runQuery(query, EXA_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_TABLE_ORA_NUMBER_TO_DECIMAL));
     }
 
     @Test
-    public void testNumber10S5ToDecimal() throws SQLException {
+    void testNumber10S5ToDecimal() throws SQLException {
         final String query = "SELECT C7 FROM %s";
-        for (final ResultSet result : runQuery(query, EXA_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+        for (final ResultSet result : runQuery(query, EXA_TABLE_JDBC_NUMBER_TO_DECIMAL,
+                ORA_TABLE_ORA_NUMBER_TO_DECIMAL)) {
             result.next();
             final BigDecimal expected = new BigDecimal("12345.12345");
             final BigDecimal actual = result.getBigDecimal("C7").stripTrailingZeros();
@@ -238,32 +234,37 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testSelectAllColsNumber() throws SQLException {
+    void testSelectAllColsNumber() throws SQLException {
         final String query = "SELECT * FROM %s";
-        for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
-            matchNextRowDecimal(result, "1234567890123456789012345678901234.6","1234567890123456789012345678.9","1234567890123456789012345678901234.56");
+        for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL,
+                ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+            matchNextRowDecimal(result, "1234567890123456789012345678901234.6", "1234567890123456789012345678.9",
+                    "1234567890123456789012345678901234.56");
         }
 
         matchSingleRowExplain(String.format(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL),
-                "SELECT CAST(\"A\" AS DECIMAL(36,1)), CAST(\"B\" AS DECIMAL(36,1)), \"C\" FROM \"" + ORA_NUMBER_TABLE + "\"");
+                "SELECT CAST(\"A\" AS DECIMAL(36,1)), CAST(\"B\" AS DECIMAL(36,1)), \"C\" FROM \"" + ORA_NUMBER_TABLE
+                        + "\"");
         matchSingleRowExplain(String.format(query, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL),
-                "SELECT CAST(\"A\" AS DECIMAL(36,1)), CAST(\"B\" AS DECIMAL(36,1)), \"C\" FROM \"" + ORA_NUMBER_TABLE + "\"");
+                "SELECT CAST(\"A\" AS DECIMAL(36,1)), CAST(\"B\" AS DECIMAL(36,1)), \"C\" FROM \"" + ORA_NUMBER_TABLE
+                        + "\"");
 
-        Map<String, String> columnTypesJDBC = getColumnTypesOfTable(EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL);
-        Map<String, String> columnTypesORA = getColumnTypesOfTable(ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL);
+        final Map<String, String> columnTypesJDBC = getColumnTypesOfTable(EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL);
+        final Map<String, String> columnTypesORA = getColumnTypesOfTable(ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL);
 
         assertEquals("DECIMAL(36,1)", columnTypesJDBC.get("A"));
         assertEquals("DECIMAL(36,1)", columnTypesORA.get("A"));
-        assertEquals("DECIMAL(36,1)",  columnTypesJDBC.get("B"));
+        assertEquals("DECIMAL(36,1)", columnTypesJDBC.get("B"));
         assertEquals("DECIMAL(36,1)", columnTypesORA.get("B"));
-        assertEquals("DECIMAL(36,2)",  columnTypesJDBC.get("C"));
+        assertEquals("DECIMAL(36,2)", columnTypesJDBC.get("C"));
         assertEquals("DECIMAL(36,2)", columnTypesORA.get("C"));
     }
 
     @Test
-    public void testSelectNumber() throws SQLException {
+    void testSelectNumber() throws SQLException {
         final String query = "SELECT a FROM %s";
-        for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+        for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL,
+                ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
             matchNextRowDecimal(result, "1234567890123456789012345678901234.6");
         }
         matchSingleRowExplain(String.format(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL),
@@ -273,9 +274,10 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testSelectNumber3810() throws SQLException {
+    void testSelectNumber3810() throws SQLException {
         final String query = "SELECT b FROM %s";
-        for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+        for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL,
+                ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
             matchNextRowDecimal(result, "1234567890123456789012345678.9");
         }
         matchSingleRowExplain(String.format(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL),
@@ -285,9 +287,10 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testSelectNumber3602() throws SQLException {
+    void testSelectNumber3602() throws SQLException {
         final String query = "SELECT c FROM %s";
-        for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
+        for (final ResultSet result : runQuery(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL,
+                ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL)) {
             matchNextRowDecimal(result, "1234567890123456789012345678901234.56");
         }
 
@@ -299,52 +302,57 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
 
     // Join Tests -------------------------------------------------------------
     @Test
-    public void innerJoin() throws SQLException {
-        final String query = String.format("SELECT * FROM  %1$s.t1 a INNER JOIN  %1$s.t2 b ON a.x=b.x", VIRTUAL_SCHEMA_ORA);
+    void innerJoin() throws SQLException {
+        final String query = String.format("SELECT * FROM  %1$s.t1 a INNER JOIN  %1$s.t2 b ON a.x=b.x",
+                VIRTUAL_SCHEMA_ORA);
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, "2", "bbb", "2" ,"bbb");
+        matchNextRow(result, "2", "bbb", "2", "bbb");
         assertFalse(result.next());
     }
 
     @Test
-    public void innerJoinWithProjection() throws SQLException {
-        final String query = String.format("SELECT b.y || %1$s.t1.y FROM  %1$s.t1 INNER JOIN  %1$s.t2 b ON %1$s.t1.x=b.x", VIRTUAL_SCHEMA_JDBC);
+    void innerJoinWithProjection() throws SQLException {
+        final String query = String.format(
+                "SELECT b.y || %1$s.t1.y FROM  %1$s.t1 INNER JOIN  %1$s.t2 b ON %1$s.t1.x=b.x", VIRTUAL_SCHEMA_JDBC);
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "bbbbbb");
         assertFalse(result.next());
     }
 
     @Test
-    public void leftJoin() throws SQLException {
-        final String query = String.format("SELECT * FROM  %1$s.t1 a LEFT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_ORA);
+    void leftJoin() throws SQLException {
+        final String query = String.format(
+                "SELECT * FROM  %1$s.t1 a LEFT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_ORA);
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, "1", "aaa", null ,null);
-        matchNextRow(result, "2", "bbb", "2" ,"bbb");
+        matchNextRow(result, "1", "aaa", null, null);
+        matchNextRow(result, "2", "bbb", "2", "bbb");
         assertFalse(result.next());
     }
 
     @Test
-    public void rightJoin() throws SQLException {
-        final String query = String.format("SELECT * FROM  %1$s.t1 a RIGHT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_JDBC);
+    void rightJoin() throws SQLException {
+        final String query = String.format(
+                "SELECT * FROM  %1$s.t1 a RIGHT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_JDBC);
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, "2", "bbb", "2" ,"bbb");
-        matchNextRow(result, null, null, "3" ,"ccc");
+        matchNextRow(result, "2", "bbb", "2", "bbb");
+        matchNextRow(result, null, null, "3", "ccc");
         assertFalse(result.next());
     }
 
     @Test
-    public void fullOuterJoin() throws SQLException {
-        final String query = String.format("SELECT * FROM  %1$s.t1 a FULL OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_ORA);
+    void fullOuterJoin() throws SQLException {
+        final String query = String.format(
+                "SELECT * FROM  %1$s.t1 a FULL OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_ORA);
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, "1", "aaa", null ,null);
-        matchNextRow(result, "2", "bbb", "2" ,"bbb");
-        matchNextRow(result, null, null, "3" ,"ccc");
+        matchNextRow(result, "1", "aaa", null, null);
+        matchNextRow(result, "2", "bbb", "2", "bbb");
+        matchNextRow(result, null, null, "3", "ccc");
         assertFalse(result.next());
     }
 
     // Type Tests -------------------------------------------------------------
     @Test
-    public void testColumnTypeEquivalence() throws SQLException {
+    void testColumnTypeEquivalence() throws SQLException {
         final Map<String, String> jdbcColumnTypes = getColumnTypesOfTable(EXA_TABLE_JDBC);
         final Map<String, String> importColumnTypes = getColumnTypesOfTable(EXA_TABLE_ORA);
 
@@ -354,28 +362,29 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testSelectExpression() throws SQLException {
+    void testSelectExpression() throws SQLException {
         final String query = "SELECT C7 + 1 FROM %s ORDER BY 1";
         for (final ResultSet result : runQuery(query)) {
             matchNextRowDecimal(result, "12346.12345");
             matchNextRowDecimal(result, "12356.12345");
         }
-        runMatchSingleRowExplain(query, "SELECT CAST((\"C7\" + 1) AS FLOAT) FROM \"" + ORA_TABLE + "\" ORDER BY (\"C7\" + 1)");
+        runMatchSingleRowExplain(query,
+                "SELECT CAST((\"C7\" + 1) AS FLOAT) FROM \"" + ORA_TABLE + "\" ORDER BY (\"C7\" + 1)");
     }
 
     @Test
-    public void testFilterExpression() throws SQLException {
+    void testFilterExpression() throws SQLException {
         final String query = "SELECT C7 FROM %s WHERE C7 > 12346";
-        ResultSet resultJDBC = runQueryJDBC(query);
+        final ResultSet resultJDBC = runQueryJDBC(query);
         matchNextRow(resultJDBC, new BigDecimal("12355.12345"));
-        ResultSet resultORA = runQueryORA(query);
+        final ResultSet resultORA = runQueryORA(query);
         matchNextRow(resultORA, "01.2355123450E4");
 
         runMatchSingleRowExplain(query, "SELECT \"C7\" FROM \"" + ORA_TABLE + "\" WHERE 12346 < \"C7\"");
     }
 
     @Test
-    public void testAggregateSingleGroup() throws SQLException {
+    void testAggregateSingleGroup() throws SQLException {
         final String query = "SELECT min(C7) FROM %s";
         for (final ResultSet result : runQuery(query)) {
             matchNextRowDecimal(result, "12345.12345");
@@ -384,51 +393,51 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testAggregateGroupByColumn() throws SQLException {
+    void testAggregateGroupByColumn() throws SQLException {
         final String query = "SELECT C5, min(C7) FROM %s GROUP BY C5 ORDER BY 1 DESC";
         for (final ResultSet result : runQuery(query)) {
             matchNextRowDecimal(result, "123456789012345678901234567890123456", "12345.12345");
             matchNextRowDecimal(result, "1234567890.123456789", "12355.12345");
         }
-        runMatchSingleRowExplain(query,
-                "SELECT TO_CHAR(\"C5\"), CAST(MIN(\"C7\") AS FLOAT) FROM \"" + ORA_TABLE + "\" GROUP BY \"C5\" ORDER BY \"C5\" DESC");
+        runMatchSingleRowExplain(query, "SELECT TO_CHAR(\"C5\"), CAST(MIN(\"C7\") AS FLOAT) FROM \"" + ORA_TABLE
+                + "\" GROUP BY \"C5\" ORDER BY \"C5\" DESC");
     }
 
     @Test
-    public void testAggregateGroupByExpression() throws SQLException {
+    void testAggregateGroupByExpression() throws SQLException {
         final String query = "SELECT C5 + 1, min(C7) FROM %s GROUP BY C5 + 1 ORDER BY 1 DESC";
         for (final ResultSet result : runQuery(query)) {
             matchNextRowDecimal(result, "123456789012345678901234567890123457", "12345.12345");
             matchNextRowDecimal(result, "1234567891.123456789", "12355.12345");
         }
-        runMatchSingleRowExplain(query,
-                "SELECT CAST((\"C5\" + 1) AS FLOAT), CAST(MIN(\"C7\") AS FLOAT) FROM \"" + ORA_TABLE + "\" GROUP BY (\"C5\" + 1) ORDER BY (\"C5\" + 1) DESC");
+        runMatchSingleRowExplain(query, "SELECT CAST((\"C5\" + 1) AS FLOAT), CAST(MIN(\"C7\") AS FLOAT) FROM \""
+                + ORA_TABLE + "\" GROUP BY (\"C5\" + 1) ORDER BY (\"C5\" + 1) DESC");
     }
 
     @Test
-    public void testAggregateGroupByTuple() throws SQLException {
+    void testAggregateGroupByTuple() throws SQLException {
         final String query = "SELECT C_NUMBER36, C5, min(C7) FROM %s GROUP BY C_NUMBER36, C5 ORDER BY C5 DESC";
         for (final ResultSet result : runQuery(query)) {
             matchNextRowDecimal(result, "123456789012345678901234567890123456", "123456789012345678901234567890123456",
                     "12345.12345");
             matchNextRowDecimal(result, "123456789012345678901234567890123456", "1234567890.123456789", "12355.12345");
         }
-        runMatchSingleRowExplain(query, "SELECT \"C_NUMBER36\", TO_CHAR(\"C5\"), CAST(MIN(\"C7\") AS FLOAT) FROM \"" + ORA_TABLE
-                + "\" GROUP BY \"C5\", \"C_NUMBER36\" ORDER BY \"C5\" DESC");
+        runMatchSingleRowExplain(query, "SELECT \"C_NUMBER36\", TO_CHAR(\"C5\"), CAST(MIN(\"C7\") AS FLOAT) FROM \""
+                + ORA_TABLE + "\" GROUP BY \"C5\", \"C_NUMBER36\" ORDER BY \"C5\" DESC");
     }
 
     @Test
-    public void testAggregateHaving() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    void testAggregateHaving() throws SQLException, ClassNotFoundException, FileNotFoundException {
         final String query = "SELECT C5, min(C7) FROM %s GROUP BY C5 HAVING MIN(C7) > 12350";
         for (final ResultSet result : runQuery(query)) {
             matchNextRowDecimal(result, "1234567890.123456789", "12355.12345");
         }
-        runMatchSingleRowExplain(query,
-                "SELECT TO_CHAR(\"C5\"), CAST(MIN(\"C7\") AS FLOAT) FROM \"" + ORA_TABLE + "\" GROUP BY \"C5\" HAVING 12350 < MIN(\"C7\")");
+        runMatchSingleRowExplain(query, "SELECT TO_CHAR(\"C5\"), CAST(MIN(\"C7\") AS FLOAT) FROM \"" + ORA_TABLE
+                + "\" GROUP BY \"C5\" HAVING 12350 < MIN(\"C7\")");
     }
 
     @Test
-    public void testOrderByColumn() throws SQLException {
+    void testOrderByColumn() throws SQLException {
         final String query = "SELECT C1 FROM %s ORDER BY C1 DESC NULLS LAST";
         for (final ResultSet result : runQuery(query)) {
             matchNextRow(result, "aaaaaaaaaaaaaaaaaaaa                              ");
@@ -438,12 +447,12 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testOrderByExpression() throws SQLException {
+    void testOrderByExpression() throws SQLException {
         final String query = "SELECT C7 FROM %s ORDER BY ABS(C7) DESC NULLS FIRST";
-        ResultSet resultJDBC = runQueryJDBC(query);
+        final ResultSet resultJDBC = runQueryJDBC(query);
         matchNextRow(resultJDBC, new BigDecimal("12355.12345"));
         matchNextRow(resultJDBC, new BigDecimal("12345.12345"));
-        ResultSet resultORA = runQueryORA(query);
+        final ResultSet resultORA = runQueryORA(query);
         matchNextRow(resultORA, "01.2355123450E4");
         matchNextRow(resultORA, "01.2345123450E4");
 
@@ -451,12 +460,12 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testLimit() throws SQLException {
+    void testLimit() throws SQLException {
         final String query = "SELECT C7 FROM %s ORDER BY C7 LIMIT 2";
-        ResultSet resultJDBC = runQueryJDBC(query);
+        final ResultSet resultJDBC = runQueryJDBC(query);
         matchNextRow(resultJDBC, new BigDecimal("12345.12345"));
         matchNextRow(resultJDBC, new BigDecimal("12355.12345"));
-        ResultSet resultORA = runQueryORA(query);
+        final ResultSet resultORA = runQueryORA(query);
         matchNextRow(resultORA, "01.2345123450E4");
         matchNextRow(resultORA, "01.2355123450E4");
 
@@ -465,20 +474,20 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testLimitOffset() throws SQLException {
+    void testLimitOffset() throws SQLException {
         final String query = "SELECT C7 FROM %s ORDER BY C7 LIMIT 1 OFFSET 1";
-        ResultSet resultJDBC = runQueryJDBC(query);
+        final ResultSet resultJDBC = runQueryJDBC(query);
         matchNextRow(resultJDBC, new BigDecimal("12355.12345"));
-        ResultSet resultORA = runQueryORA(query);
+        final ResultSet resultORA = runQueryORA(query);
         matchNextRow(resultORA, "01.2355123450E4");
 
         runMatchSingleRowExplain(query,
-                "SELECT c0 FROM ( SELECT LIMIT_SUBSELECT.*, ROWNUM ROWNUM_SUB FROM ( SELECT \"C7\" AS c0 FROM \"" + ORA_TABLE
-                        + "\" ORDER BY \"C7\"  ) LIMIT_SUBSELECT WHERE ROWNUM <= 2 ) WHERE ROWNUM_SUB > 1");
+                "SELECT c0 FROM ( SELECT LIMIT_SUBSELECT.*, ROWNUM ROWNUM_SUB FROM ( SELECT \"C7\" AS c0 FROM \""
+                        + ORA_TABLE + "\" ORDER BY \"C7\"  ) LIMIT_SUBSELECT WHERE ROWNUM <= 2 ) WHERE ROWNUM_SUB > 1");
     }
 
     @Test
-    public void testChar() throws SQLException {
+    void testChar() throws SQLException {
         final String query = "SELECT C1 FROM %s";
         for (final ResultSet result : runQuery(query)) {
             matchNextRow(result, "aaaaaaaaaaaaaaaaaaaa                              ");
@@ -487,7 +496,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testNChar() throws SQLException {
+    void testNChar() throws SQLException {
         final String query = "SELECT C2 FROM %s";
         for (final ResultSet result : runQuery(query)) {
             matchNextRow(result, "bbbbbbbbbbbbbbbbbbbb                              ");
@@ -496,7 +505,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testVarchar() throws SQLException {
+    void testVarchar() throws SQLException {
         final String query = "SELECT C3 FROM %s";
         for (final ResultSet result : runQuery(query)) {
             matchNextRow(result, "cccccccccccccccccccc");
@@ -505,7 +514,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testNVarchar() throws SQLException {
+    void testNVarchar() throws SQLException {
         final String query = "SELECT C4 FROM %s";
         for (final ResultSet result : runQuery(query)) {
             matchNextRow(result, "dddddddddddddddddddd");
@@ -514,7 +523,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testNumber() throws SQLException {
+    void testNumber() throws SQLException {
         final String query = "SELECT C5 FROM %s";
         for (final ResultSet result : runQuery(query)) {
             result.next();
@@ -526,7 +535,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testNumber36() throws SQLException {
+    void testNumber36() throws SQLException {
         final String query = "SELECT c_number36 FROM %s";
         for (final ResultSet result : runQuery(query)) {
             result.next();
@@ -538,7 +547,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testNumber38() throws SQLException {
+    void testNumber38() throws SQLException {
         final String query = "SELECT C6 FROM %s";
         for (final ResultSet result : runQuery(query)) {
             result.next();
@@ -550,7 +559,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testNumber10S5() throws SQLException {
+    void testNumber10S5() throws SQLException {
         final String query = "SELECT C7 FROM %s";
         for (final ResultSet result : runQuery(query)) {
             result.next();
@@ -562,7 +571,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testBinaryFloat() throws SQLException {
+    void testBinaryFloat() throws SQLException {
         final String query = "SELECT C_BINFLOAT FROM %s";
         for (final ResultSet result : runQuery(query)) {
             result.next();
@@ -576,7 +585,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testBinaryDouble() throws SQLException {
+    void testBinaryDouble() throws SQLException {
         final String query = "SELECT C_BINDOUBLE FROM %s";
         for (final ResultSet result : runQuery(query)) {
             result.next();
@@ -590,7 +599,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testFloat() throws SQLException {
+    void testFloat() throws SQLException {
         final String query = "SELECT C_FLOAT FROM %s";
         for (final ResultSet result : runQuery(query)) {
             result.next();
@@ -604,7 +613,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testFloat126() throws SQLException {
+    void testFloat126() throws SQLException {
         final String query = "SELECT C_FLOAT126 FROM %s";
         for (final ResultSet result : runQuery(query)) {
             result.next();
@@ -618,7 +627,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testLong() throws SQLException {
+    void testLong() throws SQLException {
         final String query = "SELECT C_LONG FROM " + EXA_TABLE_JDBC;
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "test long 123");
@@ -626,7 +635,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testDate() throws SQLException {
+    void testDate() throws SQLException {
         final String query = "SELECT C10 FROM %s";
         for (final ResultSet result : runQuery(query)) {
             matchNextRow(result, Date.valueOf("2016-08-19"));
@@ -636,12 +645,12 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testTimestamp3() throws SQLException {
+    void testTimestamp3() throws SQLException {
         final String query = "SELECT C11 FROM %s";
-        ResultSet resultJDBC = runQueryJDBC(query);
+        final ResultSet resultJDBC = runQueryJDBC(query);
         matchNextRow(resultJDBC, "11-MAR-13 05.30.15.123 PM");
-        ResultSet resultORA = runQueryORA(query);
-        matchNextRow(resultORA,Timestamp.valueOf("2013-03-11 17:30:15.123"));
+        final ResultSet resultORA = runQueryORA(query);
+        matchNextRow(resultORA, Timestamp.valueOf("2013-03-11 17:30:15.123"));
 
         runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(\"C11\") FROM \"" + ORA_TABLE + "\"");
         runMatchSingleRowExplainORA(query, "SELECT \"C11\" FROM \"" + ORA_TABLE + "\"");
@@ -650,12 +659,12 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testTimestamp6() throws SQLException {
+    void testTimestamp6() throws SQLException {
         final String query = "SELECT C12 FROM %s";
-        ResultSet resultJDBC = runQueryJDBC(query);
+        final ResultSet resultJDBC = runQueryJDBC(query);
         matchNextRow(resultJDBC, "11-MAR-13 05.30.15.123456 PM");
-        ResultSet resultORA = runQueryORA(query);
-        matchNextRow(resultORA,Timestamp.valueOf("2013-03-11 17:30:15.123"));
+        final ResultSet resultORA = runQueryORA(query);
+        matchNextRow(resultORA, Timestamp.valueOf("2013-03-11 17:30:15.123"));
 
         runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(\"C12\") FROM \"" + ORA_TABLE + "\"");
         runMatchSingleRowExplainORA(query, "SELECT \"C12\" FROM \"" + ORA_TABLE + "\"");
@@ -664,12 +673,12 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testTimestamp9() throws SQLException {
+    void testTimestamp9() throws SQLException {
         final String query = "SELECT C13 FROM %s";
-        ResultSet resultJDBC = runQueryJDBC(query);
+        final ResultSet resultJDBC = runQueryJDBC(query);
         matchNextRow(resultJDBC, "11-MAR-13 05.30.15.123456789 PM");
-        ResultSet resultORA = runQueryORA(query);
-        matchNextRow(resultORA,Timestamp.valueOf("2013-03-11 17:30:15.123"));
+        final ResultSet resultORA = runQueryORA(query);
+        matchNextRow(resultORA, Timestamp.valueOf("2013-03-11 17:30:15.123"));
 
         runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(\"C13\") FROM \"" + ORA_TABLE + "\"");
         runMatchSingleRowExplainORA(query, "SELECT \"C13\" FROM \"" + ORA_TABLE + "\"");
@@ -678,11 +687,11 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testTimestampTZ() throws SQLException {
+    void testTimestampTZ() throws SQLException {
         final String query = "SELECT C14 FROM %s";
-        ResultSet resultJDBC = runQueryJDBC(query);
+        final ResultSet resultJDBC = runQueryJDBC(query);
         matchNextRow(resultJDBC, "19-AUG-16 11.28.05.000000 AM -08:00");
-        ResultSet resultORA = runQueryORA(query);
+        final ResultSet resultORA = runQueryORA(query);
         matchNextRow(resultORA, Timestamp.valueOf("2016-08-19 19:28:05.000"));
 
         runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(\"C14\") FROM \"" + ORA_TABLE + "\"");
@@ -692,12 +701,12 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testTimestampLocalTZ() throws SQLException {
+    void testTimestampLocalTZ() throws SQLException {
         executeUpdate("ALTER SESSION SET TIME_ZONE = 'UTC'");
         final String query = "SELECT C15 FROM %s";
-        ResultSet resultJDBC = runQueryJDBC(query);
+        final ResultSet resultJDBC = runQueryJDBC(query);
         matchNextRow(resultJDBC, "30-APR-18 06.00.05.000000 PM");
-        ResultSet resultORA = runQueryORA(query);
+        final ResultSet resultORA = runQueryORA(query);
         matchNextRow(resultORA, Timestamp.valueOf("2018-04-30 18:00:05.000"));
 
         runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(\"C15\") FROM \"" + ORA_TABLE + "\"");
@@ -707,7 +716,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testIntervalYear() throws SQLException {
+    void testIntervalYear() throws SQLException {
         final String query = "SELECT C16 FROM %s";
         for (final ResultSet result : runQuery(query)) {
             matchNextRow(result, "+54-02");
@@ -717,7 +726,7 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testIntervalDay() throws SQLException {
+    void testIntervalDay() throws SQLException {
         final String query = "SELECT C17 FROM %s ORDER BY 1";
         for (final ResultSet result : runQuery(query)) {
             matchNextRow(result, "+01 11:12:10.123000");
@@ -728,21 +737,23 @@ public class OracleSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testSelectAllTimestampColumns() throws SQLException {
+    void testSelectAllTimestampColumns() throws SQLException {
         executeUpdate("ALTER SESSION SET TIME_ZONE = 'UTC'");
         final String query = "SELECT * FROM %s.%s";
-        ResultSet resultJDBC = runQueryJDBC(String.format(query, VIRTUAL_SCHEMA_JDBC, "TS_T"));
-        matchNextRow(resultJDBC, "01-JAN-18 11.00.00.000000 AM", "01-JAN-18 10.00.00.000000 AM", "01-JAN-18 11.00.00.000000 AM +01:00");
-        ResultSet resultORA = runQueryORA(String.format(query, VIRTUAL_SCHEMA_ORA, "TS_T"));
-        matchNextRow(resultORA,Timestamp.valueOf("2018-01-01 11:00:00.000"), Timestamp.valueOf("2018-01-01 10:00:00.000"), Timestamp.valueOf("2018-01-01 10:00:00.000"));
-        Map<String, String> columnTypesJDBC = getColumnTypesOfTable(VIRTUAL_SCHEMA_JDBC + ".TS_T");
-        Map<String, String> columnTypesORA = getColumnTypesOfTable(VIRTUAL_SCHEMA_ORA + ".TS_T");
+        final ResultSet resultJDBC = runQueryJDBC(String.format(query, VIRTUAL_SCHEMA_JDBC, "TS_T"));
+        matchNextRow(resultJDBC, "01-JAN-18 11.00.00.000000 AM", "01-JAN-18 10.00.00.000000 AM",
+                "01-JAN-18 11.00.00.000000 AM +01:00");
+        final ResultSet resultORA = runQueryORA(String.format(query, VIRTUAL_SCHEMA_ORA, "TS_T"));
+        matchNextRow(resultORA, Timestamp.valueOf("2018-01-01 11:00:00.000"),
+                Timestamp.valueOf("2018-01-01 10:00:00.000"), Timestamp.valueOf("2018-01-01 10:00:00.000"));
+        final Map<String, String> columnTypesJDBC = getColumnTypesOfTable(VIRTUAL_SCHEMA_JDBC + ".TS_T");
+        final Map<String, String> columnTypesORA = getColumnTypesOfTable(VIRTUAL_SCHEMA_ORA + ".TS_T");
 
         assertEquals("TIMESTAMP", columnTypesJDBC.get("A"));
         assertEquals("TIMESTAMP", columnTypesORA.get("A"));
-        assertEquals("VARCHAR(2000000) UTF8",  columnTypesJDBC.get("B"));
+        assertEquals("VARCHAR(2000000) UTF8", columnTypesJDBC.get("B"));
         assertEquals("VARCHAR(2000000) UTF8", columnTypesORA.get("B"));
-        assertEquals("VARCHAR(2000000) UTF8",  columnTypesJDBC.get("C"));
+        assertEquals("VARCHAR(2000000) UTF8", columnTypesJDBC.get("C"));
         assertEquals("VARCHAR(2000000) UTF8", columnTypesORA.get("C"));
     }
 }
