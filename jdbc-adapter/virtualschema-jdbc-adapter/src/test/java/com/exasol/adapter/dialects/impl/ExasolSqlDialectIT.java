@@ -1,37 +1,26 @@
 package com.exasol.adapter.dialects.impl;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.sql.*;
 import java.util.List;
 
-import com.exasol.adapter.dialects.PostgreSQLIdentifierMapping;
-import com.exasol.adapter.metadata.DataType;
 import org.junit.Assume;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
-import com.exasol.adapter.jdbc.JdbcMetadataReader;
-import com.exasol.adapter.json.SchemaMetadataSerializer;
-import com.exasol.adapter.metadata.SchemaMetadata;
+import com.exasol.adapter.dialects.IntegrationTestConfigurationCondition;
 import com.google.common.collect.ImmutableList;
 
 /**
  * Integration tests for the Exasol SQL dialect.
  */
+@ExtendWith(IntegrationTestConfigurationCondition.class)
 public class ExasolSqlDialectIT extends AbstractIntegrationTest {
 
     public static class ConnectionBuilder {
@@ -40,9 +29,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         private String connectionUser;
         private String connectionPassword;
 
-        public ConnectionBuilder(
-                final String connectionName,
-                final String connectionString) {
+        public ConnectionBuilder(final String connectionName, final String connectionString) {
             this.connectionName = connectionName;
             this.connectionString = connectionString;
             this.connectionUser = "";
@@ -66,7 +53,7 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
             createConnection.append(" TO '");
             createConnection.append(this.connectionString);
             createConnection.append("'");
-            if (this.connectionUser != "" && this.connectionPassword != "") {
+            if ((this.connectionUser != "") && (this.connectionPassword != "")) {
                 createConnection.append(" USER '");
                 createConnection.append(this.connectionUser);
                 createConnection.append("' IDENTIFIED BY '");
@@ -76,9 +63,6 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
             return createConnection.toString();
         }
     }
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     private static final String TEST_SCHEMA = "NATIVE_EXA_IT";
     private static final String TEST_SCHEMA_MIXED_CASE = "NATIVE_EXA_IT_Mixed_Case";
@@ -194,22 +178,25 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
 
     @Test
     public void testIdentifierCaseSensitivityOnColumns() throws SQLException {
-        final ResultSet result = executeQuery("SELECT \"Column1\", \"column2\", COLUMN3 FROM " + VIRTUAL_SCHEMA_MIXED_CASE + ".\"Table_Mixed_Case\"");
+        final ResultSet result = executeQuery(
+                "SELECT \"Column1\", \"column2\", COLUMN3 FROM " + VIRTUAL_SCHEMA_MIXED_CASE + ".\"Table_Mixed_Case\"");
         matchLastRow(result, 1L, 2L, 3L);
     }
 
     @Test
     public void assertUnquotedMixedCaseTableIsNotFound() throws SQLException {
-        this.thrown.expect(SQLException.class);
-        this.thrown.expectMessage("object VS_EXA_IT_MIXED_CASE.TABLE_MIXED_CASE not found");
-        executeQuery("SELECT \"Column1\", \"column2\", COLUMN3 FROM " + VIRTUAL_SCHEMA_MIXED_CASE + ".Table_Mixed_Case");
+        assertThrows(
+                SQLException.class, () -> executeQuery("SELECT \"Column1\", \"column2\", COLUMN3 FROM "
+                        + VIRTUAL_SCHEMA_MIXED_CASE + ".Table_Mixed_Case"),
+                "object VS_EXA_IT_MIXED_CASE.TABLE_MIXED_CASE not found");
     }
 
     @Test
     public void assertUnquotedMixedCaseColumnIsNotFound() throws SQLException {
-        this.thrown.expect(SQLException.class);
-        this.thrown.expectMessage("object COLUMN1 not found");
-        executeQuery("SELECT Column1, column2, COLUMN3 FROM " + VIRTUAL_SCHEMA_MIXED_CASE + ".\"Table_Mixed_Case\"");
+        assertThrows(SQLException.class,
+                () -> executeQuery(
+                        "SELECT Column1, column2, COLUMN3 FROM " + VIRTUAL_SCHEMA_MIXED_CASE + ".\"Table_Mixed_Case\""),
+                "object COLUMN1 not found");
     }
 
     @Test
@@ -217,32 +204,34 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         String query = "SELECT GROUP_CONCAT(A) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         ResultSet result = executeQuery(query);
         matchLastRow(result, "1,1,2,2,3,3");
-        matchSingleRowExplain(query, "SELECT GROUP_CONCAT(\"A\") FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
+        matchSingleRowExplain(query, "SELECT GROUP_CONCAT(\"A\") FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
+                IS_LOCAL);
         query = "SELECT GROUP_CONCAT(DISTINCT A) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchLastRow(result, "1,2,3");
-        matchSingleRowExplain(query, "SELECT GROUP_CONCAT(DISTINCT \"A\") FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
-                IS_LOCAL);
+        matchSingleRowExplain(query,
+                "SELECT GROUP_CONCAT(DISTINCT \"A\") FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
         query = "SELECT GROUP_CONCAT(A ORDER BY C) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchLastRow(result, "1,2,3,1,2,3");
-        matchSingleRowExplain(query, "SELECT GROUP_CONCAT(\"A\" ORDER BY \"C\") FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
-                IS_LOCAL);
+        matchSingleRowExplain(query,
+                "SELECT GROUP_CONCAT(\"A\" ORDER BY \"C\") FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
         query = "SELECT GROUP_CONCAT(A ORDER BY C DESC) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchLastRow(result, "3,2,1,3,2,1");
-        matchSingleRowExplain(query, "SELECT GROUP_CONCAT(\"A\" ORDER BY \"C\" DESC) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
+        matchSingleRowExplain(query,
+                "SELECT GROUP_CONCAT(\"A\" ORDER BY \"C\" DESC) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
                 IS_LOCAL);
         query = "SELECT GROUP_CONCAT(A ORDER BY C DESC NULLS LAST) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchLastRow(result, "3,2,1,3,2,1");
-        matchSingleRowExplain(query,
-                "SELECT GROUP_CONCAT(\"A\" ORDER BY \"C\" DESC NULLS LAST) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
+        matchSingleRowExplain(query, "SELECT GROUP_CONCAT(\"A\" ORDER BY \"C\" DESC NULLS LAST) FROM \"" + TEST_SCHEMA
+                + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
         query = "SELECT GROUP_CONCAT(A SEPARATOR ';'||' ')  FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchLastRow(result, "1; 1; 2; 2; 3; 3");
-        matchSingleRowExplain(query, "SELECT GROUP_CONCAT(\"A\" SEPARATOR '; ') FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
-                IS_LOCAL);
+        matchSingleRowExplain(query,
+                "SELECT GROUP_CONCAT(\"A\" SEPARATOR '; ') FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
     }
 
     @Test
@@ -250,11 +239,13 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         String query = "SELECT EXTRACT(MONTH FROM C9) FROM " + VIRTUAL_SCHEMA + ".ALL_EXA_TYPES";
         ResultSet result = executeQuery(query);
         matchLastRow(result, (short) 8);
-        matchSingleRowExplain(query, "SELECT EXTRACT(MONTH FROM \"C9\") FROM \"" + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"", IS_LOCAL);
+        matchSingleRowExplain(query, "SELECT EXTRACT(MONTH FROM \"C9\") FROM \"" + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"",
+                IS_LOCAL);
         query = "SELECT EXTRACT(MONTH FROM C12) FROM " + VIRTUAL_SCHEMA + ".ALL_EXA_TYPES";
         result = executeQuery(query);
         matchLastRow(result, (short) 6);
-        matchSingleRowExplain(query, "SELECT EXTRACT(MONTH FROM \"C12\") FROM \"" + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"", IS_LOCAL);
+        matchSingleRowExplain(query,
+                "SELECT EXTRACT(MONTH FROM \"C12\") FROM \"" + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"", IS_LOCAL);
     }
 
     @Test
@@ -262,69 +253,69 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         String query = "SELECT CAST(A AS CHAR(15)) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         ResultSet result = executeQuery(query);
         matchNextRow(result, "1              ");
-        matchSingleRowExplain(query, "SELECT CAST(\"A\" AS CHAR(15) UTF8) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
-                IS_LOCAL);
+        matchSingleRowExplain(query,
+                "SELECT CAST(\"A\" AS CHAR(15) UTF8) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
         query = "SELECT CAST(CAST(A > 0 AS VARCHAR(15)) AS BOOLEAN) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchNextRow(result, true);
-        matchSingleRowExplain(query,
-                "SELECT CAST(CAST(0 < \"A\" AS VARCHAR(15) UTF8) AS BOOLEAN) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
-                IS_LOCAL);
+        matchSingleRowExplain(query, "SELECT CAST(CAST(0 < \"A\" AS VARCHAR(15) UTF8) AS BOOLEAN) FROM \"" + TEST_SCHEMA
+                + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
         query = "SELECT CAST(CAST(C9 AS VARCHAR(30)) AS DATE) FROM " + VIRTUAL_SCHEMA + ".ALL_EXA_TYPES";
         result = executeQuery(query);
         matchNextRow(result, getSqlDate(2016, 8, 1));
         matchSingleRowExplain(query,
-                "SELECT CAST(CAST(\"C9\" AS VARCHAR(30) UTF8) AS DATE) FROM \"" + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"", IS_LOCAL);
+                "SELECT CAST(CAST(\"C9\" AS VARCHAR(30) UTF8) AS DATE) FROM \"" + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"",
+                IS_LOCAL);
         query = "SELECT CAST(CAST(A AS VARCHAR(15)) AS DECIMAL(8, 1)) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchNextRow(result, new BigDecimal("1.0"));
-        matchSingleRowExplain(query,
-                "SELECT CAST(CAST(\"A\" AS VARCHAR(15) UTF8) AS DECIMAL(8, 1)) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
-                IS_LOCAL);
+        matchSingleRowExplain(query, "SELECT CAST(CAST(\"A\" AS VARCHAR(15) UTF8) AS DECIMAL(8, 1)) FROM \""
+                + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
         query = "SELECT CAST(CAST(C AS VARCHAR(15)) AS DOUBLE) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchNextRow(result, 1.1d);
         matchSingleRowExplain(query,
-                "SELECT CAST(CAST(\"C\" AS VARCHAR(15) UTF8) AS DOUBLE) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
+                "SELECT CAST(CAST(\"C\" AS VARCHAR(15) UTF8) AS DOUBLE) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
+                IS_LOCAL);
         query = "SELECT CAST(CAST(C14 AS VARCHAR(100)) AS GEOMETRY(5)) FROM " + VIRTUAL_SCHEMA + ".ALL_EXA_TYPES";
         result = executeQuery(query);
         matchNextRow(result, "POINT (2 5)");
-        matchSingleRowExplain(query,
-                "SELECT CAST(CAST(\"C14\" AS VARCHAR(100) UTF8) AS GEOMETRY(5)) FROM \"" + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"",
-                IS_LOCAL);
+        matchSingleRowExplain(query, "SELECT CAST(CAST(\"C14\" AS VARCHAR(100) UTF8) AS GEOMETRY(5)) FROM \""
+                + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"", IS_LOCAL);
         query = "SELECT CAST(CAST(C13 AS VARCHAR(100)) AS INTERVAL DAY (5) TO SECOND (2)) FROM " + VIRTUAL_SCHEMA
                 + ".ALL_EXA_TYPES";
         result = executeQuery(query);
         matchNextRow(result, "+00003 12:50:10.12");
         matchSingleRowExplain(query,
-                "SELECT CAST(CAST(\"C13\" AS VARCHAR(100) UTF8) AS INTERVAL DAY (5) TO SECOND (2)) FROM \"" + TEST_SCHEMA
-                        + "\".\"ALL_EXA_TYPES\"",
+                "SELECT CAST(CAST(\"C13\" AS VARCHAR(100) UTF8) AS INTERVAL DAY (5) TO SECOND (2)) FROM \""
+                        + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"",
                 IS_LOCAL);
         query = "SELECT CAST(CAST(C12 AS VARCHAR(100)) AS INTERVAL YEAR (5) TO MONTH) FROM " + VIRTUAL_SCHEMA
                 + ".ALL_EXA_TYPES";
         result = executeQuery(query);
         matchNextRow(result, "+00004-06");
-        matchSingleRowExplain(query, "SELECT CAST(CAST(\"C12\" AS VARCHAR(100) UTF8) AS INTERVAL YEAR (5) TO MONTH) FROM \""
-                + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"", IS_LOCAL);
+        matchSingleRowExplain(query,
+                "SELECT CAST(CAST(\"C12\" AS VARCHAR(100) UTF8) AS INTERVAL YEAR (5) TO MONTH) FROM \"" + TEST_SCHEMA
+                        + "\".\"ALL_EXA_TYPES\"",
+                IS_LOCAL);
         query = "SELECT CAST(CAST(C10 AS VARCHAR(100)) AS TIMESTAMP) FROM " + VIRTUAL_SCHEMA + ".ALL_EXA_TYPES";
         result = executeQuery(query);
         matchNextRow(result, getSqlTimestamp(2016, 8, 1, 0, 0, 1, 0));
-        matchSingleRowExplain(query,
-                "SELECT CAST(CAST(\"C10\" AS VARCHAR(100) UTF8) AS TIMESTAMP) FROM \"" + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"",
-                IS_LOCAL);
+        matchSingleRowExplain(query, "SELECT CAST(CAST(\"C10\" AS VARCHAR(100) UTF8) AS TIMESTAMP) FROM \""
+                + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"", IS_LOCAL);
         query = "SELECT CAST(CAST(C11 AS VARCHAR(100)) AS TIMESTAMP WITH LOCAL TIME ZONE) FROM " + VIRTUAL_SCHEMA
                 + ".ALL_EXA_TYPES";
         result = executeQuery(query);
         matchNextRow(result, getSqlTimestamp(2016, 8, 1, 0, 0, 2, 0));
         matchSingleRowExplain(query,
-                "SELECT CAST(CAST(\"C11\" AS VARCHAR(100) UTF8) AS TIMESTAMP WITH LOCAL TIME ZONE) FROM \"" + TEST_SCHEMA
-                        + "\".\"ALL_EXA_TYPES\"",
+                "SELECT CAST(CAST(\"C11\" AS VARCHAR(100) UTF8) AS TIMESTAMP WITH LOCAL TIME ZONE) FROM \""
+                        + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"",
                 IS_LOCAL);
         query = "SELECT CAST(A AS VARCHAR(15)) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchNextRow(result, "1");
-        matchSingleRowExplain(query, "SELECT CAST(\"A\" AS VARCHAR(15) UTF8) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
-                IS_LOCAL);
+        matchSingleRowExplain(query,
+                "SELECT CAST(\"A\" AS VARCHAR(15) UTF8) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
     }
 
     @Test
@@ -339,57 +330,56 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         result = executeQuery(query);
         matchNextRow(result, "NO");
         matchSingleRowExplain(query,
-                "SELECT CASE WHEN 1 < \"A\" THEN 'YES' ELSE 'NO' END FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
+                "SELECT CASE WHEN 1 < \"A\" THEN 'YES' ELSE 'NO' END FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
+                IS_LOCAL);
     }
 
     @Test
     public void testErrorMessages() throws SQLException, FileNotFoundException {
-        this.thrown.expect(Exception.class);
-        this.thrown.expectMessage("Could not access the connection information of connection NO_CONNECTION");
-        createVirtualSchema("VS_EXA_IT_BROKEN", ExasolSqlDialect.getPublicName(), "", "NATIVE_EXA_IT", "NO_CONNECTION",
-        "", "", "ADAPTER.JDBC_ADAPTER", "",
-        false, getConfig().debugAddress(), "", null,
-                "");
+        assertThrows(Exception.class,
+                () -> createVirtualSchema("VS_EXA_IT_BROKEN", ExasolSqlDialect.getPublicName(), "", "NATIVE_EXA_IT",
+                        "NO_CONNECTION", "", "", "ADAPTER.JDBC_ADAPTER", "", false, getConfig().debugAddress(), "",
+                        null, ""),
+                "Could not access the connection information of connection NO_CONNECTION");
     }
 
     @Test
     public void testVirtualSchemaImportFromJDBCWithConnectionName() throws SQLException, FileNotFoundException {
         final String connectionString = "jdbc:exa:localhost:" + getPortOfConnectedDatabase();
-        final ConnectionBuilder JDBCConnection = new ConnectionBuilder(
-                "VS_JDBC_WITH_CONNNAME_CONNECTION", connectionString).
-                user(getConfig().getExasolUser()).
-                password(getConfig().getExasolPassword());
+        final ConnectionBuilder JDBCConnection = new ConnectionBuilder("VS_JDBC_WITH_CONNNAME_CONNECTION",
+                connectionString).user(getConfig().getExasolUser()).password(getConfig().getExasolPassword());
         execute(JDBCConnection.getCreateConnection());
-        createVirtualSchema("VS_JDBC_WITH_CONNNAME", ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "VS_JDBC_WITH_CONNNAME_CONNECTION",
-        "", "", "ADAPTER.JDBC_ADAPTER", "",
-        false, "", "", null, "");
+        createVirtualSchema("VS_JDBC_WITH_CONNNAME", ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA,
+                "VS_JDBC_WITH_CONNNAME_CONNECTION", "", "", "ADAPTER.JDBC_ADAPTER", "", false, "", "", null, "");
         final String query = "SELECT 1 FROM VS_JDBC_WITH_CONNNAME.SIMPLE_VALUES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new Short("1"));
-        matchSingleRowExplain(query, "IMPORT INTO (c0 DECIMAL(1, 0)) FROM JDBC AT VS_JDBC_WITH_CONNNAME_CONNECTION STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
+        matchSingleRowExplain(query,
+                "IMPORT INTO (c0 DECIMAL(1, 0)) FROM JDBC AT VS_JDBC_WITH_CONNNAME_CONNECTION STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
     }
 
     @Test
     public void testVirtualSchemaImportFromEXAWithConnectionName() throws SQLException, FileNotFoundException {
         final String connectionString = "jdbc:exa:localhost:" + getPortOfConnectedDatabase();
-        final ConnectionBuilder EXAConnection = new ConnectionBuilder(
-                "VS_EXA_WITH_CONNNAME_CONNECTION", connectionString).
-                user(getConfig().getExasolUser()).
-                password(getConfig().getExasolPassword());
+        final ConnectionBuilder EXAConnection = new ConnectionBuilder("VS_EXA_WITH_CONNNAME_CONNECTION",
+                connectionString).user(getConfig().getExasolUser()).password(getConfig().getExasolPassword());
         execute(EXAConnection.getCreateConnection());
-        createVirtualSchema("VS_EXA_WITH_CONNNAME", ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "VS_EXA_WITH_CONNNAME_CONNECTION",
-                "", "", "ADAPTER.JDBC_ADAPTER", "",
-                false, "", "", "IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:" + getPortOfConnectedDatabase() + "'", "");
+        createVirtualSchema("VS_EXA_WITH_CONNNAME", ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA,
+                "VS_EXA_WITH_CONNNAME_CONNECTION", "", "", "ADAPTER.JDBC_ADAPTER", "", false, "", "",
+                "IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:" + getPortOfConnectedDatabase() + "'",
+                "");
         final String query = "SELECT 1 FROM VS_EXA_WITH_CONNNAME.SIMPLE_VALUES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new Short("1"));
-        matchSingleRowExplain(query, "IMPORT FROM EXA AT 'localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
+        matchSingleRowExplain(query,
+                "IMPORT FROM EXA AT 'localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
     }
 
     @Test
-    public void testVirtualSchemaImportFromJDBCWithConnectionStringUserPassword() throws SQLException, FileNotFoundException {
+    public void testVirtualSchemaImportFromJDBCWithConnectionStringUserPassword()
+            throws SQLException, FileNotFoundException {
         final String connectionString = "jdbc:exa:localhost:" + getPortOfConnectedDatabase();
         createVirtualSchema("VS_JDBC_WITH_USER_PW", ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "",
                 getConfig().getExasolUser(), getConfig().getExasolPassword(), "ADAPTER.JDBC_ADAPTER", connectionString,
@@ -397,35 +387,42 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT 1 FROM VS_JDBC_WITH_USER_PW.SIMPLE_VALUES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new Short("1"));
-        matchSingleRowExplain(query, "IMPORT INTO (c0 DECIMAL(1, 0)) FROM JDBC AT 'jdbc:exa:localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
+        matchSingleRowExplain(query,
+                "IMPORT INTO (c0 DECIMAL(1, 0)) FROM JDBC AT 'jdbc:exa:localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
     }
 
     @Test
-    public void testVirtualSchemaImportFromEXAWithConnectionStringUserPassword() throws SQLException, FileNotFoundException {
+    public void testVirtualSchemaImportFromEXAWithConnectionStringUserPassword()
+            throws SQLException, FileNotFoundException {
         final String connectionString = "jdbc:exa:localhost:" + getPortOfConnectedDatabase();
         createVirtualSchema("VS_EXA_WITH_USER_PW", ExasolSqlDialect.getPublicName(), "", TEST_SCHEMA, "",
                 getConfig().getExasolUser(), getConfig().getExasolPassword(), "ADAPTER.JDBC_ADAPTER", connectionString,
-                false, "", "", "IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:" + getPortOfConnectedDatabase() + "'", "");
+                false, "", "",
+                "IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:" + getPortOfConnectedDatabase() + "'",
+                "");
         final String query = "SELECT 1 FROM VS_EXA_WITH_USER_PW.SIMPLE_VALUES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new Short("1"));
-        matchSingleRowExplain(query, "IMPORT FROM EXA AT 'localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
+        matchSingleRowExplain(query,
+                "IMPORT FROM EXA AT 'localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
     }
 
     // Join Tests -------------------------------------------------------------
     @Test
     public void innerJoin() throws SQLException {
-        final String query = String.format("SELECT * FROM  %1$s.t1 a INNER JOIN  %1$s.t2 b ON a.x=b.x", VIRTUAL_SCHEMA_JDBC);
+        final String query = String.format("SELECT * FROM  %1$s.t1 a INNER JOIN  %1$s.t2 b ON a.x=b.x",
+                VIRTUAL_SCHEMA_JDBC);
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
+        matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
         assertFalse(result.next());
     }
 
     @Test
     public void innerJoinWithProjection() throws SQLException {
-        final String query = String.format("SELECT b.y || %1$s.t1.y FROM  %1$s.t1 INNER JOIN  %1$s.t2 b ON %1$s.t1.x=b.x", VIRTUAL_SCHEMA_JDBC);
+        final String query = String.format(
+                "SELECT b.y || %1$s.t1.y FROM  %1$s.t1 INNER JOIN  %1$s.t2 b ON %1$s.t1.x=b.x", VIRTUAL_SCHEMA_JDBC);
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "bbbbbb");
         assertFalse(result.next());
@@ -433,84 +430,32 @@ public class ExasolSqlDialectIT extends AbstractIntegrationTest {
 
     @Test
     public void leftJoin() throws SQLException {
-        final String query = String.format("SELECT * FROM  %1$s.t1 a LEFT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_JDBC);
+        final String query = String.format(
+                "SELECT * FROM  %1$s.t1 a LEFT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_JDBC);
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 1, "aaa", null ,null);
-        matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
+        matchNextRow(result, (long) 1, "aaa", null, null);
+        matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
         assertFalse(result.next());
     }
 
     @Test
     public void rightJoin() throws SQLException {
-        final String query = String.format("SELECT * FROM  %1$s.t1 a RIGHT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_JDBC);
+        final String query = String.format(
+                "SELECT * FROM  %1$s.t1 a RIGHT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_JDBC);
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
-        matchNextRow(result, null, null, (long) 3 ,"ccc");
+        matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
+        matchNextRow(result, null, null, (long) 3, "ccc");
         assertFalse(result.next());
     }
 
     @Test
     public void fullOuterJoin() throws SQLException {
-        final String query = String.format("SELECT * FROM  %1$s.t1 a FULL OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_JDBC);
+        final String query = String.format(
+                "SELECT * FROM  %1$s.t1 a FULL OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_JDBC);
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 1, "aaa", null ,null);
-        matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
-        matchNextRow(result, null, null, (long) 3 ,"ccc");
+        matchNextRow(result, (long) 1, "aaa", null, null);
+        matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
+        matchNextRow(result, null, null, (long) 3, "ccc");
         assertFalse(result.next());
     }
-
-
-    /**
-     * This was replaced by integration test {@link #testDataTypeMapping()}. It can
-     * be enabled temporarily for debugging.
-     */
-    @Ignore
-    @Test
-    public void testDifferentDataTypes()
-            throws SQLException, FileNotFoundException {
-        final Statement stmt = getConnection().createStatement();
-        createOrReplaceSchema(stmt);
-        createTables(stmt);
-        final String[] tableNames = new String[] { "T8", "T9", "TA", "TB", "TC", "TD" };
-        final List<String> tables = new ArrayList<>(Arrays.asList(tableNames));
-        final SchemaMetadata meta = JdbcMetadataReader.readRemoteMetadata("jdbc:exa:" + getConfig().getExasolAddress(),
-                getConfig().getExasolUser(), getConfig().getExasolPassword(), "EXA_DB", "JDBC_ADAPTER_TEST_SCHEMA",
-                tables, ExasolSqlDialect.getPublicName(), getConfig().getExceptionHandlingMode(), Collections.emptyList(),
-                PostgreSQLIdentifierMapping.CONVERT_TO_UPPER, DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8));
-        if (getConfig().isDebugOn()) {
-            System.out.println("Meta: " + SchemaMetadataSerializer.serialize(meta).build().toString());
-        }
-        assertNotNull(meta);
-    }
-
-    private void createOrReplaceSchema(final Statement stmt) throws SQLException {
-        final String jdbc_adapter_test_schema = "JDBC_ADAPTER_TEST_SCHEMA";
-        String sql = "DROP SCHEMA IF EXISTS " + jdbc_adapter_test_schema + " CASCADE";
-        stmt.execute(sql);
-        sql = "CREATE SCHEMA " + jdbc_adapter_test_schema;
-        stmt.execute(sql);
-    }
-
-    private void createTables(final Statement stmt) throws SQLException {
-        String sql;
-        sql = "CREATE TABLE T8(c1 boolean default TRUE, c2 char(10) default 'foo'"
-                + ", c3 date default '2016-06-01', c4 decimal(5,0) default 0)";
-        stmt.execute(sql);
-        sql = "CREATE TABLE T9(c1 double default 1E2, c2 geometry default 'POINT(2 5)'"
-                + ", c3 interval year to month default '3-5', c4 interval day to second default '2 12:50:10.123')";
-        stmt.execute(sql);
-        sql = "CREATE TABLE TA(c1 timestamp default '2016-06-01 00:00:01.000'"
-                + ", c2 timestamp with local time zone default '2016-06-01 00:00:02.000', c3 varchar(100) default 'bar')";
-        stmt.execute(sql);
-        sql = "CREATE TABLE TB(c1 boolean default NULL, c2 char(10) default NULL"
-                + ", c3 date default NULL, c4 decimal(5,0) default NULL)";
-        stmt.execute(sql);
-        sql = "CREATE TABLE TC(c1 double default NULL, c2 geometry default NULL"
-                + ", c3 interval year to month default NULL, c4 interval day to second default NULL)";
-        stmt.execute(sql);
-        sql = "CREATE TABLE TD(c1 timestamp default NULL, c2 timestamp with local time zone default NULL"
-                + ", c3 varchar(100) default NULL)";
-        stmt.execute(sql);
-    }
-
 }

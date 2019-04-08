@@ -6,13 +6,11 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 
 /**
@@ -21,8 +19,8 @@ import com.exasol.adapter.metadata.DataType;
 public class DB2SqlDialect extends AbstractSqlDialect {
     private static final String NAME = "DB2";
 
-    public DB2SqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
-        super(remoteMetadataReader, properties);
+    public DB2SqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
     }
 
     public static String getPublicName() {

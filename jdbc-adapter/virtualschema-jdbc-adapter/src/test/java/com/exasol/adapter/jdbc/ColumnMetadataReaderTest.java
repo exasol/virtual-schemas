@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.sql.*;
 import java.util.List;
 
+import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,6 +17,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
@@ -357,8 +359,12 @@ class ColumnMetadataReaderTest {
     @Test
     void testMapColumnWithTypeNameNull() throws SQLException {
         mockDatatype(Types.VARCHAR);
-        when(this.columnsMock.getString(ColumnMetadataReader.TYPE_NAME_COLUMN)).thenReturn(null);
+        mockTypeName(null);
         assertThat(mapSingleMockedColumn().getOriginalTypeName(), equalTo(""));
+    }
+
+    private void mockTypeName(final String typeName) throws SQLException {
+        when(this.columnsMock.getString(ColumnMetadataReader.TYPE_NAME_COLUMN)).thenReturn(typeName);
     }
 
     private void mockComment(final String comment) throws SQLException {
@@ -388,5 +394,13 @@ class ColumnMetadataReaderTest {
         final ColumnMetadataReader columnMetadataReader = new ColumnMetadataReader(this.connectionMock);
         when(this.connectionMock.getMetaData()).thenThrow(FAKE_SQL_EXCEPTION);
         assertThrows(RemoteMetadataReaderException.class, () -> columnMetadataReader.mapColumns(""));
+    }
+
+    @Test
+    void testMapColumnAdapterNotes() throws SQLException, JSONException {
+        mockDatatype(Types.DOUBLE);
+        mockTypeName("DOUBLE");
+        JSONAssert.assertEquals(mapSingleMockedColumn().getAdapterNotes(),
+                "{\"jdbcDataType\":8, \"typeName\":\"DOUBLE\"}", true);
     }
 }

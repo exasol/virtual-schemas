@@ -16,7 +16,6 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

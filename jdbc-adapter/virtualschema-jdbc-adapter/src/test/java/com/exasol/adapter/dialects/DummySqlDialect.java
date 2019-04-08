@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import com.exasol.adapter.AdapterProperties;
@@ -12,8 +13,8 @@ public class DummySqlDialect extends AbstractSqlDialect {
         return "dummy dialect";
     }
 
-    public DummySqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
-        super(remoteMetadataReader, properties);
+    public DummySqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
     }
 
     public AdapterProperties getProperties() {

@@ -28,7 +28,7 @@ public class JdbcTypeDescription {
         return this.precisionOrSize;
     }
 
-    public int getCharOctedLength() {
+    public int getCharOctetLength() {
         return this.charOctedLength;
     }
 

@@ -6,15 +6,13 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 import java.util.EnumMap;
 import java.util.Map;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
@@ -30,8 +28,8 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
     public final static int maxSybaseNVarcharSize = 4000;
     private static final String NAME = "SYBASE";
 
-    public SybaseSqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
-        super(remoteMetadataReader, properties);
+    public SybaseSqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
     }
 
     public static String getPublicName() {

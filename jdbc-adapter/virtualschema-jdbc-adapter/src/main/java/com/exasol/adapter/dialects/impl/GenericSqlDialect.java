@@ -1,11 +1,11 @@
 package com.exasol.adapter.dialects.impl;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 import com.exasol.adapter.metadata.DataType;
 
@@ -14,8 +14,8 @@ import com.exasol.adapter.metadata.DataType;
  * all information from the JDBC Metadata.
  */
 public class GenericSqlDialect extends AbstractSqlDialect {
-    public GenericSqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
-        super(remoteMetadataReader, properties);
+    public GenericSqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
     }
 
     private static final String NAME = "GENERIC";
@@ -56,7 +56,7 @@ public class GenericSqlDialect extends AbstractSqlDialect {
                 return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
             } else {
                 throw new UnsupportedOperationException("Unexpected quote behavior. Adapter notes: " //
-                      + adapterNotes.toString());
+                        + adapterNotes.toString());
             }
         }
     }
@@ -77,7 +77,7 @@ public class GenericSqlDialect extends AbstractSqlDialect {
                 return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
             } else {
                 throw new UnsupportedOperationException("Unexpected quote behavior. Adapter notes: " //
-                      + adapterNotes.toString());
+                        + adapterNotes.toString());
             }
         }
     }

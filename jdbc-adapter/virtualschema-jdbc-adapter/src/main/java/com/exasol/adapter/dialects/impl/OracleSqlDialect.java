@@ -15,7 +15,6 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionInformation;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
@@ -31,8 +30,8 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     private final boolean castAggFuncToFloat = true;
     private final boolean castScalarFuncToFloat = true;
 
-    public OracleSqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
-        super(remoteMetadataReader, properties);
+    public OracleSqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
         this.omitParenthesesMap.add(ScalarFunction.SYSDATE);
         this.omitParenthesesMap.add(ScalarFunction.SYSTIMESTAMP);
     }

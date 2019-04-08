@@ -5,8 +5,8 @@ import java.util.*;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.jdbc.*;
-import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
@@ -17,10 +17,29 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     protected Set<ScalarFunction> omitParenthesesMap = new HashSet<>();
     protected RemoteMetadataReader remoteMetadataReader;
     protected AdapterProperties properties;
+    protected final Connection connection;
 
-    public AbstractSqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
-        this.remoteMetadataReader = remoteMetadataReader;
+    /**
+     * Create a new instance of an {@link AbstractSqlDialect}
+     *
+     * @param properties user properties
+     */
+    public AbstractSqlDialect(final Connection connection, final AdapterProperties properties) {
+        this.connection = connection;
+        this.remoteMetadataReader = createRemoteDataReader();
         this.properties = properties;
+    }
+
+    /**
+     * Create the {@link RemoteMetadataReader} that is used to get the database metadata from the remote source.
+     * <p>
+     * Override this method in the concrete SQL dialect implementation if the dialect requires non-standard metadata
+     * mapping.
+     *
+     * @return metadata reader
+     */
+    protected RemoteMetadataReader createRemoteDataReader() {
+        return new BaseRemoteMetadataReader(this.connection, this.properties);
     }
 
     @Override
@@ -36,74 +55,6 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         }
         final String tableName = changeIdentifierCaseIfNeeded(tables.getString("TABLE_NAME"));
         return MappedTable.createMappedTable(tableName, tables.getString("TABLE_NAME"), commentString);
-    }
-
-    @Override
-    public ColumnMetadata mapColumn(final ResultSet columns) throws SQLException {
-        final String colName = changeIdentifierCaseIfNeeded(columns.getString("COLUMN_NAME"));
-        final int jdbcType = columns.getInt("DATA_TYPE");
-        final int decimalScale = columns.getInt("DECIMAL_DIGITS");
-        final int precisionOrSize = columns.getInt("COLUMN_SIZE");
-        final int charOctedLength = columns.getInt("CHAR_OCTET_LENGTH");
-        final String typeName = columns.getString("TYPE_NAME");
-        final JdbcTypeDescription jdbcTypeDescription = new JdbcTypeDescription(jdbcType, decimalScale, precisionOrSize,
-                charOctedLength, typeName);
-        // Check if dialect want's to handle this row
-        final DataType colType = mapJdbcType(jdbcTypeDescription);
-
-        // Nullable
-        boolean isNullable = true;
-        try {
-            final String nullable = columns.getString("IS_NULLABLE");
-            if ((nullable != null) && nullable.toLowerCase().equals("no")) {
-                isNullable = false;
-            }
-        } catch (final SQLException ex) {
-            // ignore me
-        }
-
-        // Identity
-
-        boolean isIdentity = false;
-        try {
-            final String identity = columns.getString("IS_AUTOINCREMENT");
-            if ((identity != null) && identity.toLowerCase().equals("yes")) {
-                isIdentity = true;
-            }
-        } catch (final SQLException ex) {
-            // ignore me --some older JDBC drivers (Java 1.5) don't support IS_AUTOINCREMENT
-        }
-
-        // Default
-        String defaultValue = "";
-        try {
-            final String defaultString = columns.getString("COLUMN_DEF");
-            if (defaultString != null) {
-                defaultValue = defaultString;
-            }
-        } catch (final SQLException ex) {
-            // ignore me
-        }
-
-        // Comment
-        String comment = "";
-        try {
-            final String commentString = columns.getString("REMARKS");
-            if ((commentString != null) && !commentString.isEmpty()) {
-                comment = commentString;
-            }
-        } catch (final SQLException ex) {
-            // ignore me
-        }
-
-        // Column type
-        String columnTypeName = columns.getString("TYPE_NAME");
-        if (columnTypeName == null) {
-            columnTypeName = "";
-        }
-        final String adapterNotes = ColumnAdapterNotes.serialize(new ColumnAdapterNotes(jdbcType, columnTypeName));
-        return ColumnMetadata.builder().name(colName).adapterNotes(adapterNotes).type(colType).nullable(isNullable)
-                .identity(isIdentity).defaultValue(defaultValue).comment(comment).build();
     }
 
     private static DataType getExaTypeFromJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
@@ -158,7 +109,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         case Types.NVARCHAR:
         case Types.LONGVARCHAR:
         case Types.LONGNVARCHAR: {
-            final DataType.ExaCharset charset = (jdbcTypeDescription.getCharOctedLength() == jdbcTypeDescription
+            final DataType.ExaCharset charset = (jdbcTypeDescription.getCharOctetLength() == jdbcTypeDescription
                     .getPrecisionOrSize()) ? DataType.ExaCharset.ASCII : DataType.ExaCharset.UTF8;
             if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_VARCHAR_SIZE) {
                 final int precision = jdbcTypeDescription.getPrecisionOrSize() == 0 ? DataType.MAX_EXASOL_VARCHAR_SIZE
@@ -171,7 +122,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         }
         case Types.CHAR:
         case Types.NCHAR: {
-            final DataType.ExaCharset charset = (jdbcTypeDescription.getCharOctedLength() == jdbcTypeDescription
+            final DataType.ExaCharset charset = (jdbcTypeDescription.getCharOctetLength() == jdbcTypeDescription
                     .getPrecisionOrSize()) ? DataType.ExaCharset.ASCII : DataType.ExaCharset.UTF8;
             if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_CHAR_SIZE) {
                 colType = DataType.createChar(jdbcTypeDescription.getPrecisionOrSize(), charset);
@@ -303,5 +254,10 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         }
         jdbcImportQuery.append(" STATEMENT '").append(pushdownSql.replace("'", "''")).append("'");
         return jdbcImportQuery.toString();
+    }
+
+    @Override
+    public SchemaMetadata readSchemaMetadata(final List<String> whiteListedRemoteTables) {
+        return this.remoteMetadataReader.readRemoteSchemaMetadata(); // FIXME: use table white list
     }
 }

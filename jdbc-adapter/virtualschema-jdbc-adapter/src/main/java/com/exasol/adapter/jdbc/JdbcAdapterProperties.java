@@ -5,18 +5,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import com.exasol.ExaConnectionAccessException;
-import com.exasol.ExaConnectionInformation;
-import com.exasol.ExaMetadata;
+import com.exasol.*;
 import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlDialectContext;
+import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialectRegistry;
 import com.exasol.adapter.metadata.DataType;
 
 /**
- * Class to expose a nice interface to properties. Casts to the correct data
- * types, checks for valid property values and consistency.
+ * Class to expose a nice interface to properties. Casts to the correct data types, checks for valid property values and
+ * consistency.
  */
 public final class JdbcAdapterProperties {
     static final Logger LOGGER = Logger.getLogger(JdbcAdapterProperties.class.getName());
@@ -61,7 +58,7 @@ public final class JdbcAdapterProperties {
     }
 
     private static String getProperty(final Map<String, String> properties, final String name,
-                                      final String defaultValue) {
+            final String defaultValue) {
         if (properties.containsKey(name)) {
             return properties.get(name);
         } else {
@@ -78,15 +75,15 @@ public final class JdbcAdapterProperties {
         if (precisionAndScale.trim().isEmpty()) {
             return DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
         }
-        final List <String> precisionAndScaleList =  Arrays.
-                stream(precisionAndScale.split(",")).
-                map(String::trim).
-                collect(Collectors.toList());
-        return DataType.createDecimal(Integer.valueOf(precisionAndScaleList.get(0)), Integer.valueOf(precisionAndScaleList.get(1)));
+        final List<String> precisionAndScaleList = Arrays.stream(precisionAndScale.split(",")).map(String::trim)
+                .collect(Collectors.toList());
+        return DataType.createDecimal(Integer.valueOf(precisionAndScaleList.get(0)),
+                Integer.valueOf(precisionAndScaleList.get(1)));
     }
 
     public static String getPostgreSQLIdentifierMapping(final Map<String, String> properties) {
-        return getProperty(properties, PROP_POSTGRESQL_IDENTIFIER_MAPPING, VALUE_POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER);
+        return getProperty(properties, PROP_POSTGRESQL_IDENTIFIER_MAPPING,
+                VALUE_POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER);
     }
 
     public static List<String> getIgnoreErrorList(final Map<String, String> properties) {
@@ -94,10 +91,7 @@ public final class JdbcAdapterProperties {
         if (ignoreErrors.trim().isEmpty()) {
             return Collections.emptyList();
         }
-        return Arrays.
-                stream(ignoreErrors.split(","))
-                .map(String::trim)
-                .map(String::toUpperCase)
+        return Arrays.stream(ignoreErrors.split(",")).map(String::trim).map(String::toUpperCase)
                 .collect(Collectors.toList());
     }
 
@@ -111,39 +105,37 @@ public final class JdbcAdapterProperties {
 
     public static boolean isUserSpecifiedConnection(final Map<String, String> properties) {
         final String connName = getProperty(properties, PROP_CONNECTION_NAME);
-        return (connName != null && !connName.isEmpty());
+        return ((connName != null) && !connName.isEmpty());
     }
 
     public static String getConnectionName(final Map<String, String> properties) {
         final String connName = getProperty(properties, PROP_CONNECTION_NAME);
-        assert (connName != null && !connName.isEmpty());
+        assert ((connName != null) && !connName.isEmpty());
         return connName;
     }
 
     /**
-     * Returns the credentials for the remote system. These are either directly
-     * specified in the properties or obtained from a connection (requires privilege
-     * to access the connection .
+     * Returns the credentials for the remote system. These are either directly specified in the properties or obtained
+     * from a connection (requires privilege to access the connection) .
      */
-    public static ExaConnectionInformation getConnectionInformation(final Map<String, String> properties,
-                                                                    final ExaMetadata exaMeta) {
-        final String connName = getProperty(properties, PROP_CONNECTION_NAME);
-        if (connName != null && !connName.isEmpty()) {
+    public static ExaConnectionInformation getConnectionInformation(final AdapterProperties properties,
+            final ExaMetadata exasolMetadata) {
+        final String connectionName = properties.getConnectionName();
+        if ((connectionName != null) && !connectionName.isEmpty()) {
             try {
-                final ExaConnectionInformation connInfo = exaMeta.getConnection(connName);
-                return connInfo;
-            } catch (final ExaConnectionAccessException e) {
-                throw new RuntimeException("Could not access the connection information of connection " + connName
-                        + ". Error: " + e.toString());
+                return exasolMetadata.getConnection(connectionName);
+            } catch (final ExaConnectionAccessException exception) {
+                throw new RuntimeException(
+                        "Could not access the connection information of connection \"" + connectionName + "\"",
+                        exception);
             }
         } else {
-            final String connectionString = properties.get(PROP_CONNECTION_STRING);
-            final String user = properties.get(PROP_USERNAME);
-            final String password = properties.get(PROP_PASSWORD);
-            return new ExaConnectionInformationJdbc(connectionString, user, password);
+            return new ExaConnectionInformationJdbc(properties.getConnectionString(), properties.getUsername(),
+                    properties.getPassword());
         }
     }
 
+    @Deprecated
     public static void checkPropertyConsistency(final Map<String, String> properties) throws AdapterException {
         validatePropertyValues(properties);
         checkMandatoryProperties(properties);
@@ -154,24 +146,28 @@ public final class JdbcAdapterProperties {
         checkOracleSpecificPropertyConsistency(properties);
     }
 
-    private static void checkOracleSpecificPropertyConsistency(final Map<String, String> properties) throws InvalidPropertyException{
+    private static void checkOracleSpecificPropertyConsistency(final Map<String, String> properties)
+            throws InvalidPropertyException {
         if (properties.containsKey(PROP_ORACLE_CAST_NUMBER_TO_DECIMAL)) {
             final String dialectName = getProperty(properties, PROP_SQL_DIALECT).toUpperCase();
             if (!dialectName.equals(VALUE_SQL_DIALECT_ORACLE)) {
-                throw new InvalidPropertyException(PROP_ORACLE_CAST_NUMBER_TO_DECIMAL + " can be used only with " + VALUE_SQL_DIALECT_ORACLE + " dialect.");
+                throw new InvalidPropertyException(PROP_ORACLE_CAST_NUMBER_TO_DECIMAL + " can be used only with "
+                        + VALUE_SQL_DIALECT_ORACLE + " dialect.");
             }
         }
     }
 
-    private static void checkPostgreSQLIdentifierPropertyConsistency(final Map<String, String> properties) throws InvalidPropertyException {
+    private static void checkPostgreSQLIdentifierPropertyConsistency(final Map<String, String> properties)
+            throws InvalidPropertyException {
         if (properties.containsKey(PROP_POSTGRESQL_IDENTIFIER_MAPPING)) {
             final String dialectName = getProperty(properties, PROP_SQL_DIALECT);
             if (!dialectName.equals(VALUE_SQL_DIALECT_POSTGRESQL)) {
-                throw new InvalidPropertyException(PROP_POSTGRESQL_IDENTIFIER_MAPPING + " can be used only with " + VALUE_SQL_DIALECT_POSTGRESQL + " dialect.");
+                throw new InvalidPropertyException(PROP_POSTGRESQL_IDENTIFIER_MAPPING + " can be used only with "
+                        + VALUE_SQL_DIALECT_POSTGRESQL + " dialect.");
             }
             final String propertyValue = properties.get(PROP_POSTGRESQL_IDENTIFIER_MAPPING);
-            if (!propertyValue.equals(VALUE_POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE) &&
-                    !propertyValue.equals(VALUE_POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER)) {
+            if (!propertyValue.equals(VALUE_POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE)
+                    && !propertyValue.equals(VALUE_POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER)) {
                 throw new InvalidPropertyException("Value for " + PROP_POSTGRESQL_IDENTIFIER_MAPPING + " must be "
                         + VALUE_POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE + " or "
                         + VALUE_POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER);
@@ -185,14 +181,13 @@ public final class JdbcAdapterProperties {
         for (final String errorToIgnore : errorsToIgnore) {
             if (!errorToIgnore.startsWith(dialect)) {
                 throw new InvalidPropertyException(
-                        "Error " + errorToIgnore + " cannot be ignored in " + dialect + " dialect."
-                );
+                        "Error " + errorToIgnore + " cannot be ignored in " + dialect + " dialect.");
             }
         }
     }
 
     private static void checkImportPropertyConsistency(final Map<String, String> properties,
-                                                       final String propImportFromX, final String propConnection) throws InvalidPropertyException {
+            final String propImportFromX, final String propConnection) throws InvalidPropertyException {
         final boolean isImport = getProperty(properties, propImportFromX).toUpperCase().equals("TRUE");
         final boolean connectionIsEmpty = getProperty(properties, propConnection).isEmpty();
         if (isImport) {
@@ -246,7 +241,7 @@ public final class JdbcAdapterProperties {
     }
 
     private static void validateExceptionHandling(final String exceptionHandling) throws AdapterException {
-        if (!(exceptionHandling == null || exceptionHandling.isEmpty())) {
+        if (!((exceptionHandling == null) || exceptionHandling.isEmpty())) {
             for (final ExceptionHandlingMode mode : ExceptionHandlingMode.values()) {
                 if (mode.name().equals(exceptionHandling)) {
                     return;
@@ -327,21 +322,9 @@ public final class JdbcAdapterProperties {
         return getProperty(properties, PROP_SQL_DIALECT);
     }
 
-    public static SqlDialect getSqlDialect(final Map<String, String> properties, final SqlDialectContext dialectContext)
-            throws InvalidPropertyException {
-        final String dialectName = getProperty(properties, PROP_SQL_DIALECT);
-        final SqlDialect dialect = SqlDialectRegistry.getInstance().getDialectInstanceForNameWithContext(dialectName,
-                dialectContext);
-        if (dialect == null) {
-            throw new InvalidPropertyException("SQL Dialect not supported: " + dialectName + " - all dialects: "
-                    + SqlDialectRegistry.getInstance().getDialectsString());
-        }
-        return dialect;
-    }
-
     public static ExceptionHandlingMode getExceptionHandlingMode(final Map<String, String> properties) {
         final String propertyValue = getProperty(properties, PROP_EXCEPTION_HANDLING);
-        if (propertyValue == null || propertyValue.isEmpty()) {
+        if ((propertyValue == null) || propertyValue.isEmpty()) {
             return ExceptionHandlingMode.NONE;
         }
         for (final ExceptionHandlingMode mode : ExceptionHandlingMode.values()) {
@@ -359,13 +342,6 @@ public final class JdbcAdapterProperties {
         } catch (final IllegalArgumentException | NullPointerException e) {
             throw new InvalidPropertyException("Unable to set log level \"" + levelAsText + "\"");
         }
-    }
-
-    public static boolean isRefreshNeeded(final Map<String, String> newProperties) {
-        return newProperties.containsKey(PROP_CONNECTION_STRING) || newProperties.containsKey(PROP_CONNECTION_NAME)
-                || newProperties.containsKey(PROP_USERNAME) || newProperties.containsKey(PROP_PASSWORD)
-                || newProperties.containsKey(PROP_SCHEMA_NAME) || newProperties.containsKey(PROP_CATALOG_NAME)
-                || newProperties.containsKey(PROP_TABLES);
     }
 
     public static class ExaConnectionInformationJdbc implements ExaConnectionInformation {
@@ -402,11 +378,11 @@ public final class JdbcAdapterProperties {
     }
 
     /**
-     * Returns the properties as they would be after successfully applying the
-     * changes to the existing (old) set of properties.
+     * Returns the properties as they would be after successfully applying the changes to the existing (old) set of
+     * properties.
      */
     public static Map<String, String> getNewProperties(final Map<String, String> oldProperties,
-                                                       final Map<String, String> changedProperties) {
+            final Map<String, String> changedProperties) {
         final Map<String, String> newCompleteProperties = new HashMap<>(oldProperties);
         for (final Map.Entry<String, String> changedProperty : changedProperties.entrySet()) {
             if (changedProperty.getValue() == null) {

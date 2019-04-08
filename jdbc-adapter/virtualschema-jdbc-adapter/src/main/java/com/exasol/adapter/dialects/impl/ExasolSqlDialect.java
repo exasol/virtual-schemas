@@ -1,12 +1,12 @@
 package com.exasol.adapter.dialects.impl;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionInformation;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.ScalarFunction;
 
@@ -18,8 +18,8 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     static final String LOCAL_IMPORT_PROPERTY = "IS_LOCAL";
     static final String EXASOL_IMPORT_PROPERTY = "IMPORT_FROM_EXA";
 
-    public ExasolSqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
-        super(remoteMetadataReader, properties);
+    public ExasolSqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
         this.omitParenthesesMap.add(ScalarFunction.SYSDATE);
         this.omitParenthesesMap.add(ScalarFunction.SYSTIMESTAMP);
         this.omitParenthesesMap.add(ScalarFunction.CURRENT_SCHEMA);
@@ -126,7 +126,6 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
 
     @Override
     public NullSorting getDefaultNullSorting() {
-        assert (this.remoteMetadataReader.getSchemaAdapterNotes().areNullsSortedHigh());
         return NullSorting.NULLS_SORTED_HIGH;
     }
 

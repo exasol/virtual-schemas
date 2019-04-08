@@ -131,6 +131,6 @@ public class JdbcAdapterTest {
         assertEquals(9, type.getPrecisionOrSize());
         assertEquals(0, type.getDecimalScale());
         assertEquals("SMALLINT", type.getTypeName());
-        assertEquals(0, type.getCharOctedLength());
+        assertEquals(0, type.getCharOctetLength());
     }
 }

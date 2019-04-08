@@ -3,9 +3,9 @@ package com.exasol.adapter.jdbc;
 import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.*;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
+import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.metadata.TableMetadata;
 
@@ -17,9 +17,17 @@ import com.exasol.adapter.metadata.TableMetadata;
  */
 public class BaseRemoteMetadataReader implements RemoteMetadataReader {
     private final Connection connection;
+    private final AdapterProperties properties;
 
-    public BaseRemoteMetadataReader(final Connection connection) {
+    /**
+     * Create a new instance of a {@link BaseTableMetadataReader}
+     * 
+     * @param connection database connection through which the reader retrieves the metadata from the remote source
+     * @param properties user-defined properties
+     */
+    public BaseRemoteMetadataReader(final Connection connection, final AdapterProperties properties) {
         this.connection = connection;
+        this.properties = properties;
     }
 
     @Override
@@ -35,23 +43,16 @@ public class BaseRemoteMetadataReader implements RemoteMetadataReader {
     }
 
     private List<TableMetadata> extractTableMetadata(final DatabaseMetaData remoteMetadata) throws SQLException {
-        final List<TableMetadata> translatedTables = new ArrayList<>();
         try (final ResultSet remoteTables = remoteMetadata.getTables(ANY_CATALOG, ANY_SCHEMA, ANY_TABLE, ANY_TYPE)) {
-            mapTables(translatedTables, remoteTables);
-            return translatedTables;
+            return mapTables(remoteTables);
         }
     }
 
-    private void mapTables(final List<TableMetadata> translatedTables, final ResultSet remoteTables)
-            throws SQLException {
-        while (remoteTables.next()) {
-            final TableMetadata tableMetadata = mapTable(remoteTables);
-            translatedTables.add(tableMetadata);
-        }
-    }
-
-    private TableMetadata mapTable(final ResultSet remoteTable) throws SQLException {
-        throw new RuntimeException("Not implemented yet"); // FIXME: implement
+    private List<TableMetadata> mapTables(final ResultSet remoteTables) throws SQLException {
+        final ColumnMetadataReader columnMetadataReader = new ColumnMetadataReader(this.connection);
+        final TableMetadataReader tableMetadataReader = new BaseTableMetadataReader(columnMetadataReader,
+                this.properties);
+        return tableMetadataReader.mapTables(remoteTables);
     }
 
     @Override

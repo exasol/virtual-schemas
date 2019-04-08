@@ -1,19 +1,19 @@
 package com.exasol.adapter.dialects.impl;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 
 /**
  * Dialect for MySQL using the MySQL Connector JDBC driver.
  */
 public class MysqlSqlDialect extends AbstractSqlDialect {
-    public MysqlSqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
-        super(remoteMetadataReader, properties);
+    public MysqlSqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
     }
 
     private static final String NAME = "MYSQL";

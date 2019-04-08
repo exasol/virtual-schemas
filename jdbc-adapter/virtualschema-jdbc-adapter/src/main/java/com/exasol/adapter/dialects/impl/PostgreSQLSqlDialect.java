@@ -12,7 +12,6 @@ import java.util.*;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.ScalarFunction;
 
@@ -21,9 +20,10 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     private static final int MAX_POSTGRES_SQL_VARCHAR_SIZE_BASED_ON_EXASOL_LIMIT = 2000000;
     private static final String POSTGRES_IGNORE_UPPERCASE_TABLES = "POSTGRESQL_UPPERCASE_TABLES";
     static final String POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY = "POSTGRESQL_IDENTIFIER_MAPPING";
+    private static final PostgreSQLIdentifierMapping DEFAULT_POSTGRESS_IDENTIFIER_MAPPING = PostgreSQLIdentifierMapping.CONVERT_TO_UPPER;
 
-    public PostgreSQLSqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
-        super(remoteMetadataReader, properties);
+    public PostgreSQLSqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
     }
 
     public static String getPublicName() {
@@ -96,7 +96,11 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     }
 
     private PostgreSQLIdentifierMapping getIdentifierMapping() {
-        return PostgreSQLIdentifierMapping.parse(this.properties.get(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY));
+        if (this.properties.containsKey(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY)) {
+            return PostgreSQLIdentifierMapping.parse(this.properties.get(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY));
+        } else {
+            return DEFAULT_POSTGRESS_IDENTIFIER_MAPPING;
+        }
     }
 
     private boolean containsUppercaseCharacter(final String tableName) {

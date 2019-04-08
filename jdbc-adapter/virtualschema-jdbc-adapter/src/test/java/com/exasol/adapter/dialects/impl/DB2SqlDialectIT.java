@@ -9,14 +9,17 @@ import java.util.List;
 
 import org.junit.Assume;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
+import com.exasol.adapter.dialects.IntegrationTestConfigurationCondition;
 
 /**
  * Integration test for theDB2 SQL dialect
  *
  */
+@ExtendWith(IntegrationTestConfigurationCondition.class)
 public class DB2SqlDialectIT extends AbstractIntegrationTest {
 
     private static final String VIRTUAL_SCHEMA = "DB2";
@@ -39,8 +42,8 @@ public class DB2SqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT PRICE,PROMOPRICE FROM " + VIRTUAL_SCHEMA + ".PRODUCT WHERE pid = '100-100-01'";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new BigDecimal("9.99"), new BigDecimal("7.25"));
-        matchSingleRowExplain(query,
-                "SELECT \"PRICE\", \"PROMOPRICE\" FROM \"" + DB2_SCHEMA + "\".\"PRODUCT\" WHERE \"PID\" = '100-100-01'");
+        matchSingleRowExplain(query, "SELECT \"PRICE\", \"PROMOPRICE\" FROM \"" + DB2_SCHEMA
+                + "\".\"PRODUCT\" WHERE \"PID\" = '100-100-01'");
     }
 
     @Test

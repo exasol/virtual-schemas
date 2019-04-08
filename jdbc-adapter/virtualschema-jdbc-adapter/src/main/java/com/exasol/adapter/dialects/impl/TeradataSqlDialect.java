@@ -6,22 +6,20 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.JdbcAdapterProperties;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 
 public class TeradataSqlDialect extends AbstractSqlDialect {
     public final static int maxTeradataVarcharSize = 32000;
     private static final String NAME = "TERADATA";
 
-    public TeradataSqlDialect(final RemoteMetadataReader remoteMetadataReader, final AdapterProperties properties) {
-        super(remoteMetadataReader, properties);
+    public TeradataSqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
     }
 
     public static String getPublicName() {

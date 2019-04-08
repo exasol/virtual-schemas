@@ -19,7 +19,6 @@ import com.google.common.collect.ImmutableMap;
 import utils.SqlTestUtil;
 
 public class SqlDialectTest {
-
     @Test
     public void testAggregateFunctionAliases() throws AdapterException {
         final TableMetadata clicksMeta = getTestTableMetadata();
@@ -146,7 +145,7 @@ public class SqlDialectTest {
                 final Map<ScalarFunction, String> scalarAliases, final Map<ScalarFunction, String> infixAliases,
                 final Map<ScalarFunction, String> prefixAliases) {
             super(null, AdapterProperties.emptyProperties()); // FIXME: fix test super(new SqlDialectContext(new
-                                                              // SchemaAdapterNotes(".", "\"", false, false,
+            // SchemaAdapterNotes(".", "\"", false, false,
             // false, false, false, false, false, false, false, false, true, false)));
 
             this.aggregationAliases = aggregationAliases;

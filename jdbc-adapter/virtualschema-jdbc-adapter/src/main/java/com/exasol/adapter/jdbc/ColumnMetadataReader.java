@@ -62,30 +62,45 @@ public class ColumnMetadataReader {
 
     private ColumnMetadata mapColumn(final ResultSet remoteColumn) throws SQLException {
         final String columnName = readColumnName(remoteColumn);
-        final int jdbcType = remoteColumn.getInt(DATA_TYPE_COLUMN);
-        final int decimalScale = remoteColumn.getInt(SCALE_COLUMN);
-        final int precisionOrSize = remoteColumn.getInt(SIZE_COLUMN);
-        final int charOctedLength = remoteColumn.getInt(CHAR_OCTET_LENGTH_COLUMN);
-        final String typeName = remoteColumn.getString(TYPE_NAME_COLUMN);
+        final int jdbcType = readJdbcDataType(remoteColumn);
+        final int decimalScale = readScale(remoteColumn);
+        final int precisionOrSize = readPrecisionOrSize(remoteColumn);
+        final int charOctedLength = readOctetLength(remoteColumn);
+        final String typeName = readTypeName(remoteColumn);
         final JdbcTypeDescription jdbcTypeDescription = new JdbcTypeDescription(jdbcType, decimalScale, precisionOrSize,
                 charOctedLength, typeName);
-        final DataType colType = mapJdbcType(jdbcTypeDescription);
-        final boolean isNullable = isRemoteColumnNullable(remoteColumn, columnName);
-        final boolean isIdentity = isAutoIncrementColmun(remoteColumn, columnName);
-        final String defaultValue = readDefaultValue(remoteColumn);
-        final String comment = readComment(remoteColumn);
         final String originalTypeName = readColumnTypeName(remoteColumn);
         final String adapterNotes = ColumnAdapterNotes.serialize(new ColumnAdapterNotes(jdbcType, originalTypeName));
         return ColumnMetadata.builder() //
                 .name(columnName) //
                 .adapterNotes(adapterNotes) //
-                .type(colType) //
-                .nullable(isNullable) //
-                .identity(isIdentity) //
-                .defaultValue(defaultValue) //
-                .comment(comment) //
+                .type(mapJdbcType(jdbcTypeDescription)) //
+                .nullable(isRemoteColumnNullable(remoteColumn, columnName)) //
+                .identity(isAutoIncrementColmun(remoteColumn, columnName)) //
+                .defaultValue(readDefaultValue(remoteColumn)) //
+                .comment(readComment(remoteColumn)) //
                 .originalTypeName(originalTypeName) //
                 .build();
+    }
+
+    private int readJdbcDataType(final ResultSet remoteColumn) throws SQLException {
+        return remoteColumn.getInt(DATA_TYPE_COLUMN);
+    }
+
+    private int readScale(final ResultSet remoteColumn) throws SQLException {
+        return remoteColumn.getInt(SCALE_COLUMN);
+    }
+
+    private int readPrecisionOrSize(final ResultSet remoteColumn) throws SQLException {
+        return remoteColumn.getInt(SIZE_COLUMN);
+    }
+
+    private int readOctetLength(final ResultSet remoteColumn) throws SQLException {
+        return remoteColumn.getInt(CHAR_OCTET_LENGTH_COLUMN);
+    }
+
+    private String readTypeName(final ResultSet remoteColumn) throws SQLException {
+        return remoteColumn.getString(TYPE_NAME_COLUMN);
     }
 
     private boolean isRemoteColumnNullable(final ResultSet remoteColumn, final String columnName) {
@@ -138,7 +153,7 @@ public class ColumnMetadataReader {
     }
 
     private String readColumnTypeName(final ResultSet remoteColumn) throws SQLException {
-        final String columnTypeName = remoteColumn.getString(TYPE_NAME_COLUMN);
+        final String columnTypeName = readTypeName(remoteColumn);
         return (columnTypeName == null) ? "" : columnTypeName;
     }
 
@@ -159,13 +174,13 @@ public class ColumnMetadataReader {
         switch (jdbcTypeDescription.getJdbcType()) {
         case Types.TINYINT:
         case Types.SMALLINT:
-            return convertSmallInteger(jdbcTypeDescription);
+            return convertSmallInteger(jdbcTypeDescription.getPrecisionOrSize());
         case Types.INTEGER:
-            return convertInteger(jdbcTypeDescription);
+            return convertInteger(jdbcTypeDescription.getPrecisionOrSize());
         case Types.BIGINT:
-            return convertBigInteger(jdbcTypeDescription);
+            return convertBigInteger(jdbcTypeDescription.getPrecisionOrSize());
         case Types.DECIMAL:
-            return convertDecimal(jdbcTypeDescription);
+            return convertDecimal(jdbcTypeDescription.getPrecisionOrSize(), jdbcTypeDescription.getDecimalScale());
         case Types.NUMERIC:
             return fallBackToMaximumSizeVarChar();
         case Types.REAL:
@@ -176,10 +191,10 @@ public class ColumnMetadataReader {
         case Types.NVARCHAR:
         case Types.LONGVARCHAR:
         case Types.LONGNVARCHAR:
-            return convertVarChar(jdbcTypeDescription);
+            return convertVarChar(jdbcTypeDescription.getPrecisionOrSize(), jdbcTypeDescription.getCharOctetLength());
         case Types.CHAR:
         case Types.NCHAR:
-            return convertChar(jdbcTypeDescription);
+            return convertChar(jdbcTypeDescription.getPrecisionOrSize(), jdbcTypeDescription.getCharOctetLength());
         case Types.DATE:
             return DataType.createDate();
         case Types.TIMESTAMP:
@@ -211,19 +226,17 @@ public class ColumnMetadataReader {
         }
     }
 
-    private static DataType convertSmallInteger(final JdbcTypeDescription jdbcTypeDescription) {
+    private static DataType convertSmallInteger(final int jdbcPrecision) {
         final DataType colType;
-        final int precision = jdbcTypeDescription.getPrecisionOrSize() == 0 ? 9
-                : jdbcTypeDescription.getPrecisionOrSize();
+        final int precision = jdbcPrecision == 0 ? 9 : jdbcPrecision;
         colType = DataType.createDecimal(precision, 0);
         return colType;
     }
 
-    private static DataType convertInteger(final JdbcTypeDescription jdbcTypeDescription) {
+    private static DataType convertInteger(final int jdbcPrecision) {
         final DataType colType;
-        if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-            final int precision = jdbcTypeDescription.getPrecisionOrSize() == 0 ? 18
-                    : jdbcTypeDescription.getPrecisionOrSize();
+        if (jdbcPrecision <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
+            final int precision = jdbcPrecision == 0 ? 18 : jdbcPrecision;
             colType = DataType.createDecimal(precision, 0);
         } else {
             colType = fallBackToMaximumSizeVarChar();
@@ -231,11 +244,10 @@ public class ColumnMetadataReader {
         return colType;
     }
 
-    private static DataType convertBigInteger(final JdbcTypeDescription jdbcTypeDescription) {
+    private static DataType convertBigInteger(final int jdbcPrecision) {
         final DataType colType;
-        if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-            final int precision = jdbcTypeDescription.getPrecisionOrSize() == 0 ? 36
-                    : jdbcTypeDescription.getPrecisionOrSize();
+        if (jdbcPrecision <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
+            final int precision = jdbcPrecision == 0 ? 36 : jdbcPrecision;
             colType = DataType.createDecimal(precision, 0);
         } else {
             colType = fallBackToMaximumSizeVarChar();
@@ -243,11 +255,10 @@ public class ColumnMetadataReader {
         return colType;
     }
 
-    private static DataType convertDecimal(final JdbcTypeDescription jdbcTypeDescription) {
+    private static DataType convertDecimal(final int jdbcPrecision, final int scale) {
         final DataType colType;
-        if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-            colType = DataType.createDecimal(jdbcTypeDescription.getPrecisionOrSize(),
-                    jdbcTypeDescription.getDecimalScale());
+        if (jdbcPrecision <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
+            colType = DataType.createDecimal(jdbcPrecision, scale);
         } else {
             colType = fallBackToMaximumSizeVarChar();
         }
@@ -258,13 +269,12 @@ public class ColumnMetadataReader {
         return DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
     }
 
-    private static DataType convertVarChar(final JdbcTypeDescription jdbcTypeDescription) {
+    private static DataType convertVarChar(final int size, final int octetLength) {
         final DataType colType;
-        final DataType.ExaCharset charset = (jdbcTypeDescription.getCharOctedLength() == jdbcTypeDescription
-                .getPrecisionOrSize()) ? DataType.ExaCharset.ASCII : DataType.ExaCharset.UTF8;
-        if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_VARCHAR_SIZE) {
-            final int precision = jdbcTypeDescription.getPrecisionOrSize() == 0 ? DataType.MAX_EXASOL_VARCHAR_SIZE
-                    : jdbcTypeDescription.getPrecisionOrSize();
+        final DataType.ExaCharset charset = (octetLength == size) ? DataType.ExaCharset.ASCII
+                : DataType.ExaCharset.UTF8;
+        if (size <= DataType.MAX_EXASOL_VARCHAR_SIZE) {
+            final int precision = size == 0 ? DataType.MAX_EXASOL_VARCHAR_SIZE : size;
             colType = DataType.createVarChar(precision, charset);
         } else {
             colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, charset);
@@ -272,15 +282,15 @@ public class ColumnMetadataReader {
         return colType;
     }
 
-    private static DataType convertChar(final JdbcTypeDescription jdbcTypeDescription) {
+    private static DataType convertChar(final int size, final int octetLength) {
         final DataType colType;
-        final DataType.ExaCharset charset = (jdbcTypeDescription.getCharOctedLength() == jdbcTypeDescription
-                .getPrecisionOrSize()) ? DataType.ExaCharset.ASCII : DataType.ExaCharset.UTF8;
-        if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_CHAR_SIZE) {
-            colType = DataType.createChar(jdbcTypeDescription.getPrecisionOrSize(), charset);
+        final DataType.ExaCharset charset = (octetLength == size) ? DataType.ExaCharset.ASCII
+                : DataType.ExaCharset.UTF8;
+        if (size <= DataType.MAX_EXASOL_CHAR_SIZE) {
+            colType = DataType.createChar(size, charset);
         } else {
-            if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_VARCHAR_SIZE) {
-                colType = DataType.createVarChar(jdbcTypeDescription.getPrecisionOrSize(), charset);
+            if (size <= DataType.MAX_EXASOL_VARCHAR_SIZE) {
+                colType = DataType.createVarChar(size, charset);
             } else {
                 colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, charset);
             }
