@@ -17,6 +17,7 @@ readonly docker_helper="$(pwd)/integration-test-data/socker.py"
 readonly tmp="$(mktemp -td exasol-vs-adapter-integration.XXXXXX)" || exit 1
 readonly config_with_ips="$(pwd)/integration-test-data/integration-test-travis_with_ips.yaml"
 readonly exaconf="$tmp/cluster/EXAConf"
+readonly docker_db_repository="https://github.com/EXASOL/docker-db.git"
 
 function cleanup() {
     cleanup_remote_dbs || true
@@ -83,7 +84,7 @@ cleanup_remote_dbs() {
 
 prepare_docker() {
 	docker pull "$docker_image"
-	git clone https://github.com/EXASOL/docker-db.git "$1/$docker_name"
+	git clone "$docker_db_repository" "$1/$docker_name"
 	pushd "$1/$docker_name"
 	pipenv install -r exadt_requirements.txt
 	pipenv run ./exadt create-cluster --root "$1"/cluster --create-root "$docker_name"
