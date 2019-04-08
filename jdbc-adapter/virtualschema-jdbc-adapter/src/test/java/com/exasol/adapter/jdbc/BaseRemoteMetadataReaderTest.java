@@ -102,8 +102,35 @@ class BaseRemoteMetadataReaderTest {
         final RemoteMetadataReader reader = new BaseRemoteMetadataReader(this.connectionMock,
                 AdapterProperties.emptyProperties());
         when(this.remoteMetadataMock.getCatalogSeparator()).thenReturn("catalog-separator");
-        // FIXME: add all attributes of the adapter notes
+        when(this.remoteMetadataMock.getIdentifierQuoteString()).thenReturn("identifier-quote-string");
+        when(this.remoteMetadataMock.storesLowerCaseIdentifiers()).thenReturn(true);
+        when(this.remoteMetadataMock.storesUpperCaseIdentifiers()).thenReturn(true);
+        when(this.remoteMetadataMock.storesMixedCaseIdentifiers()).thenReturn(true);
+        when(this.remoteMetadataMock.supportsMixedCaseIdentifiers()).thenReturn(true);
+        when(this.remoteMetadataMock.storesLowerCaseQuotedIdentifiers()).thenReturn(true);
+        when(this.remoteMetadataMock.storesUpperCaseQuotedIdentifiers()).thenReturn(true);
+        when(this.remoteMetadataMock.storesMixedCaseQuotedIdentifiers()).thenReturn(true);
+        when(this.remoteMetadataMock.supportsMixedCaseQuotedIdentifiers()).thenReturn(true);
+        when(this.remoteMetadataMock.nullsAreSortedAtEnd()).thenReturn(true);
+        when(this.remoteMetadataMock.nullsAreSortedAtStart()).thenReturn(true);
+        when(this.remoteMetadataMock.nullsAreSortedHigh()).thenReturn(true);
+        when(this.remoteMetadataMock.nullsAreSortedLow()).thenReturn(true);
+
         final SchemaAdapterNotes notes = reader.getSchemaAdapterNotes();
-        assertAll(() -> assertThat(notes.getCatalogSeparator(), equalTo("catalog-separator")));
+        assertAll(() -> assertThat(notes.getCatalogSeparator(), equalTo("catalog-separator")),
+                () -> assertThat(notes.getIdentifierQuoteString(), equalTo("identifier-quote-string")),
+
+                () -> assertThat(notes.storesLowerCaseIdentifiers(), equalTo(true)),
+                () -> assertThat(notes.storesUpperCaseIdentifiers(), equalTo(true)),
+                () -> assertThat(notes.storesMixedCaseIdentifiers(), equalTo(true)),
+                () -> assertThat(notes.supportsMixedCaseIdentifiers(), equalTo(true)),
+                () -> assertThat(notes.storesLowerCaseQuotedIdentifiers(), equalTo(true)),
+                () -> assertThat(notes.storesUpperCaseQuotedIdentifiers(), equalTo(true)),
+                () -> assertThat(notes.storesMixedCaseQuotedIdentifiers(), equalTo(true)),
+                () -> assertThat(notes.supportsMixedCaseQuotedIdentifiers(), equalTo(true)),
+                () -> assertThat(notes.areNullsSortedAtStart(), equalTo(true)),
+                () -> assertThat(notes.areNullsSortedAtEnd(), equalTo(true)),
+                () -> assertThat(notes.areNullsSortedHigh(), equalTo(true)),
+                () -> assertThat(notes.areNullsSortedLow(), equalTo(true)));
     }
 }

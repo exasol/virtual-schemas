@@ -21,7 +21,7 @@ public class BaseRemoteMetadataReader implements RemoteMetadataReader {
 
     /**
      * Create a new instance of a {@link BaseTableMetadataReader}
-     * 
+     *
      * @param connection database connection through which the reader retrieves the metadata from the remote source
      * @param properties user-defined properties
      */
@@ -61,6 +61,19 @@ public class BaseRemoteMetadataReader implements RemoteMetadataReader {
             final DatabaseMetaData metadata = this.connection.getMetaData();
             return SchemaAdapterNotes.builder() //
                     .catalogSeparator(metadata.getCatalogSeparator()) //
+                    .identifierQuoteString(metadata.getIdentifierQuoteString()) //
+                    .storesLowerCaseIdentifiers(metadata.storesLowerCaseIdentifiers()) //
+                    .storesUpperCaseIdentifiers(metadata.storesUpperCaseIdentifiers()) //
+                    .storesMixedCaseIdentifiers(metadata.storesMixedCaseIdentifiers()) //
+                    .supportsMixedCaseIdentifiers(metadata.supportsMixedCaseIdentifiers()) //
+                    .storesLowerCaseQuotedIdentifiers(metadata.storesLowerCaseQuotedIdentifiers()) //
+                    .storesUpperCaseQuotedIdentifiers(metadata.storesUpperCaseQuotedIdentifiers()) //
+                    .storesMixedCaseQuotedIdentifiers(metadata.storesMixedCaseQuotedIdentifiers()) //
+                    .supportsMixedCaseQuotedIdentifiers(metadata.supportsMixedCaseQuotedIdentifiers()) //
+                    .areNullsSortedAtEnd(metadata.nullsAreSortedAtEnd()) //
+                    .areNullsSortedAtStart(metadata.nullsAreSortedAtStart()) //
+                    .areNullsSortedHigh(metadata.nullsAreSortedHigh()) //
+                    .areNullsSortedLow(metadata.nullsAreSortedLow()) //
                     .build();
         } catch (final SQLException exception) {
             throw new RemoteMetadataReaderException("Unable to create schema adapte notes from remote schema.",
