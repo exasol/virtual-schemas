@@ -16,11 +16,11 @@ readonly jdbc_driver_dir="$(pwd)/integration-test-data/drivers"
 readonly docker_helper="$(pwd)/integration-test-data/socker.py"
 readonly tmp="$(mktemp -td exasol-vs-adapter-integration.XXXXXX)" || exit 1
 readonly config_with_ips="$(pwd)/integration-test-data/integration-test-travis_with_ips.yaml"
-readonly exaconf=$tmp/cluster/EXAConf
+readonly exaconf="$tmp/cluster/EXAConf"
 
 function cleanup() {
     cleanup_remote_dbs || true
-	cleanup_docker $tmp || true
+	cleanup_docker "$tmp" || true
     sudo rm -rf "$tmp" || true
 }
 trap cleanup EXIT
@@ -37,79 +37,79 @@ main() {
 }
 
 deploy_jdbc_drivers() {
-	bucket_fs_url=$(awk '/bucketFsUrl/{print $NF}' $config)
-	bfs_url_no_http=$(echo $bucket_fs_url | awk -F/ '{for(i=3;i<=NF;++i)printf "%s/",$i}')
-	bucket_fs_pwd=`awk '/WritePasswd/{ print $3; }' $exaconf | base64 -d`
-	bucket_fs_upload_url=http://w:$bucket_fs_pwd@$bfs_url_no_http/
+	bucket_fs_url="$(awk '/bucketFsUrl/{print $NF}' $config)"
+	bfs_url_no_http="$(echo $bucket_fs_url | awk -F/ '{for(i=3;i<=NF;++i)printf "%s/",$i}')"
+	bucket_fs_pwd="$(awk '/WritePasswd/{ print $3; }' $exaconf | base64 -d)"
+	bucket_fs_upload_url="http://w:$bucket_fs_pwd@$bfs_url_no_http/"
 	#upload drivers that are part of the repository
-	for d in $jdbc_driver_dir/*
+	for d in "$jdbc_driver_dir"/*
 	do
-	    db_driver=$(basename $d)
-	    find $jdbc_driver_dir/$db_driver -type f -exec curl -X PUT -T {} $bucket_fs_upload_url/drivers/jdbc/$db_driver/ \;
+	    db_driver="$(basename $d)"
+	    find "$jdbc_driver_dir/$db_driver" -type f -exec curl -X PUT -T {} "$bucket_fs_upload_url/drivers/jdbc/$db_driver/" \;
 	done
 	#upload additional (local) drivers
-	additional_jdbc_driver_dir=$(awk '/additionalJDBCDriverDir/{print $NF}' $config)
+	additional_jdbc_driver_dir="$(awk '/additionalJDBCDriverDir/{print $NF}' $config)"
 	if [ -d "$additional_jdbc_driver_dir" ]; then
-	    for d in $additional_jdbc_driver_dir/*
+	    for d in "$additional_jdbc_driver_dir"/*
 	    do
-	        db_driver=$(basename $d)
-	        find $additional_jdbc_driver_dir/$db_driver -type f -exec curl -X PUT -T {} $bucket_fs_upload_url/drivers/jdbc/$db_driver/ \;
+	        db_driver="$(basename $d)"
+	        find "$additional_jdbc_driver_dir/$db_driver" -type f -exec curl -X PUT -T {} "$bucket_fs_upload_url/drivers/jdbc/$db_driver/" \;
 	    done
 	fi
 	#deploy oracle instantclient
-	instantclient_dir=$(awk '/instantclientDir/{print $NF}' $config)
-	instantclient_path=$instantclient_dir/instantclient-basic-linux.x64-12.1.0.2.0.zip
-	if [ -f $instantclient_path ]; then
-	    curl -X PUT -T $instantclient_path $bucket_fs_upload_url/drivers/oracle/
+	instantclient_dir="$(awk '/instantclientDir/{print $NF}' $config)"
+	instantclient_path="$instantclient_dir/instantclient-basic-linux.x64-12.1.0.2.0.zip"
+	if [ -f "$instantclient_path" ]; then
+	    curl -X PUT -T "$instantclient_path" "$bucket_fs_upload_url/drivers/oracle/"
 	fi
 	#deploy adapter jar
-	adapter_jar=`awk '/jdbcAdapterPath/{ n=split($0,a,"/"); print a[n];}' $config`
-	adapter_path=./virtualschema-jdbc-adapter-dist/target/$adapter_jar
-	curl -X PUT -T $adapter_path $bucket_fs_upload_url
+	adapter_jar="$(awk '/jdbcAdapterPath/{ n=split($0,a,"/"); print a[n];}' $config)"
+	adapter_path="./virtualschema-jdbc-adapter-dist/target/$adapter_jar"
+	curl -X PUT -T "$adapter_path" "$bucket_fs_upload_url"
 }
 
 replace_hosts_with_ips_in_config() {
-	$docker_helper --add_docker_hosts $config > $config_with_ips
+	"$docker_helper" --add_docker_hosts "$config" > "$config_with_ips"
 }
 
 start_remote_dbs() {
-	$docker_helper --run $config
+	"$docker_helper" --run "$config"
 	sleep 10
 }
 
 cleanup_remote_dbs() {
-	$docker_helper --rm $config
+	"$docker_helper" --rm "$config"
 }
 
 prepare_docker() {
 	docker pull "$docker_image"
-	git clone https://github.com/EXASOL/docker-db.git $1/$docker_name
-	pushd $1/$docker_name
+	git clone https://github.com/EXASOL/docker-db.git "$1/$docker_name"
+	pushd "$1/$docker_name"
 	pipenv install -r exadt_requirements.txt
-	pipenv run ./exadt create-cluster --root $1/cluster --create-root $docker_name
-	pipenv run ./exadt init-cluster --image $docker_image --license ./license/license.xml --auto-storage $docker_name
+	pipenv run ./exadt create-cluster --root "$1"/cluster --create-root "$docker_name"
+	pipenv run ./exadt init-cluster --image "$docker_image" --license ./license/license.xml --auto-storage "$docker_name"
 	popd
 }
 
 init_docker() {
-	pushd $1/$docker_name
-	pipenv run ./exadt start-cluster $docker_name
-	exa_container_name=`docker ps --filter ancestor=exasol/docker-db:6.1.2-d1 --format "{{.Names}}"`
+	pushd "$1/$docker_name"
+	pipenv run ./exadt start-cluster "$docker_name"
+	exa_container_name="$(docker ps --filter ancestor=exasol/docker-db:6.1.2-d1 --format "{{.Names}}")"
 	docker logs -f "$exa_container_name" &
 	popd
 }
 
 check_docker_ready() {
 	# Wait until database is ready
-	exa_container_name=`docker ps --filter ancestor=exasol/docker-db:6.1.2-d1 --format "{{.Names}}"`
+	exa_container_name="$(docker ps --filter ancestor=exasol/docker-db:6.1.2-d1 --format "{{.Names}}")"
 	(docker logs -f --tail 0 "$exa_container_name" &) 2>&1 | grep -q -i 'stage4: All stages finished'
 	sleep 30
 }
 
 cleanup_docker() {
-	pushd $1/$docker_name
-	pipenv run ./exadt --yes stop-cluster $docker_name || true
-	pipenv run ./exadt --yes delete-cluster $docker_name || true
+	pushd "$1/$docker_name"
+	pipenv run ./exadt --yes stop-cluster "$docker_name" || true
+	pipenv run ./exadt --yes delete-cluster "$docker_name" || true
 	popd
 }
 
