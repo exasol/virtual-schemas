@@ -26,7 +26,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
      */
     public AbstractSqlDialect(final Connection connection, final AdapterProperties properties) {
         this.connection = connection;
-        this.remoteMetadataReader = createRemoteDataReader();
+        this.remoteMetadataReader = createRemoteMetadataReader();
         this.properties = properties;
     }
 
@@ -38,23 +38,13 @@ public abstract class AbstractSqlDialect implements SqlDialect {
      *
      * @return metadata reader
      */
-    protected RemoteMetadataReader createRemoteDataReader() {
+    protected RemoteMetadataReader createRemoteMetadataReader() {
         return new BaseRemoteMetadataReader(this.connection, this.properties);
     }
 
     @Override
     public String getTableCatalogAndSchemaSeparator() {
         return ".";
-    }
-
-    @Override
-    public MappedTable mapTable(final ResultSet tables, final List<String> ignoreErrorList) throws SQLException {
-        String commentString = tables.getString("REMARKS");
-        if (commentString == null) {
-            commentString = "";
-        }
-        final String tableName = changeIdentifierCaseIfNeeded(tables.getString("TABLE_NAME"));
-        return MappedTable.createMappedTable(tableName, tables.getString("TABLE_NAME"), commentString);
     }
 
     private static DataType getExaTypeFromJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
@@ -193,9 +183,6 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new SqlGenerationVisitor(this, context);
     }
-
-    @Override
-    public abstract DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcType) throws SQLException;
 
     @Override
     public final DataType mapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {

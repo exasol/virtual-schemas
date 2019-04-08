@@ -38,6 +38,12 @@ class BaseTableMetadataReaderTest {
     }
 
     @Test
+    void testIsTableIncludedByMapping() {
+        final TableMetadataReader reader = new BaseTableMetadataReader(null, AdapterProperties.emptyProperties());
+        assertThat(reader.isTableIncludedByMapping("any name"), equalTo(true));
+    }
+
+    @Test
     void testMapTables() throws SQLException {
         mockTableCount(this.tablesMock, 2);
         mockTableName(this.tablesMock, TABLE_A, TABLE_B);

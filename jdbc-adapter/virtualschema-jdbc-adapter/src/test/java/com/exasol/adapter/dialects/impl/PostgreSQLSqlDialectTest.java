@@ -6,16 +6,20 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.adapter.metadata.DataType.ExaDataType.VARCHAR;
+import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.sql.*;
-import java.util.*;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,34 +82,10 @@ class PostgreSQLSqlDialectTest {
     }
 
     @Test
-    void testMapTableWithUpperCaseCharactersAndNoErrorIgnoredThrowsException() throws SQLException {
-        final ResultSet resultSet = mock(ResultSet.class);
-        when(resultSet.getString("TABLE_NAME")).thenReturn("uPPer");
-        assertThrows(IllegalArgumentException.class, () -> this.dialect.mapTable(resultSet, Collections.emptyList()));
-    }
-
-    @Test
-    void testMapTableWithRussianUpperCaseCharactersAndNoErrorIgnoredThrowsException() throws SQLException {
-        final ResultSet resultSet = mock(ResultSet.class);
-        when(resultSet.getString("TABLE_NAME")).thenReturn("аППер");
-        assertThrows(IllegalArgumentException.class, () -> this.dialect.mapTable(resultSet, Collections.emptyList()));
-    }
-
-    @Test
-    void testMapTableWithLowerCaseCharacters() throws SQLException {
-        final ResultSet resultSet = mock(ResultSet.class);
-        when(resultSet.getString("TABLE_NAME")).thenReturn("lower");
-        assertAll(() -> this.dialect.mapTable(resultSet, Collections.emptyList()));
-    }
-
-    @Test
-    void testMapTableWithIgnoreUppercaseCharactersError() throws SQLException {
-        final ResultSet resultSet = mock(ResultSet.class);
-        when(resultSet.getString("TABLE_NAME")).thenReturn("Upper");
-        final List<String> ignoreList = new ArrayList<>();
-        ignoreList.add("Dummy_Error");
-        ignoreList.add("POSTGRESQL_UPPERCASE_TABLES");
-        assertAll(() -> this.dialect.mapTable(resultSet, ignoreList));
+    void testMetadataReaderClass() throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException,
+            SecurityException, IllegalArgumentException, InvocationTargetException {
+        assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
+                instanceOf(PostgreSQLMetadataReader.class));
     }
 
     @Test

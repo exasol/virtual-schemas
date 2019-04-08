@@ -15,51 +15,47 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     public OracleSqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         super(dialect, context);
 
-        if ((dialect instanceof OracleSqlDialect) && ((OracleSqlDialect) dialect).getCastAggFuncToFloat()) {
-            this.aggregateFunctionsCast.add(AggregateFunction.SUM);
-            this.aggregateFunctionsCast.add(AggregateFunction.MIN);
-            this.aggregateFunctionsCast.add(AggregateFunction.MAX);
-            this.aggregateFunctionsCast.add(AggregateFunction.AVG);
-            this.aggregateFunctionsCast.add(AggregateFunction.MEDIAN);
-            this.aggregateFunctionsCast.add(AggregateFunction.FIRST_VALUE);
-            this.aggregateFunctionsCast.add(AggregateFunction.LAST_VALUE);
-            this.aggregateFunctionsCast.add(AggregateFunction.STDDEV);
-            this.aggregateFunctionsCast.add(AggregateFunction.STDDEV_POP);
-            this.aggregateFunctionsCast.add(AggregateFunction.STDDEV_SAMP);
-            this.aggregateFunctionsCast.add(AggregateFunction.VARIANCE);
-            this.aggregateFunctionsCast.add(AggregateFunction.VAR_POP);
-            this.aggregateFunctionsCast.add(AggregateFunction.VAR_SAMP);
-        }
+        this.aggregateFunctionsCast.add(AggregateFunction.SUM);
+        this.aggregateFunctionsCast.add(AggregateFunction.MIN);
+        this.aggregateFunctionsCast.add(AggregateFunction.MAX);
+        this.aggregateFunctionsCast.add(AggregateFunction.AVG);
+        this.aggregateFunctionsCast.add(AggregateFunction.MEDIAN);
+        this.aggregateFunctionsCast.add(AggregateFunction.FIRST_VALUE);
+        this.aggregateFunctionsCast.add(AggregateFunction.LAST_VALUE);
+        this.aggregateFunctionsCast.add(AggregateFunction.STDDEV);
+        this.aggregateFunctionsCast.add(AggregateFunction.STDDEV_POP);
+        this.aggregateFunctionsCast.add(AggregateFunction.STDDEV_SAMP);
+        this.aggregateFunctionsCast.add(AggregateFunction.VARIANCE);
+        this.aggregateFunctionsCast.add(AggregateFunction.VAR_POP);
+        this.aggregateFunctionsCast.add(AggregateFunction.VAR_SAMP);
 
-        if ((dialect instanceof OracleSqlDialect) && ((OracleSqlDialect) dialect).getCastScalarFuncToFloat()) {
-            this.scalarFunctionsCast.add(ScalarFunction.ADD);
-            this.scalarFunctionsCast.add(ScalarFunction.SUB);
-            this.scalarFunctionsCast.add(ScalarFunction.MULT);
-            this.scalarFunctionsCast.add(ScalarFunction.FLOAT_DIV);
-            this.scalarFunctionsCast.add(ScalarFunction.NEG);
-            this.scalarFunctionsCast.add(ScalarFunction.ABS);
-            this.scalarFunctionsCast.add(ScalarFunction.ACOS);
-            this.scalarFunctionsCast.add(ScalarFunction.ASIN);
-            this.scalarFunctionsCast.add(ScalarFunction.ATAN);
-            this.scalarFunctionsCast.add(ScalarFunction.ATAN2);
-            this.scalarFunctionsCast.add(ScalarFunction.COS);
-            this.scalarFunctionsCast.add(ScalarFunction.COSH);
-            this.scalarFunctionsCast.add(ScalarFunction.COT);
-            this.scalarFunctionsCast.add(ScalarFunction.DEGREES);
-            this.scalarFunctionsCast.add(ScalarFunction.EXP);
-            this.scalarFunctionsCast.add(ScalarFunction.GREATEST);
-            this.scalarFunctionsCast.add(ScalarFunction.LEAST);
-            this.scalarFunctionsCast.add(ScalarFunction.LN);
-            this.scalarFunctionsCast.add(ScalarFunction.LOG);
-            this.scalarFunctionsCast.add(ScalarFunction.MOD);
-            this.scalarFunctionsCast.add(ScalarFunction.POWER);
-            this.scalarFunctionsCast.add(ScalarFunction.RADIANS);
-            this.scalarFunctionsCast.add(ScalarFunction.SIN);
-            this.scalarFunctionsCast.add(ScalarFunction.SINH);
-            this.scalarFunctionsCast.add(ScalarFunction.SQRT);
-            this.scalarFunctionsCast.add(ScalarFunction.TAN);
-            this.scalarFunctionsCast.add(ScalarFunction.TANH);
-        }
+        this.scalarFunctionsCast.add(ScalarFunction.ADD);
+        this.scalarFunctionsCast.add(ScalarFunction.SUB);
+        this.scalarFunctionsCast.add(ScalarFunction.MULT);
+        this.scalarFunctionsCast.add(ScalarFunction.FLOAT_DIV);
+        this.scalarFunctionsCast.add(ScalarFunction.NEG);
+        this.scalarFunctionsCast.add(ScalarFunction.ABS);
+        this.scalarFunctionsCast.add(ScalarFunction.ACOS);
+        this.scalarFunctionsCast.add(ScalarFunction.ASIN);
+        this.scalarFunctionsCast.add(ScalarFunction.ATAN);
+        this.scalarFunctionsCast.add(ScalarFunction.ATAN2);
+        this.scalarFunctionsCast.add(ScalarFunction.COS);
+        this.scalarFunctionsCast.add(ScalarFunction.COSH);
+        this.scalarFunctionsCast.add(ScalarFunction.COT);
+        this.scalarFunctionsCast.add(ScalarFunction.DEGREES);
+        this.scalarFunctionsCast.add(ScalarFunction.EXP);
+        this.scalarFunctionsCast.add(ScalarFunction.GREATEST);
+        this.scalarFunctionsCast.add(ScalarFunction.LEAST);
+        this.scalarFunctionsCast.add(ScalarFunction.LN);
+        this.scalarFunctionsCast.add(ScalarFunction.LOG);
+        this.scalarFunctionsCast.add(ScalarFunction.MOD);
+        this.scalarFunctionsCast.add(ScalarFunction.POWER);
+        this.scalarFunctionsCast.add(ScalarFunction.RADIANS);
+        this.scalarFunctionsCast.add(ScalarFunction.SIN);
+        this.scalarFunctionsCast.add(ScalarFunction.SINH);
+        this.scalarFunctionsCast.add(ScalarFunction.SQRT);
+        this.scalarFunctionsCast.add(ScalarFunction.TAN);
+        this.scalarFunctionsCast.add(ScalarFunction.TANH);
     }
 
     // If set to true, the selectlist elements will get aliases such as c1, c2, ...

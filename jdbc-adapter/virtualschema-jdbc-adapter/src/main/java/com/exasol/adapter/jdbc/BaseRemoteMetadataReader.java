@@ -16,8 +16,10 @@ import com.exasol.adapter.metadata.TableMetadata;
  * See <a href="https://docs.oracle.com/javase/8/docs/api/java/sql/DatabaseMetaData.html">java.sql.DatabaseMetaData</a>
  */
 public class BaseRemoteMetadataReader implements RemoteMetadataReader {
-    private final Connection connection;
-    private final AdapterProperties properties;
+    protected final Connection connection;
+    protected final AdapterProperties properties;
+    private final ColumnMetadataReader columnMetadataReader;
+    private final TableMetadataReader tableMetadataReader;
 
     /**
      * Create a new instance of a {@link BaseTableMetadataReader}
@@ -28,6 +30,16 @@ public class BaseRemoteMetadataReader implements RemoteMetadataReader {
     public BaseRemoteMetadataReader(final Connection connection, final AdapterProperties properties) {
         this.connection = connection;
         this.properties = properties;
+        this.columnMetadataReader = createColumnMetadataReader();
+        this.tableMetadataReader = createTableMetadataReader();
+    }
+
+    protected ColumnMetadataReader createColumnMetadataReader() {
+        return new ColumnMetadataReader(this.connection);
+    }
+
+    protected TableMetadataReader createTableMetadataReader() {
+        return new BaseTableMetadataReader(this.columnMetadataReader, this.properties);
     }
 
     @Override
@@ -49,10 +61,7 @@ public class BaseRemoteMetadataReader implements RemoteMetadataReader {
     }
 
     private List<TableMetadata> mapTables(final ResultSet remoteTables) throws SQLException {
-        final ColumnMetadataReader columnMetadataReader = new ColumnMetadataReader(this.connection);
-        final TableMetadataReader tableMetadataReader = new BaseTableMetadataReader(columnMetadataReader,
-                this.properties);
-        return tableMetadataReader.mapTables(remoteTables);
+        return this.tableMetadataReader.mapTables(remoteTables);
     }
 
     @Override

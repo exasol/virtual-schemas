@@ -7,18 +7,19 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.*;
-import java.util.*;
+import java.util.EnumMap;
+import java.util.Map;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.ScalarFunction;
 
 public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "POSTGRESQL";
     private static final int MAX_POSTGRES_SQL_VARCHAR_SIZE_BASED_ON_EXASOL_LIMIT = 2000000;
-    private static final String POSTGRES_IGNORE_UPPERCASE_TABLES = "POSTGRESQL_UPPERCASE_TABLES";
     static final String POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY = "POSTGRESQL_IDENTIFIER_MAPPING";
     private static final PostgreSQLIdentifierMapping DEFAULT_POSTGRESS_IDENTIFIER_MAPPING = PostgreSQLIdentifierMapping.CONVERT_TO_UPPER;
 
@@ -82,29 +83,12 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         return colType;
     }
 
-    @Override
-    public MappedTable mapTable(final ResultSet tables, final List<String> ignoreErrorList) throws SQLException {
-        final String tableName = tables.getString("TABLE_NAME");
-        if ((getIdentifierMapping() == PostgreSQLIdentifierMapping.CONVERT_TO_UPPER)
-                && !ignoreErrorList.contains(POSTGRES_IGNORE_UPPERCASE_TABLES)
-                && containsUppercaseCharacter(tableName)) {
-            throw new IllegalArgumentException("Table " + tableName + " cannot be used in virtual schema. "
-                    + "Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation.");
-        } else {
-            return super.mapTable(tables, ignoreErrorList);
-        }
-    }
-
     private PostgreSQLIdentifierMapping getIdentifierMapping() {
         if (this.properties.containsKey(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY)) {
             return PostgreSQLIdentifierMapping.parse(this.properties.get(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY));
         } else {
             return DEFAULT_POSTGRESS_IDENTIFIER_MAPPING;
         }
-    }
-
-    private boolean containsUppercaseCharacter(final String tableName) {
-        return !tableName.equals(tableName.toLowerCase());
     }
 
     @Override
@@ -195,4 +179,8 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         return new PostgresSQLSqlGenerationVisitor(this, context);
     }
 
+    @Override
+    protected RemoteMetadataReader createRemoteMetadataReader() {
+        return new PostgreSQLMetadataReader(this.connection, this.properties);
+    }
 }

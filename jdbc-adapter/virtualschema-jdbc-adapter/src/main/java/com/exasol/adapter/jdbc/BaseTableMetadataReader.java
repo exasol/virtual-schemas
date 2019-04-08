@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import com.exasol.adapter.AdapterProperties;
@@ -18,6 +19,7 @@ public class BaseTableMetadataReader implements TableMetadataReader {
     static final String NAME_COLUMN = "TABLE_NAME";
     static final String REMARKS_COLUMN = "REMARKS";
     static final String DEFAULT_TABLE_ADAPTER_NOTES = "";
+    private static final Logger LOGGER = Logger.getLogger(BaseTableMetadataReader.class.getName());
     private static final Pattern UNQUOTED_IDENTIFIER_PATTERN = Pattern.compile("^[a-zA-Z]\\w*");
     private final ColumnMetadataReader columnMetadataReader;
     protected final AdapterProperties properties;
@@ -37,14 +39,19 @@ public class BaseTableMetadataReader implements TableMetadataReader {
     public List<TableMetadata> mapTables(final ResultSet remoteTables) throws SQLException {
         final List<TableMetadata> translatedTables = new ArrayList<>();
         while (remoteTables.next()) {
-            final TableMetadata tableMetadata = mapTable(remoteTables);
-            translatedTables.add(tableMetadata);
+            final String tableName = readTableName(remoteTables);
+            if (isTableIncludedByMapping(tableName)) {
+                final TableMetadata tableMetadata = mapTable(remoteTables, tableName);
+                LOGGER.fine(() -> "Mapping table metadata for remote table \"" + tableName + "\".");
+                translatedTables.add(tableMetadata);
+            } else {
+                LOGGER.fine(() -> "Skipping table \"" + tableName + "\" when mapping remote metadata.");
+            }
         }
         return translatedTables;
     }
 
-    protected TableMetadata mapTable(final ResultSet remoteTables) throws SQLException {
-        final String tableName = readTableName(remoteTables);
+    protected TableMetadata mapTable(final ResultSet remoteTables, final String tableName) throws SQLException {
         final String comment = readComment(remoteTables);
         final List<ColumnMetadata> columns = this.columnMetadataReader.mapColumns(tableName);
         final String adapterNotes = DEFAULT_TABLE_ADAPTER_NOTES;
@@ -87,5 +94,10 @@ public class BaseTableMetadataReader implements TableMetadataReader {
 
     protected boolean isUnquotedIdentifier(final String identifier) {
         return UNQUOTED_IDENTIFIER_PATTERN.matcher(identifier).matches();
+    }
+
+    @Override
+    public boolean isTableIncludedByMapping(final String tableName) {
+        return true;
     }
 }

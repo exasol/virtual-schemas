@@ -7,7 +7,8 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.*;
-import java.util.*;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,8 +28,6 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     static final String LOCAL_IMPORT_PROPERTY = "IS_LOCAL";
     static final String ORACLE_IMPORT_PROPERTY = "IMPORT_FROM_ORA";
     static final int ORACLE_MAGIC_NUMBER_SCALE = -127;
-    private final boolean castAggFuncToFloat = true;
-    private final boolean castScalarFuncToFloat = true;
 
     public OracleSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
@@ -42,14 +41,6 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         return NAME;
     }
 
-    public boolean getCastAggFuncToFloat() {
-        return this.castAggFuncToFloat;
-    }
-
-    public boolean getCastScalarFuncToFloat() {
-        return this.castScalarFuncToFloat;
-    }
-
     @Override
     public Capabilities getCapabilities() {
         final Capabilities.Builder builder = Capabilities.builder();
@@ -61,16 +52,12 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         builder.addLiteral(NULL, DATE, TIMESTAMP, TIMESTAMP_UTC, DOUBLE, EXACTNUMERIC, STRING, INTERVAL);
         builder.addAggregateFunction(COUNT, COUNT_STAR, COUNT_DISTINCT, GROUP_CONCAT, GROUP_CONCAT_SEPARATOR,
                 GROUP_CONCAT_ORDER_BY);
-        if (this.castAggFuncToFloat) {
-            builder.addAggregateFunction(SUM, SUM_DISTINCT, MIN, MAX, AVG, AVG_DISTINCT, MEDIAN, FIRST_VALUE, //
-                    LAST_VALUE, STDDEV, STDDEV_DISTINCT, STDDEV_POP, STDDEV_SAMP, VARIANCE, VARIANCE_DISTINCT, VAR_POP,
-                    VAR_SAMP);
-        }
+        builder.addAggregateFunction(SUM, SUM_DISTINCT, MIN, MAX, AVG, AVG_DISTINCT, MEDIAN, FIRST_VALUE, //
+                LAST_VALUE, STDDEV, STDDEV_DISTINCT, STDDEV_POP, STDDEV_SAMP, VARIANCE, VARIANCE_DISTINCT, VAR_POP,
+                VAR_SAMP);
         builder.addScalarFunction(CEIL, DIV, FLOOR, SIGN);
-        if (this.castScalarFuncToFloat) {
-            builder.addScalarFunction(ADD, SUB, MULT, FLOAT_DIV, NEG, ABS, ACOS, ASIN, ATAN, ATAN2, COS, COSH, COT,
-                    DEGREES, EXP, GREATEST, LEAST, LN, LOG, MOD, POWER, RADIANS, SIN, SINH, SQRT, TAN, TANH);
-        }
+        builder.addScalarFunction(ADD, SUB, MULT, FLOAT_DIV, NEG, ABS, ACOS, ASIN, ATAN, ATAN2, COS, COSH, COT, DEGREES,
+                EXP, GREATEST, LEAST, LN, LOG, MOD, POWER, RADIANS, SIN, SINH, SQRT, TAN, TANH);
         builder.addScalarFunction(ASCII, CHR, INSTR, LENGTH, LOCATE, LOWER, LPAD, LTRIM, REGEXP_INSTR, REGEXP_REPLACE,
                 REGEXP_SUBSTR, REPEAT, REPLACE, REVERSE, RPAD, RTRIM, SOUNDEX, SUBSTR, TRANSLATE, TRIM, UPPER, ADD_DAYS,
                 ADD_HOURS, ADD_MINUTES, ADD_MONTHS, ADD_SECONDS, ADD_WEEKS, ADD_YEARS, CURRENT_DATE, CURRENT_TIMESTAMP,
@@ -96,21 +83,6 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     @Override
     public SchemaOrCatalogSupport supportsJdbcSchemas() {
         return SchemaOrCatalogSupport.SUPPORTED;
-    }
-
-    @Override
-    public MappedTable mapTable(final ResultSet tables, final List<String> ignoreErrorList) throws SQLException {
-        final String tableName = tables.getString("TABLE_NAME");
-        if (tableName.startsWith("BIN$")) {
-            // In case of Oracle we may see deleted tables with strange names
-            // (BIN$OeQco6jg/drgUDAKzmRzgA==$0). Should be filtered out. Squirrel also
-            // doesn't see them for unknown reasons. See
-            // http://stackoverflow.com/questions/2446053/what-are-the-bin-tables-in-oracles-all-tab-columns-table
-            System.out.println("Skip table: " + tableName);
-            return MappedTable.createIgnoredTable();
-        } else {
-            return super.mapTable(tables, ignoreErrorList);
-        }
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.exasol.adapter.dialects;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -136,15 +135,6 @@ public interface SqlDialect {
             return tableComment;
         }
     }
-
-    /**
-     * @param tables          A jdbc Resultset for the
-     *                        {@link DatabaseMetaData#getTables(String, String, String, String[])} call, pointing to the
-     *                        current table.
-     * @param ignoreErrorList The elements of this list suppress certain errors the adapter would throw
-     * @return An instance of {@link MappedTable} describing the mapped table.
-     */
-    public MappedTable mapTable(ResultSet tables, final List<String> ignoreErrorList) throws SQLException;
 
     /**
      * Maps the jdbc datatype information of a column to the EXASOL datatype of the column. The dialect can also return
