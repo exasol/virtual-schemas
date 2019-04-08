@@ -13,13 +13,15 @@ import java.sql.Statement;
 import java.util.*;
 
 import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.dialects.IntegrationTestConfigurationCondition;
 import com.exasol.jdbc.DataException;
 import org.junit.Assume;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
 
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
+import org.junit.Rule;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -28,7 +30,8 @@ import org.mockito.junit.MockitoJUnitRunner;
  * Integration test for the PostgreSQL SQL dialect
  *
  */
-public class PostgreSQLDialectIT extends AbstractIntegrationTest {
+@ExtendWith(IntegrationTestConfigurationCondition.class)
+class PostgreSQLDialectIT extends AbstractIntegrationTest {
     private static final String VIRTUAL_SCHEMA = "PG";
     private static final String VIRTUAL_SCHEMA_UPPERCASE_TABLE = "PG_UPPER";
     private static final String VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE = "PG_PRESERVE_CASE";
@@ -41,10 +44,10 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     private Map<String, String> columnTypes;
 
     @Rule
-    public ExpectedException expectedEx = ExpectedException.none();
+    private final ExpectedException expectedEx = ExpectedException.none();
 
-    @BeforeClass
-    public static void setUpClass() throws FileNotFoundException, SQLException, ClassNotFoundException {
+    @BeforeAll
+    static void beforeAll() throws FileNotFoundException, SQLException, ClassNotFoundException {
         Assume.assumeTrue(getConfig().getPostgresqlTestsRequested());
         setConnection(connectToExa());
 
@@ -75,44 +78,44 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
             stmt.execute(String.format("create table %s.t(x int)", POSTGRES_SCHEMA));
             stmt.execute(String.format("insert into %s.t values (1);", POSTGRES_SCHEMA));
             stmt.execute(String.format(
-                "create table %s.%s (" +
-                    "mybigint bigint,	" +
-                    "mybigserial bigserial,	" +
-                    "mybit bit, 	" +
-                    "mybitVar bit varying  (5) ," +
-                    "myBoolean boolean,		" +
-                    "myBox box,	 	" +
-                    "myBytea bytea,	 	" +
-                    "myCharacter character (1000)," +
-                    "myCharacterVar character varying  (1000)," +
-                    "myCidr cidr	, 	" +
-                    "myCircle circle	 ," +
-                    "myDate date	, 	" +
-                    "myDouble double precision," +
-                    "myinet inet	, 	" +
-                    "myInteger integer," +
-                    "myInterval interval," +
-                    "myJson json, 	" +
-                    "myJsonB jsonb,	 	" +
-                    "myLine line,	 	" +
-                    "myLseg lseg,	 	" +
-                    "myMacAddr macaddr,	 	" +
-                    "myMoney money,	 	" +
-                    "myNumeric numeric(36, 10)," +
-                    "myPath path,	 	" +
-                    "mypoint point,	 	" +
-                    "mypolygon polygon,	 	" +
-                    "myreal real	,     " +
-                    "mysmallint smallint," +
-                    "mytext text,	 	" +
-                    "mytime time," +
-                    "mytimeWithTimeZone time with time zone," +
-                    "mytimestamp timestamp, 	 	" +
-                    "mytimestampWithTimeZone timestamp with time zone," +
-                    "mytsquery tsquery,	 	" +
-                    "mytsvector tsvector	, 	" +
-                    "myuuid uuid,	 	" +
-                    "myxml xml	 	" +
+                "create table %s.%s (" + //
+                    "mybigint bigint,	" + //
+                    "mybigserial bigserial,	" + //
+                    "mybit bit, 	" + //
+                    "mybitVar bit varying  (5) ," + //
+                    "myBoolean boolean,		" + //
+                    "myBox box,	 	" + //
+                    "myBytea bytea,	 	" + //
+                    "myCharacter character (1000)," + //
+                    "myCharacterVar character varying  (1000)," + //
+                    "myCidr cidr	, 	" + //
+                    "myCircle circle	 ," + //
+                    "myDate date	, 	" + //
+                    "myDouble double precision," + //
+                    "myinet inet	, 	" + //
+                    "myInteger integer," + //
+                    "myInterval interval," + //
+                    "myJson json, 	" + //
+                    "myJsonB jsonb,	 	" + //
+                    "myLine line,	 	" + //
+                    "myLseg lseg,	 	" + //
+                    "myMacAddr macaddr,	 	" + //
+                    "myMoney money,	 	" + //
+                    "myNumeric numeric(36, 10)," + //
+                    "myPath path,	 	" + //
+                    "mypoint point,	 	" + //
+                    "mypolygon polygon,	 	" + //
+                    "myreal real	,     " + //
+                    "mysmallint smallint," + //
+                    "mytext text,	 	" + //
+                    "mytime time," + //
+                    "mytimeWithTimeZone time with time zone," + //
+                    "mytimestamp timestamp, 	 	" + //
+                    "mytimestampWithTimeZone timestamp with time zone," + //
+                    "mytsquery tsquery,	 	" + //
+                    "mytsvector tsvector	, 	" + //
+                    "myuuid uuid,	 	" + //
+                    "myxml xml	 	" + //
                 ")"
             , POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
             stmt.execute(String.format("INSERT INTO %s.%s(mybigint) VALUES(10000000000)", POSTGRES_SCHEMA, POSTGRES_TABLE_DATATYPES));
@@ -175,13 +178,13 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testOpenVirtualSchema() throws SQLException {
+    void testOpenVirtualSchema() throws SQLException {
         final String open_schema_query = String.format("OPEN SCHEMA %s", VIRTUAL_SCHEMA);
         execute(open_schema_query);
     }
 
     @Test
-    public void testSelectSingleColumn() throws SQLException {
+    void testSelectSingleColumn() throws SQLException {
         final String query = String.format("SELECT x FROM %s.t", VIRTUAL_SCHEMA);
         final ResultSet result = executeQuery(query);
         matchNextRow(result, 1L);
@@ -189,7 +192,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
 
     // Join Tests -------------------------------------------------------------
     @Test
-    public void innerJoin() throws SQLException {
+    void innerJoin() throws SQLException {
         final String query = String.format("SELECT * FROM  %1$s.t1 a INNER JOIN  %1$s.t2 b ON a.x=b.x", VIRTUAL_SCHEMA);
         final ResultSet result = executeQuery(query);
         matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
@@ -197,7 +200,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void innerJoinWithProjection() throws SQLException {
+    void innerJoinWithProjection() throws SQLException {
         final String query = String.format("SELECT b.y || %1$s.t1.y FROM  %1$s.t1 INNER JOIN  %1$s.t2 b ON %1$s.t1.x=b.x", VIRTUAL_SCHEMA);
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "bbbbbb");
@@ -205,7 +208,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void leftJoin() throws SQLException {
+    void leftJoin() throws SQLException {
         final String query = String.format("SELECT * FROM  %1$s.t1 a LEFT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA);
         final ResultSet result = executeQuery(query);
         matchNextRow(result, (long) 1, "aaa", null ,null);
@@ -214,7 +217,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void rightJoin() throws SQLException {
+    void rightJoin() throws SQLException {
         final String query = String.format("SELECT * FROM  %1$s.t1 a RIGHT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA);
         final ResultSet result = executeQuery(query);
         matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
@@ -223,7 +226,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void fullOuterJoin() throws SQLException {
+    void fullOuterJoin() throws SQLException {
         final String query = String.format("SELECT * FROM  %1$s.t1 a FULL OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA);
         final ResultSet result = executeQuery(query);
         matchNextRow(result, (long) 1, "aaa", null ,null);
@@ -234,7 +237,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
 
     // Identifier Test - CONVERT_TO_UPPER mode --------------------------------
     @Test
-    public void testCreateSchemaWithUpperCaseTables() throws SQLException, FileNotFoundException {
+    void testCreateSchemaWithUpperCaseTables() throws SQLException, FileNotFoundException {
         this.expectedEx.expect(DataException.class);
         this.expectedEx.expectMessage("Table UPPer_t cannot be used in virtual schema. Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation.");
         createVirtualSchema("FOO", PostgreSQLSqlDialect.getPublicName(), POSTGRES_CATALOG, POSTGRES_SCHEMA_UPPERCASE_TABLE, "",
@@ -243,7 +246,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testQueryUpperCaseTableQuoted() throws SQLException {
+    void testQueryUpperCaseTableQuoted() throws SQLException {
         this.expectedEx.expect(DataException.class);
         this.expectedEx.expectMessage("Cannot resolve column types");
         final String query = String.format("SELECT x FROM  %s.\"UPPer_t\"", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
@@ -251,7 +254,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testQueryUpperCaseTable() throws SQLException {
+    void testQueryUpperCaseTable() throws SQLException {
         this.expectedEx.expect(SQLException.class);
         this.expectedEx.expectMessage("object PG_UPPER.UPPER_T not found");
         final String query = String.format("SELECT x FROM  %s.UPPer_t", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
@@ -259,14 +262,14 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testQueryLowerCaseTable() throws SQLException {
+    void testQueryLowerCaseTable() throws SQLException {
         final String query = String.format("SELECT x FROM  %s.lower_t", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
         final ResultSet result = executeQuery(query);
         assertFalse(result.next());
     }
 
     @Test
-    public void testUnsetIgnoreUpperCaseTablesAndRefresh() throws SQLException {
+    void testUnsetIgnoreUpperCaseTablesAndRefresh() throws SQLException {
         this.expectedEx.expect(DataException.class);
         this.expectedEx.expectMessage("Table UPPer_t cannot be used in virtual schema. Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation.");
         final String alter_schema_query = String.format("ALTER VIRTUAL SCHEMA %s set ignore_errors=''", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
@@ -278,7 +281,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testSetIgnoreUpperCaseTablesAndRefresh() throws SQLException {
+    void testSetIgnoreUpperCaseTablesAndRefresh() throws SQLException {
         final String alter_schema_query = String.format("ALTER VIRTUAL SCHEMA %s set ignore_errors='POSTGRESQL_UPPERCASE_TABLES'", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
         execute(alter_schema_query);
         final String refresh_schema_query = String.format("ALTER VIRTUAL SCHEMA %s REFRESH", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
@@ -287,7 +290,7 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
 
     // Identifier Test - PRESERVE_ORIGINAL_CASE mode --------------------------------
     @Test
-    public void testPreserveCaseQueryLowerCaseTableFails() throws SQLException {
+    void testPreserveCaseQueryLowerCaseTableFails() throws SQLException {
         this.expectedEx.expect(SQLException.class);
         this.expectedEx.expectMessage("object PG_PRESERVE_CASE.LOWER_T not found");
         final String query = String.format("SELECT x FROM  %s.lower_t", VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE);
@@ -295,21 +298,21 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testPreserveCaseQueryLowerCaseTableWithQuotes() throws SQLException {
+    void testPreserveCaseQueryLowerCaseTableWithQuotes() throws SQLException {
         final String query = String.format("SELECT \"x\" FROM  %s.\"lower_t\"", VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE);
         final ResultSet result = executeQuery(query);
         assertFalse(result.next());
     }
 
     @Test
-    public void testPreserveCaseQueryUpperCaseTableWithQuotes() throws SQLException {
+    void testPreserveCaseQueryUpperCaseTableWithQuotes() throws SQLException {
         final String query = String.format("SELECT \"Y\" FROM  %s.\"UPPer_t\"", VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE);
         final ResultSet result = executeQuery(query);
         assertFalse(result.next());
     }
 
     @Test
-    public void testPreserveCaseQueryUpperCaseTableWithQuotesLowerCaseColumn() throws SQLException {
+    void testPreserveCaseQueryUpperCaseTableWithQuotesLowerCaseColumn() throws SQLException {
         final String query = String.format("SELECT \"x\" FROM  %s.\"UPPer_t\"", VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE);
         final ResultSet result = executeQuery(query);
         assertFalse(result.next());
@@ -317,157 +320,157 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
 
     // Datatype tests ---------------------------------------------------------
     @Test
-    public void testDatatypeBigint() throws SQLException {
+    void testDatatypeBigint() throws SQLException {
         testDatatype("mybigint", new BigDecimal("10000000000"), "DECIMAL(19,0)");
     }
     @Test
-    public void testDatatypeBigSerial() throws SQLException {
+    void testDatatypeBigSerial() throws SQLException {
         testDatatype("mybigserial", new BigDecimal("1"), "DECIMAL(19,0)");
     }
     @Test
-    public void testDatatypeBit() throws SQLException {
+    void testDatatypeBit() throws SQLException {
         testDatatype("mybit",  Boolean.TRUE, "BOOLEAN");
     }
     @Test
-    public void testDatatypeBitVar() throws SQLException {
+    void testDatatypeBitVar() throws SQLException {
         testDatatype("mybitvar",  Boolean.FALSE, "VARCHAR(5) UTF8");
     }
     @Test
-    public void testDatatypeBoolean() throws SQLException {
+    void testDatatypeBoolean() throws SQLException {
         testDatatype("myboolean",  Boolean.FALSE, "BOOLEAN");
     }
     @Test
-    public void testDatatypeBox() throws SQLException {
+    void testDatatypeBox() throws SQLException {
         testDatatype("mybox", "(4,16),(1,8)", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypeBytea() throws SQLException {
+    void testDatatypeBytea() throws SQLException {
         testDatatype("mybytea", "bytea NOT SUPPORTED", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypeCharacter() throws SQLException {
+    void testDatatypeCharacter() throws SQLException {
         final String empty = " ";
         final String expected = "hajksdf" + String.join("", Collections.nCopies(993, empty));
         testDatatype("mycharacter", expected, "CHAR(1000) ASCII");
     }
     @Test
-    public void testDatatypeCharacterVar() throws SQLException {
+    void testDatatypeCharacterVar() throws SQLException {
         testDatatype("mycharactervar", "hjkdhjgfh", "VARCHAR(1000) ASCII");
     }
     @Test
-    public void testDatatypeCidr() throws SQLException {
+    void testDatatypeCidr() throws SQLException {
         testDatatype("mycidr", "192.168.100.128/25", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypeCircle() throws SQLException {
+    void testDatatypeCircle() throws SQLException {
         testDatatype("mycircle", "<(1,5),3>", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypeDate() throws SQLException {
+    void testDatatypeDate() throws SQLException {
         testDatatype("mydate", "2010-01-01", "DATE");
     }
     @Test
-    public void testDatatypeDouble() throws SQLException {
+    void testDatatypeDouble() throws SQLException {
         testDatatype("mydouble", new Double("192189234.1723854"), "DOUBLE");
     }
     @Test
-    public void testDatatypeInet() throws SQLException {
+    void testDatatypeInet() throws SQLException {
         testDatatype("myinet", "192.168.100.128/32", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypeInteger() throws SQLException {
+    void testDatatypeInteger() throws SQLException {
         testDatatype("myinteger", new Integer("7189234"), "DECIMAL(10,0)");
     }
     @Test
-    public void testDatatypeIntervalYM() throws SQLException {
+    void testDatatypeIntervalYM() throws SQLException {
         testDatatype("myinterval", "1 year", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypeJSON() throws SQLException {
+    void testDatatypeJSON() throws SQLException {
         testDatatype("myjson", "{\"bar\": \"baz\", \"balance\": 7.77, \"active\": false}", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypeJSONB() throws SQLException {
+    void testDatatypeJSONB() throws SQLException {
         testDatatype("myjsonb", "{\"bar\": \"baz\", \"active\": false, \"balance\": 7.77}", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypeLine() throws SQLException {
+    void testDatatypeLine() throws SQLException {
         testDatatype("myline", "{1,2,3}", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypeLSeg() throws SQLException {
+    void testDatatypeLSeg() throws SQLException {
         testDatatype("mylseg", "[(1,2),(3,4)]", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypeMACAddr() throws SQLException {
+    void testDatatypeMACAddr() throws SQLException {
         testDatatype("mymacaddr", "08:00:2b:01:02:03", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypeMoney() throws SQLException {
+    void testDatatypeMoney() throws SQLException {
         testDatatype("mymoney", "100.01", "DOUBLE");
     }
     @Test
-    public void testDatatypeNumeric() throws SQLException {
+    void testDatatypeNumeric() throws SQLException {
         testDatatype("mynumeric", new BigDecimal("24.2300000000"), "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypePath() throws SQLException {
+    void testDatatypePath() throws SQLException {
         testDatatype("mypath", "[(1,2),(3,4)]", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypePoint() throws SQLException {
+    void testDatatypePoint() throws SQLException {
         testDatatype("mypoint", "(1,3)", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypePolygon() throws SQLException {
+    void testDatatypePolygon() throws SQLException {
         testDatatype("mypolygon", "((1,2),(2,4),(3,7))", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypeReal() throws SQLException {
+    void testDatatypeReal() throws SQLException {
         testDatatype("myreal", new Float("10.12"), "DOUBLE");
     }
     @Test
-    public void testDatatypeSmallInt() throws SQLException {
+    void testDatatypeSmallInt() throws SQLException {
         testDatatype("mysmallint", new Integer("100"), "DECIMAL(5,0)");
     }
     @Test
-    public void testDatatypeText() throws SQLException {
+    void testDatatypeText() throws SQLException {
         testDatatype("mytext", "skldfjgkl jsdklfgjklsdjfg jsklfdjg", "VARCHAR(2000000) ASCII");
     }
     @Test
-    public void testDatatypeTime() throws SQLException {
+    void testDatatypeTime() throws SQLException {
         testDatatype("mytime", "1970-01-01 11:11:11.0", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypeTimeWithTimezone() throws SQLException {
+    void testDatatypeTimeWithTimezone() throws SQLException {
         testDatatype("mytimeWithTimeZone", "1970-01-01 10:11:11.0", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypeTimestamp() throws SQLException {
+    void testDatatypeTimestamp() throws SQLException {
         testDatatype("mytimestamp", "2010-01-01 11:11:11.000000", "TIMESTAMP");
     }
     @Test
-    public void testDatatypeTimestampWithTimezone() throws SQLException {
+    void testDatatypeTimestampWithTimezone() throws SQLException {
         testDatatype("mytimestampwithtimezone", "2010-01-01 10:11:11.000000", "TIMESTAMP");
     }
     @Test
-    public void testDatatypeTsQuery() throws SQLException {
+    void testDatatypeTsQuery() throws SQLException {
         testDatatype("mytsquery", "'fat' & 'rat'", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypeTsvector() throws SQLException {
+    void testDatatypeTsvector() throws SQLException {
         testDatatype("mytsvector", "'fat':2 'rat':3", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypeUUID() throws SQLException {
+    void testDatatypeUUID() throws SQLException {
         testDatatype("myuuid", "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11", "VARCHAR(2000000) UTF8");
     }
     @Test
-    public void testDatatypeXML() throws SQLException {
+    void testDatatypeXML() throws SQLException {
         testDatatype("myxml", "<?xml version=\"1.0\"?><book><title>Manual</title><chapter>...</chapter></book>", "VARCHAR(2000000) UTF8");
     }
 
-    public void testDatatype(final String columnName, final Object expectedValue, final String expectedType) throws SQLException {
+    void testDatatype(final String columnName, final Object expectedValue, final String expectedType) throws SQLException {
         final StringBuilder query = new StringBuilder();
         query.append("SELECT ").append(columnName);
         query.append(" FROM ").append(VIRTUAL_SCHEMA).append(".").append(POSTGRES_TABLE_DATATYPES);
@@ -515,5 +518,4 @@ public class PostgreSQLDialectIT extends AbstractIntegrationTest {
         PostgreSQLIncludes.add(jdbcDriverPath);
         createJDBCAdapter(PostgreSQLIncludes);
     }
-
 }

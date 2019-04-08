@@ -8,36 +8,36 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assume;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
+import com.exasol.adapter.dialects.IntegrationTestConfigurationCondition;
 
 /**
  * Integration test for the Impala SQL dialect
  *
- * Testdata: sample_07: code string, description string, total_emp int, salary
- * int
+ * Testdata: sample_07: code string, description string, total_emp int, salary int
  */
+@ExtendWith(IntegrationTestConfigurationCondition.class)
 public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
-
     private static final String VIRTUAL_SCHEMA = "VS_IMPALA";
     private static final String IMPALA_SCHEMA = "default";
     private static final boolean IS_LOCAL = false;
 
-    @BeforeClass
-    public static void setUpClass() throws FileNotFoundException, SQLException, ClassNotFoundException {
+    @BeforeAll
+    static void beforeAll() throws FileNotFoundException, SQLException, ClassNotFoundException {
         Assume.assumeTrue(getConfig().impalaTestsRequested());
         setConnection(connectToExa());
-
         createImpalaJDBCAdapter();
         createVirtualSchema(VIRTUAL_SCHEMA, ImpalaSqlDialect.getPublicName(), "", IMPALA_SCHEMA, "", "no-user",
                 "no-password", "ADAPTER.JDBC_ADAPTER", getConfig().getImpalaJdbcConnectionString(), IS_LOCAL,
-                getConfig().debugAddress(), "SAMPLE_07,ALL_HIVE_IMPALA_TYPES,SIMPLE,SIMPLE_WITH_NULLS", null,"");
+                getConfig().debugAddress(), "SAMPLE_07,ALL_HIVE_IMPALA_TYPES,SIMPLE,SIMPLE_WITH_NULLS", null, "");
     }
 
     @Test
-    public void testTypeMapping() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    void testTypeMapping() throws SQLException {
         // TODO Test type mapping for tables with invalid Impala Types
         final ResultSet result = executeQuery(
                 "SELECT COLUMN_NAME, COLUMN_TYPE, COLUMN_MAXSIZE, COLUMN_NUM_PREC, COLUMN_NUM_SCALE, COLUMN_DEFAULT FROM EXA_DBA_COLUMNS WHERE COLUMN_SCHEMA = '"
@@ -65,7 +65,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testSelectWithAllTypes() throws SQLException {
+    void testSelectWithAllTypes() throws SQLException {
         final ResultSet result = executeQuery("SELECT * from " + VIRTUAL_SCHEMA + ".ALL_HIVE_IMPALA_TYPES");
         matchLastRow(result, (short) 123, 12345, 1234567890L, new BigDecimal(1234567890123456789L), 12.199999809265137,
                 12.2, 12345, new BigDecimal("12345.12"), "12345.12", getSqlTimestamp(1985, 9, 25, 17, 45, 30, 5), "abc",
@@ -74,14 +74,14 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testSimpleQuery() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    void testSimpleQuery() throws SQLException {
         final String query = "SELECT * FROM sample_07";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "00-0000", "All Occupations", (long) 134354250, (long) 40690);
     }
 
     @Test
-    public void testProjection() throws SQLException {
+    void testProjection() throws SQLException {
         final String query = "SELECT c2 FROM " + VIRTUAL_SCHEMA + ".ALL_HIVE_IMPALA_TYPES";
         final ResultSet result = executeQuery(query);
         matchLastRow(result, 12345);
@@ -89,7 +89,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testComparisonPredicates() throws SQLException {
+    void testComparisonPredicates() throws SQLException {
         // =, !=, <, <=, >, >=
         final String query = "select salary, salary=33880, salary!=33880, salary<33880, salary<=33880, salary>33880, salary>=33880 from "
                 + VIRTUAL_SCHEMA + ".sample_07 where code = '11-1031'";
@@ -100,7 +100,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testLogicalPredicates() throws SQLException {
+    void testLogicalPredicates() throws SQLException {
         // NOT, AND, OR
         final String query = "select * from vs_impala.simple_with_nulls where (c1 < 2 or c1 > 2) and not (c2 is null)";
         final ResultSet result = executeQuery(query);
@@ -111,7 +111,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testLikePredicates() throws SQLException {
+    void testLikePredicates() throws SQLException {
         // LIKE, LIKE ESCAPE (not pushed down), REGEXP_LIKE
         final String query = "select code, code like 'x%1' escape 'x' from " + VIRTUAL_SCHEMA
                 + ".sample_07 where (code like '15%' and not code regexp_like '.*1$')";
@@ -125,7 +125,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testMiscPredicates() throws SQLException {
+    void testMiscPredicates() throws SQLException {
         // BETWEEN, IN, IS NULL, IS NOT NULL
         final String query = "select c1, c2, c1 in (2, 3), c2 is null, c2 is not null from vs_impala.simple_with_nulls WHERE c1 between 1 and 2";
         final ResultSet result = executeQuery(query);
@@ -137,7 +137,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testCountSumAggregateFunction() throws SQLException {
+    void testCountSumAggregateFunction() throws SQLException {
         final String query = "SELECT COUNT(A), COUNT(*), COUNT(DISTINCT A), SUM(A), SUM(DISTINCT A) from vs_impala.simple";
         final ResultSet result = executeQuery(query);
         matchLastRow(result, new BigDecimal(6), new BigDecimal(6), new BigDecimal(3), 12D, 6D);
@@ -154,7 +154,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testLiteralsPredicates() throws SQLException {
+    void testLiteralsPredicates() throws SQLException {
         // String/varchar, bool, null, double, decimal
         final String query = "select count(*) from vs_impala.ALL_HIVE_IMPALA_TYPES where c11 = 'abc' and c12 = 'varchar 茶' and c6 = 1.22E1 and c8 = 12345.12";
         final ResultSet result = executeQuery(query);
@@ -164,27 +164,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testAggregationFunctions() throws SQLException {
-        /**
-         * COUNT(A) COUNT(*) COUNT(DISTINCT A) COUNT(ALL (A, C)) COVAR_POP(A, C)
-         * COVAR_SAMP(A, C) FIRST_VALUE(A) GROUP_CONCAT(A) GROUP_CONCAT(DISTINCT A)
-         * GROUP_CONCAT(A ORDER BY C) GROUP_CONCAT(A ORDER BY C DESC) GROUP_CONCAT(A
-         * SEPARATOR GROUPING(A) GROUPING(A, C) GROUPING_ID(A) GROUPING_ID(A, C)
-         * LAST_VALUE(A) MAX(A) MAX(ALL A) MAX(DISTINCT A) MEDIAN(A) MIN(A) MIN(ALL A)
-         * MIN(DISTINCT A) PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY A)
-         * PERCENTILE_DISC(0.5) WITHIN GROUP (ORDER BY A) REGR_AVGX(A, C) REGR_AVGY(A,
-         * C) REGR_COUNT(A, C) REGR_INTERCEPT(A, C) REGR_R2(A, C) REGR_SLOPE(A, C)
-         * REGR_SXX(A, C) REGR_SXY(A, C) REGR_SYY(A, C) STDDEV(A) STDDEV(ALL A)
-         * STDDEV(DISTINCT A) STDDEV_POP(A) STDDEV_POP(ALL A) STDDEV_POP(DISTINCT A)
-         * STDDEV_SAMP(A) STDDEV_SAMP(ALL A) STDDEV_SAMP(DISTINCT A) SUM(A) SUM(ALL A)
-         * SUM(DISTINCT A) VAR_POP(A) VAR_POP(ALL A) VAR_POP(DISTINCT A) VAR_SAMP(A)
-         * VAR_SAMP(ALL A) VAR_SAMP(DISTINCT A) VARIANCE(A) VARIANCE(ALL A)
-         * VARIANCE(DISTINCT A)
-         */
-    }
-
-    @Test
-    public void testOrderBy() throws SQLException {
+    void testOrderBy() throws SQLException {
         final String query = "SELECT CODE, SALARY from sample_07 ORDER BY SALARY";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "35-3021", 16700L);
@@ -192,7 +172,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testOrderByLimit() throws SQLException {
+    void testOrderByLimit() throws SQLException {
         final String query = "SELECT CODE, SALARY from sample_07 ORDER BY SALARY LIMIT 3";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "35-3021", 16700L);
@@ -202,7 +182,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testOrderByLimitOffset() throws SQLException {
+    void testOrderByLimitOffset() throws SQLException {
         final String query = "SELECT CODE, SALARY from sample_07 ORDER BY SALARY LIMIT 2 OFFSET 1";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "35-2011", 16860L);
@@ -212,7 +192,7 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testAggregateFunctions() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    void testAggregateFunctions() throws SQLException {
         final String query = "SELECT count(*), count(salary), count(distinct salary) FROM sample_07";
         final ResultSet result = executeQuery(query);
         matchLastRow(result, new BigDecimal(823), new BigDecimal(819), new BigDecimal(759));
@@ -229,5 +209,4 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
         }
         createJDBCAdapter(impalaIncludes);
     }
-
 }
