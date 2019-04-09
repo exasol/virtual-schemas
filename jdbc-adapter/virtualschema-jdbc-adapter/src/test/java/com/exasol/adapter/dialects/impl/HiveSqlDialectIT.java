@@ -21,8 +21,9 @@ import com.exasol.adapter.dialects.AbstractIntegrationTest;
 public class HiveSqlDialectIT extends AbstractIntegrationTest {
 
     private static final String VIRTUAL_SCHEMA = "VS_HIVE";
-    private static final String HIVE_SCHEMA = "xperience";
+    private static final String HIVE_SCHEMA = "default";
     private static final boolean IS_LOCAL = false;
+    private static final String HIVE_CONNECTION = "HIVE_CONNECTION";
 
     @BeforeClass
     public static void setUpClass() throws FileNotFoundException, SQLException, ClassNotFoundException {
@@ -30,9 +31,10 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         setConnection(connectToExa());
 
         createHiveJDBCAdapter();
-        createVirtualSchema(VIRTUAL_SCHEMA, HiveSqlDialect.getPublicName(), "", HIVE_SCHEMA, "", "hdfs", "hdfs",
-                "ADAPTER.JDBC_ADAPTER", getConfig().getHiveJdbcConnectionString(), IS_LOCAL, getConfig().debugAddress(),
-                "ALL_HIVE_DATA_TYPES", null,"");
+        createHiveConnection();
+        createVirtualSchema(VIRTUAL_SCHEMA, HiveSqlDialect.getPublicName(), "", HIVE_SCHEMA, HIVE_CONNECTION, "", "",
+                "ADAPTER.JDBC_ADAPTER", "", IS_LOCAL, getConfig().debugAddress(),
+                "", null,"");
     }
 
     @Test
@@ -241,11 +243,13 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     private static void createHiveJDBCAdapter() throws SQLException, FileNotFoundException {
         final List<String> hiveIncludes = new ArrayList<>();
         hiveIncludes.add(getConfig().getJdbcAdapterPath());
-        final String jdbcPrefixPath = getConfig().getHiveJdbcPrefixPath();
-        for (final String jar : getConfig().getHiveJdbcJars()) {
-            hiveIncludes.add(jdbcPrefixPath + jar);
-        }
+        final String jdbcDriverPath = getConfig().getHiveJdbcDriverPath();
+        hiveIncludes.add(jdbcDriverPath);
         createJDBCAdapter(hiveIncludes);
+    }
+
+    private static void createHiveConnection() throws SQLException,  FileNotFoundException {
+        createConnection(HIVE_CONNECTION, getConfig().getHiveDockerJdbcConnectionString(), "", "");
     }
 
 }

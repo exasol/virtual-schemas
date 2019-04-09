@@ -34,3 +34,11 @@ oracle:
   dockerName:             myora
   dockerConnectionString: jdbc:oracle:thin:@DBHOST:1521/XE
   instantclientDir:       /var/tmp/vstest/instantclient/
+
+hive:
+  runIntegrationTests:    false
+  jdbcDriverPath:         /buckets/bfsdefault/default/drivers/jdbc/HIVE/HiveJDBC41.jar;
+  connectionString:       jdbc:hive2://localhost:10000            
+  dockerName:             docker-hive_hive-server_1
+  dockerComposeRepo:      https://github.com/big-data-europe/docker-hive.git
+  dockerConnectionString: jdbc:hive2://DBHOST:10000
