@@ -190,10 +190,4 @@ public class OracleSqlDialect extends AbstractSqlDialect {
             return ImportType.JDBC;
         }
     }
-
-    @Override
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }

@@ -55,7 +55,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         return builder.build();
     }
 
-    @Override
     public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
         DataType colType = null;
         final int jdbcType = jdbcTypeDescription.getJdbcType();

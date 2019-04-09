@@ -79,9 +79,4 @@ public class DummySqlDialect extends AbstractSqlDialect {
     public String getStringLiteral(final String value) {
         return null;
     }
-
-    @Override
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
-        return null;
-    }
 }

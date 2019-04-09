@@ -127,9 +127,4 @@ public class GenericSqlDialect extends AbstractSqlDialect {
     public String getStringLiteral(final String value) {
         return "'" + value.replace("'", "''") + "'";
     }
-
-    @Override
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
-        return null;
-    }
 }

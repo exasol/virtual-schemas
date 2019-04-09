@@ -3,7 +3,6 @@ package com.exasol.adapter.dialects;
 import static org.junit.Assert.assertEquals;
 
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.util.*;
 
 import org.junit.jupiter.api.Test;
@@ -245,11 +244,5 @@ class SqlDialectTest {
         public String getStringLiteral(final String value) {
             return "'" + value + "'";
         }
-
-        @Override
-        public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
-            return null;
-        }
     }
-
 }

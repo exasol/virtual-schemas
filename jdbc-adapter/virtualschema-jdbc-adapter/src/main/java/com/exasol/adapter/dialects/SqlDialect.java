@@ -120,34 +120,21 @@ public interface SqlDialect {
         }
 
         public boolean isIgnored() {
-            return isIgnored;
+            return this.isIgnored;
         }
 
         public String getTableName() {
-            return tableName;
+            return this.tableName;
         }
 
         public String getOriginalTableName() {
-            return originalName;
+            return this.originalName;
         }
 
         public String getTableComment() {
-            return tableComment;
+            return this.tableComment;
         }
     }
-
-    /**
-     * Maps the jdbc datatype information of a column to the EXASOL datatype of the column. The dialect can also return
-     * null, so that the default mapping occurs. This method will be called by {@link #mapJdbcType(JdbcTypeDescription)}
-     * in the default implementation.
-     *
-     * @param jdbcType A jdbc type description
-     * @return Either null, if the default datatype mapping shall be applied, or the datatype which the current column
-     *         shall be mapped to. This datatype will be used as the datatype in the virtual table and in the pushdown
-     *         sql.
-     *
-     */
-    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcType) throws SQLException;
 
     /**
      * How unquoted or quoted identifiers in queries or DDLs are handled

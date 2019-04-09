@@ -130,8 +130,4 @@ public class HiveSqlDialect extends AbstractSqlDialect {
         return scalarAliases;
     }
 
-    @Override
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
-        return null;
-    }
 }
