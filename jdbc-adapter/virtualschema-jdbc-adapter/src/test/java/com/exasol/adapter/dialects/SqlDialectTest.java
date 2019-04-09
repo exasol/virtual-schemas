@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
@@ -18,9 +18,9 @@ import com.google.common.collect.ImmutableMap;
 
 import utils.SqlTestUtil;
 
-public class SqlDialectTest {
+class SqlDialectTest {
     @Test
-    public void testAggregateFunctionAliases() throws AdapterException {
+    void testAggregateFunctionAliases() throws AdapterException {
         final TableMetadata clicksMeta = getTestTableMetadata();
         final SqlTable fromClause = new SqlTable("TEST", clicksMeta);
         final SqlColumn col1 = new SqlColumn(1, clicksMeta.getColumns().get(0));
@@ -53,7 +53,7 @@ public class SqlDialectTest {
     }
 
     @Test
-    public void testScalarFunctionAliases() throws AdapterException {
+    void testScalarFunctionAliases() throws AdapterException {
         final TableMetadata clicksMeta = getTestTableMetadata();
         final SqlTable fromClause = new SqlTable("TEST", clicksMeta);
         final SqlColumn col1 = new SqlColumn(1, clicksMeta.getColumns().get(0));
@@ -86,7 +86,7 @@ public class SqlDialectTest {
     }
 
     @Test
-    public void testInvalidAliases() throws Exception {
+    void testInvalidAliases() throws Exception {
         final TableMetadata clicksMeta = getTestTableMetadata();
         final SqlTable fromClause = new SqlTable("TEST", clicksMeta);
         final SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
@@ -135,7 +135,6 @@ public class SqlDialectTest {
     }
 
     static class AliasesSqlDialect extends AbstractSqlDialect {
-
         private final Map<AggregateFunction, String> aggregationAliases;
         private final Map<ScalarFunction, String> scalarAliases;
         private final Map<ScalarFunction, String> infixAliases;

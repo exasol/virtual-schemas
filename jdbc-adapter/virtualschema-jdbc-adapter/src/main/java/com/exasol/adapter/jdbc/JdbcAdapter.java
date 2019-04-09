@@ -10,7 +10,8 @@ import com.exasol.ExaMetadata;
 import com.exasol.adapter.*;
 import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.*;
+import com.exasol.adapter.metadata.SchemaMetadata;
+import com.exasol.adapter.metadata.SchemaMetadataInfo;
 import com.exasol.adapter.request.*;
 import com.exasol.adapter.response.*;
 
@@ -93,6 +94,12 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
                 connectionInformation.getPassword());
     }
 
+    private SqlDialect createDialect(final Connection connection, final AdapterProperties properties) {
+        final SqlDialectFactory factory = new SqlDialectFactory(connection, SqlDialectRegistry.getInstance(),
+                properties);
+        return factory.createSqlDialect(properties.getSqlDialect());
+    }
+
     @Override
     public DropVirtualSchemaResponse dropVirtualSchema(final ExaMetadata metadata,
             final DropVirtualSchemaRequest request) {
@@ -161,12 +168,6 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
                 .build();
     }
 
-    private SqlDialect createDialect(final Connection connection, final AdapterProperties properties) {
-        final SqlDialectFactory factory = new SqlDialectFactory(connection, SqlDialectRegistry.getInstance(),
-                properties);
-        return factory.createSqlDialect(properties.getSqlDialect());
-    }
-
     private Capabilities parseExcludedCapabilities(final String excludedCapabilitiesStr) {
         LOGGER.info(() -> "Excluded Capabilities: "
                 + (excludedCapabilitiesStr.isEmpty() ? "none" : excludedCapabilitiesStr));
@@ -214,7 +215,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
                     schemaMetadataInfo);
             String columnDescription = "";
             if (importType == ImportType.JDBC) {
-                columnDescription = createColumnDescription(connection, pushdownQuery, dialect);
+                columnDescription = dialect.describeQueryResultColumns(pushdownQuery);
             }
             final String sql = dialect.generatePushdownSql(connectionInformation, columnDescription, pushdownQuery);
             return PushDownResponse.builder().pushDownSql(sql).build();
@@ -287,52 +288,5 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
             credentials = "USER '" + connection.getUser() + "' IDENTIFIED BY '" + connection.getPassword() + "'";
         }
         return credentials;
-    }
-
-    private String createColumnDescription(final Connection connection, final String pushdownQuery,
-            final SqlDialect dialect) throws SQLException {
-        LOGGER.fine(() -> "createColumnDescription: " + pushdownQuery);
-        DataType[] internalTypes = null;
-        try (final PreparedStatement statement = connection.prepareStatement(pushdownQuery)) {
-            ResultSetMetaData metadata = statement.getMetaData();
-            if (metadata == null) {
-                statement.execute();
-                metadata = statement.getMetaData();
-                if (metadata == null) {
-                    throw new SQLException(
-                            "Unable to read source metadata trying to create description for source columns.");
-                }
-            }
-            internalTypes = new DataType[metadata.getColumnCount()];
-            for (int col = 1; col <= metadata.getColumnCount(); ++col) {
-                final JdbcTypeDescription description = getJdbcTypeDescription(metadata, col);
-                internalTypes[col - 1] = dialect.mapJdbcType(description);
-            }
-        }
-        return buildColumnDescriptionFrom(internalTypes);
-    }
-
-    protected static JdbcTypeDescription getJdbcTypeDescription(final ResultSetMetaData metadata, final int col)
-            throws SQLException {
-        final int jdbcType = metadata.getColumnType(col);
-        final int jdbcPrecisions = metadata.getPrecision(col);
-        final int jdbcScales = metadata.getScale(col);
-        return new JdbcTypeDescription(jdbcType, jdbcScales, jdbcPrecisions, 0, metadata.getColumnTypeName(col));
-    }
-
-    protected static String buildColumnDescriptionFrom(final DataType[] internalTypes) {
-        final StringBuilder columnDescription = new StringBuilder();
-        columnDescription.append('(');
-        for (int i = 0; i < internalTypes.length; i++) {
-            columnDescription.append("c");
-            columnDescription.append(i);
-            columnDescription.append(" ");
-            columnDescription.append(internalTypes[i].toString());
-            if (i < (internalTypes.length - 1)) {
-                columnDescription.append(",");
-            }
-        }
-        columnDescription.append(')');
-        return columnDescription.toString();
     }
 }

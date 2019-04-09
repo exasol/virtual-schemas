@@ -150,22 +150,6 @@ public interface SqlDialect {
     public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcType) throws SQLException;
 
     /**
-     * Maps the jdbc datatype information of a column to the EXASOL datatype of the column. This method will be called
-     * by {@link #mapColumn(ResultSet)} in the default implementation.
-     *
-     * @param jdbcType A jdbc type description
-     * @return Either null, if the default datatype mapping shall be applied, or the datatype which the current column
-     *         shall be mapped to. This datatype will be used as the datatype in the virtual table and in the pushdown
-     *         sql.
-     *
-     */
-    public DataType mapJdbcType(JdbcTypeDescription jdbcType) throws SQLException;
-
-    //
-    // SQL GENERATION
-    //
-
-    /**
      * How unquoted or quoted identifiers in queries or DDLs are handled
      */
     public enum IdentifierCaseHandling {
@@ -313,4 +297,13 @@ public interface SqlDialect {
      * @return remote schema metadata
      */
     public SchemaMetadata readSchemaMetadata(List<String> whiteListedRemoteTables);
+
+    /**
+     * Generate a textual description of the columns of a query result (e.g. a push-down query)
+     *
+     * @param query query for which the column information is retrieved from the remote data source
+     * @return column description
+     * @throws SQLException if the metadata of the query result cannot be read from the remote data source
+     */
+    public String describeQueryResultColumns(final String query) throws SQLException;
 }

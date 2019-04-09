@@ -70,19 +70,19 @@ class BaseRemoteMetadataReaderTest {
     private void mockTableA() throws SQLException {
         final ResultSet tableAColumns = Mockito.mock(ResultSet.class);
         when(tableAColumns.next()).thenReturn(true, true, false);
-        when(tableAColumns.getString(ColumnMetadataReader.NAME_COLUMN)).thenReturn("COLUMN_A1", "COLUMN_A2");
-        when(tableAColumns.getInt(ColumnMetadataReader.DATA_TYPE_COLUMN)).thenReturn(Types.BOOLEAN, Types.DATE);
-        when(tableAColumns.getBoolean(ColumnMetadataReader.NULLABLE_COLUMN)).thenReturn(true, false);
+        when(tableAColumns.getString(BaseColumnMetadataReader.NAME_COLUMN)).thenReturn("COLUMN_A1", "COLUMN_A2");
+        when(tableAColumns.getInt(BaseColumnMetadataReader.DATA_TYPE_COLUMN)).thenReturn(Types.BOOLEAN, Types.DATE);
+        when(tableAColumns.getBoolean(BaseColumnMetadataReader.NULLABLE_COLUMN)).thenReturn(true, false);
         when(this.remoteMetadataMock.getColumns(null, null, "TABLE_A", "%")).thenReturn(tableAColumns);
     }
 
     private void mockTableB() throws SQLException {
         final ResultSet tableBColumns = Mockito.mock(ResultSet.class);
         when(tableBColumns.next()).thenReturn(true, true, true, false);
-        when(tableBColumns.getInt(ColumnMetadataReader.DATA_TYPE_COLUMN)).thenReturn(Types.BOOLEAN, Types.DOUBLE);
-        when(tableBColumns.getString(ColumnMetadataReader.NAME_COLUMN)).thenReturn("COLUMN_B1", "COLUMN_B2",
+        when(tableBColumns.getInt(BaseColumnMetadataReader.DATA_TYPE_COLUMN)).thenReturn(Types.BOOLEAN, Types.DOUBLE);
+        when(tableBColumns.getString(BaseColumnMetadataReader.NAME_COLUMN)).thenReturn("COLUMN_B1", "COLUMN_B2",
                 "COLUMN_B3");
-        when(tableBColumns.getBoolean(ColumnMetadataReader.NULLABLE_COLUMN)).thenReturn(false, true, false);
+        when(tableBColumns.getBoolean(BaseColumnMetadataReader.NULLABLE_COLUMN)).thenReturn(false, true, false);
         when(this.remoteMetadataMock.getColumns(null, null, "TABLE_B", "%")).thenReturn(tableBColumns);
     }
 

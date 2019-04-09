@@ -1,6 +1,5 @@
 package com.exasol.adapter.dialects.impl;
 
-import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
 
@@ -8,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 
 class PostgreSQLMetadataReaderTest {
     private PostgreSQLMetadataReader reader;
@@ -18,8 +18,12 @@ class PostgreSQLMetadataReaderTest {
     }
 
     @Test
-    void testTableMetadataReaderClass() {
-        assertThat(getMethodReturnViaReflection(this.reader, "createTableMetadataReader"),
-                instanceOf(PostgreSQLTableMetadataReader.class));
+    void testGetTableMetadataReader() {
+        assertThat(this.reader.getTableMetadataReader(), instanceOf(PostgreSQLTableMetadataReader.class));
+    }
+
+    @Test
+    void testGetColumnMetadataReader() {
+        assertThat(this.reader.getColumnMetadataReader(), instanceOf(BaseColumnMetadataReader.class));
     }
 }

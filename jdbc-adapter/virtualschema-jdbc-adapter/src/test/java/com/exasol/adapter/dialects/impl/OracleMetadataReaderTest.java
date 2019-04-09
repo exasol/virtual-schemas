@@ -1,10 +1,7 @@
 package com.exasol.adapter.dialects.impl;
 
-import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
-
-import java.lang.reflect.InvocationTargetException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,9 +17,12 @@ class OracleMetadataReaderTest {
     }
 
     @Test
-    void testTableMetadataReaderClass() throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException,
-            SecurityException, IllegalArgumentException, InvocationTargetException {
-        assertThat(getMethodReturnViaReflection(this.reader, "createTableMetadataReader"),
-                instanceOf(OracleTableMetadataReader.class));
+    void testGetTableMetadataReader() {
+        assertThat(this.reader.getTableMetadataReader(), instanceOf(OracleTableMetadataReader.class));
+    }
+
+    @Test
+    void testGetColumnMetadataReader() {
+        assertThat(this.reader.getColumnMetadataReader(), instanceOf(OracleColumnMetadataReader.class));
     }
 }

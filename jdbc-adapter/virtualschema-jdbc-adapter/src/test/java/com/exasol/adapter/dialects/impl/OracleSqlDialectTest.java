@@ -11,8 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.sql.SQLException;
-import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,13 +18,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.*;
 
 import utils.SqlTestUtil;
@@ -126,46 +122,6 @@ class OracleSqlDialectTest {
                 ") WHERE ROWNUM_SUB > 5";
         final String actualSql = node.accept(this.generator);
         assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
-    }
-
-    @Test
-    void testMapColumnTypeWithMaximumDecimalPrecision() throws SQLException {
-        final int precision = DataType.MAX_EXASOL_DECIMAL_PRECISION;
-        final int scale = 0;
-        final JdbcTypeDescription typeDescription = createTypeDescriptionForNumeric(precision, scale);
-        assertThat(this.dialect.dialectSpecificMapJdbcType(typeDescription),
-                equalTo(DataType.createDecimal(precision, scale)));
-    }
-
-    private JdbcTypeDescription createTypeDescriptionForNumeric(final int precision, final int scale) {
-        final int octetLength = 10;
-        final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.NUMERIC, scale, precision,
-                octetLength, "NUMERIC");
-        return typeDescription;
-    }
-
-    @ValueSource(strings = { "10,2", " 10,2", " 10 , 2 " })
-    @ParameterizedTest
-    void testMapColumnTypeBeyondMaximumDecimalPrecision(final String input) throws SQLException {
-        final int precision = DataType.MAX_EXASOL_DECIMAL_PRECISION + 1;
-        final int scale = 0;
-        final int castPrecision = 10;
-        final int castScale = 2;
-        final Map<String, String> rawProperties = new HashMap<>();
-        rawProperties.put(OracleSqlDialect.ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY, castPrecision + "," + castScale);
-        this.dialect = new OracleSqlDialect(null, new AdapterProperties(rawProperties));
-        final JdbcTypeDescription typeDescription = createTypeDescriptionForNumeric(precision, scale);
-        assertThat(this.dialect.dialectSpecificMapJdbcType(typeDescription),
-                equalTo(DataType.createDecimal(castPrecision, castScale)));
-    }
-
-    @Test
-    void testMapColumnTypeWithMagicScale() throws SQLException {
-        final int precision = 10;
-        final int scale = OracleSqlDialect.ORACLE_MAGIC_NUMBER_SCALE;
-        final JdbcTypeDescription typeDescription = createTypeDescriptionForNumeric(precision, scale);
-        assertThat(this.dialect.dialectSpecificMapJdbcType(typeDescription),
-                equalTo(DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8)));
     }
 
     @CsvSource({ "FALSE, FALSE, JDBC", //

@@ -19,4 +19,18 @@ public interface RemoteMetadataReader {
      * @return schema adapter notes
      */
     public SchemaAdapterNotes getSchemaAdapterNotes();
+
+    /**
+     * Get the remote column metadata reader
+     *
+     * @return column metadata reader
+     */
+    public ColumnMetadataReader getColumnMetadataReader();
+
+    /**
+     * Get the table metadata reader
+     *
+     * @return table metadata reader
+     */
+    public TableMetadataReader getTableMetadataReader();
 }

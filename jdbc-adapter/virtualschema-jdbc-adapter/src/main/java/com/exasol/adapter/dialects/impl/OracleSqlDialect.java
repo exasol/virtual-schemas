@@ -6,7 +6,8 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -83,57 +84,6 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     @Override
     public SchemaOrCatalogSupport supportsJdbcSchemas() {
         return SchemaOrCatalogSupport.SUPPORTED;
-    }
-
-    @Override
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
-        DataType colType = null;
-        final int jdbcType = jdbcTypeDescription.getJdbcType();
-        switch (jdbcType) {
-        case Types.DECIMAL:
-        case Types.NUMERIC:
-            final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
-            final int decimalScale = jdbcTypeDescription.getDecimalScale();
-            if (decimalScale == ORACLE_MAGIC_NUMBER_SCALE) {
-                colType = workAroundNumberWithoutScaleAndPrecision();
-                break;
-            }
-            if (decimalPrec <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-                colType = DataType.createDecimal(decimalPrec, decimalScale);
-            } else {
-                colType = workAroundNumberWithoutScaleAndPrecision();
-            }
-            break;
-        case Types.OTHER:
-            // Oracle JDBC uses OTHER as CLOB
-            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            break;
-        case -103:
-            // INTERVAL YEAR TO MONTH
-        case -104:
-            // INTERVAL DAY TO SECOND
-            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            break;
-        case -102:
-        case -101:
-            // -101 and -102 is TIMESTAMP WITH (LOCAL) TIMEZONE in Oracle.
-            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            break;
-        case 100:
-        case 101:
-            // 100 and 101 are BINARY_FLOAT and BINARY_DOUBLE in Oracle.
-            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            break;
-        }
-        return colType;
-    }
-
-    // Oracle JDBC driver returns scale -127 if NUMBER data type was specified
-    // without scale and precision. Convert to VARCHAR.
-    // See http://docs.oracle.com/cd/B28359_01/server.111/b28318/datatype.htm#i16209
-    // and https://docs.oracle.com/cd/E19501-01/819-3659/gcmaz/
-    private DataType workAroundNumberWithoutScaleAndPrecision() {
-        return getOracleNumberTargetType();
     }
 
     DataType getOracleNumberTargetType() {
@@ -239,5 +189,11 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         } else {
             return ImportType.JDBC;
         }
+    }
+
+    @Override
+    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

@@ -34,12 +34,46 @@ public class BaseRemoteMetadataReader implements RemoteMetadataReader {
         this.tableMetadataReader = createTableMetadataReader();
     }
 
+    /**
+     * Create a reader that handles column metadata
+     * <p>
+     * Override this method in cases where a remote data source needs specific handling of column metadata
+     *
+     * @return column metadata reader
+     */
     protected ColumnMetadataReader createColumnMetadataReader() {
-        return new ColumnMetadataReader(this.connection);
+        return new BaseColumnMetadataReader(this.connection, this.properties);
     }
 
+    /**
+     * Create a reader that handles table metadata
+     * <p>
+     * Override this method in cases where a remote data source needs specific handling of table metadata
+     *
+     * @return table metadata reader
+     */
     protected TableMetadataReader createTableMetadataReader() {
         return new BaseTableMetadataReader(this.columnMetadataReader, this.properties);
+    }
+
+    /**
+     * Get the remote column metadata reader
+     *
+     * @return column metadata reader
+     */
+    @Override
+    public ColumnMetadataReader getColumnMetadataReader() {
+        return this.columnMetadataReader;
+    }
+
+    /**
+     * Get the table metadata reader
+     *
+     * @return table metadata reader
+     */
+    @Override
+    public TableMetadataReader getTableMetadataReader() {
+        return this.tableMetadataReader;
     }
 
     @Override

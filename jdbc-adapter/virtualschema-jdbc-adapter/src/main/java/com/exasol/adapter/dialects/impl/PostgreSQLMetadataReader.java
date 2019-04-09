@@ -21,7 +21,7 @@ public class PostgreSQLMetadataReader extends BaseRemoteMetadataReader {
     }
 
     @Override
-    protected BaseTableMetadataReader createTableMetadataReader() {
-        return new PostgreSQLTableMetadataReader(createColumnMetadataReader(), this.properties);
+    public BaseTableMetadataReader getTableMetadataReader() {
+        return new PostgreSQLTableMetadataReader(getColumnMetadataReader(), this.properties);
     }
 }
