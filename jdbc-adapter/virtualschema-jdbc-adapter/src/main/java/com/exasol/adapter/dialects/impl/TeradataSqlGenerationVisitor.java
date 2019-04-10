@@ -49,7 +49,7 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
         }
         final List<String> selectListElements = new ArrayList<>();
         if (selectList.isSelectStar()) {
-            if (SqlGenerationHelper.selectListRequiresCasts(selectList, nodeRequiresCast)) {
+            if (SqlGenerationHelper.selectListRequiresCasts(selectList, this.nodeRequiresCast)) {
                 final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
                 int columnId = 0;
                 final List<TableMetadata> tableMetadata = new ArrayList<>();
@@ -133,10 +133,11 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
     private String getColumnProjectionStringNoCheckImpl(final String typeName, final SqlColumn column,
           String projString) {
         if (typeName.startsWith("SYSUDTLIB.ST_GEOMETRY") || typeName.startsWith("JSON")) {
-            projString = CAST + projString + "  as VARCHAR(" + TeradataSqlDialect.maxTeradataVarcharSize + ") )";
+            projString = CAST + projString + "  as VARCHAR(" + TeradataColumnMetadataReader.MAX_TERADATA_VARCHAR_SIZE + ") )";
         } else if (typeName.startsWith("XML")) {
             projString =
-                  "XMLSERIALIZE(DOCUMENT " + projString + " as VARCHAR(" + TeradataSqlDialect.maxTeradataVarcharSize +
+                  "XMLSERIALIZE(DOCUMENT " + projString + " as VARCHAR(" + TeradataColumnMetadataReader.MAX_TERADATA_VARCHAR_SIZE
+                        +
                         ") INCLUDING XMLDECLARATION) ";
         } else if (typeName.startsWith("NUMBER") &&
               column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.DOUBLE) {
@@ -148,7 +149,7 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
         } else if (typeName.startsWith("PERIOD")) {
             projString = CAST + projString + "  as VARCHAR(100) )";
         } else if (typeName.startsWith("CLOB")) {
-            projString = CAST + projString + "  as VARCHAR(" + TeradataSqlDialect.maxTeradataVarcharSize + ") )";
+            projString = CAST + projString + "  as VARCHAR(" + TeradataColumnMetadataReader.MAX_TERADATA_VARCHAR_SIZE + ") )";
         } else if (TYPE_NAME_NOT_SUPPORTED.contains(typeName)) {
             projString = "'" + typeName + " NOT SUPPORTED'";
         } else if (typeName.startsWith("SYSUDTLIB")) {

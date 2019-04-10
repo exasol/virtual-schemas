@@ -5,6 +5,8 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -50,5 +52,11 @@ class TeradataSqlDialectTest {
                                 RTRIM, SOUNDEX, SUBSTR, TRANSLATE, TRIM, UPPER, ADD_DAYS, ADD_HOURS, ADD_MINUTES,
                                 ADD_MONTHS, ADD_SECONDS, ADD_WEEKS, ADD_YEARS, CURRENT_DATE, CURRENT_TIMESTAMP,
                                 NULLIFZERO, ZEROIFNULL, TRUNC, ROUND)));
+    }
+
+    @Test
+    void testMetadataReaderClass() {
+        assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
+                instanceOf(TeradataMetadataReader.class));
     }
 }

@@ -12,11 +12,18 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.JdbcAdapterProperties;
-import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 
+/**
+ * This class implements the Teradata SQL dialect
+ */
 public class TeradataSqlDialect extends AbstractSqlDialect {
-    public final static int maxTeradataVarcharSize = 32000;
     private static final String NAME = "TERADATA";
+
+    @Override
+    protected RemoteMetadataReader createRemoteMetadataReader() {
+        return new TeradataMetadataReader(this.connection, this.properties);
+    }
 
     public TeradataSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
@@ -44,58 +51,6 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
                 ADD_MINUTES, ADD_MONTHS, ADD_SECONDS, ADD_WEEKS, ADD_YEARS, CURRENT_DATE, CURRENT_TIMESTAMP, NULLIFZERO,
                 ZEROIFNULL, TRUNC, ROUND);
         return builder.build();
-    }
-
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
-        DataType colType = null;
-        final int jdbcType = jdbcTypeDescription.getJdbcType();
-        switch (jdbcType) {
-        case Types.TIME:
-            colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
-            break;
-        case 2013: // Types.TIME_WITH_TIMEZONE is Java 1.8 specific
-            colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
-            break;
-        case Types.NUMERIC:
-            final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
-            final int decimalScale = jdbcTypeDescription.getDecimalScale();
-
-            if (decimalPrec <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-                colType = DataType.createDecimal(decimalPrec, decimalScale);
-            } else {
-                colType = DataType.createDouble();
-            }
-            break;
-        case Types.OTHER: // Teradata JDBC uses OTHER for several data types GEOMETRY, INTERVAL etc...
-            final String columnTypeName = jdbcTypeDescription.getTypeName();
-
-            if (columnTypeName.equals("GEOMETRY")) {
-                colType = DataType.createVarChar(jdbcTypeDescription.getPrecisionOrSize(), DataType.ExaCharset.UTF8);
-            } else if (columnTypeName.startsWith("INTERVAL")) {
-                colType = DataType.createVarChar(30, DataType.ExaCharset.UTF8); // TODO verify that varchar 30 is
-                // sufficient in all cases
-            } else if (columnTypeName.startsWith("PERIOD")) {
-                colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8);
-            } else {
-                colType = DataType.createVarChar(TeradataSqlDialect.maxTeradataVarcharSize, DataType.ExaCharset.UTF8);
-            }
-            break;
-        case Types.SQLXML:
-            colType = DataType.createVarChar(TeradataSqlDialect.maxTeradataVarcharSize, DataType.ExaCharset.UTF8);
-            break;
-        case Types.CLOB:
-            colType = DataType.createVarChar(TeradataSqlDialect.maxTeradataVarcharSize, DataType.ExaCharset.UTF8);
-            break;
-        case Types.BLOB:
-        case Types.VARBINARY:
-        case Types.BINARY:
-            colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8);
-            break;
-        case Types.DISTINCT:
-            colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8);
-            break;
-        }
-        return colType;
     }
 
     @Override

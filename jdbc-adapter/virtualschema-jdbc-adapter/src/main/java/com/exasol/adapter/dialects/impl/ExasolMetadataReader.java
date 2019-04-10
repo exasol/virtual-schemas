@@ -6,6 +6,9 @@ import com.exasol.adapter.jdbc.ColumnMetadataReader;
 
 import java.sql.Connection;
 
+/**
+ * This class reads and Exasol-specific database metadata
+ */
 public class ExasolMetadataReader extends BaseRemoteMetadataReader {
     /**
      * Create a new instance of a {@link ExasolMetadataReader}
