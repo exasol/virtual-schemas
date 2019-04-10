@@ -5,7 +5,7 @@ general:
   debugAddress:            ''
   bucketFsUrl:             http://127.0.0.1:6594/default
   jdbcAdapterPath:         /buckets/bfsdefault/default/virtualschema-jdbc-adapter-dist-1.9.1.jar
-  additionalJDBCDriverDir: /var/tmp/vstest/drivers/
+  additionalJDBCDriverDir: /vagrant/drivers/
 
 exasol:
   runIntegrationTests: true
@@ -33,7 +33,7 @@ oracle:
   password:               loader
   dockerName:             myora
   dockerConnectionString: jdbc:oracle:thin:@DBHOST:1521/XE
-  instantclientDir:       /var/tmp/vstest/instantclient/
+  instantclientDir:       /vagrant/instantclient/
 
 hive:
   runIntegrationTests:    false
