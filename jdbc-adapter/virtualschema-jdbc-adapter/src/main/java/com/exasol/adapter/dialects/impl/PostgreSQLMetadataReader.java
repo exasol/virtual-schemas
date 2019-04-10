@@ -3,8 +3,7 @@ package com.exasol.adapter.dialects.impl;
 import java.sql.Connection;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
-import com.exasol.adapter.jdbc.BaseTableMetadataReader;
+import com.exasol.adapter.jdbc.*;
 
 /**
  * This class implements a reader for PostgreSQL-specific metadata
@@ -21,7 +20,12 @@ public class PostgreSQLMetadataReader extends BaseRemoteMetadataReader {
     }
 
     @Override
-    public BaseTableMetadataReader getTableMetadataReader() {
+    public BaseTableMetadataReader createTableMetadataReader() {
         return new PostgreSQLTableMetadataReader(getColumnMetadataReader(), this.properties);
+    }
+
+    @Override
+    public ColumnMetadataReader createColumnMetadataReader() {
+        return new PostgreSQLColumnMetadataReader(this.connection, this.properties);
     }
 }

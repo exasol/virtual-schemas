@@ -62,7 +62,7 @@ public class BaseRemoteMetadataReader implements RemoteMetadataReader {
      * @return column metadata reader
      */
     @Override
-    public ColumnMetadataReader getColumnMetadataReader() {
+    public final ColumnMetadataReader getColumnMetadataReader() {
         return this.columnMetadataReader;
     }
 
@@ -72,7 +72,7 @@ public class BaseRemoteMetadataReader implements RemoteMetadataReader {
      * @return table metadata reader
      */
     @Override
-    public TableMetadataReader getTableMetadataReader() {
+    public final TableMetadataReader getTableMetadataReader() {
         return this.tableMetadataReader;
     }
 
