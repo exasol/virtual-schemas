@@ -7,6 +7,9 @@ import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 
+/**
+ * This class implements Exasol-specific reading of column metadata
+ */
 public class ExasolColumnMetadataReader extends BaseColumnMetadataReader {
     static final int EXASOL_INTERVAL_DAY_TO_SECONDS = -104;
     static final int EXASOL_INTERVAL_YEAR_TO_MONTHS = -103;

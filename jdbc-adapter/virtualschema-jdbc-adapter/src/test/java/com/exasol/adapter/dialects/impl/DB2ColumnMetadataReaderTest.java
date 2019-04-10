@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 import java.sql.Types;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,9 +31,8 @@ class DB2ColumnMetadataReaderTest {
     }
 
     @Test
-    void testMapJdbcTypeIntervalVarcharWithMaxSize() {
-        final JdbcTypeDescription jdbcTypeDescription = new JdbcTypeDescription(
-                DB2ColumnMetadataReader.DB2SQL_VARCHAR_WITH_EXASOL_MAX_SIZE, 0, 0, 0, "");
+    void testMapJdbcTypeOther() {
+        final JdbcTypeDescription jdbcTypeDescription = new JdbcTypeDescription(Types.OTHER, 0, 0, 0, "");
         assertThat(this.db2ColumnMetadataReader.mapJdbcType(jdbcTypeDescription),
                 equalTo(DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8)));
     }
@@ -64,18 +64,23 @@ class DB2ColumnMetadataReaderTest {
     }
 
     @Test
-    void testMapJdbcTypeDB2SqlChar() {
-        final JdbcTypeDescription jdbcTypeDescription = new JdbcTypeDescription(DB2ColumnMetadataReader.DB2SQL_CHAR,
-                0, 0, 0, "");
+    void testMapJdbcTypeBinary() {
+        final JdbcTypeDescription jdbcTypeDescription = new JdbcTypeDescription(Types.BINARY, 0, 0, 0, "");
         assertThat(this.db2ColumnMetadataReader.mapJdbcType(jdbcTypeDescription),
                 equalTo(DataType.createChar(jdbcTypeDescription.getPrecisionOrSize() * 2, DataType.ExaCharset.ASCII)));
     }
 
     @Test
-    void testMapJdbcTypeDB2SqlVarchar() {
-        final JdbcTypeDescription jdbcTypeDescription = new JdbcTypeDescription(DB2ColumnMetadataReader.DB2SQL_VARCHAR,
-              0, 0, 0, "");
+    void testMapJdbcTypeVarbinary() {
+        final JdbcTypeDescription jdbcTypeDescription = new JdbcTypeDescription(Types.VARBINARY, 0, 0, 0, "");
+        assertThat(this.db2ColumnMetadataReader.mapJdbcType(jdbcTypeDescription), equalTo(
+                DataType.createVarChar(jdbcTypeDescription.getPrecisionOrSize() * 2, DataType.ExaCharset.ASCII)));
+    }
+
+    @Test
+    void testMapJdbcTypeDefault() {
+        final JdbcTypeDescription jdbcTypeDescription = new JdbcTypeDescription(Types.BOOLEAN, 0, 0, 0, "BOOLEAN");
         assertThat(this.db2ColumnMetadataReader.mapJdbcType(jdbcTypeDescription),
-              equalTo(DataType.createVarChar(jdbcTypeDescription.getPrecisionOrSize() * 2, DataType.ExaCharset.ASCII)));
+                CoreMatchers.equalTo(DataType.createBool()));
     }
 }

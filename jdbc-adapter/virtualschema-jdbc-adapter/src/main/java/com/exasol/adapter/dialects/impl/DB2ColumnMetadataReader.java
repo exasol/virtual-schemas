@@ -7,11 +7,16 @@ import com.exasol.adapter.metadata.DataType;
 
 import java.sql.*;
 
+/**
+ * This class implements DB2-specific reading of column metadata
+ */
 public class DB2ColumnMetadataReader extends BaseColumnMetadataReader {
-    static final int DB2SQL_VARCHAR_WITH_EXASOL_MAX_SIZE = 1111;
-    static final int DB2SQL_CHAR = -2;
-    static final int DB2SQL_VARCHAR = -3;
-
+    /**
+     * Create a new instance of an {@link DB2ColumnMetadataReader}
+     *
+     * @param connection connection to the remote data source
+     * @param properties user-defined adapter properties
+     */
     public DB2ColumnMetadataReader(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
@@ -21,7 +26,7 @@ public class DB2ColumnMetadataReader extends BaseColumnMetadataReader {
         final int size = jdbcTypeDescription.getPrecisionOrSize();
         switch (jdbcTypeDescription.getJdbcType()) {
         case Types.CLOB:
-        case DB2SQL_VARCHAR_WITH_EXASOL_MAX_SIZE:
+        case Types.OTHER:
             return DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
         case Types.TIMESTAMP:
             return DataType.createVarChar(32, DataType.ExaCharset.UTF8);
@@ -32,9 +37,9 @@ public class DB2ColumnMetadataReader extends BaseColumnMetadataReader {
         case Types.NCHAR:
         case Types.LONGNVARCHAR:
             return getLiteralDataType(size);
-        case DB2SQL_CHAR:
+        case Types.BINARY:
             return DataType.createChar(size * 2, DataType.ExaCharset.ASCII);
-        case DB2SQL_VARCHAR:
+        case Types.VARBINARY:
             return DataType.createVarChar(size * 2, DataType.ExaCharset.ASCII);
         default:
             return super.mapJdbcType(jdbcTypeDescription);

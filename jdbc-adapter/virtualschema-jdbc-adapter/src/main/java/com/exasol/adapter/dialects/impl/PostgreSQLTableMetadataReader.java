@@ -18,7 +18,7 @@ public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
     static final String POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY = "POSTGRESQL_IDENTIFIER_MAPPING";
 
     /**
-     * Create a new {@link PostgresTableMetadataReader} instance
+     * Create a new {@link PostgreSQLTableMetadataReader} instance
      *
      * @param columnMetadataReader reader to be used to map the metadata of the tables columns
      */
