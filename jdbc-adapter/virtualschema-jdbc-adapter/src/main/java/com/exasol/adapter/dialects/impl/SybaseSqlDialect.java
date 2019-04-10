@@ -6,14 +6,13 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
-import java.sql.*;
+import java.sql.Connection;
 import java.util.EnumMap;
 import java.util.Map;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
@@ -61,77 +60,6 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
                 ST_ISSIMPLE, ST_OVERLAPS, ST_SYMDIFFERENCE, ST_TOUCHES, ST_UNION, ST_WITHIN, BIT_AND, BIT_NOT, BIT_OR,
                 BIT_XOR, CASE, HASH_MD5, HASH_SHA, HASH_SHA1, NULLIFZERO, ZEROIFNULL);
         return builder.build();
-    }
-
-    @Override
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
-        DataType colType = null;
-        final int jdbcType = jdbcTypeDescription.getJdbcType();
-        final String columnTypeName = jdbcTypeDescription.getTypeName();
-
-        switch (jdbcType) {
-        case Types.VARCHAR: // the JTDS JDBC Type for date, time, datetime2, datetimeoffset is 12
-            if (columnTypeName.equalsIgnoreCase("date")) {
-                colType = DataType.createDate();
-            } else if (columnTypeName.equalsIgnoreCase("datetime2")) {
-                colType = DataType.createTimestamp(false);
-            }
-            break;
-        case Types.TIME:
-            colType = DataType.createVarChar(210, DataType.ExaCharset.UTF8);
-            break;
-        case 2013: // Types.TIME_WITH_TIMEZONE is Java 1.8 specific
-            colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
-            break;
-        case Types.DATE:
-            colType = DataType.createDate();
-            break;
-        case Types.NUMERIC:
-        case Types.DECIMAL:
-            final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
-            final int decimalScale = jdbcTypeDescription.getDecimalScale();
-
-            if (decimalPrec <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-                colType = DataType.createDecimal(decimalPrec, decimalScale);
-            } else {
-                int size = decimalPrec + 1;
-                if (decimalScale > 0) {
-                    size++;
-                }
-                colType = DataType.createVarChar(size, DataType.ExaCharset.UTF8);
-            }
-            break;
-        case Types.OTHER:
-
-            // TODO
-            colType = DataType.createVarChar(SybaseSqlDialect.maxSybaseVarcharSize, DataType.ExaCharset.UTF8);
-            break;
-
-        case Types.SQLXML:
-
-            colType = DataType.createVarChar(SybaseSqlDialect.maxSybaseVarcharSize, DataType.ExaCharset.UTF8);
-            break;
-
-        case Types.CLOB: // TEXT and UNITEXT types in Sybase
-
-            colType = DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
-            break;
-
-        case Types.BLOB:
-            if (columnTypeName.equalsIgnoreCase("hierarchyid")) {
-                colType = DataType.createVarChar(4000, DataType.ExaCharset.UTF8);
-            }
-            if (columnTypeName.equalsIgnoreCase("geometry")) {
-                colType = DataType.createVarChar(SybaseSqlDialect.maxSybaseVarcharSize, DataType.ExaCharset.UTF8);
-            } else {
-                colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8);
-            }
-            break;
-        case Types.DISTINCT:
-            colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8);
-            break;
-        }
-        return colType;
     }
 
     @Override

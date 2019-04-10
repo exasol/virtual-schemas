@@ -24,7 +24,7 @@ class SybaseMetadataReaderTest {
     }
 
     @Test
-    void testGetColumnMetadataReader() {
-        assertThat(this.reader.getColumnMetadataReader(), instanceOf(SybaseColumnMetadataReader.class));
+    void testGetColumnMetadataReaderReusesSqlServerColumnMetadataReader() {
+        assertThat(this.reader.getColumnMetadataReader(), instanceOf(SqlServerColumnMetadataReader.class));
     }
 }

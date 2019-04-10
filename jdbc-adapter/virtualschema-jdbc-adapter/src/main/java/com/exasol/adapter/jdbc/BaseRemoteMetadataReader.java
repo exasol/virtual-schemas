@@ -80,7 +80,8 @@ public class BaseRemoteMetadataReader implements RemoteMetadataReader {
     public SchemaMetadata readRemoteSchemaMetadata() {
         try {
             final DatabaseMetaData remoteMetadata = this.connection.getMetaData();
-            final String adapterNotes = null;
+            final String adapterNotes = SchemaAdapterNotesJsonConverter.getInstance()
+                    .convertToJson(getSchemaAdapterNotes());
             final List<TableMetadata> tables = extractTableMetadata(remoteMetadata);
             return new SchemaMetadata(adapterNotes, tables);
         } catch (final SQLException exception) {
@@ -89,7 +90,8 @@ public class BaseRemoteMetadataReader implements RemoteMetadataReader {
     }
 
     private List<TableMetadata> extractTableMetadata(final DatabaseMetaData remoteMetadata) throws SQLException {
-        try (final ResultSet remoteTables = remoteMetadata.getTables(ANY_CATALOG, ANY_SCHEMA, ANY_TABLE, ANY_TYPE)) {
+        try (final ResultSet remoteTables = remoteMetadata.getTables(ANY_CATALOG, ANY_SCHEMA, ANY_TABLE,
+                SUPPORTED_TABLE_TYPES.toArray(new String[0]))) {
             return mapTables(remoteTables);
         }
     }

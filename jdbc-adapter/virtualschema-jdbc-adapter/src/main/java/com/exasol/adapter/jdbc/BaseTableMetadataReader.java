@@ -39,27 +39,46 @@ public class BaseTableMetadataReader implements TableMetadataReader {
     public List<TableMetadata> mapTables(final ResultSet remoteTables) throws SQLException {
         final List<TableMetadata> translatedTables = new ArrayList<>();
         while (remoteTables.next()) {
-            final String tableName = readTableName(remoteTables);
-            if (isTableIncludedByMapping(tableName)) {
-                final TableMetadata tableMetadata = mapTable(remoteTables, tableName);
-                LOGGER.fine(() -> "Mapping table metadata for remote table \"" + tableName + "\".");
-                translatedTables.add(tableMetadata);
-            } else {
-                LOGGER.fine(() -> "Skipping table \"" + tableName + "\" when mapping remote metadata.");
-            }
+            mapOrSkipTable(remoteTables, translatedTables);
         }
         return translatedTables;
     }
 
-    protected TableMetadata mapTable(final ResultSet remoteTables, final String tableName) throws SQLException {
-        final String comment = readComment(remoteTables);
-        final List<ColumnMetadata> columns = this.columnMetadataReader.mapColumns(tableName);
-        final String adapterNotes = DEFAULT_TABLE_ADAPTER_NOTES;
-        return new TableMetadata(adjustIdentifierCase(tableName), adapterNotes, columns, comment);
+    protected void mapOrSkipTable(final ResultSet remoteTables, final List<TableMetadata> translatedTables)
+            throws SQLException {
+        final String tableName = readTableName(remoteTables);
+        if (isTableIncludedByMapping(tableName)) {
+            if (isTableFilteredOut(tableName)) {
+                LOGGER.fine(() -> "Skipping table \"" + tableName
+                        + "\" when mapping remote data due to user-defined table filter");
+            } else {
+                LOGGER.fine(() -> "Mapping table metadata for remote table \"" + tableName + "\".");
+                final TableMetadata tableMetadata = mapTable(remoteTables, tableName);
+                translatedTables.add(tableMetadata);
+            }
+        } else {
+            LOGGER.fine(() -> "Skipping unsupported table \"" + tableName + "\" when mapping remote metadata.");
+        }
     }
 
     protected String readTableName(final ResultSet remoteTables) throws SQLException {
         return remoteTables.getString(NAME_COLUMN);
+    }
+
+    @Override
+    public boolean isTableIncludedByMapping(final String tableName) {
+        return true;
+    }
+
+    private boolean isTableFilteredOut(final String tableName) {
+        return this.properties.getFilteredTables().contains(tableName);
+    }
+
+    protected TableMetadata mapTable(final ResultSet table, final String tableName) throws SQLException {
+        final String comment = readComment(table);
+        final List<ColumnMetadata> columns = this.columnMetadataReader.mapColumns(tableName);
+        final String adapterNotes = DEFAULT_TABLE_ADAPTER_NOTES;
+        return new TableMetadata(adjustIdentifierCase(tableName), adapterNotes, columns, comment);
     }
 
     protected String readComment(final ResultSet remoteTables) throws SQLException {
@@ -94,10 +113,5 @@ public class BaseTableMetadataReader implements TableMetadataReader {
 
     protected boolean isUnquotedIdentifier(final String identifier) {
         return UNQUOTED_IDENTIFIER_PATTERN.matcher(identifier).matches();
-    }
-
-    @Override
-    public boolean isTableIncludedByMapping(final String tableName) {
-        return true;
     }
 }

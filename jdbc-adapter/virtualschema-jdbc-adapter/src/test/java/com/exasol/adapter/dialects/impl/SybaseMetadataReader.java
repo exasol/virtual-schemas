@@ -20,8 +20,13 @@ public class SybaseMetadataReader extends BaseRemoteMetadataReader {
         super(connection, properties);
     }
 
+    /**
+     * Create a column metadata reader
+     * <p>
+     * Due to the close relationship between Sybase and SQLSever, we reuse the SQLServer column metadata reader here.
+     */
     @Override
     protected ColumnMetadataReader createColumnMetadataReader() {
-        return new SybaseColumnMetadataReader(this.connection, this.properties);
+        return new SqlServerColumnMetadataReader(this.connection, this.properties);
     }
 }

@@ -63,18 +63,10 @@ public interface SqlDialect {
         return "SqlDialect interface";
     }
 
-    //
-    // CAPABILITIES
-    //
-
     /**
      * @return The set of capabilities supported by this SQL-Dialect
      */
     public Capabilities getCapabilities();
-
-    //
-    // MAPPING OF METADATA: CATALOGS, SCHEMAS, TABLES AND DATA TYPES
-    //
 
     public enum SchemaOrCatalogSupport {
         SUPPORTED, UNSUPPORTED, UNKNOWN

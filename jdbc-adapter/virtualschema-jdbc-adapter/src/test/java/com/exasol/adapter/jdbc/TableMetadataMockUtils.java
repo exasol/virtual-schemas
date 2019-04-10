@@ -47,11 +47,11 @@ public final class TableMetadataMockUtils {
         if (count == 0) {
             when(tablesMock.next()).thenReturn(false);
         } else {
-            final Boolean[] nextResults = new Boolean[count + 1];
-            for (int i = 0; i < count; ++i) {
+            final Boolean[] nextResults = new Boolean[count];
+            for (int i = 0; i < (count - 1); ++i) {
                 nextResults[i] = true;
             }
-            nextResults[count] = false;
+            nextResults[count - 1] = false;
             when(tablesMock.next()).thenReturn(true, nextResults);
         }
     }

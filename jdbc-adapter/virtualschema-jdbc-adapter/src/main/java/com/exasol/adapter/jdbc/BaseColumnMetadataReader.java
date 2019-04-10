@@ -110,8 +110,7 @@ public class BaseColumnMetadataReader implements ColumnMetadataReader {
 
     protected boolean isRemoteColumnNullable(final ResultSet remoteColumn, final String columnName) {
         try {
-            final String nullable = remoteColumn.getString(NULLABLE_COLUMN);
-            return !JDBC_FALSE.equalsIgnoreCase(nullable);
+            return !JDBC_FALSE.equalsIgnoreCase(remoteColumn.getString(NULLABLE_COLUMN));
         } catch (final SQLException exception) {
             LOGGER.warning(() -> "Caught an SQL exception trying to determine whether column \"" + columnName
                     + "\" is nullable: " + exception.getMessage());

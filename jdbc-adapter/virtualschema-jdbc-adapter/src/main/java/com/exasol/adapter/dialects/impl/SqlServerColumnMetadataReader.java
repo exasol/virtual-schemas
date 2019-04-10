@@ -46,7 +46,7 @@ public class SqlServerColumnMetadataReader extends BaseColumnMetadataReader {
         case Types.OTHER:
         case Types.SQLXML:
             return DataType.createVarChar(SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-        case Types.CLOB: // xml type in SQL Server
+        case Types.CLOB:
             return DataType.createVarChar(SqlServerSqlDialect.MAX_SQLSERVER_CLOB_SIZE, DataType.ExaCharset.UTF8);
         case Types.BLOB:
             return mapBlob(jdbcTypeDescription);
