@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects.impl;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
@@ -60,6 +61,10 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
             stmt.execute("create table t2(x int, y varchar(100))");
             stmt.execute("truncate table t2");
             stmt.execute("insert into t2 values (2,'bbb'), (3,'ccc')");
+
+            stmt.execute("CREATE TABLE ALL_HIVE_DATA_TYPES(ARRAYCOL ARRAY<string>, BIGINTEGER BIGINT, BOOLCOLUMN BOOLEAN, CHARCOLUMN CHAR(1), DECIMALCOL DECIMAL(10,0), DOUBLECOL DOUBLE, FLOATCOL FLOAT, INTCOL INT, MAPCOL MAP<string,int>, SMALLINTEGER SMALLINT, STRINGCOL STRING, STRUCTCOL struct<a : int, b : int>, TIMESTAMPCOL TIMESTAMP, TINYINTEGER TINYINT, VARCHARCOL VARCHAR(10), BINARYCOL BINARY, DATECOL DATE)");
+            stmt.execute("truncate table ALL_HIVE_DATA_TYPES");
+            stmt.execute("insert into all_hive_data_types(arraycol,biginteger,boolcolumn,charcolumn,decimalcol,doublecol,floatcol,intcol,mapcol,smallinteger,stringcol,structcol,timestampcol,tinyinteger,varcharcol,binarycol,datecol) select array('etet','ettee'), 56, true, '2', 53, 56.3, 5.199999809265137, 85, map('jkljj',5), 2, 'tshg', named_struct('a',2,'b',4), timestamp '2017-01-02 13:32:50.744', 1, 'tytu', 'MTAxMA==', date '1970-01-01' from t");
         }
     }
 
@@ -115,7 +120,6 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         assertFalse(result.next());
     }
 
-/*
     @Test
     public void testTypeMapping() throws SQLException, ClassNotFoundException, FileNotFoundException {
         final ResultSet result = executeQuery(
@@ -124,7 +128,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         matchNextRow(result, "ARRAYCOL", "VARCHAR(255) ASCII", (long) 255, null, null, null);
         matchNextRow(result, "BIGINTEGER", "DECIMAL(19,0)", (long) 19, (long) 19, (long) 0, null);
         matchNextRow(result, "BOOLCOLUMN", "BOOLEAN", (long) 1, null, null, null);
-        matchNextRow(result, "CHARCOLUMN", "CHAR(1) UTF8", (long) 1, null, null, null);
+        matchNextRow(result, "CHARCOLUMN", "CHAR(1) ASCII", (long) 1, null, null, null);
         matchNextRow(result, "DECIMALCOL", "DECIMAL(10,0)", (long) 10, (long) 10, (long) 0, null);
         matchNextRow(result, "DOUBLECOL", "DOUBLE", (long) 64, null, null, null);
         matchNextRow(result, "FLOATCOL", "DOUBLE", (long) 64, null, null, null);
@@ -135,7 +139,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         matchNextRow(result, "STRUCTCOL", "VARCHAR(255) ASCII", (long) 255, null, null, null);
         matchNextRow(result, "TIMESTAMPCOL", "TIMESTAMP", (long) 29, null, null, null);
         matchNextRow(result, "TINYINTEGER", "DECIMAL(3,0)", (long) 3, (long) 3, (long) 0, null);
-        matchNextRow(result, "VARCHARCOL", "VARCHAR(10) UTF8", (long) 10, null, null, null);
+        matchNextRow(result, "VARCHARCOL", "VARCHAR(10) ASCII", (long) 10, null, null, null);
         matchNextRow(result, "BINARYCOL", "VARCHAR(2000000) UTF8", (long) 2000000, null, null, null);
         matchLastRow(result, "DATECOL", "DATE", (long) 10, null, null, null);
     }
@@ -144,8 +148,8 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     public void testSelectWithAllTypes() throws SQLException {
         final ResultSet result = executeQuery("SELECT * from " + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES");
         matchNextRow(result, "[\"etet\",\"ettee\"]", new BigDecimal("56"), true, "2", (long) 53, 56.3,
-                5.199999809265137, (long) 85, "{\"jkljj\":5}", 2, "tshg", "{\"a\":\"value\",\"b\":{\"c\":8}}",
-                getSqlTimestamp(2017, 1, 2, 13, 32, 50, 744), (short) 1, "tytu", "MTAxMA==", getSqlDate(1970, 1, 1));
+                5.199999809265137, (long) 85, "{\"jkljj\":5}", 2, "tshg", "{\"a\":2,\"b\":4}",
+                getSqlTimestamp(2017, 1, 2, 13, 32, 50, 744), (short) 1, "tytu", "TVRBeE1BPT0=", getSqlDate(1970, 1, 1));
     }
 
     @Test
@@ -153,15 +157,15 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT BIGINTEGER FROM " + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new BigDecimal("56"));
-        matchSingleRowExplain(query, "SELECT `BIGINTEGER` FROM `xperience`.`ALL_HIVE_DATA_TYPES`");
+        matchSingleRowExplain(query, "SELECT `BIGINTEGER` FROM `default`.`ALL_HIVE_DATA_TYPES`");
     }
 
     @Test
     public void testRewrittenProjection() throws SQLException {
         final String query = "SELECT BINARYCOL FROM " + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, "MTAxMA==");
-        matchSingleRowExplain(query, "SELECT base64(`BINARYCOL`) FROM `xperience`.`ALL_HIVE_DATA_TYPES`");
+        matchNextRow(result, "TVRBeE1BPT0=");
+        matchSingleRowExplain(query, "SELECT base64(`BINARYCOL`) FROM `default`.`ALL_HIVE_DATA_TYPES`");
     }
 
     @Test
@@ -169,20 +173,19 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT boolcolumn, min(biginteger) FROM " + VIRTUAL_SCHEMA
                 + ".ALL_HIVE_DATA_TYPES GROUP BY boolcolumn";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, false, new BigDecimal("56"));
-        matchNextRow(result, true, new BigDecimal("51"));
+        matchNextRow(result, true, new BigDecimal("56"));
         matchSingleRowExplain(query,
-                "SELECT `BOOLCOLUMN`, MIN(`BIGINTEGER`) FROM `xperience`.`ALL_HIVE_DATA_TYPES` GROUP BY `BOOLCOLUMN`");
+                "SELECT `BOOLCOLUMN`, MIN(`BIGINTEGER`) FROM `default`.`ALL_HIVE_DATA_TYPES` GROUP BY `BOOLCOLUMN`");
     }
 
     @Test
     public void testAggregateHaving() throws SQLException, ClassNotFoundException, FileNotFoundException {
         final String query = "SELECT boolcolumn, min(biginteger) FROM " + VIRTUAL_SCHEMA
-                + ".ALL_HIVE_DATA_TYPES GROUP BY boolcolumn having min(biginteger)<56";
+                + ".ALL_HIVE_DATA_TYPES GROUP BY boolcolumn having min(biginteger)<57";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, true, new BigDecimal("51"));
+        matchNextRow(result, true, new BigDecimal("56"));
         matchSingleRowExplain(query,
-                "SELECT `BOOLCOLUMN`, MIN(`BIGINTEGER`) FROM `xperience`.`ALL_HIVE_DATA_TYPES` GROUP BY `BOOLCOLUMN` HAVING MIN(`BIGINTEGER`) < 56");
+                "SELECT `BOOLCOLUMN`, MIN(`BIGINTEGER`) FROM `default`.`ALL_HIVE_DATA_TYPES` GROUP BY `BOOLCOLUMN` HAVING MIN(`BIGINTEGER`) < 57");
     }
 
     @Test
@@ -193,8 +196,8 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new BigDecimal("56"), false, true, true, true, false, false);
         matchSingleRowExplain(query,
-                "SELECT `BIGINTEGER`, `BIGINTEGER` = 60, `BIGINTEGER` != 60, `BIGINTEGER` < 60, `BIGINTEGER` <= 60, 60 < `BIGINTEGER`,"
-                        + " 60 <= `BIGINTEGER` FROM `xperience`.`ALL_HIVE_DATA_TYPES` WHERE `INTCOL` = 85");
+                "SELECT `BIGINTEGER`, `BIGINTEGER` = 60, `BIGINTEGER` <> 60, `BIGINTEGER` < 60, `BIGINTEGER` <= 60, 60 < `BIGINTEGER`,"
+                        + " 60 <= `BIGINTEGER` FROM `default`.`ALL_HIVE_DATA_TYPES` WHERE `INTCOL` = 85");
     }
 
     @Test
@@ -203,9 +206,8 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         final String query = "select biginteger from " + VIRTUAL_SCHEMA
                 + ".ALL_HIVE_DATA_TYPES where (biginteger < 56 or biginteger > 56) and not (biginteger is null)";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, new BigDecimal("51"));
-        matchNextRow(result, new BigDecimal("60"));
-        matchSingleRowExplain(query, "SELECT `BIGINTEGER` FROM `xperience`.`ALL_HIVE_DATA_TYPES` "
+        assertEquals(false, result.next());
+        matchSingleRowExplain(query, "SELECT `BIGINTEGER` FROM `default`.`ALL_HIVE_DATA_TYPES` "
                 + "WHERE ((`BIGINTEGER` < 56 OR 56 < `BIGINTEGER`) AND NOT (`BIGINTEGER` IS NULL))");
     }
 
@@ -217,7 +219,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "tytu", false);
         matchSingleRowExplain(query,
-                "SELECT `VARCHARCOL` FROM `xperience`.`ALL_HIVE_DATA_TYPES` WHERE `VARCHARCOL` LIKE 't%'");
+                "SELECT `VARCHARCOL` FROM `default`.`ALL_HIVE_DATA_TYPES` WHERE `VARCHARCOL` LIKE 't%'");
     }
 
     @Test
@@ -226,9 +228,9 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         final String query = "select varcharcol from " + VIRTUAL_SCHEMA
                 + ".ALL_HIVE_DATA_TYPES where varcharcol REGEXP_LIKE 'a+'";
         final ResultSet result = executeQuery(query);
-        matchLastRow(result, "anotherStr");
+        assertEquals(false, result.next());
         matchSingleRowExplain(query,
-                "SELECT `VARCHARCOL` FROM `xperience`.`ALL_HIVE_DATA_TYPES` WHERE `VARCHARCOL`REGEXP'a+'");
+                "SELECT `VARCHARCOL` FROM `default`.`ALL_HIVE_DATA_TYPES` WHERE `VARCHARCOL`REGEXP'a+'");
     }
 
     @Test
@@ -238,9 +240,8 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
                 + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES WHERE biginteger between 51 and 60";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new BigDecimal("56"), true, false, true);
-        matchNextRow(result, new BigDecimal("51"), false, false, true);
         matchSingleRowExplain(query, "SELECT `BIGINTEGER`, `BIGINTEGER` IN (56, 61), `BIGINTEGER` IS NULL, "
-                + "`BIGINTEGER` IS NOT NULL FROM `xperience`.`ALL_HIVE_DATA_TYPES` WHERE `BIGINTEGER` BETWEEN 51 AND 60");
+                + "`BIGINTEGER` IS NOT NULL FROM `default`.`ALL_HIVE_DATA_TYPES` WHERE `BIGINTEGER` BETWEEN 51 AND 60");
     }
 
     @Test
@@ -248,9 +249,9 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT COUNT(biginteger), COUNT(*), COUNT(DISTINCT biginteger), SUM(biginteger), SUM(DISTINCT biginteger) from "
                 + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, new BigDecimal("7"), new BigDecimal("8"), new BigDecimal("3"), 403.0, 167.0);
+        matchNextRow(result, new BigDecimal("1"), new BigDecimal("1"), new BigDecimal("1"), 56.0, 56.0);
         matchSingleRowExplain(query,
-                "SELECT COUNT(`BIGINTEGER`), COUNT(*), COUNT(DISTINCT `BIGINTEGER`), SUM(`BIGINTEGER`), SUM(DISTINCT `BIGINTEGER`) FROM `xperience`.`ALL_HIVE_DATA_TYPES`");
+                "SELECT COUNT(`BIGINTEGER`), COUNT(*), COUNT(DISTINCT `BIGINTEGER`), SUM(`BIGINTEGER`), SUM(DISTINCT `BIGINTEGER`) FROM `default`.`ALL_HIVE_DATA_TYPES`");
     }
 
     @Test
@@ -258,9 +259,9 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT AVG(biginteger), MIN(biginteger), MAX(biginteger) from " + VIRTUAL_SCHEMA
                 + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, 57.57142857142857, new BigDecimal("51"), new BigDecimal("60"));
+        matchNextRow(result, 56.0, new BigDecimal("56"), new BigDecimal("56"));
         matchSingleRowExplain(query,
-                "SELECT AVG(`BIGINTEGER`), MIN(`BIGINTEGER`), MAX(`BIGINTEGER`) FROM `xperience`.`ALL_HIVE_DATA_TYPES`");
+                "SELECT AVG(`BIGINTEGER`), MIN(`BIGINTEGER`), MAX(`BIGINTEGER`) FROM `default`.`ALL_HIVE_DATA_TYPES`");
     }
 
     @Test
@@ -271,7 +272,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         matchNextRow(result, "TYTUtytutytu");
         matchSingleRowExplain(query,
                 "SELECT CAST(CONCAT(CAST(UPPER(`VARCHARCOL`) as string),CAST(LOWER(CAST(REPEAT(`VARCHARCOL`,2) "
-                        + "as string)) as string)) as string) FROM `xperience`.`ALL_HIVE_DATA_TYPES`");
+                        + "as string)) as string)) as string) FROM `default`.`ALL_HIVE_DATA_TYPES`");
     }
 
     @Test
@@ -281,7 +282,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new BigDecimal("1"), new BigDecimal("0"));
         matchSingleRowExplain(query,
-                "SELECT `BIGINTEGER` DIV `BIGINTEGER`, `BIGINTEGER` % `BIGINTEGER` FROM `xperience`.`ALL_HIVE_DATA_TYPES`");
+                "SELECT `BIGINTEGER` DIV `BIGINTEGER`, `BIGINTEGER` % `BIGINTEGER` FROM `default`.`ALL_HIVE_DATA_TYPES`");
     }
 
     @Test
@@ -289,36 +290,35 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         final String query = "select substring(stringcol FROM 1 FOR 2) from " + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "ts");
-        matchSingleRowExplain(query, "SELECT SUBSTR(`STRINGCOL`, 1, 2) FROM `xperience`.`ALL_HIVE_DATA_TYPES`");
+        matchSingleRowExplain(query, "SELECT SUBSTR(`STRINGCOL`, 1, 2) FROM `default`.`ALL_HIVE_DATA_TYPES`");
     }
 
-    // can not test because it is supported only in newer Hive version
+    @Test
     public void testOrderBy() throws SQLException {
         final String query = "SELECT boolcolumn, biginteger from " + VIRTUAL_SCHEMA
                 + ".ALL_HIVE_DATA_TYPES ORDER BY biginteger";
         final ResultSet result = executeQuery(query);
         matchSingleRowExplain(query,
-                "SELECT `BIGINTEGER`, `BOOLCOLUMN` FROM `xperience`.`ALL_HIVE_DATA_TYPES` ORDER BY `BIGINTEGER` NULLS LAST");
+                "SELECT `BIGINTEGER`, `BOOLCOLUMN` FROM `default`.`ALL_HIVE_DATA_TYPES` ORDER BY `BIGINTEGER` NULLS LAST");
     }
 
-    // can not test because it is supported only in newer Hive version
+    @Test
     public void testOrderByLimit() throws SQLException {
         final String query = "SELECT boolcolumn, biginteger from " + VIRTUAL_SCHEMA
                 + ".ALL_HIVE_DATA_TYPES ORDER BY biginteger LIMIT 3";
         final ResultSet result = executeQuery(query);
         matchSingleRowExplain(query,
-                "SELECT `BIGINTEGER`, `BOOLCOLUMN` FROM `xperience`.`ALL_HIVE_DATA_TYPES` ORDER BY `BIGINTEGER` NULLS LAST LIMIT 3");
+                "SELECT `BIGINTEGER`, `BOOLCOLUMN` FROM `default`.`ALL_HIVE_DATA_TYPES` ORDER BY `BIGINTEGER` NULLS LAST LIMIT 3");
     }
 
-    // can not test because it is supported only in newer Hive version
+    @Test
     public void testOrderByLimitOffset() throws SQLException {
         final String query = "SELECT boolcolumn, biginteger from " + VIRTUAL_SCHEMA
                 + ".ALL_HIVE_DATA_TYPES ORDER BY biginteger LIMIT 2 offset 1";
         final ResultSet result = executeQuery(query);
         matchSingleRowExplain(query,
-                "SELECT `BIGINTEGER`, `BOOLCOLUMN` FROM `xperience`.`ALL_HIVE_DATA_TYPES` ORDER BY `BIGINTEGER` NULLS LAST");
+                "SELECT `BIGINTEGER`, `BOOLCOLUMN` FROM `default`.`ALL_HIVE_DATA_TYPES` ORDER BY `BIGINTEGER` NULLS LAST");
     }
-    */
 
     private static void createHiveJDBCAdapter() throws SQLException, FileNotFoundException {
         final List<String> hiveIncludes = new ArrayList<>();
