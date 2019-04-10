@@ -6,7 +6,7 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
-import java.sql.*;
+import java.sql.Connection;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -14,12 +14,10 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
-import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.ScalarFunction;
 
 public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "POSTGRESQL";
-    private static final int MAX_POSTGRES_SQL_VARCHAR_SIZE_BASED_ON_EXASOL_LIMIT = 2000000;
     static final String POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY = "POSTGRESQL_IDENTIFIER_MAPPING";
     private static final PostgreSQLIdentifierMapping DEFAULT_POSTGRESS_IDENTIFIER_MAPPING = PostgreSQLIdentifierMapping.CONVERT_TO_UPPER;
 
@@ -53,34 +51,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
                 SECOND, DAY, WEEK, MONTH, YEAR, CURRENT_DATE, CURRENT_TIMESTAMP, DATE_TRUNC, EXTRACT, LOCALTIMESTAMP,
                 POSIX_TIME, TO_CHAR, CASE, HASH_MD5);
         return builder.build();
-    }
-
-    @Override
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
-        DataType colType = null;
-        final int jdbcType = jdbcTypeDescription.getJdbcType();
-        switch (jdbcType) {
-        case Types.OTHER:
-            final String columnTypeName = jdbcTypeDescription.getTypeName();
-            if (columnTypeName.equals("varbit")) {
-                final int n = jdbcTypeDescription.getPrecisionOrSize();
-                colType = DataType.createVarChar(n, DataType.ExaCharset.UTF8);
-            } else {
-                colType = DataType.createVarChar(
-                        PostgreSQLSqlDialect.MAX_POSTGRES_SQL_VARCHAR_SIZE_BASED_ON_EXASOL_LIMIT,
-                        DataType.ExaCharset.UTF8);
-            }
-            break;
-        case Types.SQLXML:
-        case Types.DISTINCT:
-            colType = DataType.createVarChar(PostgreSQLSqlDialect.MAX_POSTGRES_SQL_VARCHAR_SIZE_BASED_ON_EXASOL_LIMIT,
-                    DataType.ExaCharset.UTF8);
-            break;
-        default:
-            break;
-        }
-
-        return colType;
     }
 
     private PostgreSQLIdentifierMapping getIdentifierMapping() {

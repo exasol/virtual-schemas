@@ -7,7 +7,6 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -90,7 +89,7 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         if (this.properties.containsKey(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY)) {
             return getOracleNumberTypeFromProperty();
         } else {
-            return DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+            return DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
         }
     }
 
@@ -189,11 +188,5 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         } else {
             return ImportType.JDBC;
         }
-    }
-
-    @Override
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
     }
 }

@@ -53,7 +53,7 @@ class OracleColumnMetadataReaderTest {
         final int scale = OracleColumnMetadataReader.ORACLE_MAGIC_NUMBER_SCALE;
         final JdbcTypeDescription typeDescription = createTypeDescriptionForNumeric(precision, scale);
         assertThat(this.columnMetadataReader.mapJdbcType(typeDescription),
-                equalTo(DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8)));
+                equalTo(DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8)));
     }
 
     @Test

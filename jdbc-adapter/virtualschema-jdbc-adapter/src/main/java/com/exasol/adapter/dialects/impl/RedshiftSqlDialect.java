@@ -6,14 +6,13 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
-import java.sql.*;
+import java.sql.Connection;
 import java.util.EnumMap;
 import java.util.Map;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
@@ -48,24 +47,6 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
                 BIT_OR, ADD_MONTHS, MONTHS_BETWEEN, CONVERT_TZ, SYSDATE, YEAR, CURRENT_DATE, CURRENT_TIMESTAMP, EXTRACT,
                 CAST, TO_NUMBER, TO_TIMESTAMP, TO_DATE, HASH_SHA1, HASH_MD5, CURRENT_SCHEMA, CURRENT_USER);
         return builder.build();
-    }
-
-    @Override
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
-        DataType colType = null;
-        final int jdbcType = jdbcTypeDescription.getJdbcType();
-        switch (jdbcType) {
-        case Types.NUMERIC:
-            final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
-            final int decimalScale = jdbcTypeDescription.getDecimalScale();
-            if (decimalPrec <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-                colType = DataType.createDecimal(decimalPrec, decimalScale);
-            } else {
-                colType = DataType.createDouble();
-            }
-            break;
-        }
-        return colType;
     }
 
     @Override

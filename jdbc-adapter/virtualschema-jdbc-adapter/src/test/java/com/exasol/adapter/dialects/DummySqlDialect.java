@@ -1,12 +1,10 @@
 package com.exasol.adapter.dialects;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
-import com.exasol.adapter.metadata.DataType;
 
 public class DummySqlDialect extends AbstractSqlDialect {
     public static String getPublicName() {
@@ -80,8 +78,4 @@ public class DummySqlDialect extends AbstractSqlDialect {
         return null;
     }
 
-    @Override
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
-        return null;
-    }
 }

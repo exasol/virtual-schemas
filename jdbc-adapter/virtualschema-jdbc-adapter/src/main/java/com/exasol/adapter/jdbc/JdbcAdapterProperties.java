@@ -73,7 +73,7 @@ public final class JdbcAdapterProperties {
     public static DataType getOracleNumberTargetType(final Map<String, String> properties) {
         final String precisionAndScale = getProperty(properties, PROP_ORACLE_CAST_NUMBER_TO_DECIMAL);
         if (precisionAndScale.trim().isEmpty()) {
-            return DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+            return DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
         }
         final List<String> precisionAndScaleList = Arrays.stream(precisionAndScale.split(",")).map(String::trim)
                 .collect(Collectors.toList());

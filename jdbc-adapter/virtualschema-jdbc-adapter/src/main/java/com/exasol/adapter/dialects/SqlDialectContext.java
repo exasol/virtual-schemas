@@ -22,7 +22,7 @@ public class SqlDialectContext {
     }
 
     public SqlDialectContext(final SchemaAdapterNotes schemaAdapterNotes, final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping, final ImportType importType) {
-        this(schemaAdapterNotes, postgreSQLIdentifierMapping, importType, DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8));
+        this(schemaAdapterNotes, postgreSQLIdentifierMapping, importType, DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8));
     }
 
     public SqlDialectContext(final SchemaAdapterNotes schemaAdapterNotes, final PostgreSQLIdentifierMapping postgreSQLIdentifierMapping, final DataType oracleNumberTargetType) {

@@ -271,7 +271,7 @@ public class BaseColumnMetadataReader implements ColumnMetadataReader {
     }
 
     private static DataType fallBackToMaximumSizeVarChar() {
-        return DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+        return DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
     }
 
     private static DataType convertVarChar(final int size, final int octetLength) {
@@ -301,5 +301,25 @@ public class BaseColumnMetadataReader implements ColumnMetadataReader {
             }
         }
         return colType;
+    }
+
+    /**
+     * Map a <code>NUMERIC</code> column to an Exasol <code>DECIMAL</code>
+     * <p>
+     * If the precision of the remote column exceeds the maximum precision of an Exasol <code>DECIMAL</code>, the column
+     * is mapped to an Exasol <code>DOUBLE</code> instead.
+     * 
+     * @param jdbcTypeDescription parameter object describing the type from the JDBC perspective
+     * @return Exasol <code>DECIMAL</code> if precision is less than or equal maximum precision, <code>DOUBLE</code>
+     *         otherwise.
+     */
+    protected DataType mapJdbcTypeNumericToDecimalWithFallbackToDouble(final JdbcTypeDescription jdbcTypeDescription) {
+        final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
+        final int decimalScale = jdbcTypeDescription.getDecimalScale();
+        if (decimalPrec <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
+            return DataType.createDecimal(decimalPrec, decimalScale);
+        } else {
+            return DataType.createDouble();
+        }
     }
 }

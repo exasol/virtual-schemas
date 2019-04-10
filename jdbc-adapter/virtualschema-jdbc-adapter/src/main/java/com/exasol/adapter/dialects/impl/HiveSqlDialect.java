@@ -7,14 +7,12 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.EnumMap;
 import java.util.Map;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.ScalarFunction;
 
 /**
@@ -128,10 +126,5 @@ public class HiveSqlDialect extends AbstractSqlDialect {
         scalarAliases.put(ScalarFunction.WEEK, "WEEKOFYEAR");
         scalarAliases.put(ScalarFunction.CURRENT_USER, "CURRENT_USER()");
         return scalarAliases;
-    }
-
-    @Override
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
-        return null;
     }
 }

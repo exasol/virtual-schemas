@@ -46,7 +46,7 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
         case ORACLE_TIMESTAMP_WITH_LOCAL_TIME_ZONE:
         case ORACLE_BINARY_FLOAT:
         case ORACLE_BINARY_DOUBLE:
-            return DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+            return DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
         default:
             return super.mapJdbcType(jdbcTypeDescription);
         }
@@ -77,7 +77,7 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
         if (this.properties.containsKey(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY)) {
             return getOracleNumberTypeFromProperty();
         } else {
-            return DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+            return DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
         }
     }
 

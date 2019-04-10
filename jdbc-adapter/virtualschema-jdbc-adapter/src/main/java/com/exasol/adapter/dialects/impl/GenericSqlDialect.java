@@ -1,13 +1,12 @@
 package com.exasol.adapter.dialects.impl;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.dialects.AbstractSqlDialect;
+import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
-import com.exasol.adapter.metadata.DataType;
 
 /**
  * This dialect can be used for data sources where a custom dialect implementation does not yet exists. It will obtain
@@ -126,10 +125,5 @@ public class GenericSqlDialect extends AbstractSqlDialect {
     @Override
     public String getStringLiteral(final String value) {
         return "'" + value.replace("'", "''") + "'";
-    }
-
-    @Override
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
-        return null;
     }
 }

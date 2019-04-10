@@ -5,19 +5,13 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
-import static com.exasol.adapter.metadata.DataType.ExaDataType.VARCHAR;
 import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
-import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,8 +20,6 @@ import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.metadata.DataType;
 
 class PostgreSQLSqlDialectTest {
     private static final String POSTGRESQL_IDENTIFIER_MAPPING = "CONVERT_TO_UPPER";
@@ -82,30 +74,8 @@ class PostgreSQLSqlDialectTest {
     }
 
     @Test
-    void testMetadataReaderClass() throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException,
-            SecurityException, IllegalArgumentException, InvocationTargetException {
+    void testMetadataReaderClass() {
         assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
                 instanceOf(PostgreSQLMetadataReader.class));
-    }
-
-    @Test
-    void testDialectSpecificMapJdbcTypeDistinct() throws SQLException {
-        final JdbcTypeDescription jdbcTypeDescription = mock(JdbcTypeDescription.class);
-        when(jdbcTypeDescription.getJdbcType()).thenReturn(Types.DISTINCT);
-        assertVarcharDataType(jdbcTypeDescription);
-    }
-
-    @Test
-    void testDialectSpecificMapJdbcTypeSQLXML() throws SQLException {
-        final JdbcTypeDescription jdbcTypeDescription = mock(JdbcTypeDescription.class);
-        when(jdbcTypeDescription.getJdbcType()).thenReturn(Types.SQLXML);
-        assertVarcharDataType(jdbcTypeDescription);
-    }
-
-    private void assertVarcharDataType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
-        final DataType dataType = this.dialect.dialectSpecificMapJdbcType(jdbcTypeDescription);
-        assertEquals(DataType.ExaCharset.UTF8, dataType.getCharset());
-        assertEquals(2000000, dataType.getSize());
-        assertEquals(VARCHAR, dataType.getExaDataType());
     }
 }

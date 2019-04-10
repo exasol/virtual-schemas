@@ -6,23 +6,20 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
-import java.sql.*;
+import java.sql.Connection;
 import java.util.EnumMap;
 import java.util.Map;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
 public class SqlServerSqlDialect extends AbstractSqlDialect {
-    // Tested SQL Server versions: SQL Server 2014
-    // Tested JDBC drivers: jtds-1.3.1 (https://sourceforge.net/projects/jtds/)
-    public final static int maxSqlServerVarcharSize = 8000;
-    public final static int maxSqlServerNVarcharSize = 4000;
-    public final static int maxSqlServerClob = 2000000;
+    public static final int MAX_SQLSERVER_VARCHAR_SIZE = 8000;
+    public static final int MAX_SQLSERVER_NVARCHAR_SIZE = 4000;
+    public static final int MAX_SQLSERVER_CLOB_SIZE = 2000000;
     private static final String NAME = "SQLSERVER";
 
     public SqlServerSqlDialect(final Connection connection, final AdapterProperties properties) {
@@ -58,68 +55,6 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
                 ST_ISSIMPLE, ST_OVERLAPS, ST_SYMDIFFERENCE, ST_TOUCHES, ST_UNION, ST_WITHIN, BIT_AND, BIT_NOT, BIT_OR,
                 BIT_XOR, CASE, HASH_MD5, HASH_SHA, HASH_SHA1, NULLIFZERO, ZEROIFNULL);
         return builder.build();
-    }
-
-    @Override
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
-        DataType colType = null;
-        final int jdbcType = jdbcTypeDescription.getJdbcType();
-        final String columnTypeName = jdbcTypeDescription.getTypeName();
-
-        switch (jdbcType) {
-        case Types.VARCHAR:
-            if (columnTypeName.equalsIgnoreCase("date")) {
-                colType = DataType.createDate();
-            } else if (columnTypeName.equalsIgnoreCase("datetime2")) {
-                colType = DataType.createTimestamp(false);
-            }
-            break;
-        case Types.TIME:
-            colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
-            break;
-        case 2013: // Types.TIME_WITH_TIMEZONE is Java 1.8 specific
-            colType = DataType.createVarChar(21, DataType.ExaCharset.UTF8);
-            break;
-        case Types.NUMERIC:
-            final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
-            final int decimalScale = jdbcTypeDescription.getDecimalScale();
-
-            if (decimalPrec <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-                colType = DataType.createDecimal(decimalPrec, decimalScale);
-            } else {
-                colType = DataType.createDouble();
-            }
-            break;
-
-        case Types.OTHER:
-            // TODO
-            colType = DataType.createVarChar(SqlServerSqlDialect.maxSqlServerVarcharSize, DataType.ExaCharset.UTF8);
-            break;
-        case Types.SQLXML:
-            colType = DataType.createVarChar(SqlServerSqlDialect.maxSqlServerVarcharSize, DataType.ExaCharset.UTF8);
-            break;
-        case Types.CLOB: // xml type in SQL Server
-            colType = DataType.createVarChar(SqlServerSqlDialect.maxSqlServerClob, DataType.ExaCharset.UTF8);
-            break;
-        case Types.BLOB:
-            if (columnTypeName.equalsIgnoreCase("hierarchyid")) {
-                colType = DataType.createVarChar(4000, DataType.ExaCharset.UTF8);
-            }
-            if (columnTypeName.equalsIgnoreCase("geometry")) {
-                colType = DataType.createVarChar(SqlServerSqlDialect.maxSqlServerVarcharSize, DataType.ExaCharset.UTF8);
-            } else {
-                colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8);
-            }
-            break;
-        case Types.VARBINARY:
-        case Types.BINARY:
-            colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8);
-            break;
-        case Types.DISTINCT:
-            colType = DataType.createVarChar(100, DataType.ExaCharset.UTF8);
-            break;
-        }
-        return colType;
     }
 
     @Override

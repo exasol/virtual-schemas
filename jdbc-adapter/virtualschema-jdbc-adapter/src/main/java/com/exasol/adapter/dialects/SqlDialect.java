@@ -7,7 +7,6 @@ import java.util.Map;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.jdbc.ConnectionInformation;
 import com.exasol.adapter.jdbc.JdbcAdapterProperties;
-import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
@@ -135,19 +134,6 @@ public interface SqlDialect {
             return tableComment;
         }
     }
-
-    /**
-     * Maps the jdbc datatype information of a column to the EXASOL datatype of the column. The dialect can also return
-     * null, so that the default mapping occurs. This method will be called by {@link #mapJdbcType(JdbcTypeDescription)}
-     * in the default implementation.
-     *
-     * @param jdbcType A jdbc type description
-     * @return Either null, if the default datatype mapping shall be applied, or the datatype which the current column
-     *         shall be mapped to. This datatype will be used as the datatype in the virtual table and in the pushdown
-     *         sql.
-     *
-     */
-    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcType) throws SQLException;
 
     /**
      * How unquoted or quoted identifiers in queries or DDLs are handled

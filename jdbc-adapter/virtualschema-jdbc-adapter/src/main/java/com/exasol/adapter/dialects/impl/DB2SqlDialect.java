@@ -110,10 +110,10 @@ public class DB2SqlDialect extends AbstractSqlDialect {
 
         switch (jdbcType) {
         case Types.CLOB:
-            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+            colType = DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
             break;
         case 1111:
-            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+            colType = DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
             break;
         case Types.TIMESTAMP:
             colType = DataType.createVarChar(32, DataType.ExaCharset.UTF8);

@@ -114,7 +114,7 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
 
         case Types.CLOB: // TEXT and UNITEXT types in Sybase
 
-            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
+            colType = DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
             break;
 
         case Types.BLOB:

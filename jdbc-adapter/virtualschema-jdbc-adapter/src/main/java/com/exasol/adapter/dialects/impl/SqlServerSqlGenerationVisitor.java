@@ -121,17 +121,17 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
     private String getColumnProjectionStringNoCheckImpl(String typeName, SqlColumn column, String projString) {
     	
     	if ( typeName.startsWith("text") ) {
-            projString = "CAST(" + projString + "  as NVARCHAR("+SqlServerSqlDialect.maxSqlServerNVarcharSize+") )";
+            projString = "CAST(" + projString + "  as NVARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_NVARCHAR_SIZE+") )";
         } else if ( typeName.startsWith("date") || typeName.startsWith("datetime2") ) {
             projString = "CAST(" + projString + "  as DateTime )";
         } else if (typeName.startsWith("hierarchyid") ) {
-            projString = "CAST(" + projString + "  as NVARCHAR("+SqlServerSqlDialect.maxSqlServerNVarcharSize+") )";
+            projString = "CAST(" + projString + "  as NVARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_NVARCHAR_SIZE+") )";
         } else if (typeName.startsWith("geometry") || typeName.startsWith("geography") ) {
-            projString = "CAST(" + projString + "  as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )";
+            projString = "CAST(" + projString + "  as VARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE+") )";
         } else if (typeName.startsWith("timestamp") ){
             projString = "CAST(" + projString + "  as DateTime )"; 
         } else if (typeName.startsWith("xml")) {
-            projString = "CAST(" + projString + "  as NVARCHAR("+SqlServerSqlDialect.maxSqlServerNVarcharSize+") )";
+            projString = "CAST(" + projString + "  as NVARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_NVARCHAR_SIZE+") )";
         } else if (TYPE_NAME_NOT_SUPPORTED.contains(typeName)){
         	projString = "'"+typeName+" NOT SUPPORTED'"; //returning a string constant for unsupported data types
         } 
@@ -353,7 +353,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
 	    case ST_ENDPOINT:
             	builder.append("CAST(");
 	    		builder.append(argumentsSql.get(0)+".STEndPoint()") ;
-            	builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+            	builder.append("as VARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE+") )");
 	    		sql = builder.toString();
 	    		break;
 	
@@ -380,14 +380,14 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
 	    case ST_POINTN:
         		builder.append("CAST(");
 	    		builder.append(argumentsSql.get(0)+".STPointN("+argumentsSql.get(1)+")") ;
-        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE+") )");
 	    		sql = builder.toString();
 	    		break;
 	
 	    case ST_STARTPOINT:
     			builder.append("CAST(");
 	    		builder.append(argumentsSql.get(0)+".STStartPoint()") ;
-        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE+") )");
 	    		sql = builder.toString();
 	    		break;
 	
@@ -399,14 +399,14 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
 	    case ST_EXTERIORRING:
 				builder.append("CAST(");
 	    		builder.append(argumentsSql.get(0)+".STExteriorRing()") ;
-        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE+") )");
 	    		sql = builder.toString();
 	    		break;
 	
 	    case ST_INTERIORRINGN:
 				builder.append("CAST(");
 	    		builder.append(argumentsSql.get(0)+".STInteriorRingN ("+argumentsSql.get(1)+")") ;
-        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE+") )");
 	    		sql = builder.toString();
 	    		break;
 	
@@ -418,7 +418,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
 	    case ST_GEOMETRYN:
 				builder.append("CAST(");
 	    		builder.append(argumentsSql.get(0)+".STGeometryN("+argumentsSql.get(1)+")") ;
-        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE+") )");
 	    		sql = builder.toString();
 	    		break;
 	
@@ -430,21 +430,21 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
 	    case ST_BOUNDARY:
 				builder.append("CAST(");
 	    		builder.append(argumentsSql.get(0)+".STBoundary()") ;
-        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE+") )");
 	    		sql = builder.toString();
 	    		break;
 	
 	    case ST_BUFFER:
 				builder.append("CAST(");
 	    		builder.append(argumentsSql.get(0)+".STBuffer("+argumentsSql.get(1)+")") ;
-        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE+") )");
 	    		sql = builder.toString();
 	    		break;
 	
 	    case ST_CENTROID:
 				builder.append("CAST(");
 	    		builder.append(argumentsSql.get(0)+".STCentroid()") ;
-        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE+") )");
 	    		sql = builder.toString();
 	    		break;
 	
@@ -456,7 +456,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
 	    case ST_CONVEXHULL:
 				builder.append("CAST(");
 	    		builder.append(argumentsSql.get(0)+".STConvexHull()") ;
-        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE+") )");
 	    		sql = builder.toString();
 	    		break;
 	
@@ -468,7 +468,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
 	    case ST_DIFFERENCE:
 				builder.append("CAST(");
 	    		builder.append(argumentsSql.get(0)+".STDifference("+argumentsSql.get(1)+")") ;
-        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE+") )");
 	    		sql = builder.toString();
 	    		break;
 	
@@ -480,7 +480,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
 	    case ST_DISJOINT:
 				builder.append("CAST(");
 	    		builder.append(argumentsSql.get(0)+".STDisjoint("+argumentsSql.get(1)+")") ;
-        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE+") )");
 	    		sql = builder.toString();
 	    		break;
 	
@@ -492,7 +492,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
 	    case ST_ENVELOPE:
 				builder.append("CAST(");
 	    		builder.append(argumentsSql.get(0)+".STEnvelope()") ;
-        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE+") )");
 	    		sql = builder.toString();
 	    		break;
 	
@@ -510,7 +510,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
 	    case ST_INTERSECTION:
 				builder.append("CAST(");
 	    		builder.append(argumentsSql.get(0)+".STIntersection("+argumentsSql.get(1)+")") ;
-        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE+") )");
 	    		sql = builder.toString();
 	    		break;
 	
@@ -536,7 +536,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
 	    case ST_SYMDIFFERENCE:
 				builder.append("CAST(");
 	    		builder.append(argumentsSql.get(0)+".STSymDifference ("+argumentsSql.get(1)+")") ;
-        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE+") )");
 	    		sql = builder.toString();
 	    		break;
 	
@@ -548,7 +548,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
 	    case ST_UNION:
 				builder.append("CAST(");
 	    		builder.append(argumentsSql.get(0)+".STUnion("+argumentsSql.get(1)+")") ;
-        		builder.append("as VARCHAR("+SqlServerSqlDialect.maxSqlServerVarcharSize+") )");
+        		builder.append("as VARCHAR("+SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE+") )");
 	    		sql = builder.toString();
 	    		break;
 	

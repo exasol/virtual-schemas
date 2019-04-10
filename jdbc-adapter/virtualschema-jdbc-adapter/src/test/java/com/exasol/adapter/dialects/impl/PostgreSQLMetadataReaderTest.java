@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 
 class PostgreSQLMetadataReaderTest {
     private PostgreSQLMetadataReader reader;
@@ -24,6 +23,6 @@ class PostgreSQLMetadataReaderTest {
 
     @Test
     void testGetColumnMetadataReader() {
-        assertThat(this.reader.getColumnMetadataReader(), instanceOf(BaseColumnMetadataReader.class));
+        assertThat(this.reader.getColumnMetadataReader(), instanceOf(PostgreSQLColumnMetadataReader.class));
     }
 }
