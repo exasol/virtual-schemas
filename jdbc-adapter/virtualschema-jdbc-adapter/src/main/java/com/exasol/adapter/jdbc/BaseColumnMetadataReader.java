@@ -37,6 +37,7 @@ public class BaseColumnMetadataReader implements ColumnMetadataReader {
      * Create a new instance of a {@link ColumnMetadataReader}
      *
      * @param connection JDBC connection through which the column metadata is read from the remote database
+     * @param properties user-defined adapter properties
      */
     public BaseColumnMetadataReader(final Connection connection, final AdapterProperties properties) {
         this.connection = connection;

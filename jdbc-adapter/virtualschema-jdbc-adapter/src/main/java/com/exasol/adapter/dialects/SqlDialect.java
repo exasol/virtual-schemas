@@ -119,19 +119,19 @@ public interface SqlDialect {
         }
 
         public boolean isIgnored() {
-            return isIgnored;
+            return this.isIgnored;
         }
 
         public String getTableName() {
-            return tableName;
+            return this.tableName;
         }
 
         public String getOriginalTableName() {
-            return originalName;
+            return this.originalName;
         }
 
         public String getTableComment() {
-            return tableComment;
+            return this.tableComment;
         }
     }
 

@@ -6,12 +6,12 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
-import java.sql.*;
+import java.sql.Connection;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 
 /**
  * Dialect for DB2 using the DB2 Connector JDBC driver.
@@ -21,6 +21,11 @@ public class DB2SqlDialect extends AbstractSqlDialect {
 
     public DB2SqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
+    }
+
+    @Override
+    protected RemoteMetadataReader createRemoteMetadataReader() {
+        return new DB2MetadataReader(this.connection, this.properties);
     }
 
     public static String getPublicName() {
@@ -101,45 +106,5 @@ public class DB2SqlDialect extends AbstractSqlDialect {
     @Override
     public String getStringLiteral(final String value) {
         return "'" + value.replace("'", "''") + "'";
-    }
-
-    @Override
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
-        DataType colType = null;
-        final int jdbcType = jdbcTypeDescription.getJdbcType();
-
-        switch (jdbcType) {
-        case Types.CLOB:
-            colType = DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
-            break;
-        case 1111:
-            colType = DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
-            break;
-        case Types.TIMESTAMP:
-            colType = DataType.createVarChar(32, DataType.ExaCharset.UTF8);
-            break;
-        case Types.VARCHAR:
-        case Types.NVARCHAR:
-        case Types.LONGVARCHAR:
-        case Types.CHAR:
-        case Types.NCHAR:
-        case Types.LONGNVARCHAR: {
-            final int size = jdbcTypeDescription.getPrecisionOrSize();
-            final DataType.ExaCharset charset = DataType.ExaCharset.UTF8;
-            if (size <= DataType.MAX_EXASOL_VARCHAR_SIZE) {
-                colType = DataType.createVarChar(size, charset);
-            } else {
-                colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, charset);
-            }
-            break;
-        }
-        case -2:
-            colType = DataType.createChar(jdbcTypeDescription.getPrecisionOrSize() * 2, DataType.ExaCharset.ASCII);
-            break;
-        case -3:
-            colType = DataType.createVarChar(jdbcTypeDescription.getPrecisionOrSize() * 2, DataType.ExaCharset.ASCII);
-            break;
-        }
-        return colType;
     }
 }

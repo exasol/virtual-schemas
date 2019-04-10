@@ -1,13 +1,12 @@
 package com.exasol.adapter.dialects.impl;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionInformation;
-import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.ScalarFunction;
 
 /**
@@ -28,6 +27,11 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
         this.omitParenthesesMap.add(ScalarFunction.CURRENT_USER);
     }
 
+    @Override
+    protected RemoteMetadataReader createRemoteMetadataReader() {
+        return new ExasolMetadataReader(this.connection, this.properties);
+    }
+
     /**
      * Get the name under which the dialect is listed.
      *
@@ -45,34 +49,6 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     @Override
     public SchemaOrCatalogSupport supportsJdbcSchemas() {
         return SchemaOrCatalogSupport.SUPPORTED;
-    }
-
-    @Override
-    public DataType dialectSpecificMapJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
-        DataType colType = null;
-        final int jdbcType = jdbcTypeDescription.getJdbcType();
-
-        switch (jdbcType) {
-        case -104:
-            // Currently precision is hardcoded, because we cannot retrieve it via EXASOL
-            // jdbc driver.
-            colType = DataType.createIntervalDaySecond(2, 3);
-            break;
-        case -103:
-            // Currently precision is hardcoded, because we cannot retrieve it via EXASOL
-            // jdbc driver.
-            colType = DataType.createIntervalYearMonth(2);
-            break;
-        case 123:
-            // Currently srid is hardcoded, because we cannot retrieve it via EXASOL jdbc
-            // driver.
-            colType = DataType.createGeometry(3857);
-            break;
-        case 124:
-            colType = DataType.createTimestamp(true);
-            break;
-        }
-        return colType;
     }
 
     @Override

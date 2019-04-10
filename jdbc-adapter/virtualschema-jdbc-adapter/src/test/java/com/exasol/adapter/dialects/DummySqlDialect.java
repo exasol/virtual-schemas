@@ -77,5 +77,4 @@ public class DummySqlDialect extends AbstractSqlDialect {
     public String getStringLiteral(final String value) {
         return null;
     }
-
 }
