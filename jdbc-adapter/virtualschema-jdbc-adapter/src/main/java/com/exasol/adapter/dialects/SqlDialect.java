@@ -12,50 +12,18 @@ import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
 /**
- * Interface for the implementation of a SQL dialect. All data source specific logic is specified here.
- *
+ * Interface for the implementation of a SQL dialect.
  * <p>
- * The responsibilities of a dialect can be be divided into 3 areas:
- * </p>
- *
+ * Dialects define the capabilities and the behavior of the adapter implementation for a specific remote database.
  * <p>
- * <b>1. Capabilities:</b><br>
- * The dialect defines the set of supported capabilities. See {@link #getCapabilities()} for details.
- * </p>
+ * For information about how the metadata of the remote data source is mapped, please refer to the list of interfaces
+ * below.
  *
- * <p>
- * <b>2. Data Type Mapping:</b><br>
- * The dialect defines, how the tables in the data source are mapped to EXASOL virtual tables. In particular the data
- * types have to be mapped to EXASOL data types. See {@link #mapJdbcType(JdbcTypeDescription)} for details.
- * </p>
- *
- * <p>
- * <b>3. SQL Generation:</b><br>
- * The dialect defines how to generate SQL statements in the data source syntax. The dialect provides several methods to
- * customize quoting, case-sensitivity, function name aliases, and other aspects of the syntax.
- *
- * The actual SQL generation is done by the separate class {@link SqlGenerationVisitor} (it uses the visitor pattern).
- * For things like quoting and case-sensitivity, the SQL generation visitor will ask the dialect how to handle them.
- *
- * If your dialect has a special SQL syntax which cannot be realized using the methods of {@link SqlDialect}, then you
- * can implement your own SQL generation visitor which extends {@link SqlGenerationVisitor}. Your custom visitor must
- * then be returned by {@link #getSqlGenerationVisitor(SqlGenerationContext)}. For an example look at
- * {@link com.exasol.adapter.dialects.impl.OracleSqlGenerationVisitor}.
- * </p>
- *
- * <b>Notes for developing a dialect</b>
- *
- * <p>
- * Create a class for your integration test, with the suffix IT.java.
- * </p>
- *
- * <p>
- * We recommend to extend the abstract class {@link AbstractSqlDialect} instead of directly implementing
- * {@link SqlDialect}.
- * </p>
+ * @see com.exasol.adapter.jdbc.RemoteMetadataReader
+ * @see com.exasol.adapter.jdbc.TableMetadataReader
+ * @see com.exasol.adapter.jdbc.ColumnMetadataReader
  */
 public interface SqlDialect {
-
     /**
      * @return the name that can be used to choose this dialect (user can give this name). Case insensitive.
      */
@@ -68,64 +36,44 @@ public interface SqlDialect {
      */
     public Capabilities getCapabilities();
 
-    public enum SchemaOrCatalogSupport {
-        SUPPORTED, UNSUPPORTED, UNKNOWN
+    /**
+     * Multiplicity that the remote data source supports for a structural element like catalogs or a schemas.
+     * <p>
+     * <dl>
+     * <dt><code>NONE</code></dt>
+     * <dd>database does not support the structural element</dd>
+     * <dt><code>SINGLE</code></dt>
+     * <dd>database uses a single (pseudo) structural element</dd>
+     * <dt><code>MULTIPLE</code></dt>
+     * <dd>database truly supports this element with multiple possible entries</dd>
+     * <dt><code>AUTO_DETECT</code></dt>
+     * <dd>dialect auto-detects support for this element</dd>
+     * </dl>
+     * </p>
+     * Dialects that support a single database should not use <code>AUTO_DETECT</code> because this unnecessarily costs
+     * performance.
+     */
+    public enum StructureElementSupport {
+        NONE, SINGLE, MULTIPLE, AUTO_DETECT
     }
 
     /**
-     * @return True, if the database "truly" supports the concept of JDBC catalogs (not just a single dummy catalog). If
-     *         true, the user must specify the catalog. False, if the database does not have a catalog concept, e.g. if
-     *         it has no catalogs, or a single dummy catalog, or even if it throws an Exception for
-     *         {@link DatabaseMetaData#getCatalogs()}. If false, the user must not specify the catalog.
+     * Define whether the remote source supports catalogs and if it does, whether is supports a single "pseudo" catalog
+     * or multiple catalogs.
+     *
+     * @return <code>NONE</code> if the dialect does not support catalogs at all, <code>SINGLE</code> if it supports
+     *         exactly one (like e.g. Exasol) or <code>MULTIPLE</code> if real catalogs are supported.
      */
-    public SchemaOrCatalogSupport supportsJdbcCatalogs();
+    public StructureElementSupport supportsJdbcCatalogs();
 
     /**
-     * @return True, if the database "truly" supports the concept of JDBC schemas (not just a single dummy schema). If
-     *         true, the user must specify the schema. False, if the database does not have a schema concept, e.g. if it
-     *         has no schemas, or a single dummy schemas, or even if it throws an Exception for
-     *         {@link DatabaseMetaData#getSchemas()}. If false, the user must not specify the schema.
+     * Define whether the remote source supports schemas and if it does, whether is supports a single "pseudo" schema or
+     * multiple schemas.
+     *
+     * @return <code>NONE</code> if the dialect does not support schemas at all, <code>SINGLE</code> if it supports
+     *         exactly one (like e.g. Exasol) or <code>MULTIPLE</code> if real schemas are supported.
      */
-    public SchemaOrCatalogSupport supportsJdbcSchemas();
-
-    public class MappedTable {
-        private boolean isIgnored = false;
-        private String tableName = "";
-        private String originalName = "";
-        private String tableComment = "";
-
-        public static MappedTable createMappedTable(final String tableName, final String originalName,
-                final String tableComment) {
-            final MappedTable t = new MappedTable();
-            t.isIgnored = false;
-            t.tableName = tableName;
-            t.originalName = originalName;
-            t.tableComment = tableComment;
-            return t;
-        }
-
-        public static MappedTable createIgnoredTable() {
-            final MappedTable t = new MappedTable();
-            t.isIgnored = true;
-            return t;
-        }
-
-        public boolean isIgnored() {
-            return this.isIgnored;
-        }
-
-        public String getTableName() {
-            return this.tableName;
-        }
-
-        public String getOriginalTableName() {
-            return this.originalName;
-        }
-
-        public String getTableComment() {
-            return this.tableComment;
-        }
-    }
+    public StructureElementSupport supportsJdbcSchemas();
 
     /**
      * How unquoted or quoted identifiers in queries or DDLs are handled

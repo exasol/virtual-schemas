@@ -6,7 +6,8 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
@@ -54,13 +55,13 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public SchemaOrCatalogSupport supportsJdbcCatalogs() {
-        return SchemaOrCatalogSupport.UNSUPPORTED;
+    public StructureElementSupport supportsJdbcCatalogs() {
+        return StructureElementSupport.NONE;
     }
 
     @Override
-    public SchemaOrCatalogSupport supportsJdbcSchemas() {
-        return SchemaOrCatalogSupport.SUPPORTED;
+    public StructureElementSupport supportsJdbcSchemas() {
+        return StructureElementSupport.MULTIPLE;
     }
 
     @Override

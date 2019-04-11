@@ -83,13 +83,13 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public SchemaOrCatalogSupport supportsJdbcCatalogs() {
-        return SchemaOrCatalogSupport.SUPPORTED;
+    public StructureElementSupport supportsJdbcCatalogs() {
+        return StructureElementSupport.MULTIPLE;
     }
 
     @Override
-    public SchemaOrCatalogSupport supportsJdbcSchemas() {
-        return SchemaOrCatalogSupport.SUPPORTED;
+    public StructureElementSupport supportsJdbcSchemas() {
+        return StructureElementSupport.MULTIPLE;
     }
 
     @Override

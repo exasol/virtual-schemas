@@ -42,13 +42,13 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public SchemaOrCatalogSupport supportsJdbcCatalogs() {
-        return SchemaOrCatalogSupport.UNSUPPORTED;
+    public StructureElementSupport supportsJdbcCatalogs() {
+        return StructureElementSupport.SINGLE;
     }
 
     @Override
-    public SchemaOrCatalogSupport supportsJdbcSchemas() {
-        return SchemaOrCatalogSupport.SUPPORTED;
+    public StructureElementSupport supportsJdbcSchemas() {
+        return StructureElementSupport.MULTIPLE;
     }
 
     /**

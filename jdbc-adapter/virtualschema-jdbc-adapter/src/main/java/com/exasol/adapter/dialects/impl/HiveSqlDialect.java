@@ -55,13 +55,13 @@ public class HiveSqlDialect extends AbstractSqlDialect {
      * are organized. The driver also maps the JDBC schema to the Hive schema/database.
      */
     @Override
-    public SchemaOrCatalogSupport supportsJdbcCatalogs() {
-        return SchemaOrCatalogSupport.UNSUPPORTED;
+    public StructureElementSupport supportsJdbcCatalogs() {
+        return StructureElementSupport.SINGLE;
     }
 
     @Override
-    public SchemaOrCatalogSupport supportsJdbcSchemas() {
-        return SchemaOrCatalogSupport.SUPPORTED;
+    public StructureElementSupport supportsJdbcSchemas() {
+        return StructureElementSupport.MULTIPLE;
     }
 
     @Override

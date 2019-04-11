@@ -29,13 +29,13 @@ public class DummySqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public SchemaOrCatalogSupport supportsJdbcCatalogs() {
-        return null;
+    public StructureElementSupport supportsJdbcCatalogs() {
+        return StructureElementSupport.NONE;
     }
 
     @Override
-    public SchemaOrCatalogSupport supportsJdbcSchemas() {
-        return null;
+    public StructureElementSupport supportsJdbcSchemas() {
+        return StructureElementSupport.NONE;
     }
 
     @Override

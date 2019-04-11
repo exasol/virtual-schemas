@@ -76,13 +76,13 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public SchemaOrCatalogSupport supportsJdbcCatalogs() {
-        return SchemaOrCatalogSupport.UNSUPPORTED;
+    public StructureElementSupport supportsJdbcCatalogs() {
+        return StructureElementSupport.NONE;
     }
 
     @Override
-    public SchemaOrCatalogSupport supportsJdbcSchemas() {
-        return SchemaOrCatalogSupport.SUPPORTED;
+    public StructureElementSupport supportsJdbcSchemas() {
+        return StructureElementSupport.MULTIPLE;
     }
 
     DataType getOracleNumberTargetType() {

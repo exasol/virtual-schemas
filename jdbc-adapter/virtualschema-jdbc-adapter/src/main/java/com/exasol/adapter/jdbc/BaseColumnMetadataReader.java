@@ -53,16 +53,32 @@ public class BaseColumnMetadataReader implements ColumnMetadataReader {
     @Override
     public List<ColumnMetadata> mapColumns(final String tableName) {
         final List<ColumnMetadata> columns = new ArrayList<>();
-        try (final ResultSet remoteColumns = this.connection.getMetaData().getColumns(ANY_CATALOG, ANY_SCHEMA,
+        final String catalogName = getCatalogName();
+        try (final ResultSet remoteColumns = this.connection.getMetaData().getColumns(catalogName, schemaName(),
                 tableName, ANY_COLUMN)) {
             while (remoteColumns.next()) {
                 final ColumnMetadata metadata = mapColumn(remoteColumns);
                 columns.add(metadata);
             }
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException("Unable to read column metadata from remote", exception);
+            throw new RemoteMetadataReaderException("Unable to read column metadata from remote for catalog \""
+                    + catalogName + "\" and schema \"" + schemaName() + "\"", exception);
         }
         return columns;
+    }
+
+    protected String schemaName() {
+        return getSchemaName();
+    }
+
+    @Override
+    public String getCatalogName() {
+        return this.properties.getCatalogName();
+    }
+
+    @Override
+    public String getSchemaName() {
+        return this.properties.getCatalogName();
     }
 
     private ColumnMetadata mapColumn(final ResultSet remoteColumn) throws SQLException {
@@ -308,7 +324,7 @@ public class BaseColumnMetadataReader implements ColumnMetadataReader {
      * <p>
      * If the precision of the remote column exceeds the maximum precision of an Exasol <code>DECIMAL</code>, the column
      * is mapped to an Exasol <code>DOUBLE</code> instead.
-     * 
+     *
      * @param jdbcTypeDescription parameter object describing the type from the JDBC perspective
      * @return Exasol <code>DECIMAL</code> if precision is less than or equal maximum precision, <code>DOUBLE</code>
      *         otherwise.

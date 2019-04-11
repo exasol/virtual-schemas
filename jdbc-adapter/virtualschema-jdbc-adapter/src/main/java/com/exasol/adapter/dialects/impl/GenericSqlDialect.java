@@ -30,13 +30,13 @@ public class GenericSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public SchemaOrCatalogSupport supportsJdbcCatalogs() {
-        return SchemaOrCatalogSupport.UNKNOWN;
+    public StructureElementSupport supportsJdbcCatalogs() {
+        return StructureElementSupport.AUTO_DETECT;
     }
 
     @Override
-    public SchemaOrCatalogSupport supportsJdbcSchemas() {
-        return SchemaOrCatalogSupport.UNKNOWN;
+    public StructureElementSupport supportsJdbcSchemas() {
+        return StructureElementSupport.AUTO_DETECT;
     }
 
     @Override

@@ -164,13 +164,13 @@ class SqlDialectTest {
         }
 
         @Override
-        public SchemaOrCatalogSupport supportsJdbcCatalogs() {
-            return SchemaOrCatalogSupport.UNSUPPORTED;
+        public StructureElementSupport supportsJdbcCatalogs() {
+            return StructureElementSupport.NONE;
         }
 
         @Override
-        public SchemaOrCatalogSupport supportsJdbcSchemas() {
-            return SchemaOrCatalogSupport.UNSUPPORTED;
+        public StructureElementSupport supportsJdbcSchemas() {
+            return StructureElementSupport.NONE;
         }
 
         @Override
