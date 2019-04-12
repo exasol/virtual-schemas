@@ -524,7 +524,7 @@ class PostgreSQLDialectIT extends AbstractIntegrationTest {
 
     @Test
     void testDatatypeTimeWithTimezone() throws SQLException {
-        testDatatype("mytimeWithTimeZone", "1970-01-01 10:11:11.0", "VARCHAR(2000000) UTF8");
+        testDatatype("mytimeWithTimeZone", "1970-01-01 11:11:11.0", "VARCHAR(2000000) UTF8");
     }
 
     @Test
@@ -534,7 +534,7 @@ class PostgreSQLDialectIT extends AbstractIntegrationTest {
 
     @Test
     void testDatatypeTimestampWithTimezone() throws SQLException {
-        testDatatype("mytimestampwithtimezone", "2010-01-01 10:11:11.000000", "TIMESTAMP");
+        testDatatype("mytimestampwithtimezone", "2010-01-01 11:11:11.000000", "TIMESTAMP");
     }
 
     @Test

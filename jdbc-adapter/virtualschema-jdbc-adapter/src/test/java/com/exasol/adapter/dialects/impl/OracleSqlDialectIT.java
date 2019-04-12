@@ -705,7 +705,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         executeUpdate("ALTER SESSION SET TIME_ZONE = 'UTC'");
         final String query = "SELECT C15 FROM %s";
         final ResultSet resultJDBC = runQueryJDBC(query);
-        matchNextRow(resultJDBC, "30-APR-18 06.00.05.000000 PM");
+        matchNextRow(resultJDBC, "30-APR-18 07.00.05.000000 PM");
         final ResultSet resultORA = runQueryORA(query);
         matchNextRow(resultORA, Timestamp.valueOf("2018-04-30 18:00:05.000"));
 
@@ -741,7 +741,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         executeUpdate("ALTER SESSION SET TIME_ZONE = 'UTC'");
         final String query = "SELECT * FROM %s.%s";
         final ResultSet resultJDBC = runQueryJDBC(String.format(query, VIRTUAL_SCHEMA_JDBC, "TS_T"));
-        matchNextRow(resultJDBC, "01-JAN-18 11.00.00.000000 AM", "01-JAN-18 10.00.00.000000 AM",
+        matchNextRow(resultJDBC, "01-JAN-18 11.00.00.000000 AM", "01-JAN-18 11.00.00.000000 AM",
                 "01-JAN-18 11.00.00.000000 AM +01:00");
         final ResultSet resultORA = runQueryORA(String.format(query, VIRTUAL_SCHEMA_ORA, "TS_T"));
         matchNextRow(resultORA, Timestamp.valueOf("2018-01-01 11:00:00.000"),
