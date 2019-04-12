@@ -49,18 +49,25 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
      */
     @Override
     public List<ColumnMetadata> mapColumns(final String tableName) {
-        final List<ColumnMetadata> columns = new ArrayList<>();
-        final String catalogName = getCatalogName();
-        final String schemaName = getSchemaName();
+        return mapColumns(getCatalogName(), getSchemaName(), tableName);
+    }
+
+    protected List<ColumnMetadata> mapColumns(final String catalogName, final String schemaName,
+            final String tableName) {
         try (final ResultSet remoteColumns = this.connection.getMetaData().getColumns(catalogName, schemaName,
                 tableName, ANY_COLUMN)) {
-            while (remoteColumns.next()) {
-                final ColumnMetadata metadata = mapColumn(remoteColumns);
-                columns.add(metadata);
-            }
+            return getColumnsFromResultSet(remoteColumns);
         } catch (final SQLException exception) {
             throw new RemoteMetadataReaderException("Unable to read column metadata from remote for catalog \""
                     + catalogName + "\" and schema \"" + schemaName + "\"", exception);
+        }
+    }
+
+    protected List<ColumnMetadata> getColumnsFromResultSet(final ResultSet remoteColumns) throws SQLException {
+        final List<ColumnMetadata> columns = new ArrayList<>();
+        while (remoteColumns.next()) {
+            final ColumnMetadata metadata = mapColumn(remoteColumns);
+            columns.add(metadata);
         }
         return columns;
     }

@@ -69,9 +69,6 @@ public class OracleSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Map<AggregateFunction, String> getAggregateFunctionAliases() {
-        // APPROXIMATE_COUNT_DISTINCT supported with version >= 12.1.0.2
-        // aggregationAliases.put(AggregateFunction.APPROXIMATE_COUNT_DISTINCT,
-        // "APPROX_COUNT_DISTINCT");
         return new EnumMap<>(AggregateFunction.class);
     }
 

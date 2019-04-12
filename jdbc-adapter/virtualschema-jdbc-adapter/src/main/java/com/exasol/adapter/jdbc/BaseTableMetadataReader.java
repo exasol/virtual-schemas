@@ -49,22 +49,10 @@ public class BaseTableMetadataReader implements TableMetadataReader {
             throws SQLException {
         final String tableName = readTableName(remoteTables);
         if (isTableIncludedByMapping(tableName)) {
-            if (isTableFilteredOut(tableName)) {
-                LOGGER.fine(() -> "Skipping table \"" + tableName
-                        + "\" when mapping remote data due to user-defined table filter");
-            } else {
-                LOGGER.fine(() -> "Mapping table metadata for remote table \"" + tableName + "\".");
-                final TableMetadata tableMetadata = mapTable(remoteTables, tableName);
-                LOGGER.finer(() -> "Read table metadata: " + tableMetadata.describe());
-                translatedTables.add(tableMetadata);
-            }
+            mapOrSkipSupportedTable(remoteTables, translatedTables, tableName);
         } else {
-            LOGGER.fine(() -> "Skipping unsupported table \"" + tableName + "\" when mapping remote metadata.");
+            skipUnsupportedTable(tableName);
         }
-    }
-
-    protected String readTableName(final ResultSet remoteTables) throws SQLException {
-        return remoteTables.getString(NAME_COLUMN);
     }
 
     @Override
@@ -72,8 +60,43 @@ public class BaseTableMetadataReader implements TableMetadataReader {
         return true;
     }
 
+    protected void mapOrSkipSupportedTable(final ResultSet remoteTables, final List<TableMetadata> translatedTables,
+            final String tableName) throws SQLException {
+        if (isTableFilteredOut(tableName)) {
+            skipFilteredTable(tableName);
+        } else {
+            mapTableNotFilteredOut(remoteTables, translatedTables, tableName);
+        }
+    }
+
     private boolean isTableFilteredOut(final String tableName) {
         return this.properties.getFilteredTables().contains(tableName);
+    }
+
+    protected void skipFilteredTable(final String tableName) {
+        LOGGER.fine(
+                () -> "Skipping table \"" + tableName + "\" when mapping remote data due to user-defined table filter");
+    }
+
+    protected void mapTableNotFilteredOut(final ResultSet remoteTables, final List<TableMetadata> translatedTables,
+            final String tableName) throws SQLException {
+        final TableMetadata tableMetadata = mapTable(remoteTables, tableName);
+        if (tableMetadata.getColumns().isEmpty()) {
+            skipTableWithEmptyColumns(tableName);
+        } else {
+            addMappedTable(translatedTables, tableMetadata);
+        }
+    }
+
+    protected void skipTableWithEmptyColumns(final String tableName) {
+        LOGGER.fine(() -> "Not mapping table \"" + tableName + "\" because it has no columns."
+                + " This can happen if the view containing the columns is invalid"
+                + " or if the Virtual Schema adapter does not support mapping the column types.");
+    }
+
+    protected void addMappedTable(final List<TableMetadata> translatedTables, final TableMetadata tableMetadata) {
+        LOGGER.finer(() -> "Read table metadata: " + tableMetadata.describe());
+        translatedTables.add(tableMetadata);
     }
 
     protected TableMetadata mapTable(final ResultSet table, final String tableName) throws SQLException {
@@ -81,6 +104,10 @@ public class BaseTableMetadataReader implements TableMetadataReader {
         final List<ColumnMetadata> columns = this.columnMetadataReader.mapColumns(tableName);
         final String adapterNotes = DEFAULT_TABLE_ADAPTER_NOTES;
         return new TableMetadata(adjustIdentifierCase(tableName), adapterNotes, columns, comment);
+    }
+
+    protected String readTableName(final ResultSet remoteTables) throws SQLException {
+        return remoteTables.getString(NAME_COLUMN);
     }
 
     protected String readComment(final ResultSet remoteTables) throws SQLException {
@@ -115,5 +142,9 @@ public class BaseTableMetadataReader implements TableMetadataReader {
 
     protected boolean isUnquotedIdentifier(final String identifier) {
         return UNQUOTED_IDENTIFIER_PATTERN.matcher(identifier).matches();
+    }
+
+    protected void skipUnsupportedTable(final String tableName) {
+        LOGGER.fine(() -> "Skipping unsupported table \"" + tableName + "\" when mapping remote metadata.");
     }
 }

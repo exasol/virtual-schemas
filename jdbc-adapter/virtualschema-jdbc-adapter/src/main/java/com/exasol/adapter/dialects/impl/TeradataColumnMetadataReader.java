@@ -1,11 +1,17 @@
 package com.exasol.adapter.dialects.impl;
 
+import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.ANY_COLUMN;
+
+import java.sql.*;
+import java.util.Collections;
+import java.util.List;
+
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
+import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
+import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
-
-import java.sql.*;
 
 /**
  * This class implements Teradata-specific reading of column metadata
@@ -58,4 +64,27 @@ public class TeradataColumnMetadataReader extends BaseColumnMetadataReader {
             return DataType.createVarChar(MAX_TERADATA_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
         }
     }
+
+    @Override
+    protected List<ColumnMetadata> mapColumns(final String catalogName, final String schemaName,
+            final String tableName) {
+        try (final ResultSet remoteColumns = this.connection.getMetaData().getColumns(catalogName, schemaName,
+                tableName, ANY_COLUMN)) {
+            return getColumnsFromResultSet(remoteColumns);
+        } catch (final SQLException exception) {
+            if (isError3087(exception)) {
+                LOGGER.finer("Caught Teradata error 3087 when trying to read column data."
+                        + " This happens when the view the columns belong to is invalid. Ignoring columns.");
+                return Collections.emptyList();
+            } else {
+                throw new RemoteMetadataReaderException("Unable to read column metadata from remote for catalog \""
+                        + catalogName + "\" and schema \"" + schemaName + "\"", exception);
+            }
+        }
+    }
+
+    protected boolean isError3087(final SQLException exception) {
+        return exception.getMessage().contains("Teradata Database") && exception.getMessage().contains("Error 3807");
+    }
+
 }

@@ -4,23 +4,33 @@ import static com.exasol.adapter.dialects.impl.TeradataColumnMetadataReader.MAX_
 import static com.exasol.adapter.metadata.DataType.MAX_EXASOL_DECIMAL_PRECISION;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
-import java.sql.Types;
+import java.sql.*;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
 import com.exasol.adapter.metadata.DataType;
 
+@ExtendWith(MockitoExtension.class)
 class TeradataColumnMetadataReaderTest {
     private TeradataColumnMetadataReader teradataColumnMetadataReader;
+    @Mock
+    private Connection connectionMock;
 
     @BeforeEach
     void beforeEach() {
-        this.teradataColumnMetadataReader = new TeradataColumnMetadataReader(null, AdapterProperties.emptyProperties());
+        this.teradataColumnMetadataReader = new TeradataColumnMetadataReader(this.connectionMock,
+                AdapterProperties.emptyProperties());
     }
 
     @Test
@@ -128,5 +138,19 @@ class TeradataColumnMetadataReaderTest {
         final JdbcTypeDescription jdbcTypeDescription = new JdbcTypeDescription(Types.BOOLEAN, 0, 0, 0, "BOOLEAN");
         assertThat(this.teradataColumnMetadataReader.mapJdbcType(jdbcTypeDescription),
                 CoreMatchers.equalTo(DataType.createBool()));
+    }
+
+    @Test
+    void testMapColumnIgnoresInvalidViewsIgnoresInvalidViewExceptions() throws SQLException {
+        when(this.connectionMock.getMetaData())
+                .thenThrow(new SQLException("Teradata Database -- Error 3807 -- must be ignored"));
+        this.teradataColumnMetadataReader.mapColumns("irrelevant");
+    }
+
+    @Test
+    void testMapColumnProcessesRegularSqlExceptions() throws SQLException {
+        when(this.connectionMock.getMetaData()).thenThrow(new SQLException("this must be caught"));
+        assertThrows(RemoteMetadataReaderException.class,
+                () -> this.teradataColumnMetadataReader.mapColumns("irrelevant"));
     }
 }

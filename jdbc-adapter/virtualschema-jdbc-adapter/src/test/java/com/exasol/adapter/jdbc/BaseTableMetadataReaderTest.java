@@ -2,6 +2,7 @@ package com.exasol.adapter.jdbc;
 
 import static com.exasol.adapter.jdbc.TableMetadataMockUtils.*;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.iterableWithSize;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.when;
@@ -55,7 +56,8 @@ class BaseTableMetadataReaderTest {
         final List<TableMetadata> tables = reader.mapTables(this.tablesMock);
         final TableMetadata tableA = tables.get(0);
         final TableMetadata tableB = tables.get(1);
-        assertAll(() -> assertThat(tableA.getName(), equalTo(TABLE_A)),
+        assertAll(() -> assertThat(tables, iterableWithSize(2)), //
+                () -> assertThat(tableA.getName(), equalTo(TABLE_A)),
                 () -> assertThat(tableA.getComment(), equalTo(TABLE_A_COMMENT)),
                 () -> assertThat(tableA.getAdapterNotes(),
                         equalTo(BaseTableMetadataReader.DEFAULT_TABLE_ADAPTER_NOTES)),
@@ -106,5 +108,19 @@ class BaseTableMetadataReaderTest {
         public IdentifierCaseHandling getQuotedIdentifierCaseHandling() {
             return this.quotedIdentifierCaseHandling;
         }
+    }
+
+    @Test
+    void testMapTablesIgnoresTablesThatHaveNoColumns() throws SQLException {
+        mockTableCount(this.tablesMock, 2);
+        mockTableName(this.tablesMock, TABLE_A, TABLE_B);
+        mockTableComment(this.tablesMock, TABLE_A_COMMENT, TABLE_B_COMMENT);
+        mockTableWithColumnsOfType(this.tablesMock, this.columnMetadataReaderMock, TABLE_A, DataType.createBool());
+        final TableMetadataReader reader = new BaseTableMetadataReader(this.columnMetadataReaderMock,
+                AdapterProperties.emptyProperties());
+        final List<TableMetadata> tables = reader.mapTables(this.tablesMock);
+        final TableMetadata tableA = tables.get(0);
+        assertAll(() -> assertThat(tables, iterableWithSize(1)), //
+                () -> assertThat(tableA.getName(), equalTo(TABLE_A)));
     }
 }
