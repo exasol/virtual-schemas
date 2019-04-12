@@ -1,9 +1,11 @@
 package com.exasol.adapter.jdbc;
 
-import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.*;
+import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.ANY_TABLE;
+import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.SUPPORTED_TABLE_TYPES;
 
 import java.sql.*;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.metadata.SchemaMetadata;
@@ -15,9 +17,8 @@ import com.exasol.adapter.metadata.TableMetadata;
  * <p>
  * See <a href="https://docs.oracle.com/javase/8/docs/api/java/sql/DatabaseMetaData.html">java.sql.DatabaseMetaData</a>
  */
-public class BaseRemoteMetadataReader implements RemoteMetadataReader {
-    protected final Connection connection;
-    protected final AdapterProperties properties;
+public class BaseRemoteMetadataReader extends AbstractMetadataReader implements RemoteMetadataReader {
+    private static final Logger LOGGER = Logger.getLogger(BaseRemoteMetadataReader.class.getName());
     private final ColumnMetadataReader columnMetadataReader;
     private final TableMetadataReader tableMetadataReader;
 
@@ -28,8 +29,7 @@ public class BaseRemoteMetadataReader implements RemoteMetadataReader {
      * @param properties user-defined properties
      */
     public BaseRemoteMetadataReader(final Connection connection, final AdapterProperties properties) {
-        this.connection = connection;
-        this.properties = properties;
+        super(connection, properties);
         this.columnMetadataReader = createColumnMetadataReader();
         this.tableMetadataReader = createTableMetadataReader();
     }
@@ -90,10 +90,18 @@ public class BaseRemoteMetadataReader implements RemoteMetadataReader {
     }
 
     private List<TableMetadata> extractTableMetadata(final DatabaseMetaData remoteMetadata) throws SQLException {
-        try (final ResultSet remoteTables = remoteMetadata.getTables(ANY_CATALOG, ANY_SCHEMA, ANY_TABLE,
+        final String catalogName = getCatalogName();
+        final String schemaName = getSchemaName();
+        logTablesScan(catalogName, schemaName);
+        try (final ResultSet remoteTables = remoteMetadata.getTables(catalogName, schemaName, ANY_TABLE,
                 SUPPORTED_TABLE_TYPES.toArray(new String[0]))) {
             return mapTables(remoteTables);
         }
+    }
+
+    protected void logTablesScan(final String catalogName, final String schemaName) {
+        LOGGER.fine(
+                () -> "Scanning catalog \"" + catalogName + "\", schema \"" + schemaName + "\" for contained tables.");
     }
 
     private List<TableMetadata> mapTables(final ResultSet remoteTables) throws SQLException {
@@ -124,5 +132,11 @@ public class BaseRemoteMetadataReader implements RemoteMetadataReader {
             throw new RemoteMetadataReaderException("Unable to create schema adapte notes from remote schema.",
                     exception);
         }
+    }
+
+    @Override
+    public SchemaMetadata readRemoteSchemaMetadata(final List<String> tables) {
+        // FIXME Auto-generated method stub
+        throw new UnsupportedOperationException("Filtering tables not implemented.");
     }
 }

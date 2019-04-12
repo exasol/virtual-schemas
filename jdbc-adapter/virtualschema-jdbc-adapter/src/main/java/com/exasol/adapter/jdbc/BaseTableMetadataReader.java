@@ -11,6 +11,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialect.IdentifierCaseHandling;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.TableMetadata;
+import com.google.common.base.Strings;
 
 /**
  * This class maps metadata of tables from the remote source to Exasol
@@ -54,6 +55,7 @@ public class BaseTableMetadataReader implements TableMetadataReader {
             } else {
                 LOGGER.fine(() -> "Mapping table metadata for remote table \"" + tableName + "\".");
                 final TableMetadata tableMetadata = mapTable(remoteTables, tableName);
+                LOGGER.finer(() -> "Read table metadata: " + tableMetadata.describe());
                 translatedTables.add(tableMetadata);
             }
         } else {
@@ -75,7 +77,7 @@ public class BaseTableMetadataReader implements TableMetadataReader {
     }
 
     protected TableMetadata mapTable(final ResultSet table, final String tableName) throws SQLException {
-        final String comment = readComment(table);
+        final String comment = Strings.nullToEmpty(readComment(table));
         final List<ColumnMetadata> columns = this.columnMetadataReader.mapColumns(tableName);
         final String adapterNotes = DEFAULT_TABLE_ADAPTER_NOTES;
         return new TableMetadata(adjustIdentifierCase(tableName), adapterNotes, columns, comment);

@@ -11,19 +11,27 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.sql.Connection;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.SqlDialect;
 
+@ExtendWith(MockitoExtension.class)
 class RedshiftSqlDialectTest {
-    SqlDialect dialect;
+    private SqlDialect dialect;
+    @Mock
+    private Connection connectionMock;
 
     @BeforeEach
     void beforeEach() {
-        this.dialect = new RedshiftSqlDialect(null, AdapterProperties.emptyProperties());
+        this.dialect = new RedshiftSqlDialect(this.connectionMock, AdapterProperties.emptyProperties());
     }
 
     @Test

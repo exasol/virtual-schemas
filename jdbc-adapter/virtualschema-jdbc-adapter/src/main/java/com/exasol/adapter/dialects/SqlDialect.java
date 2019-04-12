@@ -6,7 +6,6 @@ import java.util.Map;
 
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.jdbc.ConnectionInformation;
-import com.exasol.adapter.jdbc.JdbcAdapterProperties;
 import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
@@ -192,18 +191,6 @@ public interface SqlDialect {
     public SqlGenerationVisitor getSqlGenerationVisitor(SqlGenerationContext context);
 
     /**
-     * Allows dialect specific handling of different exceptions.
-     *
-     * @param exception     the caught exception
-     * @param exceptionMode exception mode of the adapter
-     * @throws SQLException
-     * @deprecated this method was never used in any adapters so since 1.9.0 it is deprecated and will be removed.
-     */
-    @Deprecated
-    public void handleException(SQLException exception, JdbcAdapterProperties.ExceptionHandlingMode exceptionMode)
-            throws SQLException;
-
-    /**
      * Returns the final pushdown SQL statement. This means generally encapsulating the given SQL query in an IMPORT
      * statement.
      *
@@ -217,12 +204,19 @@ public interface SqlDialect {
             String pushdownSql);
 
     /**
-     * Read the remote schema metadata from the remote source
+     * Read the remote schema metadata for all tables from the remote source
      *
-     * @param whiteListedRemoteTables selected tables for which the metadata should be read
      * @return remote schema metadata
      */
-    public SchemaMetadata readSchemaMetadata(List<String> whiteListedRemoteTables);
+    public SchemaMetadata readSchemaMetadata();
+
+    /**
+     * Read the remote schema metadata for selected from the remote source
+     *
+     * @param tables selected tables for which the metadata should be read
+     * @return remote schema metadata
+     */
+    public SchemaMetadata readSchemaMetadata(List<String> tables);
 
     /**
      * Generate a textual description of the columns of a query result (e.g. a push-down query)

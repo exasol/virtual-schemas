@@ -56,6 +56,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     @Override
     public CreateVirtualSchemaResponse createVirtualSchema(final ExaMetadata exasolMetadata,
             final CreateVirtualSchemaRequest request) throws AdapterException {
+        logCreateVirtualSchemaRequestReceived(request);
         final SchemaMetadataInfo schemaMetadataInfo = request.getSchemaMetadataInfo();
         final AdapterProperties properties = getPropertiesFromRequest(request);
         JdbcAdapterProperties.checkPropertyConsistency(schemaMetadataInfo.getProperties());
@@ -63,9 +64,13 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
             final SchemaMetadata remoteMeta = readMetadata(properties, exasolMetadata);
             return CreateVirtualSchemaResponse.builder().schemaMetadata(remoteMeta).build();
         } catch (final SQLException exception) {
-            throw new AdapterException("Unable create Virtual Schema \"" + schemaMetadataInfo.getSchemaName() + "\".",
+            throw new AdapterException("Unable create Virtual Schema \"" + request.getVirtualSchemaName() + "\".",
                     exception);
         }
+    }
+
+    protected void logCreateVirtualSchemaRequestReceived(final CreateVirtualSchemaRequest request) {
+        LOGGER.fine(() -> "Received request to create Virutal Schema \"" + request.getVirtualSchemaName() + "\".");
     }
 
     private AdapterProperties getPropertiesFromRequest(final AdapterRequest request) {
@@ -75,7 +80,14 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     private SchemaMetadata readMetadata(final AdapterProperties properties, final ExaMetadata exasolMetadata)
             throws SQLException {
         final List<String> tables = properties.getFilteredTables();
-        return readMetadata(properties, tables, exasolMetadata);
+        try (final Connection connection = getConnection(exasolMetadata, properties)) {
+            final SqlDialect dialect = createDialect(connection, properties);
+            if (tables.isEmpty()) {
+                return dialect.readSchemaMetadata();
+            } else {
+                return dialect.readSchemaMetadata(tables);
+            }
+        }
     }
 
     private SchemaMetadata readMetadata(final AdapterProperties properties, final List<String> whiteListedRemoteTables,
@@ -90,8 +102,23 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
             throws SQLException {
         final ExaConnectionInformation connectionInformation = JdbcAdapterProperties
                 .getConnectionInformation(properties, exasolMetadata);
-        return DriverManager.getConnection(connectionInformation.getAddress(), connectionInformation.getUser(),
-                connectionInformation.getPassword());
+        final String address = connectionInformation.getAddress();
+        final String user = connectionInformation.getUser();
+        final String password = connectionInformation.getPassword();
+        logConnectionAttempt(address, user);
+        final Connection connection = DriverManager.getConnection(address, user, password);
+        logRemoteDatabaseDetails(connection);
+        return connection;
+    }
+
+    protected void logConnectionAttempt(final String address, final String user) {
+        LOGGER.fine(() -> "Connecting to \"" + address + "\" as user \"" + user + "\"");
+    }
+
+    protected void logRemoteDatabaseDetails(final Connection connection) throws SQLException {
+        final String databaseProductName = connection.getMetaData().getDatabaseProductName();
+        final String databaseProductVersion = connection.getMetaData().getDatabaseProductVersion();
+        LOGGER.info(() -> "Connected to " + databaseProductName + " " + databaseProductVersion);
     }
 
     private SqlDialect createDialect(final Connection connection, final AdapterProperties properties) {
@@ -103,7 +130,12 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     @Override
     public DropVirtualSchemaResponse dropVirtualSchema(final ExaMetadata metadata,
             final DropVirtualSchemaRequest request) {
+        logDropVirtualSchemaRequestReceived(request);
         return DropVirtualSchemaResponse.builder().build();
+    }
+
+    protected void logDropVirtualSchemaRequestReceived(final DropVirtualSchemaRequest request) {
+        LOGGER.fine(() -> "Received request to drop Virutal Schema \"" + request.getVirtualSchemaName() + "\".");
     }
 
     @Override
@@ -201,27 +233,41 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     public PushDownResponse pushdown(final ExaMetadata exasolMetadata, final PushDownRequest request)
             throws AdapterException {
         final SchemaMetadataInfo schemaMetadataInfo = request.getSchemaMetadataInfo();
-        final Map<String, String> rawProperties = schemaMetadataInfo.getProperties();
         final AdapterProperties properties = getPropertiesFromRequest(request);
-        final ImportType importType = getImportType(schemaMetadataInfo);
         try (final Connection connection = getConnection(exasolMetadata, properties)) {
             final SqlDialect dialect = createDialect(connection, properties);
-            final boolean hasMoreThanOneTable = request.getInvolvedTablesMetadata().size() > 1;
-            final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
-                    properties.getSchemaName(), JdbcAdapterProperties.isLocal(rawProperties), hasMoreThanOneTable);
-            final SqlGenerationVisitor sqlGeneratorVisitor = dialect.getSqlGenerationVisitor(context);
-            final String pushdownQuery = request.getSelect().accept(sqlGeneratorVisitor);
+            final String pushdownQuery = createPushdownQuery(request, properties, dialect);
             final ConnectionInformation connectionInformation = getConnectionInformation(exasolMetadata,
                     schemaMetadataInfo);
-            String columnDescription = "";
-            if (importType == ImportType.JDBC) {
-                columnDescription = dialect.describeQueryResultColumns(pushdownQuery);
-            }
-            final String sql = dialect.generatePushdownSql(connectionInformation, columnDescription, pushdownQuery);
-            return PushDownResponse.builder().pushDownSql(sql).build();
+            final String columnDescription = createImportColumnsDescription(schemaMetadataInfo, dialect, pushdownQuery);
+            final String importFromPushdownQuery = dialect.generatePushdownSql(connectionInformation, columnDescription,
+                    pushdownQuery);
+            LOGGER.finer(() -> "Import from push-down query:\n" + importFromPushdownQuery);
+            return PushDownResponse.builder().pushDownSql(importFromPushdownQuery).build();
         } catch (final SQLException exception) {
             throw new AdapterException("Unable to execute push-down request.", exception);
         }
+    }
+
+    protected String createImportColumnsDescription(final SchemaMetadataInfo schemaMetadataInfo,
+            final SqlDialect dialect, final String pushdownQuery) throws SQLException {
+        final ImportType importType = getImportType(schemaMetadataInfo);
+        final String columnsDescription = (importType == ImportType.JDBC)
+                ? dialect.describeQueryResultColumns(pushdownQuery)
+                : "";
+        LOGGER.finer(() -> "Import columns " + columnsDescription);
+        return columnsDescription;
+    }
+
+    protected String createPushdownQuery(final PushDownRequest request, final AdapterProperties properties,
+            final SqlDialect dialect) throws AdapterException {
+        final boolean hasMoreThanOneTable = request.getInvolvedTablesMetadata().size() > 1;
+        final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
+                properties.getSchemaName(), properties.isLocalSource(), hasMoreThanOneTable);
+        final SqlGenerationVisitor sqlGeneratorVisitor = dialect.getSqlGenerationVisitor(context);
+        final String pushdownQuery = request.getSelect().accept(sqlGeneratorVisitor);
+        LOGGER.finer(() -> "Push-down query:\n" + pushdownQuery);
+        return pushdownQuery;
     }
 
     private ImportType getImportType(final SchemaMetadataInfo meta) {

@@ -2,10 +2,12 @@ package com.exasol.adapter.dialects;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
+import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterProperties;
 
 public class SqlDialectFactory {
+    private static final Logger LOGGER = Logger.getLogger(SqlDialectFactory.class.getName());
     private final SqlDialectRegistry sqlDialectRegistry;
     private final AdapterProperties properties;
     private final Connection connection;
@@ -18,6 +20,8 @@ public class SqlDialectFactory {
     }
 
     public SqlDialect createSqlDialect(final String dialectName) {
+        assert (this.connection != null);
+        assert (this.properties != null);
         final Class<? extends SqlDialect> sqlDialectClass = this.sqlDialectRegistry
                 .getSqlDialectClassForName(dialectName);
         return instantiateDialect(sqlDialectClass, dialectName);
@@ -25,6 +29,7 @@ public class SqlDialectFactory {
 
     private SqlDialect instantiateDialect(final Class<? extends SqlDialect> dialectClass, final String dialectName) {
         try {
+            LOGGER.fine(() -> "Instantiating SQL dialect class " + dialectClass.getName());
             return dialectClass.getConstructor(Connection.class, AdapterProperties.class).newInstance(this.connection,
                     this.properties);
         } catch (final InstantiationException | IllegalAccessException | InvocationTargetException

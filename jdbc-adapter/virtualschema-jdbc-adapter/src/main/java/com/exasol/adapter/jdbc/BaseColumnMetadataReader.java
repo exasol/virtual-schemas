@@ -16,7 +16,7 @@ import com.exasol.adapter.metadata.DataType;
  * This class implements a mapper that reads column metadata from the remote database and converts it into JDBC
  * information.
  */
-public class BaseColumnMetadataReader implements ColumnMetadataReader {
+public class BaseColumnMetadataReader extends AbstractMetadataReader implements ColumnMetadataReader {
     public static final Logger LOGGER = Logger.getLogger(BaseColumnMetadataReader.class.getName());
     public static final String NAME_COLUMN = "COLUMN_NAME";
     public static final String DATA_TYPE_COLUMN = "DATA_TYPE";
@@ -30,8 +30,6 @@ public class BaseColumnMetadataReader implements ColumnMetadataReader {
     public static final String AUTOINCREMENT_COLUMN = "IS_AUTOINCREMENT";
     public static final String NULLABLE_COLUMN = "IS_NULLABLE";
     private static final boolean DEFAULT_NULLABLE = true;
-    private final Connection connection;
-    protected final AdapterProperties properties;
 
     /**
      * Create a new instance of a {@link ColumnMetadataReader}
@@ -40,8 +38,7 @@ public class BaseColumnMetadataReader implements ColumnMetadataReader {
      * @param properties user-defined adapter properties
      */
     public BaseColumnMetadataReader(final Connection connection, final AdapterProperties properties) {
-        this.connection = connection;
-        this.properties = properties;
+        super(connection, properties);
     }
 
     /**
@@ -54,7 +51,8 @@ public class BaseColumnMetadataReader implements ColumnMetadataReader {
     public List<ColumnMetadata> mapColumns(final String tableName) {
         final List<ColumnMetadata> columns = new ArrayList<>();
         final String catalogName = getCatalogName();
-        try (final ResultSet remoteColumns = this.connection.getMetaData().getColumns(catalogName, schemaName(),
+        final String schemaName = getSchemaName();
+        try (final ResultSet remoteColumns = this.connection.getMetaData().getColumns(catalogName, schemaName,
                 tableName, ANY_COLUMN)) {
             while (remoteColumns.next()) {
                 final ColumnMetadata metadata = mapColumn(remoteColumns);
@@ -62,23 +60,9 @@ public class BaseColumnMetadataReader implements ColumnMetadataReader {
             }
         } catch (final SQLException exception) {
             throw new RemoteMetadataReaderException("Unable to read column metadata from remote for catalog \""
-                    + catalogName + "\" and schema \"" + schemaName() + "\"", exception);
+                    + catalogName + "\" and schema \"" + schemaName + "\"", exception);
         }
         return columns;
-    }
-
-    protected String schemaName() {
-        return getSchemaName();
-    }
-
-    @Override
-    public String getCatalogName() {
-        return this.properties.getCatalogName();
-    }
-
-    @Override
-    public String getSchemaName() {
-        return this.properties.getCatalogName();
     }
 
     private ColumnMetadata mapColumn(final ResultSet remoteColumn) throws SQLException {

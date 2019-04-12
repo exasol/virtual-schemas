@@ -1,5 +1,7 @@
 package com.exasol.adapter.jdbc;
 
+import java.util.List;
+
 import com.exasol.adapter.metadata.SchemaMetadata;
 
 /**
@@ -12,6 +14,14 @@ public interface RemoteMetadataReader {
      * @return remote schema metadata
      */
     public SchemaMetadata readRemoteSchemaMetadata();
+
+    /**
+     * Read schema metadata for a selection of tables from the remote data source.
+     *
+     * @param tables selected tables
+     * @return remote schema metadata
+     */
+    public SchemaMetadata readRemoteSchemaMetadata(List<String> tables);
 
     /**
      * Create the schema adapter notes from database metadata.

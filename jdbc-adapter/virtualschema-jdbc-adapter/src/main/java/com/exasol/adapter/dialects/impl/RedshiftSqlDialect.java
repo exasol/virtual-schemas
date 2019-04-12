@@ -123,6 +123,8 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
 
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
+        assert (this.connection != null);
+        assert (this.properties != null);
         return new RedshiftMetadataReader(this.connection, this.properties);
     }
 }

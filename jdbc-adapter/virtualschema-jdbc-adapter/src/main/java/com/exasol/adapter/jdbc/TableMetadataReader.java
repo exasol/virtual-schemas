@@ -44,7 +44,7 @@ public interface TableMetadataReader {
 
     /**
      * Returns true if the metadata reader includes the table with the given name when the remote metadata gets mapped
-     * 
+     *
      * @param tableName name of the table
      * @return <code>true</code> if the reader includes the the mapping, <code>false</code> if it is ignored
      */

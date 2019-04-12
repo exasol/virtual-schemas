@@ -7,12 +7,10 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.JdbcAdapterProperties;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 
 /**
@@ -107,16 +105,5 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
     @Override
     public String getStringLiteral(final String value) {
         return "'" + value.replace("'", "''") + "'";
-    }
-
-    @Override
-    public void handleException(final SQLException exception,
-            final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
-        if (exceptionMode == JdbcAdapterProperties.ExceptionHandlingMode.IGNORE_INVALID_VIEWS) {
-            if (exception.getMessage().contains("Teradata Database") && exception.getMessage().contains("Error 3807")) {
-                return;
-            }
-        }
-        throw exception;
     }
 }

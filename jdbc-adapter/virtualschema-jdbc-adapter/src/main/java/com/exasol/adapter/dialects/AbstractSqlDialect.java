@@ -26,8 +26,8 @@ public abstract class AbstractSqlDialect implements SqlDialect {
      */
     public AbstractSqlDialect(final Connection connection, final AdapterProperties properties) {
         this.connection = connection;
-        this.remoteMetadataReader = createRemoteMetadataReader();
         this.properties = properties;
+        this.remoteMetadataReader = createRemoteMetadataReader();
     }
 
     /**
@@ -99,19 +99,13 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     }
 
     @Override
-    public void handleException(final SQLException exception,
-            final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
-        throw exception;
-    }
-
-    @Override
     public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription,
             final String pushdownSql) {
         final StringBuilder jdbcImportQuery = new StringBuilder();
         if (columnDescription == null) {
             jdbcImportQuery.append("IMPORT FROM JDBC AT ").append(connectionInformation.getCredentials());
         } else {
-            jdbcImportQuery.append("IMPORT INTO ").append(columnDescription);
+            jdbcImportQuery.append("IMPORT INTO ").append("(").append(columnDescription).append(")");
             jdbcImportQuery.append(" FROM JDBC AT ").append(connectionInformation.getCredentials());
         }
         jdbcImportQuery.append(" STATEMENT '").append(pushdownSql.replace("'", "''")).append("'");
@@ -119,8 +113,13 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     }
 
     @Override
-    public SchemaMetadata readSchemaMetadata(final List<String> whiteListedRemoteTables) {
-        return this.remoteMetadataReader.readRemoteSchemaMetadata(); // FIXME: use table white list
+    public SchemaMetadata readSchemaMetadata() {
+        return this.remoteMetadataReader.readRemoteSchemaMetadata();
+    }
+
+    @Override
+    public SchemaMetadata readSchemaMetadata(final List<String> tables) {
+        return this.remoteMetadataReader.readRemoteSchemaMetadata(tables);
     }
 
     @Override

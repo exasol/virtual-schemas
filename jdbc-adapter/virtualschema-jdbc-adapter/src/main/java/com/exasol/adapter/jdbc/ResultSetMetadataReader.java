@@ -32,7 +32,7 @@ public class ResultSetMetadataReader {
 
     /**
      * Generate a textual description of the result columns of the push-down query
-     * 
+     *
      * @param query push-down query
      * @return string describing the columns (names and types)
      * @throws SQLException if the necessary remote metadata cannot be read
@@ -72,7 +72,7 @@ public class ResultSetMetadataReader {
     private List<DataType> mapResultMetadataToExasolDataTypes(final ResultSetMetaData metadata) throws SQLException {
         final int columnCount = metadata.getColumnCount();
         final List<DataType> types = new ArrayList<>(columnCount);
-        for (int columnNumber = 0; columnNumber < columnCount; ++columnNumber) {
+        for (int columnNumber = 1; columnNumber <= columnCount; ++columnNumber) {
             final JdbcTypeDescription jdbcTypeDescription = getJdbcTypeDescription(metadata, columnNumber);
             final DataType type = this.columnMetadataReader.mapJdbcType(jdbcTypeDescription);
             types.add(type);
@@ -80,11 +80,12 @@ public class ResultSetMetadataReader {
         return types;
     }
 
-    protected static JdbcTypeDescription getJdbcTypeDescription(final ResultSetMetaData metadata, final int col)
-            throws SQLException {
-        final int jdbcType = metadata.getColumnType(col);
-        final int jdbcPrecisions = metadata.getPrecision(col);
-        final int jdbcScales = metadata.getScale(col);
-        return new JdbcTypeDescription(jdbcType, jdbcScales, jdbcPrecisions, 0, metadata.getColumnTypeName(col));
+    protected static JdbcTypeDescription getJdbcTypeDescription(final ResultSetMetaData metadata,
+            final int columnNumber) throws SQLException {
+        final int jdbcType = metadata.getColumnType(columnNumber);
+        final int jdbcPrecisions = metadata.getPrecision(columnNumber);
+        final int jdbcScales = metadata.getScale(columnNumber);
+        return new JdbcTypeDescription(jdbcType, jdbcScales, jdbcPrecisions, 0,
+                metadata.getColumnTypeName(columnNumber));
     }
 }

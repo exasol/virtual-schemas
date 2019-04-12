@@ -28,18 +28,4 @@ public interface ColumnMetadataReader {
      * @return Exasol data type information
      */
     public DataType mapJdbcType(JdbcTypeDescription jdbcTypeDescription);
-
-    /**
-     * Get the catalog in which the database metadata to be read resides
-     *
-     * @return parent catalog for metadata to be read
-     */
-    public String getCatalogName();
-
-    /**
-     * Get the schema in which the database metadata to be read resides
-     *
-     * @return parent schema for metadata to be read
-     */
-    public String getSchemaName();
 }
