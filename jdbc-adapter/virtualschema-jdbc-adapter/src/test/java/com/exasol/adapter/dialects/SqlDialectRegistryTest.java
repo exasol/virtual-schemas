@@ -8,8 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.exasol.adapter.dialects.impl.DB2SqlDialect;
-import com.exasol.adapter.dialects.impl.ExasolSqlDialect;
+import com.exasol.adapter.dialects.db2.DB2SqlDialect;
+import com.exasol.adapter.dialects.exasol.ExasolSqlDialect;
 
 class SqlDialectRegistryTest {
     @BeforeEach
@@ -48,21 +48,21 @@ class SqlDialectRegistryTest {
     @Test
     void testReadDialectsFromSystemProperty() {
         System.setProperty(SqlDialectRegistry.SQL_DIALECTS_PROPERTY,
-                "com.exasol.adapter.dialects.impl.ExasolSqlDialect");
+                "com.exasol.adapter.dialects.exasol.ExasolSqlDialect");
         assertThat(SqlDialectRegistry.getInstance().getDialectsString(), equalTo("EXASOL"));
     }
 
     @Test
     void testUsingDialectWithoutNameMethodThrowsException() {
         System.setProperty(SqlDialectRegistry.SQL_DIALECTS_PROPERTY,
-                "com.exasol.adapter.dialects.impl.DummyDialectWithoutNameMethod");
-        assertThrows(SqlDialectsRegistryException.class, () -> SqlDialectRegistry.getInstance().getDialectsString());
+                "com.exasol.adapter.dialects.dummy.DummyDialectWithoutNameMethod");
+        assertThrows(SqlDialectRegistryException.class, () -> SqlDialectRegistry.getInstance().getDialectsString());
     }
 
     @Test
     void testRegisteringNonExistentDialectThrowsException() {
         System.setProperty(SqlDialectRegistry.SQL_DIALECTS_PROPERTY, "this.dialect.does.not.exist.DummySqlDialect");
-        assertThrows(SqlDialectsRegistryException.class, SqlDialectRegistry::getInstance);
+        assertThrows(SqlDialectRegistryException.class, SqlDialectRegistry::getInstance);
     }
 
     @Test

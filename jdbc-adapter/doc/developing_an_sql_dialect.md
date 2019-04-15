@@ -25,7 +25,7 @@ To register your new dialect add it to the list in [sql_dialects.properties](../
 ```properties
 com.exasol.adapter.dialects.supported=\
 ...
-com.exasol.adapter.dialects.impl.MyAweSomeSqlDialect
+com.exasol.adapter.dialects.myawesomedialect.MyAweSomeSqlDialect
 ```
 
 For tests or in case you want to exclude existing dialects in certain scenarios you can override the contents of this file by setting the system property `com.exasol.adapter.dialects.supported`.

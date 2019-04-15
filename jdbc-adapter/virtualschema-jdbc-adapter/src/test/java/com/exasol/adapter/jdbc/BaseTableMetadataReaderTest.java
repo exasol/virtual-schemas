@@ -10,18 +10,19 @@ import static org.mockito.Mockito.when;
 import java.sql.*;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialect.IdentifierCaseHandling;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.metadata.TableMetadata;
 
+@ExtendWith(MockitoExtension.class)
 class BaseTableMetadataReaderTest {
     @Mock
     private Connection connectionMock;
@@ -32,14 +33,8 @@ class BaseTableMetadataReaderTest {
     @Mock
     private ColumnMetadataReader columnMetadataReaderMock;
 
-    @BeforeEach
-    void beforeEach() throws SQLException {
-        MockitoAnnotations.initMocks(this);
-        when(this.connectionMock.getMetaData()).thenReturn(this.remoteMetadataMock);
-    }
-
     @Test
-    void testIsTableIncludedByMapping() {
+    void testIsTableIncludedByMapping() throws SQLException {
         final TableMetadataReader reader = new BaseTableMetadataReader(null, AdapterProperties.emptyProperties());
         assertThat(reader.isTableIncludedByMapping("any name"), equalTo(true));
     }
@@ -67,6 +62,10 @@ class BaseTableMetadataReaderTest {
                 () -> assertThat(tableB.getAdapterNotes(),
                         equalTo(BaseTableMetadataReader.DEFAULT_TABLE_ADAPTER_NOTES)),
                 () -> assertThat(tableB.getColumns().get(0).getName(), equalTo(COLUMN_B1)));
+    }
+
+    protected void mockConnection() throws SQLException {
+        when(this.connectionMock.getMetaData()).thenReturn(this.remoteMetadataMock);
     }
 
     @CsvSource({ "INTERPRET_AS_LOWER, INTERPRET_AS_LOWER, true", //

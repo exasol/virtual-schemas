@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.impl.ExasolSqlDialect;
+import com.exasol.adapter.dialects.exasol.ExasolSqlDialect;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
 import com.google.common.collect.ImmutableList;

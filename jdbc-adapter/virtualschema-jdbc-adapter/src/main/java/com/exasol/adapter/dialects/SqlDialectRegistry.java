@@ -49,7 +49,7 @@ public final class SqlDialectRegistry {
             properties.load(stream);
             return properties.getProperty(SQL_DIALECTS_PROPERTY);
         } catch (final IOException e) {
-            throw new SqlDialectsRegistryException(
+            throw new SqlDialectRegistryException(
                     "Unable to load list of SQL dialect from " + DIALECTS_PROPERTIES_FILE);
         }
     }
@@ -67,7 +67,7 @@ public final class SqlDialectRegistry {
             this.supportedDialects.add(dialect);
             LOGGER.fine(() -> "Registered SQL dialect implementation class \"" + className + "\"");
         } catch (final ClassNotFoundException exception) {
-            throw new SqlDialectsRegistryException("Unable to find SQL dialect implementation class " + className,
+            throw new SqlDialectRegistryException("Unable to find SQL dialect implementation class " + className,
                     exception);
         }
     }
@@ -90,7 +90,7 @@ public final class SqlDialectRegistry {
             dialectName = (String) dialect.getMethod(GET_PUBLIC_NAME_METHOD).invoke(null);
         } catch (final IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
-            throw new SqlDialectsRegistryException(
+            throw new SqlDialectRegistryException(
                     "Unable to invoke " + GET_PUBLIC_NAME_METHOD + " trying to determine SQL dialect name");
         }
         return dialectName;

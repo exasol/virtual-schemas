@@ -133,7 +133,7 @@ public class FileBasedIntegrationTest {
             InvocationTargetException, InstantiationException {
         final String schemaName = "LS";
         final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, multipleTables);
-        final Class<?> dialectClass = Class.forName("com.exasol.adapter.dialects.impl." + dialect + "SqlDialect");
+        final Class<?> dialectClass = getDialectClass(dialect);
         final SqlDialect sqlDialect = (SqlDialect) dialectClass
                 .getConstructor(Connection.class, AdapterProperties.class)
                 .newInstance(null, AdapterProperties.emptyProperties());
@@ -144,6 +144,13 @@ public class FileBasedIntegrationTest {
             System.err.println("Exception in: " + testFile + " Test#: " + testNr + " dialect: " + dialect);
             throw e;
         }
+    }
+
+    protected Class<?> getDialectClass(final String dialect) throws ClassNotFoundException {
+        final String fullyQualifiedDialectName = "com.exasol.adapter.dialects." + dialect.toLowerCase() + "." + dialect
+                + "SqlDialect";
+        final Class<?> dialectClass = Class.forName(fullyQualifiedDialectName);
+        return dialectClass;
     }
 
     private Map<String, List<String>> getExpectedPushdownQueriesFrom(final String jsonTest, final int testNr)

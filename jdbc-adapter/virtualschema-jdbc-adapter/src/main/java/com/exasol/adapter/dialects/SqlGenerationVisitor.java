@@ -58,7 +58,7 @@ import com.google.common.base.Joiner;
  * extend this class and override the required methods. You also have to return
  * your custom visitor class then in the method
  * {@link SqlDialect#getSqlGenerationVisitor(SqlGenerationContext)}. See
- * {@link com.exasol.adapter.dialects.impl.OracleSqlGenerationVisitor} for an
+ * {@link com.exasol.adapter.dialects.oracle.OracleSqlGenerationVisitor} for an
  * example.
  * </p>
  *
