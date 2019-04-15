@@ -34,4 +34,10 @@ class RedshiftColumnMetadataReaderTest extends AbstractColumnMetadataReaderTest 
         assertThat(this.columnMetadataReader.mapJdbcType(new JdbcTypeDescription(Types.BOOLEAN, 0, 0, 0, "")),
                 equalTo(DataType.createBool()));
     }
+
+    @Test
+    void testMapJdbcTypeOtherDouble() {
+        assertThat(this.columnMetadataReader.mapJdbcType(new JdbcTypeDescription(Types.OTHER, 0, 0, 0, "double")),
+                equalTo(DataType.createDouble()));
+    }
 }

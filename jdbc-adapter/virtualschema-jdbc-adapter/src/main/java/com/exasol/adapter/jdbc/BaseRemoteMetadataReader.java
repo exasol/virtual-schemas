@@ -1,11 +1,9 @@
 package com.exasol.adapter.jdbc;
 
 import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.ANY_TABLE;
-import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.SUPPORTED_TABLE_TYPES;
 
 import java.sql.*;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterProperties;
@@ -115,9 +113,14 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
         final String schemaName = getSchemaNameFilter();
         logTablesScan(catalogName, schemaName);
         try (final ResultSet remoteTables = remoteMetadata.getTables(catalogName, schemaName, ANY_TABLE,
-                SUPPORTED_TABLE_TYPES.toArray(new String[0]))) {
+                getSupportedTableTypes().toArray(new String[0]))) {
             return mapTables(remoteTables, selectedTables);
         }
+    }
+
+    @Override
+    public Set<String> getSupportedTableTypes() {
+        return RemoteMetadataReaderConstants.DEFAULT_SUPPORTED_TABLE_TYPES;
     }
 
     protected void logTablesScan(final String catalogName, final String schemaName) {
@@ -133,11 +136,11 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
             if (schemaName == null) {
                 builder.append("any schema ");
             } else {
-                builder.append("\", schema \"");
+                builder.append("schema \"");
                 builder.append(schemaName);
                 builder.append("\" ");
             }
-            builder.append(" for contained tables.");
+            builder.append("for contained tables.");
             return builder.toString();
         });
     }
