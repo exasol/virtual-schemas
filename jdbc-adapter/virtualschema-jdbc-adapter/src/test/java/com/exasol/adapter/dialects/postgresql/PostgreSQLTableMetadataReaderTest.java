@@ -43,7 +43,7 @@ class PostgreSQLTableMetadataReaderTest {
         setIdentifierMappingProperty(identifierMapping, rawProperties);
         final TableMetadataReader reader = new PostgreSQLTableMetadataReader(this.columnMetadataReaderMock,
                 new AdapterProperties(rawProperties));
-        final List<TableMetadata> tables = reader.mapTables(this.tablesMock);
+        final List<TableMetadata> tables = reader.mapTables(this.tablesMock, Optional.empty());
         final TableMetadata table = tables.get(0);
         return table;
     }

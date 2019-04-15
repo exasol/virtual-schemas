@@ -8,6 +8,7 @@ import static org.junit.Assert.assertThat;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.oracle.OracleTableMetadataReader;
 import com.exasol.adapter.jdbc.ColumnMetadataReader;
 import com.exasol.adapter.jdbc.TableMetadataReader;
 import com.exasol.adapter.metadata.DataType;
@@ -50,7 +50,7 @@ class OracleTableMetadataReaderTest {
         mockTableName(this.tablesMock, TABLE_A, TABLE_B, "BIN$TRASHED");
         mockTableWithColumnsOfType(this.tablesMock, this.columnMetadataReaderMock, TABLE_A, DataType.createBool());
         mockTableWithColumnsOfType(this.tablesMock, this.columnMetadataReaderMock, TABLE_B, DataType.createBool());
-        final List<String> tableNames = this.reader.mapTables(this.tablesMock) //
+        final List<String> tableNames = this.reader.mapTables(this.tablesMock, Optional.empty()) //
                 .stream() //
                 .map(TableMetadata::getName) //
                 .collect(Collectors.toList());

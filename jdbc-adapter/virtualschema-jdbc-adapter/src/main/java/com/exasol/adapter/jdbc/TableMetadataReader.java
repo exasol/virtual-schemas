@@ -3,6 +3,7 @@ package com.exasol.adapter.jdbc;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 import com.exasol.adapter.dialects.SqlDialect.IdentifierCaseHandling;
 import com.exasol.adapter.metadata.TableMetadata;
@@ -14,11 +15,13 @@ public interface TableMetadataReader {
     /**
      * Map a list of tables found in a JDBC result set to a list of {@link TableMetadata}
      *
-     * @param remoteTables result set containing the tables to be mapped
+     * @param remoteTables   result set containing the tables to be mapped
+     * @param selectedTables optional list of tables name that is used to narrow down the mapping
      * @return list of {@link TableMetadata}
      * @throws SQLException if either mapping the table or its columns produces an SQL error
      */
-    public List<TableMetadata> mapTables(ResultSet remoteTables) throws SQLException;
+    public List<TableMetadata> mapTables(ResultSet remoteTables, Optional<List<String>> selectedTables)
+            throws SQLException;
 
     /**
      * Adjust the case of the identifier as required and configured

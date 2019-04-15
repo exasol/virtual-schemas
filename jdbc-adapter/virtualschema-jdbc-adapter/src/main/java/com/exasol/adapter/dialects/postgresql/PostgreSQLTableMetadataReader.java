@@ -3,6 +3,7 @@ package com.exasol.adapter.dialects.postgresql;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.PostgreSQLIdentifierMapping;
@@ -46,15 +47,18 @@ public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
     }
 
     @Override
-    public List<TableMetadata> mapTables(final ResultSet remoteTables) throws SQLException {
+    public List<TableMetadata> mapTables(final ResultSet remoteTables, final Optional<List<String>> selectedTables)
+            throws SQLException {
         final String tableName = readTableName(remoteTables);
-        if ((getIdentifierMapping() == PostgreSQLIdentifierMapping.CONVERT_TO_UPPER) && !ignoresUpperCaseTables()
+        if (isTableSelected(tableName, selectedTables) //
+                && (getIdentifierMapping() == PostgreSQLIdentifierMapping.CONVERT_TO_UPPER) //
+                && !ignoresUpperCaseTables() //
                 && containsUppercaseCharacter(tableName)) {
             throw new RemoteMetadataReaderException("Table \"" + tableName
                     + "\" cannot be used in virtual schema. Set property " + IGNORE_ERRORS_PROPERTY + " to "
                     + POSTGRESQL_UPPERCASE_TABLES_SWITCH + " to enforce schema creation.");
         } else {
-            return super.mapTables(remoteTables);
+            return super.mapTables(remoteTables, selectedTables);
         }
     }
 

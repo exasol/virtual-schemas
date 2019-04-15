@@ -212,4 +212,22 @@ class BaseRemoteMetadataReaderTest {
                 new AdapterProperties(rawProperties));
         assertThat(reader.getSchemaNameFilter(), equalTo(expectedSchema));
     }
+
+    // Don't mix this test up with the one for filtered tables. In the refresh request users can limit the tables they
+    // want refreshed. This is a different mechanism that coexists with the table filter via property. Both have to
+    // work together.
+    @Test
+    void testReadRemoteDataSkippingForSelectedTablesOnly() throws SQLException {
+        mockConnection();
+        mockTableA();
+        mockGetTableCalls();
+        mockSupportingMetadata();
+        final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(this.connectionMock,
+                AdapterProperties.emptyProperties());
+        final SchemaMetadata metadata = reader.readRemoteSchemaMetadata(Arrays.asList(TABLE_A));
+        final List<TableMetadata> tables = metadata.getTables();
+        final TableMetadata tableAMetadata = tables.get(0);
+        assertAll(() -> assertThat(tables, iterableWithSize(1)),
+                () -> assertThat(tableAMetadata.getName(), equalTo(TABLE_A)));
+    }
 }
