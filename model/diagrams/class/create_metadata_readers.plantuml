@@ -2,15 +2,17 @@
 !include ../clean.skin
 
 interface MetadataReader
-class AbstractMetadataReader
 interface RemoteMetadataReader
+interface TableMetadataReader
+interface ColumnMetadataReader
+interface SqlDialect
+class AbstractMetadataReader
 class BaseRemoteMetadataReader
 class BaseTableMetadataReader
 class BaseColumnMetadataReader
 class PostgreSQLMetadataReader
 class PostgreSQLTableMetadataReader
 class PostgreSQLColumnMetadataReader
-interface SqlDialect
 abstract class AbstractSqlDialect
 class PostgreSQLSqldialect
 
@@ -27,7 +29,9 @@ PostgreSQLMetadataReader -r-> PostgreSQLColumnMetadataReader : <<create>>
 AbstractSqlDialect -r-> BaseRemoteMetadataReader : <<create>>
 PostgreSQLSqldialect -r-> PostgreSQLMetadataReader : <<create>>
 BaseTableMetadataReader -u-|> AbstractMetadataReader
+BaseTableMetadataReader .u.|> TableMetadataReader
 BaseColumnMetadataReader -u-|> AbstractMetadataReader
+BaseColumnMetadataReader .u.|> ColumnMetadataReader 
 PostgreSQLTableMetadataReader -u-|> BaseTableMetadataReader
 PostgreSQLColumnMetadataReader -u-|> BaseColumnMetadataReader
 

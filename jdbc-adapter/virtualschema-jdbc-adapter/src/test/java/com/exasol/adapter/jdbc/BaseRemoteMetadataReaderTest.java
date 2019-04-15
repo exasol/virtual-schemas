@@ -184,7 +184,7 @@ class BaseRemoteMetadataReaderTest {
     @Test
     void testGetCatalogNameFilterDefaultsToAny() {
         final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(null, AdapterProperties.emptyProperties());
-        assertThat(reader.getCatalogNameFilter(), equalTo(MetadataReader.ANY_CATALOG_FILTER));
+        assertThat(reader.getCatalogNameFilter(), equalTo(AbstractMetadataReader.ANY_CATALOG_FILTER));
     }
 
     @Test
@@ -200,7 +200,7 @@ class BaseRemoteMetadataReaderTest {
     @Test
     void testGetSchemaNameFilterDefaultsToAny() {
         final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(null, AdapterProperties.emptyProperties());
-        assertThat(reader.getSchemaNameFilter(), equalTo(MetadataReader.ANY_CATALOG_FILTER));
+        assertThat(reader.getSchemaNameFilter(), equalTo(AbstractMetadataReader.ANY_CATALOG_FILTER));
     }
 
     @Test
