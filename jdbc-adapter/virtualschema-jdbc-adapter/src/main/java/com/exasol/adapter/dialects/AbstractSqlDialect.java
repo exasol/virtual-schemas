@@ -47,17 +47,6 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         return ".";
     }
 
-    public String changeIdentifierCaseIfNeeded(final String identifier) {
-        if (getQuotedIdentifierHandling() == getUnquotedIdentifierHandling()) {
-            if (getQuotedIdentifierHandling() != IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE) {
-                // Completely case-insensitive. We can store everything uppercase to allow
-                // working with unquoted identifiers in EXASOL
-                return identifier.toUpperCase();
-            }
-        }
-        return identifier;
-    }
-
     @Override
     public boolean omitParentheses(final ScalarFunction function) {
         return this.omitParenthesesMap.contains(function);

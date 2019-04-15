@@ -84,18 +84,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String changeIdentifierCaseIfNeeded(final String identifier) {
-        if (getIdentifierMapping() != PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE) {
-            final boolean isSimplePostgresIdentifier = identifier.matches("^[a-z][0-9a-z_]*");
-
-            if (isSimplePostgresIdentifier) {
-                return identifier.toUpperCase();
-            }
-        }
-        return identifier;
-    }
-
-    @Override
     public IdentifierCaseHandling getUnquotedIdentifierHandling() {
         return IdentifierCaseHandling.INTERPRET_AS_LOWER;
     }
