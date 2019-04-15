@@ -49,7 +49,7 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
      */
     @Override
     public List<ColumnMetadata> mapColumns(final String tableName) {
-        return mapColumns(getCatalogName(), getSchemaName(), tableName);
+        return mapColumns(getCatalogNameFilter(), getSchemaNameFilter(), tableName);
     }
 
     protected List<ColumnMetadata> mapColumns(final String catalogName, final String schemaName,

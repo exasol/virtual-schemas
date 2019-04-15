@@ -90,8 +90,8 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
     }
 
     private List<TableMetadata> extractTableMetadata(final DatabaseMetaData remoteMetadata) throws SQLException {
-        final String catalogName = getCatalogName();
-        final String schemaName = getSchemaName();
+        final String catalogName = getCatalogNameFilter();
+        final String schemaName = getSchemaNameFilter();
         logTablesScan(catalogName, schemaName);
         try (final ResultSet remoteTables = remoteMetadata.getTables(catalogName, schemaName, ANY_TABLE,
                 SUPPORTED_TABLE_TYPES.toArray(new String[0]))) {
@@ -100,8 +100,25 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
     }
 
     protected void logTablesScan(final String catalogName, final String schemaName) {
-        LOGGER.fine(
-                () -> "Scanning catalog \"" + catalogName + "\", schema \"" + schemaName + "\" for contained tables.");
+        LOGGER.fine(() -> {
+            final StringBuilder builder = new StringBuilder("Scanning \"");
+            if (catalogName == null) {
+                builder.append("any catalog, ");
+            } else {
+                builder.append("catalog \"");
+                builder.append(catalogName);
+                builder.append("\", ");
+            }
+            if (schemaName == null) {
+                builder.append("any schema ");
+            } else {
+                builder.append("\", schema \"");
+                builder.append(schemaName);
+                builder.append("\" ");
+            }
+            builder.append(" for contained tables.");
+            return builder.toString();
+        });
     }
 
     private List<TableMetadata> mapTables(final ResultSet remoteTables) throws SQLException {

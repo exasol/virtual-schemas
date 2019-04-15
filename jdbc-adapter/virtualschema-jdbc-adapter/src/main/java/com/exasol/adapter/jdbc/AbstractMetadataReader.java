@@ -11,7 +11,7 @@ import com.exasol.adapter.AdapterProperties;
  * @see BaseTableMetadataReader
  * @see BaseColumnMetadataReader
  */
-public abstract class AbstractMetadataReader {
+public abstract class AbstractMetadataReader implements MetadataReader {
     protected final Connection connection;
     protected final AdapterProperties properties;
 
@@ -26,20 +26,22 @@ public abstract class AbstractMetadataReader {
     }
 
     /**
-     * Get the catalog in which the database metadata to be read resides
+     * Get the catalog name that is applied as filter criteria when looking up remote metadata
      *
-     * @return parent catalog for metadata to be read
+     * @return catalog name or <code>null</code> if metadata lookups are not limited by catalog
      */
-    protected String getCatalogName() {
+    @Override
+    public String getCatalogNameFilter() {
         return this.properties.getCatalogName();
     }
 
     /**
-     * Get the schema in which the database metadata to be read resides
+     * Get the schema name that is applied as filter criteria when looking up remote metadata
      *
-     * @return parent schema for metadata to be read
+     * @return schema name or <code>null</code> if metadata lookups are not limited by schema
      */
-    protected String getSchemaName() {
+    @Override
+    public String getSchemaNameFilter() {
         return this.properties.getSchemaName();
     }
 }

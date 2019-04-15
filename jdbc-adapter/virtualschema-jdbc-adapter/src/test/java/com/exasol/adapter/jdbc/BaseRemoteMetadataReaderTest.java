@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import java.sql.*;
 import java.util.*;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -28,16 +27,16 @@ class BaseRemoteMetadataReaderTest {
     @Mock
     private DatabaseMetaData remoteMetadataMock;
 
-    @BeforeEach
-    void beforeEach() throws SQLException {
-        when(this.connectionMock.getMetaData()).thenReturn(this.remoteMetadataMock);
-    }
-
     @Test
     void testReadEmptyRemoteMetadata() throws RemoteMetadataReaderException, SQLException {
+        mockConnection();
         mockGetAllTablesReturnsEmptyList();
         mockSupportingMetadata();
         assertThat(readMockedSchemaMetadata().getTables(), emptyIterableOf(TableMetadata.class));
+    }
+
+    protected void mockConnection() throws SQLException {
+        when(this.connectionMock.getMetaData()).thenReturn(this.remoteMetadataMock);
     }
 
     private SchemaMetadata readMockedSchemaMetadata() {
@@ -57,6 +56,7 @@ class BaseRemoteMetadataReaderTest {
 
     @Test
     void testReadRemoteMetadata() throws RemoteMetadataReaderException, SQLException {
+        mockConnection();
         mockGetColumnsCalls();
         mockGetTableCalls();
         mockSupportingMetadata();
@@ -126,6 +126,7 @@ class BaseRemoteMetadataReaderTest {
 
     @Test
     void testReadRemoteDataSkippingFilteredTables() throws SQLException {
+        mockConnection();
         final Map<String, String> rawProperties = new HashMap<>();
         rawProperties.put(AdapterProperties.TABLE_FILTER_PROPERTY, TABLE_B);
         mockTableA();
@@ -140,6 +141,7 @@ class BaseRemoteMetadataReaderTest {
 
     @Test
     void testCreateSchemaAdapterNotes() throws SQLException {
+        mockConnection();
         final RemoteMetadataReader reader = new BaseRemoteMetadataReader(this.connectionMock,
                 AdapterProperties.emptyProperties());
         mockSupportingMetadata();
@@ -162,6 +164,7 @@ class BaseRemoteMetadataReaderTest {
 
     @Test
     void testReadRemoteMetadataWithAdapterNotes() throws RemoteMetadataReaderException, SQLException {
+        mockConnection();
         final ResultSet tablesMock = Mockito.mock(ResultSet.class);
         mockTableCount(tablesMock, 1);
         mockTableName(tablesMock, TABLE_A);
@@ -176,5 +179,37 @@ class BaseRemoteMetadataReaderTest {
                 () -> assertThat(tables, iterableWithSize(1)),
                 () -> assertThat(tableAMetadata.getName(), equalTo(TABLE_A)),
                 () -> assertThat(columnsAMetadata, iterableWithSize(2)));
+    }
+
+    @Test
+    void testGetCatalogNameFilterDefaultsToAny() {
+        final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(null, AdapterProperties.emptyProperties());
+        assertThat(reader.getCatalogNameFilter(), equalTo(MetadataReader.ANY_CATALOG_FILTER));
+    }
+
+    @Test
+    void testGetCatalogNameFilter() {
+        final Map<String, String> rawProperties = new HashMap<>();
+        final String expectedCatalog = "FOO";
+        rawProperties.put(AdapterProperties.CATALOG_NAME_PROPERTY, expectedCatalog);
+        final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(null,
+                new AdapterProperties(rawProperties));
+        assertThat(reader.getCatalogNameFilter(), equalTo(expectedCatalog));
+    }
+
+    @Test
+    void testGetSchemaNameFilterDefaultsToAny() {
+        final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(null, AdapterProperties.emptyProperties());
+        assertThat(reader.getSchemaNameFilter(), equalTo(MetadataReader.ANY_CATALOG_FILTER));
+    }
+
+    @Test
+    void testGetSchemaNameFilter() {
+        final Map<String, String> rawProperties = new HashMap<>();
+        final String expectedSchema = "BAR";
+        rawProperties.put(AdapterProperties.SCHEMA_NAME_PROPERTY, expectedSchema);
+        final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(null,
+                new AdapterProperties(rawProperties));
+        assertThat(reader.getSchemaNameFilter(), equalTo(expectedSchema));
     }
 }
