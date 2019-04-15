@@ -1,5 +1,5 @@
 # How To Develop and Test a Dialect
-This page describes how you can develop and semi-automatically test a dialect for the JDBC adapter. The framework for testing a dialect is still work in progress.
+This page describes how you can develop and semi-automatically test a dialect for the JDBC adapter.
 
 ## Content
 
@@ -11,8 +11,10 @@ This page describes how you can develop and semi-automatically test a dialect fo
 You can implement a dialect by implementing the interface `com.exasol.adapter.dialects.SqlDialect`.
 We recommend to look at the following resources to get started:
 
-* First have a look at the [SqlDialect interface source code](../virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/SqlDialect.java). You can start with the comments of the interface and have a look at the methods you can override.
-* Second you can review the source code of one of the [dialect implementations](../virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/impl) as an inspiration. Ideally you should look at the dialect which is closest to your data source.
+* First have a look at the [SqlDialect interface source code](../virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/SqlDialect.java). 
+You can start with the comments of the interface and have a look at the methods you can override.
+* Second you can review the source code of one of the [dialect implementations](../virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/) as an inspiration. 
+Ideally you should look at the dialect which is closest to your data source.
 
 To implement a full dialect for a typical data source you have to run all of the following steps. We recommend to follow the order proposed here.
 
@@ -20,7 +22,7 @@ To implement a full dialect for a typical data source you have to run all of the
 
 The Virtual Schema adapter creates an instance of an SQL dialect on demand. You can pick any dialect that is listed in the `SqlDialects` registry.
 
-To register your new dialect add it to the list in [sql_dialects.properties](../virtualschema-jdbc-adapter/src/main/resources/sql_dialects.properties]).
+To register your new dialect add it to the list in [sql_dialects.properties](../virtualschema-jdbc-adapter/src/main/resources/sql_dialects.properties).
 
 ```properties
 com.exasol.adapter.dialects.supported=\
@@ -28,9 +30,10 @@ com.exasol.adapter.dialects.supported=\
 com.exasol.adapter.dialects.myawesomedialect.MyAweSomeSqlDialect
 ```
 
-For tests or in case you want to exclude existing dialects in certain scenarios you can override the contents of this file by setting the system property `com.exasol.adapter.dialects.supported`.
+For tests or in case you want to exclude existing dialects in certain scenarios you can override the contents of this file 
+by setting the system property `com.exasol.adapter.dialects.supported`.
 
-Please also remember to [list the supported dialect in the documentation](../README.md).
+Please also remember to [list the supported dialect in the documentation](../README.md). <!-- FIXME -->
 
 ### Setup Data Source
 
@@ -149,7 +152,7 @@ Add a new class that derives from [AbstractIntegrationTest](../virtualschema-jdb
 * Create the test schema in the source database
 * Create the virtual schema
 * Execute the tests on the virtual schema
-See [PostgreSQLDialectIT](../virtualschema-jdbc-adapter/src/test/java/com/exasol/adapter/dialects/impl/PostgreSQLDialectIT.java) for an example.
+See [PostgreSQLDialectIT](../virtualschema-jdbc-adapter/src/test/java/com/exasol/adapter/dialects/postgresql/PostgreSQLDialectIT.java) for an example.
 
 ### Executing Integration Tests
 
@@ -228,53 +231,6 @@ This will run all integration tests, i.e. all JUnit tests with the suffix `IT` i
 
 The YAML configuration file stores the information for your test environment like JDBC connection strings, paths and credentials.
 
-## Observing Adapter Output
-
-You can either use [netcat](http://netcat.sourceforge.net/) or `exaoutput.py` from the [EXASolution Python Package](https://github.com/EXASOL/python-exasol). Since netcat is available on most Linux machines anyway, we will use this in the description here.
-
-First start netcat in listen-mode on a free TCP port on your machine.
-
-```bash
-nc -lkp 3000
-```
-
-The `-l` switch puts netcat into listen-mode. `-k` tells it to stay open after the peer closed a connection. `-p 3000` set the number of the TCP port netcat listens on.
-
-Next find out your IP address.
-
-Linux:
-
-```bash
-ip -br address
-```
-
-Windows:
-
-```cmd
-ipconfig /all
-```
-
-The next SQL command shows an example of declaring a virtual schema. Notice the IP address and port in the last line. This tells the adapter script where to direct the output to. 
-
-```sql
-CREATE VIRTUAL SCHEMA VS_EXA_IT
-USING ADAPTER.JDBC_ADAPTER
-WITH CONNECTION_STRING='jdbc:exa:localhost:8563' USERNAME='sys' PASSWORD='exasol'
-     SCHEMA_NAME='NATIVE_EXA_IT' SQL_DIALECT='EXASOL' IS_LOCAL='true'
-     DEBUG_ADDRESS='10.44.1.228:3000' LOG_LEVEL='ALL';
-```
-
-The parameter LOG_LEVEL lets you pick a log level as defined in [java.util.logging.Level](https://docs.oracle.com/javase/8/docs/api/java/util/logging/Level.html).
-
-The recommended standard log levels are:
-
-* `INFO` in production
-* `ALL` for in-depth debugging
-
-You can tell that the connection works if you see the following message after executing the SQL command that installs a virtual schema:
-
-    Attached to output service
-
 ## Java Remote Debugging of Adapter script
 
 When developing a new dialect it is sometimes really helpful to debug the deployed adapter script inside the database.
@@ -324,11 +280,3 @@ jdbc-adapter/tools/version.sh unify
 ```
 
 Note that the script must be run from the root directory of the virtual schema project.
-
-## Troubleshooting
-
-### Setting the Right IP Addresses for Database Connections
-
-Keep in mind that the adapter script is deployed in the Exasol database. If you want it to be able to make connections to other databases, you need to make sure that the IP addresses or host names are the ones that the database sees, not your local machine. This is easily forgotten in case of automated integration tests since it feels like they run on your machine -- which is only partially true.
-
-So a common source of error would be to specify `localhost` or `127.0.0.1` as address of the remote database in case you have it running in Docker or a VM on your local machine. But the Exasol Database cannot reach the other database there unless it is running on the same machine directly (i.e. not behind a virtual network device).
