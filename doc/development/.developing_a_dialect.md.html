@@ -652,17 +652,26 @@ function setDocumentScrollTop(ypos)
 <p>In the case of the JDBC adapter there are <em>two</em> different adapter layers in between Exasol and the source. The first one from Exasol's perspective is the JDBC adapter which contains the common part of the translation between Exasol and a source for which a JDBC driver exists. The second layer is a SQL dialect adapter, that evens out the specialties of the source databases.</p> 
 <p>The name SQL dialect adapter is derived from the non-standard implementation parts of SQL databases which are often referred to as &quot;dialects&quot; of the SQL language.</p> 
 <p>As an example, PostgreSQL handles some of the data types subtly different from Exasol and the SQL dialect adapter needs to deal with those differences by implementing conversion functions.</p> 
-<pre><code>.-------------------------.
-|        PostgreSQL       |   External data source
-|-------------------------|
-|   SQL Dialect Adapter   |   Even out specifics of the source database
-|-------------------------|
-|     JDBC  Adapter       |   Common JDBC functions
-|-------------------------|
-|    Virtual Schema API   |
-|-------------------------|
-|         Exasol          |
-'-------------------------'
+<p>Below you can see a layer model of the Virtual Schemas when implemented with the JDBC adapter. The layers in the middle -- i.e. everything that deals with translating between the source and Exasol -- are provided in this repository.</p> 
+<pre><code>.-----------------------------------------.
+|  Exasol    |          Exasol            |
+|   core     |----------------------------|
+|            |//// Virtual Schema API ////|
+|------------|----------------------------|
+|            |       JDBC  Adapter        |   Common JDBC functions
+|  In this   |----------------------------|
+| repository |///// SQL Dialect API //////|
+|            |----------------------------|
+|            |    SQL Dialect Adapter     |   Even out specifics of the source database
+|------------|----------------------------|
+|            |///////// JDBC API /////////|
+|            |----------------------------|
+|            |  PostgresSQL JDBC Driver   |   JDBC compliant access to payload and metadata
+|  External  |----------------------------|
+|            |// PostgresSQL Native API //|
+|            |----------------------------|
+|            |         PostgreSQL         |   External data source
+'-----------------------------------------'
 </code></pre> 
 <p>For more information about the structure of the Virtual Schemas check the UML diagrams provided in the directory <a href="model/.diagrams.md.html">model/diagrams</a>. You either need <a href="http://plantuml.com/" rel="nofollow">PlantUML</a> to render them or an editor that has PlamtUML preview built in.</p> 
 <h2> <a id="developing-a-dialect" class="anchor" href="#developing-a-dialect" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Developing a Dialect</h2> 
