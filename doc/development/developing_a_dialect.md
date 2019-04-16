@@ -1,22 +1,83 @@
-# How To Develop and Test a Dialect
-This page describes how you can develop and semi-automatically test a dialect for the JDBC adapter.
+# How To Develop and Test a SQL Dialect Adapter
+
+This article describes how you can develop and test an SQL dialect adapter based on the Virtual Schema JDBC adapter.
 
 ## Content
 
 * [Developing a Dialect](#developing-a-dialect)
 * [Integration Testing with Containers](#integration-testing-with-containers)
 
+## Introduction
+
+Before you start writing your own SQL adapter that integrates Virtual Schemas with the SQL dialect a specific data source uses, we first need to briefly discuss how Virtual Schemas are structured in general and the JDBC adapter in particular.
+
+[Adapters](https://www.gofpatterns.com/structural-design-patterns/structural-patterns/adapter-pattern.php) (also known as wrappers) are a piece of code that enable interaction between two previously incompatible objects by planting an adapter layer in between that serves as a translator. In our case a Virtual Schema adapter implements an API defined by Exasol Virtual Schemas and translates all data accesses and type conversions between the adapted source and the Exasol database.
+
+In the case of the JDBC adapter there are _two_ different adapter layers in between Exasol and the source. The first one from Exasol's perspective is the JDBC adapter which contains the common part of the translation between Exasol and a source for which a JDBC driver exists. The second layer is a SQL dialect adapter, that evens out the specialties of the source databases.
+
+The name SQL dialect adapter is derived from the non-standard implementation parts of SQL databases which are often referred to as "dialects" of the SQL language.
+
+As an example, PostgreSQL handles some of the data types subtly different from Exasol and the SQL dialect adapter needs to deal with those differences by implementing conversion functions.
+
+    .-------------------------.
+    |        PostgreSQL       |   External data source
+    |-------------------------|
+    |   SQL Dialect Adapter   |   Even out specifics of the source database
+    |-------------------------|
+    |     JDBC  Adapter       |   Common JDBC functions
+    |-------------------------|
+    |    Virtual Schema API   |
+    |-------------------------|
+    |         Exasol          |
+    '-------------------------'
+
+For more information about the structure of the Virtual Schemas check the UML diagrams provided in the directory [model/diagrams](model/diagrams). You either need [PlantUML](http://plantuml.com/) to render them or an editor that has PlamtUML preview built in.
+
 ## Developing a Dialect
 
-You can implement a dialect by implementing the interface `com.exasol.adapter.dialects.SqlDialect`.
-We recommend to look at the following resources to get started:
+If you want to write an SQL dialect, you need to start by implementing the dialect adapter interfaces.
 
-* First have a look at the [SqlDialect interface source code](../virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/SqlDialect.java). 
-You can start with the comments of the interface and have a look at the methods you can override.
-* Second you can review the source code of one of the [dialect implementations](../virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/) as an inspiration. 
-Ideally you should look at the dialect which is closest to your data source.
+### Project Structure
 
-To implement a full dialect for a typical data source you have to run all of the following steps. We recommend to follow the order proposed here.
+This repository contains Maven sub-projects that are structured as follows. 
+
+    jdbc-adapter                               Parent project and integration test framework
+      |
+      |-- virtualschema-jdbc-adapter           The actual implementation files
+      |
+      '-- virtualschema-jdbc-adapter-dist      Environment for creating the all-in-one adapter JAR
+
+### Package Structure
+
+The Java package structure of the `virtualschema-jdbc-adapter` reflects the separation into dialect-independent and dialect-specific parts. 
+
+    com.exasol.adapter
+      |
+      |-- dialects                             Common code for all dialect adapters
+      |     |
+      |     |-- db2                            IBM DB2-specific dialect adapter implementation
+      |     |
+      |     |-- exasol                         Exasol-specific dialect adapter implementation
+      |     |
+      |     |-- hive                           Apache-Hive-specific dialect adapter implementation
+      |     |
+      |     '-- ...
+      |
+      '-- jdbc                                 Base implementation for getting metadata from JDBC
+
+### Interfaces
+
+* [`com.exasol.adapter.dialects.SqlDialect`](jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/SqlDialect.java) (implementation mandatory)
+   * Define capabilities
+   * Define which kind of support the dialect has for catalogs and schemas
+* [`com.exasol.adapter.jdbc.RemoteMetadataReader`](jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/RemoteMetadataReader.java) (optional depending on dialect)
+   * Read top-level metadata
+   * Locate tables
+* [`com.exasol.adapter.jdbc.TableMetadataReader`](jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/TableMetadataReader.java) (optional depending on dialect)
+   * Decide which tables should be mapped
+   * Map data on table level
+* [`com.exasol.adapter.jdbc.ColumnMetadataReader`](jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/ColumnMetadataReader.java) (optional depending on dialect)
+   * Map data on column level
 
 ### Registering the Dialect
 

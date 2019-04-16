@@ -16,38 +16,42 @@ SonarCloud results:
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtualschema-jdbc-adapter-main&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtualschema-jdbc-adapter-main)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtualschema-jdbc-adapter-main&metric=ncloc)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtualschema-jdbc-adapter-main)
 
-
-<p style="border: 1px solid black;padding: 10px; background-color: #FFFFCC;"><span style="font-size:200%">&#9888;</span> 
-Please note that this is an open source project which is officially supported by Exasol. For any question, you can contact our support team.</p>
-
 # Overview
 
-**Virtual schemas** provide a powerful abstraction to conveniently access arbitrary data sources. 
-Virtual schemas are a kind of read-only link to an external source and contain virtual tables which look like regular tables except that the actual data are not stored locally.
+Exasol **Virtual Schemas** are an abstraction layer that makes external data sources accessible in our data analytics platform through regular SQL commands. The contents of the external data sources are mapped to virtual tables which look like and can be queried as any regular Exasol table.
 
-After creating a virtual schema, its included tables can be used in SQL queries and even combined with persistent tables stored directly in Exasol, 
-or with other virtual tables from other virtual schemas. 
-The SQL optimizer internally translates the virtual objects into connections to the underlying systems and implicitly transfers the necessary data. 
-SQL conditions are tried to be pushed down to the data sources to ensure minimal data transfer and optimal performance.
+Regardless of whether that source is a relational database like ours, or it's like the structure of GitHub repositories, the interface that users see is always the same.
 
-That's why this concept creates a kind of logical view on top of several data sources which could be databases or other data services.
-By that, you can either implement a harmonized access layer for your reporting tools or you can use this technology for agile and flexible ETL processing,
-since you don't need to change anything in Exasol if you change or extend the objects in the underlying system.
+This means an user familiar with SQL will immediately feel at home when accessing remote data through Virtual Schemas.
 
-Please note that virtual schemas are part of the Advanced Edition of Exasol.
+## Features
 
-For further details about the concept, usage and examples, please see the corresponding chapter in our Exasol User Manual and our User Guide.
+* Read access to data on remote data sources
+* Data in those sources appears as tables inside Exasol and can be queried using regular SQL statements.
+* Supports the following relational databases as sources: [IBM DB2](https://www.ibm.com/db2/), [Exasol](https://www.exasol.com), Generic [JDBC](https://www.oracle.com/technetwork/java/overview-141217.html)-capable RDBMS, [Oracle](https://www.oracle.com), [PostgreSQL](https://postgresql.org/), [Amazon AWS Redshift](https://aws.amazon.com/redshift/), [Microsoft SQLServer](https://www.microsoft.com/en-us/sql-server/), [Sybase](http://www.sybase.com/), [Teradata](https://www.teradata.com/)
+* Supports [Apache Impala](http://impala.apache.org/) (Hadoop-based analytical database) as a source
+* Supports [Apache Hive](https://hive.apache.org/) (Hadoop-based data warehouse) as source
+* Supports access to file-based columnar storage (e.g. [Tableau files](https://onlinehelp.tableau.com/current/pro/desktop/en-us/environ_filesandfolders.html))
+  via [Amazon AWS Redshift Spectrum](https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html)
+* Pushes down queries to the remote source (some sources)
+* Supports sources with no / one / multiple catalogs or schemas
+* Allows limiting metadata mapping to selected catalogs and / or schemas
+* Allows redirecting log output to a remote machine
+* Allows remote debugging with the Java Debugger
+
+## Customer Support
+
+This is an open source project which is officially supported by Exasol. For any question, you can contact our support team.
 
 
 # Table of Contents
 
-### Information for users
+## Information for users
 
-- [User Guide with supported dialect information](doc/user-guide/user_guide.md)
+- [User Guide](doc/user-guide/user_guide.md)
+- [Deployment Guide](deploying_the_virtual_schema_adapter.md) 
+- Supported dialects:
 
-- [Step-by-step deployment guide](deploying_the_virtual_schema_adapter.md) 
-
-- List of supported dialects:
     1. [EXASOL](doc/dialects/exasol.md)
     1. [Hive](doc/dialects/hive.md)
     1. [Impala](doc/dialects/impala.md)
@@ -60,30 +64,9 @@ For further details about the concept, usage and examples, please see the corres
     1. [PostgreSQL](doc/dialects/postgresql.md)
     1. Generic
 
-### Information for developers 
+## Information for developers 
 
 - [Virtual Schema API Documentation](doc/development/virtual_schema_api.md)
-
-- [How To Develop and Test a Dialect](doc/development/developing_a_dialect.md)
-
-- [Remote logging](doc/development/remote_logging.md)
-
-- [Debugging virtual schemas](doc/development/debugging_virtual_schemas.md)
-
-
-# Project structure 
-
-
-### API Specification and User Guide
-
-The directory [doc](doc) contains the API specification and User Guide for virtual schema adapters.
-
-### JDBC Adapter
-
-The directory [jdbc-adapter](jdbc-adapter) contains the JDBC adapter which allows to integrate any kind of JDBC data source which provides a JDBC driver.
-
-### Python Redis Demo Adapter
-
-The directory [python-redis-demo-adapter](python-redis-demo-adapter) contains a demo adapter for Redis written in Python. 
-This adapter was created to easily demonstrate the key concepts in a real, but very simple implementation. 
-If you want to write your own adapter, this might be the right code to get a first impression what you'll have to develop.
+- [Developing and Testing a SQL Dialect](doc/development/developing_a_dialect.md)
+- [Remote Logging](doc/development/remote_logging.md)
+- [Debugging Virtual Schemas](doc/development/debugging_virtual_schemas.md)
