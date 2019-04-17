@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.jdbc.ConnectionInformation;
+import com.exasol.adapter.jdbc.PropertyValidationException;
 import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
@@ -226,4 +227,6 @@ public interface SqlDialect {
      * @throws SQLException if the metadata of the query result cannot be read from the remote data source
      */
     public String describeQueryResultColumns(final String query) throws SQLException;
+
+    public void validateProperties(final Map<String, String> properties) throws PropertyValidationException;
 }

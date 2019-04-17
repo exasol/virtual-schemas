@@ -1,12 +1,12 @@
 package com.exasol.adapter.dialects.exasol;
 
 import java.sql.Connection;
+import java.util.Map;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.ConnectionInformation;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.sql.ScalarFunction;
 
 /**
@@ -16,6 +16,7 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "EXASOL";
     static final String LOCAL_IMPORT_PROPERTY = "IS_LOCAL";
     static final String EXASOL_IMPORT_PROPERTY = "IMPORT_FROM_EXA";
+    static final String EXASOL_CONNECTION_STRING_PROPERTY = "EXA_CONNECTION_STRING";
 
     public ExasolSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
@@ -92,12 +93,7 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
 
     @Override
     public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
-        // We need schema qualifiers a) if we are in IS_LOCAL mode, i.e. we run
-        // statements directly in a subselect without IMPORT FROM JDBC
-        // and b) if we don't have the schema in the jdbc connection string (like
-        // "jdbc:exa:localhost:5555;schema=native")
         return true;
-        // return context.isLocal();
     }
 
     @Override
@@ -143,5 +139,17 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
         } else {
             return ImportType.JDBC;
         }
+    }
+
+    @Override
+    public void validateProperties(Map<String, String> properties) throws PropertyValidationException {
+        super.validateProperties(properties);
+        checkImportPropertyConsistency(properties, EXASOL_IMPORT_PROPERTY, EXASOL_CONNECTION_STRING_PROPERTY);
+    }
+
+    @Override
+    protected void validatePropertyValues(Map<String, String> properties) throws PropertyValidationException {
+        super.validatePropertyValues(properties);
+        validateBooleanProperty(properties, EXASOL_IMPORT_PROPERTY);
     }
 }

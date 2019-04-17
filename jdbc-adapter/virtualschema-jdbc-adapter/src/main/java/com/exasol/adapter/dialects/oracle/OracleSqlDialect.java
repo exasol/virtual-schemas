@@ -16,6 +16,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionInformation;
+import com.exasol.adapter.jdbc.PropertyValidationException;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
@@ -25,9 +26,11 @@ import com.exasol.adapter.sql.ScalarFunction;
  */
 public class OracleSqlDialect extends AbstractSqlDialect {
     static final String ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY = "ORACLE_CAST_NUMBER_TO_DECIMAL";
+    private static final String VALUE_SQL_DIALECT_ORACLE = "ORACLE";
+    private static final String PROP_ORACLE_CAST_NUMBER_TO_DECIMAL = "ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE";
     static final String LOCAL_IMPORT_PROPERTY = "IS_LOCAL";
     static final String ORACLE_IMPORT_PROPERTY = "IMPORT_FROM_ORA";
-    static final int ORACLE_MAGIC_NUMBER_SCALE = -127;
+    private static final String ORACLE_CONNECTION_NAME_PROPERTY = "ORA_CONNECTION_NAME";
 
     public OracleSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
@@ -101,7 +104,8 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         } else {
             throw new IllegalArgumentException("Unable to parse adapter property "
                     + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " value \"" + oraclePrecisionAndScale
-                    + " into a number precison and scale. The required format is \"<precsion>.<scale>\", where both are integer numbers.");
+                    + " into a number precison and scale. The required format is \"<precsion>.<scale>\", where "
+                    + "both are integer numbers.");
         }
     }
 
@@ -185,5 +189,29 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         } else {
             return ImportType.JDBC;
         }
+    }
+
+    @Override
+    public void validateProperties(Map<String, String> properties) throws PropertyValidationException {
+        super.checkImportPropertyConsistency(properties, ORACLE_IMPORT_PROPERTY, ORACLE_CONNECTION_NAME_PROPERTY);
+        checkOracleSpecificPropertyConsistency(properties);
+        super.validateProperties(properties);
+    }
+
+    private void checkOracleSpecificPropertyConsistency(final Map<String, String> properties)
+            throws PropertyValidationException {
+        if (properties.containsKey(PROP_ORACLE_CAST_NUMBER_TO_DECIMAL)) {
+            final String dialectName = getProperty(properties, SQL_DIALECT_PROPERTY).toUpperCase();
+            if (!dialectName.equals(VALUE_SQL_DIALECT_ORACLE)) {
+                throw new PropertyValidationException(PROP_ORACLE_CAST_NUMBER_TO_DECIMAL + " can be used only with "
+                        + VALUE_SQL_DIALECT_ORACLE + " dialect.");
+            }
+        }
+    }
+
+    @Override
+    protected void validatePropertyValues(Map<String, String> properties) throws PropertyValidationException {
+        validateBooleanProperty(properties, ORACLE_IMPORT_PROPERTY);
+        super.validatePropertyValues(properties);
     }
 }

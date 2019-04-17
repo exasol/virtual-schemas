@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.PostgreSQLIdentifierMapping;
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.metadata.TableMetadata;
 

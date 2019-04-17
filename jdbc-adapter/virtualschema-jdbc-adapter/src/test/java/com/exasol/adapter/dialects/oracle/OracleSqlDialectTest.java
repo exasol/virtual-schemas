@@ -10,10 +10,12 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import com.exasol.adapter.jdbc.PropertyValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -135,5 +137,14 @@ class OracleSqlDialectTest {
         rawProperties.put(OracleSqlDialect.ORACLE_IMPORT_PROPERTY, fromOracle);
         final OracleSqlDialect dialect = new OracleSqlDialect(null, new AdapterProperties(rawProperties));
         assertThat(dialect.getImportType().toString(), equalTo(expectedImportType));
+    }
+
+    @Test
+    void testCheckOracleSpecificPropertyConsistencyInvalidDialect() {
+        final Map<String, String> properties = new HashMap<>();
+        properties.put("SQL_DIALECT", "POSTGRES");
+        properties.put("CONNECTION_NAME", "CONN1");
+        properties.put("ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE", "CONN1");
+        assertThrows(PropertyValidationException.class, () -> this.dialect.validateProperties(properties));
     }
 }

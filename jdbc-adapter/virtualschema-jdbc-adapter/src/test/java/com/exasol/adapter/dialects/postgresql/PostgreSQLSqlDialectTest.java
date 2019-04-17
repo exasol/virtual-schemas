@@ -11,10 +11,12 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import com.exasol.adapter.jdbc.PropertyValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -77,5 +79,63 @@ class PostgreSQLSqlDialectTest {
     void testMetadataReaderClass() {
         assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
                 instanceOf(PostgreSQLMetadataReader.class));
+    }
+
+    @Test
+    void checkPostgreSQLIdentifierMappingConsistencyThrowsException() {
+        final Map<String, String> properties = new HashMap<>();
+        properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT_TO_UPPER");
+        properties.put("SQL_DIALECT", "ORACLE");
+        properties.put("CONNECTION_NAME", "CONN1");
+        assertThrows(PropertyValidationException.class, () -> this.dialect.validateProperties(properties));
+    }
+
+    @Test
+    void checkPostgreSQLIdentifierMappingConsistency() throws PropertyValidationException {
+        final Map<String, String> properties = new HashMap<>();
+        properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT_TO_UPPER");
+        properties.put("SQL_DIALECT", "POSTGRESQL");
+        properties.put("CONNECTION_NAME", "CONN1");
+        this.dialect.validateProperties(properties);
+    }
+
+    @Test
+    void checkPostgreSQLIdentifierMappingInvalidPropertyValueThrowsException() {
+        final Map<String, String> properties = new HashMap<>();
+        properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT");
+        properties.put("SQL_DIALECT", "POSTGRESQL");
+        properties.put("CONNECTION_NAME", "CONN1");
+        assertThrows(PropertyValidationException.class, () -> this.dialect.validateProperties(properties));
+    }
+
+    @Test
+    void checkIgnoreErrorsConsistency() {
+        final Map<String, String> properties = new HashMap<>();
+        properties.put("IGNORE_ERRORS", "ORACLE_ERROR");
+        properties.put("dialect", "postgresql");
+        assertThrows(PropertyValidationException.class, () -> this.dialect.validateProperties(properties));
+    }
+
+    @Test
+    void testGetDefaultPostgreSQLIdentifierMapping() {
+        final Map<String, String> properties = new HashMap<>();
+        final String val = dialect.getPostgreSQLIdentifierMapping(properties);
+        assertEquals("CONVERT_TO_UPPER", val);
+    }
+
+    @Test
+    void testGetPreserveCasePostgreSQLIdentifierMapping() {
+        final Map<String, String> properties = new HashMap<>();
+        properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "PRESERVE_ORIGINAL_CASE");
+        final String val = dialect.getPostgreSQLIdentifierMapping(properties);
+        assertEquals("PRESERVE_ORIGINAL_CASE", val);
+    }
+
+    @Test
+    void testGetConverToUpperPostgreSQLIdentifierMapping() {
+        final Map<String, String> properties = new HashMap<>();
+        properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT_TO_UPPER");
+        final String val = dialect.getPostgreSQLIdentifierMapping(properties);
+        assertEquals("CONVERT_TO_UPPER", val);
     }
 }

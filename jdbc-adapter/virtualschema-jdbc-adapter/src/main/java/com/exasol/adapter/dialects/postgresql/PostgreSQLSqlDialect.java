@@ -13,12 +13,16 @@ import java.util.Map;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.PropertyValidationException;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.ScalarFunction;
 
 public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "POSTGRESQL";
-    static final String POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY = "POSTGRESQL_IDENTIFIER_MAPPING";
+    private static final String POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY = "POSTGRESQL_IDENTIFIER_MAPPING";
+    private static final String SQL_DIALECT_POSTGRESQL_VALUE = "POSTGRESQL";
+    private static final String POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE_VALUE = "PRESERVE_ORIGINAL_CASE";
+    private static final String POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE = "CONVERT_TO_UPPER";
     private static final PostgreSQLIdentifierMapping DEFAULT_POSTGRESS_IDENTIFIER_MAPPING = PostgreSQLIdentifierMapping.CONVERT_TO_UPPER;
 
     public PostgreSQLSqlDialect(final Connection connection, final AdapterProperties properties) {
@@ -140,5 +144,35 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
         return new PostgreSQLMetadataReader(this.connection, this.properties);
+    }
+
+    @Override
+    public void validateProperties(Map<String, String> properties) throws PropertyValidationException {
+        checkPostgreSQLIdentifierPropertyConsistency(properties);
+        super.checkIgnoreErrors(properties);
+        super.validateProperties(properties);
+    }
+
+    String getPostgreSQLIdentifierMapping(final Map<String, String> properties) {
+        return getProperty(properties, POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY,
+              POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE);
+    }
+
+    private void checkPostgreSQLIdentifierPropertyConsistency(final Map<String, String> properties)
+            throws PropertyValidationException {
+        if (properties.containsKey(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY)) {
+            final String dialectName = getProperty(properties, SQL_DIALECT_PROPERTY);
+            if (!dialectName.equals(SQL_DIALECT_POSTGRESQL_VALUE)) {
+                throw new PropertyValidationException(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY + " can be used only with "
+                        + SQL_DIALECT_POSTGRESQL_VALUE + " dialect.");
+            }
+            final String propertyValue = properties.get(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY);
+            if (!propertyValue.equals(POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE_VALUE)
+                    && !propertyValue.equals(POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE)) {
+                throw new PropertyValidationException("Value for " + POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY
+                        + " must be " + POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE_VALUE + " or "
+                        + POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE);
+            }
+        }
     }
 }
