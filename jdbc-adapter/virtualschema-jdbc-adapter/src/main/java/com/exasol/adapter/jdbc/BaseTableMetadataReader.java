@@ -28,6 +28,7 @@ public class BaseTableMetadataReader implements TableMetadataReader {
      * Create a new instance of a {@link TableMetadata}
      *
      * @param columnMetadataReader reader to be used to map the tables columns
+     * @param properties           user-defined adapter properties
      */
     public BaseTableMetadataReader(final ColumnMetadataReader columnMetadataReader,
             final AdapterProperties properties) {
