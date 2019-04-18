@@ -112,14 +112,30 @@ public interface SqlDialect {
     public String applyQuoteIfNeeded(String identifier);
 
     /**
-     * @return True if table names must be catalog-qualified, e.g. SELECT * FROM MY_CATALOG.MY_TABLE, otherwise false.
-     *         Can be combined with {@link #requiresSchemaQualifiedTableNames(SqlGenerationContext)}
+     * Check whether the dialect expects table identifiers to be qualified with the catalog
+     *
+     * <p>
+     * Example:
+     * <p>
+     * <code>SELECT * FROM MY_CATALOG.MY_TABLE</code>
+     * <p>
+     * Can be combined with {@link #requiresSchemaQualifiedTableNames(SqlGenerationContext)}
+     *
+     * @return <code>true</code> if table names must be catalog-qualified
      */
     public boolean requiresCatalogQualifiedTableNames(SqlGenerationContext context);
 
     /**
-     * @return True if table names must be schema-qualified, e.g. SELECT * FROM MY_SCHEMA.MY_TABLE, otherwise false. Can
-     *         be combined with {@link #requiresCatalogQualifiedTableNames(SqlGenerationContext)}
+     * Check whether the dialect expects table identifiers to be qualified with the schema
+     *
+     * <p>
+     * Example:
+     * <p>
+     * <code>SELECT * FROM MY_SCHEMA.MY_TABLE</code>
+     * <p>
+     * Can be combined with {@link #requiresCatalogQualifiedTableNames(SqlGenerationContext)}
+     *
+     * @return <code>true</code> if table names must be schema-qualified
      */
     public boolean requiresSchemaQualifiedTableNames(SqlGenerationContext context);
 
@@ -129,18 +145,25 @@ public interface SqlDialect {
      */
     public String getTableCatalogAndSchemaSeparator();
 
+    /**
+     * Definition of where <code>NULL</code> values appear in a search result.
+     *
+     * <dl>
+     * <dt><code>NULLS_SORTED_AT_END</code></dt>
+     * <dd>Independently of the actual search order <code>NULL</code> values always appear at the <em>end</em> of the
+     * result set</dd>
+     * <dt><code>NULLS_SORTED_AT_START</code></dt>
+     * <dd>Independently of the actual search order <code>NULL</code> values always appear at the <em>start</em> of the
+     * result set
+     * <dt><code>NULLS_SORTED_HIGH</code></dt>
+     * <dd><code>NULL</code> values appear at the start of the result set when sorted in descending order, and at the
+     * end when sorted ascending</dd>
+     * <dt><code>NULLS_SORTED_LOW</code></dt>
+     * <dd><code>NULL</code>values appear at the end of the result set when sorted in descending order, and at the start
+     * when sorted ascending</dd>
+     */
     public enum NullSorting {
-        // NULL values are sorted at the end regardless of sort order
-        NULLS_SORTED_AT_END,
-
-        // NULL values are sorted at the start regardless of sort order
-        NULLS_SORTED_AT_START,
-
-        // NULL values are sorted high
-        NULLS_SORTED_HIGH,
-
-        // NULL values are sorted low
-        NULLS_SORTED_LOW
+        NULLS_SORTED_AT_END, NULLS_SORTED_AT_START, NULLS_SORTED_HIGH, NULLS_SORTED_LOW
     }
 
     /**
@@ -213,8 +236,9 @@ public interface SqlDialect {
      * Read the remote schema metadata for all tables from the remote source
      *
      * @return remote schema metadata
+     * @throws SQLException if reading the remote metadata fails
      */
-    public SchemaMetadata readSchemaMetadata();
+    public SchemaMetadata readSchemaMetadata() throws SQLException;
 
     /**
      * Read the remote schema metadata for selected from the remote source

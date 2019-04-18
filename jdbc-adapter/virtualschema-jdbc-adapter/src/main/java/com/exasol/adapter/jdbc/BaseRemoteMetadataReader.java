@@ -80,13 +80,14 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
     @Override
     public SchemaMetadata readRemoteSchemaMetadata() {
         try {
-            final DatabaseMetaData remoteMetadata = this.connection.getMetaData();
             final String adapterNotes = SchemaAdapterNotesJsonConverter.getInstance()
                     .convertToJson(getSchemaAdapterNotes());
+            final DatabaseMetaData remoteMetadata = this.connection.getMetaData();
             final List<TableMetadata> tables = extractTableMetadata(remoteMetadata, Optional.empty());
             return new SchemaMetadata(adapterNotes, tables);
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException("Unable to read remote schema metadata.", exception);
+            throw new RemoteMetadataReaderException(
+                    "Unable to read remote schema metadata. SQL error: " + exception.getMessage(), exception);
         }
     }
 

@@ -21,6 +21,7 @@ public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
      * Create a new {@link PostgreSQLTableMetadataReader} instance
      *
      * @param columnMetadataReader reader to be used to map the metadata of the tables columns
+     * @param properties           user-defined adapter properties
      */
     public PostgreSQLTableMetadataReader(final ColumnMetadataReader columnMetadataReader,
             final AdapterProperties properties) {

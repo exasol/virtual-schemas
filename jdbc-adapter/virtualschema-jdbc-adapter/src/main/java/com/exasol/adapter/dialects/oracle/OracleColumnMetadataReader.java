@@ -28,6 +28,7 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
      * Create a new instance of an {@link OracleColumnMetadataReader}
      *
      * @param connection connection to the remote data source
+     * @param properties user-defined adapter properties
      */
     public OracleColumnMetadataReader(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);

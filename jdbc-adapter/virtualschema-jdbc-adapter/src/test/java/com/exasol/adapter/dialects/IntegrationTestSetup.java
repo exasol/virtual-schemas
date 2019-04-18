@@ -1,8 +1,6 @@
 package com.exasol.adapter.dialects;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.logging.Logger;
@@ -10,7 +8,6 @@ import java.util.logging.Logger;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.URIBuilder;
@@ -18,16 +15,14 @@ import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
- * The main method of this class will be called in the
- * <code>pre-integration-test</code> Maven phase before the actual
+ * The main method of this class will be called in the <code>pre-integration-test</code> Maven phase before the actual
  * <code>integration-test</code> phase starts.
  *
  * <p>
- * We upload the JAR file containing the virtual schema adapter to BucketFS so
- * that we don't accidentally forget to do this before the integration test.
- * There is a caveat though: if you run this on a cluster, the cluster nodes
- * will not replicate the JAR instantly. This takes a while. So in clustered
- * environments it is safer to upload the file and wait a while.
+ * We upload the JAR file containing the virtual schema adapter to BucketFS so that we don't accidentally forget to do
+ * this before the integration test. There is a caveat though: if you run this on a cluster, the cluster nodes will not
+ * replicate the JAR instantly. This takes a while. So in clustered environments it is safer to upload the file and wait
+ * a while.
  * </p>
  *
  * <p>
@@ -35,10 +30,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
  * </p>
  *
  * <p>
- * This does not deploy the latest JAR, because the distribution Maven module is
- * and and build after this module. Right now you need to do something like
- * <code><pre>mvn clean package && mvn verify -Pit -D...</pre></code> to upload
- * and test the latest JAR.
+ * This does not deploy the latest JAR, because the distribution Maven module is and and build after this module. Right
+ * now you need to do something like <code><pre>mvn clean package && mvn verify -Pit -D...</pre></code> to upload and
+ * test the latest JAR.
  * </p>
  */
 public class IntegrationTestSetup {
@@ -51,11 +45,7 @@ public class IntegrationTestSetup {
     /**
      * Entry point of the {@link IntegrationTestSetup}
      *
-     * @param args version of the adapter, path to configuration file and skipping
-     *             (optional)
-     * @throws ClientProtocolException
-     * @throws IOException
-     * @throws URISyntaxException
+     * @param args version of the adapter, path to configuration file and skipping (optional)
      */
     public static void main(final String[] args) {
         if (isSkippingIntegrationTestConfigured(args)) {
@@ -74,7 +64,7 @@ public class IntegrationTestSetup {
     }
 
     private static boolean isSkippingIntegrationTestConfigured(final String[] args) {
-        return args.length > 2 && Boolean.valueOf(args[2]);
+        return (args.length > 2) && Boolean.valueOf(args[2]);
     }
 
     private void run() {

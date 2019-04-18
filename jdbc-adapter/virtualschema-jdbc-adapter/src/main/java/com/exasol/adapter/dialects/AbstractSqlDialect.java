@@ -105,7 +105,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     }
 
     @Override
-    public SchemaMetadata readSchemaMetadata() {
+    public SchemaMetadata readSchemaMetadata() throws SQLException {
         return this.remoteMetadataReader.readRemoteSchemaMetadata();
     }
 
