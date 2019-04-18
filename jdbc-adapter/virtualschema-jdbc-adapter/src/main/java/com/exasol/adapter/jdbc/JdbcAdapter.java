@@ -186,6 +186,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     @Override
     public GetCapabilitiesResponse getCapabilities(final ExaMetadata metadata, final GetCapabilitiesRequest request)
             throws AdapterException {
+        LOGGER.fine(() -> "Received request list the adapter's capabilites.");
         final AdapterProperties properties = getPropertiesFromRequest(request);
         final Connection connection = null;
         final SqlDialect dialect = createDialect(connection, properties);
@@ -200,7 +201,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     }
 
     private Capabilities parseExcludedCapabilities(final String excludedCapabilitiesStr) {
-        LOGGER.info(() -> "Excluded Capabilities: "
+        LOGGER.config(() -> "Excluded Capabilities: "
                 + (excludedCapabilitiesStr.isEmpty() ? "none" : excludedCapabilitiesStr));
         final Capabilities.Builder builder = Capabilities.builder();
         for (String capability : excludedCapabilitiesStr.split(",")) {

@@ -230,8 +230,9 @@ public interface SqlDialect {
      * Read the remote schema metadata for all tables from the remote source
      *
      * @return remote schema metadata
+     * @throws SQLException if reading the remote metadata fails
      */
-    public SchemaMetadata readSchemaMetadata();
+    public SchemaMetadata readSchemaMetadata() throws SQLException;
 
     /**
      * Read the remote schema metadata for selected from the remote source
