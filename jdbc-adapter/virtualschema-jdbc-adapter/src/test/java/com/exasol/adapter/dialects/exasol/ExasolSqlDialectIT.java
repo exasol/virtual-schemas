@@ -352,7 +352,7 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new Short("1"));
         matchSingleRowExplain(query,
-                "IMPORT INTO (c0 DECIMAL(1, 0)) FROM JDBC AT VS_JDBC_WITH_CONNNAME_CONNECTION STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
+                "IMPORT INTO (c1 DECIMAL(1, 0)) FROM JDBC AT VS_JDBC_WITH_CONNNAME_CONNECTION STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
     }
 
@@ -384,7 +384,7 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new Short("1"));
         matchSingleRowExplain(query,
-                "IMPORT INTO (c0 DECIMAL(1, 0)) FROM JDBC AT 'jdbc:exa:localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
+                "IMPORT INTO (c1 DECIMAL(1, 0)) FROM JDBC AT 'jdbc:exa:localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
     }
 
