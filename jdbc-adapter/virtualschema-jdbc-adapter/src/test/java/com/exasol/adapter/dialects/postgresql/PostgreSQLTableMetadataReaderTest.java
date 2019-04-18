@@ -17,10 +17,14 @@ import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
 
 class PostgreSQLTableMetadataReaderTest {
     @CsvSource({ //
-            "foobar, 'NONE', CONVERT_TO_UPPER, true", //
+            "foobar, NONE, CONVERT_TO_UPPER, true", //
             "foobar, POSTGRESQL_UPPERCASE_TABLES, CONVERT_TO_UPPER, true", //
             "FooBar, POSTGRESQL_UPPERCASE_TABLES, PRESERVE_ORIGINAL_CASE, true", //
-            "FooBar, 'NONE', PRESERVE_ORIGINAL_CASE, true" })
+            "FooBar, NONE, PRESERVE_ORIGINAL_CASE, true", //
+            "FooBar, NONE, CONVERT_TO_UPPER, true", //
+            "\"FooBar\", POSTGRESQL_UPPERCASE_TABLES, PRESERVE_ORIGINAL_CASE, true", //
+            "\"FooBar\", NONE, PRESERVE_ORIGINAL_CASE, true" //
+    })
     @ParameterizedTest
     void testIsUppercaseTableIncludedByMapping(final String tableName, final String ignoreErrors,
             final PostgreSQLIdentifierMapping identifierMapping, final boolean included) {
@@ -37,7 +41,7 @@ class PostgreSQLTableMetadataReaderTest {
     void testIsUppercaseTableIncludedByMappingWithConvertToUpperNotIgnoringUppercaseTablesThrowsException() {
         final PostgreSQLTableMetadataReader reader = new PostgreSQLTableMetadataReader(null,
                 AdapterProperties.emptyProperties());
-        assertThrows(RemoteMetadataReaderException.class, () -> reader.isTableIncludedByMapping("FooBar"));
+        assertThrows(RemoteMetadataReaderException.class, () -> reader.isTableIncludedByMapping("\"FooBar\""));
     }
 
 }

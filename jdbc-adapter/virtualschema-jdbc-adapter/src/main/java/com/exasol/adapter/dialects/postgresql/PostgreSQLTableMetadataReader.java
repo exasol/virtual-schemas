@@ -48,7 +48,7 @@ public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
 
     @Override
     public boolean isTableIncludedByMapping(final String tableName) {
-        if (containsUppercaseCharacter(tableName)) {
+        if (containsUppercaseCharacter(tableName) && !isUnquotedIdentifier(tableName)) {
             return isUppercaseTableIncludedByMapping(tableName);
         } else {
             return true;
@@ -83,13 +83,14 @@ public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
 
     @Override
     public String adjustIdentifierCase(final String identifier) {
-        if (getIdentifierMapping() != PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE) {
+        if (getIdentifierMapping() == PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE) {
+            return identifier;
+        } else {
             if (isUnquotedIdentifier(identifier)) {
                 return identifier.toUpperCase();
             } else {
                 return identifier;
             }
         }
-        return identifier;
     }
 }
