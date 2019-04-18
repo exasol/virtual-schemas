@@ -57,6 +57,11 @@ public interface SqlDialect {
         NONE, SINGLE, MULTIPLE, AUTO_DETECT
     }
 
+    // Specifies different exception handling strategies
+    public enum ExceptionHandlingMode {
+        IGNORE_INVALID_VIEWS, NONE
+    }
+
     /**
      * Define whether the remote source supports catalogs and if it does, whether is supports a single "pseudo" catalog
      * or multiple catalogs.
@@ -228,5 +233,5 @@ public interface SqlDialect {
      */
     public String describeQueryResultColumns(final String query) throws SQLException;
 
-    public void validateProperties(final Map<String, String> properties) throws PropertyValidationException;
+    public void validateProperties() throws PropertyValidationException;
 }

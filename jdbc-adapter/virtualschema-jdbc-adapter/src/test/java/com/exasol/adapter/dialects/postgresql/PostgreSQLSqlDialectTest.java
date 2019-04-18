@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.jdbc.PropertyValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -87,7 +88,9 @@ class PostgreSQLSqlDialectTest {
         properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT_TO_UPPER");
         properties.put("SQL_DIALECT", "ORACLE");
         properties.put("CONNECTION_NAME", "CONN1");
-        assertThrows(PropertyValidationException.class, () -> this.dialect.validateProperties(properties));
+        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        final SqlDialect sqlDialect = new PostgreSQLSqlDialect(null, adapterProperties);
+        assertThrows(PropertyValidationException.class, () -> sqlDialect.validateProperties());
     }
 
     @Test
@@ -96,7 +99,9 @@ class PostgreSQLSqlDialectTest {
         properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT_TO_UPPER");
         properties.put("SQL_DIALECT", "POSTGRESQL");
         properties.put("CONNECTION_NAME", "CONN1");
-        this.dialect.validateProperties(properties);
+        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        final SqlDialect sqlDialect = new PostgreSQLSqlDialect(null, adapterProperties);
+        sqlDialect.validateProperties();
     }
 
     @Test
@@ -105,21 +110,27 @@ class PostgreSQLSqlDialectTest {
         properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT");
         properties.put("SQL_DIALECT", "POSTGRESQL");
         properties.put("CONNECTION_NAME", "CONN1");
-        assertThrows(PropertyValidationException.class, () -> this.dialect.validateProperties(properties));
+        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        final SqlDialect sqlDialect = new PostgreSQLSqlDialect(null, adapterProperties);
+        assertThrows(PropertyValidationException.class, () -> sqlDialect.validateProperties());
     }
 
     @Test
     void checkIgnoreErrorsConsistency() {
         final Map<String, String> properties = new HashMap<>();
         properties.put("IGNORE_ERRORS", "ORACLE_ERROR");
-        properties.put("dialect", "postgresql");
-        assertThrows(PropertyValidationException.class, () -> this.dialect.validateProperties(properties));
+        properties.put("SQL_DIALECT", "postgresql");
+        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        final SqlDialect sqlDialect = new PostgreSQLSqlDialect(null, adapterProperties);
+        assertThrows(PropertyValidationException.class, () -> sqlDialect.validateProperties());
     }
 
     @Test
     void testGetDefaultPostgreSQLIdentifierMapping() {
         final Map<String, String> properties = new HashMap<>();
-        final String val = dialect.getPostgreSQLIdentifierMapping(properties);
+        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        final SqlDialect sqlDialect = new PostgreSQLSqlDialect(null, adapterProperties);
+        final String val = this.dialect.getPostgreSQLIdentifierMapping();
         assertEquals("CONVERT_TO_UPPER", val);
     }
 
@@ -127,7 +138,9 @@ class PostgreSQLSqlDialectTest {
     void testGetPreserveCasePostgreSQLIdentifierMapping() {
         final Map<String, String> properties = new HashMap<>();
         properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "PRESERVE_ORIGINAL_CASE");
-        final String val = dialect.getPostgreSQLIdentifierMapping(properties);
+        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        final PostgreSQLSqlDialect sqlDialect = new PostgreSQLSqlDialect(null, adapterProperties);
+        final String val = sqlDialect.getPostgreSQLIdentifierMapping();
         assertEquals("PRESERVE_ORIGINAL_CASE", val);
     }
 
@@ -135,7 +148,9 @@ class PostgreSQLSqlDialectTest {
     void testGetConverToUpperPostgreSQLIdentifierMapping() {
         final Map<String, String> properties = new HashMap<>();
         properties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT_TO_UPPER");
-        final String val = dialect.getPostgreSQLIdentifierMapping(properties);
+        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        final PostgreSQLSqlDialect sqlDialect = new PostgreSQLSqlDialect(null, adapterProperties);
+        final String val = sqlDialect.getPostgreSQLIdentifierMapping();
         assertEquals("CONVERT_TO_UPPER", val);
     }
 }

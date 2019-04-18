@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.postgresql;
 
+import static com.exasol.adapter.AdapterProperties.SQL_DIALECT_PROPERTY;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -67,14 +68,10 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Map<ScalarFunction, String> getScalarFunctionAliases() {
-
         final Map<ScalarFunction, String> scalarAliases = new EnumMap<>(ScalarFunction.class);
-
         scalarAliases.put(ScalarFunction.SUBSTR, "SUBSTRING");
         scalarAliases.put(ScalarFunction.HASH_MD5, "MD5");
-
         return scalarAliases;
-
     }
 
     @Override
@@ -147,26 +144,25 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public void validateProperties(Map<String, String> properties) throws PropertyValidationException {
-        checkPostgreSQLIdentifierPropertyConsistency(properties);
-        super.checkIgnoreErrors(properties);
-        super.validateProperties(properties);
+    public void validateProperties() throws PropertyValidationException {
+        checkPostgreSQLIdentifierPropertyConsistency();
+        super.checkIgnoreErrors();
+        super.validateProperties();
     }
 
-    String getPostgreSQLIdentifierMapping(final Map<String, String> properties) {
-        return getProperty(properties, POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY,
-              POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE);
+    String getPostgreSQLIdentifierMapping() {
+        return getProperty(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY,
+                POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE);
     }
 
-    private void checkPostgreSQLIdentifierPropertyConsistency(final Map<String, String> properties)
-            throws PropertyValidationException {
-        if (properties.containsKey(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY)) {
-            final String dialectName = getProperty(properties, SQL_DIALECT_PROPERTY);
+    private void checkPostgreSQLIdentifierPropertyConsistency() throws PropertyValidationException {
+        if (this.properties.containsKey(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY)) {
+            final String dialectName = getProperty(SQL_DIALECT_PROPERTY);
             if (!dialectName.equals(SQL_DIALECT_POSTGRESQL_VALUE)) {
                 throw new PropertyValidationException(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY + " can be used only with "
                         + SQL_DIALECT_POSTGRESQL_VALUE + " dialect.");
             }
-            final String propertyValue = properties.get(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY);
+            final String propertyValue = this.properties.get(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY);
             if (!propertyValue.equals(POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE_VALUE)
                     && !propertyValue.equals(POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE)) {
                 throw new PropertyValidationException("Value for " + POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY

@@ -1,10 +1,12 @@
 package com.exasol.adapter.dialects.oracle;
 
+import static com.exasol.adapter.AdapterProperties.IS_LOCAL_PROPERTY;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static com.exasol.adapter.dialects.oracle.OracleSqlDialect.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
@@ -133,8 +135,8 @@ class OracleSqlDialectTest {
     @ParameterizedTest
     void testGetImportTypeLocal(final String local, final String fromOracle, final String expectedImportType) {
         final Map<String, String> rawProperties = new HashMap<>();
-        rawProperties.put(OracleSqlDialect.LOCAL_IMPORT_PROPERTY, local);
-        rawProperties.put(OracleSqlDialect.ORACLE_IMPORT_PROPERTY, fromOracle);
+        rawProperties.put(IS_LOCAL_PROPERTY, local);
+        rawProperties.put(ORACLE_IMPORT_PROPERTY, fromOracle);
         final OracleSqlDialect dialect = new OracleSqlDialect(null, new AdapterProperties(rawProperties));
         assertThat(dialect.getImportType().toString(), equalTo(expectedImportType));
     }
@@ -145,6 +147,8 @@ class OracleSqlDialectTest {
         properties.put("SQL_DIALECT", "POSTGRES");
         properties.put("CONNECTION_NAME", "CONN1");
         properties.put("ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE", "CONN1");
-        assertThrows(PropertyValidationException.class, () -> this.dialect.validateProperties(properties));
+        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
+        assertThrows(PropertyValidationException.class, sqlDialect::validateProperties);
     }
 }

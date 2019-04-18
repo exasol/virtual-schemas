@@ -1,7 +1,6 @@
 package com.exasol.adapter.dialects.exasol;
 
 import java.sql.Connection;
-import java.util.Map;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.*;
@@ -9,12 +8,13 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.sql.ScalarFunction;
 
+import static com.exasol.adapter.AdapterProperties.IS_LOCAL_PROPERTY;
+
 /**
  * Exasol SQL dialect
  */
 public class ExasolSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "EXASOL";
-    static final String LOCAL_IMPORT_PROPERTY = "IS_LOCAL";
     static final String EXASOL_IMPORT_PROPERTY = "IMPORT_FROM_EXA";
     static final String EXASOL_CONNECTION_STRING_PROPERTY = "EXA_CONNECTION_STRING";
 
@@ -75,14 +75,11 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuote(final String identifier) {
-        // If identifier contains double quotation marks ", it needs to be espaced by
-        // another double quotation mark. E.g. "a""b" is the identifier a"b in the db.
         return "\"" + identifier.replace("\"", "\"\"") + "\"";
     }
 
     @Override
     public String applyQuoteIfNeeded(final String identifier) {
-        // This is a simplified rule, which quotes all identifiers although not needed
         return applyQuote(identifier);
     }
 
@@ -132,7 +129,7 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
      * @return import type
      */
     public ImportType getImportType() {
-        if (this.properties.isEnabled(LOCAL_IMPORT_PROPERTY)) {
+        if (this.properties.isEnabled(IS_LOCAL_PROPERTY)) {
             return ImportType.LOCAL;
         } else if (this.properties.isEnabled(EXASOL_IMPORT_PROPERTY)) {
             return ImportType.EXA;
@@ -142,14 +139,30 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public void validateProperties(Map<String, String> properties) throws PropertyValidationException {
-        super.validateProperties(properties);
-        checkImportPropertyConsistency(properties, EXASOL_IMPORT_PROPERTY, EXASOL_CONNECTION_STRING_PROPERTY);
+    public void validateProperties() throws PropertyValidationException {
+        super.validateProperties();
+        checkImportPropertyConsistency();
     }
 
     @Override
-    protected void validatePropertyValues(Map<String, String> properties) throws PropertyValidationException {
-        super.validatePropertyValues(properties);
-        validateBooleanProperty(properties, EXASOL_IMPORT_PROPERTY);
+    protected void validatePropertyValues() throws PropertyValidationException {
+        super.validatePropertyValues();
+        validateBooleanProperty(EXASOL_IMPORT_PROPERTY);
+    }
+
+    private void checkImportPropertyConsistency() throws PropertyValidationException {
+        final boolean isImport = getProperty(EXASOL_IMPORT_PROPERTY).toUpperCase().equals("TRUE");
+        final boolean connectionIsEmpty = getProperty(EXASOL_CONNECTION_STRING_PROPERTY).isEmpty();
+        if (isImport) {
+            if (connectionIsEmpty) {
+                throw new PropertyValidationException("You defined the property " + EXASOL_IMPORT_PROPERTY
+                        + ", please also define " + EXASOL_CONNECTION_STRING_PROPERTY);
+            }
+        } else {
+            if (!connectionIsEmpty) {
+                throw new PropertyValidationException("You defined the property " + EXASOL_CONNECTION_STRING_PROPERTY
+                        + " without setting " + EXASOL_IMPORT_PROPERTY + " to 'TRUE'. This is not allowed");
+            }
+        }
     }
 }
