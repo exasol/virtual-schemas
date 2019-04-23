@@ -46,5 +46,4 @@ public class PostgreSQLColumnMetadataReader extends BaseColumnMetadataReader {
     protected boolean isVarBitColumn(final JdbcTypeDescription jdbcTypeDescription) {
         return jdbcTypeDescription.getTypeName().equals(POSTGRES_VARBIT_TYPE_NAME);
     }
-
 }

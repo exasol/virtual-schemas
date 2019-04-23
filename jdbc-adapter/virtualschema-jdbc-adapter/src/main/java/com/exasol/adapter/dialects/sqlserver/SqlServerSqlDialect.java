@@ -13,15 +13,14 @@ import java.util.Map;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
 public class SqlServerSqlDialect extends AbstractSqlDialect {
-    public static final int MAX_SQLSERVER_VARCHAR_SIZE = 8000;
-    public static final int MAX_SQLSERVER_NVARCHAR_SIZE = 4000;
-    public static final int MAX_SQLSERVER_CLOB_SIZE = 2000000;
+    static final int MAX_SQLSERVER_VARCHAR_SIZE = 8000;
+    static final int MAX_SQLSERVER_NVARCHAR_SIZE = 4000;
+    static final int MAX_SQLSERVER_CLOB_SIZE = 2000000;
     private static final String NAME = "SQLSERVER";
 
     public SqlServerSqlDialect(final Connection connection, final AdapterProperties properties) {

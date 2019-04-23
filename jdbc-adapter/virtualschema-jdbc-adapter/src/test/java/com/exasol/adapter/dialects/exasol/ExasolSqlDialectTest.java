@@ -13,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.exasol.adapter.dialects.PropertyValidationException;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,10 +29,12 @@ import utils.SqlTestUtil;
 
 class ExasolSqlDialectTest {
     private ExasolSqlDialect dialect;
+    private Map<String, String> rawProperties;
 
     @BeforeEach
     void beforeEach() {
         this.dialect = new ExasolSqlDialect(null, AdapterProperties.emptyProperties());
+        this.rawProperties = new HashMap<>();
     }
 
     @CsvSource({ "A1, \"A1\"", //
@@ -79,10 +80,9 @@ class ExasolSqlDialectTest {
             "FALSE, TRUE, EXA" })
     @ParameterizedTest
     void testGetImportTypeLocal(final String local, final String fromExasol, final String expectedImportType) {
-        final Map<String, String> rawProperties = new HashMap<>();
-        rawProperties.put(IS_LOCAL_PROPERTY, local);
-        rawProperties.put(ExasolSqlDialect.EXASOL_IMPORT_PROPERTY, fromExasol);
-        final ExasolSqlDialect dialect = new ExasolSqlDialect(null, new AdapterProperties(rawProperties));
+        this.rawProperties.put(IS_LOCAL_PROPERTY, local);
+        this.rawProperties.put(ExasolSqlDialect.EXASOL_IMPORT_PROPERTY, fromExasol);
+        final ExasolSqlDialect dialect = new ExasolSqlDialect(null, new AdapterProperties(this.rawProperties));
         assertThat(dialect.getImportType().toString(), equalTo(expectedImportType));
     }
 
@@ -94,30 +94,28 @@ class ExasolSqlDialectTest {
 
     @Test
     void checkValidBoolOptions1() throws PropertyValidationException {
-        final Map<String, String> properties = getMinimumMandatory();
-        properties.put(SQL_DIALECT_PROPERTY, "EXASOL");
-        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        properties.put(ExasolSqlDialect.EXASOL_IMPORT_PROPERTY, "TrUe");
-        properties.put(ExasolSqlDialect.EXASOL_CONNECTION_STRING_PROPERTY, "localhost:5555");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        setMandatoryProperties("EXASOL");
+        this.rawProperties.put(ExasolSqlDialect.EXASOL_IMPORT_PROPERTY, "TrUe");
+        this.rawProperties.put(ExasolSqlDialect.EXASOL_CONNECTION_STRING_PROPERTY, "localhost:5555");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new ExasolSqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
     }
 
     @Test
     void checkValidBoolOptions2() throws PropertyValidationException {
-        final Map<String, String> properties = getMinimumMandatory();
-        properties.put(ExasolSqlDialect.EXASOL_IMPORT_PROPERTY, "FalSe");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        setMandatoryProperties("EXASOL");
+        this.rawProperties.put(ExasolSqlDialect.EXASOL_IMPORT_PROPERTY, "FalSe");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new ExasolSqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
     }
 
     @Test
     void testInconsistentExasolProperties() {
-        final Map<String, String> properties = getMinimumMandatory();
-        properties.put(ExasolSqlDialect.EXASOL_CONNECTION_STRING_PROPERTY, "localhost:5555");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        setMandatoryProperties("EXASOL");
+        this.rawProperties.put(ExasolSqlDialect.EXASOL_CONNECTION_STRING_PROPERTY, "localhost:5555");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new ExasolSqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -127,9 +125,9 @@ class ExasolSqlDialectTest {
 
     @Test
     void testInvalidExasolProperties() {
-        final Map<String, String> properties = getMinimumMandatory();
-        properties.put(ExasolSqlDialect.EXASOL_IMPORT_PROPERTY, "True");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        setMandatoryProperties("EXASOL");
+        this.rawProperties.put(ExasolSqlDialect.EXASOL_IMPORT_PROPERTY, "True");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new ExasolSqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -139,10 +137,8 @@ class ExasolSqlDialectTest {
 
     @Test
     void testValidateDialectNameProperty() {
-        final Map<String, String> properties = new HashMap<>();
-        properties.put(SQL_DIALECT_PROPERTY, "ORACLE");
-        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        setMandatoryProperties("ORACLE");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new ExasolSqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -152,28 +148,24 @@ class ExasolSqlDialectTest {
 
     @Test
     void testValidateCatalogProperty() throws PropertyValidationException {
-        final Map<String, String> properties = getMinimumMandatory();
-        properties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        setMandatoryProperties("EXASOL");
+        this.rawProperties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new ExasolSqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
     }
 
     @Test
     void testValidateSchemaProperty() throws PropertyValidationException {
-        final Map<String, String> properties = new HashMap<>();
-        properties.put(SQL_DIALECT_PROPERTY, "EXASOL");
-        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        properties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        setMandatoryProperties("EXASOL");
+        this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new ExasolSqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
     }
 
-    private static Map<String, String> getMinimumMandatory() {
-        final Map<String, String> properties = new HashMap<>();
-        properties.put(SQL_DIALECT_PROPERTY, "EXASOL");
-        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        return properties;
+    private void setMandatoryProperties(final String sqlDialectProperty) {
+        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
+        this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN");
     }
 }

@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects.db2;
 
-import static com.exasol.adapter.AdapterProperties.*;
+import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -27,17 +28,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.PropertyValidationException;
+import com.exasol.adapter.dialects.SqlDialect;
 
 @ExtendWith(MockitoExtension.class)
 class DB2SqlDialectTest {
     private SqlDialect dialect;
     @Mock
     private Connection connectionMock;
+    private Map<String, String> rawProperties;
 
     @BeforeEach
     void beforeEach() {
+        this.rawProperties = new HashMap<>();
         this.dialect = new DB2SqlDialect(this.connectionMock, AdapterProperties.emptyProperties());
     }
 
@@ -78,10 +81,8 @@ class DB2SqlDialectTest {
 
     @Test
     void testValidateDialectNameProperty() {
-        final Map<String, String> properties = new HashMap<>();
-        properties.put(SQL_DIALECT_PROPERTY, "ORACLE");
-        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        setMandatoryProperties("ORACLE");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DB2SqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -91,11 +92,9 @@ class DB2SqlDialectTest {
 
     @Test
     void testValidateCatalogProperty() {
-        final Map<String, String> properties = new HashMap<>();
-        properties.put(SQL_DIALECT_PROPERTY, "DB2");
-        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        properties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        setMandatoryProperties("DB2");
+        this.rawProperties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DB2SqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -103,13 +102,16 @@ class DB2SqlDialectTest {
                 "The dialect DB2 does not support catalogs. Please, do not set the CATALOG_NAME property."));
     }
 
+    private void setMandatoryProperties(final String sqlDialectProperty) {
+        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
+        this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN");
+    }
+
     @Test
     void testValidateSchemaProperty() throws PropertyValidationException {
-        final Map<String, String> properties = new HashMap<>();
-        properties.put(SQL_DIALECT_PROPERTY, "DB2");
-        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        properties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        setMandatoryProperties("DB2");
+        this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DB2SqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
     }

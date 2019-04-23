@@ -1,14 +1,15 @@
 package com.exasol.adapter.dialects.exasol;
 
+import static com.exasol.adapter.AdapterProperties.IS_LOCAL_PROPERTY;
+
 import java.sql.Connection;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.*;
+import com.exasol.adapter.jdbc.ConnectionInformation;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.ScalarFunction;
-
-import static com.exasol.adapter.AdapterProperties.IS_LOCAL_PROPERTY;
 
 /**
  * Exasol SQL dialect

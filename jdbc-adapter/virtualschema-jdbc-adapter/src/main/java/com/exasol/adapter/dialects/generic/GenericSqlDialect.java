@@ -4,9 +4,7 @@ import java.sql.Connection;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.PropertyValidationException;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 
 /**

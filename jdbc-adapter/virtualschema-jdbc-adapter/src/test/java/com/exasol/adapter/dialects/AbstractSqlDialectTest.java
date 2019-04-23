@@ -22,14 +22,14 @@ class AbstractSqlDialectTest {
 
     @BeforeEach
     void beforeEach() {
-        rawProperties = new HashMap<>();
+        this.rawProperties = new HashMap<>();
     }
 
     @Test
     void testNoCredentials() {
-        rawProperties.put(SQL_DIALECT_PROPERTY, "GENERIC");
-        rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(SQL_DIALECT_PROPERTY, "GENERIC");
+        this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -42,21 +42,21 @@ class AbstractSqlDialectTest {
     @Test
     void testUserNamePasswordOptional() throws PropertyValidationException {
         getMinimumMandatory();
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
     }
 
     private void getMinimumMandatory() {
-        rawProperties.put(SQL_DIALECT_PROPERTY, "GENERIC");
-        rawProperties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
+        this.rawProperties.put(SQL_DIALECT_PROPERTY, "GENERIC");
+        this.rawProperties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
     }
 
     @Test
     void testRedundantCredentialsUserName() {
         getMinimumMandatory();
-        rawProperties.put(USERNAME_PROPERTY, "MY_USER");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(USERNAME_PROPERTY, "MY_USER");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -67,8 +67,8 @@ class AbstractSqlDialectTest {
     @Test
     void testRedundantCredentialsPassword() {
         getMinimumMandatory();
-        rawProperties.put(PASSWORD_PROPERTY, "MY_PASSWORD");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(PASSWORD_PROPERTY, "MY_PASSWORD");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -79,8 +79,8 @@ class AbstractSqlDialectTest {
     @Test
     void testRedundantCredentialsConnectionString() {
         getMinimumMandatory();
-        rawProperties.put(CONNECTION_STRING_PROPERTY, "MY_CONN");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(CONNECTION_STRING_PROPERTY, "MY_CONN");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -90,9 +90,9 @@ class AbstractSqlDialectTest {
 
     @Test
     void testNoDialect() {
-        rawProperties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
+        this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -101,10 +101,10 @@ class AbstractSqlDialectTest {
 
     @Test
     void testInvalidDialect() {
-        rawProperties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
-        rawProperties.put(SQL_DIALECT_PROPERTY, "INVALID_DIALECT");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
+        this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
+        this.rawProperties.put(SQL_DIALECT_PROPERTY, "INVALID_DIALECT");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -113,8 +113,9 @@ class AbstractSqlDialectTest {
 
     @Test
     void testInvalidDebugAddress1() {
-        rawProperties.put(DEBUG_ADDRESS_PROPERTY, "bla");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        getMinimumMandatory();
+        this.rawProperties.put(DEBUG_ADDRESS_PROPERTY, "bla");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -124,8 +125,8 @@ class AbstractSqlDialectTest {
     @Test
     void testInvalidDebugAddress2() {
         getMinimumMandatory();
-        rawProperties.put(DEBUG_ADDRESS_PROPERTY, "bla:no-number");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(DEBUG_ADDRESS_PROPERTY, "bla:no-number");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -135,8 +136,8 @@ class AbstractSqlDialectTest {
     @Test
     void testInvalidDebugAddress3() {
         getMinimumMandatory();
-        rawProperties.put(DEBUG_ADDRESS_PROPERTY, "bla:123:456");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(DEBUG_ADDRESS_PROPERTY, "bla:123:456");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -146,17 +147,17 @@ class AbstractSqlDialectTest {
     @Test
     void testValidDebugAddress() throws PropertyValidationException {
         getMinimumMandatory();
-        rawProperties.put(DEBUG_ADDRESS_PROPERTY, "bla:123");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(DEBUG_ADDRESS_PROPERTY, "bla:123");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
     }
 
     @Test
     void testSchemaAndCatalogOptional() throws PropertyValidationException {
-        rawProperties.put(SQL_DIALECT_PROPERTY, "GENERIC");
-        rawProperties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(SQL_DIALECT_PROPERTY, "GENERIC");
+        this.rawProperties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
     }
@@ -164,8 +165,8 @@ class AbstractSqlDialectTest {
     @Test
     void checkValidBoolOption1() throws PropertyValidationException {
         getMinimumMandatory();
-        rawProperties.put(IS_LOCAL_PROPERTY, "TrUe");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(IS_LOCAL_PROPERTY, "TrUe");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
     }
@@ -173,8 +174,8 @@ class AbstractSqlDialectTest {
     @Test
     void checkValidBoolOption2() throws PropertyValidationException {
         getMinimumMandatory();
-        rawProperties.put(IS_LOCAL_PROPERTY, "FalSe");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(IS_LOCAL_PROPERTY, "FalSe");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
     }
@@ -182,8 +183,8 @@ class AbstractSqlDialectTest {
     @Test
     void checkInvalidBoolOption1() {
         getMinimumMandatory();
-        rawProperties.put(IS_LOCAL_PROPERTY, "asdasd");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(IS_LOCAL_PROPERTY, "asdasd");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -195,8 +196,8 @@ class AbstractSqlDialectTest {
     @Test
     void testInvalidExceptionHandling() {
         getMinimumMandatory();
-        rawProperties.put(EXCEPTION_HANDLING_PROPERTY, "IGNORE_ALL");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(EXCEPTION_HANDLING_PROPERTY, "IGNORE_ALL");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -220,74 +221,74 @@ class AbstractSqlDialectTest {
     @Test
     void testExasolSpecificPropertyImport() {
         getMinimumMandatory();
-        rawProperties.put(EXASOL_IMPORT_PROPERTY, "EXASOL_IMPORT_PROPERTY");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(EXASOL_IMPORT_PROPERTY, "EXASOL_IMPORT_PROPERTY");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
-        assertThat(exception.getMessage(), containsString("Do not use rawProperties " + EXASOL_IMPORT_PROPERTY + " and "
+        assertThat(exception.getMessage(), containsString("Do not use properties " + EXASOL_IMPORT_PROPERTY + " and "
                 + EXASOL_CONNECTION_STRING_PROPERTY + " with GENERIC dialect"));
     }
 
     @Test
     void testExasolSpecificPropertyConnectionString() {
         getMinimumMandatory();
-        rawProperties.put(EXASOL_CONNECTION_STRING_PROPERTY, "EXASOL_CONNECTION_STRING_PROPERTY");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(EXASOL_CONNECTION_STRING_PROPERTY, "EXASOL_CONNECTION_STRING_PROPERTY");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
-        assertThat(exception.getMessage(), containsString("Do not use rawProperties " + EXASOL_IMPORT_PROPERTY + " and "
+        assertThat(exception.getMessage(), containsString("Do not use properties " + EXASOL_IMPORT_PROPERTY + " and "
                 + EXASOL_CONNECTION_STRING_PROPERTY + " with GENERIC dialect"));
     }
 
     @Test
     void testOracleSpecificPropertyImport() {
         getMinimumMandatory();
-        rawProperties.put(ORACLE_IMPORT_PROPERTY, "ORACLE_IMPORT_PROPERTY");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(ORACLE_IMPORT_PROPERTY, "ORACLE_IMPORT_PROPERTY");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
         assertThat(exception.getMessage(),
                 containsString(
-                        "Do not use rawProperties " + ORACLE_IMPORT_PROPERTY + ", " + ORACLE_CONNECTION_NAME_PROPERTY
+                        "Do not use properties " + ORACLE_IMPORT_PROPERTY + ", " + ORACLE_CONNECTION_NAME_PROPERTY
                                 + " and " + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " with GENERIC dialect"));
     }
 
     @Test
     void testOracleSpecificPropertyConnectionString() {
         getMinimumMandatory();
-        rawProperties.put(ORACLE_CONNECTION_NAME_PROPERTY, "ORACLE_CONNECTION_NAME_PROPERTY");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(ORACLE_CONNECTION_NAME_PROPERTY, "ORACLE_CONNECTION_NAME_PROPERTY");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
         assertThat(exception.getMessage(),
                 containsString(
-                        "Do not use rawProperties " + ORACLE_IMPORT_PROPERTY + ", " + ORACLE_CONNECTION_NAME_PROPERTY
+                        "Do not use properties " + ORACLE_IMPORT_PROPERTY + ", " + ORACLE_CONNECTION_NAME_PROPERTY
                                 + " and " + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " with GENERIC dialect"));
     }
 
     @Test
     void testOracleSpecificPropertyCastNumberToDecimal() {
         getMinimumMandatory();
-        rawProperties.put(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY, "ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY, "ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
         assertThat(exception.getMessage(),
                 containsString(
-                        "Do not use rawProperties " + ORACLE_IMPORT_PROPERTY + ", " + ORACLE_CONNECTION_NAME_PROPERTY
+                        "Do not use properties " + ORACLE_IMPORT_PROPERTY + ", " + ORACLE_CONNECTION_NAME_PROPERTY
                                 + " and " + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " with GENERIC dialect"));
     }
 
     @Test
     void testPostgreSqlSpecificPropertyCastNumberToDecimal() {
         getMinimumMandatory();
-        rawProperties.put(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY, "ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY");
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
+        this.rawProperties.put(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY, "ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);

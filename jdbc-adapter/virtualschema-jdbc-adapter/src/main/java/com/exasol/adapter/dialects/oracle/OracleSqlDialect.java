@@ -17,7 +17,6 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionInformation;
-import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
@@ -94,16 +93,9 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         final Pattern pattern = Pattern.compile("\\s*(\\d+)\\s*,\\s*(\\d+)\\s*");
         final String oraclePrecisionAndScale = this.properties.get(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY);
         final Matcher matcher = pattern.matcher(oraclePrecisionAndScale);
-        if (matcher.matches()) {
-            final int precision = Integer.parseInt(matcher.group(1));
-            final int scale = Integer.parseInt(matcher.group(2));
-            return DataType.createDecimal(precision, scale);
-        } else {
-            throw new IllegalArgumentException("Unable to parse adapter property "
-                    + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " value \"" + oraclePrecisionAndScale
-                    + " into a number precison and scale. The required format is \"<precsion>.<scale>\", where "
-                    + "both are integer numbers.");
-        }
+        final int precision = Integer.parseInt(matcher.group(1));
+        final int scale = Integer.parseInt(matcher.group(2));
+        return DataType.createDecimal(precision, scale);
     }
 
     @Override
@@ -191,5 +183,20 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         super.validateProperties();
         super.checkImportPropertyConsistency(ORACLE_IMPORT_PROPERTY, ORACLE_CONNECTION_NAME_PROPERTY);
         super.validateBooleanProperty(ORACLE_IMPORT_PROPERTY);
+        validateCastNumberToDecimalProperty();
+    }
+
+    private void validateCastNumberToDecimalProperty() throws PropertyValidationException {
+        if (this.properties.containsKey(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY)) {
+            final Pattern pattern = Pattern.compile("\\s*(\\d+)\\s*,\\s*(\\d+)\\s*");
+            final String oraclePrecisionAndScale = this.properties.get(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY);
+            final Matcher matcher = pattern.matcher(oraclePrecisionAndScale);
+            if (!matcher.matches()) {
+                throw new PropertyValidationException("Unable to parse adapter property "
+                        + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " value \"" + oraclePrecisionAndScale
+                        + " into a number precison and scale. The required format is \"<precsion>.<scale>\", where "
+                        + "both are integer numbers.");
+            }
+        }
     }
 }

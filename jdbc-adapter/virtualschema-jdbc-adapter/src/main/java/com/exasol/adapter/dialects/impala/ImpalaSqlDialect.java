@@ -10,7 +10,6 @@ import java.sql.Connection;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.dialects.PropertyValidationException;
 
 /**
  * Dialect for Impala, using the Cloudera Impala JDBC Driver/Connector (developed by Simba).

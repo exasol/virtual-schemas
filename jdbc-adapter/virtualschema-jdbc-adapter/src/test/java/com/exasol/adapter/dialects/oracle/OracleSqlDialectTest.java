@@ -28,7 +28,6 @@ import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.sql.*;
 
 import utils.SqlTestUtil;
@@ -38,6 +37,7 @@ class OracleSqlDialectTest {
     private SqlNode node;
     private SqlDialect dialect;
     private SqlGenerationVisitor generator;
+    private Map<String, String> rawProperties;
 
     @BeforeEach
     void beforeEach() {
@@ -45,6 +45,7 @@ class OracleSqlDialectTest {
         this.dialect = new OracleSqlDialect(null, AdapterProperties.emptyProperties());
         final SqlGenerationContext context = new SqlGenerationContext("", SCHEMA_NAME, false, false);
         this.generator = this.dialect.getSqlGenerationVisitor(context);
+        this.rawProperties = new HashMap<>();
     }
 
     @Test
@@ -135,31 +136,26 @@ class OracleSqlDialectTest {
             "FALSE, TRUE, ORA" })
     @ParameterizedTest
     void testGetImportTypeLocal(final String local, final String fromOracle, final String expectedImportType) {
-        final Map<String, String> rawProperties = new HashMap<>();
-        rawProperties.put(IS_LOCAL_PROPERTY, local);
-        rawProperties.put(ORACLE_IMPORT_PROPERTY, fromOracle);
-        final OracleSqlDialect dialect = new OracleSqlDialect(null, new AdapterProperties(rawProperties));
+        this.rawProperties.put(IS_LOCAL_PROPERTY, local);
+        this.rawProperties.put(ORACLE_IMPORT_PROPERTY, fromOracle);
+        final OracleSqlDialect dialect = new OracleSqlDialect(null, new AdapterProperties(this.rawProperties));
         assertThat(dialect.getImportType().toString(), equalTo(expectedImportType));
     }
 
-//    @Test
-//    void testCheckOracleSpecificPropertyConsistencyInvalidDialect() {
-//        final Map<String, String> properties = new HashMap<>();
-//        properties.put("SQL_DIALECT", "ORACLE");
-//        properties.put("CONNECTION_NAME", "CONN1");
-//        properties.put("ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE", "CONN1");
-//        final AdapterProperties adapterProperties = new AdapterProperties(properties);
-//        final SqlDialect sqlDialect = new OracleSqlDialect(null, adapterProperties);
-//        assertThrows(PropertyValidationException.class, sqlDialect::validateProperties);
-//    }
+    @Test
+    void testCheckOracleSpecificPropertyConsistencyInvalidDialect() {
+        setMandatoryProperties("ORACLE");
+        this.rawProperties.put("ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE", "MY_CONN");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
+        final SqlDialect sqlDialect = new OracleSqlDialect(null, adapterProperties);
+        assertThrows(PropertyValidationException.class, sqlDialect::validateProperties);
+    }
 
     @Test
     void testValidateCatalogProperty() {
-        final Map<String, String> properties = new HashMap<>();
-        properties.put(SQL_DIALECT_PROPERTY, "ORACLE");
-        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        properties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        setMandatoryProperties("ORACLE");
+        this.rawProperties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new OracleSqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -169,10 +165,8 @@ class OracleSqlDialectTest {
 
     @Test
     void testValidateDialectNameProperty() {
-        final Map<String, String> properties = new HashMap<>();
-        properties.put(SQL_DIALECT_PROPERTY, "IMPALA");
-        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        setMandatoryProperties("IMPALA");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new OracleSqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -182,12 +176,15 @@ class OracleSqlDialectTest {
 
     @Test
     void testValidateSchemaProperty() throws PropertyValidationException {
-        final Map<String, String> properties = new HashMap<>();
-        properties.put(SQL_DIALECT_PROPERTY, "ORACLE");
-        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        properties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        setMandatoryProperties("ORACLE");
+        this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new OracleSqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
+    }
+
+    private void setMandatoryProperties(final String sqlDialectProperty) {
+        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
+        this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN");
     }
 }

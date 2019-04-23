@@ -1,5 +1,7 @@
 package com.exasol.adapter.dialects.oracle;
 
+import static com.exasol.adapter.dialects.oracle.OracleSqlDialect.ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY;
+
 import java.sql.Connection;
 import java.sql.Types;
 import java.util.regex.Matcher;
@@ -9,8 +11,6 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
-
-import static com.exasol.adapter.dialects.oracle.OracleSqlDialect.ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY;
 
 /**
  * This class implements Oracle-specific reading of column metadata
@@ -55,11 +55,11 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
     }
 
     protected DataType mapNumericType(final JdbcTypeDescription jdbcTypeDescription) {
-        final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
         final int decimalScale = jdbcTypeDescription.getDecimalScale();
         if (decimalScale == ORACLE_MAGIC_NUMBER_SCALE) {
             return workAroundNumberWithoutScaleAndPrecision();
         }
+        final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
         if (decimalPrec <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
             return DataType.createDecimal(decimalPrec, decimalScale);
         } else {
@@ -94,7 +94,7 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
         } else {
             throw new IllegalArgumentException("Unable to parse adapter property "
                     + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " value \"" + oraclePrecisionAndScale
-                    + " into a number precison and scale. The required format is \"<precsion>.<scale>\", where both are integer numbers.");
+                    + " into a number precison and scale. The required format is \"<precision>.<scale>\", where both are integer numbers.");
         }
     }
 }

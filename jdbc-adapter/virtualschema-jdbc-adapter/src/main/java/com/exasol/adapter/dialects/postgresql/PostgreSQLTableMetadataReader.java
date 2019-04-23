@@ -1,5 +1,7 @@
 package com.exasol.adapter.dialects.postgresql;
 
+import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -8,8 +10,6 @@ import java.util.Optional;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.metadata.TableMetadata;
-
-import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY;
 
 /**
  * This class handles the specifics of mapping PostgreSQL table metadata to Exasol

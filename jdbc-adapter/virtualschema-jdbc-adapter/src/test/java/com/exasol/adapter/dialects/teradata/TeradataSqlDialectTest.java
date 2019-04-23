@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects.teradata;
 
-import static com.exasol.adapter.AdapterProperties.*;
+import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -23,15 +24,17 @@ import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.PropertyValidationException;
+import com.exasol.adapter.dialects.SqlDialect;
 
 class TeradataSqlDialectTest {
-    SqlDialect dialect;
+    private SqlDialect dialect;
+    private Map<String, String> rawProperties;
 
     @BeforeEach
     void beforeEach() {
         this.dialect = new TeradataSqlDialect(null, AdapterProperties.emptyProperties());
+        this.rawProperties = new HashMap<>();
     }
 
     @Test
@@ -70,11 +73,9 @@ class TeradataSqlDialectTest {
 
     @Test
     void testValidateCatalogProperty() {
-        final Map<String, String> properties = new HashMap<>();
-        properties.put(SQL_DIALECT_PROPERTY, "TERADATA");
-        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        properties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        setMandatoryProperties("TERADATA");
+        this.rawProperties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new TeradataSqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -84,25 +85,26 @@ class TeradataSqlDialectTest {
 
     @Test
     void testValidateDialectNameProperty() {
-        final Map<String, String> properties = new HashMap<>();
-        properties.put(SQL_DIALECT_PROPERTY, "ORACLE");
-        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        setMandatoryProperties("ORACLE");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new TeradataSqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
-              sqlDialect::validateProperties);
+                sqlDialect::validateProperties);
         MatcherAssert.assertThat(exception.getMessage(), containsString(
-              "The dialect TERADATA cannot have the name ORACLE. You specified the wrong dialect name or created the wrong dialect class."));
+                "The dialect TERADATA cannot have the name ORACLE. You specified the wrong dialect name or created the wrong dialect class."));
     }
 
     @Test
     void testValidateSchemaProperty() throws PropertyValidationException {
-        final Map<String, String> properties = new HashMap<>();
-        properties.put(SQL_DIALECT_PROPERTY, "TERADATA");
-        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        properties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        setMandatoryProperties("TERADATA");
+        this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new TeradataSqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
+    }
+
+    private void setMandatoryProperties(final String sqlDialectProperty) {
+        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
+        this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN");
     }
 }
