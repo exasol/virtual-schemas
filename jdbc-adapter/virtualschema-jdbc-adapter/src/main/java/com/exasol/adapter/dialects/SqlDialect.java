@@ -6,7 +6,6 @@ import java.util.Map;
 
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.jdbc.ConnectionInformation;
-import com.exasol.adapter.jdbc.PropertyValidationException;
 import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;

@@ -1,24 +1,30 @@
 package com.exasol.adapter.dialects.teradata;
 
+import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.teradata.TeradataMetadataReader;
-import com.exasol.adapter.dialects.teradata.TeradataSqlDialect;
+import com.exasol.adapter.dialects.PropertyValidationException;
 
 class TeradataSqlDialectTest {
     SqlDialect dialect;
@@ -60,5 +66,43 @@ class TeradataSqlDialectTest {
     void testMetadataReaderClass() {
         assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
                 instanceOf(TeradataMetadataReader.class));
+    }
+
+    @Test
+    void testValidateCatalogProperty() {
+        final Map<String, String> properties = new HashMap<>();
+        properties.put(SQL_DIALECT_PROPERTY, "TERADATA");
+        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
+        properties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
+        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        final SqlDialect sqlDialect = new TeradataSqlDialect(null, adapterProperties);
+        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
+                sqlDialect::validateProperties);
+        MatcherAssert.assertThat(exception.getMessage(), containsString(
+                "The dialect TERADATA does not support catalogs. Please, do not set the CATALOG_NAME property."));
+    }
+
+    @Test
+    void testValidateDialectNameProperty() {
+        final Map<String, String> properties = new HashMap<>();
+        properties.put(SQL_DIALECT_PROPERTY, "ORACLE");
+        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
+        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        final SqlDialect sqlDialect = new TeradataSqlDialect(null, adapterProperties);
+        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
+              sqlDialect::validateProperties);
+        MatcherAssert.assertThat(exception.getMessage(), containsString(
+              "The dialect TERADATA cannot have the name ORACLE. You specified the wrong dialect name or created the wrong dialect class."));
+    }
+
+    @Test
+    void testValidateSchemaProperty() throws PropertyValidationException {
+        final Map<String, String> properties = new HashMap<>();
+        properties.put(SQL_DIALECT_PROPERTY, "TERADATA");
+        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
+        properties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
+        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        final SqlDialect sqlDialect = new TeradataSqlDialect(null, adapterProperties);
+        sqlDialect.validateProperties();
     }
 }

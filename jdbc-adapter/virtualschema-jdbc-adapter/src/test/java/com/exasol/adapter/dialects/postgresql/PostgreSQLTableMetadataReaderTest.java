@@ -1,5 +1,7 @@
 package com.exasol.adapter.dialects.postgresql;
 
+import static com.exasol.adapter.AdapterProperties.IGNORE_ERRORS_PROPERTY;
+import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY;
 import static com.exasol.adapter.jdbc.TableMetadataMockUtils.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -43,21 +45,18 @@ class PostgreSQLTableMetadataReaderTest {
         final TableMetadataReader reader = new PostgreSQLTableMetadataReader(this.columnMetadataReaderMock,
                 new AdapterProperties(rawProperties));
         final List<TableMetadata> tables = reader.mapTables(this.tablesMock, Optional.empty());
-        final TableMetadata table = tables.get(0);
-        return table;
+        return tables.get(0);
     }
 
     private void setIdentifierMappingProperty(final PostgreSQLIdentifierMapping identifierMapping,
             final Map<String, String> rawProperties) {
-        rawProperties.put(PostgreSQLTableMetadataReader.POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY,
-                identifierMapping.toString());
+        rawProperties.put(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY, identifierMapping.toString());
     }
 
     private void setIgnoreUpperCaseTablesProperty(final boolean ignoreUpperCaseTables,
             final Map<String, String> rawProperties) {
         if (ignoreUpperCaseTables) {
-            rawProperties.put(PostgreSQLTableMetadataReader.IGNORE_ERRORS_PROPERTY,
-                    PostgreSQLTableMetadataReader.POSTGRESQL_UPPERCASE_TABLES_SWITCH);
+            rawProperties.put(IGNORE_ERRORS_PROPERTY, PostgreSQLTableMetadataReader.POSTGRESQL_UPPERCASE_TABLES_SWITCH);
         }
     }
 

@@ -17,7 +17,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionInformation;
-import com.exasol.adapter.jdbc.PropertyValidationException;
+import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
@@ -26,19 +26,16 @@ import com.exasol.adapter.sql.ScalarFunction;
  * This class implements the Oracle SQL dialect
  */
 public class OracleSqlDialect extends AbstractSqlDialect {
-    static final String ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY = "ORACLE_CAST_NUMBER_TO_DECIMAL";
-    private static final String VALUE_SQL_DIALECT_ORACLE = "ORACLE";
-    private static final String PROP_ORACLE_CAST_NUMBER_TO_DECIMAL = "ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE";
-    static final String ORACLE_IMPORT_PROPERTY = "IMPORT_FROM_ORA";
-    private static final String ORACLE_CONNECTION_NAME_PROPERTY = "ORA_CONNECTION_NAME";
+    private static final String NAME = "ORACLE";
+    public static final String ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY = "ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE";
+    public static final String ORACLE_IMPORT_PROPERTY = "IMPORT_FROM_ORA";
+    public static final String ORACLE_CONNECTION_NAME_PROPERTY = "ORA_CONNECTION_NAME";
 
     public OracleSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
         this.omitParenthesesMap.add(ScalarFunction.SYSDATE);
         this.omitParenthesesMap.add(ScalarFunction.SYSTIMESTAMP);
     }
-
-    private static final String NAME = "ORACLE";
 
     public static String getPublicName() {
         return NAME;
@@ -190,40 +187,9 @@ public class OracleSqlDialect extends AbstractSqlDialect {
 
     @Override
     public void validateProperties() throws PropertyValidationException {
-        checkImportPropertyConsistency();
-        checkOracleSpecificPropertyConsistency();
+        super.validateDialectName(getPublicName());
         super.validateProperties();
-    }
-
-    private void checkOracleSpecificPropertyConsistency() throws PropertyValidationException {
-        if (this.properties.containsKey(PROP_ORACLE_CAST_NUMBER_TO_DECIMAL)) {
-            final String dialectName = this.properties.getSqlDialect().toUpperCase();
-            if (!dialectName.equals(VALUE_SQL_DIALECT_ORACLE)) {
-                throw new PropertyValidationException(PROP_ORACLE_CAST_NUMBER_TO_DECIMAL + " can be used only with "
-                        + VALUE_SQL_DIALECT_ORACLE + " dialect.");
-            }
-        }
-    }
-
-    @Override
-    protected void validatePropertyValues() throws PropertyValidationException {
-        validateBooleanProperty(ORACLE_IMPORT_PROPERTY);
-        super.validatePropertyValues();
-    }
-
-    private void checkImportPropertyConsistency() throws PropertyValidationException {
-        final boolean isImport = getProperty(ORACLE_IMPORT_PROPERTY).toUpperCase().equals("TRUE");
-        final boolean connectionIsEmpty = getProperty(ORACLE_CONNECTION_NAME_PROPERTY).isEmpty();
-        if (isImport) {
-            if (connectionIsEmpty) {
-                throw new PropertyValidationException("You defined the property " + ORACLE_IMPORT_PROPERTY
-                        + ", please also define " + ORACLE_CONNECTION_NAME_PROPERTY);
-            }
-        } else {
-            if (!connectionIsEmpty) {
-                throw new PropertyValidationException("You defined the property " + ORACLE_CONNECTION_NAME_PROPERTY
-                        + " without setting " + ORACLE_IMPORT_PROPERTY + " to 'TRUE'. This is not allowed");
-            }
-        }
+        super.checkImportPropertyConsistency(ORACLE_IMPORT_PROPERTY, ORACLE_CONNECTION_NAME_PROPERTY);
+        super.validateBooleanProperty(ORACLE_IMPORT_PROPERTY);
     }
 }

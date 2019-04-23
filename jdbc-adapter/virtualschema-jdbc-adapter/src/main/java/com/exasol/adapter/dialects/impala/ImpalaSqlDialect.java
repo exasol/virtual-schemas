@@ -10,6 +10,7 @@ import java.sql.Connection;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.dialects.PropertyValidationException;
 
 /**
  * Dialect for Impala, using the Cloudera Impala JDBC Driver/Connector (developed by Simba).
@@ -17,14 +18,14 @@ import com.exasol.adapter.dialects.*;
  * See http://www.cloudera.com/documentation/enterprise/latest/topics/impala_langref.html
  */
 public class ImpalaSqlDialect extends AbstractSqlDialect {
-    public ImpalaSqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
-    }
-
     private static final String NAME = "IMPALA";
 
     public static String getPublicName() {
         return NAME;
+    }
+
+    public ImpalaSqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
     }
 
     @Override
@@ -84,10 +85,6 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
 
     @Override
     public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
-        // We need schema qualifiers a) if we are in IS_LOCAL mode, i.e. we run
-        // statements directly in a subselect without IMPORT FROM JDBC
-        // and b) if we don't have the schema in the jdbc connection string (like
-        // "jdbc:exa:localhost:5555;schema=native")
         return true;
     }
 
@@ -98,23 +95,17 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
 
     @Override
     public NullSorting getDefaultNullSorting() {
-        // In Impala 1.2.1 and higher, all NULL values come at the end of the result set
-        // for ORDER BY ... ASC queries,
-        // and at the beginning of the result set for ORDER BY ... DESC queries.
-        // In effect, NULL is considered greater than all other values for sorting
-        // purposes.
-        // The original Impala behavior always put NULL values at the end, even for
-        // ORDER BY ... DESC queries.
-        // The new behavior in Impala 1.2.1 makes Impala more compatible with other
-        // popular database systems.
-        // In Impala 1.2.1 and higher, you can override or specify the sorting behavior
-        // for NULL by adding the clause
-        // NULLS FIRST or NULLS LAST at the end of the ORDER BY clause.
         return NullSorting.NULLS_SORTED_HIGH;
     }
 
     @Override
     public String getStringLiteral(final String value) {
         return "'" + value.replace("'", "''") + "'";
+    }
+
+    @Override
+    public void validateProperties() throws PropertyValidationException {
+        super.validateDialectName(getPublicName());
+        super.validateProperties();
     }
 }

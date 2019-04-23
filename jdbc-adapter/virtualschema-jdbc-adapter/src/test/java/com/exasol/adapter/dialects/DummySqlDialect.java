@@ -77,4 +77,10 @@ public class DummySqlDialect extends AbstractSqlDialect {
     public String getStringLiteral(final String value) {
         return null;
     }
+
+    @Override
+    public void validateProperties() throws PropertyValidationException {
+        super.validateDialectName("GENERIC");
+        super.validateProperties();
+    }
 }

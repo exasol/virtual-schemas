@@ -9,7 +9,7 @@ import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 
 public class PostgreSQLColumnMetadataReader extends BaseColumnMetadataReader {
-    static final String POSTGRES_VARBIT_TYPE_NAME = "varbit";
+    private static final String POSTGRES_VARBIT_TYPE_NAME = "varbit";
 
     /**
      * Create a new instance of a {@link PostgreSQLColumnMetadataReader}

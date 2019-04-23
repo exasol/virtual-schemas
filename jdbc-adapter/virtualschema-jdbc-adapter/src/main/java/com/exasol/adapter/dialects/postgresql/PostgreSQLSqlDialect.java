@@ -1,6 +1,5 @@
 package com.exasol.adapter.dialects.postgresql;
 
-import static com.exasol.adapter.AdapterProperties.SQL_DIALECT_PROPERTY;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -14,14 +13,13 @@ import java.util.Map;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.PropertyValidationException;
+import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.ScalarFunction;
 
 public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "POSTGRESQL";
-    private static final String POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY = "POSTGRESQL_IDENTIFIER_MAPPING";
-    private static final String SQL_DIALECT_POSTGRESQL_VALUE = "POSTGRESQL";
+    public static final String POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY = "POSTGRESQL_IDENTIFIER_MAPPING";
     private static final String POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE_VALUE = "PRESERVE_ORIGINAL_CASE";
     private static final String POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE = "CONVERT_TO_UPPER";
     private static final PostgreSQLIdentifierMapping DEFAULT_POSTGRESS_IDENTIFIER_MAPPING = PostgreSQLIdentifierMapping.CONVERT_TO_UPPER;
@@ -109,7 +107,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuoteIfNeeded(final String identifier) {
-        // This is a simplified rule, which quotes all identifiers although not needed
         return applyQuote(identifier);
     }
 
@@ -145,23 +142,22 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
 
     @Override
     public void validateProperties() throws PropertyValidationException {
-        checkPostgreSQLIdentifierPropertyConsistency();
+        super.validateDialectName(getPublicName());
         super.checkIgnoreErrors();
         super.validateProperties();
+        checkPostgreSQLIdentifierPropertyConsistency();
     }
 
     String getPostgreSQLIdentifierMapping() {
-        return getProperty(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY,
-                POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE);
+        if (this.properties.containsKey(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY)) {
+            return this.properties.get(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY);
+        } else {
+            return POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE;
+        }
     }
 
     private void checkPostgreSQLIdentifierPropertyConsistency() throws PropertyValidationException {
         if (this.properties.containsKey(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY)) {
-            final String dialectName = getProperty(SQL_DIALECT_PROPERTY);
-            if (!dialectName.equals(SQL_DIALECT_POSTGRESQL_VALUE)) {
-                throw new PropertyValidationException(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY + " can be used only with "
-                        + SQL_DIALECT_POSTGRESQL_VALUE + " dialect.");
-            }
             final String propertyValue = this.properties.get(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY);
             if (!propertyValue.equals(POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE_VALUE)
                     && !propertyValue.equals(POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE)) {

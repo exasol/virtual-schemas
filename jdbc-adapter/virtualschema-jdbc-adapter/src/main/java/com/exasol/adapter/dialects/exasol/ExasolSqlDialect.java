@@ -15,8 +15,8 @@ import static com.exasol.adapter.AdapterProperties.IS_LOCAL_PROPERTY;
  */
 public class ExasolSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "EXASOL";
-    static final String EXASOL_IMPORT_PROPERTY = "IMPORT_FROM_EXA";
-    static final String EXASOL_CONNECTION_STRING_PROPERTY = "EXA_CONNECTION_STRING";
+    public static final String EXASOL_IMPORT_PROPERTY = "IMPORT_FROM_EXA";
+    public static final String EXASOL_CONNECTION_STRING_PROPERTY = "EXA_CONNECTION_STRING";
 
     public ExasolSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
@@ -140,29 +140,9 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
 
     @Override
     public void validateProperties() throws PropertyValidationException {
+        super.validateDialectName(getPublicName());
         super.validateProperties();
-        checkImportPropertyConsistency();
-    }
-
-    @Override
-    protected void validatePropertyValues() throws PropertyValidationException {
-        super.validatePropertyValues();
-        validateBooleanProperty(EXASOL_IMPORT_PROPERTY);
-    }
-
-    private void checkImportPropertyConsistency() throws PropertyValidationException {
-        final boolean isImport = getProperty(EXASOL_IMPORT_PROPERTY).toUpperCase().equals("TRUE");
-        final boolean connectionIsEmpty = getProperty(EXASOL_CONNECTION_STRING_PROPERTY).isEmpty();
-        if (isImport) {
-            if (connectionIsEmpty) {
-                throw new PropertyValidationException("You defined the property " + EXASOL_IMPORT_PROPERTY
-                        + ", please also define " + EXASOL_CONNECTION_STRING_PROPERTY);
-            }
-        } else {
-            if (!connectionIsEmpty) {
-                throw new PropertyValidationException("You defined the property " + EXASOL_CONNECTION_STRING_PROPERTY
-                        + " without setting " + EXASOL_IMPORT_PROPERTY + " to 'TRUE'. This is not allowed");
-            }
-        }
+        super.checkImportPropertyConsistency(EXASOL_IMPORT_PROPERTY, EXASOL_CONNECTION_STRING_PROPERTY);
+        super.validateBooleanProperty(EXASOL_IMPORT_PROPERTY);
     }
 }

@@ -10,6 +10,8 @@ import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 
+import static com.exasol.adapter.dialects.oracle.OracleSqlDialect.ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY;
+
 /**
  * This class implements Oracle-specific reading of column metadata
  */
@@ -21,7 +23,6 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
     private static final int ORACLE_CLOB = Types.OTHER;
     private static final int INTERVAL_DAY_TO_SECOND = -104;
     private static final int INTERVAL_YEAR_TO_MONTH = -103;
-    static final String ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY = "ORACLE_CAST_NUMBER_TO_DECIMAL";
     static final int ORACLE_MAGIC_NUMBER_SCALE = -127;
 
     /**

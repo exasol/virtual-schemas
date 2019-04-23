@@ -13,18 +13,13 @@ import java.util.Map;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
 public class SybaseSqlDialect extends AbstractSqlDialect {
-    // The Sybase dialect started as a copy of the SQL Server dialect.
-    // Tested Sybase version: ASE 16.0
-    // Tested JDBC drivers: jtds-1.3.1 (https://sourceforge.net/projects/jtds/)
-    // Documentation:
-    // http://infocenter.sybase.com/help/index.jsp?topic=/com.sybase.infocenter.help.ase.16.0/doc/html/title.html
-    // https://help.sap.com/viewer/p/SAP_ASE
-    public final static int maxSybaseVarcharSize = 8000;
-    public final static int maxSybaseNVarcharSize = 4000;
+    static final int MAX_SYBASE_VARCHAR_SIZE = 8000;
+    static final int MAX_SYBASE_N_VARCHAR_SIZE = 4000;
     private static final String NAME = "SYBASE";
 
     public SybaseSqlDialect(final Connection connection, final AdapterProperties properties) {
@@ -139,5 +134,11 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
     @Override
     public String getStringLiteral(final String value) {
         return "'" + value.replace("'", "''") + "'";
+    }
+
+    @Override
+    public void validateProperties() throws PropertyValidationException {
+        super.validateDialectName(getPublicName());
+        super.validateProperties();
     }
 }

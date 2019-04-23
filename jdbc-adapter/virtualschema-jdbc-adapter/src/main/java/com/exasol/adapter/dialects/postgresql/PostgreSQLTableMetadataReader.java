@@ -9,13 +9,13 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.metadata.TableMetadata;
 
+import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY;
+
 /**
  * This class handles the specifics of mapping PostgreSQL table metadata to Exasol
  */
 public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
     static final String POSTGRESQL_UPPERCASE_TABLES_SWITCH = "POSTGRESQL_UPPERCASE_TABLES";
-    static final String IGNORE_ERRORS_PROPERTY = "IGNORE_ERRORS";
-    static final String POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY = "POSTGRESQL_IDENTIFIER_MAPPING";
 
     /**
      * Create a new {@link PostgreSQLTableMetadataReader} instance
@@ -55,8 +55,8 @@ public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
                 && !ignoresUpperCaseTables() //
                 && containsUppercaseCharacter(tableName)) {
             throw new RemoteMetadataReaderException("Table \"" + tableName
-                    + "\" cannot be used in virtual schema. Set property " + IGNORE_ERRORS_PROPERTY + " to "
-                    + POSTGRESQL_UPPERCASE_TABLES_SWITCH + " to enforce schema creation.");
+                    + "\" cannot be used in virtual schema. Set property " + AdapterProperties.IGNORE_ERRORS_PROPERTY
+                    + " to " + POSTGRESQL_UPPERCASE_TABLES_SWITCH + " to enforce schema creation.");
         } else {
             return super.mapTables(remoteTables, selectedTables);
         }

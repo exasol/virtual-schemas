@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.exasol.adapter.jdbc.PropertyValidationException;
+import com.exasol.adapter.dialects.PropertyValidationException;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -114,27 +114,13 @@ class ExasolSqlDialectTest {
     }
 
     @Test
-    void checkInvalidBoolOption() {
-        final Map<String, String> properties = getMinimumMandatory();
-        properties.put(ExasolSqlDialect.EXASOL_IMPORT_PROPERTY, "asdasd");
-        properties.put(ExasolSqlDialect.EXASOL_CONNECTION_STRING_PROPERTY, "localhost:5555");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
-        final SqlDialect sqlDialect = new ExasolSqlDialect(null, adapterProperties);
-        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
-              sqlDialect::validateProperties);
-        MatcherAssert.assertThat(exception.getMessage(), containsString(
-                "The value 'asdasd' for the property IMPORT_FROM_EXA is invalid. It has to be either 'true' or 'false' "
-                        + "(case insensitive)"));
-    }
-
-    @Test
     void testInconsistentExasolProperties() {
         final Map<String, String> properties = getMinimumMandatory();
         properties.put(ExasolSqlDialect.EXASOL_CONNECTION_STRING_PROPERTY, "localhost:5555");
         final AdapterProperties adapterProperties = new AdapterProperties(properties);
         final SqlDialect sqlDialect = new ExasolSqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
-              sqlDialect::validateProperties);
+                sqlDialect::validateProperties);
         MatcherAssert.assertThat(exception.getMessage(),
                 containsString("You defined the property EXA_CONNECTION_STRING without setting IMPORT_FROM_EXA "));
     }
@@ -146,9 +132,42 @@ class ExasolSqlDialectTest {
         final AdapterProperties adapterProperties = new AdapterProperties(properties);
         final SqlDialect sqlDialect = new ExasolSqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
-              sqlDialect::validateProperties);
+                sqlDialect::validateProperties);
         MatcherAssert.assertThat(exception.getMessage(),
                 containsString("You defined the property IMPORT_FROM_EXA, please also define EXA_CONNECTION_STRING"));
+    }
+
+    @Test
+    void testValidateDialectNameProperty() {
+        final Map<String, String> properties = new HashMap<>();
+        properties.put(SQL_DIALECT_PROPERTY, "ORACLE");
+        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
+        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        final SqlDialect sqlDialect = new ExasolSqlDialect(null, adapterProperties);
+        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
+                sqlDialect::validateProperties);
+        MatcherAssert.assertThat(exception.getMessage(), containsString(
+                "The dialect EXASOL cannot have the name ORACLE. You specified the wrong dialect name or created the wrong dialect class."));
+    }
+
+    @Test
+    void testValidateCatalogProperty() throws PropertyValidationException {
+        final Map<String, String> properties = getMinimumMandatory();
+        properties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
+        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        final SqlDialect sqlDialect = new ExasolSqlDialect(null, adapterProperties);
+        sqlDialect.validateProperties();
+    }
+
+    @Test
+    void testValidateSchemaProperty() throws PropertyValidationException {
+        final Map<String, String> properties = new HashMap<>();
+        properties.put(SQL_DIALECT_PROPERTY, "EXASOL");
+        properties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
+        properties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
+        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        final SqlDialect sqlDialect = new ExasolSqlDialect(null, adapterProperties);
+        sqlDialect.validateProperties();
     }
 
     private static Map<String, String> getMinimumMandatory() {

@@ -6,6 +6,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.AbstractSqlDialect;
 import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 
 /**
@@ -13,11 +14,11 @@ import com.exasol.adapter.jdbc.SchemaAdapterNotes;
  * all information from the JDBC Metadata.
  */
 public class GenericSqlDialect extends AbstractSqlDialect {
+    private static final String NAME = "GENERIC";
+
     public GenericSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
-
-    private static final String NAME = "GENERIC";
 
     public static String getPublicName() {
         return NAME;
@@ -43,7 +44,6 @@ public class GenericSqlDialect extends AbstractSqlDialect {
     public IdentifierCaseHandling getUnquotedIdentifierHandling() {
         final SchemaAdapterNotes adapterNotes = this.remoteMetadataReader.getSchemaAdapterNotes();
         if (adapterNotes.supportsMixedCaseIdentifiers()) {
-            // Unquoted identifiers are treated case-sensitive and stored mixed case
             return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
         } else {
             if (adapterNotes.storesLowerCaseIdentifiers()) {
@@ -51,7 +51,6 @@ public class GenericSqlDialect extends AbstractSqlDialect {
             } else if (adapterNotes.storesUpperCaseIdentifiers()) {
                 return IdentifierCaseHandling.INTERPRET_AS_UPPER;
             } else if (adapterNotes.storesMixedCaseIdentifiers()) {
-                // This case is a bit strange - case insensitive, but still stores it mixed case
                 return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
             } else {
                 throw new UnsupportedOperationException("Unexpected quote behavior. Adapter notes: " //
@@ -64,7 +63,6 @@ public class GenericSqlDialect extends AbstractSqlDialect {
     public IdentifierCaseHandling getQuotedIdentifierHandling() {
         final SchemaAdapterNotes adapterNotes = this.remoteMetadataReader.getSchemaAdapterNotes();
         if (adapterNotes.supportsMixedCaseQuotedIdentifiers()) {
-            // Quoted identifiers are treated case-sensitive and stored mixed case
             return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
         } else {
             if (adapterNotes.storesLowerCaseQuotedIdentifiers()) {
@@ -72,7 +70,6 @@ public class GenericSqlDialect extends AbstractSqlDialect {
             } else if (adapterNotes.storesUpperCaseQuotedIdentifiers()) {
                 return IdentifierCaseHandling.INTERPRET_AS_UPPER;
             } else if (adapterNotes.storesMixedCaseQuotedIdentifiers()) {
-                // This case is a bit strange - case insensitive, but still stores it mixed case
                 return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
             } else {
                 throw new UnsupportedOperationException("Unexpected quote behavior. Adapter notes: " //
@@ -89,7 +86,6 @@ public class GenericSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuoteIfNeeded(final String identifier) {
-        // We could consider getExtraNameCharacters() here as well to do less quoting
         return applyQuote(identifier);
     }
 
@@ -100,10 +96,6 @@ public class GenericSqlDialect extends AbstractSqlDialect {
 
     @Override
     public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
-        // See getCatalogSeparator(): String that this database uses as the separator
-        // between a catalog and table name.
-        // See isCatalogAtStart(): whether a catalog appears at the start of a fully
-        // qualified table name
         return true;
     }
 
@@ -125,5 +117,11 @@ public class GenericSqlDialect extends AbstractSqlDialect {
     @Override
     public String getStringLiteral(final String value) {
         return "'" + value.replace("'", "''") + "'";
+    }
+
+    @Override
+    public void validateProperties() throws PropertyValidationException {
+        super.validateDialectName(getPublicName());
+        super.validateProperties();
     }
 }

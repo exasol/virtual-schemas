@@ -13,6 +13,7 @@ import java.util.Map;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.sql.ScalarFunction;
 
 /**
@@ -21,12 +22,14 @@ import com.exasol.adapter.sql.ScalarFunction;
  * supported dialect
  */
 public class HiveSqlDialect extends AbstractSqlDialect {
+    private static final String NAME = "HIVE";
+
     public HiveSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
 
     public static String getPublicName() {
-        return "HIVE";
+        return NAME;
     }
 
     @Override
@@ -91,20 +94,11 @@ public class HiveSqlDialect extends AbstractSqlDialect {
 
     @Override
     public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
-        // We need schema qualifiers a) if we are in IS_LOCAL mode, i.e. we run
-        // statements directly in a subselect without IMPORT FROM JDBC
-        // and b) if we don't have the schema in the jdbc connection string (like
-        // "jdbc:exa:localhost:5555;schema=native")
         return true;
     }
 
     @Override
     public NullSorting getDefaultNullSorting() {
-        // https://cwiki.apache.org/confluence/display/Hive/LanguageManual+SortBy
-        // In Hive 2.1.0 and later, specifying the null sorting order for each of
-        // the columns in the "order by" clause is supported. The default null sorting
-        // order for ASC order is NULLS FIRST, while the default null sorting order for
-        // DESC order is NULLS LAST.
         return NullSorting.NULLS_SORTED_LOW;
     }
 
@@ -126,5 +120,11 @@ public class HiveSqlDialect extends AbstractSqlDialect {
         scalarAliases.put(ScalarFunction.WEEK, "WEEKOFYEAR");
         scalarAliases.put(ScalarFunction.CURRENT_USER, "CURRENT_USER()");
         return scalarAliases;
+    }
+
+    @Override
+    public void validateProperties() throws PropertyValidationException {
+        super.validateDialectName(getPublicName());
+        super.validateProperties();
     }
 }
