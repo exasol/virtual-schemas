@@ -1,21 +1,19 @@
 package com.exasol.adapter.dialects.postgresql;
 
+import static com.exasol.adapter.AdapterProperties.IGNORE_ERRORS_PROPERTY;
 import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Optional;
+import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.jdbc.*;
-import com.exasol.adapter.metadata.TableMetadata;
 
 /**
  * This class handles the specifics of mapping PostgreSQL table metadata to Exasol
  */
 public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
-    static final String POSTGRESQL_UPPERCASE_TABLES_SWITCH = "POSTGRESQL_UPPERCASE_TABLES";
+    static final Logger LOGGER = Logger.getLogger(PostgreSQLTableMetadataReader.class.getName());
+    private static final String POSTGRESQL_UPPERCASE_TABLES_SWITCH = "POSTGRESQL_UPPERCASE_TABLES";
 
     /**
      * Create a new {@link PostgreSQLTableMetadataReader} instance
@@ -34,7 +32,9 @@ public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
      * @return identifier mapping
      */
     public PostgreSQLIdentifierMapping getIdentifierMapping() {
-        return PostgreSQLIdentifierMapping.valueOf(this.properties.get(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY));
+        return this.properties.containsKey(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY) //
+                ? PostgreSQLIdentifierMapping.valueOf(this.properties.get(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY))
+                : PostgreSQLIdentifierMapping.CONVERT_TO_UPPER;
     }
 
     /**
@@ -47,18 +47,28 @@ public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
     }
 
     @Override
-    public List<TableMetadata> mapTables(final ResultSet remoteTables, final Optional<List<String>> selectedTables)
-            throws SQLException {
-        final String tableName = readTableName(remoteTables);
-        if (isTableSelected(tableName, selectedTables) //
-                && (getIdentifierMapping() == PostgreSQLIdentifierMapping.CONVERT_TO_UPPER) //
-                && !ignoresUpperCaseTables() //
-                && containsUppercaseCharacter(tableName)) {
-            throw new RemoteMetadataReaderException("Table \"" + tableName
-                    + "\" cannot be used in virtual schema. Set property " + AdapterProperties.IGNORE_ERRORS_PROPERTY
-                    + " to " + POSTGRESQL_UPPERCASE_TABLES_SWITCH + " to enforce schema creation.");
+    public boolean isTableIncludedByMapping(final String tableName) {
+        if (containsUppercaseCharacter(tableName) && !isUnquotedIdentifier(tableName)) {
+            return isUppercaseTableIncludedByMapping(tableName);
         } else {
-            return super.mapTables(remoteTables, selectedTables);
+            return true;
+        }
+    }
+
+    protected boolean isUppercaseTableIncludedByMapping(final String tableName) {
+        if (getIdentifierMapping() == PostgreSQLIdentifierMapping.CONVERT_TO_UPPER) {
+            if (ignoresUpperCaseTables()) {
+                LOGGER.fine(() -> "Ignoring PostgreSQL table \"" + tableName + "\""
+                        + "because it contains an uppercase character and " + IGNORE_ERRORS_PROPERTY + " is set to \""
+                        + POSTGRESQL_UPPERCASE_TABLES_SWITCH + "\".");
+                return false;
+            } else {
+                throw new RemoteMetadataReaderException("Table \"" + tableName
+                        + "\" cannot be used in virtual schema. Set property " + IGNORE_ERRORS_PROPERTY + " to \""
+                        + POSTGRESQL_UPPERCASE_TABLES_SWITCH + "\" to enforce schema creation.");
+            }
+        } else {
+            return true;
         }
     }
 
@@ -73,13 +83,14 @@ public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
 
     @Override
     public String adjustIdentifierCase(final String identifier) {
-        if (getIdentifierMapping() != PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE) {
+        if (getIdentifierMapping() == PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE) {
+            return identifier;
+        } else {
             if (isUnquotedIdentifier(identifier)) {
                 return identifier.toUpperCase();
             } else {
                 return identifier;
             }
         }
-        return identifier;
     }
 }
