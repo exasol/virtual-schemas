@@ -58,14 +58,14 @@ public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
     protected boolean isUppercaseTableIncludedByMapping(final String tableName) {
         if (getIdentifierMapping() == PostgreSQLIdentifierMapping.CONVERT_TO_UPPER) {
             if (ignoresUpperCaseTables()) {
-                LOGGER.fine(() -> "Ignoring PostgreSQL table \"" + tableName + "\""
-                        + "because it contains an uppercase character and " + IGNORE_ERRORS_PROPERTY + " is set to \""
-                        + POSTGRESQL_UPPERCASE_TABLES_SWITCH + "\".");
+                LOGGER.fine(() -> "Ignoring PostgreSQL table " + tableName
+                        + "because it contains an uppercase character and " + IGNORE_ERRORS_PROPERTY + " is set to "
+                        + POSTGRESQL_UPPERCASE_TABLES_SWITCH + ".");
                 return false;
             } else {
-                throw new RemoteMetadataReaderException("Table \"" + tableName
-                        + "\" cannot be used in virtual schema. Set property " + IGNORE_ERRORS_PROPERTY + " to \""
-                        + POSTGRESQL_UPPERCASE_TABLES_SWITCH + "\" to enforce schema creation.");
+                throw new RemoteMetadataReaderException("Table " + tableName
+                        + " cannot be used in virtual schema. Set property " + IGNORE_ERRORS_PROPERTY + " to "
+                        + POSTGRESQL_UPPERCASE_TABLES_SWITCH + " to enforce schema creation.");
             }
         } else {
             return true;

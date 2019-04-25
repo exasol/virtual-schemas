@@ -1,7 +1,10 @@
 package com.exasol.adapter.dialects.postgresql;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
@@ -207,9 +210,10 @@ class PostgreSQLDialectIT extends AbstractIntegrationTest {
         try (final Connection conn = DriverManager.getConnection(postgresConnectionString, user, password)) {
             final Statement stmt = conn.createStatement();
             stmt.execute(String.format("create schema %s", POSTGRES_SCHEMA_UPPERCASE_TABLE));
-            stmt.execute(String.format("create table %s.lower_t(x int, y int)", POSTGRES_SCHEMA_UPPERCASE_TABLE));
             stmt.execute(
                     String.format("create table %s.\"UPPer_t\"(x int, \"Y\" int)", POSTGRES_SCHEMA_UPPERCASE_TABLE));
+            stmt.execute(String.format("create table %s.lower_t(x int, y int)", POSTGRES_SCHEMA_UPPERCASE_TABLE));
+
         }
     }
 
@@ -277,31 +281,29 @@ class PostgreSQLDialectIT extends AbstractIntegrationTest {
 
     // Identifier Test - CONVERT_TO_UPPER mode --------------------------------
     @Test
-    void testCreateSchemaWithUpperCaseTables() throws SQLException, FileNotFoundException {
-        this.expectedEx.expect(DataException.class);
-        this.expectedEx.expectMessage(
-                "Table UPPer_t cannot be used in virtual schema. Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation.");
+    void testCreateSchemaWithUpperCaseTables() {
+        final Throwable throwable = assertThrows(DataException.class, () -> //
         createVirtualSchema("FOO", PostgreSQLSqlDialect.getPublicName(), POSTGRES_CATALOG,
                 POSTGRES_SCHEMA_UPPERCASE_TABLE, "", getConfig().getPostgresqlUser(),
                 getConfig().getPostgresqlPassword(), "ADAPTER.JDBC_ADAPTER",
                 getConfig().getPostgresqlDockerJdbcConnectionString(), IS_LOCAL, getConfig().debugAddress(), "", null,
-                "JOIN");
+                "JOIN"));
+        assertThat(throwable.getMessage(), containsString(
+                "Table UPPer_t cannot be used in virtual schema. Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation."));
     }
 
     @Test
-    void testQueryUpperCaseTableQuoted() throws SQLException {
-        this.expectedEx.expect(DataException.class);
-        this.expectedEx.expectMessage("Cannot resolve column types");
+    void testQueryUpperCaseTableQuoted() {
         final String query = String.format("SELECT x FROM  %s.\"UPPer_t\"", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
-        final ResultSet result = executeQuery(query);
+        final Throwable throwable = assertThrows(SQLException.class, () -> executeQuery(query));
+        assertThat(throwable.getMessage(), containsString("object \"PG_UPPER\".\"UPPer_t\" not found"));
     }
 
     @Test
-    void testQueryUpperCaseTable() throws SQLException {
-        this.expectedEx.expect(SQLException.class);
-        this.expectedEx.expectMessage("object PG_UPPER.UPPER_T not found");
+    void testQueryUpperCaseTable() {
         final String query = String.format("SELECT x FROM  %s.UPPer_t", VIRTUAL_SCHEMA_UPPERCASE_TABLE);
-        final ResultSet result = executeQuery(query);
+        final Throwable throwable = assertThrows(SQLException.class, () -> executeQuery(query));
+        assertThat(throwable.getMessage(), containsString("object PG_UPPER.UPPER_T not found"));
     }
 
     @Test
@@ -313,9 +315,6 @@ class PostgreSQLDialectIT extends AbstractIntegrationTest {
 
     @Test
     void testUnsetIgnoreUpperCaseTablesAndRefresh() throws SQLException {
-        this.expectedEx.expect(DataException.class);
-        this.expectedEx.expectMessage(
-                "Table UPPer_t cannot be used in virtual schema. Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation.");
         final String alter_schema_query = String.format("ALTER VIRTUAL SCHEMA %s set ignore_errors=''",
                 VIRTUAL_SCHEMA_UPPERCASE_TABLE);
         execute(alter_schema_query);
@@ -325,7 +324,9 @@ class PostgreSQLDialectIT extends AbstractIntegrationTest {
         execute(alter_schema_query_identifier_mapping);
         final String refresh_schema_query = String.format("ALTER VIRTUAL SCHEMA %s REFRESH",
                 VIRTUAL_SCHEMA_UPPERCASE_TABLE);
-        execute(refresh_schema_query);
+        final Throwable throwable = assertThrows(DataException.class, () -> execute(refresh_schema_query));
+        assertThat(throwable.getMessage(), containsString(
+                "Table UPPer_t cannot be used in virtual schema. Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation."));
     }
 
     @Test
@@ -341,11 +342,10 @@ class PostgreSQLDialectIT extends AbstractIntegrationTest {
 
     // Identifier Test - PRESERVE_ORIGINAL_CASE mode --------------------------------
     @Test
-    void testPreserveCaseQueryLowerCaseTableFails() throws SQLException {
-        this.expectedEx.expect(SQLException.class);
-        this.expectedEx.expectMessage("object PG_PRESERVE_CASE.LOWER_T not found");
+    void testPreserveCaseQueryLowerCaseTableFails() {
         final String query = String.format("SELECT x FROM  %s.lower_t", VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE);
-        final ResultSet result = executeQuery(query);
+        final Throwable throwable = assertThrows(SQLException.class, () -> executeQuery(query));
+        assertThat(throwable.getMessage(), containsString("object PG_PRESERVE_CASE.LOWER_T not found"));
     }
 
     @Test

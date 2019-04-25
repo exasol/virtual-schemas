@@ -1,7 +1,8 @@
 package com.exasol.adapter.dialects.postgresql;
 
-import java.sql.Connection;
-import java.sql.Types;
+import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY;
+
+import java.sql.*;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
@@ -45,5 +46,20 @@ public class PostgreSQLColumnMetadataReader extends BaseColumnMetadataReader {
 
     protected boolean isVarBitColumn(final JdbcTypeDescription jdbcTypeDescription) {
         return jdbcTypeDescription.getTypeName().equals(POSTGRES_VARBIT_TYPE_NAME);
+    }
+
+    @Override
+    public String readColumnName(final ResultSet columns) throws SQLException {
+        if (getIdentifierMapping().equals(PostgreSQLIdentifierMapping.CONVERT_TO_UPPER)) {
+            return super.readColumnName(columns).toUpperCase();
+        } else {
+            return super.readColumnName(columns);
+        }
+    }
+
+    PostgreSQLIdentifierMapping getIdentifierMapping() {
+        return this.properties.containsKey(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY) //
+                ? PostgreSQLIdentifierMapping.valueOf(this.properties.get(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY))
+                : PostgreSQLIdentifierMapping.CONVERT_TO_UPPER;
     }
 }

@@ -122,32 +122,6 @@ class PostgreSQLSqlDialectTest {
     }
 
     @Test
-    void testGetDefaultPostgreSQLIdentifierMapping() {
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new PostgreSQLSqlDialect(null, adapterProperties);
-        final String val = this.dialect.getPostgreSQLIdentifierMapping();
-        assertEquals("CONVERT_TO_UPPER", val);
-    }
-
-    @Test
-    void testGetPreserveCasePostgreSQLIdentifierMapping() {
-        this.rawProperties.put("POSTGRESQL_IDENTIFIER_MAPPING", "PRESERVE_ORIGINAL_CASE");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final PostgreSQLSqlDialect sqlDialect = new PostgreSQLSqlDialect(null, adapterProperties);
-        final String val = sqlDialect.getPostgreSQLIdentifierMapping();
-        assertEquals("PRESERVE_ORIGINAL_CASE", val);
-    }
-
-    @Test
-    void testGetConverToUpperPostgreSQLIdentifierMapping() {
-        this.rawProperties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT_TO_UPPER");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final PostgreSQLSqlDialect sqlDialect = new PostgreSQLSqlDialect(null, adapterProperties);
-        final String val = sqlDialect.getPostgreSQLIdentifierMapping();
-        assertEquals("CONVERT_TO_UPPER", val);
-    }
-
-    @Test
     void testValidateCatalogProperty() throws PropertyValidationException {
         setMandatoryProperties("POSTGRESQL");
         this.rawProperties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");

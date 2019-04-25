@@ -147,14 +147,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         checkPostgreSQLIdentifierPropertyConsistency();
     }
 
-    String getPostgreSQLIdentifierMapping() {
-        if (this.properties.containsKey(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY)) {
-            return this.properties.get(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY);
-        } else {
-            return POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE;
-        }
-    }
-
     private void checkPostgreSQLIdentifierPropertyConsistency() throws PropertyValidationException {
         if (this.properties.containsKey(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY)) {
             final String propertyValue = this.properties.get(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY);

@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -17,12 +18,20 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
 
 class PostgreSQLTableMetadataReaderTest {
+    private PostgreSQLTableMetadataReader metadataReader;
+    private Map<String, String> rawProperties;
+
+    @BeforeEach
+    void beforeEach() {
+        this.metadataReader = new PostgreSQLTableMetadataReader(null, AdapterProperties.emptyProperties());
+        this.rawProperties = new HashMap<>();
+    }
+
     @CsvSource({ //
             "foobar, NONE, CONVERT_TO_UPPER, true", //
             "foobar, POSTGRESQL_UPPERCASE_TABLES, CONVERT_TO_UPPER, true", //
             "FooBar, POSTGRESQL_UPPERCASE_TABLES, PRESERVE_ORIGINAL_CASE, true", //
             "FooBar, NONE, PRESERVE_ORIGINAL_CASE, true", //
-            "FooBar, NONE, CONVERT_TO_UPPER, true", //
             "\"FooBar\", POSTGRESQL_UPPERCASE_TABLES, PRESERVE_ORIGINAL_CASE, true", //
             "\"FooBar\", NONE, PRESERVE_ORIGINAL_CASE, true" //
     })
@@ -42,5 +51,29 @@ class PostgreSQLTableMetadataReaderTest {
         final PostgreSQLTableMetadataReader reader = new PostgreSQLTableMetadataReader(null,
                 AdapterProperties.emptyProperties());
         assertThrows(RemoteMetadataReaderException.class, () -> reader.isTableIncludedByMapping("\"FooBar\""));
+    }
+
+    @Test
+    void testGetDefaultPostgreSQLIdentifierMapping() {
+        assertThat(this.metadataReader.getIdentifierMapping(), equalTo(PostgreSQLIdentifierMapping.CONVERT_TO_UPPER));
+    }
+
+    @Test
+    void testGetPreserveCasePostgreSQLIdentifierMapping() {
+        this.rawProperties.put("POSTGRESQL_IDENTIFIER_MAPPING", "PRESERVE_ORIGINAL_CASE");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
+        final PostgreSQLColumnMetadataReader columnMetadataReader = new PostgreSQLColumnMetadataReader(null,
+                adapterProperties);
+        assertThat(columnMetadataReader.getIdentifierMapping(),
+                equalTo(PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE));
+    }
+
+    @Test
+    void testGetConverToUpperPostgreSQLIdentifierMapping() {
+        this.rawProperties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT_TO_UPPER");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
+        final PostgreSQLColumnMetadataReader columnMetadataReader = new PostgreSQLColumnMetadataReader(null,
+                adapterProperties);
+        assertThat(columnMetadataReader.getIdentifierMapping(), equalTo(PostgreSQLIdentifierMapping.CONVERT_TO_UPPER));
     }
 }

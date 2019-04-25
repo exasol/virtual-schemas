@@ -8,15 +8,16 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.Connection;
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionInformation;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
@@ -90,12 +91,11 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     private DataType getOracleNumberTypeFromProperty() {
-        final Pattern pattern = Pattern.compile("\\s*(\\d+)\\s*,\\s*(\\d+)\\s*");
         final String oraclePrecisionAndScale = this.properties.get(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY);
-        final Matcher matcher = pattern.matcher(oraclePrecisionAndScale);
-        final int precision = Integer.parseInt(matcher.group(1));
-        final int scale = Integer.parseInt(matcher.group(2));
-        return DataType.createDecimal(precision, scale);
+        final List<String> precisionAndScaleList = Arrays.stream(oraclePrecisionAndScale.split(",")).map(String::trim)
+                .collect(Collectors.toList());
+        return DataType.createDecimal(Integer.valueOf(precisionAndScaleList.get(0)),
+                Integer.valueOf(precisionAndScaleList.get(1)));
     }
 
     @Override
@@ -175,6 +175,11 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         } else {
             return ImportType.JDBC;
         }
+    }
+
+    @Override
+    protected RemoteMetadataReader createRemoteMetadataReader() {
+        return new OracleMetadataReader(this.connection, this.properties);
     }
 
     @Override
