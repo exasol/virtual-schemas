@@ -20,7 +20,7 @@ public class BaseTableMetadataReader implements TableMetadataReader {
     static final String REMARKS_COLUMN = "REMARKS";
     static final String DEFAULT_TABLE_ADAPTER_NOTES = "";
     private static final Logger LOGGER = Logger.getLogger(BaseTableMetadataReader.class.getName());
-    private static final Pattern UNQUOTED_IDENTIFIER_PATTERN = Pattern.compile("^[a-zA-Z]\\w*");
+    private static final Pattern UNQUOTED_IDENTIFIER_PATTERN = Pattern.compile("^[a-zA-Z]\\w*$");
     private final ColumnMetadataReader columnMetadataReader;
     protected final AdapterProperties properties;
 
