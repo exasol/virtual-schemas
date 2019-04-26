@@ -8,13 +8,13 @@ general:
   additionalJDBCDriverDir: /vagrant/drivers/
 
 exasol:
-  runIntegrationTests: false
+  runIntegrationTests: true
   address:  127.0.0.1:8899
   user:     sys
   password: exasol
 
 postgresql:
-  runIntegrationTests:    false
+  runIntegrationTests:    true
   jdbcDriverPath:         /buckets/bfsdefault/default/drivers/jdbc/POSTGRESQL/postgresql-42.2.5.jar;
   connectionString:       jdbc:postgresql://localhost:45432/postgres
   user:                   postgres
@@ -36,7 +36,7 @@ oracle:
   instantclientDir:       /vagrant/instantclient/
 
 hive:
-  runIntegrationTests:    true
+  runIntegrationTests:    false
   jdbcDriverPath:         /buckets/bfsdefault/default/drivers/jdbc/HIVE/HiveJDBC41.jar;
   connectionString:       jdbc:hive2://localhost:10000            
   dockerName:             docker-hive_hive-server_1
