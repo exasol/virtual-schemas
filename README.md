@@ -67,6 +67,7 @@ This is an open source project which is officially supported by Exasol. For any 
 ## Information for developers 
 
 - [Virtual Schema API Documentation](doc/development/virtual_schema_api.md)
-- [Developing and Testing a SQL Dialect](doc/development/developing_a_dialect.md)
+- [Developing and Testing an SQL Dialect](doc/development/developing_a_dialect.md)
 - [Remote Logging](doc/development/remote_logging.md)
-- [Debugging Virtual Schemas](doc/development/debugging_virtual_schemas.md)
+- [Remote Debugging](doc/development/remote_debugging.md)
+- [Troubleshooting](doc/development/troubleshooting.md)
