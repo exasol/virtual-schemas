@@ -1,14 +1,12 @@
-# Redshift SQL Dialect
+# Athena SQL Dialect
 
-The Redshift SQL Dialect supports Amazon's [AWS Redshift](https://aws.amazon.com/redshift/) managed data warehouse. Redshift is at its core a relational database based on PostgreSQL.
-
-In addition to reading from the regular relational database, this SQL dialect adapter also supports reading from [Redshift Spectrum](https://docs.aws.amazon.com/redshift/latest/dg/c-getting-started-using-spectrum.html). This allows reading file based data from S3.
+The Athena SQL Dialect supports Amazon's [AWS Athena](https://aws.amazon.com/athena/), a managed service that lets you read files on S3 as if they were part of a relational database.
 
 ## JDBC Driver
 
 ### Registering the JDBC Driver in EXAOperation
 
-First download the [Redshift JDBC driver](https://docs.aws.amazon.com/redshift/latest/mgmt/configure-jdbc-connection.html#download-jdbc-driver).
+First download the [Athena JDBC driver](https://docs.aws.amazon.com/athena/latest/ug/connect-with-jdbc.html).
 
 Now register the driver in EXAOperation:
 
@@ -24,12 +22,12 @@ You need to specify the following settings when adding the JDBC driver via EXAOp
 
 | Parameter | Value                                               |
 |-----------|-----------------------------------------------------|
-| Name      | `REDSHIFT`                                          |
-| Main      | `com.amazon.redshift.jdbc42.Driver`                 |
-| Prefix    | `jdbc:redshift:`                                    |
-| Files     | `RedshiftJDBC42-<JDBC driver version>.jar`          |
+| Name      | `ATHENA`                                            |
+| Main      | `com.amazon.athena.jdbc.Driver`                     |
+| Prefix    | `jdbc:awsathena:`                                   |
+| Files     | `AthenaJDBC42_<JDBC driver version>.jar`            |
 
-Please refer to the [documentation on configuring JDBC connections to Redshift](https://docs.aws.amazon.com/redshift/latest/mgmt/configure-jdbc-connection.html) for details.
+Please refer to the [documentation on configuring JDBC connections to Athena](https://docs.aws.amazon.com/athena/latest/ug/connect-with-jdbc.html) for details.
 
 ### Upload JDBC Driver to EXAOperation
 
@@ -46,20 +44,19 @@ You install the adapter script via the special SQL command `CREATE JAVA ADAPTER 
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
     %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
     %jar /buckets/bucketfs1/jdbc/virtualschema-jdbc-adapter-dist-<adapter version>.jar;
-    %jar /buckets/bucketfs1/jdbc/RedshiftJDBC42-<JDBC driver version>.jar;
+    %jar /buckets/bucketfs1/jdbc/AthenaJDBC42-<JDBC driver version>.jar;
 /
 ```
 
 ## Creating a Virtual Schema
 
-Below you see how a Redshift Virtual Schema is created. Please note that you have to provide the name of the database in the property `CATALOG_NAME` since Redshift simulates catalogs.
+Below you see how a Redshift Virtual Schema is created. Please note that you have to provide the name of the database in the property `SHEMA_NAME` since Redshift simulates catalogs.
 
 ```sql
 CREATE VIRTUAL SCHEMA <virtual schema name>
     USING ADAPTER.JDBC_ADAPTER
     WITH
-    SQL_DIALECT = 'REDSHIFT'
+    SQL_DIALECT = 'ATHENA'
     CONNECTION_NAME = '<connection name>'
-    CATALOG_NAME = '<database name>'
-    SCHEMA_NAME = 'public';
+    SCHEMA_NAME = '<database name>';
 ```
