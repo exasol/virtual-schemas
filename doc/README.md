@@ -105,7 +105,7 @@ Notes
 
 Notes
 * `schemaMetadata` is optional. It can be skipped if the adapter does not want to refresh (e.g. because he detected that there is no change).
-* `questedTables` must exist if and only if the element existed in the request. The values must be the same as in the request (to make sure that Adapter only refreshed these tables).
+* `requestedTables` must exist if and only if the element existed in the request. The values must be the same as in the request (to make sure that Adapter only refreshed these tables).
 
 ### Set Properties
 
