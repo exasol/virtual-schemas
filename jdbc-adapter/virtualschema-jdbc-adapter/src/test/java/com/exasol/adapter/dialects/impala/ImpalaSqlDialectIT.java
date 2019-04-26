@@ -8,8 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assume;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
@@ -21,6 +20,7 @@ import com.exasol.adapter.dialects.impala.ImpalaSqlDialect;
  *
  * Testdata: sample_07: code string, description string, total_emp int, salary int
  */
+@Tag("integration")
 @ExtendWith(IntegrationTestConfigurationCondition.class)
 public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
     private static final String VIRTUAL_SCHEMA = "VS_IMPALA";

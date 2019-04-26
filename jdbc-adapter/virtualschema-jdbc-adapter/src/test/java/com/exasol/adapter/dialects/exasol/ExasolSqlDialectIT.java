@@ -2,15 +2,14 @@ package com.exasol.adapter.dialects.exasol;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.List;
 
-import org.junit.Assume;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
@@ -20,6 +19,7 @@ import com.google.common.collect.ImmutableList;
 /**
  * Integration tests for the Exasol SQL dialect.
  */
+@Tag("integration")
 @ExtendWith(IntegrationTestConfigurationCondition.class)
 class ExasolSqlDialectIT extends AbstractIntegrationTest {
 
@@ -73,7 +73,7 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
 
     @BeforeAll
     static void beforeAll() throws FileNotFoundException, SQLException, ClassNotFoundException {
-        Assume.assumeTrue(getConfig().exasolTestsRequested());
+        assumeTrue(getConfig().exasolTestsRequested());
         setConnection(connectToExa());
         final String connectionString = "jdbc:exa:localhost:" + getPortOfConnectedDatabase(); // connect via Virtual
                                                                                               // Schema to local
@@ -156,7 +156,10 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
                 "'2016-06-01 00:00:02.000'");
         matchNextRow(result, "C12", "INTERVAL YEAR(2) TO MONTH", (long) 13, null, null, "'3-5'");
         matchNextRow(result, "C13", "INTERVAL DAY(2) TO SECOND(3)", (long) 29, null, null, "'2 12:50:10.123'");
-        matchLastRow(result, "C14", "GEOMETRY(3857)", (long) 8000000, null, null, "'POINT(2 5)'"); // srid not yet supported, so will always default to 3857
+        matchLastRow(result, "C14", "GEOMETRY(3857)", (long) 8000000, null, null, "'POINT(2 5)'"); // srid not yet
+                                                                                                   // supported, so will
+                                                                                                   // always default to
+                                                                                                   // 3857
     }
 
     @Test
