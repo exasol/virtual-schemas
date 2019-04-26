@@ -1,8 +1,10 @@
 package com.exasol.adapter.dialects.exasol;
 
-import static com.exasol.adapter.AdapterProperties.IS_LOCAL_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.*;
 
 import java.sql.Connection;
+import java.util.Arrays;
+import java.util.List;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.*;
@@ -18,6 +20,11 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "EXASOL";
     public static final String EXASOL_IMPORT_PROPERTY = "IMPORT_FROM_EXA";
     public static final String EXASOL_CONNECTION_STRING_PROPERTY = "EXA_CONNECTION_STRING";
+    private static final List<String> supportedProperties = Arrays.asList(SQL_DIALECT_PROPERTY,
+            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
+            CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXASOL_IMPORT_PROPERTY,
+            EXASOL_CONNECTION_STRING_PROPERTY, IS_LOCAL_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
+            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
     public ExasolSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
@@ -142,8 +149,10 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     @Override
     public void validateProperties() throws PropertyValidationException {
         super.validateDialectName(getPublicName());
+        super.validateSupportedPropertiesList(supportedProperties);
         super.validateProperties();
         super.checkImportPropertyConsistency(EXASOL_IMPORT_PROPERTY, EXASOL_CONNECTION_STRING_PROPERTY);
         super.validateBooleanProperty(EXASOL_IMPORT_PROPERTY);
+        super.validateBooleanProperty(IS_LOCAL_PROPERTY);
     }
 }

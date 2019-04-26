@@ -56,7 +56,9 @@ public interface SqlDialect {
         NONE, SINGLE, MULTIPLE, AUTO_DETECT
     }
 
-    // Specifies different exception handling strategies
+    /**
+     * This enumeration specifies different exception handling strategies
+     */
     public enum ExceptionHandlingMode {
         IGNORE_INVALID_VIEWS, NONE
     }
@@ -256,5 +258,10 @@ public interface SqlDialect {
      */
     public String describeQueryResultColumns(final String query) throws SQLException;
 
+    /**
+     * Validate user-defined properties and throw exception if they are incorrect
+     * 
+     * @throws PropertyValidationException if some properties are used incorrectly
+     */
     public void validateProperties() throws PropertyValidationException;
 }

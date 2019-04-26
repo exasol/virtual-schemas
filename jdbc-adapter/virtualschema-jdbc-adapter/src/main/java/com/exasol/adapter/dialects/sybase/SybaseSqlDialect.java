@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.sybase;
 
+import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -7,8 +8,7 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.Connection;
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.*;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
@@ -20,6 +20,10 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
     static final int MAX_SYBASE_VARCHAR_SIZE = 8000;
     static final int MAX_SYBASE_N_VARCHAR_SIZE = 4000;
     private static final String NAME = "SYBASE";
+    private static final List<String> supportedProperties = Arrays.asList(SQL_DIALECT_PROPERTY,
+            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
+            CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
+            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
     public SybaseSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
@@ -138,6 +142,7 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
     @Override
     public void validateProperties() throws PropertyValidationException {
         super.validateDialectName(getPublicName());
+        super.validateSupportedPropertiesList(supportedProperties);
         super.validateProperties();
     }
 }

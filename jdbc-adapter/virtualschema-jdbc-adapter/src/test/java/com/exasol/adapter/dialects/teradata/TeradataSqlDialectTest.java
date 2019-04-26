@@ -80,7 +80,7 @@ class TeradataSqlDialectTest {
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
         MatcherAssert.assertThat(exception.getMessage(), containsString(
-                "The dialect TERADATA does not support catalogs. Please, do not set the CATALOG_NAME property."));
+                "The dialect TERADATA does not support CATALOG_NAME property. Please, do not set the CATALOG_NAME property."));
     }
 
     @Test

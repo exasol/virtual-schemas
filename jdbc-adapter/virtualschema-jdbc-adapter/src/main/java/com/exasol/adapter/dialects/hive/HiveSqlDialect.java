@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.hive;
 
+import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -7,8 +8,7 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.Connection;
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.*;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
@@ -17,11 +17,14 @@ import com.exasol.adapter.sql.ScalarFunction;
 
 /**
  * Dialect for Hive, using the Cloudera Hive JDBC Driver/Connector (developed by Simba). Only supports Hive 2.1.0 and
- * later because of the order by (nulls first/last option) TODO Finish implementation of this dialect and add as a
- * supported dialect
+ * later because of the order by (nulls first/last option)
  */
 public class HiveSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "HIVE";
+    private static final List<String> supportedProperties = Arrays.asList(SQL_DIALECT_PROPERTY,
+            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
+            CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
+            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
     public HiveSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
@@ -124,6 +127,7 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     @Override
     public void validateProperties() throws PropertyValidationException {
         super.validateDialectName(getPublicName());
+        super.validateSupportedPropertiesList(supportedProperties);
         super.validateProperties();
     }
 }

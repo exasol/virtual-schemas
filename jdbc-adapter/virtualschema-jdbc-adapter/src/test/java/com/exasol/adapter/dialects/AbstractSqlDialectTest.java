@@ -33,10 +33,9 @@ class AbstractSqlDialectTest {
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
-        assertThat(exception.getMessage(),
-                containsString(
-                        "You did not specify a connection (CONNECTION_NAME) and therefore have to specify the property "
-                                + "CONNECTION_STRING"));
+        assertThat(exception.getMessage(), containsString(
+                "You did not specify a connection using the property CONNECTION_NAME and therefore have to specify the property "
+                        + "CONNECTION_STRING"));
     }
 
     @Test
@@ -60,8 +59,8 @@ class AbstractSqlDialectTest {
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
-        assertThat(exception.getMessage(),
-                containsString("You specified a connection (CONNECTION_NAME) and therefore should not specify"));
+        assertThat(exception.getMessage(), containsString(
+                "You specified a connection using the property CONNECTION_NAME and therefore should not specify"));
     }
 
     @Test
@@ -72,8 +71,8 @@ class AbstractSqlDialectTest {
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
-        assertThat(exception.getMessage(),
-                containsString("You specified a connection (CONNECTION_NAME) and therefore should not specify"));
+        assertThat(exception.getMessage(), containsString(
+                "You specified a connection using the property CONNECTION_NAME and therefore should not specify"));
     }
 
     @Test
@@ -84,8 +83,8 @@ class AbstractSqlDialectTest {
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
-        assertThat(exception.getMessage(),
-                containsString("You specified a connection (CONNECTION_NAME) and therefore should not specify"));
+        assertThat(exception.getMessage(), containsString(
+                "You specified a connection using the property CONNECTION_NAME and therefore should not specify"));
     }
 
     @Test
@@ -163,37 +162,6 @@ class AbstractSqlDialectTest {
     }
 
     @Test
-    void checkValidBoolOption1() throws PropertyValidationException {
-        getMinimumMandatory();
-        this.rawProperties.put(IS_LOCAL_PROPERTY, "TrUe");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
-        sqlDialect.validateProperties();
-    }
-
-    @Test
-    void checkValidBoolOption2() throws PropertyValidationException {
-        getMinimumMandatory();
-        this.rawProperties.put(IS_LOCAL_PROPERTY, "FalSe");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
-        sqlDialect.validateProperties();
-    }
-
-    @Test
-    void checkInvalidBoolOption1() {
-        getMinimumMandatory();
-        this.rawProperties.put(IS_LOCAL_PROPERTY, "asdasd");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
-        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
-                sqlDialect::validateProperties);
-        assertThat(exception.getMessage(), containsString(
-                "The value 'asdasd' for the property IS_LOCAL is invalid. It has to be either 'true' or 'false' (case "
-                        + "insensitive)"));
-    }
-
-    @Test
     void testInvalidExceptionHandling() {
         getMinimumMandatory();
         this.rawProperties.put(EXCEPTION_HANDLING_PROPERTY, "IGNORE_ALL");
@@ -201,7 +169,8 @@ class AbstractSqlDialectTest {
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
-        assertThat(exception.getMessage(), containsString("You specified an invalid exception mode (IGNORE_ALL)"));
+        assertThat(exception.getMessage(), containsString(
+                "Invalid value 'IGNORE_ALL' for property EXCEPTION_HANDLING. Choose one of: IGNORE_INVALID_VIEWS, NONE"));
     }
 
     @Test
@@ -226,8 +195,8 @@ class AbstractSqlDialectTest {
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
-        assertThat(exception.getMessage(), containsString("Do not use properties " + EXASOL_IMPORT_PROPERTY + " and "
-                + EXASOL_CONNECTION_STRING_PROPERTY + " with GENERIC dialect"));
+        assertThat(exception.getMessage(),
+                containsString("The dialect GENERIC does not support IMPORT_FROM_EXA property."));
     }
 
     @Test
@@ -238,8 +207,8 @@ class AbstractSqlDialectTest {
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
-        assertThat(exception.getMessage(), containsString("Do not use properties " + EXASOL_IMPORT_PROPERTY + " and "
-                + EXASOL_CONNECTION_STRING_PROPERTY + " with GENERIC dialect"));
+        assertThat(exception.getMessage(),
+                containsString("The dialect GENERIC does not support EXA_CONNECTION_STRING property."));
     }
 
     @Test
@@ -251,9 +220,7 @@ class AbstractSqlDialectTest {
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
         assertThat(exception.getMessage(),
-                containsString(
-                        "Do not use properties " + ORACLE_IMPORT_PROPERTY + ", " + ORACLE_CONNECTION_NAME_PROPERTY
-                                + " and " + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " with GENERIC dialect"));
+                containsString("The dialect GENERIC does not support IMPORT_FROM_ORA property."));
     }
 
     @Test
@@ -265,9 +232,7 @@ class AbstractSqlDialectTest {
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
         assertThat(exception.getMessage(),
-                containsString(
-                        "Do not use properties " + ORACLE_IMPORT_PROPERTY + ", " + ORACLE_CONNECTION_NAME_PROPERTY
-                                + " and " + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " with GENERIC dialect"));
+                containsString("The dialect GENERIC does not support ORA_CONNECTION_NAME property."));
     }
 
     @Test
@@ -278,10 +243,8 @@ class AbstractSqlDialectTest {
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
-        assertThat(exception.getMessage(),
-                containsString(
-                        "Do not use properties " + ORACLE_IMPORT_PROPERTY + ", " + ORACLE_CONNECTION_NAME_PROPERTY
-                                + " and " + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " with GENERIC dialect"));
+        assertThat(exception.getMessage(), containsString(
+                "The dialect GENERIC does not support ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE property."));
     }
 
     @Test
@@ -292,7 +255,7 @@ class AbstractSqlDialectTest {
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
-        assertThat(exception.getMessage(), containsString(
-                "Do not use property " + POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY + " with GENERIC dialect"));
+        assertThat(exception.getMessage(),
+                containsString("The dialect GENERIC does not support POSTGRESQL_IDENTIFIER_MAPPING property."));
     }
 }

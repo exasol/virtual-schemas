@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.redshift;
 
+import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -7,8 +8,7 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.Connection;
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.*;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
@@ -18,11 +18,15 @@ import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
 public class RedshiftSqlDialect extends AbstractSqlDialect {
+    private static final String NAME = "REDSHIFT";
+    private static final List<String> supportedProperties = Arrays.asList(SQL_DIALECT_PROPERTY,
+            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
+            CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
+            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
+
     public RedshiftSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
-
-    private static final String NAME = "REDSHIFT";
 
     public static String getPublicName() {
         return NAME;
@@ -129,6 +133,7 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
     @Override
     public void validateProperties() throws PropertyValidationException {
         super.validateDialectName(getPublicName());
+        super.validateSupportedPropertiesList(supportedProperties);
         super.validateProperties();
     }
 }

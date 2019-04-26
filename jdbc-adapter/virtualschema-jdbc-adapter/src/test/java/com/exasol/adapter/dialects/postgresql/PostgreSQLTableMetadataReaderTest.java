@@ -30,7 +30,6 @@ class PostgreSQLTableMetadataReaderTest {
             "foobar    , POSTGRESQL_UPPERCASE_TABLES, CONVERT_TO_UPPER      , true", //
             "FooBar    , POSTGRESQL_UPPERCASE_TABLES, PRESERVE_ORIGINAL_CASE, true", //
             "FooBar    , NONE                       , PRESERVE_ORIGINAL_CASE, true", //
-//            "FooBar    , NONE                       , CONVERT_TO_UPPER      , true", //
             "\"FooBar\", POSTGRESQL_UPPERCASE_TABLES, PRESERVE_ORIGINAL_CASE, true", //
             "\"FooBar\", NONE                       , PRESERVE_ORIGINAL_CASE, true" //
     })
@@ -72,7 +71,6 @@ class PostgreSQLTableMetadataReaderTest {
     @CsvSource({ //
             "foobar    , CONVERT_TO_UPPER      , FOOBAR", //
             "foobar    , PRESERVE_ORIGINAL_CASE, foobar", //
-//            "FooBar    , CONVERT_TO_UPPER      , FOOBAR", //
             "FooBar    , PRESERVE_ORIGINAL_CASE, FooBar", //
             "\"FooBar\", CONVERT_TO_UPPER      , \"FooBar\"", //
             "\"FooBar\", PRESERVE_ORIGINAL_CASE, \"FooBar\"" //

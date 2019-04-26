@@ -1,20 +1,14 @@
 package com.exasol.adapter.dialects;
 
 import static com.exasol.adapter.AdapterProperties.*;
-import static com.exasol.adapter.dialects.exasol.ExasolSqlDialect.EXASOL_CONNECTION_STRING_PROPERTY;
-import static com.exasol.adapter.dialects.exasol.ExasolSqlDialect.EXASOL_IMPORT_PROPERTY;
-import static com.exasol.adapter.dialects.oracle.OracleSqlDialect.*;
-import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.exasol.ExasolSqlDialect;
-import com.exasol.adapter.dialects.oracle.OracleSqlDialect;
-import com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect;
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.sql.AggregateFunction;
@@ -24,6 +18,8 @@ import com.exasol.adapter.sql.ScalarFunction;
  * Abstract implementation of a dialect. We recommend that every dialect should extend this abstract class.
  */
 public abstract class AbstractSqlDialect implements SqlDialect {
+    private static final Pattern BOOLEAN_PROPERTY_VALUE_PATTERN = Pattern.compile("^TRUE$|^FALSE$",
+            Pattern.CASE_INSENSITIVE);
     protected Set<ScalarFunction> omitParenthesesMap = EnumSet.noneOf(ScalarFunction.class);
     protected RemoteMetadataReader remoteMetadataReader;
     protected AdapterProperties properties;
@@ -134,10 +130,20 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         validateConnectionProperties();
         validateCatalogNameProperty();
         validateSchemaNameProperty();
-        validateDialectSpecificProperties();
-        validateIsLocalProperty();
         validateDebugOutputAddress();
         validateExceptionHandling();
+    }
+
+    protected void validateSupportedPropertiesList(final List<String> supportedProperties)
+            throws PropertyValidationException {
+        final List<String> allProperties = new ArrayList<>(this.properties.keySet());
+        for (final String property : allProperties) {
+            if (!supportedProperties.contains(property)) {
+                throw new PropertyValidationException(
+                        "The dialect " + this.properties.getSqlDialect() + " does not support " + property
+                                + " property. Please, do not set the " + property + " property.");
+            }
+        }
     }
 
     private void validateConnectionProperties() throws PropertyValidationException {
@@ -145,21 +151,22 @@ public abstract class AbstractSqlDialect implements SqlDialect {
             if (this.properties.containsKey(CONNECTION_STRING_PROPERTY)
                     || this.properties.containsKey(USERNAME_PROPERTY)
                     || this.properties.containsKey(PASSWORD_PROPERTY)) {
-                throw new PropertyValidationException("You specified a connection (" + CONNECTION_NAME_PROPERTY
-                        + ") and therefore should not specify the properties " + CONNECTION_STRING_PROPERTY + ", "
-                        + USERNAME_PROPERTY + " and " + PASSWORD_PROPERTY);
+                throw new PropertyValidationException("You specified a connection using the property "
+                        + CONNECTION_NAME_PROPERTY + " and therefore should not specify the properties "
+                        + CONNECTION_STRING_PROPERTY + ", " + USERNAME_PROPERTY + " and " + PASSWORD_PROPERTY);
             }
         } else {
             if (!this.properties.containsKey(CONNECTION_STRING_PROPERTY)) {
-                throw new PropertyValidationException("You did not specify a connection (" + CONNECTION_NAME_PROPERTY
-                        + ") and therefore have to specify the property " + CONNECTION_STRING_PROPERTY);
+                throw new PropertyValidationException(
+                        "You did not specify a connection using the property " + CONNECTION_NAME_PROPERTY
+                                + " and therefore have to specify the property " + CONNECTION_STRING_PROPERTY);
             }
         }
     }
 
     private void validateCatalogNameProperty() throws PropertyValidationException {
         if (this.properties.containsKey(CATALOG_NAME_PROPERTY)
-                && supportsJdbcCatalogs().equals(StructureElementSupport.NONE)) {
+                && supportsJdbcCatalogs() == StructureElementSupport.NONE) {
             throw new PropertyValidationException("The dialect " + this.properties.getSqlDialect()
                     + " does not support catalogs. Please, do not set the " + CATALOG_NAME_PROPERTY + " property.");
         }
@@ -167,55 +174,15 @@ public abstract class AbstractSqlDialect implements SqlDialect {
 
     private void validateSchemaNameProperty() throws PropertyValidationException {
         if (this.properties.containsKey(SCHEMA_NAME_PROPERTY)
-                && supportsJdbcSchemas().equals(StructureElementSupport.NONE)) {
+                && supportsJdbcSchemas() == StructureElementSupport.NONE) {
             throw new PropertyValidationException("The dialect " + this.properties.getSqlDialect()
                     + " does not support schemas. Please, do not set the " + SCHEMA_NAME_PROPERTY + " property.");
         }
     }
 
-    private void validateDialectSpecificProperties() throws PropertyValidationException {
-        validateExasolSpecificProperties();
-        validateOracleSpecificProperties();
-        validatePostgreSqlSpecificProperties();
-    }
-
-    private void validateExasolSpecificProperties() throws PropertyValidationException {
-        if (!this.properties.getSqlDialect().equals(ExasolSqlDialect.getPublicName())
-                && (this.properties.containsKey(EXASOL_IMPORT_PROPERTY)
-                        || this.properties.containsKey(EXASOL_CONNECTION_STRING_PROPERTY))) {
-            throw new PropertyValidationException("Do not use properties " + EXASOL_IMPORT_PROPERTY + " and "
-                    + EXASOL_CONNECTION_STRING_PROPERTY + " with " + this.properties.getSqlDialect()
-                    + " dialect. They can be only used with EXASOL dialect.");
-        }
-    }
-
-    private void validateOracleSpecificProperties() throws PropertyValidationException {
-        if (!this.properties.getSqlDialect().equals(OracleSqlDialect.getPublicName())
-                && (this.properties.containsKey(ORACLE_IMPORT_PROPERTY)
-                        || this.properties.containsKey(ORACLE_CONNECTION_NAME_PROPERTY)
-                        || this.properties.containsKey(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY))) {
-            throw new PropertyValidationException("Do not use properties " + ORACLE_IMPORT_PROPERTY + ", "
-                    + ORACLE_CONNECTION_NAME_PROPERTY + " and " + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " with "
-                    + this.properties.getSqlDialect() + " dialect. They can be only used with ORACLE dialect.");
-        }
-    }
-
-    private void validatePostgreSqlSpecificProperties() throws PropertyValidationException {
-        if (!this.properties.getSqlDialect().equals(PostgreSQLSqlDialect.getPublicName())
-                && this.properties.containsKey(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY)) {
-            throw new PropertyValidationException("Do not use property " + POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY
-                    + " with " + this.properties.getSqlDialect()
-                    + " dialect. They can be only used with POSTGRES dialect.");
-        }
-    }
-
-    private void validateIsLocalProperty() throws PropertyValidationException {
-        validateBooleanProperty(IS_LOCAL_PROPERTY);
-    }
-
     protected void validateBooleanProperty(final String property) throws PropertyValidationException {
         if (this.properties.containsKey(property) //
-                && !this.properties.get(property).toUpperCase().matches("^TRUE$|^FALSE$")) {
+                && !BOOLEAN_PROPERTY_VALUE_PATTERN.matcher(this.properties.get(property)).matches()) {
             throw new PropertyValidationException("The value '" + this.properties.get(property) + "' for the property "
                     + property + " is invalid. It has to be either 'true' or 'false' (case insensitive).");
         }
@@ -225,8 +192,9 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         if (this.properties.containsKey(DEBUG_ADDRESS_PROPERTY)) {
             final String debugAddress = this.properties.getDebugAddress();
             if (!debugAddress.isEmpty()) {
-                final String error = "You specified an invalid hostname and port for the udf debug service ("
-                        + DEBUG_ADDRESS_PROPERTY + "). Please provide a valid value, e.g. 'hostname:3000'";
+                final String error = "You specified an invalid hostname and port where a log receiver (e.g. `netcat`) "
+                        + "is listening for incoming connections. The value of the property " + DEBUG_ADDRESS_PROPERTY
+                        + "must adhere to the following format: <host>:<port>, where host is a host name or IP address.";
                 if (debugAddress.split(":").length != 2) {
                     throw new PropertyValidationException(error);
                 }
@@ -247,7 +215,9 @@ public abstract class AbstractSqlDialect implements SqlDialect {
                         .values()) {
                     if (!mode.name().equals(exceptionHandling)) {
                         throw new PropertyValidationException(
-                                "You specified an invalid exception mode (" + exceptionHandling + ").");
+                                "Invalid value '" + exceptionHandling + "' for property " + EXCEPTION_HANDLING_PROPERTY
+                                        + ". Choose one of: " + ExceptionHandlingMode.IGNORE_INVALID_VIEWS.name() + ", "
+                                        + ExceptionHandlingMode.NONE.name());
                     }
                 }
             }
@@ -283,27 +253,16 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         }
     }
 
-    protected void checkIgnoreErrors() throws PropertyValidationException {
-        final String dialect = this.properties.getSqlDialect();
-        final List<String> errorsToIgnore = getIgnoredErrors();
-        for (final String errorToIgnore : errorsToIgnore) {
-            if (!errorToIgnore.startsWith(dialect)) {
-                throw new PropertyValidationException(
-                        "Error " + errorToIgnore + " cannot be ignored in " + dialect + " dialect.");
-            }
-        }
-    }
-
     List<String> getIgnoredErrors() {
         return this.properties.getIgnoredErrors().stream().map(String::toUpperCase).collect(Collectors.toList());
     }
 
     protected void checkImportPropertyConsistency(final String importFromProperty, final String connectionProperty)
             throws PropertyValidationException {
-        final boolean isImport = this.properties.isEnabled(importFromProperty);
+        final boolean isDirectImport = this.properties.isEnabled(importFromProperty);
         final String value = this.properties.get(connectionProperty);
-        final boolean connectionIsEmpty = value == null || value.isEmpty();
-        if (isImport) {
+        final boolean connectionIsEmpty = (value == null || value.isEmpty());
+        if (isDirectImport) {
             if (connectionIsEmpty) {
                 throw new PropertyValidationException("You defined the property " + importFromProperty
                         + ", please also define " + connectionProperty);

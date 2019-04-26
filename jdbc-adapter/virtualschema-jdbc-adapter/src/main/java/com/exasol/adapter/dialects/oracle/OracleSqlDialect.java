@@ -1,6 +1,6 @@
 package com.exasol.adapter.dialects.oracle;
 
-import static com.exasol.adapter.AdapterProperties.IS_LOCAL_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -30,6 +30,11 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     public static final String ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY = "ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE";
     public static final String ORACLE_IMPORT_PROPERTY = "IMPORT_FROM_ORA";
     public static final String ORACLE_CONNECTION_NAME_PROPERTY = "ORA_CONNECTION_NAME";
+    private static final List<String> supportedProperties = Arrays.asList(SQL_DIALECT_PROPERTY,
+            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
+            SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, ORACLE_IMPORT_PROPERTY, ORACLE_CONNECTION_NAME_PROPERTY,
+            EXCLUDED_CAPABILITIES_PROPERTY, ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY, DEBUG_ADDRESS_PROPERTY,
+            LOG_LEVEL_PROPERTY);
 
     public OracleSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
@@ -185,6 +190,7 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     @Override
     public void validateProperties() throws PropertyValidationException {
         super.validateDialectName(getPublicName());
+        super.validateSupportedPropertiesList(supportedProperties);
         super.validateProperties();
         super.checkImportPropertyConsistency(ORACLE_IMPORT_PROPERTY, ORACLE_CONNECTION_NAME_PROPERTY);
         super.validateBooleanProperty(ORACLE_IMPORT_PROPERTY);

@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.teradata;
 
+import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -7,6 +8,8 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.Connection;
+import java.util.Arrays;
+import java.util.List;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
@@ -18,6 +21,10 @@ import com.exasol.adapter.jdbc.RemoteMetadataReader;
  */
 public class TeradataSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "TERADATA";
+    private static final List<String> supportedProperties = Arrays.asList(SQL_DIALECT_PROPERTY,
+            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
+            SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, EXCEPTION_HANDLING_PROPERTY,
+            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
@@ -110,6 +117,7 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
     @Override
     public void validateProperties() throws PropertyValidationException {
         super.validateDialectName(getPublicName());
+        super.validateSupportedPropertiesList(supportedProperties);
         super.validateProperties();
     }
 }
