@@ -20,7 +20,7 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "EXASOL";
     public static final String EXASOL_IMPORT_PROPERTY = "IMPORT_FROM_EXA";
     public static final String EXASOL_CONNECTION_STRING_PROPERTY = "EXA_CONNECTION_STRING";
-    private static final List<String> supportedProperties = Arrays.asList(SQL_DIALECT_PROPERTY,
+    private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXASOL_IMPORT_PROPERTY,
             EXASOL_CONNECTION_STRING_PROPERTY, IS_LOCAL_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
@@ -149,10 +149,14 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     @Override
     public void validateProperties() throws PropertyValidationException {
         super.validateDialectName(getPublicName());
-        super.validateSupportedPropertiesList(supportedProperties);
         super.validateProperties();
         super.checkImportPropertyConsistency(EXASOL_IMPORT_PROPERTY, EXASOL_CONNECTION_STRING_PROPERTY);
         super.validateBooleanProperty(EXASOL_IMPORT_PROPERTY);
         super.validateBooleanProperty(IS_LOCAL_PROPERTY);
+    }
+
+    @Override
+    protected List<String> getSupportedProperties() {
+        return SUPPORTED_PROPERTIES;
     }
 }

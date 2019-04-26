@@ -22,7 +22,7 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     private static final String POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE_VALUE = "PRESERVE_ORIGINAL_CASE";
     private static final String POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE = "CONVERT_TO_UPPER";
     private static final PostgreSQLIdentifierMapping DEFAULT_POSTGRESS_IDENTIFIER_MAPPING = PostgreSQLIdentifierMapping.CONVERT_TO_UPPER;
-    private static final List<String> supportedProperties = Arrays.asList(SQL_DIALECT_PROPERTY,
+    private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             IGNORE_ERRORS_PROPERTY, POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
@@ -146,9 +146,13 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     @Override
     public void validateProperties() throws PropertyValidationException {
         super.validateDialectName(getPublicName());
-        super.validateSupportedPropertiesList(supportedProperties);
         super.validateProperties();
         checkPostgreSQLIdentifierPropertyConsistency();
+    }
+
+    @Override
+    protected List<String> getSupportedProperties() {
+        return SUPPORTED_PROPERTIES;
     }
 
     private void checkPostgreSQLIdentifierPropertyConsistency() throws PropertyValidationException {

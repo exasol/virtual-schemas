@@ -127,6 +127,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
 
     @Override
     public void validateProperties() throws PropertyValidationException {
+        validateSupportedPropertiesList();
         validateConnectionProperties();
         validateCatalogNameProperty();
         validateSchemaNameProperty();
@@ -134,17 +135,18 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         validateExceptionHandling();
     }
 
-    protected void validateSupportedPropertiesList(final List<String> supportedProperties)
-            throws PropertyValidationException {
+    protected void validateSupportedPropertiesList() throws PropertyValidationException {
         final List<String> allProperties = new ArrayList<>(this.properties.keySet());
         for (final String property : allProperties) {
-            if (!supportedProperties.contains(property)) {
+            if (!getSupportedProperties().contains(property)) {
                 throw new PropertyValidationException(
                         "The dialect " + this.properties.getSqlDialect() + " does not support " + property
                                 + " property. Please, do not set the " + property + " property.");
             }
         }
     }
+
+    protected abstract List<String> getSupportedProperties();
 
     private void validateConnectionProperties() throws PropertyValidationException {
         if (this.properties.containsKey(CONNECTION_NAME_PROPERTY)) {
@@ -231,11 +233,10 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         checkIfNameIsConsistent(dialectName);
     }
 
-    private void checkIfNameIsConsistent(final String dialectName) throws PropertyValidationException {
-        if (!this.properties.getSqlDialect().equals(dialectName)) {
+    private void checkIfContainsDialectName(final String availableDialects) throws PropertyValidationException {
+        if (!this.properties.containsKey(SQL_DIALECT_PROPERTY)) {
             throw new PropertyValidationException(
-                    "The dialect " + dialectName + " cannot have the name " + this.properties.getSqlDialect()
-                            + ". You specified the wrong dialect name or created the wrong dialect class.");
+                    "You have to specify the SQL dialect (" + SQL_DIALECT_PROPERTY + "). " + availableDialects);
         }
     }
 
@@ -246,15 +247,12 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         }
     }
 
-    private void checkIfContainsDialectName(final String availableDialects) throws PropertyValidationException {
-        if (!this.properties.containsKey(SQL_DIALECT_PROPERTY)) {
+    private void checkIfNameIsConsistent(final String dialectName) throws PropertyValidationException {
+        if (!this.properties.getSqlDialect().equals(dialectName)) {
             throw new PropertyValidationException(
-                    "You have to specify the SQL dialect (" + SQL_DIALECT_PROPERTY + "). " + availableDialects);
+                    "The dialect " + dialectName + " cannot have the name " + this.properties.getSqlDialect()
+                            + ". You specified the wrong dialect name or created the wrong dialect class.");
         }
-    }
-
-    List<String> getIgnoredErrors() {
-        return this.properties.getIgnoredErrors().stream().map(String::toUpperCase).collect(Collectors.toList());
     }
 
     protected void checkImportPropertyConsistency(final String importFromProperty, final String connectionProperty)
@@ -273,5 +271,9 @@ public abstract class AbstractSqlDialect implements SqlDialect {
                         + " without setting " + importFromProperty + " to 'TRUE'. This is not allowed");
             }
         }
+    }
+
+    List<String> getIgnoredErrors() {
+        return this.properties.getIgnoredErrors().stream().map(String::toUpperCase).collect(Collectors.toList());
     }
 }

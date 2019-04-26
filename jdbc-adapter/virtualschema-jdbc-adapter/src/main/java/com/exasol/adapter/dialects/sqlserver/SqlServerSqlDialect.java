@@ -22,7 +22,7 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
     static final int MAX_SQLSERVER_NVARCHAR_SIZE = 4000;
     static final int MAX_SQLSERVER_CLOB_SIZE = 2000000;
     private static final String NAME = "SQLSERVER";
-    private static final List<String> supportedProperties = Arrays.asList(SQL_DIALECT_PROPERTY,
+    private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
@@ -149,7 +149,11 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
     @Override
     public void validateProperties() throws PropertyValidationException {
         super.validateDialectName(getPublicName());
-        super.validateSupportedPropertiesList(supportedProperties);
         super.validateProperties();
+    }
+
+    @Override
+    protected List<String> getSupportedProperties() {
+        return SUPPORTED_PROPERTIES;
     }
 }
