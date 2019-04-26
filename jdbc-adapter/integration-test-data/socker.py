@@ -4,6 +4,7 @@ import argparse
 import subprocess
 import yaml
 import json
+import time
 
 DOCKER_NETWORK = 'exasoldb_priv'
 
@@ -19,6 +20,8 @@ def docker_run(config):
                     net=DOCKER_NETWORK)
                 print(cmd)
                 run(cmd)
+            elif 'dockerComposeRepo' in properties:
+                run_with_docker_compose(properties)
             elif 'dockerName' in properties:
                 cmd = "docker start {name}".format(name = properties['dockerName'])
                 print(cmd)
@@ -30,6 +33,22 @@ def docker_run(config):
                 print(cmd)
                 run(cmd)
 
+def run_with_docker_compose(properties):
+    cmd = "git clone {compose_repo}".format(
+        compose_repo = properties['dockerComposeRepo']
+    )
+    print(cmd)
+    run(cmd)
+    cmd = "echo -e '\nnetworks:\n  default:\n    external:\n      name: {network}\n' >> docker-hive/docker-compose.yml".format(
+        network = DOCKER_NETWORK
+    )
+    print(cmd)
+    run(cmd)
+    cmd = "sudo docker-compose up -d"
+    print(cmd)
+    run(cmd, "./docker-hive")
+    time.sleep(90)
+
 def docker_rm(config):
     for db, properties in config.items():
         if properties.get('runIntegrationTests', False):
@@ -37,6 +56,10 @@ def docker_rm(config):
                 cmd = "docker rm -f {name}".format(name = properties['dockerName'])
                 print(cmd)
                 run(cmd)
+            elif 'dockerComposeRepo' in properties:
+                cmd = "sudo docker-compose down"
+                print(cmd)
+                run(cmd, "./docker-hive")
             elif 'dockerName' in properties:
                 cmd = "docker stop {name}".format(name = properties['dockerName'])
                 print(cmd)
@@ -48,14 +71,15 @@ def docker_rm(config):
                 print(cmd)
                 run(cmd)
 
-def run(cmd):
+def run(cmd, working_dir=None):
     try: 
         p = subprocess.Popen(
             cmd,
             stdout = subprocess.PIPE, 
             stderr = subprocess.STDOUT,
             close_fds = True,
-            shell = True)
+            shell = True,
+            cwd = working_dir)
         out, err = p.communicate()
         if out:
             if (p.returncode != 0):

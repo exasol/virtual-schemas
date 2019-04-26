@@ -74,12 +74,16 @@ replace_hosts_with_ips_in_config() {
 }
 
 start_remote_dbs() {
+	pushd "$tmp"
 	"$docker_helper" --run "$config"
 	sleep 10
+	popd
 }
 
 cleanup_remote_dbs() {
+	pushd "$tmp"
 	"$docker_helper" --rm "$config"
+	popd
 }
 
 prepare_docker() {

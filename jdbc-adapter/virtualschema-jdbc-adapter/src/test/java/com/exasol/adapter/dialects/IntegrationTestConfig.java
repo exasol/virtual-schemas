@@ -86,7 +86,7 @@ public class IntegrationTestConfig {
     public String getImpalaJdbcPrefixPath() {
         return getProperty("impala", "jdbcDriverPath");
     }
-    public String getHiveJdbcPrefixPath() {
+    public String getHiveJdbcDriverPath() {
         return getProperty("hive", "jdbcDriverPath");
     }
 
@@ -94,12 +94,12 @@ public class IntegrationTestConfig {
         return getProperty("impala", "jdbcDriverJars");
     }
 
-    public List<String> getHiveJdbcJars() {
-        return getProperty("hive", "jdbcDriverJars");
-    }
-
     public String getHiveJdbcConnectionString() {
         return getProperty("hive", "connectionString");
+    }
+
+    public String getHiveDockerJdbcConnectionString() {
+        return getProperty("hive", "dockerConnectionString");
     }
 
     public boolean kerberosTestsRequested() {
