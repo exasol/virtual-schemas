@@ -46,12 +46,11 @@ This is an open source project which is officially supported by Exasol. For any 
 
 # Table of Contents
 
-## Information for users
+## Information for Users
 
-- [User Guide](doc/user-guide/user_guide.md)
-- [Deployment Guide](deploying_the_virtual_schema_adapter.md) 
-- Supported dialects:
-
+* [User Guide](doc/user-guide/user_guide.md)
+* [Deployment Guide](deploying_the_virtual_schema_adapter.md) 
+* Supported dialects:
     1. [EXASOL](doc/dialects/exasol.md)
     1. [Hive](doc/dialects/hive.md)
     1. [Impala](doc/dialects/impala.md)
@@ -64,10 +63,12 @@ This is an open source project which is officially supported by Exasol. For any 
     1. [PostgreSQL](doc/dialects/postgresql.md)
     1. Generic
 
-## Information for developers 
+## Information for Developers 
 
-- [Virtual Schema API Documentation](doc/development/virtual_schema_api.md)
-- [Developing and Testing an SQL Dialect](doc/development/developing_a_dialect.md)
-- [Remote Logging](doc/development/remote_logging.md)
-- [Remote Debugging](doc/development/remote_debugging.md)
-- [Troubleshooting](doc/development/troubleshooting.md)
+* [Virtual Schema API Documentation](doc/development/virtual_schema_api.md)
+* [Developing and Testing an SQL Dialect](doc/development/developing_a_dialect.md)
+* [Step-by-step guide to writing your own SQL dialect](step_by_step_guide_to_writing_your_own_dialect.md)
+* [Remote Logging](doc/development/remote_logging.md)
+* [Remote Debugging](doc/development/remote_debugging.md)
+* [Troubleshooting](doc/development/troubleshooting.md)
+* [Versioning](doc/versioning.md)
