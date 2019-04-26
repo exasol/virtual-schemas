@@ -5,16 +5,16 @@ general:
   debugAddress:            ''
   bucketFsUrl:             http://127.0.0.1:6594/default
   jdbcAdapterPath:         /buckets/bfsdefault/default/virtualschema-jdbc-adapter-dist-1.10.0.jar
-  additionalJDBCDriverDir: /var/tmp/vstest/drivers/
+  additionalJDBCDriverDir: /vagrant/drivers/
 
 exasol:
-  runIntegrationTests: true
+  runIntegrationTests: false
   address:  127.0.0.1:8899
   user:     sys
   password: exasol
 
 postgresql:
-  runIntegrationTests:    true
+  runIntegrationTests:    false
   jdbcDriverPath:         /buckets/bfsdefault/default/drivers/jdbc/POSTGRESQL/postgresql-42.2.5.jar;
   connectionString:       jdbc:postgresql://localhost:45432/postgres
   user:                   postgres
@@ -33,4 +33,12 @@ oracle:
   password:               loader
   dockerName:             myora
   dockerConnectionString: jdbc:oracle:thin:@DBHOST:1521/XE
-  instantclientDir:       /var/tmp/vstest/instantclient/
+  instantclientDir:       /vagrant/instantclient/
+
+hive:
+  runIntegrationTests:    true
+  jdbcDriverPath:         /buckets/bfsdefault/default/drivers/jdbc/HIVE/HiveJDBC41.jar;
+  connectionString:       jdbc:hive2://localhost:10000            
+  dockerName:             docker-hive_hive-server_1
+  dockerComposeRepo:      https://github.com/big-data-europe/docker-hive.git
+  dockerConnectionString: jdbc:hive2://DBHOST:10000

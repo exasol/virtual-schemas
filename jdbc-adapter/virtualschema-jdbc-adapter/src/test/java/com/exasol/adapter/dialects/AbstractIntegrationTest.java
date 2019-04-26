@@ -152,8 +152,10 @@ public class AbstractIntegrationTest {
         removeConnection(conn, connectionName);
         String sql = "CREATE CONNECTION " + connectionName;
         sql += " TO '" + connectionString + "'";
-        sql += " USER '" + user + "'";
-        sql += " IDENTIFIED BY '" + password + "'";
+        if (!user.equals("") && !password.equals("")) {
+            sql += " USER '" + user + "'";
+            sql += " IDENTIFIED BY '" + password + "'";
+        }
         conn.createStatement().execute(sql);
     }
 
