@@ -1,4 +1,4 @@
-package com.exasol.adapter.dialects;
+package com.exasol.adapter.dialects.postgresql;
 
 /**
  * This enumeration defines the behavior of PostgresSQL when it comes to dealing with unquoted identifiers (e.g. table

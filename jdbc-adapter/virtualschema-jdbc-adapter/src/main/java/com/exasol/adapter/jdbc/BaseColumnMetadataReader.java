@@ -168,7 +168,7 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
         return (columnTypeName == null) ? "" : columnTypeName;
     }
 
-    protected String readColumnName(final ResultSet columns) throws SQLException {
+    public String readColumnName(final ResultSet columns) throws SQLException {
         return columns.getString(NAME_COLUMN);
     }
 

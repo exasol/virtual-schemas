@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.oracle;
 
+import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -7,15 +8,16 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.Connection;
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionInformation;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
@@ -24,18 +26,21 @@ import com.exasol.adapter.sql.ScalarFunction;
  * This class implements the Oracle SQL dialect
  */
 public class OracleSqlDialect extends AbstractSqlDialect {
-    static final String ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY = "ORACLE_CAST_NUMBER_TO_DECIMAL";
-    static final String LOCAL_IMPORT_PROPERTY = "IS_LOCAL";
-    static final String ORACLE_IMPORT_PROPERTY = "IMPORT_FROM_ORA";
-    static final int ORACLE_MAGIC_NUMBER_SCALE = -127;
+    private static final String NAME = "ORACLE";
+    public static final String ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY = "ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE";
+    public static final String ORACLE_IMPORT_PROPERTY = "IMPORT_FROM_ORA";
+    public static final String ORACLE_CONNECTION_NAME_PROPERTY = "ORA_CONNECTION_NAME";
+    private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
+            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
+            SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, ORACLE_IMPORT_PROPERTY, ORACLE_CONNECTION_NAME_PROPERTY,
+            EXCLUDED_CAPABILITIES_PROPERTY, ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY, DEBUG_ADDRESS_PROPERTY,
+            LOG_LEVEL_PROPERTY);
 
     public OracleSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
         this.omitParenthesesMap.add(ScalarFunction.SYSDATE);
         this.omitParenthesesMap.add(ScalarFunction.SYSTIMESTAMP);
     }
-
-    private static final String NAME = "ORACLE";
 
     public static String getPublicName() {
         return NAME;
@@ -91,18 +96,11 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     private DataType getOracleNumberTypeFromProperty() {
-        final Pattern pattern = Pattern.compile("\\s*(\\d+)\\s*,\\s*(\\d+)\\s*");
         final String oraclePrecisionAndScale = this.properties.get(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY);
-        final Matcher matcher = pattern.matcher(oraclePrecisionAndScale);
-        if (matcher.matches()) {
-            final int precision = Integer.parseInt(matcher.group(1));
-            final int scale = Integer.parseInt(matcher.group(2));
-            return DataType.createDecimal(precision, scale);
-        } else {
-            throw new IllegalArgumentException("Unable to parse adapter property "
-                    + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " value \"" + oraclePrecisionAndScale
-                    + " into a number precison and scale. The required format is \"<precsion>.<scale>\", where both are integer numbers.");
-        }
+        final List<String> precisionAndScaleList = Arrays.stream(oraclePrecisionAndScale.split(",")).map(String::trim)
+                .collect(Collectors.toList());
+        return DataType.createDecimal(Integer.valueOf(precisionAndScaleList.get(0)),
+                Integer.valueOf(precisionAndScaleList.get(1)));
     }
 
     @Override
@@ -122,14 +120,11 @@ public class OracleSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuote(final String identifier) {
-        // If identifier contains double quotation marks ", it needs to be escaped by
-        // another double quotation mark. E.g. "a""b" is the identifier a"b in the db.
         return "\"" + identifier.replace("\"", "\"\"") + "\"";
     }
 
     @Override
     public String applyQuoteIfNeeded(final String identifier) {
-        // This is a simplified rule, which quotes all identifiers although not needed
         return applyQuote(identifier);
     }
 
@@ -178,12 +173,45 @@ public class OracleSqlDialect extends AbstractSqlDialect {
      * @return import type
      */
     public ImportType getImportType() {
-        if (this.properties.isEnabled(LOCAL_IMPORT_PROPERTY)) {
+        if (this.properties.isEnabled(IS_LOCAL_PROPERTY)) {
             return ImportType.LOCAL;
         } else if (this.properties.isEnabled(ORACLE_IMPORT_PROPERTY)) {
             return ImportType.ORA;
         } else {
             return ImportType.JDBC;
+        }
+    }
+
+    @Override
+    protected RemoteMetadataReader createRemoteMetadataReader() {
+        return new OracleMetadataReader(this.connection, this.properties);
+    }
+
+    @Override
+    public void validateProperties() throws PropertyValidationException {
+        super.validateDialectName(getPublicName());
+        super.validateProperties();
+        super.checkImportPropertyConsistency(ORACLE_IMPORT_PROPERTY, ORACLE_CONNECTION_NAME_PROPERTY);
+        super.validateBooleanProperty(ORACLE_IMPORT_PROPERTY);
+        validateCastNumberToDecimalProperty();
+    }
+
+    @Override
+    protected List<String> getSupportedProperties() {
+        return SUPPORTED_PROPERTIES;
+    }
+
+    private void validateCastNumberToDecimalProperty() throws PropertyValidationException {
+        if (this.properties.containsKey(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY)) {
+            final Pattern pattern = Pattern.compile("\\s*(\\d+)\\s*,\\s*(\\d+)\\s*");
+            final String oraclePrecisionAndScale = this.properties.get(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY);
+            final Matcher matcher = pattern.matcher(oraclePrecisionAndScale);
+            if (!matcher.matches()) {
+                throw new PropertyValidationException("Unable to parse adapter property "
+                        + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " value \"" + oraclePrecisionAndScale
+                        + " into a number precison and scale. The required format is \"<precsion>.<scale>\", where "
+                        + "both are integer numbers.");
+            }
         }
     }
 }

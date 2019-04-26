@@ -1,18 +1,25 @@
 package com.exasol.adapter.dialects.redshift;
 
+import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,19 +28,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.redshift.RedshiftMetadataReader;
-import com.exasol.adapter.dialects.redshift.RedshiftSqlDialect;
 
 @ExtendWith(MockitoExtension.class)
 class RedshiftSqlDialectTest {
     private SqlDialect dialect;
     @Mock
     private Connection connectionMock;
+    private Map<String, String> rawProperties;
 
     @BeforeEach
     void beforeEach() {
         this.dialect = new RedshiftSqlDialect(this.connectionMock, AdapterProperties.emptyProperties());
+        this.rawProperties = new HashMap<>();
     }
 
     @Test
@@ -71,5 +79,39 @@ class RedshiftSqlDialectTest {
     void testMetadataReaderClass() {
         assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
                 instanceOf(RedshiftMetadataReader.class));
+    }
+
+    @Test
+    void testValidateCatalogProperty() throws PropertyValidationException {
+        setMandatoryProperties("REDSHIFT");
+        this.rawProperties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
+        final SqlDialect sqlDialect = new RedshiftSqlDialect(null, adapterProperties);
+        sqlDialect.validateProperties();
+    }
+
+    @Test
+    void testValidateDialectNameProperty() {
+        setMandatoryProperties("ORACLE");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
+        final SqlDialect sqlDialect = new RedshiftSqlDialect(null, adapterProperties);
+        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
+                sqlDialect::validateProperties);
+        MatcherAssert.assertThat(exception.getMessage(), containsString(
+                "The dialect REDSHIFT cannot have the name ORACLE. You specified the wrong dialect name or created the wrong dialect class."));
+    }
+
+    @Test
+    void testValidateSchemaProperty() throws PropertyValidationException {
+        setMandatoryProperties("REDSHIFT");
+        this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
+        final SqlDialect sqlDialect = new RedshiftSqlDialect(null, adapterProperties);
+        sqlDialect.validateProperties();
+    }
+
+    private void setMandatoryProperties(final String sqlDialectProperty) {
+        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
+        this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN");
     }
 }

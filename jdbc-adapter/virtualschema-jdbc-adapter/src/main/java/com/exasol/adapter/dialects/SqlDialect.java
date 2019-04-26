@@ -57,6 +57,13 @@ public interface SqlDialect {
     }
 
     /**
+     * This enumeration specifies different exception handling strategies
+     */
+    public enum ExceptionHandlingMode {
+        IGNORE_INVALID_VIEWS, NONE
+    }
+
+    /**
      * Define whether the remote source supports catalogs and if it does, whether is supports a single "pseudo" catalog
      * or multiple catalogs.
      *
@@ -250,4 +257,11 @@ public interface SqlDialect {
      * @throws SQLException if the metadata of the query result cannot be read from the remote data source
      */
     public String describeQueryResultColumns(final String query) throws SQLException;
+
+    /**
+     * Validate user-defined properties and throw exception if they are incorrect
+     * 
+     * @throws PropertyValidationException if some properties are used incorrectly
+     */
+    public void validateProperties() throws PropertyValidationException;
 }

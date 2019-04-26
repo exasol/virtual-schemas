@@ -201,6 +201,11 @@ class SqlDialectTest {
             }
         }
 
+        @Override
+        protected List<String> getSupportedProperties() {
+            return null;
+        }
+
         public static String getPublicName() {
             return "TEST";
         }
