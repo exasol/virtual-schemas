@@ -12,6 +12,8 @@ import com.exasol.adapter.AdapterProperties;
  * @see BaseColumnMetadataReader
  */
 public abstract class AbstractMetadataReader implements MetadataReader {
+    static final String ANY_CATALOG_FILTER = null;
+    static final String ANY_SCHEMA_FILTER = null;
     protected final Connection connection;
     protected final AdapterProperties properties;
 

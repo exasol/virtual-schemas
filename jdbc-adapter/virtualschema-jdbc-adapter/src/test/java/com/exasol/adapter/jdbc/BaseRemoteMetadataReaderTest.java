@@ -184,7 +184,7 @@ class BaseRemoteMetadataReaderTest {
     @Test
     void testGetCatalogNameFilterDefaultsToAny() {
         final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(null, AdapterProperties.emptyProperties());
-        assertThat(reader.getCatalogNameFilter(), equalTo(MetadataReader.ANY_CATALOG_FILTER));
+        assertThat(reader.getCatalogNameFilter(), equalTo(AbstractMetadataReader.ANY_CATALOG_FILTER));
     }
 
     @Test
@@ -200,7 +200,7 @@ class BaseRemoteMetadataReaderTest {
     @Test
     void testGetSchemaNameFilterDefaultsToAny() {
         final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(null, AdapterProperties.emptyProperties());
-        assertThat(reader.getSchemaNameFilter(), equalTo(MetadataReader.ANY_CATALOG_FILTER));
+        assertThat(reader.getSchemaNameFilter(), equalTo(AbstractMetadataReader.ANY_CATALOG_FILTER));
     }
 
     @Test
@@ -211,5 +211,23 @@ class BaseRemoteMetadataReaderTest {
         final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(null,
                 new AdapterProperties(rawProperties));
         assertThat(reader.getSchemaNameFilter(), equalTo(expectedSchema));
+    }
+
+    // Don't mix this test up with the one for filtered tables. In the refresh request users can limit the tables they
+    // want refreshed. This is a different mechanism that coexists with the table filter via property. Both have to
+    // work together.
+    @Test
+    void testReadRemoteDataSkippingForSelectedTablesOnly() throws SQLException {
+        mockConnection();
+        mockTableA();
+        mockGetTableCalls();
+        mockSupportingMetadata();
+        final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(this.connectionMock,
+                AdapterProperties.emptyProperties());
+        final SchemaMetadata metadata = reader.readRemoteSchemaMetadata(Arrays.asList(TABLE_A));
+        final List<TableMetadata> tables = metadata.getTables();
+        final TableMetadata tableAMetadata = tables.get(0);
+        assertAll(() -> assertThat(tables, iterableWithSize(1)),
+                () -> assertThat(tableAMetadata.getName(), equalTo(TABLE_A)));
     }
 }

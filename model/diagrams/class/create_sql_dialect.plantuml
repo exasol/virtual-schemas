@@ -1,31 +1,32 @@
 @startuml
+!include ../clean.skin
 
-class JdbcAdapter {
-+createConnection(connection : Connection, properties: AdapterProperties, dialectRegistry : SqlDialectRegistry)
+class JdbcAdapter
+
+class SqlDialectFactory {
+    + SqlDialectFactory(connection : Connection, properties: AdapterProperties, dialectRegistry : SqlDialectRegistry)
+    + createSqlDialect(dialectName : String) : SqlDialect
 }
-
-class SqlDialectFactory
-
-interface RemoteMetadataReader
-
-class BaseRemoteMetadataReader
-
-class TeradataMetadataReader
 
 interface SqlDialect
 
-abstract class AbstractSqlDialect
+abstract class AbstractSqlDialect {
+    + AbstractSqlDialect(connection: Connection, properties : AdapterProperties)
+}
 
-class TeradataSqldialect
+class PostgreSQLSqlDialect
 
-JdbcAdapter -d--> SqlDialectFactory
-BaseRemoteMetadataReader .u..|> RemoteMetadataReader
-TeradataMetadataReader -u--|>  BaseRemoteMetadataReader
-SqlDialectFactory -r--> BaseRemoteMetadataReader : create connection
-SqlDialectFactory -r--> SqlDialect : create metadata reader
-AbstractSqlDialect .u..|> SqlDialect
-AbstractSqlDialect -l--> BaseRemoteMetadataReader
-TeradataSqldialect -l--> TeradataMetadataReader : @Override
-TeradataSqldialect -u--|> AbstractSqlDialect
+JdbcAdapter -d-> SqlDialectFactory
+note on link
+    inject JDBC connection and
+    user-defined properties
+end note
+SqlDialectFactory -d-> SqlDialect : <<create>>
+note on link
+    inject JDBC connection and
+    user-defined properties
+end note
+AbstractSqlDialect .u.|> SqlDialect
+PostgreSQLSqlDialect -u-|> AbstractSqlDialect
 
 @enduml

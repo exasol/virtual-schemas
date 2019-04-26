@@ -7,7 +7,7 @@ import com.exasol.adapter.metadata.SchemaMetadata;
 /**
  * Common interface for all remote metadata readers independently of the SQL dialect.
  */
-public interface RemoteMetadataReader {
+public interface RemoteMetadataReader extends MetadataReader {
     /**
      * Read schema metadata from the remote data source.
      *

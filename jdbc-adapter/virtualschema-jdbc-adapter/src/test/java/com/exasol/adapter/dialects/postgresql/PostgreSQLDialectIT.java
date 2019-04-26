@@ -10,8 +10,7 @@ import java.util.*;
 
 import org.junit.Assume;
 import org.junit.Rule;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.rules.ExpectedException;
 
@@ -21,8 +20,8 @@ import com.exasol.jdbc.DataException;
 
 /**
  * Integration test for the PostgreSQL SQL dialect
- *
  */
+@Tag("integration")
 @ExtendWith(IntegrationTestConfigurationCondition.class)
 class PostgreSQLDialectIT extends AbstractIntegrationTest {
     private static final String VIRTUAL_SCHEMA = "PG";

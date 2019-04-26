@@ -2,8 +2,7 @@ package com.exasol.adapter.jdbc;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -21,7 +20,7 @@ public class BaseTableMetadataReader implements TableMetadataReader {
     static final String REMARKS_COLUMN = "REMARKS";
     static final String DEFAULT_TABLE_ADAPTER_NOTES = "";
     private static final Logger LOGGER = Logger.getLogger(BaseTableMetadataReader.class.getName());
-    private static final Pattern UNQUOTED_IDENTIFIER_PATTERN = Pattern.compile("^[a-zA-Z]\\w*");
+    private static final Pattern UNQUOTED_IDENTIFIER_PATTERN = Pattern.compile("^[a-zA-Z]\\w*$");
     private final ColumnMetadataReader columnMetadataReader;
     protected final AdapterProperties properties;
 
@@ -29,6 +28,7 @@ public class BaseTableMetadataReader implements TableMetadataReader {
      * Create a new instance of a {@link TableMetadata}
      *
      * @param columnMetadataReader reader to be used to map the tables columns
+     * @param properties           user-defined adapter properties
      */
     public BaseTableMetadataReader(final ColumnMetadataReader columnMetadataReader,
             final AdapterProperties properties) {
@@ -37,18 +37,19 @@ public class BaseTableMetadataReader implements TableMetadataReader {
     }
 
     @Override
-    public List<TableMetadata> mapTables(final ResultSet remoteTables) throws SQLException {
+    public List<TableMetadata> mapTables(final ResultSet remoteTables, final Optional<List<String>> selectedTables)
+            throws SQLException {
         final List<TableMetadata> translatedTables = new ArrayList<>();
         while (remoteTables.next()) {
-            mapOrSkipTable(remoteTables, translatedTables);
+            mapOrSkipTable(remoteTables, translatedTables, selectedTables);
         }
         return translatedTables;
     }
 
-    protected void mapOrSkipTable(final ResultSet remoteTables, final List<TableMetadata> translatedTables)
-            throws SQLException {
+    protected void mapOrSkipTable(final ResultSet remoteTables, final List<TableMetadata> translatedTables,
+            final Optional<List<String>> selectedTables) throws SQLException {
         final String tableName = readTableName(remoteTables);
-        if (isTableIncludedByMapping(tableName)) {
+        if (isTableIncludedByMapping(tableName) && isTableSelected(tableName, selectedTables)) {
             mapOrSkipSupportedTable(remoteTables, translatedTables, tableName);
         } else {
             skipUnsupportedTable(tableName);
@@ -58,6 +59,10 @@ public class BaseTableMetadataReader implements TableMetadataReader {
     @Override
     public boolean isTableIncludedByMapping(final String tableName) {
         return true;
+    }
+
+    protected boolean isTableSelected(final String tableName, final Optional<List<String>> selectedTables) {
+        return !selectedTables.isPresent() || selectedTables.get().contains(tableName);
     }
 
     protected void mapOrSkipSupportedTable(final ResultSet remoteTables, final List<TableMetadata> translatedTables,

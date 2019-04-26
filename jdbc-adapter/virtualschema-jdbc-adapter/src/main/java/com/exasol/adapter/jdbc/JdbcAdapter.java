@@ -39,7 +39,6 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
         registerAdapterForSqlDialect(adapter, "EXASOL"); // FIXME: replace this hard-coded registration
         registerAdapterForSqlDialect(adapter, "GENERIC"); // FIXME: replace this hard-coded registration
         registerAdapterForSqlDialect(adapter, "IMPALA"); // FIXME: replace this hard-coded registration
-        registerAdapterForSqlDialect(adapter, "MYSQL"); // FIXME: replace this hard-coded registration
         registerAdapterForSqlDialect(adapter, "ORACLE"); // FIXME: replace this hard-coded registration
         registerAdapterForSqlDialect(adapter, "POSTGRESQL"); // FIXME: replace this hard-coded registration
         registerAdapterForSqlDialect(adapter, "REDSHIFT"); // FIXME: replace this hard-coded registration
@@ -187,6 +186,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     @Override
     public GetCapabilitiesResponse getCapabilities(final ExaMetadata metadata, final GetCapabilitiesRequest request)
             throws AdapterException {
+        LOGGER.fine(() -> "Received request list the adapter's capabilites.");
         final AdapterProperties properties = getPropertiesFromRequest(request);
         final Connection connection = null;
         final SqlDialect dialect = createDialect(connection, properties);
@@ -201,7 +201,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     }
 
     private Capabilities parseExcludedCapabilities(final String excludedCapabilitiesStr) {
-        LOGGER.info(() -> "Excluded Capabilities: "
+        LOGGER.config(() -> "Excluded Capabilities: "
                 + (excludedCapabilitiesStr.isEmpty() ? "none" : excludedCapabilitiesStr));
         final Capabilities.Builder builder = Capabilities.builder();
         for (String capability : excludedCapabilitiesStr.split(",")) {

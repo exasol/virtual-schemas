@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.sql.*;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +49,7 @@ class BaseTableMetadataReaderTest {
         mockTableWithColumnsOfType(this.tablesMock, this.columnMetadataReaderMock, TABLE_B, DataType.createDate());
         final TableMetadataReader reader = new BaseTableMetadataReader(this.columnMetadataReaderMock,
                 AdapterProperties.emptyProperties());
-        final List<TableMetadata> tables = reader.mapTables(this.tablesMock);
+        final List<TableMetadata> tables = reader.mapTables(this.tablesMock, Optional.empty());
         final TableMetadata tableA = tables.get(0);
         final TableMetadata tableB = tables.get(1);
         assertAll(() -> assertThat(tables, iterableWithSize(2)), //
@@ -117,7 +118,7 @@ class BaseTableMetadataReaderTest {
         mockTableWithColumnsOfType(this.tablesMock, this.columnMetadataReaderMock, TABLE_A, DataType.createBool());
         final TableMetadataReader reader = new BaseTableMetadataReader(this.columnMetadataReaderMock,
                 AdapterProperties.emptyProperties());
-        final List<TableMetadata> tables = reader.mapTables(this.tablesMock);
+        final List<TableMetadata> tables = reader.mapTables(this.tablesMock, Optional.empty());
         final TableMetadata tableA = tables.get(0);
         assertAll(() -> assertThat(tables, iterableWithSize(1)), //
                 () -> assertThat(tableA.getName(), equalTo(TABLE_A)));

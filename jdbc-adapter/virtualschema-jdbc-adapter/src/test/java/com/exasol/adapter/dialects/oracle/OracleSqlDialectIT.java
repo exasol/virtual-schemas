@@ -11,8 +11,7 @@ import java.sql.Date;
 import java.util.*;
 
 import org.junit.Assume;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
@@ -23,6 +22,7 @@ import com.exasol.adapter.dialects.IntegrationTestConfigurationCondition;
  *
  * TODO Add tests for data types TODO Test Expanding of SELECT * if elements of select list require casting
  */
+@Tag("integration")
 @ExtendWith(IntegrationTestConfigurationCondition.class)
 class OracleSqlDialectIT extends AbstractIntegrationTest {
     private static final String VIRTUAL_SCHEMA_JDBC = "VS_ORACLE_JDBC";

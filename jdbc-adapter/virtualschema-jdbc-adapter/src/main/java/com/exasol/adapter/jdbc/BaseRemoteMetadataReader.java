@@ -5,6 +5,7 @@ import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.SUPPORTED_TA
 
 import java.sql.*;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterProperties;
@@ -79,23 +80,25 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
     @Override
     public SchemaMetadata readRemoteSchemaMetadata() {
         try {
-            final DatabaseMetaData remoteMetadata = this.connection.getMetaData();
             final String adapterNotes = SchemaAdapterNotesJsonConverter.getInstance()
                     .convertToJson(getSchemaAdapterNotes());
-            final List<TableMetadata> tables = extractTableMetadata(remoteMetadata);
+            final DatabaseMetaData remoteMetadata = this.connection.getMetaData();
+            final List<TableMetadata> tables = extractTableMetadata(remoteMetadata, Optional.empty());
             return new SchemaMetadata(adapterNotes, tables);
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException("Unable to read remote schema metadata.", exception);
+            throw new RemoteMetadataReaderException(
+                    "Unable to read remote schema metadata. SQL error: " + exception.getMessage(), exception);
         }
     }
 
-    private List<TableMetadata> extractTableMetadata(final DatabaseMetaData remoteMetadata) throws SQLException {
+    private List<TableMetadata> extractTableMetadata(final DatabaseMetaData remoteMetadata,
+            final Optional<List<String>> selectedTables) throws SQLException {
         final String catalogName = getCatalogNameFilter();
         final String schemaName = getSchemaNameFilter();
         logTablesScan(catalogName, schemaName);
         try (final ResultSet remoteTables = remoteMetadata.getTables(catalogName, schemaName, ANY_TABLE,
                 SUPPORTED_TABLE_TYPES.toArray(new String[0]))) {
-            return mapTables(remoteTables);
+            return mapTables(remoteTables, selectedTables);
         }
     }
 
@@ -121,8 +124,9 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
         });
     }
 
-    private List<TableMetadata> mapTables(final ResultSet remoteTables) throws SQLException {
-        return this.tableMetadataReader.mapTables(remoteTables);
+    private List<TableMetadata> mapTables(final ResultSet remoteTables, final Optional<List<String>> selectedTables)
+            throws SQLException {
+        return this.tableMetadataReader.mapTables(remoteTables, selectedTables);
     }
 
     @Override
@@ -152,8 +156,15 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
     }
 
     @Override
-    public SchemaMetadata readRemoteSchemaMetadata(final List<String> tables) {
-        // FIXME Auto-generated method stub
-        throw new UnsupportedOperationException("Filtering tables not implemented.");
+    public SchemaMetadata readRemoteSchemaMetadata(final List<String> selectedTables) {
+        try {
+            final DatabaseMetaData remoteMetadata = this.connection.getMetaData();
+            final String adapterNotes = SchemaAdapterNotesJsonConverter.getInstance()
+                    .convertToJson(getSchemaAdapterNotes());
+            final List<TableMetadata> tables = extractTableMetadata(remoteMetadata, Optional.of(selectedTables));
+            return new SchemaMetadata(adapterNotes, tables);
+        } catch (final SQLException exception) {
+            throw new RemoteMetadataReaderException("Unable to read remote schema metadata.", exception);
+        }
     }
 }
