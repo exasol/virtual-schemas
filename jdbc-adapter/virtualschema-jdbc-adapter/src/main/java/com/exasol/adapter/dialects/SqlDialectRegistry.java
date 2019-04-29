@@ -79,9 +79,8 @@ public final class SqlDialectRegistry {
      * @return <code>true</code> if the dialect is supported
      */
     public boolean isSupported(final String wantedDialectName) {
-        return this.supportedDialects.stream().anyMatch(dialect -> {
-            return getNameForDialectClass(dialect).equalsIgnoreCase(wantedDialectName);
-        });
+        return this.supportedDialects.stream()
+                .anyMatch(dialect -> getNameForDialectClass(dialect).equalsIgnoreCase(wantedDialectName));
     }
 
     private String getNameForDialectClass(final Class<? extends SqlDialect> dialect) {
@@ -109,7 +108,7 @@ public final class SqlDialectRegistry {
      */
     public String getDialectsString() {
         return this.supportedDialects.stream() //
-                .map(dialect -> getNameForDialectClass(dialect)) //
+                .map(this::getNameForDialectClass) //
                 .sorted() //
                 .collect(Collectors.joining(", "));
     }

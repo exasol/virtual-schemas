@@ -165,7 +165,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         for (final SqlNode node : function.getArguments()) {
             argumentsSql.add(node.accept(this));
         }
-        if (function.getFunctionName().equalsIgnoreCase("count") && (argumentsSql.size() == 0)) {
+        if (function.getFunctionName().equalsIgnoreCase("count") && argumentsSql.isEmpty()) {
             argumentsSql.add("*");
         }
         String distinctSql = "";
@@ -231,7 +231,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
                 return "(" + realFunctionName + argumentsSql.get(0) + ")";
             }
         }
-        if ((argumentsSql.size() == 0) && this.dialect.omitParentheses(function.getFunction())) {
+        if (argumentsSql.isEmpty() && this.dialect.omitParentheses(function.getFunction())) {
             return functionNameInSourceSystem;
         } else {
             return functionNameInSourceSystem + "(" + Joiner.on(", ").join(argumentsSql) + ")";
@@ -330,24 +330,20 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
 
     @Override
     public String visit(final SqlLiteralTimestamp literal) {
-        // TODO Allow dialect to modify behavior
-        return "TIMESTAMP '" + literal.getValue().toString() + "'";
+        return "TIMESTAMP '" + literal.getValue() + "'";
     }
 
     @Override
     public String visit(final SqlLiteralTimestampUtc literal) {
-        // TODO Allow dialect to modify behavior
-        return "TIMESTAMP '" + literal.getValue().toString() + "'";
+        return "TIMESTAMP '" + literal.getValue() + "'";
     }
 
     @Override
     public String visit(final SqlLiteralInterval literal) {
-        // TODO Allow dialect to modify behavior
         if (literal.getDataType().getIntervalType() == DataType.IntervalType.YEAR_TO_MONTH) {
-            return "INTERVAL '" + literal.getValue().toString() + "' YEAR (" + literal.getDataType().getPrecision()
-                    + ") TO MONTH";
+            return "INTERVAL '" + literal.getValue() + "' YEAR (" + literal.getDataType().getPrecision() + ") TO MONTH";
         } else {
-            return "INTERVAL '" + literal.getValue().toString() + "' DAY (" + literal.getDataType().getPrecision()
+            return "INTERVAL '" + literal.getValue() + "' DAY (" + literal.getDataType().getPrecision()
                     + ") TO SECOND (" + literal.getDataType().getIntervalFraction() + ")";
         }
     }
@@ -361,7 +357,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
             String elementSql = orderBy.getExpressions().get(i).accept(this);
             final boolean shallNullsBeAtTheEnd = orderBy.nullsLast().get(i);
             final boolean isAscending = orderBy.isAscending().get(i);
-            if (isAscending == false) {
+            if (!isAscending) {
                 elementSql += " DESC";
             }
             if (shallNullsBeAtTheEnd != nullsAreAtEndByDefault(isAscending, this.dialect.getDefaultNullSorting())) {
@@ -388,7 +384,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
             if (isAscending) {
                 return (defaultNullSorting == SqlDialect.NullSorting.NULLS_SORTED_HIGH);
             } else {
-                return !(defaultNullSorting == SqlDialect.NullSorting.NULLS_SORTED_HIGH);
+                return (defaultNullSorting != SqlDialect.NullSorting.NULLS_SORTED_HIGH);
             }
         }
     }
