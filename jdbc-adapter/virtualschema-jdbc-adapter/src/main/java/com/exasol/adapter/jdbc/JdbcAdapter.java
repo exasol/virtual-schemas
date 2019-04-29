@@ -38,6 +38,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
         registerAdapterForSqlDialect(adapter, "DB2"); // FIXME: replace this hard-coded registration
         registerAdapterForSqlDialect(adapter, "EXASOL"); // FIXME: replace this hard-coded registration
         registerAdapterForSqlDialect(adapter, "GENERIC"); // FIXME: replace this hard-coded registration
+        registerAdapterForSqlDialect(adapter, "HIVE"); // FIXME: replace this hard-coded registration
         registerAdapterForSqlDialect(adapter, "IMPALA"); // FIXME: replace this hard-coded registration
         registerAdapterForSqlDialect(adapter, "ORACLE"); // FIXME: replace this hard-coded registration
         registerAdapterForSqlDialect(adapter, "POSTGRESQL"); // FIXME: replace this hard-coded registration
