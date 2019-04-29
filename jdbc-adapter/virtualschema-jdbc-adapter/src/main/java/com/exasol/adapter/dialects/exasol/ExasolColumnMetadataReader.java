@@ -15,6 +15,10 @@ public class ExasolColumnMetadataReader extends BaseColumnMetadataReader {
     static final int EXASOL_INTERVAL_YEAR_TO_MONTHS = -103;
     static final int EXASOL_GEOMETRY = 123;
     static final int EXASOL_TIMESTAMP = 124;
+    private static final int DEFAULT_INTERVAL_DAY_TO_SECOND_FRACTION = 3;
+    private static final int DEFAULT_INTERVAL_DAY_TO_SECOND_PRECISION = 2;
+    private static final int DEFAULT_INTERVAL_YEAR_TO_MONTH_PRECISION = 2;
+    private static final int DEFAULT_SPACIAL_REFERENCE_SYSTEM_IDENTIFIER = 3857;
 
     /**
      * Create a new instance of a {@link ExasolColumnMetadataReader}
@@ -30,11 +34,12 @@ public class ExasolColumnMetadataReader extends BaseColumnMetadataReader {
     public DataType mapJdbcType(final JdbcTypeDescription jdbcTypeDescription) {
         switch (jdbcTypeDescription.getJdbcType()) {
         case EXASOL_INTERVAL_DAY_TO_SECONDS:
-            return DataType.createIntervalDaySecond(2, 3);
+            return DataType.createIntervalDaySecond(DEFAULT_INTERVAL_DAY_TO_SECOND_PRECISION,
+                    DEFAULT_INTERVAL_DAY_TO_SECOND_FRACTION);
         case EXASOL_INTERVAL_YEAR_TO_MONTHS:
-            return DataType.createIntervalYearMonth(2);
+            return DataType.createIntervalYearMonth(DEFAULT_INTERVAL_YEAR_TO_MONTH_PRECISION);
         case EXASOL_GEOMETRY:
-            return DataType.createGeometry(3857);
+            return DataType.createGeometry(DEFAULT_SPACIAL_REFERENCE_SYSTEM_IDENTIFIER);
         case EXASOL_TIMESTAMP:
             return DataType.createTimestamp(true);
         default:

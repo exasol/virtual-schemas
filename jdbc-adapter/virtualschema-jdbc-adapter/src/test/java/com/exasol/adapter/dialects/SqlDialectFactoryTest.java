@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.hamcrest.junit.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.sql.Connection;
 import java.util.Collections;
@@ -39,8 +40,20 @@ class SqlDialectFactoryTest {
     }
 
     @Test
-    void createSqlDialect() {
+    void testCreateSqlDialect() {
         assertThat(this.sqlDialectFactory.createSqlDialect(DIALECT_NAME), instanceOf(DummySqlDialect.class));
+    }
+
+    @Test
+    void testCreateDialectThrowsExceptionOnMissingConnection() {
+        final SqlDialectFactory factory = new SqlDialectFactory(null, this.sqlDialectRegistry, this.dummyProperties);
+        assertThrows(SqlDialectFactoryException.class, () -> factory.createSqlDialect(DIALECT_NAME));
+    }
+
+    @Test
+    void testCreateDialectThrowsExceptionOnMissingProperties() {
+        final SqlDialectFactory factory = new SqlDialectFactory(this.mockConnection, this.sqlDialectRegistry, null);
+        assertThrows(SqlDialectFactoryException.class, () -> factory.createSqlDialect(DIALECT_NAME));
     }
 
     @Test

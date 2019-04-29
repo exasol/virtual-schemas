@@ -9,7 +9,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.jdbc.*;
 
 /**
- * This class handles the specifics of mapping PostgreSQL table metadata to Exasol
+ * This class handles the specifics of mapping PostgreSQL table metadata to Exasol.
  */
 public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
     static final Logger LOGGER = Logger.getLogger(PostgreSQLTableMetadataReader.class.getName());
