@@ -6,7 +6,6 @@ import java.util.List;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.*;
-import com.google.common.base.Joiner;
 
 /**
  * This class has the logic to generate SQL queries based on a graph of {@link SqlNode} elements. It uses the visitor
@@ -103,7 +102,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
                 selectElement.add(node.accept(this));
             }
         }
-        return Joiner.on(", ").join(selectElement);
+        return String.join(", ", selectElement);
     }
 
     @Override
@@ -156,7 +155,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         for (final SqlNode node : groupBy.getExpressions()) {
             selectElement.add(node.accept(this));
         }
-        return Joiner.on(", ").join(selectElement);
+        return String.join(", ", selectElement);
     }
 
     @Override
@@ -176,7 +175,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         if (this.dialect.getAggregateFunctionAliases().containsKey(function.getFunction())) {
             functionNameInSourceSystem = this.dialect.getAggregateFunctionAliases().get(function.getFunction());
         }
-        return functionNameInSourceSystem + "(" + distinctSql + Joiner.on(", ").join(argumentsSql) + ")";
+        return functionNameInSourceSystem + "(" + distinctSql + String.join(", ", argumentsSql) + ")";
     }
 
     @Override
@@ -234,7 +233,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         if (argumentsSql.isEmpty() && this.dialect.omitParentheses(function.getFunction())) {
             return functionNameInSourceSystem;
         } else {
-            return functionNameInSourceSystem + "(" + Joiner.on(", ").join(argumentsSql) + ")";
+            return functionNameInSourceSystem + "(" + String.join(", ", argumentsSql) + ")";
         }
     }
 
@@ -366,7 +365,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
             }
             sqlOrderElement.add(elementSql);
         }
-        return "ORDER BY " + Joiner.on(", ").join(sqlOrderElement);
+        return "ORDER BY " + String.join(", ", sqlOrderElement);
     }
 
     /**
@@ -395,7 +394,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         for (final SqlNode node : predicate.getAndedPredicates()) {
             operandsSql.add(node.accept(this));
         }
-        return "(" + Joiner.on(" AND ").join(operandsSql) + ")";
+        return "(" + String.join(" AND ", operandsSql) + ")";
     }
 
     @Override
@@ -415,7 +414,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         for (final SqlNode node : predicate.getInArguments()) {
             argumentsSql.add(node.accept(this));
         }
-        return predicate.getExpression().accept(this) + " IN (" + Joiner.on(", ").join(argumentsSql) + ")";
+        return predicate.getExpression().accept(this) + " IN (" + String.join(", ", argumentsSql) + ")";
     }
 
     @Override
@@ -459,7 +458,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         for (final SqlNode node : predicate.getOrPredicates()) {
             operandsSql.add(node.accept(this));
         }
-        return "(" + Joiner.on(" OR ").join(operandsSql) + ")";
+        return "(" + String.join(" OR ", operandsSql) + ")";
     }
 
     @Override
@@ -472,5 +471,4 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         return predicate.getExpression().accept(this) + " IS NOT NULL";
 
     }
-
 }
