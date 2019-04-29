@@ -63,11 +63,6 @@ public class DummySqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String applyQuoteIfNeeded(final String identifier) {
-        return null;
-    }
-
-    @Override
     public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
         return false;
     }

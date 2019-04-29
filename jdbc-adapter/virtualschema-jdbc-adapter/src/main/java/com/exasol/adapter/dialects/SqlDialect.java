@@ -106,13 +106,6 @@ public interface SqlDialect {
     public String applyQuote(String identifier);
 
     /**
-     * @param identifier The name of an identifier (table or column).
-     * @return the quoted identifier, if this name requires quoting, or the unquoted identifier, if no quoting is
-     *         required.
-     */
-    public String applyQuoteIfNeeded(String identifier);
-
-    /**
      * Check whether the dialect expects table identifiers to be qualified with the catalog
      *
      * <p>
@@ -260,7 +253,7 @@ public interface SqlDialect {
 
     /**
      * Validate user-defined properties and throw exception if they are incorrect
-     * 
+     *
      * @throws PropertyValidationException if some properties are used incorrectly
      */
     public void validateProperties() throws PropertyValidationException;

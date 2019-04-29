@@ -45,8 +45,8 @@ class ExasolSqlDialectTest {
             "1a, \"1a\", \"1a\"", //
             "'a\"b', \"a\"\"b\"" })
     @ParameterizedTest
-    void testApplyQuoteIfNeeded(final String identifier, final String expectedQuotingResult) {
-        assertThat(this.dialect.applyQuoteIfNeeded(identifier), equalTo(expectedQuotingResult));
+    void testApplyQuote(final String identifier, final String expectedQuotingResult) {
+        assertThat(this.dialect.applyQuote(identifier), equalTo(expectedQuotingResult));
     }
 
     @Test
