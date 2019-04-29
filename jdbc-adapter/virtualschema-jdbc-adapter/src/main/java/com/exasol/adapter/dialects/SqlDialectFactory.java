@@ -36,16 +36,6 @@ public class SqlDialectFactory {
      * @return SQL dialect adapter
      */
     public SqlDialect createSqlDialect(final String dialectName) {
-        if (this.connection == null) {
-            throw new SqlDialectFactoryException(
-                    "Missing database connection when trying to create an adapter for SQL dialect \"" + dialectName
-                            + "\".");
-        }
-        if (this.properties == null) {
-            throw new SqlDialectFactoryException(
-                    "Missing user-defined properties when trying to create an adapter for SQL dialect \"" + dialectName
-                            + "\".");
-        }
         final Class<? extends SqlDialect> sqlDialectClass = this.sqlDialectRegistry
                 .getSqlDialectClassForName(dialectName);
         return instantiateDialect(sqlDialectClass, dialectName);
