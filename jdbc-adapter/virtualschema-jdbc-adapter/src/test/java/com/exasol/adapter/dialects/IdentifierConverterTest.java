@@ -1,0 +1,45 @@
+package com.exasol.adapter.dialects;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import com.exasol.adapter.jdbc.IdentifierCaseHandling;
+
+class IdentifierConverterTest {
+    final IdentifierConverter identifierConverter = new IdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_UPPER,
+            IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE);
+
+    @CsvSource({ "INTERPRET_AS_LOWER, INTERPRET_AS_LOWER, true", //
+            "INTERPRET_AS_LOWER, INTERPRET_AS_UPPER, false", //
+            "INTERPRET_AS_LOWER, INTERPRET_CASE_SENSITIVE, false", //
+            "INTERPRET_AS_UPPER, INTERPRET_AS_UPPER, true", //
+            "INTERPRET_AS_UPPER, INTERPRET_AS_LOWER, false", //
+            "INTERPRET_AS_UPPER, INTERPRET_CASE_SENSITIVE, false", //
+            "INTERPRET_CASE_SENSITIVE, INTERPRET_AS_LOWER, false", //
+            "INTERPRET_CASE_SENSITIVE, INTERPRET_AS_UPPER, false", //
+            "INTERPRET_CASE_SENSITIVE, INTERPRET_CASE_SENSITIVE, false" })
+    @ParameterizedTest
+    void testConvert(final IdentifierCaseHandling unquotedIdentifierHandling,
+            final IdentifierCaseHandling quotedIdentifierHandling, final boolean resultShouldBeUpperCase) {
+        final IdentifierConverter identifierConverter = new IdentifierConverter(unquotedIdentifierHandling,
+                quotedIdentifierHandling);
+        assertThat(identifierConverter.convert("text"), equalTo(resultShouldBeUpperCase ? "TEXT" : "text"));
+    }
+
+    @Test
+    void testGetUnquotedIdentifierHandling() {
+        assertThat(this.identifierConverter.getUnquotedIdentifierHandling(),
+                equalTo(IdentifierCaseHandling.INTERPRET_AS_UPPER));
+    }
+
+    @Test
+    void testGetQuotedIdentifierHandling() {
+        assertThat(this.identifierConverter.getQuotedIdentifierHandling(),
+                equalTo(IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE));
+    }
+}

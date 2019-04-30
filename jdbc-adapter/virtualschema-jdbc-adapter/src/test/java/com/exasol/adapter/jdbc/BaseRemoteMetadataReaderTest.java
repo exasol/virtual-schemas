@@ -230,4 +230,16 @@ class BaseRemoteMetadataReaderTest {
         assertAll(() -> assertThat(tables, iterableWithSize(1)),
                 () -> assertThat(tableAMetadata.getName(), equalTo(TABLE_A)));
     }
+
+    @Test
+    void testCreateIdentifierConverter() {
+        final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(null, AdapterProperties.emptyProperties());
+        reader.createIdentifierConverter();
+        assertAll(
+                () -> assertThat(reader.getIdentifierConverter().getUnquotedIdentifierHandling(),
+                        equalTo(IdentifierCaseHandling.INTERPRET_AS_UPPER)),
+                () -> assertThat(reader.getIdentifierConverter().getQuotedIdentifierHandling(),
+                        equalTo(IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE)));
+
+    }
 }

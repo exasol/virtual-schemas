@@ -44,18 +44,6 @@ class SqlDialectFactoryTest {
         assertThat(this.sqlDialectFactory.createSqlDialect(DIALECT_NAME), instanceOf(DummySqlDialect.class));
     }
 
-//    @Test
-//    void testCreateDialectThrowsExceptionOnMissingConnection() {
-//        final SqlDialectFactory factory = new SqlDialectFactory(null, this.sqlDialectRegistry, this.dummyProperties);
-//        assertThrows(SqlDialectFactoryException.class, () -> factory.createSqlDialect(DIALECT_NAME));
-//    }
-//
-//    @Test
-//    void testCreateDialectThrowsExceptionOnMissingProperties() {
-//        final SqlDialectFactory factory = new SqlDialectFactory(this.mockConnection, this.sqlDialectRegistry, null);
-//        assertThrows(SqlDialectFactoryException.class, () -> factory.createSqlDialect(DIALECT_NAME));
-//    }
-
     @Test
     void testInjectConstructorParameters() {
         final SqlDialect dialect = this.sqlDialectFactory.createSqlDialect(DIALECT_NAME);

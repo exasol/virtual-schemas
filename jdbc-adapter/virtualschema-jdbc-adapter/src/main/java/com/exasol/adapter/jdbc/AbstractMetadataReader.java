@@ -17,16 +17,6 @@ public abstract class AbstractMetadataReader implements MetadataReader {
     protected Connection connection;
     protected final AdapterProperties properties;
 
-    @Override
-    public IdentifierCaseHandling getUnquotedIdentifierHandling() {
-        return IdentifierCaseHandling.INTERPRET_AS_UPPER;
-    }
-
-    @Override
-    public IdentifierCaseHandling getQuotedIdentifierHandling() {
-        return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
-    }
-
     /**
      * Create an {@link AbstractMetadataReader}
      *

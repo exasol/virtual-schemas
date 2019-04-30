@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.metadata.TableMetadata;
 
@@ -22,6 +23,7 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
     private static final Logger LOGGER = Logger.getLogger(BaseRemoteMetadataReader.class.getName());
     protected final ColumnMetadataReader columnMetadataReader;
     private final TableMetadataReader tableMetadataReader;
+    private IdentifierConverter identifierConverter;
 
     /**
      * Create a new instance of a {@link BaseTableMetadataReader}
@@ -166,5 +168,14 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
         } catch (final SQLException exception) {
             throw new RemoteMetadataReaderException("Unable to read remote schema metadata.", exception);
         }
+    }
+
+    protected void createIdentifierConverter() {
+        this.identifierConverter = new IdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_UPPER,
+                IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE);
+    }
+
+    public IdentifierConverter getIdentifierConverter() {
+        return this.identifierConverter;
     }
 }
