@@ -34,23 +34,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
      */
     @Deprecated
     public static String adapterCall(final ExaMetadata metadata, final String rawRequest) throws AdapterException {
-        final VirtualSchemaAdapter adapter = new JdbcAdapter();
-        registerAdapterForSqlDialect(adapter, "DB2"); // FIXME: replace this hard-coded registration
-        registerAdapterForSqlDialect(adapter, "EXASOL"); // FIXME: replace this hard-coded registration
-        registerAdapterForSqlDialect(adapter, "GENERIC"); // FIXME: replace this hard-coded registration
-        registerAdapterForSqlDialect(adapter, "HIVE"); // FIXME: replace this hard-coded registration
-        registerAdapterForSqlDialect(adapter, "IMPALA"); // FIXME: replace this hard-coded registration
-        registerAdapterForSqlDialect(adapter, "ORACLE"); // FIXME: replace this hard-coded registration
-        registerAdapterForSqlDialect(adapter, "POSTGRESQL"); // FIXME: replace this hard-coded registration
-        registerAdapterForSqlDialect(adapter, "REDSHIFT"); // FIXME: replace this hard-coded registration
-        registerAdapterForSqlDialect(adapter, "SQLSERVER"); // FIXME: replace this hard-coded registration
-        registerAdapterForSqlDialect(adapter, "SYBASE"); // FIXME: replace this hard-coded registration
-        registerAdapterForSqlDialect(adapter, "TERADATA"); // FIXME: replace this hard-coded registration
         return RequestDispatcher.adapterCall(metadata, rawRequest);
-    }
-
-    private static void registerAdapterForSqlDialect(final VirtualSchemaAdapter adapter, final String dialectName) {
-        AdapterRegistry.getInstance().registerAdapter(dialectName, adapter);
     }
 
     @Override

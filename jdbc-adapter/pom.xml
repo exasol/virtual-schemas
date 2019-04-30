@@ -17,7 +17,7 @@
         <junit.version>5.4.0</junit.version>
         <junit.platform.version>1.3.2</junit.platform.version>
         <maven.surefire.version>2.22.1</maven.surefire.version>
-        <vscommon.version>4.0.0</vscommon.version>
+        <vscommon.version>5.0.0</vscommon.version>
     </properties>
     <distributionManagement>
         <repository>
