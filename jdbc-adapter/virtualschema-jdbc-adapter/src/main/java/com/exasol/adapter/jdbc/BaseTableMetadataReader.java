@@ -26,6 +26,7 @@ public class BaseTableMetadataReader extends AbstractMetadataReader implements T
     /**
      * Create a new instance of a {@link TableMetadata}
      *
+     * @param connection           JDBC connection to remote data source
      * @param columnMetadataReader reader to be used to map the tables columns
      * @param properties           user-defined adapter properties
      * @param identifierConverter  converter between source and Exasol identifiers

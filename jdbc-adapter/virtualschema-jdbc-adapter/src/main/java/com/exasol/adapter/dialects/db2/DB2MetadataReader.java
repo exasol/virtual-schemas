@@ -1,10 +1,10 @@
 package com.exasol.adapter.dialects.db2;
 
+import java.sql.Connection;
+
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
 import com.exasol.adapter.jdbc.ColumnMetadataReader;
-
-import java.sql.Connection;
 
 /**
  * This class reads and DB2-specific database metadata
