@@ -115,6 +115,8 @@ public interface SqlDialect {
      * <p>
      * Can be combined with {@link #requiresSchemaQualifiedTableNames(SqlGenerationContext)}
      *
+     * @param context context for SQL generation
+     *
      * @return <code>true</code> if table names must be catalog-qualified
      */
     public boolean requiresCatalogQualifiedTableNames(SqlGenerationContext context);
@@ -128,6 +130,8 @@ public interface SqlDialect {
      * <code>SELECT * FROM MY_SCHEMA.MY_TABLE</code>
      * <p>
      * Can be combined with {@link #requiresCatalogQualifiedTableNames(SqlGenerationContext)}
+     *
+     * @param context context for SQL generation
      *
      * @return <code>true</code> if table names must be schema-qualified
      */
@@ -200,6 +204,10 @@ public interface SqlDialect {
     public Map<AggregateFunction, String> getAggregateFunctionAliases();
 
     /**
+     * Check whether a parentheses should be omitted for a function
+     *
+     * @param function function for which the necessity of parentheses is evaluated
+     *
      * @return Returns true for functions with zero arguments if they do not require parentheses (e.g. SYSDATE).
      */
     public boolean omitParentheses(ScalarFunction function);

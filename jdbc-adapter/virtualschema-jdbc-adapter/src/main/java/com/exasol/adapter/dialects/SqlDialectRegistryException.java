@@ -7,7 +7,7 @@ public class SqlDialectRegistryException extends RuntimeException {
     private static final long serialVersionUID = -5603866366083182805L;
 
     /**
-     * Create a new instance of the {@link SqlDialectsRegistryException}
+     * Create a new instance of the {@link SqlDialectRegistryException}
      *
      * @param message message to be displayed
      */
@@ -16,7 +16,7 @@ public class SqlDialectRegistryException extends RuntimeException {
     }
 
     /**
-     * Create a new instance of the {@link SqlDialectsRegistryException}
+     * Create a new instance of the {@link SqlDialectRegistryException}
      *
      * @param message message to be displayed
      * @param cause   root cause
