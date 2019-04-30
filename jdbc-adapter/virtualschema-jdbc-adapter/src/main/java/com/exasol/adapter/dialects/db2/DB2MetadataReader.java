@@ -22,6 +22,6 @@ public class DB2MetadataReader extends BaseRemoteMetadataReader {
 
     @Override
     protected ColumnMetadataReader createColumnMetadataReader() {
-        return new DB2ColumnMetadataReader(this.connection, this.properties);
+        return new DB2ColumnMetadataReader(this.connection, this.properties, getIdentifierConverter());
     }
 }
