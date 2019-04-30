@@ -6,6 +6,7 @@ import java.sql.Types;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
+import com.exasol.adapter.jdbc.IdentifierCaseHandling;
 import com.exasol.adapter.metadata.DataType;
 
 /**
@@ -29,5 +30,10 @@ public class RedshiftColumnMetadataReader extends BaseColumnMetadataReader {
         } else {
             return super.mapJdbcType(jdbcTypeDescription);
         }
+    }
+
+    @Override
+    public IdentifierCaseHandling getQuotedIdentifierHandling() {
+        return IdentifierCaseHandling.INTERPRET_AS_UPPER;
     }
 }

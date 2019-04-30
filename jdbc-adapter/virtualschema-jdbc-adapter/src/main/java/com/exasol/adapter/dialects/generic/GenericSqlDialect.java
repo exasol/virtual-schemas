@@ -9,6 +9,7 @@ import java.util.List;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 
 /**
@@ -44,44 +45,6 @@ public class GenericSqlDialect extends AbstractSqlDialect {
     @Override
     public StructureElementSupport supportsJdbcSchemas() {
         return StructureElementSupport.AUTO_DETECT;
-    }
-
-    @Override
-    public IdentifierCaseHandling getUnquotedIdentifierHandling() {
-        final SchemaAdapterNotes adapterNotes = this.remoteMetadataReader.getSchemaAdapterNotes();
-        if (adapterNotes.supportsMixedCaseIdentifiers()) {
-            return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
-        } else {
-            if (adapterNotes.storesLowerCaseIdentifiers()) {
-                return IdentifierCaseHandling.INTERPRET_AS_LOWER;
-            } else if (adapterNotes.storesUpperCaseIdentifiers()) {
-                return IdentifierCaseHandling.INTERPRET_AS_UPPER;
-            } else if (adapterNotes.storesMixedCaseIdentifiers()) {
-                return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
-            } else {
-                throw new UnsupportedOperationException("Unexpected quote behavior. Adapter notes: " //
-                        + adapterNotes.toString());
-            }
-        }
-    }
-
-    @Override
-    public IdentifierCaseHandling getQuotedIdentifierHandling() {
-        final SchemaAdapterNotes adapterNotes = this.remoteMetadataReader.getSchemaAdapterNotes();
-        if (adapterNotes.supportsMixedCaseQuotedIdentifiers()) {
-            return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
-        } else {
-            if (adapterNotes.storesLowerCaseQuotedIdentifiers()) {
-                return IdentifierCaseHandling.INTERPRET_AS_LOWER;
-            } else if (adapterNotes.storesUpperCaseQuotedIdentifiers()) {
-                return IdentifierCaseHandling.INTERPRET_AS_UPPER;
-            } else if (adapterNotes.storesMixedCaseQuotedIdentifiers()) {
-                return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
-            } else {
-                throw new UnsupportedOperationException("Unexpected quote behavior. Adapter notes: " //
-                        + adapterNotes.toString());
-            }
-        }
     }
 
     @Override
@@ -134,5 +97,10 @@ public class GenericSqlDialect extends AbstractSqlDialect {
     @Override
     protected List<String> getSupportedProperties() {
         return SUPPORTED_PROPERTIES;
+    }
+
+    @Override
+    protected RemoteMetadataReader createRemoteMetadataReader() {
+        return new GenericMetadataReader(this.connection, this.properties);
     }
 }

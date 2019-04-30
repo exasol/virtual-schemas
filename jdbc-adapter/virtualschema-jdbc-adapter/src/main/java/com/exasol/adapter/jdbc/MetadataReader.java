@@ -14,4 +14,14 @@ public interface MetadataReader {
      * @return schema name or <code>null</code> if metadata lookups are not limited by schema
      */
     String getSchemaNameFilter();
+
+    /**
+     * @return How to handle case sensitivity of unquoted identifiers
+     */
+    public IdentifierCaseHandling getUnquotedIdentifierHandling();
+
+    /**
+     * @return How to handle case sensitivity of quoted identifiers
+     */
+    public IdentifierCaseHandling getQuotedIdentifierHandling();
 }

@@ -48,16 +48,6 @@ public class DummySqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public IdentifierCaseHandling getUnquotedIdentifierHandling() {
-        return null;
-    }
-
-    @Override
-    public IdentifierCaseHandling getQuotedIdentifierHandling() {
-        return null;
-    }
-
-    @Override
     public String applyQuote(final String identifier) {
         return null;
     }

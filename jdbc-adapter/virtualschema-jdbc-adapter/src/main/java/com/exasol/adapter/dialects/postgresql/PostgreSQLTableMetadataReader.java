@@ -82,6 +82,11 @@ public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
     }
 
     @Override
+    public IdentifierCaseHandling getUnquotedIdentifierHandling() {
+        return IdentifierCaseHandling.INTERPRET_AS_LOWER;
+    }
+
+    @Override
     public String adjustIdentifierCase(final String identifier) {
         if (getIdentifierMapping() == PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE) {
             return identifier;

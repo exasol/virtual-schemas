@@ -7,8 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.redshift.RedshiftColumnMetadataReader;
-import com.exasol.adapter.dialects.redshift.RedshiftMetadataReader;
 import com.exasol.adapter.jdbc.BaseTableMetadataReader;
 
 class RedshiftMetadataReaderTest {

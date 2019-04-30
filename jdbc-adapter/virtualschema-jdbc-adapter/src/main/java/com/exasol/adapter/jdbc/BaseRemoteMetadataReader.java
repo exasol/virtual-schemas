@@ -20,7 +20,7 @@ import com.exasol.adapter.metadata.TableMetadata;
  */
 public class BaseRemoteMetadataReader extends AbstractMetadataReader implements RemoteMetadataReader {
     private static final Logger LOGGER = Logger.getLogger(BaseRemoteMetadataReader.class.getName());
-    private final ColumnMetadataReader columnMetadataReader;
+    protected final ColumnMetadataReader columnMetadataReader;
     private final TableMetadataReader tableMetadataReader;
 
     /**
@@ -150,7 +150,7 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
                     .areNullsSortedLow(metadata.nullsAreSortedLow()) //
                     .build();
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException("Unable to create schema adapte notes from remote schema.",
+            throw new RemoteMetadataReaderException("Unable to create schema adapter notes from remote schema.",
                     exception);
         }
     }

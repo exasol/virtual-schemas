@@ -100,16 +100,6 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public IdentifierCaseHandling getUnquotedIdentifierHandling() {
-        return IdentifierCaseHandling.INTERPRET_AS_UPPER;
-    }
-
-    @Override
-    public IdentifierCaseHandling getQuotedIdentifierHandling() {
-        return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
-    }
-
-    @Override
     public String applyQuote(final String identifier) {
         return "[" + identifier + "]";
     }

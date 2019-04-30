@@ -7,6 +7,7 @@ import java.sql.*;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
+import com.exasol.adapter.jdbc.IdentifierCaseHandling;
 import com.exasol.adapter.metadata.DataType;
 
 public class PostgreSQLColumnMetadataReader extends BaseColumnMetadataReader {
@@ -55,6 +56,11 @@ public class PostgreSQLColumnMetadataReader extends BaseColumnMetadataReader {
         } else {
             return super.readColumnName(columns);
         }
+    }
+
+    @Override
+    public IdentifierCaseHandling getUnquotedIdentifierHandling() {
+        return IdentifierCaseHandling.INTERPRET_AS_LOWER;
     }
 
     PostgreSQLIdentifierMapping getIdentifierMapping() {

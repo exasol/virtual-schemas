@@ -1,15 +1,12 @@
 package com.exasol.adapter.dialects.postgresql;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.jdbc.ColumnMetadataReader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,6 +14,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.metadata.DataType;
 
 class PostgreSQLColumnMetadataReaderTest {
@@ -26,7 +24,7 @@ class PostgreSQLColumnMetadataReaderTest {
     @BeforeEach
     void beforeEach() {
         this.columnMetadataReader = new PostgreSQLColumnMetadataReader(null, AdapterProperties.emptyProperties());
-        rawProperties = new HashMap<>();
+        this.rawProperties = new HashMap<>();
     }
 
     @Test

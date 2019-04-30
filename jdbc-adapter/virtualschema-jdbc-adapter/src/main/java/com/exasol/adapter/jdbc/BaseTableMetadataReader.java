@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.SqlDialect.IdentifierCaseHandling;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.TableMetadata;
 import com.google.common.base.Strings;
@@ -15,14 +14,12 @@ import com.google.common.base.Strings;
 /**
  * This class maps metadata of tables from the remote source to Exasol
  */
-public class BaseTableMetadataReader implements TableMetadataReader {
+public class BaseTableMetadataReader extends AbstractMetadataReader implements TableMetadataReader {
     static final String NAME_COLUMN = "TABLE_NAME";
     static final String REMARKS_COLUMN = "REMARKS";
     static final String DEFAULT_TABLE_ADAPTER_NOTES = "";
     private static final Logger LOGGER = Logger.getLogger(BaseTableMetadataReader.class.getName());
     private static final Pattern UNQUOTED_IDENTIFIER_PATTERN = Pattern.compile("^[a-z][0-9a-z_]*");
-    private final ColumnMetadataReader columnMetadataReader;
-    protected final AdapterProperties properties;
 
     /**
      * Create a new instance of a {@link TableMetadata}
@@ -32,8 +29,7 @@ public class BaseTableMetadataReader implements TableMetadataReader {
      */
     public BaseTableMetadataReader(final ColumnMetadataReader columnMetadataReader,
             final AdapterProperties properties) {
-        this.columnMetadataReader = columnMetadataReader;
-        this.properties = properties;
+        super(columnMetadataReader, properties);
     }
 
     @Override
@@ -112,7 +108,7 @@ public class BaseTableMetadataReader implements TableMetadataReader {
     }
 
     protected String readTableName(final ResultSet remoteTables) throws SQLException {
-        return remoteTables.getString(NAME_COLUMN);
+        return changeIdentifierCaseIfNeeded(remoteTables.getString(NAME_COLUMN));
     }
 
     protected String readComment(final ResultSet remoteTables) throws SQLException {
@@ -121,7 +117,7 @@ public class BaseTableMetadataReader implements TableMetadataReader {
 
     @Override
     public String adjustIdentifierCase(final String identifier) {
-        if (getQuotedIdentifierCaseHandling() == this.getUnquotedIdentifierCaseHandling()) {
+        if (super.getQuotedIdentifierHandling() == super.getUnquotedIdentifierHandling()) {
             if (isQuotedIdentifierCaseSensitive()) {
                 return identifier.toUpperCase();
             } else {
@@ -131,18 +127,8 @@ public class BaseTableMetadataReader implements TableMetadataReader {
         return identifier;
     }
 
-    @Override
-    public IdentifierCaseHandling getUnquotedIdentifierCaseHandling() {
-        return IdentifierCaseHandling.INTERPRET_AS_UPPER;
-    }
-
-    @Override
-    public IdentifierCaseHandling getQuotedIdentifierCaseHandling() {
-        return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
-    }
-
     protected boolean isQuotedIdentifierCaseSensitive() {
-        return getQuotedIdentifierCaseHandling() != IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
+        return getQuotedIdentifierHandling() != IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
     }
 
     protected boolean isUnquotedIdentifier(final String identifier) {

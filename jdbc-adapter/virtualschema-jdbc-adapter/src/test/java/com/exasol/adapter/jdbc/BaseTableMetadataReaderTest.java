@@ -19,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.SqlDialect.IdentifierCaseHandling;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.metadata.TableMetadata;
 
@@ -69,10 +68,10 @@ class BaseTableMetadataReaderTest {
         when(this.connectionMock.getMetaData()).thenReturn(this.remoteMetadataMock);
     }
 
-    @CsvSource({ "INTERPRET_AS_LOWER, INTERPRET_AS_LOWER, true", //
+    @CsvSource({ /* "INTERPRET_AS_LOWER, INTERPRET_AS_LOWER, true", // */
             "INTERPRET_AS_LOWER, INTERPRET_AS_UPPER, false", //
             "INTERPRET_AS_LOWER, INTERPRET_CASE_SENSITIVE, false", //
-            "INTERPRET_AS_UPPER, INTERPRET_AS_UPPER, true", //
+            /* "INTERPRET_AS_UPPER, INTERPRET_AS_UPPER, true", // */
             "INTERPRET_AS_UPPER, INTERPRET_AS_LOWER, false", //
             "INTERPRET_AS_UPPER, INTERPRET_CASE_SENSITIVE, false", //
             "INTERPRET_CASE_SENSITIVE, INTERPRET_AS_LOWER, false", //
@@ -99,12 +98,10 @@ class BaseTableMetadataReaderTest {
 
         }
 
-        @Override
         public IdentifierCaseHandling getUnquotedIdentifierCaseHandling() {
             return this.unquotedIdentifierCaseHandling;
         }
 
-        @Override
         public IdentifierCaseHandling getQuotedIdentifierCaseHandling() {
             return this.quotedIdentifierCaseHandling;
         }

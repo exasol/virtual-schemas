@@ -21,7 +21,6 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
     public static final String NAME_COLUMN = "COLUMN_NAME";
     public static final String DATA_TYPE_COLUMN = "DATA_TYPE";
     public static final String SIZE_COLUMN = "COLUMN_SIZE";
-    public static final String PRECISION_COLUMN = "NUM_PREC_RADIX";
     public static final String SCALE_COLUMN = "DECIMAL_DIGITS";
     public static final String CHAR_OCTET_LENGTH_COLUMN = "CHAR_OCTET_LENGTH";
     public static final String TYPE_NAME_COLUMN = "TYPE_NAME";
@@ -169,7 +168,7 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
     }
 
     public String readColumnName(final ResultSet columns) throws SQLException {
-        return columns.getString(NAME_COLUMN);
+        return changeIdentifierCaseIfNeeded(columns.getString(NAME_COLUMN));
     }
 
     /**

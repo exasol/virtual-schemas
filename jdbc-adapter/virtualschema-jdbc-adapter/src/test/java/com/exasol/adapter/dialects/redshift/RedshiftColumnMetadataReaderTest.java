@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.AbstractColumnMetadataReaderTest;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.redshift.RedshiftColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 
 class RedshiftColumnMetadataReaderTest extends AbstractColumnMetadataReaderTest {

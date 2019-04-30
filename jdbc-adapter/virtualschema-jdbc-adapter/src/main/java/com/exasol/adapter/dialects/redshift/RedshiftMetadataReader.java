@@ -3,8 +3,7 @@ package com.exasol.adapter.dialects.redshift;
 import java.sql.Connection;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
-import com.exasol.adapter.jdbc.ColumnMetadataReader;
+import com.exasol.adapter.jdbc.*;
 
 /**
  * This class implements a Redshift-specific metadata reader
@@ -23,5 +22,10 @@ public class RedshiftMetadataReader extends BaseRemoteMetadataReader {
     @Override
     protected ColumnMetadataReader createColumnMetadataReader() {
         return new RedshiftColumnMetadataReader(this.connection, this.properties);
+    }
+
+    @Override
+    protected TableMetadataReader createTableMetadataReader() {
+        return new RedshiftTableMetadataReader(columnMetadataReader, properties);
     }
 }

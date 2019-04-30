@@ -15,7 +15,6 @@ public class SqlServerColumnMetadataReader extends BaseColumnMetadataReader {
     static final int SQLSERVER_BLOB_SIZE = 100;
     static final int SQLSERVER_HIERARCHYID_SIZE = 4000;
     static final int SQLSERVER_MAX_VARCHAR_SIZE = 8000;
-    static final int SQLSERVER_MAX_NVARCHAR_SIZE = 4000;
     static final int SQLSERVER_MAX_CLOB_SIZE = 2000000;
     static final int SQLSERVER_TIMESTAMP_TEXT_SIZE = 21;
     static final String SQLSERVER_DATE_TYPE_NAME = "date";

@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-import com.exasol.adapter.dialects.SqlDialect.IdentifierCaseHandling;
 import com.exasol.adapter.metadata.TableMetadata;
 
 /**
@@ -30,21 +29,7 @@ public interface TableMetadataReader {
      * @return case-adjusted identifier
      */
     public String adjustIdentifierCase(String identifier);
-
-    /**
-     * Define how the metadata reader handles unquoted identifiers
-     *
-     * @return case handling for unquoted identifiers
-     */
-    public IdentifierCaseHandling getUnquotedIdentifierCaseHandling();
-
-    /**
-     * Define how the metadata reader handles quoted identifiers
-     *
-     * @return case handling for quoted identifiers
-     */
-    public IdentifierCaseHandling getQuotedIdentifierCaseHandling();
-
+    
     /**
      * Returns true if the metadata reader includes the table with the given name when the remote metadata gets mapped
      *
