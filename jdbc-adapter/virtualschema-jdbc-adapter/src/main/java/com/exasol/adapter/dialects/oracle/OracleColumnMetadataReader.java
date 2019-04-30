@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
@@ -28,11 +29,13 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
     /**
      * Create a new instance of an {@link OracleColumnMetadataReader}
      *
-     * @param connection connection to the remote data source
-     * @param properties user-defined adapter properties
+     * @param connection          connection to the remote data source
+     * @param properties          user-defined adapter properties
+     * @param identifierConverter converter between source and Exasol identifiers
      */
-    public OracleColumnMetadataReader(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
+    public OracleColumnMetadataReader(final Connection connection, final AdapterProperties properties,
+            final IdentifierConverter identifierConverter) {
+        super(connection, properties, identifierConverter);
     }
 
     @Override
