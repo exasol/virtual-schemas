@@ -11,7 +11,7 @@ public class IdentifierConverter {
 
     /**
      * Create a new instance of {@link IdentifierConverter} class.
-     * 
+     *
      * @param unquotedIdentifierHandling handling for unquoted identifiers
      * @param quotedIdentifierHandling   handling for quoted identifiers
      */
@@ -52,5 +52,15 @@ public class IdentifierConverter {
      */
     public IdentifierCaseHandling getQuotedIdentifierHandling() {
         return this.quotedIdentifierHandling;
+    }
+
+    /**
+     * Create a new instance of an {@link IdentifierConverter} with the default behavior
+     * 
+     * @return new instance
+     */
+    public static IdentifierConverter createDefault() {
+        return new IdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_UPPER,
+                IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE);
     }
 }

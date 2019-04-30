@@ -45,7 +45,7 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
      * @return column metadata reader
      */
     protected ColumnMetadataReader createColumnMetadataReader() {
-        return new BaseColumnMetadataReader(this.connection, this.properties);
+        return new BaseColumnMetadataReader(this.connection, this.properties, this.identifierConverter);
     }
 
     /**
@@ -56,7 +56,17 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
      * @return table metadata reader
      */
     protected TableMetadataReader createTableMetadataReader() {
-        return new BaseTableMetadataReader(this.columnMetadataReader, this.properties);
+        return new BaseTableMetadataReader(this.connection, this.columnMetadataReader, this.properties,
+                this.identifierConverter);
+    }
+
+    /**
+     * Create a converter that translates identifiers from the remote data source to the Exasol representation
+     * 
+     * @return identifier converter
+     */
+    protected void createIdentifierConverter() {
+        IdentifierConverter.createDefault();
     }
 
     /**
@@ -168,11 +178,6 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
         } catch (final SQLException exception) {
             throw new RemoteMetadataReaderException("Unable to read remote schema metadata.", exception);
         }
-    }
-
-    protected void createIdentifierConverter() {
-        this.identifierConverter = new IdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_UPPER,
-                IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE);
     }
 
     public IdentifierConverter getIdentifierConverter() {

@@ -23,14 +23,6 @@ public interface TableMetadataReader {
             throws SQLException;
 
     /**
-     * Adjust the case of the identifier as required and configured
-     *
-     * @param identifier original identifier
-     * @return case-adjusted identifier
-     */
-    public String adjustIdentifierCase(String identifier);
-    
-    /**
      * Returns true if the metadata reader includes the table with the given name when the remote metadata gets mapped
      *
      * @param tableName name of the table

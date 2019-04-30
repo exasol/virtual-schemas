@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
@@ -29,15 +30,19 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
     public static final String AUTOINCREMENT_COLUMN = "IS_AUTOINCREMENT";
     public static final String NULLABLE_COLUMN = "IS_NULLABLE";
     private static final boolean DEFAULT_NULLABLE = true;
+    private final IdentifierConverter identifierConverter;
 
     /**
      * Create a new instance of a {@link ColumnMetadataReader}
      *
-     * @param connection JDBC connection through which the column metadata is read from the remote database
-     * @param properties user-defined adapter properties
+     * @param connection          JDBC connection through which the column metadata is read from the remote database
+     * @param properties          user-defined adapter properties
+     * @param identifierConverter converter between source and Exasol identifiers
      */
-    public BaseColumnMetadataReader(final Connection connection, final AdapterProperties properties) {
+    public BaseColumnMetadataReader(final Connection connection, final AdapterProperties properties,
+            final IdentifierConverter identifierConverter) {
         super(connection, properties);
+        this.identifierConverter = identifierConverter;
     }
 
     /**
@@ -168,7 +173,7 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
     }
 
     public String readColumnName(final ResultSet columns) throws SQLException {
-        return changeIdentifierCaseIfNeeded(columns.getString(NAME_COLUMN));
+        return this.identifierConverter.convert(columns.getString(NAME_COLUMN));
     }
 
     /**

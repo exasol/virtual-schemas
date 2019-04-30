@@ -2,8 +2,8 @@ package com.exasol.adapter.dialects;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -41,5 +41,15 @@ class IdentifierConverterTest {
     void testGetQuotedIdentifierHandling() {
         assertThat(this.identifierConverter.getQuotedIdentifierHandling(),
                 equalTo(IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE));
+    }
+
+    @Test
+    void testCreateDefault() {
+        final IdentifierConverter converter = IdentifierConverter.createDefault();
+        assertAll(
+                () -> assertThat(converter.getQuotedIdentifierHandling(),
+                        equalTo(IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE)),
+                () -> assertThat(converter.getUnquotedIdentifierHandling(),
+                        equalTo(IdentifierCaseHandling.INTERPRET_AS_UPPER)));
     }
 }

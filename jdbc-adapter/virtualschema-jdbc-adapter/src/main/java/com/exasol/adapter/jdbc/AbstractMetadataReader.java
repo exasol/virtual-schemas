@@ -13,37 +13,18 @@ import com.exasol.adapter.AdapterProperties;
  */
 public abstract class AbstractMetadataReader implements MetadataReader {
     static final String ANY_CATALOG_FILTER = null;
-    public ColumnMetadataReader columnMetadataReader;
-    protected Connection connection;
     protected final AdapterProperties properties;
+    protected final Connection connection;
 
     /**
      * Create an {@link AbstractMetadataReader}
      *
+     * @param connection JDBC connection to the remote data source
      * @param properties user-defined adapter properties
      */
     public AbstractMetadataReader(final Connection connection, final AdapterProperties properties) {
+        this.properties = properties;
         this.connection = connection;
-        this.properties = properties;
-    }
-
-    /**
-     * Create an {@link AbstractMetadataReader}
-     *
-     * @param properties user-defined adapter properties
-     */
-    public AbstractMetadataReader(final ColumnMetadataReader columnMetadataReader, final AdapterProperties properties) {
-        this.columnMetadataReader = columnMetadataReader;
-        this.properties = properties;
-    }
-
-    protected String changeIdentifierCaseIfNeeded(final String identifier) {
-        if (getQuotedIdentifierHandling() == getUnquotedIdentifierHandling()) {
-            if (getQuotedIdentifierHandling() != IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE) {
-                return identifier.toUpperCase();
-            }
-        }
-        return identifier;
     }
 
     /**
