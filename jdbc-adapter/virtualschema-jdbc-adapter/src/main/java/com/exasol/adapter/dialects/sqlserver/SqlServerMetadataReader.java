@@ -22,6 +22,6 @@ public class SqlServerMetadataReader extends BaseRemoteMetadataReader {
 
     @Override
     protected ColumnMetadataReader createColumnMetadataReader() {
-        return new SqlServerColumnMetadataReader(this.connection, this.properties);
+        return new SqlServerColumnMetadataReader(this.connection, this.properties, getIdentifierConverter());
     }
 }

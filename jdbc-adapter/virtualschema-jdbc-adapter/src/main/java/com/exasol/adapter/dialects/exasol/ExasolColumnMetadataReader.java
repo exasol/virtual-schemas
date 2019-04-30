@@ -24,8 +24,9 @@ public class ExasolColumnMetadataReader extends BaseColumnMetadataReader {
     /**
      * Create a new instance of a {@link ExasolColumnMetadataReader}
      *
-     * @param connection JDBC connection through which the column metadata is read from the remote database
-     * @param properties user-defined adapter properties
+     * @param connection          JDBC connection through which the column metadata is read from the remote database
+     * @param properties          user-defined adapter properties
+     * @param identifierConverter converter between source and Exasol identifiers
      */
     public ExasolColumnMetadataReader(final Connection connection, final AdapterProperties properties,
             final IdentifierConverter identifierConverter) {
