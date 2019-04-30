@@ -20,10 +20,8 @@ public class AbstractIntegrationTest {
         return config;
     }
 
-    /**
-     * You have to call this method with a connection to your EXASOL database during the @BeforeClass method of your
-     * integration test
-     */
+    // You have to call this method with a connection to your EXASOL database during the @BeforeClass method of your
+    // integration test
     public static void setConnection(final Connection connection) {
         AbstractIntegrationTest.connection = connection;
     }

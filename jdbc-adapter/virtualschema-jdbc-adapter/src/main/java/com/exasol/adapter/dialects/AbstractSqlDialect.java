@@ -28,6 +28,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     /**
      * Create a new instance of an {@link AbstractSqlDialect}
      *
+     * @param connection JDBC connection to remote data source
      * @param properties user properties
      */
     public AbstractSqlDialect(final Connection connection, final AdapterProperties properties) {
@@ -168,7 +169,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
 
     private void validateCatalogNameProperty() throws PropertyValidationException {
         if (this.properties.containsKey(CATALOG_NAME_PROPERTY)
-                && supportsJdbcCatalogs() == StructureElementSupport.NONE) {
+                && (supportsJdbcCatalogs() == StructureElementSupport.NONE)) {
             throw new PropertyValidationException("The dialect " + this.properties.getSqlDialect()
                     + " does not support catalogs. Please, do not set the " + CATALOG_NAME_PROPERTY + " property.");
         }
@@ -176,7 +177,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
 
     private void validateSchemaNameProperty() throws PropertyValidationException {
         if (this.properties.containsKey(SCHEMA_NAME_PROPERTY)
-                && supportsJdbcSchemas() == StructureElementSupport.NONE) {
+                && (supportsJdbcSchemas() == StructureElementSupport.NONE)) {
             throw new PropertyValidationException("The dialect " + this.properties.getSqlDialect()
                     + " does not support schemas. Please, do not set the " + SCHEMA_NAME_PROPERTY + " property.");
         }
@@ -259,7 +260,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
             throws PropertyValidationException {
         final boolean isDirectImport = this.properties.isEnabled(importFromProperty);
         final String value = this.properties.get(connectionProperty);
-        final boolean connectionIsEmpty = (value == null || value.isEmpty());
+        final boolean connectionIsEmpty = ((value == null) || value.isEmpty());
         if (isDirectImport) {
             if (connectionIsEmpty) {
                 throw new PropertyValidationException("You defined the property " + importFromProperty
