@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.postgresql;
 
+import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -7,8 +8,7 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.Connection;
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.*;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
@@ -18,8 +18,14 @@ import com.exasol.adapter.sql.ScalarFunction;
 
 public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "POSTGRESQL";
-    static final String POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY = "POSTGRESQL_IDENTIFIER_MAPPING";
+    public static final String POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY = "POSTGRESQL_IDENTIFIER_MAPPING";
+    private static final String POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE_VALUE = "PRESERVE_ORIGINAL_CASE";
+    private static final String POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE = "CONVERT_TO_UPPER";
     private static final PostgreSQLIdentifierMapping DEFAULT_POSTGRESS_IDENTIFIER_MAPPING = PostgreSQLIdentifierMapping.CONVERT_TO_UPPER;
+    private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
+            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
+            CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
+            IGNORE_ERRORS_PROPERTY, POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
     public PostgreSQLSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
@@ -63,14 +69,10 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Map<ScalarFunction, String> getScalarFunctionAliases() {
-
         final Map<ScalarFunction, String> scalarAliases = new EnumMap<>(ScalarFunction.class);
-
         scalarAliases.put(ScalarFunction.SUBSTR, "SUBSTRING");
         scalarAliases.put(ScalarFunction.HASH_MD5, "MD5");
-
         return scalarAliases;
-
     }
 
     @Override
@@ -107,12 +109,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String applyQuoteIfNeeded(final String identifier) {
-        // This is a simplified rule, which quotes all identifiers although not needed
-        return applyQuote(identifier);
-    }
-
-    @Override
     public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
         return false;
     }
@@ -140,5 +136,29 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
         return new PostgreSQLMetadataReader(this.connection, this.properties);
+    }
+
+    @Override
+    public void validateProperties() throws PropertyValidationException {
+        super.validateDialectName(getPublicName());
+        super.validateProperties();
+        checkPostgreSQLIdentifierPropertyConsistency();
+    }
+
+    @Override
+    protected List<String> getSupportedProperties() {
+        return SUPPORTED_PROPERTIES;
+    }
+
+    private void checkPostgreSQLIdentifierPropertyConsistency() throws PropertyValidationException {
+        if (this.properties.containsKey(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY)) {
+            final String propertyValue = this.properties.get(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY);
+            if (!propertyValue.equals(POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE_VALUE)
+                    && !propertyValue.equals(POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE)) {
+                throw new PropertyValidationException("Value for " + POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY
+                        + " must be " + POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE_VALUE + " or "
+                        + POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE);
+            }
+        }
     }
 }

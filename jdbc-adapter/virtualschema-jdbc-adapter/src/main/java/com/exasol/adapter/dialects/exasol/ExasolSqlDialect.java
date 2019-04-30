@@ -1,6 +1,10 @@
 package com.exasol.adapter.dialects.exasol;
 
+import static com.exasol.adapter.AdapterProperties.*;
+
 import java.sql.Connection;
+import java.util.Arrays;
+import java.util.List;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.*;
@@ -14,8 +18,13 @@ import com.exasol.adapter.sql.ScalarFunction;
  */
 public class ExasolSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "EXASOL";
-    static final String LOCAL_IMPORT_PROPERTY = "IS_LOCAL";
-    static final String EXASOL_IMPORT_PROPERTY = "IMPORT_FROM_EXA";
+    public static final String EXASOL_IMPORT_PROPERTY = "IMPORT_FROM_EXA";
+    public static final String EXASOL_CONNECTION_STRING_PROPERTY = "EXA_CONNECTION_STRING";
+    private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
+            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
+            CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXASOL_IMPORT_PROPERTY,
+            EXASOL_CONNECTION_STRING_PROPERTY, IS_LOCAL_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
+            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
     public ExasolSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
@@ -74,15 +83,7 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuote(final String identifier) {
-        // If identifier contains double quotation marks ", it needs to be espaced by
-        // another double quotation mark. E.g. "a""b" is the identifier a"b in the db.
         return "\"" + identifier.replace("\"", "\"\"") + "\"";
-    }
-
-    @Override
-    public String applyQuoteIfNeeded(final String identifier) {
-        // This is a simplified rule, which quotes all identifiers although not needed
-        return applyQuote(identifier);
     }
 
     @Override
@@ -92,12 +93,7 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
 
     @Override
     public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
-        // We need schema qualifiers a) if we are in IS_LOCAL mode, i.e. we run
-        // statements directly in a subselect without IMPORT FROM JDBC
-        // and b) if we don't have the schema in the jdbc connection string (like
-        // "jdbc:exa:localhost:5555;schema=native")
         return true;
-        // return context.isLocal();
     }
 
     @Override
@@ -136,12 +132,26 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
      * @return import type
      */
     public ImportType getImportType() {
-        if (this.properties.isEnabled(LOCAL_IMPORT_PROPERTY)) {
+        if (this.properties.isEnabled(IS_LOCAL_PROPERTY)) {
             return ImportType.LOCAL;
         } else if (this.properties.isEnabled(EXASOL_IMPORT_PROPERTY)) {
             return ImportType.EXA;
         } else {
             return ImportType.JDBC;
         }
+    }
+
+    @Override
+    public void validateProperties() throws PropertyValidationException {
+        super.validateDialectName(getPublicName());
+        super.validateProperties();
+        super.checkImportPropertyConsistency(EXASOL_IMPORT_PROPERTY, EXASOL_CONNECTION_STRING_PROPERTY);
+        super.validateBooleanProperty(EXASOL_IMPORT_PROPERTY);
+        super.validateBooleanProperty(IS_LOCAL_PROPERTY);
+    }
+
+    @Override
+    protected List<String> getSupportedProperties() {
+        return SUPPORTED_PROPERTIES;
     }
 }

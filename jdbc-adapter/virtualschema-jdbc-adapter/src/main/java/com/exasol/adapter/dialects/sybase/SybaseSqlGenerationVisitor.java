@@ -19,30 +19,30 @@ import java.util.function.Predicate;
 
 public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
 
-    public SybaseSqlGenerationVisitor(SqlDialect dialect, SqlGenerationContext context) {
+    public SybaseSqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         super(dialect, context);
 
     }
 
     @Override
-    public String visit(SqlSelectList selectList) throws AdapterException {
+    public String visit(final SqlSelectList selectList) throws AdapterException {
         if (selectList.isRequestAnyColumn()) {
             // The system requested any column
             return "true";
         }
-        List<String> selectListElements = new ArrayList<>();
+        final List<String> selectListElements = new ArrayList<>();
         if (selectList.isSelectStar()) {
-            if (SqlGenerationHelper.selectListRequiresCasts(selectList, nodeRequiresCast)) {
+            if (SqlGenerationHelper.selectListRequiresCasts(selectList, this.nodeRequiresCast)) {
 
                 // Do as if the user has all columns in select list
-                SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
+                final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
 
                 int columnId = 0;
-                List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
+                final List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
                 SqlGenerationHelper.getMetadataFrom(select.getFromClause(), tableMetadata );
-                for (TableMetadata tableMeta : tableMetadata) {
-                    for (ColumnMetadata columnMeta : tableMeta.getColumns()) {
-                        SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
+                for (final TableMetadata tableMeta : tableMetadata) {
+                    for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
+                        final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
                         selectListElements.add( getColumnProjectionStringNoCheck(sqlColumn,  super.visit(sqlColumn)  )   );
                         ++columnId;
                     }
@@ -52,7 +52,7 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
                 selectListElements.add("*");
             }
         } else {
-            for (SqlNode node : selectList.getExpressions()) {
+            for (final SqlNode node : selectList.getExpressions()) {
                 selectListElements.add(node.accept(this));
             }
         }
@@ -62,13 +62,13 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
 
 
     @Override
-    public String visit(SqlStatementSelect select) throws AdapterException {
+    public String visit(final SqlStatementSelect select) throws AdapterException {
         if (!select.hasLimit()) {
             return super.visit(select);
         } else {
-            SqlLimit limit = select.getLimit();
+            final SqlLimit limit = select.getLimit();
 
-            StringBuilder sql = new StringBuilder();
+            final StringBuilder sql = new StringBuilder();
             sql.append("SELECT TOP "+limit.getLimit()+ " ");
 
             sql.append(select.getSelectList().accept(this));
@@ -97,36 +97,36 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
 
 
     @Override
-    public String visit(SqlColumn column) throws AdapterException {
+    public String visit(final SqlColumn column) throws AdapterException {
         return getColumnProjectionString(column, super.visit(column));
     }
 
-    private String getColumnProjectionString(SqlColumn column, String projString) throws AdapterException {
-        boolean isDirectlyInSelectList = (column.hasParent() && column.getParent().getType() == SqlNodeType.SELECT_LIST);
+    private String getColumnProjectionString(final SqlColumn column, final String projString) throws AdapterException {
+        final boolean isDirectlyInSelectList = (column.hasParent() && column.getParent().getType() == SqlNodeType.SELECT_LIST);
         if (!isDirectlyInSelectList) {
             return projString;
         }
-        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(),
+        final String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(),
                                                          column.getMetadata().getName()).getTypeName();
         return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
     }
 
 
-    private String getColumnProjectionStringNoCheck(SqlColumn column, String projString) throws AdapterException {
-        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(),
+    private String getColumnProjectionStringNoCheck(final SqlColumn column, final String projString) throws AdapterException {
+        final String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(),
                                                          column.getMetadata().getName()).getTypeName();
         return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
     }
 
-    private String getColumnProjectionStringNoCheckImpl(String typeName, SqlColumn column, String projString) {
+    private String getColumnProjectionStringNoCheckImpl(final String typeName, final SqlColumn column, String projString) {
       if ( typeName.startsWith("text") ) {
-            projString = "CAST(" + projString + "  as NVARCHAR("+SybaseSqlDialect.maxSybaseNVarcharSize+") )";
+            projString = "CAST(" + projString + "  as NVARCHAR("+SybaseSqlDialect.MAX_SYBASE_N_VARCHAR_SIZE +") )";
         } else if (typeName.equals("time") ){
             projString = "CONVERT(VARCHAR(12), " + projString + ", 137)";
         } else if (typeName.equals("bigtime") ){
           projString = "CONVERT(VARCHAR(16), " + projString + ", 137)";
         } else if (typeName.startsWith("xml")) {
-            projString = "CAST(" + projString + "  as NVARCHAR("+SybaseSqlDialect.maxSybaseNVarcharSize+") )";
+            projString = "CAST(" + projString + "  as NVARCHAR("+SybaseSqlDialect.MAX_SYBASE_N_VARCHAR_SIZE +") )";
         } else if (TYPE_NAME_NOT_SUPPORTED.contains(typeName)){
           projString = "'"+typeName+" NOT SUPPORTED'"; //returning a string constant for unsupported data types
         }
@@ -139,7 +139,7 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
 
   private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("varbinary","binary","image");
 
-    private Predicate<SqlNode> nodeRequiresCast = node -> {
+    private final Predicate<SqlNode> nodeRequiresCast = node -> {
         try {
             if (node.getType() == SqlNodeType.COLUMN) {
                 SqlColumn column = (SqlColumn)node;
@@ -155,14 +155,14 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
 
 
     @Override
-    public String visit(SqlFunctionScalar function) throws AdapterException {
+    public String visit(final SqlFunctionScalar function) throws AdapterException {
 
         String sql = super.visit(function);
-    List<String> argumentsSql = new ArrayList<>();
-        for (SqlNode node : function.getArguments()) {
+    final List<String> argumentsSql = new ArrayList<>();
+        for (final SqlNode node : function.getArguments()) {
             argumentsSql.add(node.accept(this));
         }
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
 
         switch (function.getFunction()) {
         case INSTR: {
@@ -191,9 +191,9 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
             }
 
 
-            String string = argumentsSql.get(0);
+            final String string = argumentsSql.get(0);
 
-            String length = argumentsSql.get(1);
+            final String length = argumentsSql.get(1);
 
 
             builder.append("RIGHT ( REPLICATE(");
@@ -220,9 +220,9 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
               padChar = argumentsSql.get(2);
             }
 
-            String string = argumentsSql.get(0);
+            final String string = argumentsSql.get(0);
 
-            String length = argumentsSql.get(1);
+            final String length = argumentsSql.get(1);
 
             builder.append("LEFT(RIGHT(");
             builder.append(string);
@@ -349,7 +349,7 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
       case ST_ENDPOINT:
               builder.append("CAST(");
           builder.append(argumentsSql.get(0)+".STEndPoint()") ;
-              builder.append("as VARCHAR("+SybaseSqlDialect.maxSybaseVarcharSize+") )");
+              builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
           sql = builder.toString();
           break;
 
@@ -376,14 +376,14 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
       case ST_POINTN:
             builder.append("CAST(");
           builder.append(argumentsSql.get(0)+".STPointN("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.maxSybaseVarcharSize+") )");
+            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
           sql = builder.toString();
           break;
 
       case ST_STARTPOINT:
           builder.append("CAST(");
           builder.append(argumentsSql.get(0)+".STStartPoint()") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.maxSybaseVarcharSize+") )");
+            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
           sql = builder.toString();
           break;
 
@@ -395,14 +395,14 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
       case ST_EXTERIORRING:
         builder.append("CAST(");
           builder.append(argumentsSql.get(0)+".STExteriorRing()") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.maxSybaseVarcharSize+") )");
+            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
           sql = builder.toString();
           break;
 
       case ST_INTERIORRINGN:
         builder.append("CAST(");
           builder.append(argumentsSql.get(0)+".STInteriorRingN ("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.maxSybaseVarcharSize+") )");
+            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
           sql = builder.toString();
           break;
 
@@ -414,7 +414,7 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
       case ST_GEOMETRYN:
         builder.append("CAST(");
           builder.append(argumentsSql.get(0)+".STGeometryN("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.maxSybaseVarcharSize+") )");
+            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
           sql = builder.toString();
           break;
 
@@ -426,21 +426,21 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
       case ST_BOUNDARY:
         builder.append("CAST(");
           builder.append(argumentsSql.get(0)+".STBoundary()") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.maxSybaseVarcharSize+") )");
+            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
           sql = builder.toString();
           break;
 
       case ST_BUFFER:
         builder.append("CAST(");
           builder.append(argumentsSql.get(0)+".STBuffer("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.maxSybaseVarcharSize+") )");
+            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
           sql = builder.toString();
           break;
 
       case ST_CENTROID:
         builder.append("CAST(");
           builder.append(argumentsSql.get(0)+".STCentroid()") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.maxSybaseVarcharSize+") )");
+            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
           sql = builder.toString();
           break;
 
@@ -452,7 +452,7 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
       case ST_CONVEXHULL:
         builder.append("CAST(");
           builder.append(argumentsSql.get(0)+".STConvexHull()") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.maxSybaseVarcharSize+") )");
+            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
           sql = builder.toString();
           break;
 
@@ -464,7 +464,7 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
       case ST_DIFFERENCE:
         builder.append("CAST(");
           builder.append(argumentsSql.get(0)+".STDifference("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.maxSybaseVarcharSize+") )");
+            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
           sql = builder.toString();
           break;
 
@@ -476,7 +476,7 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
       case ST_DISJOINT:
         builder.append("CAST(");
           builder.append(argumentsSql.get(0)+".STDisjoint("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.maxSybaseVarcharSize+") )");
+            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
           sql = builder.toString();
           break;
 
@@ -488,7 +488,7 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
       case ST_ENVELOPE:
         builder.append("CAST(");
           builder.append(argumentsSql.get(0)+".STEnvelope()") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.maxSybaseVarcharSize+") )");
+            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
           sql = builder.toString();
           break;
 
@@ -506,7 +506,7 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
       case ST_INTERSECTION:
         builder.append("CAST(");
           builder.append(argumentsSql.get(0)+".STIntersection("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.maxSybaseVarcharSize+") )");
+            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
           sql = builder.toString();
           break;
 
@@ -532,7 +532,7 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
       case ST_SYMDIFFERENCE:
         builder.append("CAST(");
           builder.append(argumentsSql.get(0)+".STSymDifference ("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.maxSybaseVarcharSize+") )");
+            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
           sql = builder.toString();
           break;
 
@@ -544,7 +544,7 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
       case ST_UNION:
         builder.append("CAST(");
           builder.append(argumentsSql.get(0)+".STUnion("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.maxSybaseVarcharSize+") )");
+            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
           sql = builder.toString();
           break;
 
@@ -601,14 +601,14 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     @Override
-    public String visit(SqlOrderBy orderBy) throws AdapterException {
+    public String visit(final SqlOrderBy orderBy) throws AdapterException {
         // ORDER BY <expr> [ASC/DESC] [NULLS FIRST/LAST]
         // ASC and NULLS LAST are default in EXASOL
-        List<String> sqlOrderElement = new ArrayList<>();
+        final List<String> sqlOrderElement = new ArrayList<>();
         for (int i = 0; i < orderBy.getExpressions().size(); ++i) {
             String elementSql = orderBy.getExpressions().get(i).accept(this);
-            boolean isNullsLast = orderBy.nullsLast().get(i);
-            boolean isAscending = orderBy.isAscending().get(i);
+            final boolean isNullsLast = orderBy.nullsLast().get(i);
+            final boolean isAscending = orderBy.isAscending().get(i);
 
             if (!isAscending && !isNullsLast) {
                 elementSql = "(CASE WHEN " + elementSql + " IS NULL THEN 0 ELSE 1 END), " + elementSql;

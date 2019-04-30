@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.hive;
 
+import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -7,8 +8,7 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.Connection;
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.*;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
@@ -17,16 +17,21 @@ import com.exasol.adapter.sql.ScalarFunction;
 
 /**
  * Dialect for Hive, using the Cloudera Hive JDBC Driver/Connector (developed by Simba). Only supports Hive 2.1.0 and
- * later because of the order by (nulls first/last option) TODO Finish implementation of this dialect and add as a
- * supported dialect
+ * later because of the order by (nulls first/last option)
  */
 public class HiveSqlDialect extends AbstractSqlDialect {
+    private static final String NAME = "HIVE";
+    private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
+            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
+            CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
+            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
+
     public HiveSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
 
     public static String getPublicName() {
-        return "HIVE";
+        return NAME;
     }
 
     @Override
@@ -80,31 +85,17 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String applyQuoteIfNeeded(final String identifier) {
-        return applyQuote(identifier);
-    }
-
-    @Override
     public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
         return false;
     }
 
     @Override
     public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
-        // We need schema qualifiers a) if we are in IS_LOCAL mode, i.e. we run
-        // statements directly in a subselect without IMPORT FROM JDBC
-        // and b) if we don't have the schema in the jdbc connection string (like
-        // "jdbc:exa:localhost:5555;schema=native")
         return true;
     }
 
     @Override
     public NullSorting getDefaultNullSorting() {
-        // https://cwiki.apache.org/confluence/display/Hive/LanguageManual+SortBy
-        // In Hive 2.1.0 and later, specifying the null sorting order for each of
-        // the columns in the "order by" clause is supported. The default null sorting
-        // order for ASC order is NULLS FIRST, while the default null sorting order for
-        // DESC order is NULLS LAST.
         return NullSorting.NULLS_SORTED_LOW;
     }
 
@@ -126,5 +117,16 @@ public class HiveSqlDialect extends AbstractSqlDialect {
         scalarAliases.put(ScalarFunction.WEEK, "WEEKOFYEAR");
         scalarAliases.put(ScalarFunction.CURRENT_USER, "CURRENT_USER()");
         return scalarAliases;
+    }
+
+    @Override
+    public void validateProperties() throws PropertyValidationException {
+        super.validateDialectName(getPublicName());
+        super.validateProperties();
+    }
+
+    @Override
+    protected List<String> getSupportedProperties() {
+        return SUPPORTED_PROPERTIES;
     }
 }

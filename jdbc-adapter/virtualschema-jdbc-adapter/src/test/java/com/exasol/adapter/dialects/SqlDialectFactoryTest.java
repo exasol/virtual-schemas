@@ -8,8 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.sql.Connection;
 import java.util.Collections;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -34,8 +33,13 @@ class SqlDialectFactoryTest {
                 this.dummyProperties);
     }
 
+    @AfterAll
+    static void afterAll() {
+        SqlDialectRegistry.deleteInstance();
+    }
+
     @Test
-    void createSqlDialect() {
+    void testCreateSqlDialect() {
         assertThat(this.sqlDialectFactory.createSqlDialect(DIALECT_NAME), instanceOf(DummySqlDialect.class));
     }
 

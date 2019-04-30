@@ -3,7 +3,6 @@ package com.exasol.adapter.dialects.oracle;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,8 +14,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.oracle.OracleColumnMetadataReader;
-import com.exasol.adapter.dialects.oracle.OracleSqlDialect;
 import com.exasol.adapter.metadata.DataType;
 
 class OracleColumnMetadataReaderTest {
@@ -29,7 +26,7 @@ class OracleColumnMetadataReaderTest {
 
     @ValueSource(strings = { "10,2", " 10,2", " 10 , 2 " })
     @ParameterizedTest
-    void testMapColumnTypeBeyondMaximumDecimalPrecision(final String input) throws SQLException {
+    void testMapColumnTypeBeyondMaximumDecimalPrecision(final String input) {
         final int precision = DataType.MAX_EXASOL_DECIMAL_PRECISION + 1;
         final int scale = 0;
         final int castPrecision = 10;
@@ -44,13 +41,12 @@ class OracleColumnMetadataReaderTest {
 
     private JdbcTypeDescription createTypeDescriptionForNumeric(final int precision, final int scale) {
         final int octetLength = 10;
-        final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.NUMERIC, scale, precision,
+        return new JdbcTypeDescription(Types.NUMERIC, scale, precision,
                 octetLength, "NUMERIC");
-        return typeDescription;
     }
 
     @Test
-    void testMapColumnTypeWithMagicScale() throws SQLException {
+    void testMapColumnTypeWithMagicScale() {
         final int precision = 10;
         final int scale = OracleColumnMetadataReader.ORACLE_MAGIC_NUMBER_SCALE;
         final JdbcTypeDescription typeDescription = createTypeDescriptionForNumeric(precision, scale);
@@ -59,7 +55,7 @@ class OracleColumnMetadataReaderTest {
     }
 
     @Test
-    void testMapColumnTypeWithMaximumDecimalPrecision() throws SQLException {
+    void testMapColumnTypeWithMaximumDecimalPrecision() {
         final int precision = DataType.MAX_EXASOL_DECIMAL_PRECISION;
         final int scale = 0;
         final JdbcTypeDescription typeDescription = createTypeDescriptionForNumeric(precision, scale);

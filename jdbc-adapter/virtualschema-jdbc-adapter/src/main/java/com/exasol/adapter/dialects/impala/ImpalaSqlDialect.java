@@ -1,11 +1,14 @@
 package com.exasol.adapter.dialects.impala;
 
+import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 
 import java.sql.Connection;
+import java.util.Arrays;
+import java.util.List;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
@@ -17,14 +20,18 @@ import com.exasol.adapter.dialects.*;
  * See http://www.cloudera.com/documentation/enterprise/latest/topics/impala_langref.html
  */
 public class ImpalaSqlDialect extends AbstractSqlDialect {
-    public ImpalaSqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
-    }
-
     private static final String NAME = "IMPALA";
+    private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
+            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
+            CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
+            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
     public static String getPublicName() {
         return NAME;
+    }
+
+    public ImpalaSqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
     }
 
     @Override
@@ -73,21 +80,12 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String applyQuoteIfNeeded(final String identifier) {
-        return applyQuote(identifier);
-    }
-
-    @Override
     public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
         return false;
     }
 
     @Override
     public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
-        // We need schema qualifiers a) if we are in IS_LOCAL mode, i.e. we run
-        // statements directly in a subselect without IMPORT FROM JDBC
-        // and b) if we don't have the schema in the jdbc connection string (like
-        // "jdbc:exa:localhost:5555;schema=native")
         return true;
     }
 
@@ -98,23 +96,22 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
 
     @Override
     public NullSorting getDefaultNullSorting() {
-        // In Impala 1.2.1 and higher, all NULL values come at the end of the result set
-        // for ORDER BY ... ASC queries,
-        // and at the beginning of the result set for ORDER BY ... DESC queries.
-        // In effect, NULL is considered greater than all other values for sorting
-        // purposes.
-        // The original Impala behavior always put NULL values at the end, even for
-        // ORDER BY ... DESC queries.
-        // The new behavior in Impala 1.2.1 makes Impala more compatible with other
-        // popular database systems.
-        // In Impala 1.2.1 and higher, you can override or specify the sorting behavior
-        // for NULL by adding the clause
-        // NULLS FIRST or NULLS LAST at the end of the ORDER BY clause.
         return NullSorting.NULLS_SORTED_HIGH;
     }
 
     @Override
     public String getStringLiteral(final String value) {
         return "'" + value.replace("'", "''") + "'";
+    }
+
+    @Override
+    public void validateProperties() throws PropertyValidationException {
+        super.validateDialectName(getPublicName());
+        super.validateProperties();
+    }
+
+    @Override
+    protected List<String> getSupportedProperties() {
+        return SUPPORTED_PROPERTIES;
     }
 }

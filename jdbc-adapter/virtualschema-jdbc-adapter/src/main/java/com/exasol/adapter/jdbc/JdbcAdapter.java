@@ -38,6 +38,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
         registerAdapterForSqlDialect(adapter, "DB2"); // FIXME: replace this hard-coded registration
         registerAdapterForSqlDialect(adapter, "EXASOL"); // FIXME: replace this hard-coded registration
         registerAdapterForSqlDialect(adapter, "GENERIC"); // FIXME: replace this hard-coded registration
+        registerAdapterForSqlDialect(adapter, "HIVE"); // FIXME: replace this hard-coded registration
         registerAdapterForSqlDialect(adapter, "IMPALA"); // FIXME: replace this hard-coded registration
         registerAdapterForSqlDialect(adapter, "ORACLE"); // FIXME: replace this hard-coded registration
         registerAdapterForSqlDialect(adapter, "POSTGRESQL"); // FIXME: replace this hard-coded registration
@@ -56,9 +57,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     public CreateVirtualSchemaResponse createVirtualSchema(final ExaMetadata exasolMetadata,
             final CreateVirtualSchemaRequest request) throws AdapterException {
         logCreateVirtualSchemaRequestReceived(request);
-        final SchemaMetadataInfo schemaMetadataInfo = request.getSchemaMetadataInfo();
         final AdapterProperties properties = getPropertiesFromRequest(request);
-        JdbcAdapterProperties.checkPropertyConsistency(schemaMetadataInfo.getProperties());
         try {
             final SchemaMetadata remoteMeta = readMetadata(properties, exasolMetadata);
             return CreateVirtualSchemaResponse.builder().schemaMetadata(remoteMeta).build();
@@ -77,10 +76,11 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     }
 
     private SchemaMetadata readMetadata(final AdapterProperties properties, final ExaMetadata exasolMetadata)
-            throws SQLException {
+            throws SQLException, PropertyValidationException {
         final List<String> tables = properties.getFilteredTables();
         try (final Connection connection = getConnection(exasolMetadata, properties)) {
             final SqlDialect dialect = createDialect(connection, properties);
+            dialect.validateProperties();
             if (tables.isEmpty()) {
                 return dialect.readSchemaMetadata();
             } else {
@@ -90,9 +90,10 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     }
 
     private SchemaMetadata readMetadata(final AdapterProperties properties, final List<String> whiteListedRemoteTables,
-            final ExaMetadata exasolMetadata) throws SQLException {
+            final ExaMetadata exasolMetadata) throws SQLException, PropertyValidationException {
         try (final Connection connection = getConnection(exasolMetadata, properties)) {
             final SqlDialect dialect = createDialect(connection, properties);
+            dialect.validateProperties();
             return dialect.readSchemaMetadata(whiteListedRemoteTables);
         }
     }
@@ -141,7 +142,6 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     public RefreshResponse refresh(final ExaMetadata metadata, final RefreshRequest request) throws AdapterException {
         final SchemaMetadataInfo schemaMetadataInfo = request.getSchemaMetadataInfo();
         final AdapterProperties properties = getPropertiesFromRequest(request);
-        JdbcAdapterProperties.checkPropertyConsistency(schemaMetadataInfo.getProperties());
         final SchemaMetadata remoteMeta;
         try {
             if (request.refreshesOnlySelectedTables()) {
@@ -166,10 +166,9 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
         final Map<String, String> newSchemaMeta = JdbcAdapterProperties
                 .getNewProperties(schemaMetadataInfo.getProperties(), changedProperties);
         final AdapterProperties properties = new AdapterProperties(newSchemaMeta);
-        JdbcAdapterProperties.checkPropertyConsistency(newSchemaMeta);
         if (AdapterProperties.isRefreshingVirtualSchemaRequired(changedProperties)) {
             final List<String> tableFilter = JdbcAdapterProperties.getTableFilter(newSchemaMeta);
-            SchemaMetadata remoteMeta;
+            final SchemaMetadata remoteMeta;
             try {
                 remoteMeta = readMetadata(properties, tableFilter, metadata);
             } catch (final SQLException exception) {

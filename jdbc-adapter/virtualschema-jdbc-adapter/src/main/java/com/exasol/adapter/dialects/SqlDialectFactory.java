@@ -6,12 +6,22 @@ import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterProperties;
 
+/**
+ * This class implements a factory that instantiates the right SQL dialect adapter.
+ */
 public class SqlDialectFactory {
     private static final Logger LOGGER = Logger.getLogger(SqlDialectFactory.class.getName());
     private final SqlDialectRegistry sqlDialectRegistry;
     private final AdapterProperties properties;
     private final Connection connection;
 
+    /**
+     * Create a new instance of an {@link SqlDialectFactory}
+     *
+     * @param connection         JDBC connection to the remote data source
+     * @param sqlDialectRegistry registry where the available dialect implementations are listed
+     * @param properties         user-defined adapter properties
+     */
     public SqlDialectFactory(final Connection connection, final SqlDialectRegistry sqlDialectRegistry,
             final AdapterProperties properties) {
         this.connection = connection;
@@ -19,9 +29,13 @@ public class SqlDialectFactory {
         this.properties = properties;
     }
 
+    /**
+     * Create an instance of the SQL dialect adapter matching the dialect name
+     *
+     * @param dialectName name of the SQL dialect for which the factory should instantiate an adapter
+     * @return SQL dialect adapter
+     */
     public SqlDialect createSqlDialect(final String dialectName) {
-        assert (this.connection != null);
-        assert (this.properties != null);
         final Class<? extends SqlDialect> sqlDialectClass = this.sqlDialectRegistry
                 .getSqlDialectClassForName(dialectName);
         return instantiateDialect(sqlDialectClass, dialectName);

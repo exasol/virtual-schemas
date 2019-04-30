@@ -1,19 +1,19 @@
 package com.exasol.adapter.dialects.postgresql;
 
+import static com.exasol.adapter.AdapterProperties.IGNORE_ERRORS_PROPERTY;
+import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY;
+
 import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.PostgreSQLIdentifierMapping;
 import com.exasol.adapter.jdbc.*;
 
 /**
- * This class handles the specifics of mapping PostgreSQL table metadata to Exasol
+ * This class handles the specifics of mapping PostgreSQL table metadata to Exasol.
  */
 public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
     static final Logger LOGGER = Logger.getLogger(PostgreSQLTableMetadataReader.class.getName());
-    static final String POSTGRESQL_UPPERCASE_TABLES_SWITCH = "POSTGRESQL_UPPERCASE_TABLES";
-    static final String IGNORE_ERRORS_PROPERTY = "IGNORE_ERRORS";
-    static final String POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY = "POSTGRESQL_IDENTIFIER_MAPPING";
+    private static final String POSTGRESQL_UPPERCASE_TABLES_SWITCH = "POSTGRESQL_UPPERCASE_TABLES";
 
     /**
      * Create a new {@link PostgreSQLTableMetadataReader} instance
@@ -58,14 +58,14 @@ public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
     protected boolean isUppercaseTableIncludedByMapping(final String tableName) {
         if (getIdentifierMapping() == PostgreSQLIdentifierMapping.CONVERT_TO_UPPER) {
             if (ignoresUpperCaseTables()) {
-                LOGGER.fine(() -> "Ignoring PostgreSQL table \"" + tableName + "\""
-                        + "because it contains an uppercase character and " + IGNORE_ERRORS_PROPERTY + " is set to \""
-                        + POSTGRESQL_UPPERCASE_TABLES_SWITCH + "\".");
+                LOGGER.fine(() -> "Ignoring PostgreSQL table " + tableName
+                        + "because it contains an uppercase character and " + IGNORE_ERRORS_PROPERTY + " is set to "
+                        + POSTGRESQL_UPPERCASE_TABLES_SWITCH + ".");
                 return false;
             } else {
-                throw new RemoteMetadataReaderException("Table \"" + tableName
-                        + "\" cannot be used in virtual schema. Set property " + IGNORE_ERRORS_PROPERTY + " to \""
-                        + POSTGRESQL_UPPERCASE_TABLES_SWITCH + "\" to enforce schema creation.");
+                throw new RemoteMetadataReaderException("Table " + tableName
+                        + " cannot be used in virtual schema. Set property " + IGNORE_ERRORS_PROPERTY + " to "
+                        + POSTGRESQL_UPPERCASE_TABLES_SWITCH + " to enforce schema creation.");
             }
         } else {
             return true;

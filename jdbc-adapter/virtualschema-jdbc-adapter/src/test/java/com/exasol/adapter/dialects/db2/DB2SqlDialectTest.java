@@ -1,18 +1,25 @@
 package com.exasol.adapter.dialects.db2;
 
+import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.dialects.SqlDialect;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,9 +36,11 @@ class DB2SqlDialectTest {
     private SqlDialect dialect;
     @Mock
     private Connection connectionMock;
+    private Map<String, String> rawProperties;
 
     @BeforeEach
     void beforeEach() {
+        this.rawProperties = new HashMap<>();
         this.dialect = new DB2SqlDialect(this.connectionMock, AdapterProperties.emptyProperties());
     }
 
@@ -67,5 +77,42 @@ class DB2SqlDialectTest {
     void testMetadataReaderClass() {
         assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
                 instanceOf(DB2MetadataReader.class));
+    }
+
+    @Test
+    void testValidateDialectNameProperty() {
+        setMandatoryProperties("ORACLE");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
+        final SqlDialect sqlDialect = new DB2SqlDialect(null, adapterProperties);
+        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
+                sqlDialect::validateProperties);
+        MatcherAssert.assertThat(exception.getMessage(), containsString(
+                "The dialect DB2 cannot have the name ORACLE. You specified the wrong dialect name or created the wrong dialect class."));
+    }
+
+    @Test
+    void testValidateCatalogProperty() {
+        setMandatoryProperties("DB2");
+        this.rawProperties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
+        final SqlDialect sqlDialect = new DB2SqlDialect(null, adapterProperties);
+        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
+                sqlDialect::validateProperties);
+        MatcherAssert.assertThat(exception.getMessage(), containsString(
+                "The dialect DB2 does not support CATALOG_NAME property. Please, do not set the CATALOG_NAME property."));
+    }
+
+    private void setMandatoryProperties(final String sqlDialectProperty) {
+        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
+        this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN");
+    }
+
+    @Test
+    void testValidateSchemaProperty() throws PropertyValidationException {
+        setMandatoryProperties("DB2");
+        this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
+        final SqlDialect sqlDialect = new DB2SqlDialect(null, adapterProperties);
+        sqlDialect.validateProperties();
     }
 }

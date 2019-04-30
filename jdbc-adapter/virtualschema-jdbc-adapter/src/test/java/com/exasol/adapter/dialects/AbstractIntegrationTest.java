@@ -1,29 +1,16 @@
 package com.exasol.adapter.dialects;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.FileNotFoundException;
-import java.sql.Connection;
+import java.sql.*;
 import java.sql.Date;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AbstractIntegrationTest {
-
     private static Connection connection;
-
     private static IntegrationTestConfig config;
 
     public static IntegrationTestConfig getConfig() throws FileNotFoundException {
@@ -33,10 +20,8 @@ public class AbstractIntegrationTest {
         return config;
     }
 
-    /**
-     * You have to call this method with a connection to your EXASOL database during
-     * the @BeforeClass method of your integration test
-     */
+    // You have to call this method with a connection to your EXASOL database during the @BeforeClass method of your
+    // integration test
     public static void setConnection(final Connection connection) {
         AbstractIntegrationTest.connection = connection;
     }
@@ -102,7 +87,8 @@ public class AbstractIntegrationTest {
     public static void createVirtualSchema(final Connection conn, final String virtualSchemaName, final String dialect,
             final String remoteCatalog, final String remoteSchema, final String connectionName, final String user,
             final String password, final String adapter, final String remoteConnectionString, final boolean isLocal,
-            final String debugAddress, final String tableFilter, final String suffix, final String excludedCapabilities) throws SQLException {
+            final String debugAddress, final String tableFilter, final String suffix, final String excludedCapabilities)
+            throws SQLException {
         removeVirtualSchema(conn, virtualSchemaName);
         String sql = "CREATE VIRTUAL SCHEMA " + virtualSchemaName;
         sql += " USING " + adapter;
@@ -129,7 +115,9 @@ public class AbstractIntegrationTest {
             sql += " SCHEMA_NAME='" + remoteSchema + "'";
         }
         sql += " SQL_DIALECT='" + dialect + "'";
-        sql += " IS_LOCAL='" + isLocal + "'";
+        if (isLocal) {
+            sql += " IS_LOCAL='" + isLocal + "'";
+        }
         if (!debugAddress.isEmpty()) {
             sql += " DEBUG_ADDRESS='" + debugAddress + "'";
         }
@@ -149,10 +137,12 @@ public class AbstractIntegrationTest {
     public static void createVirtualSchema(final String virtualSchemaName, final String dialect,
             final String remoteCatalog, final String remoteSchema, final String connectionName, final String user,
             final String password, final String adapter, final String remoteConnectionString, final boolean isLocal,
-            final String debugAddress, final String tableFilter, final String suffix, final String excludedCapabilities) throws SQLException {
+            final String debugAddress, final String tableFilter, final String suffix, final String excludedCapabilities)
+            throws SQLException {
         checkConnection();
         createVirtualSchema(connection, virtualSchemaName, dialect, remoteCatalog, remoteSchema, connectionName, user,
-                password, adapter, remoteConnectionString, isLocal, debugAddress, tableFilter, suffix, excludedCapabilities);
+                password, adapter, remoteConnectionString, isLocal, debugAddress, tableFilter, suffix,
+                excludedCapabilities);
     }
 
     public static void createConnection(final Connection conn, final String connectionName,
@@ -160,8 +150,10 @@ public class AbstractIntegrationTest {
         removeConnection(conn, connectionName);
         String sql = "CREATE CONNECTION " + connectionName;
         sql += " TO '" + connectionString + "'";
-        sql += " USER '" + user + "'";
-        sql += " IDENTIFIED BY '" + password + "'";
+        if (!user.equals("") && !password.equals("")) {
+            sql += " USER '" + user + "'";
+            sql += " IDENTIFIED BY '" + password + "'";
+        }
         conn.createStatement().execute(sql);
     }
 
@@ -207,9 +199,8 @@ public class AbstractIntegrationTest {
     }
 
     /**
-     * This method shows the diff with the types. Normally, only the String
-     * representation is shown in the diff, so you cannot distinguish between (int)1
-     * and (long)1.
+     * This method shows the diff with the types. Normally, only the String representation is shown in the diff, so you
+     * cannot distinguish between (int)1 and (long)1.
      */
     private static String getDiffWithTypes(final List<Object> expected, final List<Object> actual) {
         final StringBuilder builder = new StringBuilder();

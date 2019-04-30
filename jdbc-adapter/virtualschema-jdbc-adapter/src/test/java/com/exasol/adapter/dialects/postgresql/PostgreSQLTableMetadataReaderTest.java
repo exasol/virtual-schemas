@@ -1,5 +1,7 @@
 package com.exasol.adapter.dialects.postgresql;
 
+import static com.exasol.adapter.AdapterProperties.IGNORE_ERRORS_PROPERTY;
+import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -13,7 +15,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.PostgreSQLIdentifierMapping;
 import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
 
 class PostgreSQLTableMetadataReaderTest {
@@ -29,7 +30,6 @@ class PostgreSQLTableMetadataReaderTest {
             "foobar    , POSTGRESQL_UPPERCASE_TABLES, CONVERT_TO_UPPER      , true", //
             "FooBar    , POSTGRESQL_UPPERCASE_TABLES, PRESERVE_ORIGINAL_CASE, true", //
             "FooBar    , NONE                       , PRESERVE_ORIGINAL_CASE, true", //
-            "FooBar    , NONE                       , CONVERT_TO_UPPER      , true", //
             "\"FooBar\", POSTGRESQL_UPPERCASE_TABLES, PRESERVE_ORIGINAL_CASE, true", //
             "\"FooBar\", NONE                       , PRESERVE_ORIGINAL_CASE, true" //
     })
@@ -42,12 +42,11 @@ class PostgreSQLTableMetadataReaderTest {
     }
 
     protected void ignoreErrors(final String ignoreErrors) {
-        this.rawProperties.put(PostgreSQLTableMetadataReader.IGNORE_ERRORS_PROPERTY, ignoreErrors);
+        this.rawProperties.put(IGNORE_ERRORS_PROPERTY, ignoreErrors);
     }
 
     protected void selectIdentifierMapping(final PostgreSQLIdentifierMapping identifierMapping) {
-        this.rawProperties.put(PostgreSQLTableMetadataReader.POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY,
-                identifierMapping.toString());
+        this.rawProperties.put(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY, identifierMapping.toString());
     }
 
     protected PostgreSQLTableMetadataReader createTableMetadataReader() {
@@ -72,7 +71,6 @@ class PostgreSQLTableMetadataReaderTest {
     @CsvSource({ //
             "foobar    , CONVERT_TO_UPPER      , FOOBAR", //
             "foobar    , PRESERVE_ORIGINAL_CASE, foobar", //
-            "FooBar    , CONVERT_TO_UPPER      , FOOBAR", //
             "FooBar    , PRESERVE_ORIGINAL_CASE, FooBar", //
             "\"FooBar\", CONVERT_TO_UPPER      , \"FooBar\"", //
             "\"FooBar\", PRESERVE_ORIGINAL_CASE, \"FooBar\"" //
@@ -83,5 +81,4 @@ class PostgreSQLTableMetadataReaderTest {
         selectIdentifierMapping(identifierMapping);
         assertThat(createTableMetadataReader().adjustIdentifierCase(original), equalTo(adjusted));
     }
-
 }

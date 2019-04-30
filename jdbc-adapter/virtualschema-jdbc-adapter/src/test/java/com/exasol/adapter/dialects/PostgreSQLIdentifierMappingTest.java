@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exasol.adapter.dialects.postgresql.PostgreSQLIdentifierMapping;
 import org.junit.jupiter.api.Test;
 
 class PostgreSQLIdentifierMappingTest {

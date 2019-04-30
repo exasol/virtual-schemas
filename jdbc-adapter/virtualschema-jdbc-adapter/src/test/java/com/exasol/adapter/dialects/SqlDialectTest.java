@@ -32,8 +32,8 @@ class SqlDialectTest {
         final SqlNode node = new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
 
         final String schemaName = "SCHEMA";
-        final String expectedSql = "SELECT NDV(C1), AVERAGE(C1), COUNT2(DISTINCT *), MAX(C1) FROM " + schemaName
-                + ".TEST";
+        final String expectedSql = "SELECT NDV(\"C1\"), AVERAGE(\"C1\"), COUNT2(DISTINCT *), MAX(\"C1\") FROM \""
+                + schemaName + "\".\"TEST\"";
 
         final Map<AggregateFunction, String> aggAliases = new EnumMap<>(AggregateFunction.class);
         final Map<ScalarFunction, String> scalarAliases = ImmutableMap.of();
@@ -68,8 +68,8 @@ class SqlDialectTest {
 
         final String schemaName = "SCHEMA";
         // ADD is infix by default, but must be non-infix after applying the alias.
-        final String expectedSql = "SELECT ABSOLUTE(C1), PLUS(C1, 100), (C1 - 100), TO_CHAR(C1), NEGATIVE(C1) FROM "
-                + schemaName + ".TEST";
+        final String expectedSql = "SELECT ABSOLUTE(\"C1\"), PLUS(\"C1\", 100), (\"C1\" - 100), TO_CHAR(\"C1\"), NEGATIVE(\"C1\") FROM \""
+                + schemaName + "\".\"TEST\"";
 
         final Map<ScalarFunction, String> scalarAliases = new EnumMap<>(ScalarFunction.class);
         scalarAliases.put(ScalarFunction.ABS, "ABSOLUTE");
@@ -201,6 +201,11 @@ class SqlDialectTest {
             }
         }
 
+        @Override
+        protected List<String> getSupportedProperties() {
+            return null;
+        }
+
         public static String getPublicName() {
             return "TEST";
         }
@@ -218,11 +223,6 @@ class SqlDialectTest {
         @Override
         public String applyQuote(final String identifier) {
             return "\"" + identifier + "\"";
-        }
-
-        @Override
-        public String applyQuoteIfNeeded(final String identifier) {
-            return identifier; // Intentionally kept simple
         }
 
         @Override
