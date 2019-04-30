@@ -21,9 +21,9 @@ import com.exasol.adapter.metadata.TableMetadata;
  */
 public class BaseRemoteMetadataReader extends AbstractMetadataReader implements RemoteMetadataReader {
     private static final Logger LOGGER = Logger.getLogger(BaseRemoteMetadataReader.class.getName());
-    protected final ColumnMetadataReader columnMetadataReader;
+    private final ColumnMetadataReader columnMetadataReader;
     private final TableMetadataReader tableMetadataReader;
-    private IdentifierConverter identifierConverter;
+    private final IdentifierConverter identifierConverter;
 
     /**
      * Create a new instance of a {@link BaseTableMetadataReader}
@@ -35,6 +35,7 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
         super(connection, properties);
         this.columnMetadataReader = createColumnMetadataReader();
         this.tableMetadataReader = createTableMetadataReader();
+        this.identifierConverter = createIdentifierConverter();
     }
 
     /**
@@ -62,11 +63,11 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
 
     /**
      * Create a converter that translates identifiers from the remote data source to the Exasol representation
-     * 
+     *
      * @return identifier converter
      */
-    protected void createIdentifierConverter() {
-        IdentifierConverter.createDefault();
+    protected IdentifierConverter createIdentifierConverter() {
+        return IdentifierConverter.createDefault();
     }
 
     /**
