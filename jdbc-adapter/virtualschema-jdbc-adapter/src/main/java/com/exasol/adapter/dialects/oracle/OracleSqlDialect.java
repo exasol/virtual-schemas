@@ -114,11 +114,6 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String applyQuoteIfNeeded(final String identifier) {
-        return applyQuote(identifier);
-    }
-
-    @Override
     public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
         return false;
     }

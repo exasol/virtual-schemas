@@ -89,13 +89,6 @@ public interface SqlDialect {
     public String applyQuote(String identifier);
 
     /**
-     * @param identifier The name of an identifier (table or column).
-     * @return the quoted identifier, if this name requires quoting, or the unquoted identifier, if no quoting is
-     *         required.
-     */
-    public String applyQuoteIfNeeded(String identifier);
-
-    /**
      * Check whether the dialect expects table identifiers to be qualified with the catalog
      *
      * <p>
@@ -104,6 +97,8 @@ public interface SqlDialect {
      * <code>SELECT * FROM MY_CATALOG.MY_TABLE</code>
      * <p>
      * Can be combined with {@link #requiresSchemaQualifiedTableNames(SqlGenerationContext)}
+     *
+     * @param context context for SQL generation
      *
      * @return <code>true</code> if table names must be catalog-qualified
      */
@@ -118,6 +113,8 @@ public interface SqlDialect {
      * <code>SELECT * FROM MY_SCHEMA.MY_TABLE</code>
      * <p>
      * Can be combined with {@link #requiresCatalogQualifiedTableNames(SqlGenerationContext)}
+     *
+     * @param context context for SQL generation
      *
      * @return <code>true</code> if table names must be schema-qualified
      */
@@ -190,6 +187,10 @@ public interface SqlDialect {
     public Map<AggregateFunction, String> getAggregateFunctionAliases();
 
     /**
+     * Check whether a parentheses should be omitted for a function
+     *
+     * @param function function for which the necessity of parentheses is evaluated
+     *
      * @return Returns true for functions with zero arguments if they do not require parentheses (e.g. SYSDATE).
      */
     public boolean omitParentheses(ScalarFunction function);
@@ -243,7 +244,7 @@ public interface SqlDialect {
 
     /**
      * Validate user-defined properties and throw exception if they are incorrect
-     * 
+     *
      * @throws PropertyValidationException if some properties are used incorrectly
      */
     public void validateProperties() throws PropertyValidationException;

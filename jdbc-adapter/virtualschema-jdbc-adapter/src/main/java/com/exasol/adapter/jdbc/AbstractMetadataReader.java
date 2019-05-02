@@ -19,7 +19,7 @@ public abstract class AbstractMetadataReader implements MetadataReader {
     /**
      * Create an {@link AbstractMetadataReader}
      *
-     * @param connection JDBC connection to the remote data source
+     * @param connection JDBC connection to remote data source
      * @param properties user-defined adapter properties
      */
     public AbstractMetadataReader(final Connection connection, final AdapterProperties properties) {

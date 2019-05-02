@@ -21,7 +21,7 @@ public class JdbcTypeDescription {
      * @param jdbcType        type identifier as presented by the JDBC driver of the database
      * @param decimalScale    number of digits behind the point
      * @param precisionOrSize precision for numbers or size for size types (like <code>VARCHAR</code>)
-     * @param charOctedLength storage size the data type needs in bytes
+     * @param charOctetLength storage size the data type needs in bytes
      * @param typeName        original name the type has in the database
      */
     public JdbcTypeDescription(final int jdbcType, final int decimalScale, final int precisionOrSize,
