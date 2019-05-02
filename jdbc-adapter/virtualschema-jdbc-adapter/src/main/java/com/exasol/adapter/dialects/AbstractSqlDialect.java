@@ -1,243 +1,57 @@
 package com.exasol.adapter.dialects;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.*;
+import static com.exasol.adapter.AdapterProperties.*;
 
-import com.exasol.adapter.jdbc.ColumnAdapterNotes;
-import com.exasol.adapter.jdbc.ConnectionInformation;
-import com.exasol.adapter.jdbc.JdbcAdapterProperties;
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.DataType;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.jdbc.*;
+import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
 /**
- * Abstract implementation of a dialect. We recommend that every dialect should
- * extend this abstract class.
- *
- * TODO Find solution to handle unsupported types (e.g. exceeding varchar size).
- * E.g. skip column or always truncate or add const-null column or throw error
- * or make configurable
+ * Abstract implementation of a dialect. We recommend that every dialect should extend this abstract class.
  */
 public abstract class AbstractSqlDialect implements SqlDialect {
+    private static final Pattern BOOLEAN_PROPERTY_VALUE_PATTERN = Pattern.compile("^TRUE$|^FALSE$",
+            Pattern.CASE_INSENSITIVE);
+    protected Set<ScalarFunction> omitParenthesesMap = EnumSet.noneOf(ScalarFunction.class);
+    protected RemoteMetadataReader remoteMetadataReader;
+    protected AdapterProperties properties;
+    protected final Connection connection;
 
-    protected Set<ScalarFunction> omitParenthesesMap = new HashSet<>();
+    /**
+     * Create a new instance of an {@link AbstractSqlDialect}
+     *
+     * @param connection JDBC connection to remote data source
+     * @param properties user properties
+     */
+    public AbstractSqlDialect(final Connection connection, final AdapterProperties properties) {
+        this.connection = connection;
+        this.properties = properties;
+        this.remoteMetadataReader = createRemoteMetadataReader();
+    }
 
-    private final SqlDialectContext context;
-
-    public AbstractSqlDialect(final SqlDialectContext context) {
-        this.context = context;
+    /**
+     * Create the {@link RemoteMetadataReader} that is used to get the database metadata from the remote source.
+     * <p>
+     * Override this method in the concrete SQL dialect implementation if the dialect requires non-standard metadata
+     * mapping.
+     *
+     * @return metadata reader
+     */
+    protected RemoteMetadataReader createRemoteMetadataReader() {
+        return new BaseRemoteMetadataReader(this.connection, this.properties);
     }
 
     @Override
     public String getTableCatalogAndSchemaSeparator() {
         return ".";
-    }
-
-    @Override
-    public MappedTable mapTable(final ResultSet tables, final List<String> ignoreErrorList) throws SQLException {
-        String commentString = tables.getString("REMARKS");
-        if (commentString == null) {
-            commentString = "";
-        }
-        final String tableName = changeIdentifierCaseIfNeeded(tables.getString("TABLE_NAME"));
-        return MappedTable.createMappedTable(tableName, tables.getString("TABLE_NAME"), commentString);
-    }
-
-    @Override
-    public ColumnMetadata mapColumn(final ResultSet columns) throws SQLException {
-        final String colName = changeIdentifierCaseIfNeeded(columns.getString("COLUMN_NAME"));
-        final int jdbcType = columns.getInt("DATA_TYPE");
-        final int decimalScale = columns.getInt("DECIMAL_DIGITS");
-        final int precisionOrSize = columns.getInt("COLUMN_SIZE");
-        final int charOctedLength = columns.getInt("CHAR_OCTET_LENGTH");
-        final String typeName = columns.getString("TYPE_NAME");
-        final JdbcTypeDescription jdbcTypeDescription = new JdbcTypeDescription(jdbcType, decimalScale, precisionOrSize,
-                charOctedLength, typeName);
-        // Check if dialect want's to handle this row
-        final DataType colType = mapJdbcType(jdbcTypeDescription);
-
-        // Nullable
-        boolean isNullable = true;
-        try {
-            final String nullable = columns.getString("IS_NULLABLE");
-            if (nullable != null && nullable.toLowerCase().equals("no")) {
-                isNullable = false;
-            }
-        } catch (final SQLException ex) {
-            // ignore me
-        }
-
-        // Identity
-
-        boolean isIdentity = false;
-        try {
-            final String identity = columns.getString("IS_AUTOINCREMENT");
-            if (identity != null && identity.toLowerCase().equals("yes")) {
-                isIdentity = true;
-            }
-        } catch (final SQLException ex) {
-            // ignore me --some older JDBC drivers (Java 1.5) don't support IS_AUTOINCREMENT
-        }
-
-        // Default
-        String defaultValue = "";
-        try {
-            final String defaultString = columns.getString("COLUMN_DEF");
-            if (defaultString != null) {
-                defaultValue = defaultString;
-            }
-        } catch (final SQLException ex) {
-            // ignore me
-        }
-
-        // Comment
-        String comment = "";
-        try {
-            final String commentString = columns.getString("REMARKS");
-            if (commentString != null && !commentString.isEmpty()) {
-                comment = commentString;
-            }
-        } catch (final SQLException ex) {
-            // ignore me
-        }
-
-        // Column type
-        String columnTypeName = columns.getString("TYPE_NAME");
-        if (columnTypeName == null) {
-            columnTypeName = "";
-        }
-        final String adapterNotes = ColumnAdapterNotes.serialize(new ColumnAdapterNotes(jdbcType, columnTypeName));
-        return new ColumnMetadata(colName, adapterNotes, colType, isNullable, isIdentity, defaultValue, comment);
-    }
-
-    private static DataType getExaTypeFromJdbcType(final JdbcTypeDescription jdbcTypeDescription) throws SQLException {
-        final DataType colType;
-        switch (jdbcTypeDescription.getJdbcType()) {
-        case Types.TINYINT:
-        case Types.SMALLINT:
-            if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-                final int precision = jdbcTypeDescription.getPrecisionOrSize() == 0 ? 9
-                        : jdbcTypeDescription.getPrecisionOrSize();
-                colType = DataType.createDecimal(precision, 0);
-            } else {
-                colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            }
-            break;
-        case Types.INTEGER:
-            if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-                final int precision = jdbcTypeDescription.getPrecisionOrSize() == 0 ? 18
-                        : jdbcTypeDescription.getPrecisionOrSize();
-                colType = DataType.createDecimal(precision, 0);
-            } else {
-                colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            }
-            break;
-        case Types.BIGINT: // Java type long
-            if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-                final int precision = jdbcTypeDescription.getPrecisionOrSize() == 0 ? 36
-                        : jdbcTypeDescription.getPrecisionOrSize();
-                colType = DataType.createDecimal(precision, 0);
-            } else {
-                colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            }
-            break;
-        case Types.DECIMAL:
-
-            if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-                colType = DataType.createDecimal(jdbcTypeDescription.getPrecisionOrSize(),
-                        jdbcTypeDescription.getDecimalScale());
-            } else {
-                colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            }
-            break;
-        case Types.NUMERIC: // Java BigInteger
-            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            break;
-        case Types.REAL:
-        case Types.FLOAT:
-        case Types.DOUBLE:
-            colType = DataType.createDouble();
-            break;
-        case Types.VARCHAR:
-        case Types.NVARCHAR:
-        case Types.LONGVARCHAR:
-        case Types.LONGNVARCHAR: {
-            final DataType.ExaCharset charset = (jdbcTypeDescription.getCharOctedLength() == jdbcTypeDescription
-                    .getPrecisionOrSize()) ? DataType.ExaCharset.ASCII : DataType.ExaCharset.UTF8;
-            if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_VARCHAR_SIZE) {
-                final int precision = jdbcTypeDescription.getPrecisionOrSize() == 0 ? DataType.MAX_EXASOL_VARCHAR_SIZE
-                        : jdbcTypeDescription.getPrecisionOrSize();
-                colType = DataType.createVarChar(precision, charset);
-            } else {
-                colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, charset);
-            }
-            break;
-        }
-        case Types.CHAR:
-        case Types.NCHAR: {
-            final DataType.ExaCharset charset = (jdbcTypeDescription.getCharOctedLength() == jdbcTypeDescription
-                    .getPrecisionOrSize()) ? DataType.ExaCharset.ASCII : DataType.ExaCharset.UTF8;
-            if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_CHAR_SIZE) {
-                colType = DataType.createChar(jdbcTypeDescription.getPrecisionOrSize(), charset);
-            } else {
-                if (jdbcTypeDescription.getPrecisionOrSize() <= DataType.MAX_EXASOL_VARCHAR_SIZE) {
-                    colType = DataType.createVarChar(jdbcTypeDescription.getPrecisionOrSize(), charset);
-                } else {
-                    colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, charset);
-                }
-            }
-            break;
-        }
-        case Types.DATE:
-            colType = DataType.createDate();
-            break;
-        case Types.TIMESTAMP:
-            colType = DataType.createTimestamp(false);
-            break;
-        case Types.TIME:
-            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            break;
-        case Types.BIT:
-        case Types.BOOLEAN:
-            colType = DataType.createBool();
-            break;
-        case Types.BINARY:
-        case Types.VARBINARY:
-        case Types.LONGVARBINARY:
-        case Types.BLOB:
-        case Types.CLOB:
-        case Types.NCLOB:
-            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, DataType.ExaCharset.UTF8);
-            break;
-        case Types.OTHER:
-        case Types.JAVA_OBJECT:
-        case Types.DISTINCT:
-        case Types.STRUCT:
-        case Types.ARRAY:
-        case Types.REF:
-        case Types.DATALINK:
-        case Types.SQLXML:
-        case Types.NULL:
-        default:
-            throw new RuntimeException("Unsupported data type (" + jdbcTypeDescription.getJdbcType()
-                    + ") found in source system, should never happen");
-        }
-        assert (colType != null);
-        return colType;
-    }
-
-    public String changeIdentifierCaseIfNeeded(final String identifier) {
-        if (getQuotedIdentifierHandling() == getUnquotedIdentifierHandling()) {
-            if (getQuotedIdentifierHandling() != IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE) {
-                // Completely case-insensitive. We can store everything uppercase to allow
-                // working with unquoted identifiers in EXASOL
-                return identifier.toUpperCase();
-            }
-        }
-        return identifier;
     }
 
     @Override
@@ -251,25 +65,13 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     }
 
     @Override
-    public abstract DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcType) throws SQLException;
-
-    @Override
-    public final DataType mapJdbcType(final JdbcTypeDescription jdbcType) throws SQLException {
-        DataType type = dialectSpecificMapJdbcType(jdbcType);
-        if (type == null) {
-            type = getExaTypeFromJdbcType(jdbcType);
-        }
-        return type;
-    }
-
-    @Override
     public Map<ScalarFunction, String> getScalarFunctionAliases() {
         return new EnumMap<>(ScalarFunction.class);
     }
 
     @Override
     public Map<AggregateFunction, String> getAggregateFunctionAliases() {
-        final Map<AggregateFunction, String> aliases = new HashMap<>();
+        final Map<AggregateFunction, String> aliases = new EnumMap<>(AggregateFunction.class);
         aliases.put(AggregateFunction.GEO_INTERSECTION_AGGREGATE, "ST_INTERSECTION");
         aliases.put(AggregateFunction.GEO_UNION_AGGREGATE, "ST_UNION");
         return aliases;
@@ -277,7 +79,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
 
     @Override
     public Map<ScalarFunction, String> getBinaryInfixFunctionAliases() {
-        final Map<ScalarFunction, String> aliases = new HashMap<>();
+        final Map<ScalarFunction, String> aliases = new EnumMap<>(ScalarFunction.class);
         aliases.put(ScalarFunction.ADD, "+");
         aliases.put(ScalarFunction.SUB, "-");
         aliases.put(ScalarFunction.MULT, "*");
@@ -287,31 +89,192 @@ public abstract class AbstractSqlDialect implements SqlDialect {
 
     @Override
     public Map<ScalarFunction, String> getPrefixFunctionAliases() {
-        final Map<ScalarFunction, String> aliases = new HashMap<>();
+        final Map<ScalarFunction, String> aliases = new EnumMap<>(ScalarFunction.class);
         aliases.put(ScalarFunction.NEG, "-");
         return aliases;
     }
 
-    public SqlDialectContext getContext() {
-        return this.context;
-    }
-
     @Override
-    public void handleException(final SQLException exception,
-            final JdbcAdapterProperties.ExceptionHandlingMode exceptionMode) throws SQLException {
-        throw exception;
-    };
-
-    @Override
-    public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription, final String pushdownSql) {
+    public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription,
+            final String pushdownSql) {
         final StringBuilder jdbcImportQuery = new StringBuilder();
         if (columnDescription == null) {
             jdbcImportQuery.append("IMPORT FROM JDBC AT ").append(connectionInformation.getCredentials());
         } else {
-            jdbcImportQuery.append("IMPORT INTO ").append(columnDescription);
+            jdbcImportQuery.append("IMPORT INTO ").append("(").append(columnDescription).append(")");
             jdbcImportQuery.append(" FROM JDBC AT ").append(connectionInformation.getCredentials());
         }
         jdbcImportQuery.append(" STATEMENT '").append(pushdownSql.replace("'", "''")).append("'");
         return jdbcImportQuery.toString();
+    }
+
+    @Override
+    public SchemaMetadata readSchemaMetadata() throws SQLException {
+        return this.remoteMetadataReader.readRemoteSchemaMetadata();
+    }
+
+    @Override
+    public SchemaMetadata readSchemaMetadata(final List<String> tables) {
+        return this.remoteMetadataReader.readRemoteSchemaMetadata(tables);
+    }
+
+    @Override
+    public String describeQueryResultColumns(final String query) throws SQLException {
+        final ColumnMetadataReader columnMetadataReader = this.remoteMetadataReader.getColumnMetadataReader();
+        final ResultSetMetadataReader resultSetMetadataReader = new ResultSetMetadataReader(this.connection,
+                columnMetadataReader);
+        return resultSetMetadataReader.describeColumns(query);
+    }
+
+    @Override
+    public void validateProperties() throws PropertyValidationException {
+        validateSupportedPropertiesList();
+        validateConnectionProperties();
+        validateCatalogNameProperty();
+        validateSchemaNameProperty();
+        validateDebugOutputAddress();
+        validateExceptionHandling();
+    }
+
+    protected void validateSupportedPropertiesList() throws PropertyValidationException {
+        final List<String> allProperties = new ArrayList<>(this.properties.keySet());
+        for (final String property : allProperties) {
+            if (!getSupportedProperties().contains(property)) {
+                throw new PropertyValidationException(
+                        "The dialect " + this.properties.getSqlDialect() + " does not support " + property
+                                + " property. Please, do not set the " + property + " property.");
+            }
+        }
+    }
+
+    protected abstract List<String> getSupportedProperties();
+
+    private void validateConnectionProperties() throws PropertyValidationException {
+        if (this.properties.containsKey(CONNECTION_NAME_PROPERTY)) {
+            if (this.properties.containsKey(CONNECTION_STRING_PROPERTY)
+                    || this.properties.containsKey(USERNAME_PROPERTY)
+                    || this.properties.containsKey(PASSWORD_PROPERTY)) {
+                throw new PropertyValidationException("You specified a connection using the property "
+                        + CONNECTION_NAME_PROPERTY + " and therefore should not specify the properties "
+                        + CONNECTION_STRING_PROPERTY + ", " + USERNAME_PROPERTY + " and " + PASSWORD_PROPERTY);
+            }
+        } else {
+            if (!this.properties.containsKey(CONNECTION_STRING_PROPERTY)) {
+                throw new PropertyValidationException(
+                        "You did not specify a connection using the property " + CONNECTION_NAME_PROPERTY
+                                + " and therefore have to specify the property " + CONNECTION_STRING_PROPERTY);
+            }
+        }
+    }
+
+    private void validateCatalogNameProperty() throws PropertyValidationException {
+        if (this.properties.containsKey(CATALOG_NAME_PROPERTY)
+                && (supportsJdbcCatalogs() == StructureElementSupport.NONE)) {
+            throw new PropertyValidationException("The dialect " + this.properties.getSqlDialect()
+                    + " does not support catalogs. Please, do not set the " + CATALOG_NAME_PROPERTY + " property.");
+        }
+    }
+
+    private void validateSchemaNameProperty() throws PropertyValidationException {
+        if (this.properties.containsKey(SCHEMA_NAME_PROPERTY)
+                && (supportsJdbcSchemas() == StructureElementSupport.NONE)) {
+            throw new PropertyValidationException("The dialect " + this.properties.getSqlDialect()
+                    + " does not support schemas. Please, do not set the " + SCHEMA_NAME_PROPERTY + " property.");
+        }
+    }
+
+    protected void validateBooleanProperty(final String property) throws PropertyValidationException {
+        if (this.properties.containsKey(property) //
+                && !BOOLEAN_PROPERTY_VALUE_PATTERN.matcher(this.properties.get(property)).matches()) {
+            throw new PropertyValidationException("The value '" + this.properties.get(property) + "' for the property "
+                    + property + " is invalid. It has to be either 'true' or 'false' (case insensitive).");
+        }
+    }
+
+    private void validateDebugOutputAddress() throws PropertyValidationException {
+        if (this.properties.containsKey(DEBUG_ADDRESS_PROPERTY)) {
+            final String debugAddress = this.properties.getDebugAddress();
+            if (!debugAddress.isEmpty()) {
+                final String error = "You specified an invalid hostname and port where a log receiver (e.g. `netcat`) "
+                        + "is listening for incoming connections. The value of the property " + DEBUG_ADDRESS_PROPERTY
+                        + "must adhere to the following format: <host>:<port>, where host is a host name or IP address.";
+                if (debugAddress.split(":").length != 2) {
+                    throw new PropertyValidationException(error);
+                }
+                try {
+                    Integer.parseInt(debugAddress.split(":")[1]);
+                } catch (final NumberFormatException ex) {
+                    throw new PropertyValidationException(error);
+                }
+            }
+        }
+    }
+
+    private void validateExceptionHandling() throws PropertyValidationException {
+        if (this.properties.containsKey(EXCEPTION_HANDLING_PROPERTY)) {
+            final String exceptionHandling = this.properties.getExceptionHandling();
+            if (!((exceptionHandling == null) || exceptionHandling.isEmpty())) {
+                for (final AbstractSqlDialect.ExceptionHandlingMode mode : AbstractSqlDialect.ExceptionHandlingMode
+                        .values()) {
+                    if (!mode.name().equals(exceptionHandling)) {
+                        throw new PropertyValidationException(
+                                "Invalid value '" + exceptionHandling + "' for property " + EXCEPTION_HANDLING_PROPERTY
+                                        + ". Choose one of: " + ExceptionHandlingMode.IGNORE_INVALID_VIEWS.name() + ", "
+                                        + ExceptionHandlingMode.NONE.name());
+                    }
+                }
+            }
+        }
+    }
+
+    protected void validateDialectName(final String dialectName) throws PropertyValidationException {
+        final String availableDialects = "Available dialects: " + SqlDialectRegistry.getInstance().getDialectsString();
+        checkIfContainsDialectName(availableDialects);
+        checkIfDialectIsSupported(availableDialects);
+        checkIfNameIsConsistent(dialectName);
+    }
+
+    private void checkIfContainsDialectName(final String availableDialects) throws PropertyValidationException {
+        if (!this.properties.containsKey(SQL_DIALECT_PROPERTY)) {
+            throw new PropertyValidationException(
+                    "You have to specify the SQL dialect (" + SQL_DIALECT_PROPERTY + "). " + availableDialects);
+        }
+    }
+
+    private void checkIfDialectIsSupported(final String availableDialects) throws PropertyValidationException {
+        if (!SqlDialectRegistry.getInstance().isSupported(this.properties.getSqlDialect())) {
+            throw new PropertyValidationException(
+                    "SQL Dialect \"" + this.properties.getSqlDialect() + "\" is not supported. " + availableDialects);
+        }
+    }
+
+    private void checkIfNameIsConsistent(final String dialectName) throws PropertyValidationException {
+        if (!this.properties.getSqlDialect().equals(dialectName)) {
+            throw new PropertyValidationException(
+                    "The dialect " + dialectName + " cannot have the name " + this.properties.getSqlDialect()
+                            + ". You specified the wrong dialect name or created the wrong dialect class.");
+        }
+    }
+
+    protected void checkImportPropertyConsistency(final String importFromProperty, final String connectionProperty)
+            throws PropertyValidationException {
+        final boolean isDirectImport = this.properties.isEnabled(importFromProperty);
+        final String value = this.properties.get(connectionProperty);
+        final boolean connectionIsEmpty = ((value == null) || value.isEmpty());
+        if (isDirectImport) {
+            if (connectionIsEmpty) {
+                throw new PropertyValidationException("You defined the property " + importFromProperty
+                        + ", please also define " + connectionProperty);
+            }
+        } else {
+            if (!connectionIsEmpty) {
+                throw new PropertyValidationException("You defined the property " + connectionProperty
+                        + " without setting " + importFromProperty + " to 'TRUE'. This is not allowed");
+            }
+        }
+    }
+
+    List<String> getIgnoredErrors() {
+        return this.properties.getIgnoredErrors().stream().map(String::toUpperCase).collect(Collectors.toList());
     }
 }

@@ -1,328 +1,203 @@
 package com.exasol.adapter.dialects;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.jdbc.ConnectionInformation;
-import com.exasol.adapter.jdbc.JdbcAdapterProperties;
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
 /**
- * Interface for the implementation of a SQL dialect. All data source specific
- * logic is specified here.
- *
+ * Interface for the implementation of a SQL dialect.
  * <p>
- * The responsibilities of a dialect can be be divided into 3 areas:
- * </p>
- *
+ * Dialects define the capabilities and the behavior of the adapter implementation for a specific remote database.
  * <p>
- * <b>1. Capabilities:</b><br>
- * The dialect defines the set of supported capabilities. See
- * {@link #getCapabilities()} for details.
- * </p>
+ * For information about how the metadata of the remote data source is mapped, please refer to the list of interfaces
+ * below.
  *
- * <p>
- * <b>2. Data Type Mapping:</b><br>
- * The dialect defines, how the tables in the data source are mapped to EXASOL
- * virtual tables. In particular the data types have to be mapped to EXASOL data
- * types. See {@link #mapJdbcType(JdbcTypeDescription)} for details.
- * </p>
- *
- * <p>
- * <b>3. SQL Generation:</b><br>
- * The dialect defines how to generate SQL statements in the data source syntax.
- * The dialect provides several methods to customize quoting, case-sensitivity,
- * function name aliases, and other aspects of the syntax.
- *
- * The actual SQL generation is done by the separate class
- * {@link SqlGenerationVisitor} (it uses the visitor pattern). For things like
- * quoting and case-sensitivity, the SQL generation visitor will ask the dialect
- * how to handle them.
- *
- * If your dialect has a special SQL syntax which cannot be realized using the
- * methods of {@link SqlDialect}, then you can implement your own SQL generation
- * visitor which extends {@link SqlGenerationVisitor}. Your custom visitor must
- * then be returned by {@link #getSqlGenerationVisitor(SqlGenerationContext)}.
- * For an example look at
- * {@link com.exasol.adapter.dialects.impl.OracleSqlGenerationVisitor}.
- * </p>
- *
- * <b>Notes for developing a dialect</b>
- *
- * <p>
- * Create a class for your integration test, with the suffix IT.java.
- * </p>
- *
- * <p>
- * We recommend to extend the abstract class {@link AbstractSqlDialect} instead
- * of directly implementing {@link SqlDialect}.
- * </p>
+ * @see com.exasol.adapter.jdbc.RemoteMetadataReader
+ * @see com.exasol.adapter.jdbc.TableMetadataReader
+ * @see com.exasol.adapter.jdbc.ColumnMetadataReader
  */
 public interface SqlDialect {
-
     /**
-     * @return the name that can be used to choose this dialect (user can give this
-     *         name). Case insensitive.
+     * @return the name that can be used to choose this dialect (user can give this name). Case insensitive.
      */
     public static String getPublicName() {
         return "SqlDialect interface";
-    };
-
-    //
-    // CAPABILITIES
-    //
+    }
 
     /**
      * @return The set of capabilities supported by this SQL-Dialect
      */
     public Capabilities getCapabilities();
 
-    //
-    // MAPPING OF METADATA: CATALOGS, SCHEMAS, TABLES AND DATA TYPES
-    //
-
-    public enum SchemaOrCatalogSupport {
-        SUPPORTED, UNSUPPORTED, UNKNOWN
+    /**
+     * Multiplicity that the remote data source supports for a structural element like catalogs or a schemas.
+     * <p>
+     * <dl>
+     * <dt><code>NONE</code></dt>
+     * <dd>database does not support the structural element</dd>
+     * <dt><code>SINGLE</code></dt>
+     * <dd>database uses a single (pseudo) structural element</dd>
+     * <dt><code>MULTIPLE</code></dt>
+     * <dd>database truly supports this element with multiple possible entries</dd>
+     * <dt><code>AUTO_DETECT</code></dt>
+     * <dd>dialect auto-detects support for this element</dd>
+     * </dl>
+     * </p>
+     * Dialects that support a single database should not use <code>AUTO_DETECT</code> because this unnecessarily costs
+     * performance.
+     */
+    public enum StructureElementSupport {
+        NONE, SINGLE, MULTIPLE, AUTO_DETECT
     }
 
     /**
-     * @return True, if the database "truly" supports the concept of JDBC catalogs
-     *         (not just a single dummy catalog). If true, the user must specify the
-     *         catalog. False, if the database does not have a catalog concept, e.g.
-     *         if it has no catalogs, or a single dummy catalog, or even if it
-     *         throws an Exception for {@link DatabaseMetaData#getCatalogs()}. If
-     *         false, the user must not specify the catalog.
+     * This enumeration specifies different exception handling strategies
      */
-    public SchemaOrCatalogSupport supportsJdbcCatalogs();
-
-    /**
-     * @return True, if the database "truly" supports the concept of JDBC schemas
-     *         (not just a single dummy schema). If true, the user must specify the
-     *         schema. False, if the database does not have a schema concept, e.g.
-     *         if it has no schemas, or a single dummy schemas, or even if it throws
-     *         an Exception for {@link DatabaseMetaData#getSchemas()}. If false, the
-     *         user must not specify the schema.
-     */
-    public SchemaOrCatalogSupport supportsJdbcSchemas();
-
-    public class MappedTable {
-        private boolean isIgnored = false;
-        private String tableName = "";
-        private String originalName = "";
-        private String tableComment = "";
-
-        public static MappedTable createMappedTable(final String tableName, final String originalName,
-                final String tableComment) {
-            final MappedTable t = new MappedTable();
-            t.isIgnored = false;
-            t.tableName = tableName;
-            t.originalName = originalName;
-            t.tableComment = tableComment;
-            return t;
-        }
-
-        public static MappedTable createIgnoredTable() {
-            final MappedTable t = new MappedTable();
-            t.isIgnored = true;
-            return t;
-        }
-
-        public boolean isIgnored() {
-            return isIgnored;
-        }
-
-        public String getTableName() {
-            return tableName;
-        }
-
-        public String getOriginalTableName() {
-            return originalName;
-        }
-
-        public String getTableComment() {
-            return tableComment;
-        }
+    public enum ExceptionHandlingMode {
+        IGNORE_INVALID_VIEWS, NONE
     }
 
     /**
-     * @param tables A jdbc Resultset for the
-     *               {@link DatabaseMetaData#getTables(String, String, String, String[])}
-     *               call, pointing to the current table.
-     * @param ignoreErrorList The elements of this list suppress certain errors the adapter would throw
-     * @return An instance of {@link MappedTable} describing the mapped table.
-     */
-    public MappedTable mapTable(ResultSet tables, final List<String> ignoreErrorList) throws SQLException;
-
-    /**
-     * @param columns A jdbc Resultset for the
-     *                {@link DatabaseMetaData#getColumns(String, String, String, String)}
-     *                call, pointing to the current column.
-     * @return The mapped column
-     * @throws SQLException
-     */
-    public ColumnMetadata mapColumn(ResultSet columns) throws SQLException;
-
-    /**
-     * Maps the jdbc datatype information of a column to the EXASOL datatype of the
-     * column. The dialect can also return null, so that the default mapping occurs.
-     * This method will be called by {@link #mapJdbcType(JdbcTypeDescription)} in
-     * the default implementation.
+     * Define whether the remote source supports catalogs and if it does, whether is supports a single "pseudo" catalog
+     * or multiple catalogs.
      *
-     * @param jdbcType A jdbc type description
-     * @return Either null, if the default datatype mapping shall be applied, or the
-     *         datatype which the current column shall be mapped to. This datatype
-     *         will be used as the datatype in the virtual table and in the pushdown
-     *         sql.
+     * @return <code>NONE</code> if the dialect does not support catalogs at all, <code>SINGLE</code> if it supports
+     *         exactly one (like e.g. Exasol) or <code>MULTIPLE</code> if real catalogs are supported.
+     */
+    public StructureElementSupport supportsJdbcCatalogs();
+
+    /**
+     * Define whether the remote source supports schemas and if it does, whether is supports a single "pseudo" schema or
+     * multiple schemas.
      *
+     * @return <code>NONE</code> if the dialect does not support schemas at all, <code>SINGLE</code> if it supports
+     *         exactly one (like e.g. Exasol) or <code>MULTIPLE</code> if real schemas are supported.
      */
-    public DataType dialectSpecificMapJdbcType(JdbcTypeDescription jdbcType) throws SQLException;
+    public StructureElementSupport supportsJdbcSchemas();
 
     /**
-     * Maps the jdbc datatype information of a column to the EXASOL datatype of the
-     * column. This method will be called by {@link #mapColumn(ResultSet)} in the
-     * default implementation.
-     *
-     * @param jdbcType A jdbc type description
-     * @return Either null, if the default datatype mapping shall be applied, or the
-     *         datatype which the current column shall be mapped to. This datatype
-     *         will be used as the datatype in the virtual table and in the pushdown
-     *         sql.
-     *
-     */
-    public DataType mapJdbcType(JdbcTypeDescription jdbcType) throws SQLException;
-
-    //
-    // SQL GENERATION
-    //
-
-    /**
-     * How unquoted or quoted identifiers in queries or DDLs are handled
-     */
-    public enum IdentifierCaseHandling {
-        INTERPRET_AS_LOWER, INTERPRET_AS_UPPER, INTERPRET_CASE_SENSITIVE
-    }
-
-    /**
-     * @return How to handle case sensitivity of unquoted identifiers
-     */
-    public IdentifierCaseHandling getUnquotedIdentifierHandling();
-
-    /**
-     * @return How to handle case sensitivity of quoted identifiers
-     */
-    public IdentifierCaseHandling getQuotedIdentifierHandling();
-
-    /**
-     * @param identifier The name of an identifier (table or column). If identifiers
-     *                   are case sensitive, the identifier must be passed
-     *                   case-sensitive of course.
+     * @param identifier The name of an identifier (table or column). If identifiers are case sensitive, the identifier
+     *                   must be passed case-sensitive of course.
      * @return the quoted identifier, also if quoting is not required
      */
     public String applyQuote(String identifier);
 
     /**
-     * @param identifier The name of an identifier (table or column).
-     * @return the quoted identifier, if this name requires quoting, or the unquoted
-     *         identifier, if no quoting is required.
-     */
-    public String applyQuoteIfNeeded(String identifier);
-
-    /**
-     * @return True if table names must be catalog-qualified, e.g. SELECT * FROM
-     *         MY_CATALOG.MY_TABLE, otherwise false. Can be combined with
-     *         {@link #requiresSchemaQualifiedTableNames(SqlGenerationContext)}
+     * Check whether the dialect expects table identifiers to be qualified with the catalog
+     *
+     * <p>
+     * Example:
+     * <p>
+     * <code>SELECT * FROM MY_CATALOG.MY_TABLE</code>
+     * <p>
+     * Can be combined with {@link #requiresSchemaQualifiedTableNames(SqlGenerationContext)}
+     *
+     * @param context context for SQL generation
+     *
+     * @return <code>true</code> if table names must be catalog-qualified
      */
     public boolean requiresCatalogQualifiedTableNames(SqlGenerationContext context);
 
     /**
-     * @return True if table names must be schema-qualified, e.g. SELECT * FROM
-     *         MY_SCHEMA.MY_TABLE, otherwise false. Can be combined with
-     *         {@link #requiresCatalogQualifiedTableNames(SqlGenerationContext)}
+     * Check whether the dialect expects table identifiers to be qualified with the schema
+     *
+     * <p>
+     * Example:
+     * <p>
+     * <code>SELECT * FROM MY_SCHEMA.MY_TABLE</code>
+     * <p>
+     * Can be combined with {@link #requiresCatalogQualifiedTableNames(SqlGenerationContext)}
+     *
+     * @param context context for SQL generation
+     *
+     * @return <code>true</code> if table names must be schema-qualified
      */
     public boolean requiresSchemaQualifiedTableNames(SqlGenerationContext context);
 
     /**
-     * @return String that is used to separate the catalog and/or the schema from
-     *         the tablename. In many cases this is a dot.
+     * @return String that is used to separate the catalog and/or the schema from the tablename. In many cases this is a
+     *         dot.
      */
     public String getTableCatalogAndSchemaSeparator();
 
+    /**
+     * Definition of where <code>NULL</code> values appear in a search result.
+     *
+     * <dl>
+     * <dt><code>NULLS_SORTED_AT_END</code></dt>
+     * <dd>Independently of the actual search order <code>NULL</code> values always appear at the <em>end</em> of the
+     * result set</dd>
+     * <dt><code>NULLS_SORTED_AT_START</code></dt>
+     * <dd>Independently of the actual search order <code>NULL</code> values always appear at the <em>start</em> of the
+     * result set
+     * <dt><code>NULLS_SORTED_HIGH</code></dt>
+     * <dd><code>NULL</code> values appear at the start of the result set when sorted in descending order, and at the
+     * end when sorted ascending</dd>
+     * <dt><code>NULLS_SORTED_LOW</code></dt>
+     * <dd><code>NULL</code>values appear at the end of the result set when sorted in descending order, and at the start
+     * when sorted ascending</dd>
+     */
     public enum NullSorting {
-        // NULL values are sorted at the end regardless of sort order
-        NULLS_SORTED_AT_END,
-
-        // NULL values are sorted at the start regardless of sort order
-        NULLS_SORTED_AT_START,
-
-        // NULL values are sorted high
-        NULLS_SORTED_HIGH,
-
-        // NULL values are sorted low
-        NULLS_SORTED_LOW
+        NULLS_SORTED_AT_END, NULLS_SORTED_AT_START, NULLS_SORTED_HIGH, NULLS_SORTED_LOW
     }
 
     /**
-     * @return The behavior how nulls are sorted in an ORDER BY. If the null sorting
-     *         behavior is not {@link NullSorting#NULLS_SORTED_AT_END} and your
-     *         dialects has the order by capability but you cannot explicitly
-     *         specify NULLS FIRST or NULLS LAST, then you must overwrite the SQL
-     *         generation to somehow obtain the desired semantic.
+     * @return The behavior how nulls are sorted in an ORDER BY. If the null sorting behavior is not
+     *         {@link NullSorting#NULLS_SORTED_AT_END} and your dialects has the order by capability but you cannot
+     *         explicitly specify NULLS FIRST or NULLS LAST, then you must overwrite the SQL generation to somehow
+     *         obtain the desired semantic.
      */
     public NullSorting getDefaultNullSorting();
 
     /**
      * @param value a string literal value
-     * @return the string literal in valid SQL syntax, e.g. "value" becomes
-     *         "'value'". This might include escaping
+     * @return the string literal in valid SQL syntax, e.g. "value" becomes "'value'". This might include escaping
      */
     public String getStringLiteral(String value);
 
     /**
-     * @return aliases for scalar functions. To be defined for each function that
-     *         has the same semantic but a different name in the data source. If an
-     *         alias for the same function is defined in
-     *         {@link #getBinaryInfixFunctionAliases()}, than the infix alias will
-     *         be ignored.
+     * @return aliases for scalar functions. To be defined for each function that has the same semantic but a different
+     *         name in the data source. If an alias for the same function is defined in
+     *         {@link #getBinaryInfixFunctionAliases()}, than the infix alias will be ignored.
      */
     public Map<ScalarFunction, String> getScalarFunctionAliases();
 
     /**
-     * @return Defines which binary scalar functions should be treated infix and
-     *         how. E.g. a map entry ("ADD", "+") causes a function call "ADD(1,2)"
-     *         to be written as "1 + 2".
+     * @return Defines which binary scalar functions should be treated infix and how. E.g. a map entry ("ADD", "+")
+     *         causes a function call "ADD(1,2)" to be written as "1 + 2".
      */
     public Map<ScalarFunction, String> getBinaryInfixFunctionAliases();
 
     /**
-     * @return Defines which unary scalar functions should be treated prefix and
-     *         how. E.g. a map entry ("NEG", "-") causes a function call "NEG(2)" to
-     *         be written as "-2".
+     * @return Defines which unary scalar functions should be treated prefix and how. E.g. a map entry ("NEG", "-")
+     *         causes a function call "NEG(2)" to be written as "-2".
      */
     public Map<ScalarFunction, String> getPrefixFunctionAliases();
 
     /**
-     * @return aliases for aggregate functions. To be defined for each function that
-     *         has the same semantic but a different name in the data source.
+     * @return aliases for aggregate functions. To be defined for each function that has the same semantic but a
+     *         different name in the data source.
      */
     public Map<AggregateFunction, String> getAggregateFunctionAliases();
 
     /**
-     * @return Returns true for functions with zero arguments if they do not require
-     *         parentheses (e.g. SYSDATE).
+     * Check whether a parentheses should be omitted for a function
+     *
+     * @param function function for which the necessity of parentheses is evaluated
+     *
+     * @return Returns true for functions with zero arguments if they do not require parentheses (e.g. SYSDATE).
      */
     public boolean omitParentheses(ScalarFunction function);
 
     /**
-     * Returns the Visitor to be used for SQL generation. Use this only if you need
-     * to, i.e. if you have requirements which cannot be realized via the other
-     * methods provided by {@link SqlDialect}.
+     * Returns the Visitor to be used for SQL generation. Use this only if you need to, i.e. if you have requirements
+     * which cannot be realized via the other methods provided by {@link SqlDialect}.
      *
      * @param context context information for the sql generation visitor
      * @return the SqlGenerationVisitor to be used for this dialect
@@ -330,24 +205,47 @@ public interface SqlDialect {
     public SqlGenerationVisitor getSqlGenerationVisitor(SqlGenerationContext context);
 
     /**
-     * Allows dialect specific handling of different exceptions.
+     * Returns the final pushdown SQL statement. This means generally encapsulating the given SQL query in an IMPORT
+     * statement.
      *
-     * @param exception     the catched exception
-     * @param exceptionMode exception mode of the adapter
-     * @throws SQLException
+     * @param connectionInformation contains all values concerning the connection that are needed to build the IMPORT
+     *                              statement
+     * @param columnDescription     column names and types to be added to the IMPORT statement
+     * @param pushdownSql           the SQL text generated by the SqlGenerationVisitor {@link SqlGenerationVisitor}
+     * @return SQL string that is the pushdown SQL sent to the EXASOL database
      */
-    public void handleException(SQLException exception, JdbcAdapterProperties.ExceptionHandlingMode exceptionMode)
-            throws SQLException;
+    public String generatePushdownSql(ConnectionInformation connectionInformation, String columnDescription,
+            String pushdownSql);
 
     /**
-     * Returns the final pushdown Sql statement. This means generally encapsulating the
-     * given SQL query in an IMPORT statement.
+     * Read the remote schema metadata for all tables from the remote source
      *
-     * @param connectionInformation contains all values concerning the connection that are needed to build
-     *                              the IMPORT statement
-     * @param columnDescription column names and types to be added to the IMPORT statement
-     * @param pushdownSql the sql text generated by the SqlGenerationVisitor {@link SqlGenerationVisitor}
-     * @return the sql string that is the pushdown sql sent to the EXASOL database
+     * @return remote schema metadata
+     * @throws SQLException if reading the remote metadata fails
      */
-    public String generatePushdownSql(ConnectionInformation connectionInformation, String columnDescription, String pushdownSql);
+    public SchemaMetadata readSchemaMetadata() throws SQLException;
+
+    /**
+     * Read the remote schema metadata for selected from the remote source
+     *
+     * @param tables selected tables for which the metadata should be read
+     * @return remote schema metadata
+     */
+    public SchemaMetadata readSchemaMetadata(List<String> tables);
+
+    /**
+     * Generate a textual description of the columns of a query result (e.g. a push-down query)
+     *
+     * @param query query for which the column information is retrieved from the remote data source
+     * @return column description
+     * @throws SQLException if the metadata of the query result cannot be read from the remote data source
+     */
+    public String describeQueryResultColumns(final String query) throws SQLException;
+
+    /**
+     * Validate user-defined properties and throw exception if they are incorrect
+     *
+     * @throws PropertyValidationException if some properties are used incorrectly
+     */
+    public void validateProperties() throws PropertyValidationException;
 }

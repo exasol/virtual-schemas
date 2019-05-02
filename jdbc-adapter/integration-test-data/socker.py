@@ -72,6 +72,7 @@ def docker_rm(config):
                 run(cmd)
 
 def run(cmd, working_dir=None):
+    p = None
     try: 
         p = subprocess.Popen(
             cmd,
@@ -94,12 +95,11 @@ def run(cmd, working_dir=None):
 
 def replace_hosts_in(config):
     for db, properties in config.items():
-        if properties.get('runIntegrationTests', False):
-            if 'dockerName' in properties:
-                container_ip = get_ip_for(properties['dockerName'])
-                conn_string_with_ip = properties['dockerConnectionString'].replace(
-                    'DBHOST',container_ip)
-                properties['dockerConnectionString'] = conn_string_with_ip
+        if properties.get('runIntegrationTests', False) and 'dockerName' in properties:
+            container_ip = get_ip_for(properties['dockerName'])
+            conn_string_with_ip = properties['dockerConnectionString'].replace(
+                'DBHOST',container_ip)
+            properties['dockerConnectionString'] = conn_string_with_ip
     return yaml.dump(config, default_flow_style=False)
 
 def get_ip_for(docker_name):

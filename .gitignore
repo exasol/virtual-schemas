@@ -3,7 +3,7 @@
 # Eclipse and Maven
 .classpath
 .project
-.settings
+# .settings : we need Eclipse settings for code formatter and clean-up rules
 target
 .cache
 dependency-reduced-pom.xml

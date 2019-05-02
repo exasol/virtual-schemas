@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.exasol</groupId>
@@ -38,6 +38,12 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>${surefire.and.failsafe.plugin.version}</version>
                         <configuration>
+                            <systemProperties>
+                                <property>
+                                    <name>java.util.logging.config.file</name>
+                                    <value>src/test/resources/logging.properties</value>
+                                </property>
+                            </systemProperties>
                             <includes>
                                 <include>**/*IT.java</include>
                             </includes>
@@ -51,8 +57,8 @@
                                     <goal>verify</goal>
                                 </goals>
                             </execution>
-                            <!-- verify phase verifies the results. Must be added so
-                                that failing integration tests are not ignored. -->
+                            <!-- verify phase verifies the results. Must be added so that failing integration tests are not 
+                                ignored. -->
                             <execution>
                                 <id>verify</id>
                                 <phase>verify</phase>
@@ -74,14 +80,14 @@
                                     </goal>   <!-- Setting "java" here would make it run in the same JVM as Maven -->
                                 </goals>
                                 <configuration>
-                                    <classpathScope>test
+                                    <classpathScope>test 
                                     </classpathScope> <!-- The class we want to load is in the test folder, so we need to set this to have test classes in the classpath -->
                                     <executable>java</executable>
                                     <arguments>
                                         <argument>-classpath</argument>
-                                        <!-- automatically creates the classpath using all project dependencies,
-                                             also adding the project build directory -->
-                                        <classpath/>
+                                        <!-- automatically creates the classpath using all project dependencies, also adding 
+                                            the project build directory -->
+                                        <classpath />
                                         <argument>com.exasol.adapter.dialects.IntegrationTestSetup</argument>
                                         <argument>${project.version}</argument>
                                         <argument>${integrationtest.configfile}</argument>
@@ -96,14 +102,15 @@
         </profile>
     </profiles>
     <dependencies>
-        <!-- We need this only for the integration test profile, however without adding it here you would have to enable the profile in the IDE to have the dependency -->
+        <!-- We need this only for the integration test profile, however without adding it here you would have to enable 
+            the profile in the IDE to have the dependency -->
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>1.17</version>
             <scope>integration-test</scope>
         </dependency>
-        <!--Needed to upload jar to BucketFS-->
+        <!--Needed to upload jar to BucketFS -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
@@ -122,7 +129,8 @@
             <version>4.5.2</version>
             <scope>integration-test</scope>
         </dependency>
-        <!-- The EXASOL jdbc driver is only needed for verify scope, however we add it always so that you can always create virtual schemas to an EXASOL -->
+        <!-- The EXASOL jdbc driver is only needed for verify scope, however we add it always so that you can always create 
+            virtual schemas to an EXASOL -->
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-jdbc</artifactId>

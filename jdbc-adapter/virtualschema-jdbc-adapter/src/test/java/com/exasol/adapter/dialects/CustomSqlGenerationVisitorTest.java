@@ -1,67 +1,58 @@
 package com.exasol.adapter.dialects;
 
-import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.dialects.impl.ExasolSqlDialect;
-import com.exasol.adapter.jdbc.SchemaAdapterNotes;
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.metadata.MetadataException;
-import com.exasol.adapter.metadata.TableMetadata;
-import com.exasol.adapter.sql.*;
-import com.google.common.collect.ImmutableList;
-import org.junit.Test;
-import org.mockito.Mockito;
-import utils.SqlTestUtil;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.exasol.ExasolSqlDialect;
+import com.exasol.adapter.metadata.*;
+import com.exasol.adapter.sql.*;
+import com.google.common.collect.ImmutableList;
+
+import utils.SqlTestUtil;
 
 public class CustomSqlGenerationVisitorTest {
-
     /**
-     * This tests uses a SQL with nested expressions (NOT), to make sure that
-     * the custom sql generation visitor is used for all levels of recursion.
+     * This tests uses a SQL with nested expressions (NOT), to make sure that the custom sql generation visitor is used
+     * for all levels of recursion.
+     *
+     * @throws AdapterException
      */
     @Test
     public void testSqlGenerator() throws AdapterException {
         final SqlNode node = getTestSqlNode();
         final String schemaName = "SCHEMA";
-        final String expectedSql = "SELECT NOT_CUSTOM (NOT_CUSTOM (\"C1\")) FROM \"" + schemaName
-                + "\".\"TEST\"";
-        final SqlGenerationContext context = new SqlGenerationContext("", schemaName,
-                false, false);
-        final SqlDialectContext dialectContext = new SqlDialectContext(SchemaAdapterNotes.builder().build());
+        final String expectedSql = "SELECT NOT_CUSTOM (NOT_CUSTOM (\"C1\")) FROM \"" + schemaName + "\".\"TEST\"";
+        final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, false);
         final SqlGenerationVisitor generator = new TestSqlGenerationVisitor(
-                new ExasolSqlDialect(dialectContext), context);
+                new ExasolSqlDialect(null, AdapterProperties.emptyProperties()), context);
         final String actualSql = node.accept(generator);
-        assertEquals(SqlTestUtil.normalizeSql(expectedSql),
-                SqlTestUtil.normalizeSql(actualSql));
+        assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
     }
 
-    private SqlNode getTestSqlNode() throws MetadataException {
+    private SqlNode getTestSqlNode() {
         final TableMetadata clicksMeta = getTestTableMetadata();
         final SqlTable fromClause = new SqlTable("TEST", clicksMeta);
-        final SqlSelectList selectList = SqlSelectList.createRegularSelectList(
-                ImmutableList.<SqlNode>of(new SqlPredicateNot(
-                        new SqlPredicateNot(new SqlColumn(1, clicksMeta
-                                .getColumns().get(0))))));
-        return new SqlStatementSelect(fromClause, selectList, null, null, null,
-                null, null);
+        final SqlSelectList selectList = SqlSelectList.createRegularSelectList(ImmutableList.<SqlNode>of(
+                new SqlPredicateNot(new SqlPredicateNot(new SqlColumn(1, clicksMeta.getColumns().get(0))))));
+        return new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
     }
 
-    private TableMetadata getTestTableMetadata() throws MetadataException {
+    private TableMetadata getTestTableMetadata() {
         final List<ColumnMetadata> columns = new ArrayList<>();
-        columns.add(new ColumnMetadata("C1", "", DataType.createBool(), true,
-                false, "", ""));
+        columns.add(ColumnMetadata.builder().name("C1").adapterNotes("").type(DataType.createBool()).nullable(true)
+                .identity(false).defaultValue("").comment("").build());
         return new TableMetadata("TEST", "", columns, "");
     }
 
     public static class TestSqlGenerationVisitor extends SqlGenerationVisitor {
 
-        public TestSqlGenerationVisitor(final SqlDialect dialect,
-                final SqlGenerationContext context) {
+        public TestSqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
             super(dialect, context);
         }
 
