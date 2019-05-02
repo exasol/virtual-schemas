@@ -118,7 +118,7 @@ public class BaseTableMetadataReader extends AbstractMetadataReader implements T
     }
 
     protected String readTableName(final ResultSet remoteTables) throws SQLException {
-        return this.identifierConverter.convert(remoteTables.getString(NAME_COLUMN));
+        return remoteTables.getString(NAME_COLUMN);
     }
 
     protected String readComment(final ResultSet remoteTables) throws SQLException {
