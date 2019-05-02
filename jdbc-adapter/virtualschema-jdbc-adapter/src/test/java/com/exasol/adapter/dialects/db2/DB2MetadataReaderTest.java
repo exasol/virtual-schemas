@@ -1,12 +1,13 @@
 package com.exasol.adapter.dialects.db2;
 
-import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.jdbc.BaseTableMetadataReader;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.jdbc.BaseTableMetadataReader;
 
 class DB2MetadataReaderTest {
     private DB2MetadataReader db2MetadataReader;

@@ -7,8 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.teradata.TeradataColumnMetadataReader;
-import com.exasol.adapter.dialects.teradata.TeradataMetadataReader;
 import com.exasol.adapter.jdbc.BaseTableMetadataReader;
 
 class TeradataMetadataReaderTest {

@@ -13,6 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.metadata.DataType;
 
@@ -21,7 +22,12 @@ class OracleColumnMetadataReaderTest {
 
     @BeforeEach
     void beforeEach() {
-        this.columnMetadataReader = new OracleColumnMetadataReader(null, AdapterProperties.emptyProperties());
+        this.columnMetadataReader = createDefaultOracleColumnMetadataReader();
+    }
+
+    protected OracleColumnMetadataReader createDefaultOracleColumnMetadataReader() {
+        return new OracleColumnMetadataReader(null, AdapterProperties.emptyProperties(),
+                BaseIdentifierConverter.createDefault());
     }
 
     @ValueSource(strings = { "10,2", " 10,2", " 10 , 2 " })
@@ -33,7 +39,8 @@ class OracleColumnMetadataReaderTest {
         final int castScale = 2;
         final Map<String, String> rawProperties = new HashMap<>();
         rawProperties.put(OracleSqlDialect.ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY, castPrecision + "," + castScale);
-        this.columnMetadataReader = new OracleColumnMetadataReader(null, new AdapterProperties(rawProperties));
+        this.columnMetadataReader = new OracleColumnMetadataReader(null, new AdapterProperties(rawProperties),
+                BaseIdentifierConverter.createDefault());
         final JdbcTypeDescription typeDescription = createTypeDescriptionForNumeric(precision, scale);
         assertThat(this.columnMetadataReader.mapJdbcType(typeDescription),
                 equalTo(DataType.createDecimal(castPrecision, castScale)));
@@ -41,8 +48,7 @@ class OracleColumnMetadataReaderTest {
 
     private JdbcTypeDescription createTypeDescriptionForNumeric(final int precision, final int scale) {
         final int octetLength = 10;
-        return new JdbcTypeDescription(Types.NUMERIC, scale, precision,
-                octetLength, "NUMERIC");
+        return new JdbcTypeDescription(Types.NUMERIC, scale, precision, octetLength, "NUMERIC");
     }
 
     @Test

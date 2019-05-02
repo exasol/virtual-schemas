@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
 
 @ExtendWith(MockitoExtension.class)
 class ResultSetMetadataReaderTest {
@@ -34,7 +35,7 @@ class ResultSetMetadataReaderTest {
         when(this.connectionMock.prepareStatement(any())).thenReturn(this.statementMock);
         final String columnDescription = "c1 BOOLEAN, c2 VARCHAR(20) UTF8";
         final ColumnMetadataReader columnMetadataReader = new BaseColumnMetadataReader(this.connectionMock,
-                AdapterProperties.emptyProperties());
+                AdapterProperties.emptyProperties(), BaseIdentifierConverter.createDefault());
         final ResultSetMetadataReader reader = new ResultSetMetadataReader(this.connectionMock, columnMetadataReader);
         assertThat(reader.describeColumns("irrelevant"), equalTo(columnDescription));
     }

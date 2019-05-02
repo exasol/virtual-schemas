@@ -26,7 +26,7 @@ import com.exasol.jdbc.DataException;
  */
 @Tag("integration")
 @ExtendWith(IntegrationTestConfigurationCondition.class)
-class PostgreSQLDialectIT extends AbstractIntegrationTest {
+class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
     private static final String VIRTUAL_SCHEMA = "PG";
     private static final String VIRTUAL_SCHEMA_UPPERCASE_TABLE = "PG_UPPER";
     private static final String VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE = "PG_PRESERVE_CASE";

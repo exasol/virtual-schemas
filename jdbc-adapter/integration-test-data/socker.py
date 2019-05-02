@@ -72,6 +72,7 @@ def docker_rm(config):
                 run(cmd)
 
 def run(cmd, working_dir=None):
+    p = None
     try: 
         p = subprocess.Popen(
             cmd,

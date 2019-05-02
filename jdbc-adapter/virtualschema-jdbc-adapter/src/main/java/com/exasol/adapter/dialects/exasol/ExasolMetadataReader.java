@@ -22,6 +22,6 @@ public class ExasolMetadataReader extends BaseRemoteMetadataReader {
 
     @Override
     protected ColumnMetadataReader createColumnMetadataReader() {
-        return new ExasolColumnMetadataReader(this.connection, this.properties);
+        return new ExasolColumnMetadataReader(this.connection, this.properties, getIdentifierConverter());
     }
 }

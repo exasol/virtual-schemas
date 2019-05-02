@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
+import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.metadata.TableMetadata;
 
@@ -22,6 +24,7 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
     private static final Logger LOGGER = Logger.getLogger(BaseRemoteMetadataReader.class.getName());
     private final ColumnMetadataReader columnMetadataReader;
     private final TableMetadataReader tableMetadataReader;
+    private final IdentifierConverter identifierConverter;
 
     /**
      * Create a new instance of a {@link BaseTableMetadataReader}
@@ -31,6 +34,7 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
      */
     public BaseRemoteMetadataReader(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
+        this.identifierConverter = createIdentifierConverter();
         this.columnMetadataReader = createColumnMetadataReader();
         this.tableMetadataReader = createTableMetadataReader();
     }
@@ -43,7 +47,7 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
      * @return column metadata reader
      */
     protected ColumnMetadataReader createColumnMetadataReader() {
-        return new BaseColumnMetadataReader(this.connection, this.properties);
+        return new BaseColumnMetadataReader(this.connection, this.properties, this.identifierConverter);
     }
 
     /**
@@ -54,7 +58,17 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
      * @return table metadata reader
      */
     protected TableMetadataReader createTableMetadataReader() {
-        return new BaseTableMetadataReader(this.columnMetadataReader, this.properties);
+        return new BaseTableMetadataReader(this.connection, this.columnMetadataReader, this.properties,
+                this.identifierConverter);
+    }
+
+    /**
+     * Create a converter that translates identifiers from the remote data source to the Exasol representation
+     *
+     * @return identifier converter
+     */
+    protected IdentifierConverter createIdentifierConverter() {
+        return BaseIdentifierConverter.createDefault();
     }
 
     /**
@@ -75,6 +89,10 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
     @Override
     public final TableMetadataReader getTableMetadataReader() {
         return this.tableMetadataReader;
+    }
+
+    public IdentifierConverter getIdentifierConverter() {
+        return this.identifierConverter;
     }
 
     @Override
@@ -150,7 +168,7 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
                     .areNullsSortedLow(metadata.nullsAreSortedLow()) //
                     .build();
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException("Unable to create schema adapte notes from remote schema.",
+            throw new RemoteMetadataReaderException("Unable to create schema adapter notes from remote schema.",
                     exception);
         }
     }
