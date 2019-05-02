@@ -1,21 +1,19 @@
 package com.exasol.adapter.dialects.postgresql;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.jdbc.ColumnMetadataReader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.metadata.DataType;
 
@@ -25,8 +23,13 @@ class PostgreSQLColumnMetadataReaderTest {
 
     @BeforeEach
     void beforeEach() {
-        this.columnMetadataReader = new PostgreSQLColumnMetadataReader(null, AdapterProperties.emptyProperties());
-        rawProperties = new HashMap<>();
+        this.columnMetadataReader = createDefaultPostgreSQLColumnMetadataReader();
+        this.rawProperties = new HashMap<>();
+    }
+
+    private PostgreSQLColumnMetadataReader createDefaultPostgreSQLColumnMetadataReader() {
+        return new PostgreSQLColumnMetadataReader(null, AdapterProperties.emptyProperties(),
+                BaseIdentifierConverter.createDefault());
     }
 
     @Test
@@ -61,7 +64,7 @@ class PostgreSQLColumnMetadataReaderTest {
         this.rawProperties.put("POSTGRESQL_IDENTIFIER_MAPPING", "PRESERVE_ORIGINAL_CASE");
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final PostgreSQLColumnMetadataReader columnMetadataReader = new PostgreSQLColumnMetadataReader(null,
-                adapterProperties);
+                adapterProperties, BaseIdentifierConverter.createDefault());
         assertThat(columnMetadataReader.getIdentifierMapping(),
                 equalTo(PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE));
     }
@@ -71,7 +74,7 @@ class PostgreSQLColumnMetadataReaderTest {
         this.rawProperties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT_TO_UPPER");
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final PostgreSQLColumnMetadataReader columnMetadataReader = new PostgreSQLColumnMetadataReader(null,
-                adapterProperties);
+                adapterProperties, BaseIdentifierConverter.createDefault());
         assertThat(columnMetadataReader.getIdentifierMapping(), equalTo(PostgreSQLIdentifierMapping.CONVERT_TO_UPPER));
     }
 }

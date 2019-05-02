@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.jdbc.ColumnMetadataReader;
 import com.exasol.adapter.jdbc.TableMetadataReader;
 import com.exasol.adapter.metadata.DataType;
@@ -35,7 +36,8 @@ class OracleTableMetadataReaderTest {
 
     @BeforeEach
     void beforeEach() {
-        this.reader = new OracleTableMetadataReader(this.columnMetadataReaderMock, AdapterProperties.emptyProperties());
+        this.reader = new OracleTableMetadataReader(null, this.columnMetadataReaderMock,
+                AdapterProperties.emptyProperties(), BaseIdentifierConverter.createDefault());
     }
 
     @CsvSource({ "ANY_TABLE_NAME, true", "BIN$FOO, false" })

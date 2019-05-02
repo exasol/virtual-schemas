@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.Types;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
@@ -15,7 +16,6 @@ public class SqlServerColumnMetadataReader extends BaseColumnMetadataReader {
     static final int SQLSERVER_BLOB_SIZE = 100;
     static final int SQLSERVER_HIERARCHYID_SIZE = 4000;
     static final int SQLSERVER_MAX_VARCHAR_SIZE = 8000;
-    static final int SQLSERVER_MAX_NVARCHAR_SIZE = 4000;
     static final int SQLSERVER_MAX_CLOB_SIZE = 2000000;
     static final int SQLSERVER_TIMESTAMP_TEXT_SIZE = 21;
     static final String SQLSERVER_DATE_TYPE_NAME = "date";
@@ -26,11 +26,13 @@ public class SqlServerColumnMetadataReader extends BaseColumnMetadataReader {
     /**
      * Create a new instance of a {@link SqlServerColumnMetadataReader}
      *
-     * @param connection JDBC connection to the remote data source
-     * @param properties user-defined adapter properties
+     * @param connection          JDBC connection to the remote data source
+     * @param properties          user-defined adapter properties
+     * @param identifierConverter converter between source and Exasol identifiers
      */
-    public SqlServerColumnMetadataReader(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
+    public SqlServerColumnMetadataReader(final Connection connection, final AdapterProperties properties,
+            IdentifierConverter identifierConverter) {
+        super(connection, properties, identifierConverter);
     }
 
     @Override

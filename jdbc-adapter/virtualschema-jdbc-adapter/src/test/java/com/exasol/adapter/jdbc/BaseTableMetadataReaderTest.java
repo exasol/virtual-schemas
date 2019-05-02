@@ -13,13 +13,11 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.SqlDialect.IdentifierCaseHandling;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.metadata.TableMetadata;
 
@@ -36,8 +34,7 @@ class BaseTableMetadataReaderTest {
 
     @Test
     void testIsTableIncludedByMapping() throws SQLException {
-        final TableMetadataReader reader = new BaseTableMetadataReader(null, AdapterProperties.emptyProperties());
-        assertThat(reader.isTableIncludedByMapping("any name"), equalTo(true));
+        assertThat(createDefaultTableMetadataReader().isTableIncludedByMapping("any name"), equalTo(true));
     }
 
     @Test
@@ -47,9 +44,8 @@ class BaseTableMetadataReaderTest {
         mockTableComment(this.tablesMock, TABLE_A_COMMENT, TABLE_B_COMMENT);
         mockTableWithColumnsOfType(this.tablesMock, this.columnMetadataReaderMock, TABLE_A, DataType.createBool());
         mockTableWithColumnsOfType(this.tablesMock, this.columnMetadataReaderMock, TABLE_B, DataType.createDate());
-        final TableMetadataReader reader = new BaseTableMetadataReader(this.columnMetadataReaderMock,
-                AdapterProperties.emptyProperties());
-        final List<TableMetadata> tables = reader.mapTables(this.tablesMock, Optional.empty());
+        final List<TableMetadata> tables = createDefaultTableMetadataReader().mapTables(this.tablesMock,
+                Optional.empty());
         final TableMetadata tableA = tables.get(0);
         final TableMetadata tableB = tables.get(1);
         assertAll(() -> assertThat(tables, iterableWithSize(2)), //
@@ -65,49 +61,13 @@ class BaseTableMetadataReaderTest {
                 () -> assertThat(tableB.getColumns().get(0).getName(), equalTo(COLUMN_B1)));
     }
 
+    private TableMetadataReader createDefaultTableMetadataReader() {
+        return new BaseTableMetadataReader(this.connectionMock, this.columnMetadataReaderMock,
+                AdapterProperties.emptyProperties(), BaseIdentifierConverter.createDefault());
+    }
+
     protected void mockConnection() throws SQLException {
         when(this.connectionMock.getMetaData()).thenReturn(this.remoteMetadataMock);
-    }
-
-    @CsvSource({ "INTERPRET_AS_LOWER, INTERPRET_AS_LOWER, true", //
-            "INTERPRET_AS_LOWER, INTERPRET_AS_UPPER, false", //
-            "INTERPRET_AS_LOWER, INTERPRET_CASE_SENSITIVE, false", //
-            "INTERPRET_AS_UPPER, INTERPRET_AS_UPPER, true", //
-            "INTERPRET_AS_UPPER, INTERPRET_AS_LOWER, false", //
-            "INTERPRET_AS_UPPER, INTERPRET_CASE_SENSITIVE, false", //
-            "INTERPRET_CASE_SENSITIVE, INTERPRET_AS_LOWER, false", //
-            "INTERPRET_CASE_SENSITIVE, INTERPRET_AS_UPPER, false", //
-            "INTERPRET_CASE_SENSITIVE, INTERPRET_CASE_SENSITIVE, false" })
-    @ParameterizedTest
-    void testAdjustIdentifierCase(final IdentifierCaseHandling unquotedIdentifierHandling,
-            final IdentifierCaseHandling quotedIdentifierHandling, final boolean resultShouldBeUpperCase) {
-        final TableMetadataReader reader = new DummyTableMetadataReader(this.columnMetadataReaderMock,
-                unquotedIdentifierHandling, quotedIdentifierHandling);
-        assertThat(reader.adjustIdentifierCase("text"), equalTo(resultShouldBeUpperCase ? "TEXT" : "text"));
-    }
-
-    private static class DummyTableMetadataReader extends BaseTableMetadataReader {
-        private final IdentifierCaseHandling unquotedIdentifierCaseHandling;
-        private final IdentifierCaseHandling quotedIdentifierCaseHandling;
-
-        public DummyTableMetadataReader(final ColumnMetadataReader columnMetadataReader,
-                final IdentifierCaseHandling unquotedIdentifierCaseHandling,
-                final IdentifierCaseHandling quotedIdentifierCaseHandl) {
-            super(columnMetadataReader, AdapterProperties.emptyProperties());
-            this.quotedIdentifierCaseHandling = quotedIdentifierCaseHandl;
-            this.unquotedIdentifierCaseHandling = unquotedIdentifierCaseHandling;
-
-        }
-
-        @Override
-        public IdentifierCaseHandling getUnquotedIdentifierCaseHandling() {
-            return this.unquotedIdentifierCaseHandling;
-        }
-
-        @Override
-        public IdentifierCaseHandling getQuotedIdentifierCaseHandling() {
-            return this.quotedIdentifierCaseHandling;
-        }
     }
 
     @Test
@@ -116,9 +76,8 @@ class BaseTableMetadataReaderTest {
         mockTableName(this.tablesMock, TABLE_A, TABLE_B);
         mockTableComment(this.tablesMock, TABLE_A_COMMENT, TABLE_B_COMMENT);
         mockTableWithColumnsOfType(this.tablesMock, this.columnMetadataReaderMock, TABLE_A, DataType.createBool());
-        final TableMetadataReader reader = new BaseTableMetadataReader(this.columnMetadataReaderMock,
-                AdapterProperties.emptyProperties());
-        final List<TableMetadata> tables = reader.mapTables(this.tablesMock, Optional.empty());
+        final List<TableMetadata> tables = createDefaultTableMetadataReader().mapTables(this.tablesMock,
+                Optional.empty());
         final TableMetadata tableA = tables.get(0);
         assertAll(() -> assertThat(tables, iterableWithSize(1)), //
                 () -> assertThat(tableA.getName(), equalTo(TABLE_A)));

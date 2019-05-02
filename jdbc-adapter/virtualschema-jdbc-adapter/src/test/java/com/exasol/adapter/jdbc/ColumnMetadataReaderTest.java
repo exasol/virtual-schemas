@@ -20,6 +20,7 @@ import org.mockito.MockitoAnnotations;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.metadata.DataType.ExaCharset;
@@ -70,9 +71,14 @@ class ColumnMetadataReaderTest {
     private List<ColumnMetadata> mapMockedColumns(final ResultSet columnsMock)
             throws RemoteMetadataReaderException, SQLException {
         when(this.remoteMetadataMock.getColumns(null, null, "THE_TABLE", "%")).thenReturn(columnsMock);
-        final List<ColumnMetadata> columns = new BaseColumnMetadataReader(this.connectionMock,
-                AdapterProperties.emptyProperties()).mapColumns("THE_TABLE");
+        final List<ColumnMetadata> columns = createDefaultColumnMetadataReader().mapColumns("THE_TABLE");
         return columns;
+    }
+
+    protected BaseColumnMetadataReader createDefaultColumnMetadataReader() {
+        final BaseColumnMetadataReader reader = new BaseColumnMetadataReader(this.connectionMock,
+                AdapterProperties.emptyProperties(), BaseIdentifierConverter.createDefault());
+        return reader;
     }
 
     @Test
@@ -393,10 +399,8 @@ class ColumnMetadataReaderTest {
 
     @Test
     void testMapColumnsWrapsSqlException() throws SQLException {
-        final ColumnMetadataReader columnMetadataReader = new BaseColumnMetadataReader(this.connectionMock,
-                AdapterProperties.emptyProperties());
         when(this.connectionMock.getMetaData()).thenThrow(FAKE_SQL_EXCEPTION);
-        assertThrows(RemoteMetadataReaderException.class, () -> columnMetadataReader.mapColumns(""));
+        assertThrows(RemoteMetadataReaderException.class, () -> createDefaultColumnMetadataReader().mapColumns(""));
     }
 
     @Test

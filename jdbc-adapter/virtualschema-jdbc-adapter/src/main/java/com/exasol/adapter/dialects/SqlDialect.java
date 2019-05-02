@@ -82,23 +82,6 @@ public interface SqlDialect {
     public StructureElementSupport supportsJdbcSchemas();
 
     /**
-     * How unquoted or quoted identifiers in queries or DDLs are handled
-     */
-    public enum IdentifierCaseHandling {
-        INTERPRET_AS_LOWER, INTERPRET_AS_UPPER, INTERPRET_CASE_SENSITIVE
-    }
-
-    /**
-     * @return How to handle case sensitivity of unquoted identifiers
-     */
-    public IdentifierCaseHandling getUnquotedIdentifierHandling();
-
-    /**
-     * @return How to handle case sensitivity of quoted identifiers
-     */
-    public IdentifierCaseHandling getQuotedIdentifierHandling();
-
-    /**
      * @param identifier The name of an identifier (table or column). If identifiers are case sensitive, the identifier
      *                   must be passed case-sensitive of course.
      * @return the quoted identifier, also if quoting is not required

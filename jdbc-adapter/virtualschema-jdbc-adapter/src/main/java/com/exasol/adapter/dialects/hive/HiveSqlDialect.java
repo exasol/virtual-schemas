@@ -13,6 +13,7 @@ import java.util.*;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.ScalarFunction;
 
 /**
@@ -70,16 +71,6 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public IdentifierCaseHandling getUnquotedIdentifierHandling() {
-        return IdentifierCaseHandling.INTERPRET_AS_LOWER;
-    }
-
-    @Override
-    public IdentifierCaseHandling getQuotedIdentifierHandling() {
-        return IdentifierCaseHandling.INTERPRET_AS_LOWER;
-    }
-
-    @Override
     public String applyQuote(final String identifier) {
         return "`" + identifier + "`";
     }
@@ -128,5 +119,10 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     @Override
     protected List<String> getSupportedProperties() {
         return SUPPORTED_PROPERTIES;
+    }
+
+    @Override
+    protected RemoteMetadataReader createRemoteMetadataReader() {
+        return new HiveMetadataReader(this.connection, this.properties);
     }
 }

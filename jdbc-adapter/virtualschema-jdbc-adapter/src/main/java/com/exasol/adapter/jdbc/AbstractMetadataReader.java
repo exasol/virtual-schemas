@@ -13,9 +13,8 @@ import com.exasol.adapter.AdapterProperties;
  */
 public abstract class AbstractMetadataReader implements MetadataReader {
     static final String ANY_CATALOG_FILTER = null;
-    static final String ANY_SCHEMA_FILTER = null;
-    protected final Connection connection;
     protected final AdapterProperties properties;
+    protected final Connection connection;
 
     /**
      * Create an {@link AbstractMetadataReader}
@@ -24,8 +23,8 @@ public abstract class AbstractMetadataReader implements MetadataReader {
      * @param properties user-defined adapter properties
      */
     public AbstractMetadataReader(final Connection connection, final AdapterProperties properties) {
-        this.connection = connection;
         this.properties = properties;
+        this.connection = connection;
     }
 
     /**
