@@ -9,7 +9,7 @@ import com.exasol.adapter.VirtualSchemaAdapter;
  * This class implements a factory for the {@link JdbcAdapter}.
  * <p>
  * Note that this class must be registered in a resource file called
- * <code>META-INF/services/com.exasol.adapter.VirtualSchemaAdapterFactory</code> in order for the {@link ServiceLoader}
+ * <code>META-INF/services/com.exasol.adapter.AdapterFactory</code> in order for the {@link ServiceLoader}
  * to find it.
  */
 public class JdbcAdapterFactory implements AdapterFactory {
