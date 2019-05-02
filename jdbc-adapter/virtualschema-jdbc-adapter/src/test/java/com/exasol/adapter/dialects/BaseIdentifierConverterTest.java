@@ -10,8 +10,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import com.exasol.adapter.jdbc.IdentifierCaseHandling;
 
-class IdentifierConverterTest {
-    final IdentifierConverter identifierConverter = new IdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_UPPER,
+class BaseIdentifierConverterTest {
+    final IdentifierConverter identifierConverter = new BaseIdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_UPPER,
             IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE);
 
     @CsvSource({ "INTERPRET_AS_LOWER, INTERPRET_AS_LOWER, true", //
@@ -26,7 +26,7 @@ class IdentifierConverterTest {
     @ParameterizedTest
     void testConvert(final IdentifierCaseHandling unquotedIdentifierHandling,
             final IdentifierCaseHandling quotedIdentifierHandling, final boolean resultShouldBeUpperCase) {
-        final IdentifierConverter identifierConverter = new IdentifierConverter(unquotedIdentifierHandling,
+        final IdentifierConverter identifierConverter = new BaseIdentifierConverter(unquotedIdentifierHandling,
                 quotedIdentifierHandling);
         assertThat(identifierConverter.convert("text"), equalTo(resultShouldBeUpperCase ? "TEXT" : "text"));
     }
@@ -45,7 +45,7 @@ class IdentifierConverterTest {
 
     @Test
     void testCreateDefault() {
-        final IdentifierConverter converter = IdentifierConverter.createDefault();
+        final IdentifierConverter converter = BaseIdentifierConverter.createDefault();
         assertAll(
                 () -> assertThat(converter.getQuotedIdentifierHandling(),
                         equalTo(IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE)),

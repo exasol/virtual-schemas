@@ -21,7 +21,7 @@ public class OracleMetadataReader extends BaseRemoteMetadataReader {
 
     @Override
     protected TableMetadataReader createTableMetadataReader() {
-        return new OracleTableMetadataReader(this.connection, super.getColumnMetadataReader(), this.properties,
+        return new OracleTableMetadataReader(this.connection, getColumnMetadataReader(), this.properties,
                 super.getIdentifierConverter());
     }
 

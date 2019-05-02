@@ -3,6 +3,7 @@ package com.exasol.adapter.dialects.impala;
 import java.sql.Connection;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.*;
 
@@ -22,7 +23,7 @@ public class ImpalaMetadataReader extends BaseRemoteMetadataReader {
 
     @Override
     protected IdentifierConverter createIdentifierConverter() {
-        return new IdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_LOWER,
+        return new BaseIdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_LOWER,
               IdentifierCaseHandling.INTERPRET_AS_LOWER);
     }
 }

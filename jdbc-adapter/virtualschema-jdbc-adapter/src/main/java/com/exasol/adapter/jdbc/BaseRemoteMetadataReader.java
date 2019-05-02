@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.metadata.TableMetadata;
@@ -33,9 +34,9 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
      */
     public BaseRemoteMetadataReader(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
+        this.identifierConverter = createIdentifierConverter();
         this.columnMetadataReader = createColumnMetadataReader();
         this.tableMetadataReader = createTableMetadataReader();
-        this.identifierConverter = createIdentifierConverter();
     }
 
     /**
@@ -67,7 +68,7 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
      * @return identifier converter
      */
     protected IdentifierConverter createIdentifierConverter() {
-        return IdentifierConverter.createDefault();
+        return BaseIdentifierConverter.createDefault();
     }
 
     /**
@@ -88,6 +89,10 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
     @Override
     public final TableMetadataReader getTableMetadataReader() {
         return this.tableMetadataReader;
+    }
+
+    public IdentifierConverter getIdentifierConverter() {
+        return this.identifierConverter;
     }
 
     @Override
@@ -179,9 +184,5 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
         } catch (final SQLException exception) {
             throw new RemoteMetadataReaderException("Unable to read remote schema metadata.", exception);
         }
-    }
-
-    public IdentifierConverter getIdentifierConverter() {
-        return this.identifierConverter;
     }
 }

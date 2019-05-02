@@ -20,7 +20,7 @@ import org.mockito.MockitoAnnotations;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.IdentifierConverter;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.metadata.DataType.ExaCharset;
@@ -77,7 +77,7 @@ class ColumnMetadataReaderTest {
 
     protected BaseColumnMetadataReader createDefaultColumnMetadataReader() {
         final BaseColumnMetadataReader reader = new BaseColumnMetadataReader(this.connectionMock,
-                AdapterProperties.emptyProperties(), IdentifierConverter.createDefault());
+                AdapterProperties.emptyProperties(), BaseIdentifierConverter.createDefault());
         return reader;
     }
 

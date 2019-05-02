@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
 import com.exasol.adapter.metadata.DataType;
@@ -30,7 +31,7 @@ class TeradataColumnMetadataReaderTest {
     @BeforeEach
     void beforeEach() {
         this.teradataColumnMetadataReader = new TeradataColumnMetadataReader(this.connectionMock,
-                AdapterProperties.emptyProperties());
+                AdapterProperties.emptyProperties(), BaseIdentifierConverter.createDefault());
     }
 
     @Test

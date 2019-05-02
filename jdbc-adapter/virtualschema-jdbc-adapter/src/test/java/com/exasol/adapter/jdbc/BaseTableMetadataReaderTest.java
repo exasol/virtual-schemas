@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.IdentifierConverter;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.metadata.TableMetadata;
 
@@ -63,7 +63,7 @@ class BaseTableMetadataReaderTest {
 
     private TableMetadataReader createDefaultTableMetadataReader() {
         return new BaseTableMetadataReader(this.connectionMock, this.columnMetadataReaderMock,
-                AdapterProperties.emptyProperties(), IdentifierConverter.createDefault());
+                AdapterProperties.emptyProperties(), BaseIdentifierConverter.createDefault());
     }
 
     protected void mockConnection() throws SQLException {
