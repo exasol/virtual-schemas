@@ -186,96 +186,6 @@ void testRequiresSchemaQualifiedTableNames() {
 }
 ```
 
-### Defining Identifier Quoting
-
-Different products have different case-sensitivity and quoting rules for identifiers like table names. Exasol for example silently converts all unquoted identifiers to upper case. PostgreSQL converts them to lower case instead. MySQL table names are case-sensitive since they directly map to the names of the files containing the table data. In order to translate identifiers correctly between Exasol and the remote source, we must define the behavior of the remote data source.
-
-In our Athena example the situation is tricky. The documentation states that Athena itself is uses case-insensitive table names. On the other hand combining Athena with Apache Spark forces case-sensitive table handling. For now we implement the default behavior and let Exasol handle all unquoted identifiers as if they were upper case.
-
-As always, start with the unit test:
-
-```java
-@Test
-void testGetUnquotedIdentifierHandling() {
-    assertThat(this.dialect.getUnquotedIdentifierHandling(), equalTo(IdentifierCaseHandling.INTERPRET_AS_UPPER));
-}
-```
-
-Let the test fail, implement `getUnquotedIdentifierHandling()` and repeat the test.
-
-Exasol treats quoted identifiers with the exact case. Athena doesn't. A simple SQL command on a table where all identifiers are lower case proves that.
-
-```sql
-SELECT "Price" FROM "SALES" LIMIT 10;
-```
-
-The above command would fail on Exasol, but runs just fine on Athena. So we can treat all identifiers as upper case again.
-
-Since Athena requires special care when working with identifiers that contain numbers or start with an underscore, this give us the opportunity to write a unit test that verifies a little bit more complex quoting rules.
-
-```java
-@CsvSource({ "tableName, \"tableName\"", "table123, \"table123\"", "_table, `_table`",
-        "table_name, \"table_name\"" })
-@ParameterizedTest
-void testApplyQuote(final String unquoted, final String quoted) {
-    assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
-}
-
-@CsvSource({ "tableName, tableName", "table123, \"table123\"", "_table, `_table`", "table_name, table_name" })
-@ParameterizedTest
-void testApplyQuoteIfNeeded(final String unquoted, final String quoted) {
-    assertThat(this.dialect.applyQuoteIfNeeded(unquoted), equalTo(quoted));
-}
-```
-
-Again the tests must fail before we add the following implementation.
-
-```java
-private static final Pattern IDENTIFIER_WITH_NUMBERS = Pattern.compile(".*\\d.*");
-
-@Override
-public String applyQuote(final String identifier) {
-    if (identifier.startsWith("_")) {
-        return quoteWithBackticks(identifier);
-    } else {
-        return quoteWithDoubleQuotes(identifier);
-    }
-}
-
-private String quoteWithBackticks(final String identifier) {
-    final StringBuilder builder = new StringBuilder("`");
-    builder.append(identifier);
-    builder.append("`");
-    return builder.toString();
-}
-
-private String quoteWithDoubleQuotes(final String identifier) {
-    final StringBuilder builder = new StringBuilder("\"");
-    builder.append(identifier);
-    builder.append("\"");
-    return builder.toString();
-}
-
-@Override
-public String applyQuoteIfNeeded(final String identifier) {
-    if (identifier.startsWith("_")) {
-        return quoteWithBackticks(identifier);
-    } else {
-        if (containsNumbers(identifier)) {
-            return quoteWithDoubleQuotes(identifier);
-        } else {
-            return identifier;
-        }
-    }
-}
-
-private boolean containsNumbers(final String identifier) {
-    return IDENTIFIER_WITH_NUMBERS.matcher(identifier).matches();
-}
-```
-
-The pre-compiled pattern is a performance measure. You could have used `identifier.matches(".*\\d.*")` instead, which is a little bit slower. But since quoting happens a lot, I felt that it did not want to waste performance here.
-
 ### Defining how NULL Values are Sorted
 
 Next we tell the virtual schema how the SQL dialect sorts `NULL` values by default. The Athena documentation states that by default `NULL` values appear last in a search result regardless of search direction.
@@ -291,7 +201,7 @@ void testGetDefaultNullSorting() {
 
 Again run the test, let it fail, implement, let the test succeed.
 
-#### Implement String Literal Conversion
+### Implement String Literal Conversion
 
 The last thing we need to implement in the dialect class is quoting of string literals. Athena uses an approach typical for many SQL-capable databases. It expects string literals to be wrapped in single quotes and single qoutes inside the literal to be escaped by duplicating each.
 
@@ -323,6 +233,57 @@ public String getStringLiteral(final String value) {
 ### Checking the Code Coverage of the Dialect Adapter
 
 Before you move on to mapping metadata, first check how well your unit tests cover the dialect adapter. Keep adding test until you reach full coverage.
+
+## Implementing Identifier Case Handling
+
+Different products have different case-sensitivity and quoting rules for identifiers like table names. Exasol for example silently converts all unquoted identifiers to upper case. PostgreSQL converts them to lower case instead. MySQL table names are case-sensitive (at least on Unix-style operating systems) since they directly map to the names of the files containing the table data. In order to translate identifiers correctly between Exasol and the remote source, we must define the behavior of the remote data source.
+
+In our Athena example the situation is tricky. The documentation states that Athena itself is uses case-insensitive table names. On the other hand combining Athena with Apache Spark forces case-sensitive table handling. For now we implement the default behavior and let Exasol handle all unquoted identifiers as if they were upper case.
+
+Identifier handling is implemented in a separate class that needs to implement the interface `IdentifierConverter`.
+
+```
+public interface IdentifierConverter {
+    public String convert(String identifier);
+    public IdentifierCaseHandling getUnquotedIdentifierHandling();
+    public IdentifierCaseHandling getQuotedIdentifierHandling();
+}
+```
+
+### Standard Identifier Case Handling
+
+You can find a configurable standard implementation in class `BaseIdentifierConverter`. This should be sufficient for all but exotic cases. PostgreSQL is an example, where identifier handling needs special attention.
+
+The standard implementation can be configured in the constructor `BaseIdentifierConverter(final IdentifierCaseHandling unquotedIdentifierHandling, final IdentifierCaseHandling quotedIdentifierHandling)`.
+
+The default configuration is `IdentifierHandling.CONVERT_TO_UPPER` for unquoted identifiers and `INTERPRET_AS_CASE_SENSITIVE` for quoted one. If that is what you need for your source, you are all set.
+
+In case your database behaves differently but still works with the `BaseIdentifierConverter`, you can instantiate a matching version by overriding the method `createIdentifierConverter` in your dialect's top-level metadata reader. Here is an example from the HIVE dialect:
+
+```java
+// ...
+public class HiveMetadataReader extends BaseRemoteMetadataReader {
+    // ...
+
+    @Override
+    protected IdentifierConverter createIdentifierConverter() {
+        return new BaseIdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_LOWER,
+                IdentifierCaseHandling.INTERPRET_AS_LOWER);
+    }
+}
+```
+
+All `IdentifierConverter`s have getters that let you check the conversion configuration:
+
+### Exotic Identifier Case Handling
+
+If you are unlucky, your data source has non-standard identifier case handling. As mentioned before you can still implement your own `IdentifierConverter`.
+
+Check the following classes for an example:
+
+* `PostgresMetadataReader` &mdash; where the converter is instantiated
+* `PostgresIdentifierConverterTest`
+* `PostgresIdentifierConverter`
 
 ## Implementing Access to Remote Metadata
 

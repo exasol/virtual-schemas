@@ -12,19 +12,19 @@ public interface IdentifierConverter {
      * @param identifier identifier to convert
      * @return converted identifier
      */
-    String convert(String identifier);
+    public String convert(String identifier);
 
     /**
      * Get unquoted identifier case handling.
      *
      * @return unquoted identifier case handling
      */
-    IdentifierCaseHandling getUnquotedIdentifierHandling();
+    public IdentifierCaseHandling getUnquotedIdentifierHandling();
 
     /**
      * Get quoted identifier case handling.
      *
      * @return quoted identifier case handling
      */
-    IdentifierCaseHandling getQuotedIdentifierHandling();
+    public IdentifierCaseHandling getQuotedIdentifierHandling();
 }
