@@ -45,7 +45,7 @@ You install the adapter script via the special SQL command `CREATE JAVA ADAPTER 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
     %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
-    %jar /buckets/bucketfs1/jdbc/virtualschema-jdbc-adapter-dist-1.10.0.jar;
+    %jar /buckets/bucketfs1/jdbc/virtualschema-jdbc-adapter-dist-1.11.0.jar;
     %jar /buckets/bucketfs1/jdbc/RedshiftJDBC42-<JDBC driver version>.jar;
 /
 ```

@@ -1,7 +1,6 @@
 package com.exasol.adapter.dialects.redshift;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -40,5 +39,11 @@ class RedshiftMetadataReaderTest {
                         equalTo(IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE)),
                 () -> assertThat(converter.getUnquotedIdentifierHandling(),
                         equalTo(IdentifierCaseHandling.INTERPRET_AS_UPPER)));
+    }
+
+    @Test
+    void testGetSupportedTableTypes() {
+        assertThat(this.reader.getSupportedTableTypes(),
+                containsInAnyOrder("TABLE", "VIEW", "SYSTEM TABLE", "EXTERNAL TABLE"));
     }
 }

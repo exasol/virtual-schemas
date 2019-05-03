@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.DataType.ExaCharset;
 
 class RedshiftColumnMetadataReaderTest extends AbstractColumnMetadataReaderTest {
     @BeforeEach
@@ -33,5 +34,17 @@ class RedshiftColumnMetadataReaderTest extends AbstractColumnMetadataReaderTest 
     void testMapJdbcTypeFallbackToParent() {
         assertThat(this.columnMetadataReader.mapJdbcType(new JdbcTypeDescription(Types.BOOLEAN, 0, 0, 0, "")),
                 equalTo(DataType.createBool()));
+    }
+
+    @Test
+    void testMapJdbcTypeOtherDouble() {
+        assertThat(this.columnMetadataReader.mapJdbcType(new JdbcTypeDescription(Types.OTHER, 0, 0, 0, "double")),
+                equalTo(DataType.createDouble()));
+    }
+
+    @Test
+    void testMapJdbcTypeOtherUnknownToMaxVarChar() {
+        assertThat(this.columnMetadataReader.mapJdbcType(new JdbcTypeDescription(Types.OTHER, 0, 0, 0, "unknown")),
+                equalTo(DataType.createMaximumSizeVarChar(ExaCharset.UTF8)));
     }
 }

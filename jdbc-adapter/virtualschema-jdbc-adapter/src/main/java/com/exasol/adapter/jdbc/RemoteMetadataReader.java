@@ -1,6 +1,7 @@
 package com.exasol.adapter.jdbc;
 
 import java.util.List;
+import java.util.Set;
 
 import com.exasol.adapter.metadata.SchemaMetadata;
 
@@ -43,4 +44,11 @@ public interface RemoteMetadataReader extends MetadataReader {
      * @return table metadata reader
      */
     public TableMetadataReader getTableMetadataReader();
+
+    /**
+     * Get the table types the remote metadata reader supports
+     *
+     * @return set of table type names
+     */
+    public Set<String> getSupportedTableTypes();
 }

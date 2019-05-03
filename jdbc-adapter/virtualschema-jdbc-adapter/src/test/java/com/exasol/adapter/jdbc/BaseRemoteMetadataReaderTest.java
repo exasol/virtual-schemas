@@ -187,7 +187,7 @@ class BaseRemoteMetadataReaderTest {
     @Test
     void testGetCatalogNameFilterDefaultsToAny() {
         final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(null, AdapterProperties.emptyProperties());
-        assertThat(reader.getCatalogNameFilter(), equalTo(AbstractMetadataReader.ANY_CATALOG_FILTER));
+        assertThat(reader.getCatalogNameFilter(), equalTo(RemoteMetadataReaderConstants.ANY_CATALOG));
     }
 
     @Test
@@ -203,7 +203,7 @@ class BaseRemoteMetadataReaderTest {
     @Test
     void testGetSchemaNameFilterDefaultsToAny() {
         final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(null, AdapterProperties.emptyProperties());
-        assertThat(reader.getSchemaNameFilter(), equalTo(AbstractMetadataReader.ANY_CATALOG_FILTER));
+        assertThat(reader.getSchemaNameFilter(), equalTo(RemoteMetadataReaderConstants.ANY_SCHEMA));
     }
 
     @Test
@@ -243,6 +243,11 @@ class BaseRemoteMetadataReaderTest {
                         equalTo(IdentifierCaseHandling.INTERPRET_AS_UPPER)),
                 () -> assertThat(reader.getIdentifierConverter().getQuotedIdentifierHandling(),
                         equalTo(IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE)));
+    }
 
+    @Test
+    void testGetSupportedTableTypes() {
+        assertThat(new BaseRemoteMetadataReader(null, AdapterProperties.emptyProperties()).getSupportedTableTypes(),
+                containsInAnyOrder("TABLE", "VIEW", "SYSTEM TABLE"));
     }
 }

@@ -9,7 +9,7 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -19,7 +19,6 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +29,8 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.dialects.SqlDialect.NullSorting;
+import com.exasol.adapter.sql.ScalarFunction;
 
 @ExtendWith(MockitoExtension.class)
 class RedshiftSqlDialectTest {
@@ -97,7 +98,7 @@ class RedshiftSqlDialectTest {
         final SqlDialect sqlDialect = new RedshiftSqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
-        MatcherAssert.assertThat(exception.getMessage(), containsString(
+        assertThat(exception.getMessage(), containsString(
                 "The dialect REDSHIFT cannot have the name ORACLE. You specified the wrong dialect name or created the wrong dialect class."));
     }
 
@@ -113,5 +114,41 @@ class RedshiftSqlDialectTest {
     private void setMandatoryProperties(final String sqlDialectProperty) {
         this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
         this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN");
+    }
+
+    @Test
+    void testGetScalarFunctionAliases() {
+        final Map<ScalarFunction, String> scalarFunctionAliases = this.dialect.getScalarFunctionAliases();
+        assertThat(scalarFunctionAliases, aMapWithSize(5));
+    }
+
+    @Test
+    void testGetAggregateFunctionAliases() {
+        assertThat(this.dialect.getAggregateFunctionAliases(), aMapWithSize(0));
+    }
+
+    @Test
+    void testApplyQuote() {
+        assertThat(this.dialect.applyQuote("Foo\"Bar"), equalTo("\"Foo\"\"Bar\""));
+    }
+
+    @Test
+    void testRequiresCatalogQualifiedTableNames() {
+        assertThat(this.dialect.requiresCatalogQualifiedTableNames(null), equalTo(false));
+    }
+
+    @Test
+    void testRequiresSchemaQualifiedTableNames() {
+        assertThat(this.dialect.requiresSchemaQualifiedTableNames(null), equalTo(true));
+    }
+
+    @Test
+    void testGetDefaultNullSorting() {
+        assertThat(this.dialect.getDefaultNullSorting(), equalTo(NullSorting.NULLS_SORTED_AT_END));
+    }
+
+    @Test
+    void testGetStringLiteral() {
+        assertThat(this.dialect.getStringLiteral("Foo'Bar"), equalTo("'Foo''Bar'"));
     }
 }
