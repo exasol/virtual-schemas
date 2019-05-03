@@ -15,8 +15,10 @@ public class RedshiftTableMetadataReader extends BaseTableMetadataReader {
     /**
      * Create a new {@link RedshiftTableMetadataReader} instance
      *
+     * @param connection           JDBC connection to the remote data source
      * @param columnMetadataReader reader to be used to map the metadata of the tables columns
      * @param properties           user-defined adapter properties
+     * @param identifierConverter
      */
     public RedshiftTableMetadataReader(final Connection connection, final ColumnMetadataReader columnMetadataReader,
             final AdapterProperties properties, final IdentifierConverter identifierConverter) {
