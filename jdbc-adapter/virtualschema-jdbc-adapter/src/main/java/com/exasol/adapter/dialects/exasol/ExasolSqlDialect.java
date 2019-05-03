@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects.exasol;
 
 import static com.exasol.adapter.AdapterProperties.*;
+import static com.exasol.adapter.capabilities.MainCapability.*;
 
 import java.sql.Connection;
 import java.util.Arrays;
@@ -63,7 +64,10 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     @Override
     public Capabilities getCapabilities() {
         final Capabilities.Builder builder = Capabilities.builder();
-        builder.addMain(MainCapability.values());
+        builder.addMain(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS, AGGREGATE_SINGLE_GROUP,
+                AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_GROUP_BY_EXPRESSION, AGGREGATE_GROUP_BY_TUPLE, AGGREGATE_HAVING,
+                ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT, LIMIT_WITH_OFFSET,
+                JOIN, JOIN_TYPE_INNER, JOIN_TYPE_LEFT_OUTER, JOIN_TYPE_RIGHT_OUTER, JOIN_TYPE_FULL_OUTER, JOIN_CONDITION_EQUI);
         builder.addLiteral(LiteralCapability.values());
         builder.addPredicate(PredicateCapability.values());
         builder.addAggregateFunction(AggregateFunctionCapability.values());
