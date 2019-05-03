@@ -54,6 +54,21 @@ This repository contains Maven sub-projects that are structured as follows.
     jdbc-adapter                               Parent project and integration test framework
       |
       |-- virtualschema-jdbc-adapter           The actual implementation files
+      |     |
+      |     |-- src
+      |     |     |
+      |     |     |-- main
+      |     |     |     |
+      |     |     |     |-- java               Productive code
+      |     |     |     |
+      |     |     |     '-- resources          Productive resources (e.g. service loader configuration)
+      |     |     |
+      |     |     '-- test
+      |     |           |
+      |     |           |-- java               Unit and integration tests
+      |     |           |
+      |     |           '-- resources          Test resources
+      |    ...     
       |
       '-- virtualschema-jdbc-adapter-dist      Environment for creating the all-in-one adapter JAR
 

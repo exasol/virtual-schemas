@@ -38,13 +38,7 @@ public AthenaSqlDialect(final Connection connection, final AdapterProperties pro
 
 Add the fully qualified class name `com.exasol.adapter.dialects.athena.AthenaSqlDialect` to the file `src/main/resources/sql_dialects.properties`  so that the class loader can find your new dialect adapter.
 
-The following step is still necessary by the time of this writing, but will soon be obsoleted and replaced by automatic discovery..
-
-In `com.exasol.adapter.jdbc.JdbcAdapter/adapterCall(ExaMetadata, String)` add the following line:
-
-```java
-registerAdapterForSqlDialect(adapter, "ATHENA");
-```
+Add the dialect name (here `ATHENA`) to the list of dialects for which the `JbdcAdapterFactory` is responsible in the method `getSupportedAdapterNames()`;
 
 Create an empty unit test class for the dialect: `com.exasol.adapter.dialects.athena.AthenaSqlDialectTest` that tests class `AthenaSqlDialectTest`.
 
