@@ -8,7 +8,6 @@ import java.sql.Connection;
 import java.util.*;
 
 import javax.json.JsonObject;
-import javax.json.JsonValue;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,7 +48,6 @@ public class FileBasedIntegrationTest {
     private static final String TEST_FILE_KEY_TESTCASES = "testCases";
     private static final String TEST_FILE_KEY_EXP_PD_REQUEST = "expectedPushdownRequest";
     private static final String TEST_FILE_KEY_EXP_PD_RESPONSE = "expectedPushdownResponse";
-    private static final String JSON_API_KEY_INVOLVED_TABLES = "involvedTables";
 
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Iterable<? extends Object> data() {
@@ -73,7 +71,7 @@ public class FileBasedIntegrationTest {
             for (final String dialect : expectedPushdownQueries.keySet()) {
                 for (final PushDownRequest PushDownRequest : PushDownRequests) {
                     final String pushdownQuery = generatePushdownQuery(dialect, PushDownRequest,
-                            hasMultipleTables(jsonTest, testNr), this.testFile.getName(), testNr);
+                            this.testFile.getName(), testNr);
                     assertExpectedPushdowns(expectedPushdownQueries.get(dialect), pushdownQuery,
                             this.testFile.getName(), testNr, dialect);
                 }
@@ -119,20 +117,12 @@ public class FileBasedIntegrationTest {
         return PushDownRequests;
     }
 
-    private Boolean hasMultipleTables(final String jsonTest, final int testNr) throws Exception {
-        final JsonObject root = JsonHelper.getJsonObject(jsonTest);
-        final JsonObject test = root.getJsonArray(TEST_FILE_KEY_TESTCASES).getValuesAs(JsonObject.class).get(testNr);
-        final JsonValue req = test.getJsonArray(TEST_FILE_KEY_EXP_PD_REQUEST).get(0);
-        final int size = ((JsonObject) req).getJsonArray(JSON_API_KEY_INVOLVED_TABLES).size();
-        return size > 1;
-    }
-
     private String generatePushdownQuery(final String dialect, final PushDownRequest PushDownRequest,
-            final Boolean multipleTables, final String testFile, final int testNr)
+            final String testFile, final int testNr)
             throws AdapterException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
             InvocationTargetException, InstantiationException {
         final String schemaName = "LS";
-        final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, multipleTables);
+        final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
         final Class<?> dialectClass = getDialectClass(dialect);
         final SqlDialect sqlDialect = (SqlDialect) dialectClass
                 .getConstructor(Connection.class, AdapterProperties.class)

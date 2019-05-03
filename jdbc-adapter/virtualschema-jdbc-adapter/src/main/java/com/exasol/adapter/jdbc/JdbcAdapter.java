@@ -244,9 +244,8 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
 
     protected String createPushdownQuery(final PushDownRequest request, final AdapterProperties properties,
             final SqlDialect dialect) throws AdapterException {
-        final boolean hasMoreThanOneTable = request.getInvolvedTablesMetadata().size() > 1;
         final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
-                properties.getSchemaName(), properties.isLocalSource(), hasMoreThanOneTable);
+                properties.getSchemaName(), properties.isLocalSource());
         final SqlGenerationVisitor sqlGeneratorVisitor = dialect.getSqlGenerationVisitor(context);
         final String pushdownQuery = request.getSelect().accept(sqlGeneratorVisitor);
         LOGGER.finer(() -> "Push-down query:\n" + pushdownQuery);

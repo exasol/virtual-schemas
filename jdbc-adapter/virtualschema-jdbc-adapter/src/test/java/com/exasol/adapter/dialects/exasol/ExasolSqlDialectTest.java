@@ -74,7 +74,7 @@ class ExasolSqlDialectTest {
         final String expectedSql = "SELECT \"USER_ID\", COUNT(\"URL\") FROM \"" + schemaName + "\".\"CLICKS\""
                 + " WHERE 1 < \"USER_ID\"" + " GROUP BY \"USER_ID\"" + " HAVING 1 < COUNT(\"URL\")"
                 + " ORDER BY \"USER_ID\"" + " LIMIT 10";
-        final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false, false);
+        final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
         final SqlGenerationVisitor generator = this.dialect.getSqlGenerationVisitor(context);
         final String actualSql = node.accept(generator);
         assertThat(SqlTestUtil.normalizeSql(actualSql), equalTo(SqlTestUtil.normalizeSql(expectedSql)));
