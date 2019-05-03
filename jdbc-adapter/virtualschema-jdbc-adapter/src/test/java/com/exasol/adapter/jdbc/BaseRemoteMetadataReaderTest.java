@@ -4,6 +4,8 @@ import static com.exasol.adapter.jdbc.TableMetadataMockUtils.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.sql.*;
@@ -11,7 +13,6 @@ import java.util.*;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -22,45 +23,44 @@ import com.exasol.adapter.metadata.*;
 class BaseRemoteMetadataReaderTest {
     private static final String IDENTIFIER_QUOTE_STRING = "identifier-quote-string";
     private static final String CATALOG_SEPARATOR = "catalog-separator";
-    @Mock
-    private Connection connectionMock;
-    @Mock
-    private DatabaseMetaData remoteMetadataMock;
 
     @Test
     void testReadEmptyRemoteMetadata() throws RemoteMetadataReaderException, SQLException {
-        mockConnection();
-        mockGetAllTablesReturnsEmptyList();
-        mockSupportingMetadata();
-        assertThat(readMockedSchemaMetadata().getTables(), emptyIterableOf(TableMetadata.class));
+        final DatabaseMetaData remoteMetadataMock = mockSupportingMetadata();
+        final Connection connectionMock = mockConnection(remoteMetadataMock);
+        mockGetAllTablesReturnsEmptyList(remoteMetadataMock);
+        assertThat(readMockedSchemaMetadata(connectionMock).getTables(), emptyIterableOf(TableMetadata.class));
     }
 
-    protected void mockConnection() throws SQLException {
-        when(this.connectionMock.getMetaData()).thenReturn(this.remoteMetadataMock);
+    private Connection mockConnection(final DatabaseMetaData remoteMetadata) throws SQLException {
+        final Connection connectionMock = Mockito.mock(Connection.class);
+        when(connectionMock.getMetaData()).thenReturn(remoteMetadata);
+        return connectionMock;
     }
 
-    private SchemaMetadata readMockedSchemaMetadata() {
-        return readMockedSchemaMetadataWithProperties(AdapterProperties.emptyProperties());
+    private void mockGetAllTablesReturnsEmptyList(final DatabaseMetaData remoteMetadataMock) throws SQLException {
+        final ResultSet remoteTablesMock = Mockito.mock(ResultSet.class);
+        when(remoteTablesMock.next()).thenReturn(false);
+        mockGetAllTables(remoteMetadataMock, remoteTablesMock);
     }
 
-    protected SchemaMetadata readMockedSchemaMetadataWithProperties(final AdapterProperties properties) {
-        final RemoteMetadataReader reader = new BaseRemoteMetadataReader(this.connectionMock, properties);
+    private SchemaMetadata readMockedSchemaMetadata(final Connection connectionMock) {
+        return readMockedSchemaMetadataWithProperties(connectionMock, AdapterProperties.emptyProperties());
+    }
+
+    private SchemaMetadata readMockedSchemaMetadataWithProperties(final Connection connectionMock,
+            final AdapterProperties properties) {
+        final RemoteMetadataReader reader = new BaseRemoteMetadataReader(connectionMock, properties);
         return reader.readRemoteSchemaMetadata();
-    }
-
-    private void mockGetAllTablesReturnsEmptyList() throws SQLException {
-        final ResultSet remoteTables = Mockito.mock(ResultSet.class);
-        when(remoteTables.next()).thenReturn(false);
-        mockGetAllTables(remoteTables);
     }
 
     @Test
     void testReadRemoteMetadata() throws RemoteMetadataReaderException, SQLException {
-        mockConnection();
-        mockGetColumnsCalls();
-        mockGetTableCalls();
-        mockSupportingMetadata();
-        final SchemaMetadata metadata = readMockedSchemaMetadata();
+        final DatabaseMetaData remoteMetadataMock = mockSupportingMetadata();
+        final Connection connectionMock = mockConnection(remoteMetadataMock);
+        mockGetColumnsCalls(remoteMetadataMock);
+        mockGetTableCalls(remoteMetadataMock);
+        final SchemaMetadata metadata = readMockedSchemaMetadata(connectionMock);
         final List<TableMetadata> tables = metadata.getTables();
         final TableMetadata tableAMetadata = tables.get(0);
         final TableMetadata tableBMetadata = tables.get(1);
@@ -73,66 +73,69 @@ class BaseRemoteMetadataReaderTest {
                 () -> assertThat(columnsBMetadata, iterableWithSize(3)));
     }
 
-    private void mockGetColumnsCalls() throws SQLException {
-        mockTableA();
-        mockTableB();
+    private void mockGetColumnsCalls(final DatabaseMetaData remoteMetadataMock) throws SQLException {
+        mockTableA(remoteMetadataMock);
+        mockTableB(remoteMetadataMock);
     }
 
-    private void mockTableA() throws SQLException {
+    private void mockTableA(final DatabaseMetaData remoteMetadataMock) throws SQLException {
         final ResultSet tableAColumns = Mockito.mock(ResultSet.class);
         when(tableAColumns.next()).thenReturn(true, true, false);
         when(tableAColumns.getString(BaseColumnMetadataReader.NAME_COLUMN)).thenReturn("COLUMN_A1", "COLUMN_A2");
         when(tableAColumns.getInt(BaseColumnMetadataReader.DATA_TYPE_COLUMN)).thenReturn(Types.BOOLEAN, Types.DATE);
-        when(this.remoteMetadataMock.getColumns(null, null, TABLE_A, "%")).thenReturn(tableAColumns);
+        when(remoteMetadataMock.getColumns(any(), any(), eq(TABLE_A), any())).thenReturn(tableAColumns);
     }
 
-    private void mockTableB() throws SQLException {
+    private void mockTableB(final DatabaseMetaData remoteMetadataMock) throws SQLException {
         final ResultSet tableBColumns = Mockito.mock(ResultSet.class);
         when(tableBColumns.next()).thenReturn(true, true, true, false);
         when(tableBColumns.getInt(BaseColumnMetadataReader.DATA_TYPE_COLUMN)).thenReturn(Types.BOOLEAN, Types.DOUBLE);
         when(tableBColumns.getString(BaseColumnMetadataReader.NAME_COLUMN)).thenReturn("COLUMN_B1", "COLUMN_B2",
                 "COLUMN_B3");
-        when(this.remoteMetadataMock.getColumns(null, null, TABLE_B, "%")).thenReturn(tableBColumns);
+        when(remoteMetadataMock.getColumns(any(), any(), eq(TABLE_B), any())).thenReturn(tableBColumns);
     }
 
-    private void mockGetTableCalls() throws SQLException {
-        final ResultSet tables = Mockito.mock(ResultSet.class);
-        mockTableCount(tables, 2);
-        mockTableName(tables, TABLE_A, TABLE_B);
-        mockGetAllTables(tables);
+    private void mockGetTableCalls(final DatabaseMetaData remoteMetadataMock) throws SQLException {
+        final ResultSet tablesMock = Mockito.mock(ResultSet.class);
+        mockTableCount(tablesMock, 2);
+        mockTableName(tablesMock, TABLE_A, TABLE_B);
+        mockGetAllTables(remoteMetadataMock, tablesMock);
     }
 
-    private void mockGetAllTables(final ResultSet tables) throws SQLException {
-        when(this.remoteMetadataMock.getTables(null, null, "%",
-                RemoteMetadataReaderConstants.SUPPORTED_TABLE_TYPES.toArray(new String[0]))).thenReturn(tables);
+    private void mockGetAllTables(final DatabaseMetaData remoteMetadataMock, final ResultSet tables)
+            throws SQLException {
+        when(remoteMetadataMock.getTables(any(), any(), any(), any())).thenReturn(tables);
     }
 
-    protected void mockSupportingMetadata() throws SQLException {
-        when(this.remoteMetadataMock.getCatalogSeparator()).thenReturn(CATALOG_SEPARATOR);
-        when(this.remoteMetadataMock.getIdentifierQuoteString()).thenReturn(IDENTIFIER_QUOTE_STRING);
-        when(this.remoteMetadataMock.storesLowerCaseIdentifiers()).thenReturn(true);
-        when(this.remoteMetadataMock.storesUpperCaseIdentifiers()).thenReturn(true);
-        when(this.remoteMetadataMock.storesMixedCaseIdentifiers()).thenReturn(true);
-        when(this.remoteMetadataMock.supportsMixedCaseIdentifiers()).thenReturn(true);
-        when(this.remoteMetadataMock.storesLowerCaseQuotedIdentifiers()).thenReturn(true);
-        when(this.remoteMetadataMock.storesUpperCaseQuotedIdentifiers()).thenReturn(true);
-        when(this.remoteMetadataMock.storesMixedCaseQuotedIdentifiers()).thenReturn(true);
-        when(this.remoteMetadataMock.supportsMixedCaseQuotedIdentifiers()).thenReturn(true);
-        when(this.remoteMetadataMock.nullsAreSortedAtEnd()).thenReturn(true);
-        when(this.remoteMetadataMock.nullsAreSortedAtStart()).thenReturn(true);
-        when(this.remoteMetadataMock.nullsAreSortedHigh()).thenReturn(true);
-        when(this.remoteMetadataMock.nullsAreSortedLow()).thenReturn(true);
+    protected DatabaseMetaData mockSupportingMetadata() throws SQLException {
+        final DatabaseMetaData remoteMetadataMock = Mockito.mock(DatabaseMetaData.class);
+        when(remoteMetadataMock.getCatalogSeparator()).thenReturn(CATALOG_SEPARATOR);
+        when(remoteMetadataMock.getIdentifierQuoteString()).thenReturn(IDENTIFIER_QUOTE_STRING);
+        when(remoteMetadataMock.storesLowerCaseIdentifiers()).thenReturn(true);
+        when(remoteMetadataMock.storesUpperCaseIdentifiers()).thenReturn(true);
+        when(remoteMetadataMock.storesMixedCaseIdentifiers()).thenReturn(true);
+        when(remoteMetadataMock.supportsMixedCaseIdentifiers()).thenReturn(true);
+        when(remoteMetadataMock.storesLowerCaseQuotedIdentifiers()).thenReturn(true);
+        when(remoteMetadataMock.storesUpperCaseQuotedIdentifiers()).thenReturn(true);
+        when(remoteMetadataMock.storesMixedCaseQuotedIdentifiers()).thenReturn(true);
+        when(remoteMetadataMock.supportsMixedCaseQuotedIdentifiers()).thenReturn(true);
+        when(remoteMetadataMock.nullsAreSortedAtEnd()).thenReturn(true);
+        when(remoteMetadataMock.nullsAreSortedAtStart()).thenReturn(true);
+        when(remoteMetadataMock.nullsAreSortedHigh()).thenReturn(true);
+        when(remoteMetadataMock.nullsAreSortedLow()).thenReturn(true);
+        return remoteMetadataMock;
     }
 
     @Test
     void testReadRemoteDataSkippingFilteredTables() throws SQLException {
-        mockConnection();
+        final DatabaseMetaData remoteMetadataMock = mockSupportingMetadata();
+        final Connection connectionMock = mockConnection(remoteMetadataMock);
         final Map<String, String> rawProperties = new HashMap<>();
         rawProperties.put(AdapterProperties.TABLE_FILTER_PROPERTY, TABLE_B);
-        mockTableA();
-        mockGetTableCalls();
-        mockSupportingMetadata();
-        final SchemaMetadata metadata = readMockedSchemaMetadataWithProperties(new AdapterProperties(rawProperties));
+        mockTableA(remoteMetadataMock);
+        mockGetTableCalls(remoteMetadataMock);
+        final SchemaMetadata metadata = readMockedSchemaMetadataWithProperties(connectionMock,
+                new AdapterProperties(rawProperties));
         final List<TableMetadata> tables = metadata.getTables();
         final TableMetadata tableAMetadata = tables.get(0);
         assertAll(() -> assertThat(tables, iterableWithSize(1)),
@@ -141,10 +144,10 @@ class BaseRemoteMetadataReaderTest {
 
     @Test
     void testCreateSchemaAdapterNotes() throws SQLException {
-        mockConnection();
-        final RemoteMetadataReader reader = new BaseRemoteMetadataReader(this.connectionMock,
+        final DatabaseMetaData remoteMetadataMock = mockSupportingMetadata();
+        final Connection connectionMock = mockConnection(remoteMetadataMock);
+        final RemoteMetadataReader reader = new BaseRemoteMetadataReader(connectionMock,
                 AdapterProperties.emptyProperties());
-        mockSupportingMetadata();
         final SchemaAdapterNotes notes = reader.getSchemaAdapterNotes();
         assertAll(() -> assertThat(notes.getCatalogSeparator(), equalTo(CATALOG_SEPARATOR)),
                 () -> assertThat(notes.getIdentifierQuoteString(), equalTo(IDENTIFIER_QUOTE_STRING)),
@@ -164,14 +167,14 @@ class BaseRemoteMetadataReaderTest {
 
     @Test
     void testReadRemoteMetadataWithAdapterNotes() throws RemoteMetadataReaderException, SQLException {
-        mockConnection();
+        final DatabaseMetaData remoteMetadataMock = mockSupportingMetadata();
+        final Connection connectionMock = mockConnection(remoteMetadataMock);
         final ResultSet tablesMock = Mockito.mock(ResultSet.class);
         mockTableCount(tablesMock, 1);
         mockTableName(tablesMock, TABLE_A);
-        mockGetAllTables(tablesMock);
-        mockSupportingMetadata();
-        mockTableA();
-        final SchemaMetadata metadata = readMockedSchemaMetadata();
+        mockGetAllTables(remoteMetadataMock, tablesMock);
+        mockTableA(remoteMetadataMock);
+        final SchemaMetadata metadata = readMockedSchemaMetadata(connectionMock);
         final List<TableMetadata> tables = metadata.getTables();
         final TableMetadata tableAMetadata = tables.get(0);
         final List<ColumnMetadata> columnsAMetadata = tableAMetadata.getColumns();
@@ -218,16 +221,28 @@ class BaseRemoteMetadataReaderTest {
     // work together.
     @Test
     void testReadRemoteDataSkippingForSelectedTablesOnly() throws SQLException {
-        mockConnection();
-        mockTableA();
-        mockGetTableCalls();
-        mockSupportingMetadata();
-        final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(this.connectionMock,
+        final DatabaseMetaData remoteMetadataMock = mockSupportingMetadata();
+        final Connection connectionMock = mockConnection(remoteMetadataMock);
+        mockGetTableCalls(remoteMetadataMock);
+        mockTableA(remoteMetadataMock);
+        final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(connectionMock,
                 AdapterProperties.emptyProperties());
         final SchemaMetadata metadata = reader.readRemoteSchemaMetadata(Arrays.asList(TABLE_A));
         final List<TableMetadata> tables = metadata.getTables();
         final TableMetadata tableAMetadata = tables.get(0);
         assertAll(() -> assertThat(tables, iterableWithSize(1)),
                 () -> assertThat(tableAMetadata.getName(), equalTo(TABLE_A)));
+    }
+
+    @Test
+    void testCreateIdentifierConverter() {
+        final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(null, AdapterProperties.emptyProperties());
+        reader.createIdentifierConverter();
+        assertAll(
+                () -> assertThat(reader.getIdentifierConverter().getUnquotedIdentifierHandling(),
+                        equalTo(IdentifierCaseHandling.INTERPRET_AS_UPPER)),
+                () -> assertThat(reader.getIdentifierConverter().getQuotedIdentifierHandling(),
+                        equalTo(IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE)));
+
     }
 }

@@ -1,13 +1,12 @@
 package com.exasol.adapter.jdbc;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.SqlDialect.IdentifierCaseHandling;
+import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.TableMetadata;
 import com.google.common.base.Strings;
@@ -15,25 +14,28 @@ import com.google.common.base.Strings;
 /**
  * This class maps metadata of tables from the remote source to Exasol
  */
-public class BaseTableMetadataReader implements TableMetadataReader {
+public class BaseTableMetadataReader extends AbstractMetadataReader implements TableMetadataReader {
     static final String NAME_COLUMN = "TABLE_NAME";
     static final String REMARKS_COLUMN = "REMARKS";
     static final String DEFAULT_TABLE_ADAPTER_NOTES = "";
     private static final Logger LOGGER = Logger.getLogger(BaseTableMetadataReader.class.getName());
     private static final Pattern UNQUOTED_IDENTIFIER_PATTERN = Pattern.compile("^[a-z][0-9a-z_]*");
-    private final ColumnMetadataReader columnMetadataReader;
-    protected final AdapterProperties properties;
+    protected ColumnMetadataReader columnMetadataReader;
+    private final IdentifierConverter identifierConverter;
 
     /**
      * Create a new instance of a {@link TableMetadata}
      *
+     * @param connection           JDBC connection to remote data source
      * @param columnMetadataReader reader to be used to map the tables columns
      * @param properties           user-defined adapter properties
+     * @param identifierConverter  converter between source and Exasol identifiers
      */
-    public BaseTableMetadataReader(final ColumnMetadataReader columnMetadataReader,
-            final AdapterProperties properties) {
+    public BaseTableMetadataReader(final Connection connection, final ColumnMetadataReader columnMetadataReader,
+            final AdapterProperties properties, final IdentifierConverter identifierConverter) {
+        super(connection, properties);
         this.columnMetadataReader = columnMetadataReader;
-        this.properties = properties;
+        this.identifierConverter = identifierConverter;
     }
 
     @Override
@@ -111,38 +113,16 @@ public class BaseTableMetadataReader implements TableMetadataReader {
         return new TableMetadata(adjustIdentifierCase(tableName), adapterNotes, columns, comment);
     }
 
+    private String adjustIdentifierCase(final String tableName) {
+        return this.identifierConverter.convert(tableName);
+    }
+
     protected String readTableName(final ResultSet remoteTables) throws SQLException {
         return remoteTables.getString(NAME_COLUMN);
     }
 
     protected String readComment(final ResultSet remoteTables) throws SQLException {
         return remoteTables.getString(REMARKS_COLUMN);
-    }
-
-    @Override
-    public String adjustIdentifierCase(final String identifier) {
-        if (getQuotedIdentifierCaseHandling() == this.getUnquotedIdentifierCaseHandling()) {
-            if (isQuotedIdentifierCaseSensitive()) {
-                return identifier.toUpperCase();
-            } else {
-                return identifier;
-            }
-        }
-        return identifier;
-    }
-
-    @Override
-    public IdentifierCaseHandling getUnquotedIdentifierCaseHandling() {
-        return IdentifierCaseHandling.INTERPRET_AS_UPPER;
-    }
-
-    @Override
-    public IdentifierCaseHandling getQuotedIdentifierCaseHandling() {
-        return IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
-    }
-
-    protected boolean isQuotedIdentifierCaseSensitive() {
-        return getQuotedIdentifierCaseHandling() != IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE;
     }
 
     protected boolean isUnquotedIdentifier(final String identifier) {

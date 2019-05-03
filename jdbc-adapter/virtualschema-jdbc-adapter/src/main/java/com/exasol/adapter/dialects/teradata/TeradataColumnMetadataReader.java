@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
@@ -22,11 +23,13 @@ public class TeradataColumnMetadataReader extends BaseColumnMetadataReader {
     /**
      * Create a new instance of a {@link TeradataColumnMetadataReader}
      *
-     * @param connection JDBC connection through which the column metadata is read from the remote database
-     * @param properties user-defined adapter properties
+     * @param connection          JDBC connection through which the column metadata is read from the remote database
+     * @param properties          user-defined adapter properties
+     * @param identifierConverter converter between source and Exasol identifiers
      */
-    public TeradataColumnMetadataReader(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
+    public TeradataColumnMetadataReader(final Connection connection, final AdapterProperties properties,
+            final IdentifierConverter identifierConverter) {
+        super(connection, properties, identifierConverter);
     }
 
     @Override

@@ -12,6 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.metadata.DataType;
 
@@ -20,7 +21,8 @@ class DB2ColumnMetadataReaderTest {
 
     @BeforeEach
     void beforeEach() {
-        this.db2ColumnMetadataReader = new DB2ColumnMetadataReader(null, AdapterProperties.emptyProperties());
+        this.db2ColumnMetadataReader = new DB2ColumnMetadataReader(null, AdapterProperties.emptyProperties(),
+                BaseIdentifierConverter.createDefault());
     }
 
     @Test

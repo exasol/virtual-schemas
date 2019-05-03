@@ -15,6 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
 
 class PostgreSQLTableMetadataReaderTest {
@@ -41,17 +42,17 @@ class PostgreSQLTableMetadataReaderTest {
         assertThat(createTableMetadataReader().isTableIncludedByMapping(tableName), equalTo(included));
     }
 
-    protected void ignoreErrors(final String ignoreErrors) {
+    private void ignoreErrors(final String ignoreErrors) {
         this.rawProperties.put(IGNORE_ERRORS_PROPERTY, ignoreErrors);
     }
 
-    protected void selectIdentifierMapping(final PostgreSQLIdentifierMapping identifierMapping) {
+    private void selectIdentifierMapping(final PostgreSQLIdentifierMapping identifierMapping) {
         this.rawProperties.put(POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY, identifierMapping.toString());
     }
 
-    protected PostgreSQLTableMetadataReader createTableMetadataReader() {
+    private PostgreSQLTableMetadataReader createTableMetadataReader() {
         final AdapterProperties properties = new AdapterProperties(this.rawProperties);
-        return new PostgreSQLTableMetadataReader(null, properties);
+        return new PostgreSQLTableMetadataReader(null, null, properties, BaseIdentifierConverter.createDefault());
     }
 
     @Test
@@ -66,19 +67,5 @@ class PostgreSQLTableMetadataReaderTest {
 
         final PostgreSQLTableMetadataReader reader = createTableMetadataReader();
         assertThrows(RemoteMetadataReaderException.class, () -> reader.isTableIncludedByMapping("\"FooBar\""));
-    }
-
-    @CsvSource({ //
-            "foobar    , CONVERT_TO_UPPER      , FOOBAR", //
-            "foobar    , PRESERVE_ORIGINAL_CASE, foobar", //
-            "FooBar    , PRESERVE_ORIGINAL_CASE, FooBar", //
-            "\"FooBar\", CONVERT_TO_UPPER      , \"FooBar\"", //
-            "\"FooBar\", PRESERVE_ORIGINAL_CASE, \"FooBar\"" //
-    })
-    @ParameterizedTest
-    void testAdjustIdentifierCase(final String original, final PostgreSQLIdentifierMapping identifierMapping,
-            final String adjusted) {
-        selectIdentifierMapping(identifierMapping);
-        assertThat(createTableMetadataReader().adjustIdentifierCase(original), equalTo(adjusted));
     }
 }

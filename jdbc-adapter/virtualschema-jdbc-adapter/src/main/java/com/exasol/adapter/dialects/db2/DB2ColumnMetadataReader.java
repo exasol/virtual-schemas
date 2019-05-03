@@ -1,11 +1,13 @@
 package com.exasol.adapter.dialects.db2;
 
+import java.sql.Connection;
+import java.sql.Types;
+
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
-
-import java.sql.*;
 
 /**
  * This class implements DB2-specific reading of column metadata
@@ -14,11 +16,13 @@ public class DB2ColumnMetadataReader extends BaseColumnMetadataReader {
     /**
      * Create a new instance of an {@link DB2ColumnMetadataReader}
      *
-     * @param connection connection to the remote data source
-     * @param properties user-defined adapter properties
+     * @param connection          connection to the remote data source
+     * @param properties          user-defined adapter properties
+     * @param identifierConverter converter between source and Exasol identifiers
      */
-    public DB2ColumnMetadataReader(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
+    public DB2ColumnMetadataReader(final Connection connection, final AdapterProperties properties,
+            final IdentifierConverter identifierConverter) {
+        super(connection, properties, identifierConverter);
     }
 
     @Override

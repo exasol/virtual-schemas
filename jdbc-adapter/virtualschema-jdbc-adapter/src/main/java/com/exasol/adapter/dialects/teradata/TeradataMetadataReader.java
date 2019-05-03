@@ -1,10 +1,10 @@
 package com.exasol.adapter.dialects.teradata;
 
+import java.sql.Connection;
+
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
 import com.exasol.adapter.jdbc.ColumnMetadataReader;
-
-import java.sql.Connection;
 
 /**
  * This class reads and Teradata-specific database metadata
@@ -22,6 +22,6 @@ public class TeradataMetadataReader extends BaseRemoteMetadataReader {
 
     @Override
     protected ColumnMetadataReader createColumnMetadataReader() {
-        return new TeradataColumnMetadataReader(this.connection, this.properties);
+        return new TeradataColumnMetadataReader(this.connection, this.properties, getIdentifierConverter());
     }
 }

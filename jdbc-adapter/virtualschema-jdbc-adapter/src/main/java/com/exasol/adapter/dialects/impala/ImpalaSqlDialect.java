@@ -13,6 +13,7 @@ import java.util.List;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 
 /**
  * Dialect for Impala, using the Cloudera Impala JDBC Driver/Connector (developed by Simba).
@@ -58,22 +59,6 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
         return StructureElementSupport.MULTIPLE;
     }
 
-    /**
-     * Note from Impala documentation: Impala identifiers are always case-insensitive. That is, tables named t1 and T1
-     * always refer to the same table, regardless of quote characters. Internally, Impala always folds all specified
-     * table and column names to lowercase. This is why the column headers in query output are always displayed in
-     * lowercase.
-     */
-    @Override
-    public IdentifierCaseHandling getUnquotedIdentifierHandling() {
-        return IdentifierCaseHandling.INTERPRET_AS_LOWER;
-    }
-
-    @Override
-    public IdentifierCaseHandling getQuotedIdentifierHandling() {
-        return IdentifierCaseHandling.INTERPRET_AS_LOWER;
-    }
-
     @Override
     public String applyQuote(final String identifier) {
         return "`" + identifier + "`";
@@ -113,5 +98,10 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
     @Override
     protected List<String> getSupportedProperties() {
         return SUPPORTED_PROPERTIES;
+    }
+
+    @Override
+    protected RemoteMetadataReader createRemoteMetadataReader() {
+        return new ImpalaMetadataReader(this.connection, this.properties);
     }
 }

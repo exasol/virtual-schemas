@@ -3,9 +3,11 @@ package com.exasol.adapter.dialects.postgresql;
 import static com.exasol.adapter.AdapterProperties.IGNORE_ERRORS_PROPERTY;
 import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY;
 
+import java.sql.Connection;
 import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.*;
 
 /**
@@ -18,12 +20,14 @@ public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
     /**
      * Create a new {@link PostgreSQLTableMetadataReader} instance
      *
+     * @param connection           JDBC connection to the remote data source
      * @param columnMetadataReader reader to be used to map the metadata of the tables columns
      * @param properties           user-defined adapter properties
+     * @param identifierConverter  converter between source and Exasol identifiers
      */
-    public PostgreSQLTableMetadataReader(final ColumnMetadataReader columnMetadataReader,
-            final AdapterProperties properties) {
-        super(columnMetadataReader, properties);
+    public PostgreSQLTableMetadataReader(final Connection connection, final ColumnMetadataReader columnMetadataReader,
+            final AdapterProperties properties, final IdentifierConverter identifierConverter) {
+        super(connection, columnMetadataReader, properties, identifierConverter);
     }
 
     /**
@@ -79,18 +83,5 @@ public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
             }
         }
         return false;
-    }
-
-    @Override
-    public String adjustIdentifierCase(final String identifier) {
-        if (getIdentifierMapping() == PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE) {
-            return identifier;
-        } else {
-            if (isUnquotedIdentifier(identifier)) {
-                return identifier.toUpperCase();
-            } else {
-                return identifier;
-            }
-        }
     }
 }
