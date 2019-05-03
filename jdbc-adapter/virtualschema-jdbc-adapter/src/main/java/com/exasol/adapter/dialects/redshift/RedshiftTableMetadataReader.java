@@ -18,7 +18,7 @@ public class RedshiftTableMetadataReader extends BaseTableMetadataReader {
      * @param connection           JDBC connection to the remote data source
      * @param columnMetadataReader reader to be used to map the metadata of the tables columns
      * @param properties           user-defined adapter properties
-     * @param identifierConverter
+     * @param identifierConverter  converter between source and Exasol identifiers
      */
     public RedshiftTableMetadataReader(final Connection connection, final ColumnMetadataReader columnMetadataReader,
             final AdapterProperties properties, final IdentifierConverter identifierConverter) {
