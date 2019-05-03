@@ -47,7 +47,7 @@ public class RedshiftColumnMetadataReader extends BaseColumnMetadataReader {
         } else {
             LOGGER.finer(() -> "Mapping JDBC type OTHER [" + jdbcTypeDescription.getTypeName()
                     + "] to maximum size VARCHAR.");
+            return DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
         }
-        return DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
     }
 }
