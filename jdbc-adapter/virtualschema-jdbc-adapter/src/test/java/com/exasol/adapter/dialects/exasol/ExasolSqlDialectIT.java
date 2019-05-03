@@ -204,34 +204,34 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
         String query = "SELECT GROUP_CONCAT(A) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         ResultSet result = executeQuery(query);
         matchLastRow(result, "1,1,2,2,3,3");
-        matchSingleRowExplain(query, "SELECT GROUP_CONCAT(\"A\") FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
+        matchSingleRowExplain(query, "SELECT GROUP_CONCAT(\"SIMPLE_VALUES\".\"A\") FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
                 IS_LOCAL);
         query = "SELECT GROUP_CONCAT(DISTINCT A) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchLastRow(result, "1,2,3");
         matchSingleRowExplain(query,
-                "SELECT GROUP_CONCAT(DISTINCT \"A\") FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
+                "SELECT GROUP_CONCAT(DISTINCT \"SIMPLE_VALUES\".\"A\") FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
         query = "SELECT GROUP_CONCAT(A ORDER BY C) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchLastRow(result, "1,2,3,1,2,3");
         matchSingleRowExplain(query,
-                "SELECT GROUP_CONCAT(\"A\" ORDER BY \"C\") FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
+                "SELECT GROUP_CONCAT(\"SIMPLE_VALUES\".\"A\" ORDER BY \"SIMPLE_VALUES\".\"C\") FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
         query = "SELECT GROUP_CONCAT(A ORDER BY C DESC) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchLastRow(result, "3,2,1,3,2,1");
         matchSingleRowExplain(query,
-                "SELECT GROUP_CONCAT(\"A\" ORDER BY \"C\" DESC) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
+                "SELECT GROUP_CONCAT(\"SIMPLE_VALUES\".\"A\" ORDER BY \"SIMPLE_VALUES\".\"C\" DESC) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
                 IS_LOCAL);
         query = "SELECT GROUP_CONCAT(A ORDER BY C DESC NULLS LAST) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchLastRow(result, "3,2,1,3,2,1");
-        matchSingleRowExplain(query, "SELECT GROUP_CONCAT(\"A\" ORDER BY \"C\" DESC NULLS LAST) FROM \"" + TEST_SCHEMA
+        matchSingleRowExplain(query, "SELECT GROUP_CONCAT(\"SIMPLE_VALUES\".\"A\" ORDER BY \"SIMPLE_VALUES\".\"C\" DESC NULLS LAST) FROM \"" + TEST_SCHEMA
                 + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
         query = "SELECT GROUP_CONCAT(A SEPARATOR ';'||' ')  FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchLastRow(result, "1; 1; 2; 2; 3; 3");
         matchSingleRowExplain(query,
-                "SELECT GROUP_CONCAT(\"A\" SEPARATOR '; ') FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
+                "SELECT GROUP_CONCAT(\"SIMPLE_VALUES\".\"A\" SEPARATOR '; ') FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
     }
 
     @Test
@@ -239,13 +239,13 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
         String query = "SELECT EXTRACT(MONTH FROM C9) FROM " + VIRTUAL_SCHEMA + ".ALL_EXA_TYPES";
         ResultSet result = executeQuery(query);
         matchLastRow(result, (short) 8);
-        matchSingleRowExplain(query, "SELECT EXTRACT(MONTH FROM \"C9\") FROM \"" + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"",
+        matchSingleRowExplain(query, "SELECT EXTRACT(MONTH FROM \"ALL_EXA_TYPES\".\"C9\") FROM \"" + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"",
                 IS_LOCAL);
         query = "SELECT EXTRACT(MONTH FROM C12) FROM " + VIRTUAL_SCHEMA + ".ALL_EXA_TYPES";
         result = executeQuery(query);
         matchLastRow(result, (short) 6);
         matchSingleRowExplain(query,
-                "SELECT EXTRACT(MONTH FROM \"C12\") FROM \"" + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"", IS_LOCAL);
+                "SELECT EXTRACT(MONTH FROM \"ALL_EXA_TYPES\".\"C12\") FROM \"" + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"", IS_LOCAL);
     }
 
     @Test
@@ -254,40 +254,40 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
         ResultSet result = executeQuery(query);
         matchNextRow(result, "1              ");
         matchSingleRowExplain(query,
-                "SELECT CAST(\"A\" AS CHAR(15) UTF8) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
+                "SELECT CAST(\"SIMPLE_VALUES\".\"A\" AS CHAR(15) UTF8) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
         query = "SELECT CAST(CAST(A > 0 AS VARCHAR(15)) AS BOOLEAN) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchNextRow(result, true);
-        matchSingleRowExplain(query, "SELECT CAST(CAST(0 < \"A\" AS VARCHAR(15) UTF8) AS BOOLEAN) FROM \"" + TEST_SCHEMA
+        matchSingleRowExplain(query, "SELECT CAST(CAST(0 < \"SIMPLE_VALUES\".\"A\" AS VARCHAR(15) UTF8) AS BOOLEAN) FROM \"" + TEST_SCHEMA
                 + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
         query = "SELECT CAST(CAST(C9 AS VARCHAR(30)) AS DATE) FROM " + VIRTUAL_SCHEMA + ".ALL_EXA_TYPES";
         result = executeQuery(query);
         matchNextRow(result, getSqlDate(2016, 8, 1));
         matchSingleRowExplain(query,
-                "SELECT CAST(CAST(\"C9\" AS VARCHAR(30) UTF8) AS DATE) FROM \"" + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"",
+                "SELECT CAST(CAST(\"ALL_EXA_TYPES\".\"C9\" AS VARCHAR(30) UTF8) AS DATE) FROM \"" + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"",
                 IS_LOCAL);
         query = "SELECT CAST(CAST(A AS VARCHAR(15)) AS DECIMAL(8, 1)) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchNextRow(result, new BigDecimal("1.0"));
-        matchSingleRowExplain(query, "SELECT CAST(CAST(\"A\" AS VARCHAR(15) UTF8) AS DECIMAL(8, 1)) FROM \""
+        matchSingleRowExplain(query, "SELECT CAST(CAST(\"SIMPLE_VALUES\".\"A\" AS VARCHAR(15) UTF8) AS DECIMAL(8, 1)) FROM \""
                 + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
         query = "SELECT CAST(CAST(C AS VARCHAR(15)) AS DOUBLE) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchNextRow(result, 1.1d);
         matchSingleRowExplain(query,
-                "SELECT CAST(CAST(\"C\" AS VARCHAR(15) UTF8) AS DOUBLE) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
+                "SELECT CAST(CAST(\"SIMPLE_VALUES\".\"C\" AS VARCHAR(15) UTF8) AS DOUBLE) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
                 IS_LOCAL);
         query = "SELECT CAST(CAST(C14 AS VARCHAR(100)) AS GEOMETRY(5)) FROM " + VIRTUAL_SCHEMA + ".ALL_EXA_TYPES";
         result = executeQuery(query);
         matchNextRow(result, "POINT (2 5)");
-        matchSingleRowExplain(query, "SELECT CAST(CAST(\"C14\" AS VARCHAR(100) UTF8) AS GEOMETRY(5)) FROM \""
+        matchSingleRowExplain(query, "SELECT CAST(CAST(\"ALL_EXA_TYPES\".\"C14\" AS VARCHAR(100) UTF8) AS GEOMETRY(5)) FROM \""
                 + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"", IS_LOCAL);
         query = "SELECT CAST(CAST(C13 AS VARCHAR(100)) AS INTERVAL DAY (5) TO SECOND (2)) FROM " + VIRTUAL_SCHEMA
                 + ".ALL_EXA_TYPES";
         result = executeQuery(query);
         matchNextRow(result, "+00003 12:50:10.12");
         matchSingleRowExplain(query,
-                "SELECT CAST(CAST(\"C13\" AS VARCHAR(100) UTF8) AS INTERVAL DAY (5) TO SECOND (2)) FROM \""
+                "SELECT CAST(CAST(\"ALL_EXA_TYPES\".\"C13\" AS VARCHAR(100) UTF8) AS INTERVAL DAY (5) TO SECOND (2)) FROM \""
                         + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"",
                 IS_LOCAL);
         query = "SELECT CAST(CAST(C12 AS VARCHAR(100)) AS INTERVAL YEAR (5) TO MONTH) FROM " + VIRTUAL_SCHEMA
@@ -295,27 +295,27 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
         result = executeQuery(query);
         matchNextRow(result, "+00004-06");
         matchSingleRowExplain(query,
-                "SELECT CAST(CAST(\"C12\" AS VARCHAR(100) UTF8) AS INTERVAL YEAR (5) TO MONTH) FROM \"" + TEST_SCHEMA
+                "SELECT CAST(CAST(\"ALL_EXA_TYPES\".\"C12\" AS VARCHAR(100) UTF8) AS INTERVAL YEAR (5) TO MONTH) FROM \"" + TEST_SCHEMA
                         + "\".\"ALL_EXA_TYPES\"",
                 IS_LOCAL);
         query = "SELECT CAST(CAST(C10 AS VARCHAR(100)) AS TIMESTAMP) FROM " + VIRTUAL_SCHEMA + ".ALL_EXA_TYPES";
         result = executeQuery(query);
         matchNextRow(result, getSqlTimestamp(2016, 8, 1, 0, 0, 1, 0));
-        matchSingleRowExplain(query, "SELECT CAST(CAST(\"C10\" AS VARCHAR(100) UTF8) AS TIMESTAMP) FROM \""
+        matchSingleRowExplain(query, "SELECT CAST(CAST(\"ALL_EXA_TYPES\".\"C10\" AS VARCHAR(100) UTF8) AS TIMESTAMP) FROM \""
                 + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"", IS_LOCAL);
         query = "SELECT CAST(CAST(C11 AS VARCHAR(100)) AS TIMESTAMP WITH LOCAL TIME ZONE) FROM " + VIRTUAL_SCHEMA
                 + ".ALL_EXA_TYPES";
         result = executeQuery(query);
         matchNextRow(result, getSqlTimestamp(2016, 8, 1, 0, 0, 2, 0));
         matchSingleRowExplain(query,
-                "SELECT CAST(CAST(\"C11\" AS VARCHAR(100) UTF8) AS TIMESTAMP WITH LOCAL TIME ZONE) FROM \""
+                "SELECT CAST(CAST(\"ALL_EXA_TYPES\".\"C11\" AS VARCHAR(100) UTF8) AS TIMESTAMP WITH LOCAL TIME ZONE) FROM \""
                         + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"",
                 IS_LOCAL);
         query = "SELECT CAST(A AS VARCHAR(15)) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchNextRow(result, "1");
         matchSingleRowExplain(query,
-                "SELECT CAST(\"A\" AS VARCHAR(15) UTF8) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
+                "SELECT CAST(\"SIMPLE_VALUES\".\"A\" AS VARCHAR(15) UTF8) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
     }
 
     @Test
@@ -324,13 +324,13 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
                 + ".SIMPLE_VALUES";
         ResultSet result = executeQuery(query);
         matchNextRow(result, "YES");
-        matchSingleRowExplain(query, "SELECT CASE \"A\" WHEN 1 THEN 'YES' WHEN 2 THEN 'PERHAPS' ELSE 'NO' END FROM \""
+        matchSingleRowExplain(query, "SELECT CASE \"SIMPLE_VALUES\".\"A\" WHEN 1 THEN 'YES' WHEN 2 THEN 'PERHAPS' ELSE 'NO' END FROM \""
                 + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
         query = "SELECT CASE WHEN A > 1 THEN 'YES' ELSE 'NO' END FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
         matchNextRow(result, "NO");
         matchSingleRowExplain(query,
-                "SELECT CASE WHEN 1 < \"A\" THEN 'YES' ELSE 'NO' END FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
+                "SELECT CASE WHEN 1 < \"SIMPLE_VALUES\".\"A\" THEN 'YES' ELSE 'NO' END FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
                 IS_LOCAL);
     }
 
