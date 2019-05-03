@@ -10,7 +10,7 @@ The idea of the container based tests is:
 * Create a virtual schema for the source database
 * Run the tests on the virtual schmema
 
-![Integration test overview](images/integrationtest_overview.png)
+![Integration test overview](../images/integrationtest_overview.png)
 
 ## Prerequisites
 
@@ -21,39 +21,39 @@ What you need is, for each source database:
 
 ## Preparing Integration Test
 
-1. In order to run the integration test automated, edit the  [Travis CI integration test configuration file](../integration-test-data/integration-test-travis.yaml) and add your new database.
+1. In order to run the integration test automated, edit the  [Travis CI integration test configuration file](../../jdbc-adapter/integration-test-data/integration-test-travis.yaml) and add your new database.
 2. Provide a JDBC driver JAR for the source database.
 3. Add a new Integration Test class for you database
 
 ### Add Your Database to the Test Configuration
 Set the following properties for your database:
 
-| configuration property | explanation |
-|------------------------|-------------|
-| runIntegrationTests |    enable/disable your test (e.g. true)|
-| jdbcDriverPath |         path to the jdbc driver in bucketFS (e.g /buckets/bfsdefault/default/drivers/jdbc/POSTGRESQL/postgresql-42.2.5.jar;)|
-| connectionString |       connection string to connect to the source database from the integration test system, so use the exposed port (e.g. jdbc:postgresql://localhost:45432/postgres)|
-| user |                   the database user|
-| password |               password for the database user|
-| dockerImage |            name of the docker image for the source db|
-| dockerImageVersion |     version of the used docker image (eg. latest)|
-| dockerPortMapping |      docker port mapping external_db_port:internal_db_port (e.g. 45432:5432)|
-| dockerName |             name for the docker container (e.g. testpg)|
-| dockerConnectionString | connection string to connect to the source db from the EXASOL docker container. Use the constant DBHOST as hostname, this will be set to the actual internal docker network IP by the integration test skript during runtime (e.g. jdbc:postgresql://DBHOST:5432/postgres)|
+| Configuration property   | Explanation | Example |
+|--------------------------|-------------|---------|
+| `runIntegrationTests`    | enable/disable your test | `true` |
+| `jdbcDriverPath`         | path to the JDBC driver in bucketFS | `/buckets/bfsdefault/default/drivers/jdbc/POSTGRESQL/postgresql-42.2.5.jar`|
+| `connectionString`       | connection string to connect to the source database from the integration test system, so use the exposed port | `jdbc:postgresql://localhost:45432/postgres` |
+| `user`                   | the database user | |
+| `password`               | password for the database user| |
+| `dockerImage`            | name of the docker image for the source database | |
+| `dockerImageVersion`     | version of the used docker image | `latest` |
+| `dockerPortMapping`      | docker port mapping `<external_db_port>:<internal_db_port>` | `45432:5432` |
+| `dockerName`             | name for the docker container < `testpg` |
+| `dockerConnectionString` | connection string to connect to the source database from the EXASOL docker container. Use the constant `DBHOST` as hostname, this will be set to the actual internal docker network IP by the integration test script during runtime | `jdbc:postgresql://DBHOST:5432/postgres` |
 
 ### Provide JDBC drivers for the Source Database
 
 The JDBC drivers are automatically deployed during the test. You have to create a directory for the jdbc driver under integration-test-data/drivers. The folder contains the driver jar file(s) and a config file. See the [PostgreSQL config](../integration-test-data/drivers/POSTGRESQL/settings.cfg) for an example.
 
-In order to connect to the source database from your integration test you also have to add the jdbc driver dependency to the [POM](../virtualschema-jdbc-adapter/pom.xml) scope verify.
+In order to connect to the source database from your integration test you also have to add the jdbc driver dependency to the [POM](../../jdbc-adpter/virtualschema-jdbc-adapter/pom.xml) scope verify.
 
 ### Add a new Integration Test Class
 
-Add a new class that derives from [AbstractIntegrationTest](../virtualschema-jdbc-adapter/src/test/java/com/exasol/adapter/dialects/AbstractIntegrationTest.java). This class has to:
+Add a new class that derives from [AbstractIntegrationTest](../../jdbc-adpter/virtualschema-jdbc-adapter/src/test/java/com/exasol/adapter/dialects/AbstractIntegrationTest.java). This class has to:
 * Create the test schema in the source database
 * Create the virtual schema
 * Execute the tests on the virtual schema
-See [PostgreSQLDialectIT](../virtualschema-jdbc-adapter/src/test/java/com/exasol/adapter/dialects/postgresql/PostgreSQLDialectIT.java) for an example.
+See [PostgreSQLDialectIT](../../jdbc-adpter//virtualschema-jdbc-adapter/src/test/java/com/exasol/adapter/dialects/postgresql/PostgreSQLDialectIT.java) for an example.
 
 ## Executing Integration Tests
 
@@ -82,11 +82,11 @@ In order not to create security issues:
 * Test data loaded into source database
 * [BucketFS HTTP port listening and reachable](https://www.exasol.com/support/browse/SOL-503?src=confmacro) (e.g. on port 2580)
 
-  ![BucketFS on port 2580](images/Screenshot_BucketFS_default_service.png)
+  ![BucketFS on port 2580](../images/Screenshot_BucketFS_default_service.png)
   
 * Bucket on BucketFS prepared for holding JDBC drivers and virtual schema adapter
 
-  ![Integration test bucket](images/Screenshot_bucket_for_JARs.png)
+  ![Integration test bucket](../images/Screenshot_bucket_for_JARs.png)
 
 * JDBC driver JAR archives available for databases against which to run integration tests
 
@@ -98,7 +98,7 @@ If BucketFS is new to you, there are nice [training videos on BucketFS](https://
 2. Create credentials for the user under which the integration tests run at the source
 3. Make a local copy of the [sample integration test configuration file](../integration-test-data/integration-test-sample.yaml) in a place where you don't accidentally check this file in.
 4. Edit the credentials information
-5. [Deploy the JDBC driver(s)](deploying_the_virtual_schema_adapter.md#deploying-jdbc-driver-files) to the prepared bucket in Exasol's BucketFS       
+5. [Deploy the JDBC driver(s)](../user-guide/deploying_the_virtual_schema_adapter.md#deploying-jdbc-driver-files) to the prepared bucket in Exasol's BucketFS       
 
 ## Creating Your own Integration Test Configuration
 
@@ -115,7 +115,7 @@ Now edit the file `jdbc-adapter/local/integration-test-config.yaml` to adapt the
 
 ## Executing Integration Tests
 
-We use following [Maven lifecycle phases](https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html) for our integration tests:
+We use following [Maven life cycle phases](https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html) for our integration tests:
 
 * `pre-integration-test` phase is used to **automatically deploy the latest [JDBC](https://www.exasol.com/support/secure/attachment/66315/EXASOL_JDBC-6.1.rc1.tar.gz) adapter JAR** (based on your latest code modifications)
 * `integration-test` phase is used to execute the actual integration tests
