@@ -2,6 +2,7 @@ package com.exasol.adapter.dialects.redshift;
 
 import java.sql.Connection;
 import java.sql.Types;
+import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.IdentifierConverter;
@@ -13,6 +14,8 @@ import com.exasol.adapter.metadata.DataType;
  * This class implements a Redshift-specific column metadata reader
  */
 public class RedshiftColumnMetadataReader extends BaseColumnMetadataReader {
+    private static final Logger LOGGER = Logger.getLogger(RedshiftColumnMetadataReader.class.getName());
+
     /**
      * Create a new instance of a {@link RedshiftColumnMetadataReader}
      *
@@ -27,10 +30,24 @@ public class RedshiftColumnMetadataReader extends BaseColumnMetadataReader {
 
     @Override
     public DataType mapJdbcType(final JdbcTypeDescription jdbcTypeDescription) {
-        if (jdbcTypeDescription.getJdbcType() == Types.NUMERIC) {
+        switch (jdbcTypeDescription.getJdbcType()) {
+        case Types.NUMERIC:
             return mapJdbcTypeNumericToDecimalWithFallbackToDouble(jdbcTypeDescription);
-        } else {
+        case Types.OTHER:
+            return mapJdbcTypeOther(jdbcTypeDescription);
+        default:
             return super.mapJdbcType(jdbcTypeDescription);
+        }
+    }
+
+    protected DataType mapJdbcTypeOther(final JdbcTypeDescription jdbcTypeDescription) {
+        final String originalDataTypeName = jdbcTypeDescription.getTypeName();
+        if ("double".equals(originalDataTypeName)) {
+            return DataType.createDouble();
+        } else {
+            LOGGER.finer(() -> "Mapping JDBC type OTHER [" + jdbcTypeDescription.getTypeName()
+                    + "] to maximum size VARCHAR.");
+            return DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
         }
     }
 }

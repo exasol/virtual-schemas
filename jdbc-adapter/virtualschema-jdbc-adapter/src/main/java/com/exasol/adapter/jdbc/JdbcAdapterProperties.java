@@ -1,14 +1,11 @@
 package com.exasol.adapter.jdbc;
 
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.exasol.*;
-import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.SqlDialectRegistry;
 import com.exasol.adapter.metadata.DataType;
 
 /**
@@ -73,6 +70,10 @@ public final class JdbcAdapterProperties {
     /**
      * Returns the credentials for the remote system. These are either directly specified in the properties or obtained
      * from a connection (requires privilege to access the connection) .
+     * 
+     * @param properties     user-defined adapter properties
+     * @param exasolMetadata Exasol metadata
+     * @return Exasol connection information
      */
     public static ExaConnectionInformation getConnectionInformation(final AdapterProperties properties,
             final ExaMetadata exasolMetadata) {
@@ -163,6 +164,10 @@ public final class JdbcAdapterProperties {
     /**
      * Returns the properties as they would be after successfully applying the changes to the existing (old) set of
      * properties.
+     *
+     * @param oldProperties     properties before the change
+     * @param changedProperties changed properties
+     * @return properties as they will be applied
      */
     public static Map<String, String> getNewProperties(final Map<String, String> oldProperties,
             final Map<String, String> changedProperties) {
