@@ -169,7 +169,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     @Override
     public GetCapabilitiesResponse getCapabilities(final ExaMetadata metadata, final GetCapabilitiesRequest request)
             throws AdapterException {
-        LOGGER.fine(() -> "Received request list the adapter's capabilites.");
+        LOGGER.fine(() -> "Received request to list the adapter's capabilites.");
         final AdapterProperties properties = getPropertiesFromRequest(request);
         final Connection connection = null;
         final SqlDialect dialect = createDialect(connection, properties);
