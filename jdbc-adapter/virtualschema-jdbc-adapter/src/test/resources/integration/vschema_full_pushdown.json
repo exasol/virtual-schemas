@@ -9,7 +9,7 @@
         {
             "testQuery": "select b+1 from vs.t1",
             "testDescription": "Full pushdown with select-list in case with only from and select-list",
-            "expectedPushdownRequest": 
+            "expectedPushdownRequest":
             [
                 {
                     "involvedTables" :
@@ -41,7 +41,7 @@
                             "name" : "T1"
                         }
                     ],
-                    "pushdownRequest" : 
+                    "pushdownRequest" :
                     {
                         "type" : "select",
                         "selectList":
@@ -66,7 +66,7 @@
                                 "name": "ADD"
                             }
                         ],
-                        "from" : 
+                        "from" :
                         {
                             "type" : "table",
                             "name" : "T1"
@@ -77,28 +77,28 @@
             ],
             "expectedPushdownResponse":
             {
-                "Exasol": 
+                "Exasol":
                 [
-                    "SELECT (\"B\" + 1) FROM \"LS\".\"T1\""
+                    "SELECT (\"T1\".\"B\" + 1) FROM \"LS\".\"T1\""
                 ],
                 "PostgreSQL":
                 [
-                    "SELECT (\"b\" + 1) FROM \"ls\".\"t1\""
+                    "SELECT (\"t1\".\"b\" + 1) FROM \"ls\".\"t1\""
                 ],
                 "Oracle":
                 [
-                    "SELECT CAST((\"B\" + 1) AS FLOAT) FROM \"LS\".\"T1\""
+                    "SELECT CAST((\"T1\".\"B\" + 1) AS FLOAT) FROM \"LS\".\"T1\""
                 ],
                 "Hive":
                 [
-                    "SELECT (`B` + 1) FROM `LS`.`T1`"
+                    "SELECT (`T1`.`B` + 1) FROM `LS`.`T1`"
                 ]
             }
         },
         {
             "testQuery": "select b+1 from vs.t1 where t1.b>7",
             "testDescription": "Full pushdown with select-list and WHERE-clause",
-            "expectedPushdownRequest": 
+            "expectedPushdownRequest":
             [
                 {
                     "involvedTables" :
@@ -130,7 +130,7 @@
                             "name" : "T1"
                         }
                     ],
-                    "pushdownRequest" : 
+                    "pushdownRequest" :
                     {
                         "type" : "select",
                         "selectList":
@@ -155,7 +155,7 @@
                                 "name": "ADD"
                             }
                         ],
-                        "from" : 
+                        "from" :
                         {
                             "type" : "table",
                             "name" : "T1"
@@ -169,7 +169,7 @@
                                 "name": "B",
                                 "columnNr": 1
                             },
-                            "type": "predicate_less", 
+                            "type": "predicate_less",
                             "left":
                             {
                                 "type": "literal_exactnumeric",
@@ -183,28 +183,28 @@
             ],
             "expectedPushdownResponse":
             {
-                "Exasol": 
+                "Exasol":
                 [
-                    "SELECT (\"B\" + 1) FROM \"LS\".\"T1\" WHERE 7 < \"B\""
+                    "SELECT (\"T1\".\"B\" + 1) FROM \"LS\".\"T1\" WHERE 7 < \"T1\".\"B\""
                 ],
                 "PostgreSQL":
                 [
-                    "SELECT (\"b\" + 1) FROM \"ls\".\"t1\" WHERE 7 < \"b\""
+                    "SELECT (\"t1\".\"b\" + 1) FROM \"ls\".\"t1\" WHERE 7 < \"t1\".\"b\""
                 ],
                 "Oracle":
                 [
-                    "SELECT CAST((\"B\" + 1) AS FLOAT) FROM \"LS\".\"T1\" WHERE 7 < \"B\""
+                    "SELECT CAST((\"T1\".\"B\" + 1) AS FLOAT) FROM \"LS\".\"T1\" WHERE 7 < \"T1\".\"B\""
                 ],
                 "Hive":
                 [
-                    "SELECT (`B` + 1) FROM `LS`.`T1` WHERE 7 < `B`"
+                    "SELECT (`T1`.`B` + 1) FROM `LS`.`T1` WHERE 7 < `T1`.`B`"
                 ]
             }
         },
         {
             "testQuery": "select b+1 from vs.t1 join vs.t2 on a=x where t1.b>7",
             "testDescription": "Full pushdown with select-list, join and WHERE-clause",
-            "expectedPushdownRequest": 
+            "expectedPushdownRequest":
             [
                 {
                     "involvedTables" :
@@ -262,7 +262,7 @@
                             "name" : "T2"
                         }
                     ],
-                    "pushdownRequest" : 
+                    "pushdownRequest" :
                     {
                         "type" : "select",
                         "selectList":
@@ -329,7 +329,7 @@
                                 "name": "B",
                                 "columnNr": 1
                             },
-                            "type": "predicate_less", 
+                            "type": "predicate_less",
                             "left":
                             {
                                 "type": "literal_exactnumeric",
@@ -343,7 +343,7 @@
             ],
             "expectedPushdownResponse":
             {
-                "Exasol": 
+                "Exasol":
                 [
                     "SELECT (\"T1\".\"B\" + 1) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\""
                 ],
@@ -364,7 +364,7 @@
         {
             "testQuery": "select b+1 from vs.t1 join vs.t2 on a=x where t1.b>7 order by t2.y limit 3 offset 1",
             "testDescription": "Full pushdown with select-list, join and WHERE-clause, ORDER BY and LIMIT",
-            "expectedPushdownRequest": 
+            "expectedPushdownRequest":
             [
                 {
                     "involvedTables" :
@@ -422,7 +422,7 @@
                             "name" : "T2"
                         }
                     ],
-                    "pushdownRequest" : 
+                    "pushdownRequest" :
                     {
                         "type" : "select",
                         "selectList":
@@ -489,7 +489,7 @@
                                 "name": "B",
                                 "columnNr": 1
                             },
-                            "type": "predicate_less", 
+                            "type": "predicate_less",
                             "left":
                             {
                                 "type": "literal_exactnumeric",
@@ -523,7 +523,7 @@
             ],
             "expectedPushdownResponse":
             {
-                "Exasol": 
+                "Exasol":
                 [
                     "SELECT (\"T1\".\"B\" + 1) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\" ORDER BY \"T2\".\"Y\" LIMIT 3 OFFSET 1"
                 ],
@@ -544,7 +544,7 @@
         {
             "testQuery": "select sum(b+1) from vs.t1 join vs.t2 on a=x where t1.b>7",
             "testDescription": "Full pushdown with select-list with aggregation, join and WHERE-clause",
-            "expectedPushdownRequest": 
+            "expectedPushdownRequest":
             [
                 {
                     "involvedTables" :
@@ -602,7 +602,7 @@
                             "name" : "T2"
                         }
                     ],
-                    "pushdownRequest" : 
+                    "pushdownRequest" :
                     {
                         "type" : "select",
                         "selectList":
@@ -676,7 +676,7 @@
                                 "name": "B",
                                 "columnNr": 1
                             },
-                            "type": "predicate_less", 
+                            "type": "predicate_less",
                             "left":
                             {
                                 "type": "literal_exactnumeric",
@@ -691,7 +691,7 @@
             ],
             "expectedPushdownResponse":
             {
-                "Exasol": 
+                "Exasol":
                 [
                     "SELECT SUM((\"T1\".\"B\" + 1)) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\""
                 ],
@@ -712,7 +712,7 @@
         {
             "testQuery": "select sum(b+1) from vs.t1 join vs.t2 on a=x where t1.b>7 group by a,y",
             "testDescription": "Full pushdown with select-list with aggregation, join and WHERE-clause, GROUP BY",
-            "expectedPushdownRequest": 
+            "expectedPushdownRequest":
             [
                 {
                     "involvedTables" :
@@ -770,7 +770,7 @@
                             "name" : "T2"
                         }
                     ],
-                    "pushdownRequest" : 
+                    "pushdownRequest" :
                     {
                         "type" : "select",
                         "selectList":
@@ -844,7 +844,7 @@
                                 "name": "B",
                                 "columnNr": 1
                             },
-                            "type": "predicate_less", 
+                            "type": "predicate_less",
                             "left":
                             {
                                 "type": "literal_exactnumeric",
@@ -874,7 +874,7 @@
             ],
             "expectedPushdownResponse":
             {
-                "Exasol": 
+                "Exasol":
                 [
                     "SELECT SUM((\"T1\".\"B\" + 1)) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\" GROUP BY \"T1\".\"A\", \"T2\".\"Y\""
                 ],
@@ -895,7 +895,7 @@
         {
             "testQuery": "select sum(b+1) from vs.t1 join vs.t2 on a=x where t1.b>7 group by a,y having sum(x) > 0",
             "testDescription": "Full pushdown with select-list with aggregation, join and WHERE-clause, GROUP BY, HAVING",
-            "expectedPushdownRequest": 
+            "expectedPushdownRequest":
             [
                 {
                     "involvedTables" :
@@ -953,7 +953,7 @@
                             "name" : "T2"
                         }
                     ],
-                    "pushdownRequest" : 
+                    "pushdownRequest" :
                     {
                         "type" : "select",
                         "selectList":
@@ -1027,7 +1027,7 @@
                                 "name": "B",
                                 "columnNr": 1
                             },
-                            "type": "predicate_less", 
+                            "type": "predicate_less",
                             "left":
                             {
                                 "type": "literal_exactnumeric",
@@ -1080,7 +1080,7 @@
             ],
             "expectedPushdownResponse":
             {
-                "Exasol": 
+                "Exasol":
                 [
                     "SELECT SUM((\"T1\".\"B\" + 1)) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\" GROUP BY \"T1\".\"A\", \"T2\".\"Y\" HAVING 0 < SUM(\"T2\".\"X\")"
                 ],
@@ -1101,7 +1101,7 @@
         {
             "testQuery": "select sum(b+1) from vs.t1 join vs.t2 on a=x where t1.b>7 group by a,y having sum(x) > 0 order by sum(y+1) limit 3 offset 1",
             "testDescription": "Full pushdown with select-list with aggregation, join and WHERE-clause, GROUP BY, HAVING, ORDER BY and LIMIT",
-            "expectedPushdownRequest": 
+            "expectedPushdownRequest":
             [
                 {
                     "involvedTables" :
@@ -1159,7 +1159,7 @@
                             "name" : "T2"
                         }
                     ],
-                    "pushdownRequest" : 
+                    "pushdownRequest" :
                     {
                         "type" : "select",
                         "selectList":
@@ -1233,7 +1233,7 @@
                                 "name": "B",
                                 "columnNr": 1
                             },
-                            "type": "predicate_less", 
+                            "type": "predicate_less",
                             "left":
                             {
                                 "type": "literal_exactnumeric",
@@ -1326,7 +1326,7 @@
             ],
             "expectedPushdownResponse":
             {
-                "Exasol": 
+                "Exasol":
                 [
                     "SELECT SUM((\"T1\".\"B\" + 1)) FROM \"LS\".\"T1\" INNER JOIN \"LS\".\"T2\" ON \"T1\".\"A\" = \"T2\".\"X\" WHERE 7 < \"T1\".\"B\" GROUP BY \"T1\".\"A\", \"T2\".\"Y\" HAVING 0 < SUM(\"T2\".\"X\") ORDER BY SUM((\"T2\".\"Y\" + 1)) LIMIT 3 OFFSET 1"
                 ],
