@@ -1,27 +1,23 @@
 package com.exasol.adapter.dialects.oracle;
 
-import static org.junit.Assert.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.exasol.adapter.dialects.AbstractIntegrationTest;
+import com.exasol.adapter.dialects.IntegrationTestConfigurationCondition;
+import org.junit.Assume;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.sql.*;
-import java.sql.Date;
 import java.util.*;
 
-import org.junit.Assume;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
+import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exasol.adapter.dialects.AbstractIntegrationTest;
-import com.exasol.adapter.dialects.IntegrationTestConfigurationCondition;
 
-/**
- * Tested with Oracle 12
- *
- * TODO Add tests for data types TODO Test Expanding of SELECT * if elements of select list require casting
- */
 @Tag("integration")
 @ExtendWith(IntegrationTestConfigurationCondition.class)
 class OracleSqlDialectIT extends AbstractIntegrationTest {
@@ -47,6 +43,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
             + NUMBER_TABLE;
 
     private static final boolean IS_LOCAL = false;
+    private static final String NUMBER_T = "\"NUMBER_T\"";
+    private static final String TYPE_TEST_T = "\"TYPE_TEST\"";
 
     // Use getColumnTypes() to access this map
     private Map<String, String> columnTypesJDBC;
@@ -268,9 +266,9 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
             matchNextRowDecimal(result, "1234567890123456789012345678901234.6");
         }
         matchSingleRowExplain(String.format(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL),
-                "SELECT CAST(\"A\" AS DECIMAL(36,1)) FROM \"" + ORA_NUMBER_TABLE + "\"");
+                "SELECT CAST(" + NUMBER_T + ".\"A\" AS DECIMAL(36,1)) FROM \"" + ORA_NUMBER_TABLE + "\"");
         matchSingleRowExplain(String.format(query, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL),
-                "SELECT CAST(\"A\" AS DECIMAL(36,1)) FROM \"" + ORA_NUMBER_TABLE + "\"");
+                "SELECT CAST(" + NUMBER_T + ".\"A\" AS DECIMAL(36,1)) FROM \"" + ORA_NUMBER_TABLE + "\"");
     }
 
     @Test
@@ -281,9 +279,9 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
             matchNextRowDecimal(result, "1234567890123456789012345678.9");
         }
         matchSingleRowExplain(String.format(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL),
-                "SELECT CAST(\"B\" AS DECIMAL(36,1)) FROM \"" + ORA_NUMBER_TABLE + "\"");
+                "SELECT CAST(" + NUMBER_T + ".\"B\" AS DECIMAL(36,1)) FROM \"" + ORA_NUMBER_TABLE + "\"");
         matchSingleRowExplain(String.format(query, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL),
-                "SELECT CAST(\"B\" AS DECIMAL(36,1)) FROM \"" + ORA_NUMBER_TABLE + "\"");
+                "SELECT CAST(" + NUMBER_T + ".\"B\" AS DECIMAL(36,1)) FROM \"" + ORA_NUMBER_TABLE + "\"");
     }
 
     @Test
@@ -295,9 +293,9 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         }
 
         matchSingleRowExplain(String.format(query, EXA_NUMBER_TABLE_JDBC_NUMBER_TO_DECIMAL),
-                "SELECT \"C\" FROM \"" + ORA_NUMBER_TABLE + "\"");
+                "SELECT " + NUMBER_T + ".\"C\" FROM \"" + ORA_NUMBER_TABLE + "\"");
         matchSingleRowExplain(String.format(query, ORA_NUMBER_TABLE_ORA_NUMBER_TO_DECIMAL),
-                "SELECT \"C\" FROM \"" + ORA_NUMBER_TABLE + "\"");
+                "SELECT " + NUMBER_T + ".\"C\" FROM \"" + ORA_NUMBER_TABLE + "\"");
     }
 
     // Join Tests -------------------------------------------------------------
@@ -369,7 +367,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
             matchNextRowDecimal(result, "12356.12345");
         }
         runMatchSingleRowExplain(query,
-                "SELECT CAST((\"C7\" + 1) AS FLOAT) FROM \"" + ORA_TABLE + "\" ORDER BY (\"C7\" + 1)");
+                "SELECT CAST((" + TYPE_TEST_T + ".\"C7\" + 1) AS FLOAT) FROM \"" + ORA_TABLE + "\" ORDER BY (" + TYPE_TEST_T + ".\"C7\" + 1)");
     }
 
     @Test
@@ -380,7 +378,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final ResultSet resultORA = runQueryORA(query);
         matchNextRow(resultORA, "01.2355123450E4");
 
-        runMatchSingleRowExplain(query, "SELECT \"C7\" FROM \"" + ORA_TABLE + "\" WHERE 12346 < \"C7\"");
+        runMatchSingleRowExplain(query, "SELECT " + TYPE_TEST_T + ".\"C7\" FROM \"" + ORA_TABLE + "\" WHERE 12346 < " + TYPE_TEST_T + ".\"C7\"");
     }
 
     @Test
@@ -389,7 +387,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         for (final ResultSet result : runQuery(query)) {
             matchNextRowDecimal(result, "12345.12345");
         }
-        runMatchSingleRowExplain(query, "SELECT CAST(MIN(\"C7\") AS FLOAT) FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplain(query, "SELECT CAST(MIN(" + TYPE_TEST_T + ".\"C7\") AS FLOAT) FROM \"" + ORA_TABLE + "\"");
     }
 
     @Test
@@ -399,8 +397,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
             matchNextRowDecimal(result, "123456789012345678901234567890123456", "12345.12345");
             matchNextRowDecimal(result, "1234567890.123456789", "12355.12345");
         }
-        runMatchSingleRowExplain(query, "SELECT TO_CHAR(\"C5\"), CAST(MIN(\"C7\") AS FLOAT) FROM \"" + ORA_TABLE
-                + "\" GROUP BY \"C5\" ORDER BY \"C5\" DESC");
+        runMatchSingleRowExplain(query, "SELECT TO_CHAR(" + TYPE_TEST_T + ".\"C5\"), CAST(MIN(\"TYPE_TEST\".\"C7\") AS FLOAT) FROM \"" + ORA_TABLE
+                + "\" GROUP BY " + TYPE_TEST_T + ".\"C5\" ORDER BY \"TYPE_TEST\".\"C5\" DESC");
     }
 
     @Test
@@ -410,8 +408,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
             matchNextRowDecimal(result, "123456789012345678901234567890123457", "12345.12345");
             matchNextRowDecimal(result, "1234567891.123456789", "12355.12345");
         }
-        runMatchSingleRowExplain(query, "SELECT CAST((\"C5\" + 1) AS FLOAT), CAST(MIN(\"C7\") AS FLOAT) FROM \""
-                + ORA_TABLE + "\" GROUP BY (\"C5\" + 1) ORDER BY (\"C5\" + 1) DESC");
+        runMatchSingleRowExplain(query, "SELECT CAST((" + TYPE_TEST_T + ".\"C5\" + 1) AS FLOAT), CAST(MIN(\"TYPE_TEST\".\"C7\") AS FLOAT) FROM \""
+                + ORA_TABLE + "\" GROUP BY (" + TYPE_TEST_T + ".\"C5\" + 1) ORDER BY (\"TYPE_TEST\".\"C5\" + 1) DESC");
     }
 
     @Test
@@ -422,8 +420,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
                     "12345.12345");
             matchNextRowDecimal(result, "123456789012345678901234567890123456", "1234567890.123456789", "12355.12345");
         }
-        runMatchSingleRowExplain(query, "SELECT \"C_NUMBER36\", TO_CHAR(\"C5\"), CAST(MIN(\"C7\") AS FLOAT) FROM \""
-                + ORA_TABLE + "\" GROUP BY \"C5\", \"C_NUMBER36\" ORDER BY \"C5\" DESC");
+        runMatchSingleRowExplain(query, "SELECT " + TYPE_TEST_T + ".\"C_NUMBER36\", TO_CHAR(\"TYPE_TEST\".\"C5\"), CAST(MIN(\"TYPE_TEST\".\"C7\") AS FLOAT) FROM \""
+                + ORA_TABLE + "\" GROUP BY " + TYPE_TEST_T + ".\"C5\", \"TYPE_TEST\".\"C_NUMBER36\" ORDER BY \"TYPE_TEST\".\"C5\" DESC");
     }
 
     @Test
@@ -432,8 +430,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         for (final ResultSet result : runQuery(query)) {
             matchNextRowDecimal(result, "1234567890.123456789", "12355.12345");
         }
-        runMatchSingleRowExplain(query, "SELECT TO_CHAR(\"C5\"), CAST(MIN(\"C7\") AS FLOAT) FROM \"" + ORA_TABLE
-                + "\" GROUP BY \"C5\" HAVING 12350 < MIN(\"C7\")");
+        runMatchSingleRowExplain(query, "SELECT TO_CHAR(" + TYPE_TEST_T + ".\"C5\"), CAST(MIN(\"TYPE_TEST\".\"C7\") AS FLOAT) FROM \"" + ORA_TABLE
+                + "\" GROUP BY " + TYPE_TEST_T + ".\"C5\" HAVING 12350 < MIN(\"TYPE_TEST\".\"C7\")");
     }
 
     @Test
@@ -443,7 +441,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
             matchNextRow(result, "aaaaaaaaaaaaaaaaaaaa                              ");
             matchNextRow(result, (Object) null);
         }
-        runMatchSingleRowExplain(query, "SELECT \"C1\" FROM \"" + ORA_TABLE + "\" ORDER BY \"C1\" DESC NULLS LAST");
+        runMatchSingleRowExplain(query, "SELECT " + TYPE_TEST_T + ".\"C1\" FROM \"" + ORA_TABLE + "\" ORDER BY " + TYPE_TEST_T + ".\"C1\" DESC NULLS LAST");
     }
 
     @Test
@@ -456,7 +454,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         matchNextRow(resultORA, "01.2355123450E4");
         matchNextRow(resultORA, "01.2345123450E4");
 
-        runMatchSingleRowExplain(query, "SELECT \"C7\" FROM \"" + ORA_TABLE + "\" ORDER BY ABS(\"C7\") DESC");
+        runMatchSingleRowExplain(query, "SELECT " + TYPE_TEST_T + ".\"C7\" FROM \"" + ORA_TABLE + "\" ORDER BY ABS(" + TYPE_TEST_T + ".\"C7\") DESC");
     }
 
     @Test
@@ -469,8 +467,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         matchNextRow(resultORA, "01.2345123450E4");
         matchNextRow(resultORA, "01.2355123450E4");
 
-        runMatchSingleRowExplain(query, "SELECT LIMIT_SUBSELECT.* FROM ( SELECT \"C7\" FROM \"" + ORA_TABLE
-                + "\" ORDER BY \"C7\"  ) LIMIT_SUBSELECT WHERE ROWNUM <= 2");
+        runMatchSingleRowExplain(query, "SELECT LIMIT_SUBSELECT.* FROM ( SELECT " + TYPE_TEST_T + ".\"C7\" FROM \"" + ORA_TABLE
+                + "\" ORDER BY " + TYPE_TEST_T + ".\"C7\"  ) LIMIT_SUBSELECT WHERE ROWNUM <= 2");
     }
 
     @Test
@@ -482,8 +480,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         matchNextRow(resultORA, "01.2355123450E4");
 
         runMatchSingleRowExplain(query,
-                "SELECT c0 FROM ( SELECT LIMIT_SUBSELECT.*, ROWNUM ROWNUM_SUB FROM ( SELECT \"C7\" AS c0 FROM \""
-                        + ORA_TABLE + "\" ORDER BY \"C7\"  ) LIMIT_SUBSELECT WHERE ROWNUM <= 2 ) WHERE ROWNUM_SUB > 1");
+                "SELECT c0 FROM ( SELECT LIMIT_SUBSELECT.*, ROWNUM ROWNUM_SUB FROM ( SELECT " + TYPE_TEST_T + ".\"C7\" AS c0 FROM \""
+                        + ORA_TABLE + "\" ORDER BY " + TYPE_TEST_T + ".\"C7\"  ) LIMIT_SUBSELECT WHERE ROWNUM <= 2 ) WHERE ROWNUM_SUB > 1");
     }
 
     @Test
@@ -638,9 +636,9 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
     void testDate() throws SQLException {
         final String query = "SELECT C10 FROM %s";
         for (final ResultSet result : runQuery(query)) {
-            matchNextRow(result, Date.valueOf("2016-08-19"));
+            matchNextRow(result, java.sql.Date.valueOf("2016-08-19"));
         }
-        runMatchSingleRowExplain(query, "SELECT \"C10\" FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplain(query, "SELECT " + TYPE_TEST_T + ".\"C10\" FROM \"" + ORA_TABLE + "\"");
         assertEquals("TIMESTAMP", getColumnType("C10"));
     }
 
@@ -652,8 +650,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final ResultSet resultORA = runQueryORA(query);
         matchNextRow(resultORA, Timestamp.valueOf("2013-03-11 17:30:15.123"));
 
-        runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(\"C11\") FROM \"" + ORA_TABLE + "\"");
-        runMatchSingleRowExplainORA(query, "SELECT \"C11\" FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(" + TYPE_TEST_T + ".\"C11\") FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplainORA(query, "SELECT " + TYPE_TEST_T + ".\"C11\" FROM \"" + ORA_TABLE + "\"");
         assertEquals("TIMESTAMP", getColumnTypeJDBC("C11"));
         assertEquals("TIMESTAMP", getColumnTypeORA("C11"));
     }
@@ -666,8 +664,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final ResultSet resultORA = runQueryORA(query);
         matchNextRow(resultORA, Timestamp.valueOf("2013-03-11 17:30:15.123"));
 
-        runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(\"C12\") FROM \"" + ORA_TABLE + "\"");
-        runMatchSingleRowExplainORA(query, "SELECT \"C12\" FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(" + TYPE_TEST_T + ".\"C12\") FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplainORA(query, "SELECT " + TYPE_TEST_T + ".\"C12\" FROM \"" + ORA_TABLE + "\"");
         assertEquals("TIMESTAMP", getColumnTypeJDBC("C12"));
         assertEquals("TIMESTAMP", getColumnTypeORA("C12"));
     }
@@ -680,8 +678,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final ResultSet resultORA = runQueryORA(query);
         matchNextRow(resultORA, Timestamp.valueOf("2013-03-11 17:30:15.123"));
 
-        runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(\"C13\") FROM \"" + ORA_TABLE + "\"");
-        runMatchSingleRowExplainORA(query, "SELECT \"C13\" FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(" + TYPE_TEST_T + ".\"C13\") FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplainORA(query, "SELECT " + TYPE_TEST_T + ".\"C13\" FROM \"" + ORA_TABLE + "\"");
         assertEquals("TIMESTAMP", getColumnTypeJDBC("C13"));
         assertEquals("TIMESTAMP", getColumnTypeORA("C13"));
     }
@@ -694,8 +692,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final ResultSet resultORA = runQueryORA(query);
         matchNextRow(resultORA, Timestamp.valueOf("2016-08-19 19:28:05.000"));
 
-        runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(\"C14\") FROM \"" + ORA_TABLE + "\"");
-        runMatchSingleRowExplainORA(query, "SELECT \"C14\" FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(" + TYPE_TEST_T + ".\"C14\") FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplainORA(query, "SELECT " + TYPE_TEST_T + ".\"C14\" FROM \"" + ORA_TABLE + "\"");
         assertEquals("VARCHAR(2000000) UTF8", getColumnTypeJDBC("C14"));
         assertEquals("VARCHAR(2000000) UTF8", getColumnTypeORA("C14"));
     }
@@ -709,8 +707,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final ResultSet resultORA = runQueryORA(query);
         matchNextRow(resultORA, Timestamp.valueOf("2018-04-30 18:00:05.000"));
 
-        runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(\"C15\") FROM \"" + ORA_TABLE + "\"");
-        runMatchSingleRowExplainORA(query, "SELECT \"C15\" FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(" + TYPE_TEST_T + ".\"C15\") FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplainORA(query, "SELECT " + TYPE_TEST_T + ".\"C15\" FROM \"" + ORA_TABLE + "\"");
         assertEquals("VARCHAR(2000000) UTF8", getColumnTypeJDBC("C15"));
         assertEquals("VARCHAR(2000000) UTF8", getColumnTypeORA("C15"));
     }
@@ -721,7 +719,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         for (final ResultSet result : runQuery(query)) {
             matchNextRow(result, "+54-02");
         }
-        runMatchSingleRowExplain(query, "SELECT TO_CHAR(\"C16\") FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplain(query, "SELECT TO_CHAR(" + TYPE_TEST_T + ".\"C16\") FROM \"" + ORA_TABLE + "\"");
         assertEquals("VARCHAR(2000000) UTF8", getColumnType("C16"));
     }
 
@@ -732,7 +730,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
             matchNextRow(result, "+01 11:12:10.123000");
             matchNextRow(result, "+02 02:03:04.123456");
         }
-        runMatchSingleRowExplain(query, "SELECT TO_CHAR(\"C17\") FROM \"" + ORA_TABLE + "\" ORDER BY \"C17\"");
+        runMatchSingleRowExplain(query, "SELECT TO_CHAR(" + TYPE_TEST_T + ".\"C17\") FROM \"" + ORA_TABLE + "\" ORDER BY " + TYPE_TEST_T + ".\"C17\"");
         assertEquals("VARCHAR(2000000) UTF8", getColumnType("C17"));
     }
 

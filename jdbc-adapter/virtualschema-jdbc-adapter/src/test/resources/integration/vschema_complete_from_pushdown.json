@@ -513,7 +513,7 @@
                         },
                         "selectList": [
                             {
-                               "columnNr": 0,
+                                "columnNr": 0,
                                 "name": "C1_1",
                                 "tableName": "T1",
                                 "type": "column"
@@ -571,7 +571,7 @@
                         },
                         "selectList": [
                             {
-                               "columnNr": 0,
+                                "columnNr": 0,
                                 "name": "C2_1",
                                 "tableName": "T2",
                                 "type": "column"
@@ -699,10 +699,10 @@
             ],
             "expectedPushdownResponse": {
                 "Exasol": [
-                    "SELECT \"C1_1\", \"C1_2\" FROM \"LS\".\"T1\"",
-                    "SELECT \"C2_1\", \"C2_2\" FROM \"LS\".\"T2\"",
-                    "SELECT \"C3_2\", \"C3_3\" FROM \"LS\".\"T3\"",
-                    "SELECT \"C4_2\" FROM \"LS\".\"T4\""
+                    "SELECT \"T1\".\"C1_1\", \"T1\".\"C1_2\" FROM \"LS\".\"T1\"",
+                    "SELECT \"T2\".\"C2_1\", \"T2\".\"C2_2\" FROM \"LS\".\"T2\"",
+                    "SELECT \"T3\".\"C3_2\", \"T3\".\"C3_3\" FROM \"LS\".\"T3\"",
+                    "SELECT \"T4\".\"C4_2\" FROM \"LS\".\"T4\""
                 ]
             }
         },
