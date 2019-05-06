@@ -40,7 +40,7 @@ This step is necessary since the UDF container the adapter runs in has no access
 
 ## Adapter Script
 
-You install the adapter script via the special SQL command `CREATE JAVA ADAPTER SCRIPT`. Please remember to replace the placeholders in pointy brackets (e.g. `<adapter version>`) with their actual values.
+You install the adapter script via the special SQL command `CREATE JAVA ADAPTER SCRIPT`. Please remember to replace the placeholders in pointy brackets (e.g. `<JDBC driver version>`) with their actual values.
 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
