@@ -10,13 +10,11 @@ public class SqlGenerationContext {
     private String catalogName;
     private String schemaName;
     private boolean isLocal;
-    private boolean hasMoreThanOneTable;
-    
-    public SqlGenerationContext(String catalogName, String schemaName, boolean isLocal, boolean hasMoreThanOneTable) {
+
+    public SqlGenerationContext(String catalogName, String schemaName, boolean isLocal) {
         this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.isLocal = isLocal;
-        this.hasMoreThanOneTable = hasMoreThanOneTable;
     }
     
     public String getCatalogName() {
@@ -31,8 +29,4 @@ public class SqlGenerationContext {
         return isLocal;
     }
 
-    public boolean hasMoreThanOneTable() {
-        return hasMoreThanOneTable;
-    }
-    
 }

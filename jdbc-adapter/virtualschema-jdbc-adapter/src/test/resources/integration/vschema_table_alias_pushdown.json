@@ -8,7 +8,7 @@
     [
         {
             "testQuery": "select * from (select x from vs.t1) noAliasSubSel",
-            "expectedPushdownRequest": 
+            "expectedPushdownRequest":
             [
                 {
                     "involvedTables" :
@@ -40,7 +40,7 @@
                             "name" : "T1"
                         }
                     ],
-                    "pushdownRequest" : 
+                    "pushdownRequest" :
                     {
                         "type" : "select",
                         "selectList":
@@ -52,7 +52,7 @@
                                 "columnNr": 0
                             }
                         ],
-                        "from" : 
+                        "from" :
                         {
                             "name" : "T1",
                             "type" : "table"
@@ -63,27 +63,27 @@
             ],
             "expectedPushdownResponse":
             {
-                "Exasol": 
+                "Exasol":
                 [
-                    "SELECT \"X\" FROM \"LS\".\"T1\""
+                    "SELECT \"T1\".\"X\" FROM \"LS\".\"T1\""
                 ],
                 "PostgreSQL":
                 [
-                    "SELECT \"x\" FROM \"ls\".\"t1\""
+                    "SELECT \"t1\".\"x\" FROM \"ls\".\"t1\""
                 ],
                 "Oracle":
                 [
-                    "SELECT \"X\" FROM \"LS\".\"T1\""
+                    "SELECT \"T1\".\"X\" FROM \"LS\".\"T1\""
                 ],
                 "Hive":
                 [
-                    "SELECT `X` FROM `LS`.`T1`"
+                    "SELECT `T1`.`X` FROM `LS`.`T1`"
                 ]
             }
         },
         {
             "testQuery": "select * from (select x from vs.t1 as withAlias) aliasSubSel",
-            "expectedPushdownRequest": 
+            "expectedPushdownRequest":
             [
                 {
                     "involvedTables" :
@@ -115,7 +115,7 @@
                             "name" : "T1"
                         }
                     ],
-                    "pushdownRequest" : 
+                    "pushdownRequest" :
                     {
                         "type" : "select",
                         "selectList":
@@ -128,7 +128,7 @@
                                 "columnNr": 0
                             }
                         ],
-                        "from" : 
+                        "from" :
                         {
                             "name" : "T1",
                             "alias": "WITHALIAS",
@@ -140,27 +140,27 @@
             ],
             "expectedPushdownResponse":
             {
-                "Exasol": 
+                "Exasol":
                 [
-                    "SELECT \"X\" FROM \"LS\".\"T1\" \"WITHALIAS\""
+                    "SELECT \"WITHALIAS\".\"X\" FROM \"LS\".\"T1\" \"WITHALIAS\""
                 ],
                 "PostgreSQL":
                 [
-                    "SELECT \"x\" FROM \"ls\".\"t1\" \"withalias\""
+                    "SELECT \"withalias\".\"x\" FROM \"ls\".\"t1\" \"withalias\""
                 ],
                 "Oracle":
                 [
-                    "SELECT \"X\" FROM \"LS\".\"T1\" \"WITHALIAS\""
+                    "SELECT \"WITHALIAS\".\"X\" FROM \"LS\".\"T1\" \"WITHALIAS\""
                 ],
                 "Hive":
                 [
-                    "SELECT `X` FROM `LS`.`T1` `WITHALIAS`"
+                    "SELECT `WITHALIAS`.`X` FROM `LS`.`T1` `WITHALIAS`"
                 ]
             }
         },
         {
             "testQuery": "select * from (select x from vs.t2 as withAlias) aliasWithFullSelection",
-            "expectedPushdownRequest": 
+            "expectedPushdownRequest":
             [
                 {
                     "involvedTables" :
@@ -181,10 +181,10 @@
                             "name" : "T2"
                         }
                     ],
-                    "pushdownRequest" : 
+                    "pushdownRequest" :
                     {
                         "type" : "select",
-                        "from" : 
+                        "from" :
                         {
                             "name" : "T2",
                             "alias": "WITHALIAS",
@@ -196,7 +196,7 @@
             ],
             "expectedPushdownResponse":
             {
-                "Exasol": 
+                "Exasol":
                 [
                     "SELECT * FROM \"LS\".\"T2\" \"WITHALIAS\""
                 ],
@@ -216,7 +216,7 @@
         },
         {
             "testQuery": "select * from (select t1alias.x as col1, t2alias.x as col2 from vs.t1 as t1alias join vs.t2 t2alias on t1alias.x=t2alias.x) aliasJoin",
-            "expectedPushdownRequest": 
+            "expectedPushdownRequest":
             [
                 {
                     "involvedTables" :
@@ -263,7 +263,7 @@
                             "name" : "T2"
                         }
                     ],
-                    "pushdownRequest" : 
+                    "pushdownRequest" :
                     {
                         "type": "select",
                         "selectList":
@@ -326,7 +326,7 @@
             ],
             "expectedPushdownResponse":
             {
-                "Exasol": 
+                "Exasol":
                 [
                     "SELECT \"T1ALIAS\".\"X\", \"T2ALIAS\".\"X\" FROM \"LS\".\"T1\" \"T1ALIAS\" INNER JOIN \"LS\".\"T2\" \"T2ALIAS\" ON \"T1ALIAS\".\"X\" = \"T2ALIAS\".\"X\""
                 ],

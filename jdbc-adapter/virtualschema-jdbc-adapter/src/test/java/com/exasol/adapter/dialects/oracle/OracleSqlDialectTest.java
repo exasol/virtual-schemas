@@ -43,7 +43,7 @@ class OracleSqlDialectTest {
     void beforeEach() {
         this.node = DialectTestData.getTestSqlNode();
         this.dialect = new OracleSqlDialect(null, AdapterProperties.emptyProperties());
-        final SqlGenerationContext context = new SqlGenerationContext("", SCHEMA_NAME, false, false);
+        final SqlGenerationContext context = new SqlGenerationContext("", SCHEMA_NAME, false);
         this.generator = this.dialect.getSqlGenerationVisitor(context);
         this.rawProperties = new HashMap<>();
     }
