@@ -278,6 +278,27 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
         assertFalse(result.next());
     }
 
+    @Test
+    void rightJoinWithComplexCondition() throws SQLException {
+        final String query = String
+                .format("SELECT * FROM  %1$s.t1 a RIGHT OUTER JOIN  %1$s.t2 b ON a.x||a.y=b.x||b.y ORDER BY a.x", VIRTUAL_SCHEMA);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
+        matchNextRow(result, null, null, (long) 3, "ccc");
+        assertFalse(result.next());
+    }
+
+    @Test
+    void fullOuterJoinWithComplexCondition() throws SQLException {
+        final String query = String
+                .format("SELECT * FROM  %1$s.t1 a FULL OUTER JOIN  %1$s.t2 b ON a.x-b.x=0 ORDER BY a.x", VIRTUAL_SCHEMA);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, (long) 1, "aaa", null, null);
+        matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
+        matchNextRow(result, null, null, (long) 3, "ccc");
+        assertFalse(result.next());
+    }
+
     // Identifier Test - CONVERT_TO_UPPER mode --------------------------------
     @Test
     void testCreateSchemaWithUpperCaseTables() {
