@@ -48,7 +48,7 @@ public class AthenaMetadataReaderTest {
         final IdentifierConverter converter = this.reader.getIdentifierConverter();
         assertAll(() -> assertThat(converter, instanceOf(BaseIdentifierConverter.class)),
                 () -> assertThat(converter.getQuotedIdentifierHandling(),
-                        equalTo(IdentifierCaseHandling.INTERPRET_AS_UPPER)),
+                        equalTo(IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE)),
                 () -> assertThat(converter.getUnquotedIdentifierHandling(),
                         equalTo(IdentifierCaseHandling.INTERPRET_AS_UPPER)));
     }

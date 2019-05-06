@@ -30,6 +30,6 @@ public class AthenaMetadataReader extends BaseRemoteMetadataReader {
     @Override
     protected IdentifierConverter createIdentifierConverter() {
         return new BaseIdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_UPPER,
-                IdentifierCaseHandling.INTERPRET_AS_UPPER);
+                IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE);
     }
 }
