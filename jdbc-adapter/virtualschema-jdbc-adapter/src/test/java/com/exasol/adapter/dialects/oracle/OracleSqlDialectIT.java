@@ -304,7 +304,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA_ORA + ".t1 a INNER JOIN  " + VIRTUAL_SCHEMA_ORA
                 + ".t2 b ON a.x=b.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, 2L, "bbb", 2L, "bbb"), () -> assertFalse(result.next()));
+        assertAll(() -> matchNextRow(result, "2", "bbb", "2", "bbb"), () -> assertFalse(result.next()));
     }
 
     @Test
@@ -320,9 +320,9 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA_ORA + ".t1 a LEFT OUTER JOIN  " + VIRTUAL_SCHEMA_ORA
                 + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, 1L, "aaa", null, null);
-        matchNextRow(result, 2L, "bbb", 2L, "bbb");
-        assertFalse(result.next());
+        assertAll (() -> matchNextRow(result, "1", "aaa", null, null),
+                () -> matchNextRow(result, "2", "bbb", "2", "bbb"),
+                () -> assertFalse(result.next()));
     }
 
     @Test
@@ -330,8 +330,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA_JDBC + ".t1 a RIGHT OUTER JOIN  " + VIRTUAL_SCHEMA_JDBC
                 + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
-                () -> matchNextRow(result, null, null, 3L, "ccc"), () -> assertFalse(result.next()));
+        assertAll(() -> matchNextRow(result, "2", "bbb", "2", "bbb"),
+                () -> matchNextRow(result, null, null, "3", "ccc"), () -> assertFalse(result.next()));
     }
 
     @Test
@@ -339,9 +339,9 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA_ORA + ".t1 a FULL OUTER JOIN  " + VIRTUAL_SCHEMA_ORA
                 + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, 1L, "aaa", null, null),
-                () -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
-                () -> matchNextRow(result, null, null, 3L, "ccc"), () -> assertFalse(result.next()));
+        assertAll(() -> matchNextRow(result, "1", "aaa", null, null),
+                () -> matchNextRow(result, "2", "bbb", "2", "bbb"),
+                () -> matchNextRow(result, null, null, "3", "ccc"), () -> assertFalse(result.next()));
     }
 
     @Test
@@ -349,8 +349,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA_JDBC + ".t1 a RIGHT OUTER JOIN  " + VIRTUAL_SCHEMA_JDBC
                 + ".t2 b ON a.x||a.y=b.x||b.y ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
-                () -> matchNextRow(result, null, null, 3L, "ccc"), () -> assertFalse(result.next()));
+        assertAll(() -> matchNextRow(result, "2", "bbb", "2", "bbb"),
+                () -> matchNextRow(result, null, null, "3", "ccc"), () -> assertFalse(result.next()));
     }
 
     @Test
@@ -358,9 +358,9 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA_ORA + ".t1 a FULL OUTER JOIN  " + VIRTUAL_SCHEMA_ORA
                 + ".t2 b ON a.x-b.x=0 ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, 1L, "aaa", null, null),
-                () -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
-                () -> matchNextRow(result, null, null, 3L, "ccc"), () -> assertFalse(result.next()));
+        assertAll(() -> matchNextRow(result, "1", "aaa", null, null),
+                () -> matchNextRow(result, "2", "bbb", "2", "bbb"),
+                () -> matchNextRow(result, null, null, "3", "ccc"), () -> assertFalse(result.next()));
     }
 
     // Type Tests -------------------------------------------------------------
