@@ -32,7 +32,7 @@ This means an user familiar with SQL will immediately feel at home when accessin
 * Supports [Apache Impala](http://impala.apache.org/) (Hadoop-based analytical database) as a source
 * Supports [Apache Hive](https://hive.apache.org/) (Hadoop-based data warehouse) as source
 * Supports access to file-based columnar storage (e.g. [Tableau files](https://onlinehelp.tableau.com/current/pro/desktop/en-us/environ_filesandfolders.html))
-  via [Amazon AWS Redshift Spectrum](https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html)
+  via [Amazon AWS Redshift Spectrum](https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html) and [Amazon AWS Athena](https://aws.amazon.com/athena/)
 * Pushes down queries to the remote source (some sources)
 * Supports sources with no / one / multiple catalogs or schemas
 * Allows limiting metadata mapping to selected catalogs and / or schemas
