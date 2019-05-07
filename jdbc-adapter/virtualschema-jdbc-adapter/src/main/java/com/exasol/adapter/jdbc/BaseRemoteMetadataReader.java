@@ -113,9 +113,16 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
         final String schemaName = getSchemaNameFilter();
         logTablesScan(catalogName, schemaName);
         try (final ResultSet remoteTables = remoteMetadata.getTables(catalogName, schemaName, ANY_TABLE,
-                getSupportedTableTypes().toArray(new String[0]))) {
+                getTableTypeFilter())) {
             return mapTables(remoteTables, selectedTables);
         }
+    }
+
+    protected String[] getTableTypeFilter() {
+        final Set<String> supportedTableTypes = getSupportedTableTypes();
+        return ((supportedTableTypes == null) || supportedTableTypes.isEmpty()) //
+                ? null //
+                : supportedTableTypes.toArray(new String[0]);
     }
 
     @Override
