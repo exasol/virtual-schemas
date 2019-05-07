@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
@@ -231,26 +232,25 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
 
     // Join Tests -------------------------------------------------------------
     @Test
-    void innerJoin() throws SQLException {
-        final String query = String.format("SELECT * FROM  %1$s.t1 a INNER JOIN  %1$s.t2 b ON a.x=b.x", VIRTUAL_SCHEMA);
+    void testInnerJoin() throws SQLException {
+        final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a INNER JOIN  " + VIRTUAL_SCHEMA
+                + ".t2 b ON a.x=b.x";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
-        assertFalse(result.next());
+        assertAll(() -> matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb"), () -> assertFalse(result.next()));
     }
 
     @Test
-    void innerJoinWithProjection() throws SQLException {
-        final String query = String
-                .format("SELECT b.y || %1$s.t1.y FROM  %1$s.t1 INNER JOIN  %1$s.t2 b ON %1$s.t1.x=b.x", VIRTUAL_SCHEMA);
+    void testInnerJoinWithProjection() throws SQLException {
+        final String query = "SELECT b.y || " + VIRTUAL_SCHEMA + ".t1.y FROM  " + VIRTUAL_SCHEMA + ".t1 INNER JOIN  "
+                + VIRTUAL_SCHEMA + ".t2 b ON " + VIRTUAL_SCHEMA + ".t1.x=b.x";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, "bbbbbb");
-        assertFalse(result.next());
+        assertAll(() -> matchNextRow(result, "bbbbbb"), () -> assertFalse(result.next()));
     }
 
     @Test
-    void leftJoin() throws SQLException {
-        final String query = String
-                .format("SELECT * FROM  %1$s.t1 a LEFT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA);
+    void testLeftJoin() throws SQLException {
+        final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a LEFT OUTER JOIN  " + VIRTUAL_SCHEMA
+                + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, (long) 1, "aaa", null, null);
         matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
@@ -258,45 +258,41 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void rightJoin() throws SQLException {
-        final String query = String
-                .format("SELECT * FROM  %1$s.t1 a RIGHT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA);
+    void testRightJoin() throws SQLException {
+        final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a RIGHT OUTER JOIN  " + VIRTUAL_SCHEMA
+                + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
-        matchNextRow(result, null, null, (long) 3, "ccc");
-        assertFalse(result.next());
+        assertAll(() -> matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb"),
+                () -> matchNextRow(result, null, null, (long) 3, "ccc"), () -> assertFalse(result.next()));
     }
 
     @Test
-    void fullOuterJoin() throws SQLException {
-        final String query = String
-                .format("SELECT * FROM  %1$s.t1 a FULL OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA);
+    void testFullOuterJoin() throws SQLException {
+        final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a FULL OUTER JOIN  " + VIRTUAL_SCHEMA
+                + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 1, "aaa", null, null);
-        matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
-        matchNextRow(result, null, null, (long) 3, "ccc");
-        assertFalse(result.next());
+        assertAll(() -> matchNextRow(result, (long) 1, "aaa", null, null),
+                () -> matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb"),
+                () -> matchNextRow(result, null, null, (long) 3, "ccc"), () -> assertFalse(result.next()));
     }
 
     @Test
-    void rightJoinWithComplexCondition() throws SQLException {
-        final String query = String
-                .format("SELECT * FROM  %1$s.t1 a RIGHT OUTER JOIN  %1$s.t2 b ON a.x||a.y=b.x||b.y ORDER BY a.x", VIRTUAL_SCHEMA);
+    void testRightJoinWithComplexCondition() throws SQLException {
+        final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a RIGHT OUTER JOIN  " + VIRTUAL_SCHEMA
+                + ".t2 b ON a.x||a.y=b.x||b.y ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
-        matchNextRow(result, null, null, (long) 3, "ccc");
-        assertFalse(result.next());
+        assertAll(() -> matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb"),
+                () -> matchNextRow(result, null, null, (long) 3, "ccc"), () -> assertFalse(result.next()));
     }
 
     @Test
-    void fullOuterJoinWithComplexCondition() throws SQLException {
-        final String query = String
-                .format("SELECT * FROM  %1$s.t1 a FULL OUTER JOIN  %1$s.t2 b ON a.x-b.x=0 ORDER BY a.x", VIRTUAL_SCHEMA);
+    void testFullOuterJoinWithComplexCondition() throws SQLException {
+        final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a FULL OUTER JOIN  " + VIRTUAL_SCHEMA
+                + ".t2 b ON a.x-b.x=0 ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 1, "aaa", null, null);
-        matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
-        matchNextRow(result, null, null, (long) 3, "ccc");
-        assertFalse(result.next());
+        assertAll(() -> matchNextRow(result, (long) 1, "aaa", null, null),
+                () -> matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb"),
+                () -> matchNextRow(result, null, null, (long) 3, "ccc"), () -> assertFalse(result.next()));
     }
 
     // Identifier Test - CONVERT_TO_UPPER mode --------------------------------
