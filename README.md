@@ -51,16 +51,17 @@ This is an open source project which is officially supported by Exasol. For any 
 * [User Guide](doc/user-guide/user_guide.md)
 * [Deployment Guide](deploying_the_virtual_schema_adapter.md) 
 * Supported dialects:
-    1. [EXASOL](doc/dialects/exasol.md)
+    1. [Athena](doc/dialects/athena.md)
+    1. [DB2](doc/dialects/db2.md)
+    1. [Exasol](doc/dialects/exasol.md)
     1. [Hive](doc/dialects/hive.md)
     1. [Impala](doc/dialects/impala.md)
-    1. [DB2](doc/dialects/db2.md)
     1. [Oracle](doc/dialects/oracle.md)
-    1. [Teradata](doc/dialects/teradata.md)
+    1. [PostgreSQL](doc/dialects/postgresql.md)
     1. [Redshift](doc/dialects/redshift.md)
     1. [SQL Server](doc/dialects/sql_server.md)
     1. [Sybase ASE](doc/dialects/sybase.md)
-    1. [PostgreSQL](doc/dialects/postgresql.md)
+    1. [Teradata](doc/dialects/teradata.md)
     1. Generic
 
 ## Information for Developers 
