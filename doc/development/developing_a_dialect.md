@@ -103,7 +103,7 @@ The Java package structure of the `virtualschema-jdbc-adapter` reflects the sepa
 
 The Virtual Schema adapter creates an instance of an SQL dialect on demand. You can pick any dialect that is listed in the `SqlDialects` registry.
 
-To register your new dialect add it to the list in [sql_dialects.properties](../../virtualschema-jdbc-adapter/src/main/resources/sql_dialects.properties).
+To register your new dialect add it to the list in [sql_dialects.properties](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/resources/sql_dialects.properties).
 
 ```properties
 com.exasol.adapter.dialects.supported=\

@@ -226,12 +226,12 @@ ORDER  BY user_id
 LIMIT  10;
 ```
 
-The whole set of capabilities is a lot longer. The current list of supported Capabilities can be found in the sources of the JDBC Adapter:
-* [High Level Capabilities](../../jdbc-adapter/virtualschema-common/src/main/java/com/exasol/adapter/capabilities/MainCapability.java)
-* [Literal Capabilities]../../jdbc-adapter/virtualschema-common/src/main/java/com/exasol/adapter/capabilities/LiteralCapability.java)
-* [Predicate Capabilities](../../jdbc-adapter/virtualschema-common/src/main/java/com/exasol/adapter/capabilities/PredicateCapability.java)
-* [Scalar Function Capabilities](../../jdbc-adapter/virtualschema-common/src/main/java/com/exasol/adapter/capabilities/ScalarFunctionCapability.java)
-* [Aggregate Function Capabilities](../../jdbc-adapter/virtualschema-common/src/main/java/com/exasol/adapter/capabilities/AggregateFunctionCapability.java)
+The whole set of capabilities is a lot longer. The current list of supported Capabilities can be found in the sources of the Virtual Schema Common Java:
+* [Main Capabilities](https://github.com/exasol/virtual-schema-common-java/blob/master/src/main/java/com/exasol/adapter/capabilities/MainCapability.java)
+* [Literal Capabilities](https://github.com/exasol/virtual-schema-common-java/blob/master/src/main/java/com/exasol/adapter/capabilities/LiteralCapability.java)
+* [Predicate Capabilities](https://github.com/exasol/virtual-schema-common-java/blob/master/src/main/java/com/exasol/adapter/capabilities/PredicateCapability.java)
+* [Scalar Function Capabilities](https://github.com/exasol/virtual-schema-common-java/blob/master/src/main/java/com/exasol/adapter/capabilities/ScalarFunctionCapability.java)
+* [Aggregate Function Capabilities](https://github.com/exasol/virtual-schema-common-java/blob/master/src/main/java/com/exasol/adapter/capabilities/AggregateFunctionCapability.javaa)
 
 
 ### Pushdown

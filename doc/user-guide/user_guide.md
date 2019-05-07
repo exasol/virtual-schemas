@@ -51,7 +51,7 @@ Please note that the syntax for creating adapter scripts is not recognized by al
 ## Getting Started
 
 Before you can start using the JDBC adapter for virtual schemas you have to deploy the adapter and the JDBC driver of your data source in your Exasol database.
-Please follow the [step-by-step deployment guide](../doc/development/deploying_the_virtual_schema_adapter.md).
+Please follow the [step-by-step deployment guide](deploying_the_virtual_schema_adapter.md).
 
 ## Using the Adapter
 The following statements demonstrate how you can use virtual schemas with the JDBC adapter to connect to a Hive system. 
