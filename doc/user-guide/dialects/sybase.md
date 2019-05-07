@@ -25,7 +25,7 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter
 
 ## Installing the Test Data
 
-Create and populate the test database using the [sybase-testdata.sql](../../jdbc-adapter/integration-test-data/sybase.sql) SQL script.
+Create and populate the test database using the [sybase-testdata.sql](../../../jdbc-adapter/integration-test-data/sybase.sql) SQL script.
 
 ## Creating a Virtual Schema
 

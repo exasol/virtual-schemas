@@ -231,7 +231,7 @@ The whole set of capabilities is a lot longer. The current list of supported Cap
 * [Literal Capabilities](https://github.com/exasol/virtual-schema-common-java/blob/master/src/main/java/com/exasol/adapter/capabilities/LiteralCapability.java)
 * [Predicate Capabilities](https://github.com/exasol/virtual-schema-common-java/blob/master/src/main/java/com/exasol/adapter/capabilities/PredicateCapability.java)
 * [Scalar Function Capabilities](https://github.com/exasol/virtual-schema-common-java/blob/master/src/main/java/com/exasol/adapter/capabilities/ScalarFunctionCapability.java)
-* [Aggregate Function Capabilities](https://github.com/exasol/virtual-schema-common-java/blob/master/src/main/java/com/exasol/adapter/capabilities/AggregateFunctionCapability.javaa)
+* [Aggregate Function Capabilities](https://github.com/exasol/virtual-schema-common-java/blob/master/src/main/java/com/exasol/adapter/capabilities/AggregateFunctionCapability.java)
 
 
 ### Pushdown
