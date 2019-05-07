@@ -46,7 +46,8 @@ class PostgreSQLSqlDialectTest {
                         containsInAnyOrder(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS,
                                 AGGREGATE_SINGLE_GROUP, AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_GROUP_BY_EXPRESSION,
                                 AGGREGATE_GROUP_BY_TUPLE, AGGREGATE_HAVING, ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT,
-                                LIMIT_WITH_OFFSET)), //
+                                LIMIT_WITH_OFFSET, JOIN, JOIN_TYPE_INNER, JOIN_TYPE_LEFT_OUTER, JOIN_TYPE_RIGHT_OUTER,
+                                JOIN_TYPE_FULL_OUTER, JOIN_CONDITION_EQUI)),
                 () -> assertThat(capabilities.getLiteralCapabilities(),
                         containsInAnyOrder(BOOL, NULL, DATE, TIMESTAMP, TIMESTAMP_UTC, DOUBLE, EXACTNUMERIC, STRING)),
                 () -> assertThat(capabilities.getPredicateCapabilities(),
