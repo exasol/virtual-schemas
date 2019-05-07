@@ -49,7 +49,7 @@ This is an open source project which is officially supported by Exasol. For any 
 ## Information for Users
 
 * [User Guide](doc/user-guide/user_guide.md)
-* [Deployment Guide](deploying_the_virtual_schema_adapter.md) 
+* [Deployment Guide](doc/user-guide/deploying_the_virtual_schema_adapter.md) 
 * Supported dialects:
     1. [Athena](doc/dialects/athena.md)
     1. [DB2](doc/dialects/db2.md)
@@ -68,8 +68,8 @@ This is an open source project which is officially supported by Exasol. For any 
 
 * [Virtual Schema API Documentation](doc/development/virtual_schema_api.md)
 * [Developing and Testing an SQL Dialect](doc/development/developing_a_dialect.md)
-* [Step-by-step guide to writing your own SQL dialect](step_by_step_guide_to_writing_your_own_dialect.md)
+* [Step-by-step guide to writing your own SQL dialect](doc/development/step_by_step_guide_to_writing_your_own_dialect.md)
 * [Remote Logging](doc/development/remote_logging.md)
 * [Remote Debugging](doc/development/remote_debugging.md)
 * [Troubleshooting](doc/development/troubleshooting.md)
-* [Versioning](doc/versioning.md)
+* [Versioning](doc/development/versioning.md)

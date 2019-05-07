@@ -2,7 +2,7 @@
 
 ## Supported capabilities
 
-The Oracle dialect does not support all capabilities. A complete list can be found in [OracleSqlDialect.getCapabilities()](../../virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/impl/OracleSqlDialect.java).
+The Oracle dialect does not support all capabilities. A complete list can be found in [OracleSqlDialect.getCapabilities()](../../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/oracle/OracleSqlDialect.java).
 
 Oracle data types are mapped to their equivalents in Exasol. The following exceptions apply:
 

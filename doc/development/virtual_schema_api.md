@@ -227,11 +227,11 @@ LIMIT  10;
 ```
 
 The whole set of capabilities is a lot longer. The current list of supported Capabilities can be found in the sources of the JDBC Adapter:
-* [High Level Capabilities](../jdbc-adapter/virtualschema-common/src/main/java/com/exasol/adapter/capabilities/MainCapability.java)
-* [Literal Capabilities](../jdbc-adapter/virtualschema-common/src/main/java/com/exasol/adapter/capabilities/LiteralCapability.java)
-* [Predicate Capabilities](../jdbc-adapter/virtualschema-common/src/main/java/com/exasol/adapter/capabilities/PredicateCapability.java)
-* [Scalar Function Capabilities](../jdbc-adapter/virtualschema-common/src/main/java/com/exasol/adapter/capabilities/ScalarFunctionCapability.java)
-* [Aggregate Function Capabilities](../jdbc-adapter/virtualschema-common/src/main/java/com/exasol/adapter/capabilities/AggregateFunctionCapability.java)
+* [High Level Capabilities](../../jdbc-adapter/virtualschema-common/src/main/java/com/exasol/adapter/capabilities/MainCapability.java)
+* [Literal Capabilities]../../jdbc-adapter/virtualschema-common/src/main/java/com/exasol/adapter/capabilities/LiteralCapability.java)
+* [Predicate Capabilities](../../jdbc-adapter/virtualschema-common/src/main/java/com/exasol/adapter/capabilities/PredicateCapability.java)
+* [Scalar Function Capabilities](../../jdbc-adapter/virtualschema-common/src/main/java/com/exasol/adapter/capabilities/ScalarFunctionCapability.java)
+* [Aggregate Function Capabilities](../../jdbc-adapter/virtualschema-common/src/main/java/com/exasol/adapter/capabilities/AggregateFunctionCapability.java)
 
 
 ### Pushdown

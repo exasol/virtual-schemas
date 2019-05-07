@@ -74,4 +74,4 @@ create  virtual schema db2 using adapter.jdbc_adapter with
 
 ## Running the DB2 Integration Tests
 
-A how to has been included in the [setup sql file](../../integration-test-data/db2-testdata.sql)
+A how to has been included in the [setup sql file](../../jdbc-adapter/integration-test-data/db2-testdata.sql)

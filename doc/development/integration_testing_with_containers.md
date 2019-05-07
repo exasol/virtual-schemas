@@ -43,21 +43,21 @@ Set the following properties for your database:
 
 ### Provide JDBC drivers for the Source Database
 
-The JDBC drivers are automatically deployed during the test. You have to create a directory for the jdbc driver under integration-test-data/drivers. The folder contains the driver jar file(s) and a config file. See the [PostgreSQL config](../integration-test-data/drivers/POSTGRESQL/settings.cfg) for an example.
+The JDBC drivers are automatically deployed during the test. You have to create a directory for the jdbc driver under integration-test-data/drivers. The folder contains the driver jar file(s) and a config file. See the [PostgreSQL config](../../integration-test-data/drivers/POSTGRESQL/settings.cfg) for an example.
 
-In order to connect to the source database from your integration test you also have to add the jdbc driver dependency to the [POM](../../jdbc-adpter/virtualschema-jdbc-adapter/pom.xml) scope verify.
+In order to connect to the source database from your integration test you also have to add the jdbc driver dependency to the [POM](../../jdbc-adapter/virtualschema-jdbc-adapter/pom.xml) scope verify.
 
 ### Add a new Integration Test Class
 
-Add a new class that derives from [AbstractIntegrationTest](../../jdbc-adpter/virtualschema-jdbc-adapter/src/test/java/com/exasol/adapter/dialects/AbstractIntegrationTest.java). This class has to:
+Add a new class that derives from [AbstractIntegrationTest](../../jdbc-adapter/virtualschema-jdbc-adapter/src/test/java/com/exasol/adapter/dialects/AbstractIntegrationTest.java). This class has to:
 * Create the test schema in the source database
 * Create the virtual schema
 * Execute the tests on the virtual schema
-See [PostgreSQLDialectIT](../../jdbc-adpter//virtualschema-jdbc-adapter/src/test/java/com/exasol/adapter/dialects/postgresql/PostgreSQLDialectIT.java) for an example.
+See [PostgreSQLDialectIT](../../jdbc-adapter//virtualschema-jdbc-adapter/src/test/java/com/exasol/adapter/dialects/postgresql/PostgreSQLDialectIT.java) for an example.
 
 ## Executing Integration Tests
 
-Executing the integration test is easy, just run the [integration test bash script](../integration-test-data/run_integration_tests.sh)
+Executing the integration test is easy, just run the [integration test bash script](../../integration-test-data/run_integration_tests.sh)
 
 # Integration Testing Against a Local Database
 
@@ -96,7 +96,7 @@ If BucketFS is new to you, there are nice [training videos on BucketFS](https://
 
 1. Create a dedicated user in the source database that has the necessary access privileges 
 2. Create credentials for the user under which the integration tests run at the source
-3. Make a local copy of the [sample integration test configuration file](../integration-test-data/integration-test-sample.yaml) in a place where you don't accidentally check this file in.
+3. Make a local copy of the [sample integration test configuration file](../../integration-test-data/integration-test-sample.yaml) in a place where you don't accidentally check this file in.
 4. Edit the credentials information
 5. [Deploy the JDBC driver(s)](../user-guide/deploying_the_virtual_schema_adapter.md#deploying-jdbc-driver-files) to the prepared bucket in Exasol's BucketFS       
 
