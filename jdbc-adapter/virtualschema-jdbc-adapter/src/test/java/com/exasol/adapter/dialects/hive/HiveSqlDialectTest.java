@@ -42,7 +42,8 @@ class HiveSqlDialectTest {
                 () -> assertThat(capabilities.getMainCapabilities(),
                         containsInAnyOrder(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS,
                                 AGGREGATE_SINGLE_GROUP, AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_HAVING, ORDER_BY_COLUMN,
-                                ORDER_BY_EXPRESSION, LIMIT)), //
+                                ORDER_BY_EXPRESSION, LIMIT, JOIN, JOIN_TYPE_INNER, JOIN_TYPE_LEFT_OUTER,
+                                JOIN_TYPE_RIGHT_OUTER, JOIN_TYPE_FULL_OUTER, JOIN_CONDITION_EQUI)), //
                 () -> assertThat(capabilities.getLiteralCapabilities(),
                         containsInAnyOrder(NULL, BOOL, DATE, TIMESTAMP, DOUBLE, EXACTNUMERIC, STRING)),
                 () -> assertThat(capabilities.getPredicateCapabilities(),
