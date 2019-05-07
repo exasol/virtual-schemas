@@ -348,6 +348,27 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         assertFalse(result.next());
     }
 
+    @Test
+    void rightJoinWithComplexCondition() throws SQLException {
+        final String query = String.format(
+                "SELECT * FROM  %1$s.t1 a RIGHT OUTER JOIN  %1$s.t2 b ON a.x||a.y=b.x||b.y ORDER BY a.x", VIRTUAL_SCHEMA_JDBC);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, "2", "bbb", "2", "bbb");
+        matchNextRow(result, null, null, "3", "ccc");
+        assertFalse(result.next());
+    }
+
+    @Test
+    void fullOuterJoinWithComplexCondition() throws SQLException {
+        final String query = String.format(
+                "SELECT * FROM  %1$s.t1 a FULL OUTER JOIN  %1$s.t2 b ON a.x-b.x=0 ORDER BY a.x", VIRTUAL_SCHEMA_ORA);
+        final ResultSet result = executeQuery(query);
+        matchNextRow(result, "1", "aaa", null, null);
+        matchNextRow(result, "2", "bbb", "2", "bbb");
+        matchNextRow(result, null, null, "3", "ccc");
+        assertFalse(result.next());
+    }
+
     // Type Tests -------------------------------------------------------------
     @Test
     void testColumnTypeEquivalence() throws SQLException {
