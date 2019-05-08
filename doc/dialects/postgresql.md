@@ -48,7 +48,7 @@ ALTER VIRTUAL SCHEMA postgres SET POSTGRESQL_IDENTIFIER_MAPPING = 'CONVERT_TO_UP
 ```
 
 In this mode you do not have to care about identifier handling. Everything will work as expected out of the box as long as you **do not use quoted identifiers** (in the PostgreSQL Schema as well as in the Exasol Virtual Schema). More specifically everything will work as long as there are no identifiers in the PostgreSQL database that contain upper case characters. If that is the case an error is thrown when creating or refreshing the virtual schema.
-Regardless of this, you can create or refresh the virtual schema by specigying the adapter to ignore this particular error as shown below:
+Regardless of this, you can create or refresh the virtual schema by specifying the adapter to ignore this particular error as shown below:
 ```sql
 CREATE VIRTUAL SCHEMA postgres
 	USING adapter.jdbc_adapter 
