@@ -17,11 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * @author Karl Griesser (fullref@gmail.com)
- */
-
-
 public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
 
     private Set<ScalarFunction> scalarFunctionsCast = new HashSet<>();
