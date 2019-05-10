@@ -1,12 +1,10 @@
 package com.exasol.adapter.jdbc;
 
 import java.sql.*;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
-import com.exasol.ExaConnectionInformation;
-import com.exasol.ExaMetadata;
+import com.exasol.*;
 import com.exasol.adapter.*;
 import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.*;
@@ -20,7 +18,18 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     private static final String PREDICATE_PREFIX = "FN_PRED_";
     private static final String AGGREGATE_FUNCTION_PREFIX = "FN_AGG_";
     private static final String LITERAL_PREFIX = "LITERAL_";
+
+    private static final String CONNECTION_NAME_PROPERTY = "CONNECTION_NAME";
+    private static final String IMPORT_FROM_EXA_PROPERTY = "IMPORT_FROM_EXA";
+    private static final String IMPORT_FROM_ORA_PROPERTY = "IMPORT_FROM_ORA";
+    private static final String EXA_CONNECTION_STRING_PROPERTY = "EXA_CONNECTION_STRING";
+    private static final String ORA_CONNECTION_NAME_PROPERTY = "ORA_CONNECTION_NAME";
+    private static final String TABLES_PROPERTY = "TABLE_FILTER";
+    private static final String PROP_IS_LOCAL = "IS_LOCAL";
+    private static final String PROP_EXCLUDED_CAPABILITIES = "EXCLUDED_CAPABILITIES";
+
     private static final Logger LOGGER = Logger.getLogger(JdbcAdapter.class.getName());
+    private RemoteConnectionFactory factory = new RemoteConnectionFactory();
 
     /**
      * This method gets called by the database during interactions with the virtual schema.
@@ -62,7 +71,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     private SchemaMetadata readMetadata(final AdapterProperties properties, final ExaMetadata exasolMetadata)
             throws SQLException, PropertyValidationException {
         final List<String> tables = properties.getFilteredTables();
-        try (final Connection connection = getConnection(exasolMetadata, properties)) {
+        try (final Connection connection = factory.createConnection(exasolMetadata, properties)) {
             final SqlDialect dialect = createDialect(connection, properties);
             dialect.validateProperties();
             if (tables.isEmpty()) {
@@ -75,34 +84,11 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
 
     private SchemaMetadata readMetadata(final AdapterProperties properties, final List<String> whiteListedRemoteTables,
             final ExaMetadata exasolMetadata) throws SQLException, PropertyValidationException {
-        try (final Connection connection = getConnection(exasolMetadata, properties)) {
+        try (final Connection connection = factory.createConnection(exasolMetadata, properties)) {
             final SqlDialect dialect = createDialect(connection, properties);
             dialect.validateProperties();
             return dialect.readSchemaMetadata(whiteListedRemoteTables);
         }
-    }
-
-    private Connection getConnection(final ExaMetadata exasolMetadata, final AdapterProperties properties)
-            throws SQLException {
-        final ExaConnectionInformation connectionInformation = JdbcAdapterProperties
-                .getConnectionInformation(properties, exasolMetadata);
-        final String address = connectionInformation.getAddress();
-        final String user = connectionInformation.getUser();
-        final String password = connectionInformation.getPassword();
-        logConnectionAttempt(address, user);
-        final Connection connection = DriverManager.getConnection(address, user, password);
-        logRemoteDatabaseDetails(connection);
-        return connection;
-    }
-
-    protected void logConnectionAttempt(final String address, final String user) {
-        LOGGER.fine(() -> "Connecting to \"" + address + "\" as user \"" + user + "\"");
-    }
-
-    protected void logRemoteDatabaseDetails(final Connection connection) throws SQLException {
-        final String databaseProductName = connection.getMetaData().getDatabaseProductName();
-        final String databaseProductVersion = connection.getMetaData().getDatabaseProductVersion();
-        LOGGER.info(() -> "Connected to " + databaseProductName + " " + databaseProductVersion);
     }
 
     private SqlDialect createDialect(final Connection connection, final AdapterProperties properties) {
@@ -147,11 +133,11 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
             throws AdapterException {
         final Map<String, String> changedProperties = request.getProperties();
         final SchemaMetadataInfo schemaMetadataInfo = request.getSchemaMetadataInfo();
-        final Map<String, String> newSchemaMeta = JdbcAdapterProperties
-                .getNewProperties(schemaMetadataInfo.getProperties(), changedProperties);
+        final Map<String, String> newSchemaMeta = getNewProperties(schemaMetadataInfo.getProperties(),
+                changedProperties);
         final AdapterProperties properties = new AdapterProperties(newSchemaMeta);
         if (AdapterProperties.isRefreshingVirtualSchemaRequired(changedProperties)) {
-            final List<String> tableFilter = JdbcAdapterProperties.getTableFilter(newSchemaMeta);
+            final List<String> tableFilter = getTableFilter(newSchemaMeta);
             final SchemaMetadata remoteMeta;
             try {
                 remoteMeta = readMetadata(properties, tableFilter, metadata);
@@ -166,6 +152,32 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
         return SetPropertiesResponse.builder().schemaMetadata(null).build();
     }
 
+    private Map<String, String> getNewProperties(final Map<String, String> oldProperties,
+            final Map<String, String> changedProperties) {
+        final Map<String, String> newCompleteProperties = new HashMap<>(oldProperties);
+        for (final Map.Entry<String, String> changedProperty : changedProperties.entrySet()) {
+            if (changedProperty.getValue() == null) {
+                newCompleteProperties.remove(changedProperty.getKey());
+            } else {
+                newCompleteProperties.put(changedProperty.getKey(), changedProperty.getValue());
+            }
+        }
+        return newCompleteProperties;
+    }
+
+    private List<String> getTableFilter(final Map<String, String> properties) {
+        final String tableNames = getProperty(properties, TABLES_PROPERTY);
+        if (!tableNames.isEmpty()) {
+            final List<String> tables = Arrays.asList(tableNames.split(","));
+            for (int i = 0; i < tables.size(); ++i) {
+                tables.set(i, tables.get(i).trim());
+            }
+            return tables;
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
     @Override
     public GetCapabilitiesResponse getCapabilities(final ExaMetadata metadata, final GetCapabilitiesRequest request)
             throws AdapterException {
@@ -175,12 +187,20 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
         final SqlDialect dialect = createDialect(connection, properties);
         final Capabilities capabilities = dialect.getCapabilities();
         final Capabilities excludedCapabilities = parseExcludedCapabilities(
-                JdbcAdapterProperties.getExcludedCapabilities(request.getSchemaMetadataInfo().getProperties()));
+                getExcludedCapabilities(request.getSchemaMetadataInfo().getProperties()));
         capabilities.subtractCapabilities(excludedCapabilities);
         return GetCapabilitiesResponse //
                 .builder()//
                 .capabilities(capabilities)//
                 .build();
+    }
+
+    private String getExcludedCapabilities(final Map<String, String> properties) {
+        return getProperty(properties, PROP_EXCLUDED_CAPABILITIES);
+    }
+
+    private boolean isLocal(final Map<String, String> properties) {
+        return getProperty(properties, PROP_IS_LOCAL).toUpperCase().equals("TRUE");
     }
 
     private Capabilities parseExcludedCapabilities(final String excludedCapabilitiesStr) {
@@ -217,7 +237,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
             throws AdapterException {
         final SchemaMetadataInfo schemaMetadataInfo = request.getSchemaMetadataInfo();
         final AdapterProperties properties = getPropertiesFromRequest(request);
-        try (final Connection connection = getConnection(exasolMetadata, properties)) {
+        try (final Connection connection = factory.createConnection(exasolMetadata, properties)) {
             final SqlDialect dialect = createDialect(connection, properties);
             final String pushdownQuery = createPushdownQuery(request, properties, dialect);
             final ConnectionInformation connectionInformation = getConnectionInformation(exasolMetadata,
@@ -254,28 +274,44 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
 
     private ImportType getImportType(final SchemaMetadataInfo meta) {
         ImportType importType = ImportType.JDBC;
-        if (JdbcAdapterProperties.isLocal(meta.getProperties())) {
+        if (isLocal(meta.getProperties())) {
             importType = ImportType.LOCAL;
-        } else if (JdbcAdapterProperties.isImportFromExa(meta.getProperties())) {
+        } else if (isImportFromExa(meta.getProperties())) {
             importType = ImportType.EXA;
-        } else if (JdbcAdapterProperties.isImportFromOra(meta.getProperties())) {
+        } else if (isImportFromOra(meta.getProperties())) {
             importType = ImportType.ORA;
         }
         return importType;
     }
 
+    private boolean isImportFromExa(final Map<String, String> properties) {
+        return getProperty(properties, IMPORT_FROM_EXA_PROPERTY).toUpperCase().equals("TRUE");
+    }
+
+    private boolean isImportFromOra(final Map<String, String> properties) {
+        return getProperty(properties, IMPORT_FROM_ORA_PROPERTY).toUpperCase().equals("TRUE");
+    }
+
     private ConnectionInformation getConnectionInformation(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         final String credentials = getCredentialsForPushdownQuery(exaMeta, meta);
-        final String exaConnectionString = JdbcAdapterProperties.getExaConnectionString(meta.getProperties());
-        final String oraConnectionName = JdbcAdapterProperties.getOraConnectionName(meta.getProperties());
+        final String exaConnectionString = getExaConnectionString(meta.getProperties());
+        final String oraConnectionName = getOraConnectionName(meta.getProperties());
         return new ConnectionInformation(credentials, exaConnectionString, oraConnectionName);
+    }
+
+    private String getExaConnectionString(final Map<String, String> properties) {
+        return getProperty(properties, EXA_CONNECTION_STRING_PROPERTY);
+    }
+
+    private String getOraConnectionName(final Map<String, String> properties) {
+        return getProperty(properties, ORA_CONNECTION_NAME_PROPERTY);
     }
 
     protected String getCredentialsForPushdownQuery(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         String credentials = "";
-        if (JdbcAdapterProperties.isImportFromExa(meta.getProperties())) {
+        if (isImportFromExa(meta.getProperties())) {
             credentials = getCredentialsForEXAImport(exaMeta, meta);
-        } else if (JdbcAdapterProperties.isImportFromOra(meta.getProperties())) {
+        } else if (isImportFromOra(meta.getProperties())) {
             credentials = getCredentialsForORAImport(exaMeta, meta);
         } else {
             credentials = getCredentialsForJDBCImport(exaMeta, meta);
@@ -285,20 +321,33 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
 
     private String getCredentialsForJDBCImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         String credentials = "";
-        if (JdbcAdapterProperties.isUserSpecifiedConnection(meta.getProperties())) {
-            credentials = JdbcAdapterProperties.getConnectionName(meta.getProperties());
+        if (isUserSpecifiedConnection(meta.getProperties())) {
+            credentials = getConnectionName(meta.getProperties());
         } else {
             credentials = getUserAndPasswordForImport(exaMeta, meta);
-            final ExaConnectionInformation connection = JdbcAdapterProperties
-                    .getConnectionInformation(new AdapterProperties(meta.getProperties()), exaMeta);
-            credentials = "'" + connection.getAddress() + "' " + credentials;
+            credentials = "'" + new AdapterProperties(meta.getProperties()).getConnectionString() + "' " + credentials;
         }
         return credentials;
     }
 
+    private boolean isUserSpecifiedConnection(final Map<String, String> properties) {
+        final String connName = getProperty(properties, CONNECTION_NAME_PROPERTY);
+        return ((connName != null) && !connName.isEmpty());
+    }
+
+    private String getConnectionName(final Map<String, String> properties) {
+        final String connName = getProperty(properties, CONNECTION_NAME_PROPERTY);
+        assert ((connName != null) && !connName.isEmpty());
+        return connName;
+    }
+
+    private static String getProperty(final Map<String, String> properties, final String name) {
+        return properties.getOrDefault(name, "");
+    }
+
     private String getCredentialsForORAImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
         String credentials = "";
-        if (!JdbcAdapterProperties.isUserSpecifiedConnection(meta.getProperties())) {
+        if (!isUserSpecifiedConnection(meta.getProperties())) {
             credentials = getUserAndPasswordForImport(exaMeta, meta);
         }
         return credentials;
@@ -308,13 +357,44 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
         return getUserAndPasswordForImport(exaMeta, meta);
     }
 
-    private String getUserAndPasswordForImport(final ExaMetadata exaMeta, final SchemaMetadataInfo meta) {
+    private String getUserAndPasswordForImport(final ExaMetadata exasolMetadata,
+            final SchemaMetadataInfo schemaMetadataInfo) {
         String credentials = "";
-        final ExaConnectionInformation connection = JdbcAdapterProperties
-                .getConnectionInformation(new AdapterProperties(meta.getProperties()), exaMeta);
-        if ((connection.getUser() != null) || (connection.getPassword() != null)) {
-            credentials = "USER '" + connection.getUser() + "' IDENTIFIED BY '" + connection.getPassword() + "'";
+        String username = getUserName(exasolMetadata, new AdapterProperties(schemaMetadataInfo.getProperties()));
+        String password = getPassword(exasolMetadata, new AdapterProperties(schemaMetadataInfo.getProperties()));
+        if ((username != null) || (password != null)) {
+            credentials = "USER '" + username + "' IDENTIFIED BY '" + password + "'";
         }
         return credentials;
+    }
+
+    private String getUserName(final ExaMetadata exasolMetadata, AdapterProperties adapterProperties) {
+        final String connectionName = adapterProperties.getConnectionName();
+        if ((connectionName != null) && !connectionName.isEmpty()) {
+            try {
+                return exasolMetadata.getConnection(connectionName).getUser();
+            } catch (final ExaConnectionAccessException exception) {
+                throw new RuntimeException(
+                        "Could not access the connection information of connection \"" + connectionName + "\"",
+                        exception);
+            }
+        } else {
+            return adapterProperties.getUsername();
+        }
+    }
+
+    private String getPassword(final ExaMetadata exasolMetadata, AdapterProperties adapterProperties) {
+        final String connectionName = adapterProperties.getConnectionName();
+        if ((connectionName != null) && !connectionName.isEmpty()) {
+            try {
+                return exasolMetadata.getConnection(connectionName).getPassword();
+            } catch (final ExaConnectionAccessException exception) {
+                throw new RuntimeException(
+                        "Could not access the connection information of connection \"" + connectionName + "\"",
+                        exception);
+            }
+        } else {
+            return adapterProperties.getPassword();
+        }
     }
 }
