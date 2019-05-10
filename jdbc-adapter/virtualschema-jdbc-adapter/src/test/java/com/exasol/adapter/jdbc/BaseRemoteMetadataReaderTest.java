@@ -257,6 +257,8 @@ class BaseRemoteMetadataReaderTest {
         assertAll(
                 () -> assertThat(reader.convertToOptional(Collections.emptyList()),
                         equalTo(Optional.empty())),
+                () -> assertThat(reader.convertToOptional(null),
+                        equalTo(Optional.empty())),
                 () -> assertThat(reader.convertToOptional(Arrays.asList("T1")),
                         equalTo(Optional.of(Arrays.asList("T1"))))
         );

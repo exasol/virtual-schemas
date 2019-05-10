@@ -197,7 +197,7 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
     }
 
     protected Optional<List<String>> convertToOptional(List<String> selectedTables) {
-        if (selectedTables.size() > 0) {
+        if ((selectedTables != null) && !selectedTables.isEmpty()) {
             return Optional.of(selectedTables);
         } else {
             return Optional.empty();
