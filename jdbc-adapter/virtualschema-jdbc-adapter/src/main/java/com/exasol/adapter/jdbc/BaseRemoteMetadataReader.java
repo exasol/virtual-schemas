@@ -189,10 +189,18 @@ public class BaseRemoteMetadataReader extends AbstractMetadataReader implements 
             final DatabaseMetaData remoteMetadata = this.connection.getMetaData();
             final String adapterNotes = SchemaAdapterNotesJsonConverter.getInstance()
                     .convertToJson(getSchemaAdapterNotes());
-            final List<TableMetadata> tables = extractTableMetadata(remoteMetadata, Optional.of(selectedTables));
+            final List<TableMetadata> tables = extractTableMetadata(remoteMetadata, convertToOptional(selectedTables));
             return new SchemaMetadata(adapterNotes, tables);
         } catch (final SQLException exception) {
             throw new RemoteMetadataReaderException("Unable to read remote schema metadata.", exception);
+        }
+    }
+
+    protected Optional<List<String>> convertToOptional(List<String> selectedTables) {
+        if ((selectedTables != null) && !selectedTables.isEmpty()) {
+            return Optional.of(selectedTables);
+        } else {
+            return Optional.empty();
         }
     }
 }

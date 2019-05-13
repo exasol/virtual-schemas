@@ -2,7 +2,7 @@
 
 ## Supported capabilities
 
-The Oracle dialect does not support all capabilities. A complete list can be found in [OracleSqlDialect.getCapabilities()](../../virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/impl/OracleSqlDialect.java).
+The Oracle dialect does not support all capabilities. A complete list can be found in [OracleSqlDialect.getCapabilities()](../../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/oracle/OracleSqlDialect.java).
 
 Oracle data types are mapped to their equivalents in Exasol. The following exceptions apply:
 
@@ -32,7 +32,7 @@ CREATE JAVA ADAPTER SCRIPT adapter.jdbc_oracle AS
 
   // You need to replace `your-bucket-fs` and `your-bucket` to match the actual location
   // of the adapter jar.
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.16.0.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.16.2.jar;
 
   // Add the oracle jdbc driver to the classpath
   %jar /buckets/bucketfs1/bucket1/ojdbc7-12.1.0.2.jar
