@@ -1,36 +1,29 @@
 @startuml
-!include ../clean.skin
+!include ../exasol.skin
 
 together {
-    class RequestDispatcher {
-      + {static} adapterCall(metadata : ExaMetadata, rawRequest : String) : String
-    }
-    
-    class AdapterRegistry {
-        + getAdapterForName(name : String) : VirtualSchemaAdapter
-    }
+    class RequestDispatcher
+    class AdapterRegistry
 }
 
-interface VirtualSchemaAdapter <<interface>> [[java:com.exasol.adapter.VirtualSchemaAdapter]]  {
-    + createVirtualSchema(metadata : ExaMetadata, request : CreateVirtualSchemaRequest) : CreateVirtualSchemaResponse
-    + dropVirtualSchema(metadata : ExaMetadata, request : DropVirtualSchemaRequest) : DropVirtualSchemaResponse
-    + refresh(metadata : ExaMetadata, request : RefreshRequest) : RefreshResponse
-    + setProperties(metadata : ExaMetadata, request : SetPropertiesRequest) : SetPropertiesResponse
-    + getCapabilities(metadata : ExaMetadata, request : GetCapabilitiesRequest) : GetCapabilitiesResponse
-    + pushdown(metadata : ExaMetadata, request : PushDownRequest) : PushDownResponse
-}
-
-class VirtualSchemaPostgresAdapter
-
+interface VirtualSchemaAdapter <<interface>>
 class RequestParser
-
 class ResponseJsonConverter
+interface AdapterFactory <<interface>>
 
-RequestDispatcher -u-> ResponseJsonConverter : turn repsonse\ninto JSON
+frame "Adapter Plug-in" {
+    class JdbcAdapter
+    class JdbcAdapterFactory
+}
+
+RequestDispatcher -u-> ResponseJsonConverter : turn repsonse into JSON
 RequestDispatcher -u-> RequestParser : parse raw request
-RequestDispatcher -r-> AdapterRegistry : find\nresponsible\nadapter
+RequestDispatcher -r-> AdapterRegistry : find responsible adapter
 RequestDispatcher -d-> VirtualSchemaAdapter : dispatch request
-VirtualSchemaPostgresAdapter .u.|> VirtualSchemaAdapter
-AdapterRegistry --> VirtualSchemaAdapter
+JdbcAdapter .u.|> VirtualSchemaAdapter
+AdapterRegistry --> AdapterFactory : load
+AdapterRegistry --> AdapterFactory : create adapter instance
+JdbcAdapterFactory .u.|> AdapterFactory
+JdbcAdapterFactory -l-> JdbcAdapter : <<create>>
 
 @enduml

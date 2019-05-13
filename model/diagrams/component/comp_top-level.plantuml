@@ -1,0 +1,30 @@
+@startuml
+!include ../exasol.skin
+allow_mixing
+
+interface "VirtualSchemaAPI" as VirtualSchemaAPI <<interface>>
+database "ExasolDatabase"
+
+together {
+    database "DataSource"  <<external>>
+    component "DataSourceJdbcDriver"  <<external>>
+}
+component "VirtualSchemaBackend" {
+    interface "VirtualSchemaAdapter" as VirtualSchemaAdapter <<interface>>
+    component "RequestDispatcher"
+    component "JdbcAdapter"
+    RequestDispatcher .d.> VirtualSchemaAdapter
+    JdbcAdapter .u.|> VirtualSchemaAdapter
+}
+
+component "VirtualSchemaFrontend"
+
+VirtualSchemaFrontend -d-> "0..*  " DataSourceJdbcDriver
+VirtualSchemaFrontend -u-> ExasolDatabase
+VirtualSchemaFrontend .u.> VirtualSchemaAPI
+DataSourceJdbcDriver -l-> DataSource
+RequestDispatcher .r.|> VirtualSchemaAPI
+JdbcAdapter -l-> "1..*" DataSourceJdbcDriver
+
+ExasolDatabase -[hidden]r- VirtualSchemaAPI
+@enduml

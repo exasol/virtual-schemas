@@ -1,32 +1,23 @@
 @startuml
-!include ../clean.skin
+!include ../exasol.skin
 
-class JdbcAdapter
-
-class SqlDialectFactory {
-    + SqlDialectFactory(connection : Connection, properties: AdapterProperties, dialectRegistry : SqlDialectRegistry)
-    + createSqlDialect(dialectName : String) : SqlDialect
-}
-
-interface SqlDialect
-
-abstract class AbstractSqlDialect {
-    + AbstractSqlDialect(connection: Connection, properties : AdapterProperties)
-}
-
-class PostgreSQLSqlDialect
-
-JdbcAdapter -d-> SqlDialectFactory
+JdbcAdapter -r-> SqlDialectFactory
 note on link
-    inject JDBC connection and
+    inject JDBC connection,
+    adapter registry and
     user-defined properties
 end note
+
 SqlDialectFactory -d-> SqlDialect : <<create>>
 note on link
     inject JDBC connection and
     user-defined properties
 end note
+
 AbstractSqlDialect .u.|> SqlDialect
-PostgreSQLSqlDialect -u-|> AbstractSqlDialect
+AthenaSqlDialect -u-|> AbstractSqlDialect
+DB2SqlDialect -u-|> AbstractSqlDialect
+ExasolSqlDialect -u-|> AbstractSqlDialect
+TeradataSqlDialect -u-|> AbstractSqlDialect
 
 @enduml

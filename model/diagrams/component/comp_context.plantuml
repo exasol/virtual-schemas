@@ -1,0 +1,12 @@
+@startuml
+!include ../exasol.skin
+
+!include DATABASE(Exasol)
+!include DATABASE(DataSource)
+!include ACTOR(DatabaseAdmin)
+!include ACTOR(DatabaseUser)
+
+DatabaseUser -r- Exasol
+DatabaseAdmin -l- Exasol
+Exasol -d- DataSource
+@enduml

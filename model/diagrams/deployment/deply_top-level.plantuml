@@ -1,0 +1,44 @@
+@startuml
+!include ../exasol.skin
+
+database "ExasolDatabase"
+database "DataSource"  <<external>>
+
+node "Java Virtual Machine" as JVMB {
+    interface "Virtual\nSchemaAPI" as VirtualSchemaAPI
+    component "VirtualSchemaFrontend"
+    component "DataSourceJdbcDriver" as DataSourceJdbcDriverExaOp  <<external>>
+}
+
+storage "ExaOperationFileSystem" {
+    artifact "xyz-jdbc-driver.jar" as JdbcDriverJarExaOp <<external>>
+}
+
+VirtualSchemaFrontend -u-> ExasolDatabase
+VirtualSchemaFrontend -d-> "0 .. *  " DataSourceJdbcDriverExaOp
+JdbcDriverJarExaOp .u.> DataSourceJdbcDriverExaOp
+
+storage "BucketFS" {
+    artifact "xyz-jdbc-driver.jar" as JdbcDriverJar  <<external>>
+    artifact "virtualschema-jdbc-\nadapter-dist-1.15.1.jar" as VirtualSchemaJar
+    
+    JdbcDriverJar -[hidden]u- VirtualSchemaJar
+}
+
+node "UDFContainer" {
+    node "Java Virtual Machine" {
+        component "VirtualSchemaBackend"
+        component "DataSourceJdbcDriver"  <<external>>
+        VirtualSchemaBackend -d-> DataSourceJdbcDriver
+    }
+}
+
+
+VirtualSchemaBackend -l- VirtualSchemaAPI
+VirtualSchemaFrontend -r-( VirtualSchemaAPI
+VirtualSchemaJar .l.> VirtualSchemaBackend
+JdbcDriverJar .l.> DataSourceJdbcDriver
+DataSourceJdbcDriver --> DataSource
+DataSourceJdbcDriverExaOp -d-> DataSource
+
+@enduml
