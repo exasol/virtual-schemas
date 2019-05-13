@@ -94,3 +94,28 @@ CREATE VIRTUAL SCHEMA hive_default USING adapter.jdbc_adapter WITH
   CONNECTION_NAME = 'KRB_CONN'
   SCHEMA_NAME     = 'default';
 ```
+## Troubleshooting
+
+### VARCHAR Columns Size Fixed at 255 Characters
+
+Hive is operating on schemaless data. Virtual Schemas &mdash; as the name suggests &mdash; require a schema. In the case of string variables this creates the situation that the Hive JDBC driver cannot tell how long strings are when asked for schema data. To achieve this it would have to scan all data first, which is not an option.
+
+Instead the Driver simply reports a configurable fixed value as the maximum string size. By default this is 255 characters. In the Virtual Schema this is mapped to VARCHAR(255) columns.
+
+If you need larger strings, you have to override the default setting of the Hive JDBC driver by adding the following parameter to the JDBC connection string when creating the Virtual Schema:
+
+```
+DefaultStringColumnLength=<length>
+```
+
+So an example for a connection string would look like:
+
+```
+jdbc:hive2://localhost:10000;DefaultStringColumnLength=32767;
+```
+
+Please also note that 32KiB are the maximum string size the driver accepts.
+
+See also:
+
+* [Cloudera JDBC driver for Apache Hive Install Guide](https://www.cloudera.com/documentation/other/connectors/hive-jdbc/2-5-4/Cloudera-JDBC-Driver-for-Apache-Hive-Install-Guide-2-5-4.pdf)
