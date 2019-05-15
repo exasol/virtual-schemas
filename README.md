@@ -43,7 +43,6 @@ This means an user familiar with SQL will immediately feel at home when accessin
 
 This is an open source project which is officially supported by Exasol. For any question, you can contact our support team.
 
-
 # Table of Contents
 
 ## Information for Users
@@ -73,3 +72,29 @@ This is an open source project which is officially supported by Exasol. For any 
 * [Remote Debugging](doc/development/remote_debugging.md)
 * [Troubleshooting](doc/development/troubleshooting.md)
 * [Versioning](doc/versioning.md)
+
+## Dependencies
+
+### Run Time Dependencies
+
+Running the Virtual Schema requires a Java Runtime version 8 or later.
+
+| Dependency                                                                          | Purpose                                                | License                       |
+|-------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------|
+| [JSON-P](https://javaee.github.io/jsonp/)                                           | JSON Processing                                        | CDDL-1.0                      |
+| [Exasol Script API](https://docs.exasol.com/database_concepts/udf_scripts.htm)      | Accessing Exasol features                              | MIT License                   |
+| JDBC driver(s), depending on data source                                            | Connecting to the data source                          | Check driver documentation    |
+
+### Build Time Dependencies
+
+| Dependency                                                                          | Purpose                                                | License                       |
+|-------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------|
+| [Apache Derby](https://db.apache.org/derby/)                                        | Pure-Java embedded database                            | Apache License 2.0            |
+| [Apache Maven](https://maven.apache.org/)                                           | Build tool                                             | Apache License 2.0            |
+| [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)                                  | Checking for conditions in code via matchers           | BSD License                   |
+| [JSONassert](http://jsonassert.skyscreamer.org/)                                    | Compare JSON documents for semantic equality           | Apache License 2.0            |
+| [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0    |
+| [Mockito](http://site.mockito.org/)                                                 | Mocking framework                                      | MIT License                   |
+| [JUnit 5 System Extensions](https://github.com/itsallcode/junit5-system-extensions) | Capturing `STDOUT` and `STDERR`                        | Eclipse Public License 2.0    |
+| [Equals Verifier](https://jqno.nl/equalsverifier/)                                  | Testing `equals(...)` and `hashCode()` contracts       | Apache License 2.0            |
+

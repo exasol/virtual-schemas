@@ -10,7 +10,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.exasol.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -18,6 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import com.exasol.ExaConnectionAccessException;
+import com.exasol.ExaConnectionInformation;
+import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterProperties;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -32,25 +34,27 @@ class RemoteConnectionFactoryTest {
 
     @Test
     void testCreateConnectionWithConnectionName() throws ExaConnectionAccessException, SQLException {
-        Map<String, String> rawProperties = new HashMap<>();
+        final Map<String, String> rawProperties = new HashMap<>();
         rawProperties.put("CONNECTION_NAME", "testConnection");
-        RemoteConnectionFactory factory = new RemoteConnectionFactory();
-        when(exaMetadataMock.getConnection("testConnection")).thenReturn(exaConnectionMock);
-        when(exaConnectionMock.getUser()).thenReturn(USER);
-        when(exaConnectionMock.getPassword()).thenReturn("pass");
-        when(exaConnectionMock.getAddress()).thenReturn("jdbc:derby:memory:test;create=true;");
-        Connection connection = factory.createConnection(exaMetadataMock, new AdapterProperties(rawProperties));
+        final RemoteConnectionFactory factory = new RemoteConnectionFactory();
+        when(this.exaMetadataMock.getConnection("testConnection")).thenReturn(this.exaConnectionMock);
+        when(this.exaConnectionMock.getUser()).thenReturn(USER);
+        when(this.exaConnectionMock.getPassword()).thenReturn("pass");
+        when(this.exaConnectionMock.getAddress()).thenReturn("jdbc:derby:memory:test;create=true;");
+        final Connection connection = factory.createConnection(this.exaMetadataMock,
+                new AdapterProperties(rawProperties));
         assertAll(() -> assertThat(connection.getMetaData().getUserName(), equalTo(USER)));
     }
 
     @Test
     void testCreateConnection() throws ExaConnectionAccessException, SQLException {
-        Map<String, String> rawProperties = new HashMap<>();
+        final Map<String, String> rawProperties = new HashMap<>();
         rawProperties.put("CONNECTION_STRING", "jdbc:derby:memory:test;create=true;");
         rawProperties.put("USERNAME", USER);
         rawProperties.put("PASSWORD", "testPassword");
-        RemoteConnectionFactory factory = new RemoteConnectionFactory();
-        Connection connection = factory.createConnection(exaMetadataMock, new AdapterProperties(rawProperties));
+        final RemoteConnectionFactory factory = new RemoteConnectionFactory();
+        final Connection connection = factory.createConnection(this.exaMetadataMock,
+                new AdapterProperties(rawProperties));
         assertAll(() -> assertThat(connection.getMetaData().getUserName(), equalTo(USER)));
     }
 }
