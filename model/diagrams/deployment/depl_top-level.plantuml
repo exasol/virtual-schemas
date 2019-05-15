@@ -4,11 +4,13 @@
 database "ExasolDatabase"
 database "DataSource"  <<external>>
 
+
 node "Java Virtual Machine" as JVMB {
-    interface "Virtual\nSchemaAPI" as VirtualSchemaAPI
-    component "VirtualSchemaFrontend"
     component "DataSourceJdbcDriver" as DataSourceJdbcDriverExaOp  <<external>>
 }
+
+interface "Virtual\nSchemaAPI" as VirtualSchemaAPI
+component "VirtualSchemaFrontend"
 
 storage "ExaOperationFileSystem" {
     artifact "xyz-jdbc-driver.jar" as JdbcDriverJarExaOp <<external>>
@@ -26,18 +28,17 @@ storage "BucketFS" {
 }
 
 node "UDFContainer" {
-    node "Java Virtual Machine" {
+    node "Java Virtual Machine" as JVMA {
         component "VirtualSchemaBackend"
         component "DataSourceJdbcDriver"  <<external>>
         VirtualSchemaBackend -d-> DataSourceJdbcDriver
     }
 }
 
-
-VirtualSchemaBackend -l- VirtualSchemaAPI
+VirtualSchemaBackend -r- VirtualSchemaAPI
 VirtualSchemaFrontend -r-( VirtualSchemaAPI
-VirtualSchemaJar .l.> VirtualSchemaBackend
-JdbcDriverJar .l.> DataSourceJdbcDriver
+VirtualSchemaJar .r.> VirtualSchemaBackend
+JdbcDriverJar .r.> DataSourceJdbcDriver
 DataSourceJdbcDriver --> DataSource
 DataSourceJdbcDriverExaOp -d-> DataSource
 
