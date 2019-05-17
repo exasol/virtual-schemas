@@ -64,6 +64,8 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
      */
     @Deprecated
     public static String adapterCall(final ExaMetadata metadata, final String rawRequest) throws AdapterException {
+        LOGGER.warning("The adapter entry point \"com.exasol.adapter.jdbc.JdbcAdapter\" is deprecated."
+                + " Please use \"com.exasol.adapter.RequestDispatcher\" instead.");
         return RequestDispatcher.adapterCall(metadata, rawRequest);
     }
 
@@ -207,7 +209,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
         final Connection connection = null;
         final SqlDialect dialect = createDialect(connection, properties);
         final Capabilities capabilities = dialect.getCapabilities();
-        final Capabilities excludedCapabilities = parseExcludedCapabilities(properties.getExcludedCapabilities());
+        final Capabilities excludedCapabilities = getExcludedCapabilities(properties);
         capabilities.subtractCapabilities(excludedCapabilities);
         return GetCapabilitiesResponse //
                 .builder()//
@@ -215,11 +217,22 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
                 .build();
     }
 
-    private Capabilities parseExcludedCapabilities(final String excludedCapabilitiesStr) {
-        LOGGER.config(() -> "Excluded Capabilities: "
-                + (excludedCapabilitiesStr.isEmpty() ? "none" : excludedCapabilitiesStr));
+    private Capabilities getExcludedCapabilities(final AdapterProperties properties) {
+        if (properties.containsKey(AdapterProperties.EXCLUDED_CAPABILITIES_PROPERTY)) {
+            final String excludedCapabilitiesStr = properties.getExcludedCapabilities();
+            final Capabilities.Builder builder = parseExcludedCapabilities(excludedCapabilitiesStr);
+            return builder.build();
+        } else {
+            LOGGER.config(() -> "Excluded Capabilities: none");
+            return Capabilities.builder().build();
+        }
+    }
+
+    private Capabilities.Builder parseExcludedCapabilities(final String excludedCapabilitiesString) {
         final Capabilities.Builder builder = Capabilities.builder();
-        for (String capability : excludedCapabilitiesStr.split(",")) {
+        LOGGER.config(() -> "Excluded Capabilities: "
+                + (excludedCapabilitiesString.isEmpty() ? "none" : excludedCapabilitiesString));
+        for (String capability : excludedCapabilitiesString.split(",")) {
             capability = capability.trim();
             if (capability.isEmpty()) {
                 continue;
@@ -241,18 +254,20 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
                 builder.addMain(MainCapability.valueOf(capability));
             }
         }
-        return builder.build();
+        return builder;
     }
 
     @Override
-    public PushDownResponse pushdown(final ExaMetadata exasolMetadata, final PushDownRequest request)
+    public PushDownResponse pushdown(final ExaMetadata exaMetadata, final PushDownRequest request)
             throws AdapterException {
         final AdapterProperties properties = getPropertiesFromRequest(request);
-        try (final Connection connection = this.connectionFactory.createConnection(exasolMetadata, properties)) {
+        try (final Connection connection = this.connectionFactory.createConnection(exaMetadata, properties)) {
             final SqlDialect dialect = createDialect(connection, properties);
-            final ImportQueryBuilder importQueryBuilder = new ImportQueryBuilder(dialect, exasolMetadata);
-            final String importFromPushdownQuery = importQueryBuilder.createImportQuery(request.getSelect(),
-                    properties);
+            final String importFromPushdownQuery = new ImportQueryBuilder() //
+                    .dialect(dialect) //
+                    .statement(request.getSelect()) //
+                    .properties(properties) //
+                    .build();
             return PushDownResponse.builder().pushDownSql(importFromPushdownQuery).build();
         } catch (final SQLException exception) {
             throw new AdapterException("Unable to execute push-down request.", exception);

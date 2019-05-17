@@ -2,6 +2,7 @@ package com.exasol.adapter.jdbc;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -26,7 +27,8 @@ public class ImportQueryBuilderTest {
     private static final String USER = "the_user";
     private static final String PW = "top_secret";
     private static final String USER_IDENTIFIED_BY = "USER '" + USER + "' IDENTIFIED BY '" + PW + "'";
-    private static final String ADDRESS = "jdbc://dummy";
+    private static final String ADDRESS = "the_address";
+    private static final String ADDRESS_WITH_USER_IDENTIFIED_BY = "'" + ADDRESS + "' " + USER_IDENTIFIED_BY;
     private ExaConnectionInformation exaConnectionInformation;
     private ExaMetadata exaMetadata;
 
@@ -37,7 +39,7 @@ public class ImportQueryBuilderTest {
     }
 
     @Test
-    void getCredentialsForJDBCImportWithConnectionNameGiven() throws ExaConnectionAccessException {
+    void testGetConnectionDefinitionForJDBCImportWithConnectionNameGiven() throws ExaConnectionAccessException {
         mockExasolNamedConnection();
         final Map<String, String> rawProperties = new HashMap<>();
         rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, CONNECTION_NAME);
@@ -54,24 +56,24 @@ public class ImportQueryBuilderTest {
     private String calculateCredentials(final ExaMetadata exaMetadata, final Map<String, String> rawProperties) {
         final AdapterProperties properties = new AdapterProperties(rawProperties);
         final SqlDialect dialect = new DummySqlDialect(null, properties);
-        final ImportQueryBuilder builder = new ImportQueryBuilder(dialect, exaMetadata);
-        final String credentials = builder.getCredentialsForPushdownQuery(exaMetadata, properties);
-        return credentials;
+        return new ImportQueryBuilder() //
+                .dialect(dialect) //
+                .properties(properties) //
+                .getConnectionDefinition();
     }
 
     @Test
-    public void getCredentialsForORAImportWithConnectionNameGiven() throws ExaConnectionAccessException {
-        mockExasolNamedConnection();
+    public void testGetConnectionDefinitionForORAImportWithConnectionNameGiven() throws ExaConnectionAccessException {
         final Map<String, String> rawProperties = new HashMap<>();
-        rawProperties.put(IMPORT_FROM_ORA_PROPERTY, "true");
         rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, CONNECTION_NAME);
+        rawProperties.put(IMPORT_FROM_ORA_PROPERTY, "true");
         assertThat(calculateCredentials(this.exaMetadata, rawProperties), equalTo(CONNECTION_NAME));
     }
 
     @Test
-    void getCredentialsForEXAImportWithConnectionNameGiven() throws ExaConnectionAccessException {
-        mockExasolNamedConnection();
+    void testGetConnectionDefinitionForEXAImportWithConnectionNameGiven() throws ExaConnectionAccessException {
         final Map<String, String> rawProperties = new HashMap<>();
+        rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, CONNECTION_NAME);
         rawProperties.put(IMPORT_FROM_EXA_PROPERTY, "true");
         assertThat(calculateCredentials(this.exaMetadata, rawProperties), equalTo(CONNECTION_NAME));
     }
@@ -85,23 +87,48 @@ public class ImportQueryBuilderTest {
     }
 
     @Test
-    public void getCredentialsForJDBCImportWithConnectionStringUsernamePasswordGiven() {
+    public void testGetConnectionDefinitionForJDBCImportWithConnectionStringUsernamePasswordGiven() {
         final Map<String, String> rawProperties = createUsernameAndPasswordProperties();
-        assertThat(calculateCredentials(this.exaMetadata, rawProperties),
-                equalTo("'" + ADDRESS + "' " + USER_IDENTIFIED_BY));
+        assertThat(calculateCredentials(this.exaMetadata, rawProperties), equalTo(ADDRESS_WITH_USER_IDENTIFIED_BY));
     }
 
     @Test
-    public void getCredentialsForORAImportWithConnectionStringUsernamePasswordGiven() {
+    void testGetConnectionDefinitionForORAImportWithConnectionStringUsernamePasswordGiven() {
         final Map<String, String> rawProperties = createUsernameAndPasswordProperties();
         rawProperties.put(IMPORT_FROM_ORA_PROPERTY, "true");
-        assertThat(calculateCredentials(this.exaMetadata, rawProperties), equalTo(USER_IDENTIFIED_BY));
+        assertThat(calculateCredentials(this.exaMetadata, rawProperties), equalTo(ADDRESS_WITH_USER_IDENTIFIED_BY));
     }
 
     @Test
-    public void getCredentialsForEXAImportWithConnectionStringUsernamePasswordGiven() {
+    void testGetConnectionDefinitionForEXAImportWithConnectionStringUsernamePasswordGiven() {
         final Map<String, String> rawProperties = createUsernameAndPasswordProperties();
         rawProperties.put(IMPORT_FROM_EXA_PROPERTY, "true");
-        assertThat(calculateCredentials(this.exaMetadata, rawProperties), equalTo(USER_IDENTIFIED_BY));
+        assertThat(calculateCredentials(this.exaMetadata, rawProperties), equalTo(ADDRESS_WITH_USER_IDENTIFIED_BY));
+    }
+
+    @Test
+    void testGetConnectionDefinitionForJdbcImportWithNamedConnectionAndUsernamePasswordOverride() {
+        final Map<String, String> rawProperties = new HashMap<>();
+        rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, CONNECTION_NAME);
+        rawProperties.put(AdapterProperties.USERNAME_PROPERTY, USER);
+        rawProperties.put(AdapterProperties.PASSWORD_PROPERTY, PW);
+        assertThat(calculateCredentials(this.exaMetadata, rawProperties),
+                equalTo(CONNECTION_NAME + " " + USER_IDENTIFIED_BY));
+    }
+
+    @Test
+    void testGetConnectionDefinitionWithMissingPasswordInCredentialOverrideThrowsException() {
+        final Map<String, String> rawProperties = new HashMap<>();
+        rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, CONNECTION_NAME);
+        rawProperties.put(AdapterProperties.USERNAME_PROPERTY, USER);
+        assertThrows(IllegalArgumentException.class, () -> calculateCredentials(this.exaMetadata, rawProperties));
+    }
+
+    @Test
+    void testGetConnectionDefinitionWithMissingUsernameInCredentialOverrideThrowsException() {
+        final Map<String, String> rawProperties = new HashMap<>();
+        rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, CONNECTION_NAME);
+        rawProperties.put(AdapterProperties.PASSWORD_PROPERTY, PW);
+        assertThrows(IllegalArgumentException.class, () -> calculateCredentials(this.exaMetadata, rawProperties));
     }
 }

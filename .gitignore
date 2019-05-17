@@ -19,4 +19,4 @@ dependency-reduced-pom.xml
 **/local
 Scripts
 .dbeaver*
-*.log
+**/*.log
