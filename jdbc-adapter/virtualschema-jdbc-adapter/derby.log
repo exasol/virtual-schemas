@@ -1,7 +1,7 @@
 ----------------------------------------------------------------
-Tue May 14 12:38:20 CEST 2019:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-016a-b5eb-f1c5-0000190d9630 
-on database directory memory:/home/seb/git/virtual-schemas/jdbc-adapter/virtualschema-jdbc-adapter/test with class loader sun.misc.Launcher$AppClassLoader@372f7a8d 
+Fri May 17 09:58:13 CEST 2019:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-016a-c4cc-6e5d-000015146b70 
+on database directory memory:/home/seb/git/virtual-schemas/jdbc-adapter/virtualschema-jdbc-adapter/test with class loader sun.misc.Launcher$AppClassLoader@18b4aac2 
 Loaded from file:/home/seb/.m2/repository/org/apache/derby/derby/10.14.2.0/derby-10.14.2.0.jar
 java.vendor=Oracle Corporation
 java.runtime.version=1.8.0_212-b04
