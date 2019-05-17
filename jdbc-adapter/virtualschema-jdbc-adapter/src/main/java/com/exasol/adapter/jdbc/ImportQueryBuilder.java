@@ -133,16 +133,23 @@ public class ImportQueryBuilder {
 
     private void appendConnection(final StringBuilder builder) {
         builder.append(this.properties.getConnectionName());
-        if (this.properties.containsKey(AdapterProperties.USERNAME_PROPERTY)) {
-            if (this.properties.containsKey(AdapterProperties.PASSWORD_PROPERTY)) {
-                builder.append(" ");
-                appendCredentialsFromProperties(builder);
-            } else {
-                throw new IllegalArgumentException(createOverrideErrorMessage("password"));
-            }
+        if (this.properties.containsKey(AdapterProperties.CONNECTION_STRING_PROPERTY)) {
+            throw new IllegalArgumentException(
+                    "You can only use either a named connection or a connection string, not both at the same time."
+                            + " Please choose between setting property " + AdapterProperties.CONNECTION_NAME_PROPERTY
+                            + " and " + AdapterProperties.CONNECTION_STRING_PROPERTY + "\".");
         } else {
-            if (this.properties.containsKey(AdapterProperties.PASSWORD_PROPERTY)) {
-                throw new IllegalArgumentException(createOverrideErrorMessage("username"));
+            if (this.properties.containsKey(AdapterProperties.USERNAME_PROPERTY)) {
+                if (this.properties.containsKey(AdapterProperties.PASSWORD_PROPERTY)) {
+                    builder.append(" ");
+                    appendCredentialsFromProperties(builder);
+                } else {
+                    throw new IllegalArgumentException(createOverrideErrorMessage("password"));
+                }
+            } else {
+                if (this.properties.containsKey(AdapterProperties.PASSWORD_PROPERTY)) {
+                    throw new IllegalArgumentException(createOverrideErrorMessage("username"));
+                }
             }
         }
     }
