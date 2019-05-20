@@ -46,6 +46,8 @@ curl -X PUT -T virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter
  http://w:write-password@your.exasol.host.com:2580/bucket1/virtualschema-jdbc-adapter-dist-1.16.2.jar
 ```
 
+Port number is always 2580.
+Write-password should be set up in the EXAoperation (edit bucket -> write password).
 See chapter 3.6.4. "The synchronous cluster file system BucketFS" in the EXASolution User Manual for more details about BucketFS.
 
 ## Deploying JDBC Driver Files
@@ -71,7 +73,7 @@ CREATE SCHEMA adapter;
 CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
 
   // This is the class implementing the callback method of the adapter script
-  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
+  %scriptclass com.exasol.adapter.RequestDispatcher;
 
   // This will add the adapter jar to the classpath so that it can be used inside the adapter script
   // Replace the names of the bucketfs and the bucket with the ones you used.

@@ -40,7 +40,7 @@ Add the fully qualified class name `com.exasol.adapter.dialects.athena.AthenaSql
 
 Add the dialect name (here `ATHENA`) to the list of dialects for which the `JbdcAdapterFactory` is responsible in the method `getSupportedAdapterNames()`;
 
-Create an empty unit test class for the dialect: `com.exasol.adapter.dialects.athena.AthenaSqlDialectTest` that tests class `AthenaSqlDialectTest`.
+Create an empty unit test class for the dialect: `com.exasol.adapter.dialects.athena.AthenaSqlDialectTest` that tests class `AthenaSqlDialect`.
 
 Now that you have the skeleton of the dialect adapter, it is time to implement the specifics.
 
@@ -64,9 +64,11 @@ Each SQL Dialect adapter consists of one or more classes, depending on how stand
 
 ### Defining the Supported Capabilities
 
-First you need to find out, which capabilities the source supports and looking at the list of [SQL queries, functions and operators](https://docs.aws.amazon.com/athena/latest/ug/functions-operators-reference-section.html) contains what you need to assemble the capability list. All you have to to is read through the SQL reference and each time you come across a capability, mark that to the list.
+First you need to find out, which capabilities the source supports and looking at the list of [SQL queries, functions and operators](https://docs.aws.amazon.com/athena/latest/ug/functions-operators-reference-section.html) contains what you need to assemble the capability list. All you have to do is read through the SQL reference and each time you come across a capability, mark that to the list.
 
 The list of capabilities that Exasol's Virtual Schemas know can be found in `com.exasol.adapter.capabilities.MainCapabilities` from the project [`virtual-schema-common-java`](https://github.com/exasol/virtual-schema-common-java). If you look at the JavaDoc of that class, you find helpful examples of what that capability means.
+
+You only need to pick up the capabilities from the existing lists in the common part of the project. If the source supports something that is not in our lists, you can ignore it.
 
 Write a unit test that checks whether the SQL dialect adapter reports the capabilities that you find in the documentation of the data source. Here is an example from the Athena adapter.
 

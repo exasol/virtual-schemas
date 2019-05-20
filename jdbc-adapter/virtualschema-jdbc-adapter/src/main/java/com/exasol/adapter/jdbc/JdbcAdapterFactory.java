@@ -14,7 +14,7 @@ import com.exasol.adapter.VirtualSchemaAdapter;
 public class JdbcAdapterFactory implements AdapterFactory {
     @Override
     public Set<String> getSupportedAdapterNames() {
-        return new HashSet<>(Arrays.asList("ATHENA", "DB2", "EXASOL", "GENERIC", "HIVE", "IMPALA", "ORACLE",
+        return new HashSet<>(Arrays.asList("ATHENA", "BIG QUERY", "DB2", "EXASOL", "GENERIC", "HIVE", "IMPALA", "ORACLE",
                 "POSTGRESQL", "REDSHIFT", "SQLSERVER", "SYBASE", "TERADATA"));
     }
 
