@@ -18,14 +18,14 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter
   AS
 
   %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
-  %jar /buckets/bucketfs1/virtualschema/virtualschema-jdbc-adapter-dist-1.14.0.jar;
+  %jar /buckets/bucketfs1/virtualschema/virtualschema-jdbc-adapter-dist-1.16.3.jar;
   %jar /buckets/bucketfs1/virtualschema/jtds-1.3.1.jar;
 /
 ```
 
 ## Installing the Test Data
 
-Create and populate the test database using the [sybase-testdata.sql](../integration-test-data/sybase-testdata.sql) SQL script.
+Create and populate the test database using the [sybase-testdata.sql](../../jdbc-adapter/integration-test-data/sybase.sql) SQL script.
 
 ## Creating a Virtual Schema
 

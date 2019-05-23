@@ -41,7 +41,7 @@ Below you can see a layer model of the Virtual Schemas when implemented with the
     |            |         PostgreSQL         |   External data source
     '-----------------------------------------'
 
-For more information about the structure of the Virtual Schemas check the UML diagrams provided in the directory [model/diagrams](model/diagrams). You either need [PlantUML](http://plantuml.com/) to render them or an editor that has PlamtUML preview built in.
+For more information about the structure of the Virtual Schemas check the UML diagrams provided in the directory [model/diagrams](../../model/diagrams). You either need [PlantUML](http://plantuml.com/) to render them or an editor that has PlamtUML preview built in.
 
 ## Developing a Dialect
 
@@ -94,16 +94,16 @@ The Java package structure of the `virtualschema-jdbc-adapter` reflects the sepa
 
 | Interface                                                                                                                                                 | Implementation                | Purpose                                                                                |
 |-----------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|----------------------------------------------------------------------------------------|
-| [`com.exasol.adapter.dialects.SqlDialect`](jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/SqlDialect.java)             | mandatory                     | Define capabilities and which kind of support the dialect has for catalogs and schemas |
-| [`com.exasol.adapter.jdbc.RemoteMetadataReader`](jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/RemoteMetadataReader.java) | optional depending on dialect | Read top-level metadata and find remote tables                                         |
-| [`com.exasol.adapter.jdbc.TableMetadataReader`](jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/TableMetadataReader.java)   | optional depending on dialect | Decide which tables should be mapped and map data on table level                       |
-| [`com.exasol.adapter.jdbc.ColumnMetadataReader`](jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/ColumnMetadataReader.java) | optional depending on dialect | Map data on column level                                                               |
+| [`com.exasol.adapter.dialects.SqlDialect`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/SqlDialect.java)             | mandatory                     | Define capabilities and which kind of support the dialect has for catalogs and schemas |
+| [`com.exasol.adapter.jdbc.RemoteMetadataReader`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/RemoteMetadataReader.java) | optional depending on dialect | Read top-level metadata and find remote tables                                         |
+| [`com.exasol.adapter.jdbc.TableMetadataReader`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/TableMetadataReader.java)   | optional depending on dialect | Decide which tables should be mapped and map data on table level                       |
+| [`com.exasol.adapter.jdbc.ColumnMetadataReader`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/ColumnMetadataReader.java) | optional depending on dialect | Map data on column level                                                               |
 
 ### Registering the Dialect
 
 The Virtual Schema adapter creates an instance of an SQL dialect on demand. You can pick any dialect that is listed in the `SqlDialects` registry.
 
-To register your new dialect add it to the list in [sql_dialects.properties](../virtualschema-jdbc-adapter/src/main/resources/sql_dialects.properties).
+To register your new dialect add it to the list in [sql_dialects.properties](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/resources/sql_dialects.properties).
 
 ```properties
 com.exasol.adapter.dialects.supported=\

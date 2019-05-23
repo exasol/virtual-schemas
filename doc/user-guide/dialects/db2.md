@@ -46,7 +46,7 @@ CREATE or replace JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
 
   // This will add the adapter jar to the classpath so that it can be used inside the adapter script
   // Replace the names of the bucketfs and the bucket with the ones you used.
-  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.14.0.jar;
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.16.3.jar;
 
   // DB2 Driver files
   %jar /buckets/bucketfs1/bucket1/db2jcc4.jar;
@@ -74,4 +74,4 @@ create  virtual schema db2 using adapter.jdbc_adapter with
 
 ## Running the DB2 Integration Tests
 
-A how to has been included in the [setup sql file](../../integration-test-data/db2-testdata.sql)
+A how to has been included in the [setup sql file](../../../jdbc-adapter/integration-test-data/db2-testdata.sql)

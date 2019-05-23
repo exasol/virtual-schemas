@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects.hive;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.FileNotFoundException;
@@ -42,16 +43,17 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
 
         createHiveJDBCAdapter();
         createHiveConnection();
-        createVirtualSchema(VIRTUAL_SCHEMA, HiveSqlDialect.getPublicName(), "", HIVE_SCHEMA, HIVE_CONNECTION, "", "",
-                "ADAPTER.JDBC_ADAPTER", "", IS_LOCAL, getConfig().debugAddress(),
-                "", null,"");
+        createVirtualSchema(VIRTUAL_SCHEMA, HiveSqlDialect.getPublicName(), "", HIVE_SCHEMA,
+                HIVE_CONNECTION, "", "", "ADAPTER.JDBC_ADAPTER", "", IS_LOCAL,
+                getConfig().debugAddress(), "", null, "");
     }
 
-    private static void createTestSchema() throws SQLException, ClassNotFoundException, FileNotFoundException {
+    private static void createTestSchema()
+            throws SQLException, ClassNotFoundException, FileNotFoundException {
         final String hiveConnectionString = getConfig().getHiveJdbcConnectionString();
         Class.forName("org.apache.hive.jdbc.HiveDriver");
-        try (final Connection conn = DriverManager.getConnection(hiveConnectionString, "hive", ""))
-        {
+        try (final Connection conn = DriverManager.getConnection(hiveConnectionString, "hive",
+                "")) {
             final Statement stmt = conn.createStatement();
             stmt.execute("create table t(x int)");
             stmt.execute("truncate table t");
@@ -64,9 +66,11 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
             stmt.execute("truncate table t2");
             stmt.execute("insert into t2 values (2,'bbb'), (3,'ccc')");
 
-            stmt.execute("CREATE TABLE ALL_HIVE_DATA_TYPES(ARRAYCOL ARRAY<string>, BIGINTEGER BIGINT, BOOLCOLUMN BOOLEAN, CHARCOLUMN CHAR(1), DECIMALCOL DECIMAL(10,0), DOUBLECOL DOUBLE, FLOATCOL FLOAT, INTCOL INT, MAPCOL MAP<string,int>, SMALLINTEGER SMALLINT, STRINGCOL STRING, STRUCTCOL struct<a : int, b : int>, TIMESTAMPCOL TIMESTAMP, TINYINTEGER TINYINT, VARCHARCOL VARCHAR(10), BINARYCOL BINARY, DATECOL DATE)");
+            stmt.execute(
+                    "CREATE TABLE ALL_HIVE_DATA_TYPES(ARRAYCOL ARRAY<string>, BIGINTEGER BIGINT, BOOLCOLUMN BOOLEAN, CHARCOLUMN CHAR(1), DECIMALCOL DECIMAL(10,0), DOUBLECOL DOUBLE, FLOATCOL FLOAT, INTCOL INT, MAPCOL MAP<string,int>, SMALLINTEGER SMALLINT, STRINGCOL STRING, STRUCTCOL struct<a : int, b : int>, TIMESTAMPCOL TIMESTAMP, TINYINTEGER TINYINT, VARCHARCOL VARCHAR(10), BINARYCOL BINARY, DATECOL DATE)");
             stmt.execute("truncate table ALL_HIVE_DATA_TYPES");
-            stmt.execute("insert into all_hive_data_types(arraycol,biginteger,boolcolumn,charcolumn,decimalcol,doublecol,floatcol,intcol,mapcol,smallinteger,stringcol,structcol,timestampcol,tinyinteger,varcharcol,binarycol,datecol) select array('etet','ettee'), 56, true, '2', 53, 56.3, 5.199999809265137, 85, map('jkljj',5), 2, 'tshg', named_struct('a',2,'b',4), timestamp '2017-01-02 13:32:50.744', 1, 'tytu', 'MTAxMA==', date '1970-01-01' from t");
+            stmt.execute(
+                    "insert into all_hive_data_types(arraycol,biginteger,boolcolumn,charcolumn,decimalcol,doublecol,floatcol,intcol,mapcol,smallinteger,stringcol,structcol,timestampcol,tinyinteger,varcharcol,binarycol,datecol) select array('etet','ettee'), 56, true, '2', 53, 56.3, 5.199999809265137, 85, map('jkljj',5), 2, 'tshg', named_struct('a',2,'b',4), timestamp '2017-01-02 13:32:50.744', 1, 'tytu', 'MTAxMA==', date '1970-01-01' from t");
         }
     }
 
@@ -79,54 +83,79 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
 
     // Join Tests -------------------------------------------------------------
     @Test
-    public void innerJoin() throws SQLException {
-        final String query = String.format("SELECT * FROM  %1$s.t1 a INNER JOIN  %1$s.t2 b ON a.x=b.x", VIRTUAL_SCHEMA);
+    void testInnerJoin() throws SQLException {
+        final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a INNER JOIN  "
+                + VIRTUAL_SCHEMA + ".t2 b ON a.x=b.x";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
-        assertFalse(result.next());
+        assertAll(() -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
+                () -> assertFalse(result.next()));
     }
 
     @Test
-    public void innerJoinWithProjection() throws SQLException {
-        final String query = String.format("SELECT b.y || %1$s.t1.y FROM  %1$s.t1 INNER JOIN  %1$s.t2 b ON %1$s.t1.x=b.x", VIRTUAL_SCHEMA);
+    void testInnerJoinWithProjection() throws SQLException {
+        final String query = "SELECT b.y || " + VIRTUAL_SCHEMA + ".t1.y FROM  " + VIRTUAL_SCHEMA
+                + ".t1 INNER JOIN  " + VIRTUAL_SCHEMA + ".t2 b ON " + VIRTUAL_SCHEMA + ".t1.x=b.x";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, "bbbbbb");
-        assertFalse(result.next());
+        assertAll(() -> matchNextRow(result, "bbbbbb"), () -> assertFalse(result.next()));
     }
 
     @Test
-    public void leftJoin() throws SQLException {
-        final String query = String.format("SELECT * FROM  %1$s.t1 a LEFT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA);
+    void testLeftJoin() throws SQLException {
+        final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a LEFT OUTER JOIN  "
+                + VIRTUAL_SCHEMA + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 1, "aaa", null ,null);
-        matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
-        assertFalse(result.next());
+        assertAll(() -> matchNextRow(result, 1L, "aaa", null, null),
+                () -> matchNextRow(result, 2L, "bbb", 2L, "bbb"), () -> assertFalse(result.next()));
     }
 
     @Test
-    public void rightJoin() throws SQLException {
-        final String query = String.format("SELECT * FROM  %1$s.t1 a RIGHT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA);
+    void testRightJoin() throws SQLException {
+        final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a RIGHT OUTER JOIN  "
+                + VIRTUAL_SCHEMA + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
-        matchNextRow(result, null, null, (long) 3 ,"ccc");
-        assertFalse(result.next());
+        assertAll(() -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
+                () -> matchNextRow(result, null, null, 3L, "ccc"),
+                () -> assertFalse(result.next()));
     }
 
     @Test
-    public void fullOuterJoin() throws SQLException {
-        final String query = String.format("SELECT * FROM  %1$s.t1 a FULL OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA);
+    void testFullOuterJoin() throws SQLException {
+        final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a FULL OUTER JOIN  "
+                + VIRTUAL_SCHEMA + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 1, "aaa", null ,null);
-        matchNextRow(result, (long) 2, "bbb", (long) 2 ,"bbb");
-        matchNextRow(result, null, null, (long) 3 ,"ccc");
-        assertFalse(result.next());
+        assertAll(() -> matchNextRow(result, 1L, "aaa", null, null),
+                () -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
+                () -> matchNextRow(result, null, null, 3L, "ccc"),
+                () -> assertFalse(result.next()));
+    }
+
+    @Test
+    void testRightJoinWithComplexCondition() throws SQLException {
+        final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a RIGHT OUTER JOIN  "
+                + VIRTUAL_SCHEMA + ".t2 b ON a.x||a.y=b.x||b.y ORDER BY a.x";
+        final ResultSet result = executeQuery(query);
+        assertAll(() -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
+                () -> matchNextRow(result, null, null, 3L, "ccc"),
+                () -> assertFalse(result.next()));
+    }
+
+    @Test
+    void testFullOuterJoinWithComplexCondition() throws SQLException {
+        final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a FULL OUTER JOIN  "
+                + VIRTUAL_SCHEMA + ".t2 b ON a.x-b.x=0 ORDER BY a.x";
+        final ResultSet result = executeQuery(query);
+        assertAll(() -> matchNextRow(result, 1L, "aaa", null, null),
+                () -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
+                () -> matchNextRow(result, null, null, 3L, "ccc"),
+                () -> assertFalse(result.next()));
     }
 
     @Test
     void testTypeMapping() throws SQLException {
         final ResultSet result = executeQuery(
                 "SELECT COLUMN_NAME, COLUMN_TYPE, COLUMN_MAXSIZE, COLUMN_NUM_PREC, COLUMN_NUM_SCALE, COLUMN_DEFAULT FROM EXA_DBA_COLUMNS WHERE COLUMN_SCHEMA = '"
-                        + VIRTUAL_SCHEMA + "' AND COLUMN_TABLE='ALL_HIVE_DATA_TYPES' ORDER BY COLUMN_ORDINAL_POSITION");
+                        + VIRTUAL_SCHEMA
+                        + "' AND COLUMN_TABLE='ALL_HIVE_DATA_TYPES' ORDER BY COLUMN_ORDINAL_POSITION");
         matchNextRow(result, "ARRAYCOL", "VARCHAR(255) ASCII", (long) 255, null, null, null);
         matchNextRow(result, "BIGINTEGER", "DECIMAL(19,0)", (long) 19, (long) 19, (long) 0, null);
         matchNextRow(result, "BOOLCOLUMN", "BOOLEAN", (long) 1, null, null, null);
@@ -142,16 +171,19 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         matchNextRow(result, "TIMESTAMPCOL", "TIMESTAMP", (long) 29, null, null, null);
         matchNextRow(result, "TINYINTEGER", "DECIMAL(3,0)", (long) 3, (long) 3, (long) 0, null);
         matchNextRow(result, "VARCHARCOL", "VARCHAR(10) ASCII", (long) 10, null, null, null);
-        matchNextRow(result, "BINARYCOL", "VARCHAR(2000000) UTF8", (long) 2000000, null, null, null);
+        matchNextRow(result, "BINARYCOL", "VARCHAR(2000000) UTF8", (long) 2000000, null, null,
+                null);
         matchLastRow(result, "DATECOL", "DATE", (long) 10, null, null, null);
     }
 
     @Test
     void testSelectWithAllTypes() throws SQLException {
-        final ResultSet result = executeQuery("SELECT * from " + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES");
-        matchNextRow(result, "[\"etet\",\"ettee\"]", new BigDecimal("56"), true, "2", (long) 53, 56.3,
-                5.199999809265137, (long) 85, "{\"jkljj\":5}", 2, "tshg", "{\"a\":2,\"b\":4}",
-                getSqlTimestamp(2017, 1, 2, 13, 32, 50, 744), (short) 1, "tytu", "TVRBeE1BPT0=", getSqlDate(1970, 1, 1));
+        final ResultSet result = executeQuery(
+                "SELECT * from " + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES");
+        matchNextRow(result, "[\"etet\",\"ettee\"]", new BigDecimal("56"), true, "2", (long) 53,
+                56.3, 5.199999809265137, (long) 85, "{\"jkljj\":5}", 2, "tshg", "{\"a\":2,\"b\":4}",
+                getSqlTimestamp(2017, 1, 2, 13, 32, 50, 744), (short) 1, "tytu", "TVRBeE1BPT0=",
+                getSqlDate(1970, 1, 1));
     }
 
     @Test
@@ -159,7 +191,8 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT BIGINTEGER FROM " + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new BigDecimal("56"));
-        matchSingleRowExplain(query, "SELECT `ALL_HIVE_DATA_TYPES`.`BIGINTEGER` FROM `default`.`ALL_HIVE_DATA_TYPES`");
+        matchSingleRowExplain(query,
+                "SELECT `ALL_HIVE_DATA_TYPES`.`BIGINTEGER` FROM `default`.`ALL_HIVE_DATA_TYPES`");
     }
 
     @Test
@@ -167,7 +200,8 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT BINARYCOL FROM " + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "TVRBeE1BPT0=");
-        matchSingleRowExplain(query, "SELECT base64(`ALL_HIVE_DATA_TYPES`.`BINARYCOL`) FROM `default`.`ALL_HIVE_DATA_TYPES`");
+        matchSingleRowExplain(query,
+                "SELECT base64(`ALL_HIVE_DATA_TYPES`.`BINARYCOL`) FROM `default`.`ALL_HIVE_DATA_TYPES`");
     }
 
     @Test
@@ -209,15 +243,16 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
                 + ".ALL_HIVE_DATA_TYPES where (biginteger < 56 or biginteger > 56) and not (biginteger is null)";
         final ResultSet result = executeQuery(query);
         assertEquals(false, result.next());
-        matchSingleRowExplain(query, "SELECT `ALL_HIVE_DATA_TYPES`.`BIGINTEGER` FROM `default`.`ALL_HIVE_DATA_TYPES` "
-                + "WHERE ((`ALL_HIVE_DATA_TYPES`.`BIGINTEGER` < 56 OR 56 < `ALL_HIVE_DATA_TYPES`.`BIGINTEGER`) AND NOT (`ALL_HIVE_DATA_TYPES`.`BIGINTEGER` IS NULL))");
+        matchSingleRowExplain(query,
+                "SELECT `ALL_HIVE_DATA_TYPES`.`BIGINTEGER` FROM `default`.`ALL_HIVE_DATA_TYPES` "
+                        + "WHERE ((`ALL_HIVE_DATA_TYPES`.`BIGINTEGER` < 56 OR 56 < `ALL_HIVE_DATA_TYPES`.`BIGINTEGER`) AND NOT (`ALL_HIVE_DATA_TYPES`.`BIGINTEGER` IS NULL))");
     }
 
     @Test
     void testLikePredicates() throws SQLException {
         // LIKE, LIKE ESCAPE (not pushed down)
-        final String query = "select varcharcol, varcharcol like 't%' escape 't' from " + VIRTUAL_SCHEMA
-                + ".ALL_HIVE_DATA_TYPES where (varcharcol like 't%')";
+        final String query = "select varcharcol, varcharcol like 't%' escape 't' from "
+                + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES where (varcharcol like 't%')";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "tytu", false);
         matchSingleRowExplain(query,
@@ -242,24 +277,27 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
                 + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES WHERE biginteger between 51 and 60";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new BigDecimal("56"), true, false, true);
-        matchSingleRowExplain(query, "SELECT `ALL_HIVE_DATA_TYPES`.`BIGINTEGER`, `ALL_HIVE_DATA_TYPES`.`BIGINTEGER` IN (56, 61), `ALL_HIVE_DATA_TYPES`.`BIGINTEGER` IS NULL, "
-                + "`ALL_HIVE_DATA_TYPES`.`BIGINTEGER` IS NOT NULL FROM `default`.`ALL_HIVE_DATA_TYPES` WHERE `ALL_HIVE_DATA_TYPES`.`BIGINTEGER` BETWEEN 51 AND 60");
+        matchSingleRowExplain(query,
+                "SELECT `ALL_HIVE_DATA_TYPES`.`BIGINTEGER`, `ALL_HIVE_DATA_TYPES`.`BIGINTEGER` IN (56, 61), `ALL_HIVE_DATA_TYPES`.`BIGINTEGER` IS NULL, "
+                        + "`ALL_HIVE_DATA_TYPES`.`BIGINTEGER` IS NOT NULL FROM `default`.`ALL_HIVE_DATA_TYPES` WHERE `ALL_HIVE_DATA_TYPES`.`BIGINTEGER` BETWEEN 51 AND 60");
     }
 
-    //This does not work with the current Hive version, since datatypes for the SUM columns dffer in the prepare and execute phases
+    // This does not work with the current Hive version, since datatypes for the SUM
+    // columns dffer in the prepare and execute phases
     public void testCountSumAggregateFunction() throws SQLException {
         final String query = "SELECT COUNT(biginteger), COUNT(*), COUNT(DISTINCT biginteger), SUM(biginteger), SUM(DISTINCT biginteger) from "
                 + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, new BigDecimal("1"), new BigDecimal("1"), new BigDecimal("1"), 56.0, 56.0);
+        matchNextRow(result, new BigDecimal("1"), new BigDecimal("1"), new BigDecimal("1"), 56.0,
+                56.0);
         matchSingleRowExplain(query,
                 "SELECT COUNT(`ALL_HIVE_DATA_TYPES`.`BIGINTEGER`), COUNT(*), COUNT(DISTINCT `ALL_HIVE_DATA_TYPES`.`BIGINTEGER`), SUM(`ALL_HIVE_DATA_TYPES`.`BIGINTEGER`), SUM(DISTINCT `ALL_HIVE_DATA_TYPES`.`BIGINTEGER`) FROM `default`.`ALL_HIVE_DATA_TYPES`");
     }
 
     @Test
     void testAvgMinMaxAggregateFunction() throws SQLException {
-        final String query = "SELECT AVG(biginteger), MIN(biginteger), MAX(biginteger) from " + VIRTUAL_SCHEMA
-                + ".ALL_HIVE_DATA_TYPES";
+        final String query = "SELECT AVG(biginteger), MIN(biginteger), MAX(biginteger) from "
+                + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, 56.0, new BigDecimal("56"), new BigDecimal("56"));
         matchSingleRowExplain(query,
@@ -268,8 +306,8 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
 
     @Test
     void testCastedStringFunctions() throws SQLException {
-        final String query = "select concat(upper(varcharcol),lower(repeat(varcharcol,2))) from " + VIRTUAL_SCHEMA
-                + ".ALL_HIVE_DATA_TYPES";
+        final String query = "select concat(upper(varcharcol),lower(repeat(varcharcol,2))) from "
+                + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "TYTUtytutytu");
         matchSingleRowExplain(query,
@@ -279,8 +317,8 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
 
     @Test
     void testRewrittenDivAndModFunctions() throws SQLException {
-        final String query = "select DIV(biginteger,biginteger), mod(biginteger,biginteger) from " + VIRTUAL_SCHEMA
-                + ".ALL_HIVE_DATA_TYPES";
+        final String query = "select DIV(biginteger,biginteger), mod(biginteger,biginteger) from "
+                + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, new BigDecimal("1"), new BigDecimal("0"));
         matchSingleRowExplain(query,
@@ -289,10 +327,12 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
 
     @Test
     void testRewrittenSubStringFunction() throws SQLException {
-        final String query = "select substring(stringcol FROM 1 FOR 2) from " + VIRTUAL_SCHEMA + ".ALL_HIVE_DATA_TYPES";
+        final String query = "select substring(stringcol FROM 1 FOR 2) from " + VIRTUAL_SCHEMA
+                + ".ALL_HIVE_DATA_TYPES";
         final ResultSet result = executeQuery(query);
         matchNextRow(result, "ts");
-        matchSingleRowExplain(query, "SELECT SUBSTR(`ALL_HIVE_DATA_TYPES`.`STRINGCOL`, 1, 2) FROM `default`.`ALL_HIVE_DATA_TYPES`");
+        matchSingleRowExplain(query,
+                "SELECT SUBSTR(`ALL_HIVE_DATA_TYPES`.`STRINGCOL`, 1, 2) FROM `default`.`ALL_HIVE_DATA_TYPES`");
     }
 
     @Test
@@ -330,7 +370,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
         createJDBCAdapter(hiveIncludes);
     }
 
-    private static void createHiveConnection() throws SQLException,  FileNotFoundException {
+    private static void createHiveConnection() throws SQLException, FileNotFoundException {
         createConnection(HIVE_CONNECTION, getConfig().getHiveDockerJdbcConnectionString(), "", "");
     }
 }
