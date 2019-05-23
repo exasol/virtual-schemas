@@ -228,7 +228,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
             LOGGER.finer(() -> "Import from push-down query:\n" + importFromPushdownQuery);
             return PushDownResponse.builder().pushDownSql(importFromPushdownQuery).build();
         } catch (final SQLException exception) {
-            throw new AdapterException("Unable to execute push-down request.", exception);
+            throw new AdapterException("Unable to execute push-down request. Caused by: " +  exception.getMessage(), exception);
         }
     }
 

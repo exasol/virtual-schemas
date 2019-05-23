@@ -105,7 +105,7 @@ class BigQuerySqlDialectTest {
 
     @Test
     void testRequiresCatalogQualifiedTableNames() {
-        assertThat(this.dialect.requiresCatalogQualifiedTableNames(null), equalTo(false));
+        assertThat(this.dialect.requiresCatalogQualifiedTableNames(null), equalTo(true));
     }
 
     @Test

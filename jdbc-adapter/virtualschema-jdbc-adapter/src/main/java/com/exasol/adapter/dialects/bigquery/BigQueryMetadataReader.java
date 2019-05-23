@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects.bigquery;
 
 import java.sql.*;
+import java.util.*;
 
 import com.exasol.adapter.*;
 import com.exasol.adapter.dialects.*;
@@ -18,5 +19,16 @@ public class BigQueryMetadataReader extends BaseRemoteMetadataReader {
      */
     public BigQueryMetadataReader(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
+    }
+
+    @Override
+    public Set<String> getSupportedTableTypes() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    protected IdentifierConverter createIdentifierConverter() {
+        return new BaseIdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_UPPER,
+              IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE);
     }
 }

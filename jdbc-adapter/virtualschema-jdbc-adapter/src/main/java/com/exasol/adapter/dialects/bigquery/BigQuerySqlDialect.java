@@ -13,6 +13,7 @@ import java.util.*;
 import com.exasol.adapter.*;
 import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.*;
 
 /**
  * This class implement the SQL dialect of Google's Big Query
@@ -103,7 +104,7 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
 
     @Override
     public boolean requiresCatalogQualifiedTableNames(SqlGenerationContext context) {
-        return false;
+        return true;
     }
 
     @Override
