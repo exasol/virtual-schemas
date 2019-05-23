@@ -241,7 +241,6 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
                 final String literalCapabilities = capability.replaceFirst(LITERAL_PREFIX, "");
                 builder.addLiteral(LiteralCapability.valueOf(literalCapabilities));
             } else if (capability.startsWith(AGGREGATE_FUNCTION_PREFIX)) {
-                // Aggregate functions must be checked before scalar functions
                 final String aggregateFunctionCap = capability.replaceFirst(AGGREGATE_FUNCTION_PREFIX, "");
                 builder.addAggregateFunction(AggregateFunctionCapability.valueOf(aggregateFunctionCap));
             } else if (capability.startsWith(SCALAR_FUNCTION_PREFIX)) {
@@ -263,15 +262,10 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
         final AdapterProperties properties = getPropertiesFromRequest(request);
         try (final Connection connection = this.connectionFactory.createConnection(exaMetadata, properties)) {
             final SqlDialect dialect = createDialect(connection, properties);
-            final String importFromPushdownQuery = new ImportQueryBuilder() //
-                    .dialect(dialect) //
-                    .statement(request.getSelect()) //
-                    .properties(properties) //
-                    .build();
+            final String importFromPushdownQuery = dialect.rewriteQuery(request.getSelect(), exaMetadata);
             return PushDownResponse.builder().pushDownSql(importFromPushdownQuery).build();
         } catch (final SQLException exception) {
             throw new AdapterException("Unable to execute push-down request.", exception);
         }
     }
-
 }

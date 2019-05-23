@@ -1,6 +1,16 @@
 package com.exasol.adapter.dialects;
 
-import static com.exasol.adapter.AdapterProperties.*;
+import static com.exasol.adapter.AdapterProperties.CONNECTION_NAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.CONNECTION_STRING_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.DEBUG_ADDRESS_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.EXCEPTION_HANDLING_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.EXCLUDED_CAPABILITIES_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.LOG_LEVEL_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.PASSWORD_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.SQL_DIALECT_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.TABLE_FILTER_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.USERNAME_PROPERTY;
 
 import java.sql.Connection;
 import java.util.Arrays;
@@ -49,7 +59,7 @@ public class DummySqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuote(final String identifier) {
-        return null;
+        return "\"" + identifier + "\"";
     }
 
     @Override
