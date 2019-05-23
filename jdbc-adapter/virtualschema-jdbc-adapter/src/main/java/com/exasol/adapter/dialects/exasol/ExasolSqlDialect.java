@@ -1,54 +1,19 @@
 package com.exasol.adapter.dialects.exasol;
 
-import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.CONNECTION_NAME_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.CONNECTION_STRING_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.DEBUG_ADDRESS_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.EXCLUDED_CAPABILITIES_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.IS_LOCAL_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.LOG_LEVEL_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.PASSWORD_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.SQL_DIALECT_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.TABLE_FILTER_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.USERNAME_PROPERTY;
-import static com.exasol.adapter.capabilities.MainCapability.AGGREGATE_GROUP_BY_COLUMN;
-import static com.exasol.adapter.capabilities.MainCapability.AGGREGATE_GROUP_BY_EXPRESSION;
-import static com.exasol.adapter.capabilities.MainCapability.AGGREGATE_GROUP_BY_TUPLE;
-import static com.exasol.adapter.capabilities.MainCapability.AGGREGATE_HAVING;
-import static com.exasol.adapter.capabilities.MainCapability.AGGREGATE_SINGLE_GROUP;
-import static com.exasol.adapter.capabilities.MainCapability.FILTER_EXPRESSIONS;
-import static com.exasol.adapter.capabilities.MainCapability.JOIN;
-import static com.exasol.adapter.capabilities.MainCapability.JOIN_CONDITION_EQUI;
-import static com.exasol.adapter.capabilities.MainCapability.JOIN_TYPE_FULL_OUTER;
-import static com.exasol.adapter.capabilities.MainCapability.JOIN_TYPE_INNER;
-import static com.exasol.adapter.capabilities.MainCapability.JOIN_TYPE_LEFT_OUTER;
-import static com.exasol.adapter.capabilities.MainCapability.JOIN_TYPE_RIGHT_OUTER;
-import static com.exasol.adapter.capabilities.MainCapability.LIMIT;
-import static com.exasol.adapter.capabilities.MainCapability.LIMIT_WITH_OFFSET;
-import static com.exasol.adapter.capabilities.MainCapability.ORDER_BY_COLUMN;
-import static com.exasol.adapter.capabilities.MainCapability.ORDER_BY_EXPRESSION;
-import static com.exasol.adapter.capabilities.MainCapability.SELECTLIST_EXPRESSIONS;
-import static com.exasol.adapter.capabilities.MainCapability.SELECTLIST_PROJECTION;
+import static com.exasol.adapter.AdapterProperties.*;
+import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_CONNECTION_STRING_PROPERTY;
 import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_IMPORT_PROPERTY;
+import static com.exasol.adapter.sql.ScalarFunction.*;
 
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.List;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.capabilities.AggregateFunctionCapability;
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.capabilities.LiteralCapability;
-import com.exasol.adapter.capabilities.PredicateCapability;
-import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.ImportType;
-import com.exasol.adapter.dialects.PropertyValidationException;
-import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
-import com.exasol.adapter.sql.ScalarFunction;
 
 /**
  * Exasol SQL dialect
@@ -64,17 +29,12 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
 
     public ExasolSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
-        this.omitParenthesesMap.add(ScalarFunction.SYSDATE);
-        this.omitParenthesesMap.add(ScalarFunction.SYSTIMESTAMP);
-        this.omitParenthesesMap.add(ScalarFunction.CURRENT_SCHEMA);
-        this.omitParenthesesMap.add(ScalarFunction.CURRENT_SESSION);
-        this.omitParenthesesMap.add(ScalarFunction.CURRENT_STATEMENT);
-        this.omitParenthesesMap.add(ScalarFunction.CURRENT_USER);
-    }
-
-    @Override
-    protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new ExasolMetadataReader(this.connection, this.properties);
+        this.omitParenthesesMap.add(SYSDATE);
+        this.omitParenthesesMap.add(SYSTIMESTAMP);
+        this.omitParenthesesMap.add(CURRENT_SCHEMA);
+        this.omitParenthesesMap.add(CURRENT_SESSION);
+        this.omitParenthesesMap.add(CURRENT_STATEMENT);
+        this.omitParenthesesMap.add(CURRENT_USER);
     }
 
     /**
@@ -84,6 +44,16 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
      */
     public static String getPublicName() {
         return NAME;
+    }
+
+    @Override
+    protected RemoteMetadataReader createRemoteMetadataReader() {
+        return new ExasolMetadataReader(this.connection, this.properties);
+    }
+
+    @Override
+    protected QueryRewriter createQueryRewriter() {
+        return new ExasolQueryRewriter(this, this.remoteMetadataReader, this.connection);
     }
 
     @Override

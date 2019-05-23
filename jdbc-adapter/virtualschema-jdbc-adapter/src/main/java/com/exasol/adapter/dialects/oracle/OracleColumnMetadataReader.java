@@ -1,6 +1,6 @@
 package com.exasol.adapter.dialects.oracle;
 
-import static com.exasol.adapter.dialects.oracle.OracleSqlDialect.ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY;
+import static com.exasol.adapter.dialects.oracle.OracleProperties.ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY;
 
 import java.sql.Connection;
 import java.sql.Types;

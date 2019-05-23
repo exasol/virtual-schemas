@@ -1,7 +1,8 @@
-package com.exasol.adapter.dialects.exasol;
+package com.exasol.adapter.dialects.oracle;
 
 import static com.exasol.adapter.AdapterProperties.*;
-import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_IMPORT_PROPERTY;
+import static com.exasol.adapter.dialects.oracle.OracleProperties.ORACLE_CONNECTION_NAME_PROPERTY;
+import static com.exasol.adapter.dialects.oracle.OracleProperties.ORACLE_IMPORT_PROPERTY;
 import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
@@ -19,9 +20,10 @@ import com.exasol.*;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.dialects.exasol.ExasolSqlDialect;
 import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
 
-public class ExasolQueryRewriterTest extends AbstractQueryRewriterTest {
+public class OracleQueryRewriterTest extends AbstractQueryRewriterTest {
     @BeforeEach
     void beforeEach() {
         this.exaConnectionInformation = mock(ExaConnectionInformation.class);
@@ -38,51 +40,37 @@ public class ExasolQueryRewriterTest extends AbstractQueryRewriterTest {
         final AdapterProperties properties = new AdapterProperties(this.rawProperties);
         final SqlDialect dialect = new ExasolSqlDialect(connectionMock, properties);
         final BaseRemoteMetadataReader metadataReader = new BaseRemoteMetadataReader(connectionMock, properties);
-        final QueryRewriter queryRewriter = new ExasolQueryRewriter(dialect, metadataReader, connectionMock);
+        final QueryRewriter queryRewriter = new OracleQueryRewriter(dialect, metadataReader, connectionMock);
         assertThat(queryRewriter.rewrite(this.statement, this.exaMetadata, properties),
                 equalTo("IMPORT INTO (c1 DECIMAL(18, 0)) FROM JDBC AT " + CONNECTION_NAME
                         + " STATEMENT 'SELECT 1 FROM \"DUAL\"'"));
     }
 
     @Test
-    void testRewriteLocal() throws AdapterException, SQLException, ExaConnectionAccessException {
-        setIsLocalProperty();
-        final AdapterProperties properties = new AdapterProperties(this.rawProperties);
-        final SqlDialect dialect = new ExasolSqlDialect(null, properties);
-        final QueryRewriter queryRewriter = new ExasolQueryRewriter(dialect, null, null);
-        assertThat(queryRewriter.rewrite(this.statement, this.exaMetadata, properties),
-                equalTo("SELECT 1 FROM \"DUAL\""));
-    }
-
-    private void setIsLocalProperty() {
-        this.rawProperties.put(IS_LOCAL_PROPERTY, "true");
-    }
-
-    @Test
-    void testRewriteToImportFromExaWithConnectionDetailsInProperties()
+    void testRewriteToImportFromOraWithConnectionDetailsInProperties()
             throws AdapterException, SQLException, ExaConnectionAccessException {
-        setImportFromExaProperty();
+        setImportFromOraProperty();
         this.rawProperties.put(CONNECTION_STRING_PROPERTY, "irrelevant");
         this.rawProperties.put(USERNAME_PROPERTY, "alibaba");
         this.rawProperties.put(PASSWORD_PROPERTY, "open sesame");
-        this.rawProperties.put(ExasolProperties.EXASOL_CONNECTION_STRING_PROPERTY, "localhost:7861");
+        this.rawProperties.put(ORACLE_CONNECTION_NAME_PROPERTY, "ora_connection");
         final AdapterProperties properties = new AdapterProperties(this.rawProperties);
         final SqlDialect dialect = new ExasolSqlDialect(null, properties);
-        final QueryRewriter queryRewriter = new ExasolQueryRewriter(dialect, null, null);
+        final QueryRewriter queryRewriter = new OracleQueryRewriter(dialect, null, null);
         assertThat(queryRewriter.rewrite(this.statement, this.exaMetadata, properties),
-                equalTo("IMPORT FROM EXA AT 'localhost:7861' USER 'alibaba' IDENTIFIED BY 'open sesame'"
+                equalTo("IMPORT FROM ORA AT ora_connection USER 'alibaba' IDENTIFIED BY 'open sesame'"
                         + " STATEMENT 'SELECT 1 FROM \"DUAL\"'"));
     }
 
-    private void setImportFromExaProperty() {
-        this.rawProperties.put(EXASOL_IMPORT_PROPERTY, "true");
+    private void setImportFromOraProperty() {
+        this.rawProperties.put(ORACLE_IMPORT_PROPERTY, "true");
     }
 
     @Test
     void testConnectionDefinitionBuilderClass() {
-        final SqlDialect dialect = new ExasolSqlDialect(null, AdapterProperties.emptyProperties());
-        final QueryRewriter queryRewriter = new ExasolQueryRewriter(dialect, null, null);
+        final SqlDialect dialect = new OracleSqlDialect(null, AdapterProperties.emptyProperties());
+        final QueryRewriter queryRewriter = new OracleQueryRewriter(dialect, null, null);
         assertThat(getMethodReturnViaReflection(queryRewriter, "createConnectionDefinitionBuilder"),
-                instanceOf(ExasolConnectionDefinitionBuilder.class));
+                instanceOf(OracleConnectionDefinitionBuilder.class));
     }
 }

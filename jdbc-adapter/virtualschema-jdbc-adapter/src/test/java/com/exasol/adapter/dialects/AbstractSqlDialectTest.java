@@ -1,28 +1,16 @@
 package com.exasol.adapter.dialects;
 
-import static com.exasol.adapter.AdapterProperties.CONNECTION_NAME_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.CONNECTION_STRING_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.DEBUG_ADDRESS_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.EXCEPTION_HANDLING_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.PASSWORD_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.SQL_DIALECT_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.USERNAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_CONNECTION_STRING_PROPERTY;
 import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_IMPORT_PROPERTY;
-import static com.exasol.adapter.dialects.oracle.OracleSqlDialect.ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY;
-import static com.exasol.adapter.dialects.oracle.OracleSqlDialect.ORACLE_CONNECTION_NAME_PROPERTY;
-import static com.exasol.adapter.dialects.oracle.OracleSqlDialect.ORACLE_IMPORT_PROPERTY;
+import static com.exasol.adapter.dialects.oracle.OracleProperties.*;
 import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

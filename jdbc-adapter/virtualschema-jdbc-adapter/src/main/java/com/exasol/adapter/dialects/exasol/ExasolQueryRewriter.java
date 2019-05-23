@@ -1,5 +1,7 @@
 package com.exasol.adapter.dialects.exasol;
 
+import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_IMPORT_PROPERTY;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -7,10 +9,7 @@ import com.exasol.ExaConnectionInformation;
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.BaseQueryRewriter;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionDefinitionBuilder;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.SqlStatement;
@@ -62,7 +61,7 @@ public class ExasolQueryRewriter extends BaseQueryRewriter {
     }
 
     private boolean isImportFromExa(final AdapterProperties properties) {
-        return properties.isEnabled(ExasolProperties.EXASOL_IMPORT_PROPERTY);
+        return properties.isEnabled(EXASOL_IMPORT_PROPERTY);
     }
 
     private String rewriteToImportFromExa(final SqlStatement statement, final ExaMetadata exaMetadata,

@@ -1,5 +1,9 @@
 package com.exasol.adapter.dialects.exasol;
 
+import static com.exasol.adapter.AdapterProperties.*;
+import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_CONNECTION_STRING_PROPERTY;
+import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_IMPORT_PROPERTY;
+
 import java.util.logging.Logger;
 
 import com.exasol.ExaConnectionInformation;
@@ -15,7 +19,7 @@ public class ExasolConnectionDefinitionBuilder extends BaseConnectionDefinitionB
     @Override
     public String buildConnectionDefinition(final AdapterProperties properties,
             final ExaConnectionInformation exaConnectionInformation) {
-        if (properties.containsKey(ExasolProperties.EXASOL_IMPORT_PROPERTY)) {
+        if (properties.containsKey(EXASOL_IMPORT_PROPERTY)) {
             return buildImportFromExaConnectionDefinition(properties, exaConnectionInformation);
         } else {
             return super.buildConnectionDefinition(properties, exaConnectionInformation);
@@ -24,7 +28,7 @@ public class ExasolConnectionDefinitionBuilder extends BaseConnectionDefinitionB
 
     private String buildImportFromExaConnectionDefinition(final AdapterProperties properties,
             final ExaConnectionInformation exaConnectionInformation) {
-        if (properties.containsKey(ExasolProperties.EXASOL_CONNECTION_STRING_PROPERTY) && properties.hasUsername()
+        if (properties.containsKey(EXASOL_CONNECTION_STRING_PROPERTY) && properties.hasUsername()
                 && properties.hasPassword()) {
             return mixConnectionPropertiesWithExasolConnectionString(properties);
         } else if (properties.hasConnectionName()) {
@@ -36,10 +40,10 @@ public class ExasolConnectionDefinitionBuilder extends BaseConnectionDefinitionB
         } else {
             throw new IllegalArgumentException(
                     "Incomplete remote connection information. Please specify an Exasol connection string with property "
-                            + ExasolProperties.EXASOL_CONNECTION_STRING_PROPERTY + " plus a named connection with "
-                            + AdapterProperties.CONNECTION_NAME_PROPERTY + " or individual connetion properties "
-                            + AdapterProperties.CONNECTION_STRING_PROPERTY + ", " + AdapterProperties.USERNAME_PROPERTY
-                            + " and " + AdapterProperties.PASSWORD_PROPERTY + ".");
+                            + EXASOL_CONNECTION_STRING_PROPERTY + " plus a named connection with "
+                            + CONNECTION_NAME_PROPERTY + " or individual connetion properties "
+                            + CONNECTION_STRING_PROPERTY + ", " + USERNAME_PROPERTY + " and " + PASSWORD_PROPERTY
+                            + ".");
         }
     }
 
@@ -52,12 +56,12 @@ public class ExasolConnectionDefinitionBuilder extends BaseConnectionDefinitionB
     }
 
     private String getExasolConnectionString(final AdapterProperties properties) {
-        return properties.get(ExasolProperties.EXASOL_CONNECTION_STRING_PROPERTY);
+        return properties.get(EXASOL_CONNECTION_STRING_PROPERTY);
     }
 
     private String mixConnectionPropertiesWithExasolConnectionString(final AdapterProperties properties) {
         LOGGER.warning(() -> "Defining credentials individually with properties is deprecated."
-                + " Provide a connection name instead in property " + AdapterProperties.CONNECTION_NAME_PROPERTY + ".");
+                + " Provide a connection name instead in property " + CONNECTION_NAME_PROPERTY + ".");
         return getConnectionDefinition(getExasolConnectionString(properties), properties.getUsername(),
                 properties.getPassword());
     }
@@ -65,7 +69,7 @@ public class ExasolConnectionDefinitionBuilder extends BaseConnectionDefinitionB
     private String mixNamedConnectionWithPropertiesAndExasolConnectionString(final AdapterProperties properties,
             final ExaConnectionInformation exaConnectionInformation) {
         LOGGER.warning(() -> "Overriding details of a named connection with individually with properties is deprecated."
-                + " Provide only the connection name in property " + AdapterProperties.CONNECTION_NAME_PROPERTY + ".");
+                + " Provide only the connection name in property " + CONNECTION_NAME_PROPERTY + ".");
         final String username = properties.hasUsername() ? properties.getUsername()
                 : exaConnectionInformation.getUser();
         final String password = properties.hasPassword() ? properties.getPassword()
