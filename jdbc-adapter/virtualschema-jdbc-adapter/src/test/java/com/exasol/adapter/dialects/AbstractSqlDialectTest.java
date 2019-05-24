@@ -1,9 +1,9 @@
 package com.exasol.adapter.dialects;
 
 import static com.exasol.adapter.AdapterProperties.*;
-import static com.exasol.adapter.dialects.exasol.ExasolSqlDialect.EXASOL_CONNECTION_STRING_PROPERTY;
-import static com.exasol.adapter.dialects.exasol.ExasolSqlDialect.EXASOL_IMPORT_PROPERTY;
-import static com.exasol.adapter.dialects.oracle.OracleSqlDialect.*;
+import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_CONNECTION_STRING_PROPERTY;
+import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_IMPORT_PROPERTY;
+import static com.exasol.adapter.dialects.oracle.OracleProperties.*;
 import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;

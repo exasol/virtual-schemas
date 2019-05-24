@@ -38,7 +38,7 @@ class OracleColumnMetadataReaderTest {
         final int castPrecision = 10;
         final int castScale = 2;
         final Map<String, String> rawProperties = new HashMap<>();
-        rawProperties.put(OracleSqlDialect.ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY, castPrecision + "," + castScale);
+        rawProperties.put(OracleProperties.ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY, castPrecision + "," + castScale);
         this.columnMetadataReader = new OracleColumnMetadataReader(null, new AdapterProperties(rawProperties),
                 BaseIdentifierConverter.createDefault());
         final JdbcTypeDescription typeDescription = createTypeDescriptionForNumeric(precision, scale);

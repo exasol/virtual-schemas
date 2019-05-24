@@ -6,6 +6,7 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static com.exasol.adapter.dialects.oracle.OracleProperties.*;
 
 import java.sql.Connection;
 import java.util.*;
@@ -16,7 +17,6 @@ import java.util.stream.Collectors;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.ConnectionInformation;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.AggregateFunction;
@@ -27,9 +27,6 @@ import com.exasol.adapter.sql.ScalarFunction;
  */
 public class OracleSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "ORACLE";
-    public static final String ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY = "ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE";
-    public static final String ORACLE_IMPORT_PROPERTY = "IMPORT_FROM_ORA";
-    public static final String ORACLE_CONNECTION_NAME_PROPERTY = "ORA_CONNECTION_NAME";
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, ORACLE_IMPORT_PROPERTY, ORACLE_CONNECTION_NAME_PROPERTY,
@@ -134,25 +131,6 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         return "'" + value.replace("'", "''") + "'";
     }
 
-    @Override
-    public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription,
-            final String pushdownSql) {
-        final ImportType importType = getImportType();
-        if (importType == ImportType.JDBC) {
-            return super.generatePushdownSql(connectionInformation, columnDescription, pushdownSql);
-        } else {
-            if ((importType != ImportType.ORA)) {
-                throw new AssertionError("OracleSqlDialect has wrong ImportType");
-            }
-            final StringBuilder oracleImportQuery = new StringBuilder();
-            oracleImportQuery.append("IMPORT FROM ORA AT ").append(connectionInformation.getOraConnectionName())
-                    .append(" ");
-            oracleImportQuery.append(connectionInformation.getCredentials());
-            oracleImportQuery.append(" STATEMENT '").append(pushdownSql.replace("'", "''")).append("'");
-            return oracleImportQuery.toString();
-        }
-    }
-
     /**
      * Return the type of import the Oracle dialect uses
      *
@@ -171,6 +149,11 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
         return new OracleMetadataReader(this.connection, this.properties);
+    }
+
+    @Override
+    protected QueryRewriter createQueryRewriter() {
+        return new OracleQueryRewriter(this, this.remoteMetadataReader, this.connection);
     }
 
     @Override

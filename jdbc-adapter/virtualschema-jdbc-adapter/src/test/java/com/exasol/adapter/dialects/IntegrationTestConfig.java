@@ -1,7 +1,5 @@
 package com.exasol.adapter.dialects;
 
-
-import com.exasol.adapter.jdbc.JdbcAdapterProperties;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -33,10 +31,6 @@ public class IntegrationTestConfig {
         } catch (Exception ex) {
             throw new RuntimeException("The specified integration test config file could not be parsed: " + configFile, ex);
         }
-    }
-
-    public JdbcAdapterProperties.ExceptionHandlingMode getExceptionHandlingMode() {
-        return JdbcAdapterProperties.ExceptionHandlingMode.NONE;
     }
 
     public String getJdbcAdapterPath() {
