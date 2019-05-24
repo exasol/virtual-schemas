@@ -1,35 +1,19 @@
 package com.exasol.adapter.dialects;
 
-import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.CONNECTION_NAME_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.CONNECTION_STRING_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.DEBUG_ADDRESS_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.EXCEPTION_HANDLING_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.PASSWORD_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.SQL_DIALECT_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.USERNAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.SchemaMetadata;
-import com.exasol.adapter.sql.AggregateFunction;
-import com.exasol.adapter.sql.ScalarFunction;
-import com.exasol.adapter.sql.SqlStatement;
+import com.exasol.adapter.sql.*;
 
 /**
  * Abstract implementation of a dialect. We recommend that every dialect should
@@ -61,25 +45,24 @@ public abstract class AbstractSqlDialect implements SqlDialect {
      * Create the {@link RemoteMetadataReader} that is used to get the database
      * metadata from the remote source.
      * <p>
-     * Override this method in the concrete SQL dialect implementation if the
-     * dialect requires non-standard metadata mapping.
+     * Override this method in the concrete SQL dialect implementation to choose the
+     * right metadata reader.
      *
      * @return metadata reader
      */
-    protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new BaseRemoteMetadataReader(this.connection, this.properties);
-    }
+    protected abstract RemoteMetadataReader createRemoteMetadataReader();
 
     /**
      * Create the {@link QueryRewriter} that is used to create the final SQL query
      * sent back from the Virtual Schema backend to the Virtual Schema frontend in a
      * push-down scenario.
+     * <p>
+     * Override this method in the concrete SQL dialect implementation to choose the
+     * right query rewriter.
      *
      * @return query rewriter
      */
-    protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
-    }
+    protected abstract QueryRewriter createQueryRewriter();
 
     @Override
     public String getTableCatalogAndSchemaSeparator() {
