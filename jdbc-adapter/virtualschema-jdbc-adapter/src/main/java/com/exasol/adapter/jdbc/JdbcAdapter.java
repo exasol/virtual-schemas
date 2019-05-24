@@ -53,7 +53,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
             return CreateVirtualSchemaResponse.builder().schemaMetadata(remoteMeta).build();
         } catch (final SQLException exception) {
             throw new AdapterException("Unable create Virtual Schema \"" + request.getVirtualSchemaName()
-                    + "\". Cause: \" + exception.getMessage()", exception);
+                    + "\". Cause: \"" + exception.getMessage(), exception);
         }
     }
 
