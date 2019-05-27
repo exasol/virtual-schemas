@@ -3,6 +3,7 @@ package com.exasol.adapter.dialects.postgresql;
 import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY;
 
 import java.sql.*;
+import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.IdentifierConverter;
@@ -11,6 +12,7 @@ import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 
 public class PostgreSQLColumnMetadataReader extends BaseColumnMetadataReader {
+    private static final Logger LOGGER = Logger.getLogger(PostgreSQLMetadataReader.class.getName());
     private static final String POSTGRES_VARBIT_TYPE_NAME = "varbit";
 
     /**
@@ -41,8 +43,11 @@ public class PostgreSQLColumnMetadataReader extends BaseColumnMetadataReader {
     protected DataType mapJdbcTypeOther(final JdbcTypeDescription jdbcTypeDescription) {
         if (isVarBitColumn(jdbcTypeDescription)) {
             final int n = jdbcTypeDescription.getPrecisionOrSize();
+            LOGGER.finer(() -> "Mapping PostgreSQL datatype \"OTHER:varbit\" to VARCHAR(" + n + ")");
             return DataType.createVarChar(n, DataType.ExaCharset.UTF8);
         } else {
+            LOGGER.finer(() -> "Mapping PostgreSQL datatype \"" + jdbcTypeDescription.getTypeName()
+                    + "\" to maximum VARCHAR()");
             return DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
         }
     }
