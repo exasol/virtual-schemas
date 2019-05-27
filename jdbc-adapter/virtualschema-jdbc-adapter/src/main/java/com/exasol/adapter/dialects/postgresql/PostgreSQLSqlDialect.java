@@ -36,6 +36,16 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    protected RemoteMetadataReader createRemoteMetadataReader() {
+        return new PostgreSQLMetadataReader(this.connection, this.properties);
+    }
+
+    @Override
+    protected QueryRewriter createQueryRewriter() {
+        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
+    }
+
+    @Override
     public Capabilities getCapabilities() {
         final Capabilities.Builder builder = Capabilities.builder();
         builder.addMain(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS, AGGREGATE_SINGLE_GROUP,
@@ -122,11 +132,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     @Override
     public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new PostgresSQLSqlGenerationVisitor(this, context);
-    }
-
-    @Override
-    protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new PostgreSQLMetadataReader(this.connection, this.properties);
     }
 
     @Override

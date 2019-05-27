@@ -13,6 +13,8 @@ import java.util.*;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
@@ -133,5 +135,15 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
     @Override
     protected List<String> getSupportedProperties() {
         return SUPPORTED_PROPERTIES;
+    }
+
+    @Override
+    protected RemoteMetadataReader createRemoteMetadataReader() {
+        return new BaseRemoteMetadataReader(this.connection, this.properties);
+    }
+
+    @Override
+    protected QueryRewriter createQueryRewriter() {
+        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
     }
 }

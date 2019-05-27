@@ -2,42 +2,17 @@ package com.exasol.adapter.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 import com.exasol.ExaMetadata;
-import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.RequestDispatcher;
-import com.exasol.adapter.VirtualSchemaAdapter;
-import com.exasol.adapter.capabilities.AggregateFunctionCapability;
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.capabilities.LiteralCapability;
-import com.exasol.adapter.capabilities.MainCapability;
-import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.PropertyValidationException;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlDialectFactory;
-import com.exasol.adapter.dialects.SqlDialectRegistry;
+import com.exasol.adapter.*;
+import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.metadata.SchemaMetadataInfo;
-import com.exasol.adapter.request.AdapterRequest;
-import com.exasol.adapter.request.CreateVirtualSchemaRequest;
-import com.exasol.adapter.request.DropVirtualSchemaRequest;
-import com.exasol.adapter.request.GetCapabilitiesRequest;
-import com.exasol.adapter.request.PushDownRequest;
-import com.exasol.adapter.request.RefreshRequest;
-import com.exasol.adapter.request.SetPropertiesRequest;
-import com.exasol.adapter.response.CreateVirtualSchemaResponse;
-import com.exasol.adapter.response.DropVirtualSchemaResponse;
-import com.exasol.adapter.response.GetCapabilitiesResponse;
-import com.exasol.adapter.response.PushDownResponse;
-import com.exasol.adapter.response.RefreshResponse;
-import com.exasol.adapter.response.SetPropertiesResponse;
+import com.exasol.adapter.request.*;
+import com.exasol.adapter.response.*;
 
 public class JdbcAdapter implements VirtualSchemaAdapter {
     private static final String SCALAR_FUNCTION_PREFIX = "FN_";
@@ -51,16 +26,15 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     private final RemoteConnectionFactory connectionFactory = new RemoteConnectionFactory();
 
     /**
-     * This method gets called by the database during interactions with the virtual
-     * schema.
+     * This method gets called by the database during interactions with the virtual schema.
      *
      * @param metadata   Metadata object
      * @param rawRequest JSON request, as defined in the Adapter Script API
      * @return JSON response, as defined in the Adapter Script API
      * @throws AdapterException in case the request is not recognized
      * @deprecated As of Virtual Schema version 1.8.0 you should use
-     *             {@link com.exasol.adapter.RequestDispatcher#adapterCall(ExaMetadata, String)}
-     *             as entry point instead.
+     *             {@link com.exasol.adapter.RequestDispatcher#adapterCall(ExaMetadata, String)} as entry point
+     *             instead.
      */
     @Deprecated
     public static String adapterCall(final ExaMetadata metadata, final String rawRequest) throws AdapterException {
@@ -78,8 +52,8 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
             final SchemaMetadata remoteMeta = readMetadata(properties, exasolMetadata);
             return CreateVirtualSchemaResponse.builder().schemaMetadata(remoteMeta).build();
         } catch (final SQLException exception) {
-            throw new AdapterException("Unable create Virtual Schema \"" + request.getVirtualSchemaName() + "\".",
-                    exception);
+            throw new AdapterException("Unable create Virtual Schema \"" + request.getVirtualSchemaName()
+                    + "\". Cause: \"" + exception.getMessage(), exception);
         }
     }
 
@@ -145,9 +119,8 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
             }
             return RefreshResponse.builder().schemaMetadata(remoteMeta).build();
         } catch (final SQLException exception) {
-            throw new AdapterException(
-                    "Unable refresh metadata of Virtual Schema \"" + schemaMetadataInfo.getSchemaName() + "\".",
-                    exception);
+            throw new AdapterException("Unable refresh metadata of Virtual Schema \""
+                    + schemaMetadataInfo.getSchemaName() + "\". Cause: " + exception.getMessage(), exception);
         }
     }
 
@@ -165,9 +138,9 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
             try {
                 remoteMeta = readMetadata(mergedProperties, tableFilter, metadata);
             } catch (final SQLException exception) {
-                throw new AdapterException(
-                        "Unable to set new properties for the virtual schema \"" + schemaMetadataInfo.getSchemaName()
-                                + ("\", because metadata of the remote source could not be read."),
+                throw new AdapterException("Unable to set new properties for the virtual schema \""
+                        + schemaMetadataInfo.getSchemaName()
+                        + ("\", because metadata of the remote source could not be read. Cause: \" + exception.getMessage()"),
                         exception);
             }
             return SetPropertiesResponse.builder().schemaMetadata(remoteMeta).build();
@@ -265,7 +238,8 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
             final String importFromPushdownQuery = dialect.rewriteQuery(request.getSelect(), exaMetadata);
             return PushDownResponse.builder().pushDownSql(importFromPushdownQuery).build();
         } catch (final SQLException exception) {
-            throw new AdapterException("Unable to execute push-down request. Caused by: " +  exception.getMessage(), exception);
+            throw new AdapterException("Unable to execute push-down request. Cause: " + exception.getMessage(),
+                    exception);
         }
     }
 }

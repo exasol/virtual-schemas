@@ -13,8 +13,9 @@ import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 
 /**
- * This dialect can be used for data sources where a custom dialect implementation does not yet exists. It will obtain
- * all information from the JDBC Metadata.
+ * This dialect can be used for data sources where a custom dialect
+ * implementation does not yet exists. It will obtain all information from the
+ * JDBC Metadata.
  */
 public class GenericSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "GENERIC";
@@ -97,5 +98,10 @@ public class GenericSqlDialect extends AbstractSqlDialect {
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
         return new GenericMetadataReader(this.connection, this.properties);
+    }
+
+    @Override
+    protected QueryRewriter createQueryRewriter() {
+        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
     }
 }
