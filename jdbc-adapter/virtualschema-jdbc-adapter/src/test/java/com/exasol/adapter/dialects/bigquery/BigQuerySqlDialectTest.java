@@ -122,4 +122,9 @@ class BigQuerySqlDialectTest {
                         EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY,
                         LOG_LEVEL_PROPERTY));
     }
+
+    @Test
+    void testApplyQuote() {
+        assertThat(this.dialect.applyQuote("tableName"), equalTo("`tableName`"));
+    }
 }

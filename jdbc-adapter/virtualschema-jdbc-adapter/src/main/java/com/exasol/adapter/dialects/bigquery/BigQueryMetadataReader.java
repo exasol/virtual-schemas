@@ -10,7 +10,7 @@ import com.exasol.adapter.jdbc.*;
 /**
  * Metadata reader that reads BigQuery-specific database metadata
  */
-public class BigQueryMetadataReader extends BaseRemoteMetadataReader {
+public class BigQueryMetadataReader extends AbstractRemoteMetadataReader {
     /**
      * Create a new instance of an {@link BigQueryMetadataReader}
      *
@@ -22,6 +22,17 @@ public class BigQueryMetadataReader extends BaseRemoteMetadataReader {
     }
 
     @Override
+    protected ColumnMetadataReader createColumnMetadataReader() {
+        return new BaseColumnMetadataReader(this.connection, this.properties, this.identifierConverter);
+    }
+
+    @Override
+    protected TableMetadataReader createTableMetadataReader() {
+        return new BaseTableMetadataReader(this.connection, this.columnMetadataReader, this.properties,
+                this.identifierConverter);
+    }
+
+    @Override
     public Set<String> getSupportedTableTypes() {
         return Collections.emptySet();
     }
@@ -29,6 +40,6 @@ public class BigQueryMetadataReader extends BaseRemoteMetadataReader {
     @Override
     protected IdentifierConverter createIdentifierConverter() {
         return new BaseIdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_UPPER,
-              IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE);
+                IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE);
     }
 }

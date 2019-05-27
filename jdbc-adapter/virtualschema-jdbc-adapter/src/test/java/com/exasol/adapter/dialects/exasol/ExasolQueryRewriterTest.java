@@ -21,7 +21,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
 
-public class ExasolQueryRewriterTest extends AbstractQueryRewriterTest {
+class ExasolQueryRewriterTest extends AbstractQueryRewriterTest {
     @BeforeEach
     void beforeEach() {
         this.exaConnectionInformation = mock(ExaConnectionInformation.class);

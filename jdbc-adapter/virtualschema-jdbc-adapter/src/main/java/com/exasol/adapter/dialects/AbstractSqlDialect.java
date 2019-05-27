@@ -24,10 +24,6 @@ public abstract class AbstractSqlDialect implements SqlDialect {
             Pattern.CASE_INSENSITIVE);
     protected Set<ScalarFunction> omitParenthesesMap = EnumSet.noneOf(ScalarFunction.class);
 
-    public RemoteMetadataReader getRemoteMetadataReader() {
-        return remoteMetadataReader;
-    }
-
     protected RemoteMetadataReader remoteMetadataReader;
     protected AdapterProperties properties;
     protected final Connection connection;
@@ -42,8 +38,8 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     public AbstractSqlDialect(final Connection connection, final AdapterProperties properties) {
         this.connection = connection;
         this.properties = properties;
-        this.remoteMetadataReader = createRemoteMetadataReader();
-        this.queryRewriter = createQueryRewriter();
+        this.remoteMetadataReader = this.createRemoteMetadataReader();
+        this.queryRewriter = this.createQueryRewriter();
     }
 
     /**
@@ -132,18 +128,18 @@ public abstract class AbstractSqlDialect implements SqlDialect {
 
     @Override
     public void validateProperties() throws PropertyValidationException {
-        validateSupportedPropertiesList();
-        validateConnectionProperties();
-        validateCatalogNameProperty();
-        validateSchemaNameProperty();
-        validateDebugOutputAddress();
-        validateExceptionHandling();
+        this.validateSupportedPropertiesList();
+        this.validateConnectionProperties();
+        this.validateCatalogNameProperty();
+        this.validateSchemaNameProperty();
+        this.validateDebugOutputAddress();
+        this.validateExceptionHandling();
     }
 
     protected void validateSupportedPropertiesList() throws PropertyValidationException {
         final List<String> allProperties = new ArrayList<>(this.properties.keySet());
         for (final String property : allProperties) {
-            if (!getSupportedProperties().contains(property)) {
+            if (!this.getSupportedProperties().contains(property)) {
                 throw new PropertyValidationException(
                         "The dialect " + this.properties.getSqlDialect() + " does not support " + property
                                 + " property. Please, do not set the " + property + " property.");
@@ -173,7 +169,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
 
     private void validateCatalogNameProperty() throws PropertyValidationException {
         if (this.properties.containsKey(CATALOG_NAME_PROPERTY)
-                && (supportsJdbcCatalogs() == StructureElementSupport.NONE)) {
+                && (this.supportsJdbcCatalogs() == StructureElementSupport.NONE)) {
             throw new PropertyValidationException("The dialect " + this.properties.getSqlDialect()
                     + " does not support catalogs. Please, do not set the " + CATALOG_NAME_PROPERTY + " property.");
         }
@@ -181,7 +177,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
 
     private void validateSchemaNameProperty() throws PropertyValidationException {
         if (this.properties.containsKey(SCHEMA_NAME_PROPERTY)
-                && (supportsJdbcSchemas() == StructureElementSupport.NONE)) {
+                && (this.supportsJdbcSchemas() == StructureElementSupport.NONE)) {
             throw new PropertyValidationException("The dialect " + this.properties.getSqlDialect()
                     + " does not support schemas. Please, do not set the " + SCHEMA_NAME_PROPERTY + " property.");
         }
@@ -233,9 +229,9 @@ public abstract class AbstractSqlDialect implements SqlDialect {
 
     protected void validateDialectName(final String dialectName) throws PropertyValidationException {
         final String availableDialects = "Available dialects: " + SqlDialectRegistry.getInstance().getDialectsString();
-        checkIfContainsDialectName(availableDialects);
-        checkIfDialectIsSupported(availableDialects);
-        checkIfNameIsConsistent(dialectName);
+        this.checkIfContainsDialectName(availableDialects);
+        this.checkIfDialectIsSupported(availableDialects);
+        this.checkIfNameIsConsistent(dialectName);
     }
 
     private void checkIfContainsDialectName(final String availableDialects) throws PropertyValidationException {

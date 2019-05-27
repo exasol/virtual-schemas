@@ -23,7 +23,7 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.dialects.exasol.ExasolSqlDialect;
 import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
 
-public class OracleQueryRewriterTest extends AbstractQueryRewriterTest {
+class OracleQueryRewriterTest extends AbstractQueryRewriterTest {
     @BeforeEach
     void beforeEach() {
         this.exaConnectionInformation = mock(ExaConnectionInformation.class);

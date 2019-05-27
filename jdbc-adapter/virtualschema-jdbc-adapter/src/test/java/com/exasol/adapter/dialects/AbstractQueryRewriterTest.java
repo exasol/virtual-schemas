@@ -48,6 +48,12 @@ public abstract class AbstractQueryRewriterTest {
         this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, CONNECTION_NAME);
     }
 
+    protected void setUserPasswordAndConnectionString() {
+        this.rawProperties.put(AdapterProperties.USERNAME_PROPERTY, CONNECTION_USER);
+        this.rawProperties.put(AdapterProperties.PASSWORD_PROPERTY, CONNECTION_PW);
+        this.rawProperties.put(AdapterProperties.CONNECTION_STRING_PROPERTY, CONNECTION_ADDRESS);
+    }
+
     protected SqlStatement createSimpleSelectStatement() {
         final ColumnMetadata columnMetadata = ColumnMetadata.builder().name("the_column")
                 .type(DataType.createDecimal(18, 0)).build();
@@ -68,5 +74,4 @@ public abstract class AbstractQueryRewriterTest {
         when(connectionMock.prepareStatement(any())).thenReturn(statementMock);
         return connectionMock;
     }
-
 }

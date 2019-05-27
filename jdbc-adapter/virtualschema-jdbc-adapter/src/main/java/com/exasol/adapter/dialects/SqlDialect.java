@@ -260,6 +260,4 @@ public interface SqlDialect {
      * @throws AdapterException if rewriting the query failed
      */
     public String rewriteQuery(SqlStatement statement, ExaMetadata exaMetadata) throws AdapterException, SQLException;
-
-    public RemoteMetadataReader getRemoteMetadataReader();
 }
