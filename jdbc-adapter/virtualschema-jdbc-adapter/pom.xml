@@ -149,6 +149,12 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire.and.failsafe.plugin.version}</version>
+                <configuration>
+                  <!-- Set the highest log level for coverage testing, so that we have a chance to reach branches
+                    in the logging lambdas too.
+                   -->
+                  <argLine>-Djava.util.logging.config.file=src/test/resources/logging.properties</argLine>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
