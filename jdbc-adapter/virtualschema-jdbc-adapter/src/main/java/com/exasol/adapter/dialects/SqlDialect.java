@@ -7,6 +7,7 @@ import java.util.Map;
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
@@ -259,4 +260,6 @@ public interface SqlDialect {
      * @throws AdapterException if rewriting the query failed
      */
     public String rewriteQuery(SqlStatement statement, ExaMetadata exaMetadata) throws AdapterException, SQLException;
+
+    public RemoteMetadataReader getRemoteMetadataReader();
 }

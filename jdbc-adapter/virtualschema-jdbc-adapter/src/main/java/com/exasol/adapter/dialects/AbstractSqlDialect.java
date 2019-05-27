@@ -23,6 +23,11 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     private static final Pattern BOOLEAN_PROPERTY_VALUE_PATTERN = Pattern.compile("^TRUE$|^FALSE$",
             Pattern.CASE_INSENSITIVE);
     protected Set<ScalarFunction> omitParenthesesMap = EnumSet.noneOf(ScalarFunction.class);
+
+    public RemoteMetadataReader getRemoteMetadataReader() {
+        return remoteMetadataReader;
+    }
+
     protected RemoteMetadataReader remoteMetadataReader;
     protected AdapterProperties properties;
     protected final Connection connection;
