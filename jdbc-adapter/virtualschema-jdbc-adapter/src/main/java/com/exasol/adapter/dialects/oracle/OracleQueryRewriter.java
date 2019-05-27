@@ -51,7 +51,7 @@ public class OracleQueryRewriter extends BaseQueryRewriter {
             final AdapterProperties properties) throws AdapterException {
         final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
                 properties.getSchemaName(), false);
-        final SqlGenerationVisitor sqlGeneratorVisitor = new SqlGenerationVisitor(this.dialect, context);
+        final SqlGenerationVisitor sqlGeneratorVisitor = this.dialect.getSqlGenerationVisitor(context);
         final ExaConnectionInformation exaConnectionInformation = getConnectionInformation(exaMetadata, properties);
         final String connectionDefinition = this.connectionDefinitionBuilder.buildConnectionDefinition(properties,
                 exaConnectionInformation);
