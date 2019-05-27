@@ -4,16 +4,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
-import com.exasol.ExaConnectionAccessException;
-import com.exasol.ExaConnectionInformation;
-import com.exasol.ExaMetadata;
+import com.exasol.*;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.jdbc.ColumnMetadataReader;
-import com.exasol.adapter.jdbc.ConnectionDefinitionBuilder;
-import com.exasol.adapter.jdbc.BaseConnectionDefinitionBuilder;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
-import com.exasol.adapter.jdbc.ResultSetMetadataReader;
+import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.sql.SqlStatement;
 
 public class BaseQueryRewriter implements QueryRewriter {
@@ -41,8 +35,7 @@ public class BaseQueryRewriter implements QueryRewriter {
     /**
      * Create the connection definition builder
      * <p>
-     * Override this method in case you need connection definitions that differ from
-     * the regular JDBC style.
+     * Override this method in case you need connection definitions that differ from the regular JDBC style.
      *
      * @return connection definition builder
      */
@@ -67,9 +60,10 @@ public class BaseQueryRewriter implements QueryRewriter {
             throws AdapterException {
         final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
                 properties.getSchemaName(), false);
-        final SqlGenerationVisitor sqlGeneratorVisitor = new SqlGenerationVisitor(this.dialect, context);
+        final SqlGenerationVisitor sqlGeneratorVisitor = this.dialect.getSqlGenerationVisitor(context);
         final String pushdownQuery = statement.accept(sqlGeneratorVisitor);
-        LOGGER.finer(() -> "Push-down query:\n" + pushdownQuery);
+        LOGGER.finer(() -> "Push-down query generated with " + sqlGeneratorVisitor.getClass().getSimpleName() + ":\n"
+                + pushdownQuery);
         return pushdownQuery;
     }
 
