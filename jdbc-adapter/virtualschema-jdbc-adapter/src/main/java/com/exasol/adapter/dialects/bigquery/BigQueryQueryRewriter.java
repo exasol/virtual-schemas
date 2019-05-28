@@ -1,14 +1,17 @@
 package com.exasol.adapter.dialects.bigquery;
 
+import java.sql.*;
+import java.util.logging.*;
+
 import com.exasol.*;
 import com.exasol.adapter.*;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.sql.*;
 
-import java.sql.*;
-
 public class BigQueryQueryRewriter extends BaseQueryRewriter {
+    private static final Logger LOGGER = Logger.getLogger(BigQueryQueryRewriter.class.getName());
+
     /**
      * Create a new instance of a {@link BigQueryQueryRewriter}
      *
@@ -24,32 +27,74 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
     @Override
     public String rewrite(final SqlStatement statement, final ExaMetadata exaMetadata,
             final AdapterProperties properties) throws AdapterException, SQLException {
-        final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
-                properties.getSchemaName(), false);
-        final SqlGenerationVisitor visitor = this.dialect.getSqlGenerationVisitor(context);
-        final String query = statement.accept(visitor);
         final StringBuilder builder = new StringBuilder();
 
         try (final Statement jdbcStatement = this.connection.createStatement()) {
-            System.out.println(query);
+            final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
+                    properties.getSchemaName(), false);
+            final SqlGenerationVisitor visitor = this.dialect.getSqlGenerationVisitor(context);
+            final String query = statement.accept(visitor);
+            LOGGER.info("Query: " + query);
             try (final ResultSet resultSet = jdbcStatement.executeQuery(query)) {
-                final ResultSetMetaData metadata = resultSet.getMetaData();
-                final int columnCount = metadata.getColumnCount();
-                builder.append("SELECT * FROM (VALUES ");
+                builder.append("SELECT * FROM VALUES");
+                final ResultSetMetaData resultSetNetadata = resultSet.getMetaData();
+                int rowEmpty = 0;
+                boolean first = true;
                 while (resultSet.next()) {
-                    builder.append("(");
-                    for (int i = 1; i <= columnCount; i++) {
-                        builder.append(metadata.getColumnName(i));
+                    rowEmpty++;
+                    if (!first) {
+                        builder.append(",");
+                    } else {
+                        first = false;
+                    }
 
-                        if (!resultSet.last()) {
+                    final int columnCount = resultSetNetadata.getColumnCount();
+                    LOGGER.info("Column count: " + resultSetNetadata.getColumnCount());
+                    builder.append(" (");
+                    for (int i = 1; i <= columnCount; i++) {
+                        final int type = resultSetNetadata.getColumnType(i);
+                        LOGGER.info("Column type: " + type);
+                        LOGGER.info("Column name: " + resultSetNetadata.getColumnName(i));
+                        final String columnName = resultSetNetadata.getColumnName(i);
+                        this.appendColumnValue(builder, resultSet, columnName, type);
+                        if (i < columnCount) {
                             builder.append(", ");
                         }
                     }
                     builder.append(")");
                 }
+                if (rowEmpty == 0) {
+                    builder.append(" (1) WHERE false");
+                    return builder.toString();
+                }
             }
         }
-        builder.append(")");
         return builder.toString();
+    }
+
+    private void appendColumnValue(final StringBuilder builder, final ResultSet resultSet, final String columnName,
+            final int type) throws SQLException {
+        switch (type) {
+        case Types.BIGINT:
+            builder.append(resultSet.getInt(columnName));
+            break;
+        case Types.NUMERIC:
+        case Types.DOUBLE:
+            builder.append(resultSet.getDouble(columnName));
+            break;
+        case Types.BOOLEAN:
+            builder.append(resultSet.getBoolean(columnName));
+            break;
+        case Types.DATE:
+        case Types.TIMESTAMP:
+        case Types.TIME:
+        case Types.VARCHAR:
+        case Types.VARBINARY:
+        default:
+            builder.append("'");
+            builder.append(resultSet.getString(columnName));
+            builder.append("'");
+            break;
+        }
     }
 }
