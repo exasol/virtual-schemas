@@ -1,5 +1,6 @@
 package com.exasol.adapter.jdbc;
 
+import static com.exasol.adapter.AdapterProperties.*;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
@@ -25,7 +26,10 @@ class JdbcAdapterIT {
                 + "        \"name\" : \"foo\",\n" //
                 + "        \"properties\" :\n" //
                 + "        {\n" //
-                + "            \"SQL_DIALECT\" : \"EXASOL\"\n" //
+                + "            \"" + SQL_DIALECT_PROPERTY + "\" : \"GENERIC\"\n," //
+                + "            \"" + CONNECTION_STRING_PROPERTY + "\" : \"jdbc:derby:memory:test;create=true;\"\n," //
+                + "            \"" + USERNAME_PROPERTY + "\" : \"\"\n," //
+                + "            \"" + PASSWORD_PROPERTY + "\" : \"\"\n" //
                 + "        }\n" //
                 + "    }\n" //
                 + "}";
