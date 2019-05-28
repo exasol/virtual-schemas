@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import com.exasol.ExaMetadata;
 import com.exasol.adapter.*;
 import com.exasol.adapter.response.GetCapabilitiesResponse;
 
@@ -30,7 +31,8 @@ class JdbcAdapterIT {
                 + "}";
         final VirtualSchemaAdapter adapterMock = Mockito.mock(VirtualSchemaAdapter.class);
         when(adapterMock.getCapabilities(any(), any())).thenReturn(GetCapabilitiesResponse.builder().build());
-        RequestDispatcher.adapterCall(null, rawRequest);
+        final ExaMetadata exaMetadata = Mockito.mock(ExaMetadata.class);
+        RequestDispatcher.adapterCall(exaMetadata, rawRequest);
         final List<AdapterFactory> registeredFactories = AdapterRegistry.getInstance().getRegisteredAdapterFactories();
         assertThat(registeredFactories, hasItem(instanceOf(JdbcAdapterFactory.class)));
     }
