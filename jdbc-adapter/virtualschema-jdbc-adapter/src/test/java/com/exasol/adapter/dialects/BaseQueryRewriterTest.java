@@ -17,7 +17,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
 import com.exasol.adapter.sql.TestSqlStatementFactory;
 
-public class BaseQueryRewriterTest extends AbstractQueryRewriterTest {
+class BaseQueryRewriterTest extends AbstractQueryRewriterTest {
     @BeforeEach
     void beforeEach() {
         this.exaConnectionInformation = mock(ExaConnectionInformation.class);

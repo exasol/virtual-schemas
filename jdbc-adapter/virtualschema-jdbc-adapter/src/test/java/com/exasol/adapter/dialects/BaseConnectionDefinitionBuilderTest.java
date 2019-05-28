@@ -13,7 +13,7 @@ import com.exasol.ExaConnectionInformation;
 import com.exasol.adapter.jdbc.BaseConnectionDefinitionBuilder;
 import com.exasol.adapter.jdbc.ConnectionDefinitionBuilder;
 
-public class BaseConnectionDefinitionBuilderTest extends AbstractConnectionDefinitionBuilderTest {
+class BaseConnectionDefinitionBuilderTest extends AbstractConnectionDefinitionBuilderTest {
     @BeforeEach
     void beforeEach() {
         this.exaConnectionInformation = mock(ExaConnectionInformation.class);
