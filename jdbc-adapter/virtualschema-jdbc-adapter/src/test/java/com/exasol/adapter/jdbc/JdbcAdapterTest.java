@@ -1,107 +1,91 @@
 package com.exasol.adapter.jdbc;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static com.exasol.adapter.AdapterProperties.*;
+import static org.hamcrest.Matchers.emptyCollectionOf;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-import com.exasol.*;
+import com.exasol.ExaMetadata;
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.capabilities.MainCapability;
+import com.exasol.adapter.dialects.generic.GenericSqlDialect;
 import com.exasol.adapter.metadata.SchemaMetadataInfo;
+import com.exasol.adapter.metadata.TableMetadata;
+import com.exasol.adapter.request.GetCapabilitiesRequest;
+import com.exasol.adapter.request.PushDownRequest;
+import com.exasol.adapter.response.GetCapabilitiesResponse;
+import com.exasol.adapter.response.PushDownResponse;
+import com.exasol.adapter.sql.SqlStatement;
+import com.exasol.adapter.sql.TestSqlStatementFactory;
 
 public class JdbcAdapterTest {
-    private ExaMetadata exaMetadata;
+    private static final String SCHEMA_NAME = "THE_SCHEMA";
+    private final JdbcAdapter adapter = new JdbcAdapter();
+    private Map<String, String> rawProperties;
+    private final String GENERIC_ADAPTER_NAME = GenericSqlDialect.getPublicName();
 
-    private Map<String, String> propertiesConnectionName;
-    private Map<String, String> propertiesConnectionStringUserPassword;
-
-    @Before
-    public void setUp() throws ExaConnectionAccessException {
-        final ExaConnectionInformation exaConnectionInformation = mock(ExaConnectionInformation.class);
-        this.exaMetadata = mock(ExaMetadata.class);
-
-        when(exaConnectionInformation.getUser()).thenReturn("testCommUser");
-        when(exaConnectionInformation.getPassword()).thenReturn("testConnPassword");
-        when(exaConnectionInformation.getAddress()).thenReturn("testConnAddress");
-        when(this.exaMetadata.getConnection(any())).thenReturn(exaConnectionInformation);
-
-        this.propertiesConnectionStringUserPassword = new HashMap<>();
-        this.propertiesConnectionStringUserPassword.put("CONNECTION_STRING", "testConnectionString");
-        this.propertiesConnectionStringUserPassword.put("USERNAME", "testUsername");
-        this.propertiesConnectionStringUserPassword.put("PASSWORD", "testPassword");
-
-        this.propertiesConnectionName = new HashMap<>();
-        this.propertiesConnectionName.put("CONNECTION_NAME", "CONN_NAME");
-
+    @BeforeEach
+    void beforeEach() {
+        this.rawProperties = new HashMap<>();
     }
 
     @Test
-    public void getCredentialsForJDBCImportWithConnectionNameGiven() {
-        final SchemaMetadataInfo schemaMetadataInfoConnectionName = new SchemaMetadataInfo("", "",
-                this.propertiesConnectionName);
-        final String credentials = new JdbcAdapter().getCredentialsForPushdownQuery(this.exaMetadata,
-                schemaMetadataInfoConnectionName);
-        assertEquals("CONN_NAME", credentials);
+    public void testPushdown() throws AdapterException {
+        final PushDownResponse response = pushStatementDown(TestSqlStatementFactory.createSelectOneFromSysDummy());
+        assertThat(response.getPushDownSql(), equalTo("IMPORT INTO (c1 DECIMAL(10, 0))" //
+                + " FROM JDBC" //
+                + " AT 'jdbc:derby:memory:test;create=true;' USER '' IDENTIFIED BY ''"//
+                + " STATEMENT 'SELECT 1 FROM \"SYSIBM\".\"SYSDUMMY1\"'"));
+    }
+
+    private PushDownResponse pushStatementDown(final SqlStatement statement) throws AdapterException {
+        setGenericSqlDialectProperty();
+        setDerbyConnectionProperties();
+        this.rawProperties.put(SCHEMA_NAME_PROPERTY, "SYSIBM");
+        final List<TableMetadata> involvedTablesMetadata = null;
+        final PushDownRequest request = new PushDownRequest(this.GENERIC_ADAPTER_NAME, createSchemaMetadataInfo(),
+                statement, involvedTablesMetadata);
+        final ExaMetadata exaMetadataMock = Mockito.mock(ExaMetadata.class);
+        final PushDownResponse response = this.adapter.pushdown(exaMetadataMock, request);
+        return response;
+    }
+
+    private void setGenericSqlDialectProperty() {
+        this.rawProperties.put(SQL_DIALECT_PROPERTY, this.GENERIC_ADAPTER_NAME);
+    }
+
+    private void setDerbyConnectionProperties() {
+        this.rawProperties.put(CONNECTION_STRING_PROPERTY, "jdbc:derby:memory:test;create=true;");
+        this.rawProperties.put(USERNAME_PROPERTY, "");
+        this.rawProperties.put(PASSWORD_PROPERTY, "");
+    }
+
+    private SchemaMetadataInfo createSchemaMetadataInfo() {
+        return new SchemaMetadataInfo(SCHEMA_NAME, "", this.rawProperties);
     }
 
     @Test
-    public void getCredentialsForORAImportWithConnectionNameGiven() {
-        final Map<String, String> oraPropertiesConnectionName = new HashMap<>(this.propertiesConnectionName);
-        oraPropertiesConnectionName.put("IMPORT_FROM_ORA", "true");
-        final SchemaMetadataInfo oraSchemaMetadataInfoConnectionName = new SchemaMetadataInfo("", "",
-                oraPropertiesConnectionName);
-        final String credentials = new JdbcAdapter().getCredentialsForPushdownQuery(this.exaMetadata,
-                oraSchemaMetadataInfoConnectionName);
-        assertEquals("", credentials);
+    public void testPushdownWithIllegalStatementThrowsException() throws AdapterException {
+        assertThrows(AdapterException.class,
+                () -> pushStatementDown(TestSqlStatementFactory.createSelectOneFromDual()));
     }
 
     @Test
-    public void getCredentialsForEXAImportWithConnectionNameGiven() {
-        final Map<String, String> exaPropertiesConnectionName = new HashMap<>(this.propertiesConnectionName);
-        exaPropertiesConnectionName.put("IMPORT_FROM_EXA", "true");
-        final SchemaMetadataInfo exaSchemaMetadataInfoConnectionName = new SchemaMetadataInfo("", "",
-                exaPropertiesConnectionName);
-
-        final String credentials = new JdbcAdapter().getCredentialsForPushdownQuery(this.exaMetadata,
-                exaSchemaMetadataInfoConnectionName);
-        assertEquals("USER 'testCommUser' IDENTIFIED BY 'testConnPassword'", credentials);
-    }
-
-    @Test
-    public void getCredentialsForJDBCImportWithConnectionStringUsernamePasswordGiven() {
-        final SchemaMetadataInfo schemaMetadataInfoConnectionStringUserPassword = new SchemaMetadataInfo("", "",
-                this.propertiesConnectionStringUserPassword);
-        final String credentials = new JdbcAdapter().getCredentialsForPushdownQuery(this.exaMetadata,
-                schemaMetadataInfoConnectionStringUserPassword);
-        assertEquals("'testConnectionString' USER 'testUsername' IDENTIFIED BY 'testPassword'", credentials);
-    }
-
-    @Test
-    public void getCredentialsForORAImportWithConnectionStringUsernamePasswordGiven() {
-        final Map<String, String> oraPropertiesConnectionStringUserPassword = new HashMap<>(
-                this.propertiesConnectionStringUserPassword);
-        oraPropertiesConnectionStringUserPassword.put("IMPORT_FROM_ORA", "true");
-        final SchemaMetadataInfo oraSchemaMetadataInfoConnectionStringUserPassword = new SchemaMetadataInfo("", "",
-                oraPropertiesConnectionStringUserPassword);
-        final String credentials = new JdbcAdapter().getCredentialsForPushdownQuery(this.exaMetadata,
-                oraSchemaMetadataInfoConnectionStringUserPassword);
-        assertEquals("USER 'testUsername' IDENTIFIED BY 'testPassword'", credentials);
-    }
-
-    @Test
-    public void getCredentialsForEXAImportWithConnectionStringUsernamePasswordGiven() {
-        final Map<String, String> exaPropertiesConnectionStringUserPassword = new HashMap<>(
-                this.propertiesConnectionStringUserPassword);
-        exaPropertiesConnectionStringUserPassword.put("IMPORT_FROM_EXA", "true");
-        final SchemaMetadataInfo exaSchemaMetadataInfoConnectionStringUserPassword = new SchemaMetadataInfo("", "",
-                exaPropertiesConnectionStringUserPassword);
-        final String credentials = new JdbcAdapter().getCredentialsForPushdownQuery(this.exaMetadata,
-                exaSchemaMetadataInfoConnectionStringUserPassword);
-        assertEquals("USER 'testUsername' IDENTIFIED BY 'testPassword'", credentials);
+    public void testGetCapabilities() throws AdapterException {
+        setGenericSqlDialectProperty();
+        setDerbyConnectionProperties();
+        this.rawProperties.put(SCHEMA_NAME_PROPERTY, "SYSIBM");
+        final GetCapabilitiesRequest request = new GetCapabilitiesRequest(this.GENERIC_ADAPTER_NAME,
+                createSchemaMetadataInfo());
+        final ExaMetadata exaMetadataMock = Mockito.mock(ExaMetadata.class);
+        final GetCapabilitiesResponse response = this.adapter.getCapabilities(exaMetadataMock, request);
+        assertThat(response.getCapabilities().getMainCapabilities(), emptyCollectionOf(MainCapability.class));
     }
 }

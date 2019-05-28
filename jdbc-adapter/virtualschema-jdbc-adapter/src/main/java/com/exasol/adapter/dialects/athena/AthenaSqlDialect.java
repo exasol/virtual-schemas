@@ -13,8 +13,7 @@ import java.util.List;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.dialects.AbstractSqlDialect;
-import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 
 /**
@@ -32,7 +31,7 @@ public class AthenaSqlDialect extends AbstractSqlDialect {
 
     /**
      * Get the Athena dialect name
-     * 
+     *
      * @return always "ATHENA"
      */
     public static String getPublicName() {
@@ -76,15 +75,17 @@ public class AthenaSqlDialect extends AbstractSqlDialect {
     /**
      * Get the type of support Athena has for catalogs.
      * <p>
-     * While Athena itself does not use catalogs, the JDBC driver simulates a single catalog for better compatibility
-     * with standard products like BI tools.
+     * While Athena itself does not use catalogs, the JDBC driver simulates a single
+     * catalog for better compatibility with standard products like BI tools.
      * <p>
      *
-     * @return always {@link com.exasol.adapter.dialects.SqlDialect.StructureElementSupport#SINGLE}
+     * @return always
+     *         {@link com.exasol.adapter.dialects.SqlDialect.StructureElementSupport#SINGLE}
      *
      * @see <a href=
      *      "https://s3.amazonaws.com/athena-downloads/drivers/JDBC/SimbaAthenaJDBC_2.0.7/docs/Simba+Athena+JDBC+Driver+Install+and+Configuration+Guide.pdf">
-     *      Simba Athena JDBC Driver Install and Configuration Guide, section "Catalog and Schema Support"</a>
+     *      Simba Athena JDBC Driver Install and Configuration Guide, section
+     *      "Catalog and Schema Support"</a>
      */
     @Override
     public StructureElementSupport supportsJdbcCatalogs() {
@@ -96,9 +97,12 @@ public class AthenaSqlDialect extends AbstractSqlDialect {
      * <p>
      * Athena knows schemas as a mirror of databases.
      *
-     * @return always {@link com.exasol.adapter.dialects.SqlDialect.StructureElementSupport#MULTIPLE}
+     * @return always
+     *         {@link com.exasol.adapter.dialects.SqlDialect.StructureElementSupport#MULTIPLE}
      *
-     * @see <a href="https://docs.aws.amazon.com/athena/latest/ug/show-databases.html">SHOW DATABASES documentation</a>
+     * @see <a href=
+     *      "https://docs.aws.amazon.com/athena/latest/ug/show-databases.html">SHOW
+     *      DATABASES documentation</a>
      */
     @Override
     public StructureElementSupport supportsJdbcSchemas() {
@@ -154,6 +158,11 @@ public class AthenaSqlDialect extends AbstractSqlDialect {
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
         return new AthenaMetadataReader(this.connection, this.properties);
+    }
+
+    @Override
+    protected QueryRewriter createQueryRewriter() {
+        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
     }
 
     @Override

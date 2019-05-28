@@ -8,14 +8,16 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.exasol.ExaMetadata;
+import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.jdbc.*;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.SchemaMetadata;
-import com.exasol.adapter.sql.AggregateFunction;
-import com.exasol.adapter.sql.ScalarFunction;
+import com.exasol.adapter.sql.*;
 
 /**
- * Abstract implementation of a dialect. We recommend that every dialect should extend this abstract class.
+ * Abstract implementation of a dialect. We recommend that every dialect should
+ * extend this abstract class.
  */
 public abstract class AbstractSqlDialect implements SqlDialect {
     private static final Pattern BOOLEAN_PROPERTY_VALUE_PATTERN = Pattern.compile("^TRUE$|^FALSE$",
@@ -24,6 +26,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     protected RemoteMetadataReader remoteMetadataReader;
     protected AdapterProperties properties;
     protected final Connection connection;
+    protected QueryRewriter queryRewriter;
 
     /**
      * Create a new instance of an {@link AbstractSqlDialect}
@@ -35,19 +38,31 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         this.connection = connection;
         this.properties = properties;
         this.remoteMetadataReader = createRemoteMetadataReader();
+        this.queryRewriter = createQueryRewriter();
     }
 
     /**
-     * Create the {@link RemoteMetadataReader} that is used to get the database metadata from the remote source.
+     * Create the {@link RemoteMetadataReader} that is used to get the database
+     * metadata from the remote source.
      * <p>
-     * Override this method in the concrete SQL dialect implementation if the dialect requires non-standard metadata
-     * mapping.
+     * Override this method in the concrete SQL dialect implementation to choose the
+     * right metadata reader.
      *
      * @return metadata reader
      */
-    protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new BaseRemoteMetadataReader(this.connection, this.properties);
-    }
+    protected abstract RemoteMetadataReader createRemoteMetadataReader();
+
+    /**
+     * Create the {@link QueryRewriter} that is used to create the final SQL query
+     * sent back from the Virtual Schema backend to the Virtual Schema frontend in a
+     * push-down scenario.
+     * <p>
+     * Override this method in the concrete SQL dialect implementation to choose the
+     * right query rewriter.
+     *
+     * @return query rewriter
+     */
+    protected abstract QueryRewriter createQueryRewriter();
 
     @Override
     public String getTableCatalogAndSchemaSeparator() {
@@ -95,17 +110,9 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     }
 
     @Override
-    public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription,
-            final String pushdownSql) {
-        final StringBuilder jdbcImportQuery = new StringBuilder();
-        if (columnDescription == null) {
-            jdbcImportQuery.append("IMPORT FROM JDBC AT ").append(connectionInformation.getCredentials());
-        } else {
-            jdbcImportQuery.append("IMPORT INTO ").append("(").append(columnDescription).append(")");
-            jdbcImportQuery.append(" FROM JDBC AT ").append(connectionInformation.getCredentials());
-        }
-        jdbcImportQuery.append(" STATEMENT '").append(pushdownSql.replace("'", "''")).append("'");
-        return jdbcImportQuery.toString();
+    public String rewriteQuery(final SqlStatement statement, final ExaMetadata exaMetadata)
+            throws AdapterException, SQLException {
+        return this.queryRewriter.rewrite(statement, exaMetadata, this.properties);
     }
 
     @Override
@@ -116,14 +123,6 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     @Override
     public SchemaMetadata readSchemaMetadata(final List<String> tables) {
         return this.remoteMetadataReader.readRemoteSchemaMetadata(tables);
-    }
-
-    @Override
-    public String describeQueryResultColumns(final String query) throws SQLException {
-        final ColumnMetadataReader columnMetadataReader = this.remoteMetadataReader.getColumnMetadataReader();
-        final ResultSetMetadataReader resultSetMetadataReader = new ResultSetMetadataReader(this.connection,
-                columnMetadataReader);
-        return resultSetMetadataReader.describeColumns(query);
     }
 
     @Override

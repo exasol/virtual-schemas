@@ -18,7 +18,7 @@ import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AthenaMetadataReaderTest {
+class AthenaMetadataReaderTest {
     private AthenaMetadataReader reader;
     @Mock
     private Connection connectionMock;

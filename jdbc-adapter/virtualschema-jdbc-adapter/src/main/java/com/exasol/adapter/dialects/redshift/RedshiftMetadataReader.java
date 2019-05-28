@@ -4,12 +4,14 @@ import java.sql.Connection;
 import java.util.*;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
+import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.*;
 
 /**
  * This class implements a Redshift-specific metadata reader
  */
-public class RedshiftMetadataReader extends BaseRemoteMetadataReader {
+public class RedshiftMetadataReader extends AbstractRemoteMetadataReader {
     /**
      * Create a new instance of a {@link RedshiftMetadataReader}
      *
@@ -35,5 +37,10 @@ public class RedshiftMetadataReader extends BaseRemoteMetadataReader {
     public Set<String> getSupportedTableTypes() {
         return Collections
                 .unmodifiableSet(new HashSet<>(Arrays.asList("TABLE", "VIEW", "SYSTEM TABLE", "EXTERNAL TABLE")));
+    }
+
+    @Override
+    protected IdentifierConverter createIdentifierConverter() {
+        return BaseIdentifierConverter.createDefault();
     }
 }
