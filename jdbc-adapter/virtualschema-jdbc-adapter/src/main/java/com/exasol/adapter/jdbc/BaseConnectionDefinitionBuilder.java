@@ -8,14 +8,19 @@ import com.exasol.ExaConnectionInformation;
 import com.exasol.adapter.AdapterProperties;
 
 /**
- * This class creates the connection definition part of <code>IMPORT</code>
- * statements.
+ * This class creates the connection definition part of <code>IMPORT</code> statements.
  *
- * @see <a href="https://docs.exasol.com/sql/import.htm">IMPORT (Exasol
- *      documentation)</a>
+ * @see <a href="https://docs.exasol.com/sql/import.htm">IMPORT (Exasol documentation)</a>
  */
 public class BaseConnectionDefinitionBuilder implements ConnectionDefinitionBuilder {
     private static final Logger LOGGER = Logger.getLogger(BaseConnectionDefinitionBuilder.class.getName());
+    private static final String MISSING_CONNECTION_DETAILS_ERROR = "Incomplete remote connection information."
+            + " Please specify either a named connection with " + CONNECTION_NAME_PROPERTY
+            + " or individual connetion properties " + CONNECTION_STRING_PROPERTY + ", " + USERNAME_PROPERTY + " and "
+            + PASSWORD_PROPERTY + ".";
+    protected static final String CONFLICTING_CONNECTION_DETAILS_ERROR = "Mixing named connections in property "
+            + CONNECTION_NAME_PROPERTY + " and individual conneciton properties " + CONNECTION_STRING_PROPERTY + ", "
+            + USERNAME_PROPERTY + " and " + PASSWORD_PROPERTY + " is not allowed.";
 
     /**
      * Get the connection definition part of a push-down query
@@ -27,20 +32,14 @@ public class BaseConnectionDefinitionBuilder implements ConnectionDefinitionBuil
     @Override
     public String buildConnectionDefinition(final AdapterProperties properties,
             final ExaConnectionInformation exaConnectionInformation) {
-        if (properties.hasConnectionString() && properties.hasUsername() && properties.hasPassword()) {
+        if (hasIndividualConnectionPropertiesOnly(properties)) {
             return getConnectionFromPropertiesOnly(properties);
+        } else if (hasConflictingConnectionProperties(properties)) {
+            throw new IllegalArgumentException(CONFLICTING_CONNECTION_DETAILS_ERROR);
         } else if (properties.hasConnectionName()) {
-            if (properties.hasConnectionString() || properties.hasUsername() || properties.hasPassword()) {
-                return mixNamedConnectionWithProperties(properties, exaConnectionInformation);
-            } else {
-                return getNamedConnection(properties);
-            }
+            return getNamedConnection(properties);
         } else {
-            throw new IllegalArgumentException(
-                    "Incomplete remote connection information. Please specify at least a named connection with "
-                            + CONNECTION_NAME_PROPERTY + " or individual connetion properties "
-                            + CONNECTION_STRING_PROPERTY + ", " + USERNAME_PROPERTY + " and " + PASSWORD_PROPERTY
-                            + ".");
+            throw new IllegalArgumentException(MISSING_CONNECTION_DETAILS_ERROR);
         }
     }
 
@@ -49,27 +48,28 @@ public class BaseConnectionDefinitionBuilder implements ConnectionDefinitionBuil
     }
 
     private String getConnectionFromPropertiesOnly(final AdapterProperties properties) {
-        LOGGER.warning(() -> "Defining credentials individually with properties is deprecated."
-                + " Provide a connection name instead in property " + CONNECTION_NAME_PROPERTY + ".");
+        warnConnectionPropertiesDeprecated();
         return getConnectionDefinition(properties.getConnectionString(), properties.getUsername(),
                 properties.getPassword());
     }
 
-    private String mixNamedConnectionWithProperties(final AdapterProperties properties,
-            final ExaConnectionInformation exaConnectionInformation) {
-        LOGGER.warning(() -> "Overriding details of a named connection with individually with properties is deprecated."
-                + " Provide only the connection name in property " + CONNECTION_NAME_PROPERTY + ".");
-        final String connectionString = properties.hasConnectionString() ? properties.getConnectionString()
-                : exaConnectionInformation.getAddress();
-        final String username = properties.hasUsername() ? properties.getUsername()
-                : exaConnectionInformation.getUser();
-        final String password = properties.hasPassword() ? properties.getPassword()
-                : exaConnectionInformation.getPassword();
-        return getConnectionDefinition(connectionString, username, password);
+    protected void warnConnectionPropertiesDeprecated() {
+        LOGGER.warning(() -> "Defining credentials individually with properties is deprecated."
+                + " Provide a connection name instead in property " + CONNECTION_NAME_PROPERTY + ".");
     }
 
     protected String getConnectionDefinition(final String connectionString, final String username,
             final String password) {
         return "AT '" + connectionString + "' USER '" + username + "' IDENTIFIED BY '" + password + "'";
+    }
+
+    protected boolean hasIndividualConnectionPropertiesOnly(final AdapterProperties properties) {
+        return !properties.hasConnectionName() && properties.hasConnectionString() && properties.hasUsername()
+                && properties.hasPassword();
+    }
+
+    protected boolean hasConflictingConnectionProperties(final AdapterProperties properties) {
+        return properties.hasConnectionName()
+                && (properties.hasConnectionString() || properties.hasUsername() || properties.hasPassword());
     }
 }

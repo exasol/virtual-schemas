@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.Map;
 
 import com.exasol.ExaConnectionInformation;
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.jdbc.BaseConnectionDefinitionBuilder;
 import com.exasol.adapter.jdbc.ConnectionDefinitionBuilder;
 
 public abstract class AbstractConnectionDefinitionBuilderTest {
@@ -61,5 +63,10 @@ public abstract class AbstractConnectionDefinitionBuilderTest {
     protected String calculateConnectionDefinition() {
         final AdapterProperties properties = new AdapterProperties(this.rawProperties);
         return createConnectionBuilderUnderTest().buildConnectionDefinition(properties, this.exaConnectionInformation);
+    }
+
+    protected void assertIllegalPropertiesThrowsException(final Map<String, String> rawProperties) {
+        assertThrows(IllegalArgumentException.class, () -> new BaseConnectionDefinitionBuilder()
+                .buildConnectionDefinition(new AdapterProperties(rawProperties), null));
     }
 }

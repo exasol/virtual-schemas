@@ -55,29 +55,30 @@ class ExasolConnectionDefinitionBuilderTest extends AbstractConnectionDefinition
     }
 
     @Test
-    void testBuildConnectionDefinitionForImportFromExaWithNamedConnectionAndUsernameOverride() {
-        setImportFromExaProperties();
-        mockExasolNamedConnection();
-        setConnectionNameProperty();
-        setUserNameProperty();
-        assertThat(calculateConnectionDefinition(), equalTo(
-                "AT '" + EXASOL_CONNECTION_STRING + "' USER '" + USER + "' IDENTIFIED BY '" + CONNECTION_PW + "'"));
-    }
-
-    @Test
-    void testBuildConnectionDefinitionForImportFromExaWithNamedConnectionAndPasswordOverride() {
-        setImportFromExaProperties();
-        mockExasolNamedConnection();
-        setConnectionNameProperty();
-        setPasswordProperty();
-        assertThat(calculateConnectionDefinition(), equalTo(
-                "AT '" + EXASOL_CONNECTION_STRING + "' USER '" + CONNECTION_USER + "' IDENTIFIED BY '" + PW + "'"));
-    }
-
-    @Test
     void testBuildConnectionDefinitionWithoutConnectionInfomationThrowsException() {
         setImportFromExaProperties();
         assertThrows(IllegalArgumentException.class, () -> new BaseConnectionDefinitionBuilder()
                 .buildConnectionDefinition(new AdapterProperties(this.rawProperties), null));
+    }
+
+    @Test
+    void testBuildConnectionDefinitionWithExtraUsernameThrowsException() {
+        setConnectionNameProperty();
+        setUserNameProperty();
+        assertIllegalPropertiesThrowsException(this.rawProperties);
+    }
+
+    @Test
+    void testBuildConnectionDefinitionWithExtraPasswordThrowsException() {
+        setConnectionNameProperty();
+        setPasswordProperty();
+        assertIllegalPropertiesThrowsException(this.rawProperties);
+    }
+
+    @Test
+    void testBuildConnectionDefinitionWithExtraConnectionStringThrowsException() {
+        setConnectionNameProperty();
+        setConnectionStringProperty("irrelevant");
+        assertIllegalPropertiesThrowsException(this.rawProperties);
     }
 }

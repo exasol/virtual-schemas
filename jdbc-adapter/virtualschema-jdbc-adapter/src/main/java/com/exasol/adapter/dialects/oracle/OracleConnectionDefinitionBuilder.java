@@ -1,6 +1,6 @@
 package com.exasol.adapter.dialects.oracle;
 
-import static com.exasol.adapter.AdapterProperties.CONNECTION_NAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.dialects.oracle.OracleProperties.ORACLE_CONNECTION_NAME_PROPERTY;
 import static com.exasol.adapter.dialects.oracle.OracleProperties.ORACLE_IMPORT_PROPERTY;
 
@@ -27,25 +27,24 @@ public class OracleConnectionDefinitionBuilder extends BaseConnectionDefinitionB
     }
 
     private String buildImportFromOraConnectionDefinition(final AdapterProperties properties) {
-        if (properties.containsKey(ORACLE_CONNECTION_NAME_PROPERTY) && properties.hasUsername()
-                && properties.hasPassword()) {
+        if (hasConflictingConnectionProperties(properties)) {
+            throw new IllegalArgumentException(CONFLICTING_CONNECTION_DETAILS_ERROR);
+        } else if (properties.containsKey(ORACLE_CONNECTION_NAME_PROPERTY)
+                && hasIndividualConnectionPropertiesOnly(properties)) {
             return mixConnectionPropertiesWithOracleConnectionName(properties);
-        } else if (properties.hasConnectionName()) {
-            LOGGER.warning("Exasol named conneciton set in property " + AdapterProperties.CONNECTION_NAME_PROPERTY
-                    + " is ignored during IMPORT FROM ORA.");
-            return buildOracleConnectionDefinition(properties);
+        } else if (properties.containsKey(ORACLE_CONNECTION_NAME_PROPERTY)) {
+            return buildOracleConnectionDefinitionFromOracleConnectionOnly(properties);
         } else {
-            return buildOracleConnectionDefinition(properties);
+            throw new IllegalArgumentException("If you enable IMPORT FROM ORA with property " + ORACLE_IMPORT_PROPERTY
+                    + " you also need to provide the name of an Oracle connetion with "
+                    + ORACLE_CONNECTION_NAME_PROPERTY + " and credentials in " + USERNAME_PROPERTY + " and "
+                    + PASSWORD_PROPERTY + ".");
         }
     }
 
     private String getOracleConnectionDefinition(final String oracleConnectionName, final String username,
             final String password) {
         return "AT " + oracleConnectionName + " USER '" + username + "' IDENTIFIED BY '" + password + "'";
-    }
-
-    private String getOracleConnectionName(final AdapterProperties properties) {
-        return properties.get(ORACLE_CONNECTION_NAME_PROPERTY);
     }
 
     private String mixConnectionPropertiesWithOracleConnectionName(final AdapterProperties properties) {
@@ -55,7 +54,11 @@ public class OracleConnectionDefinitionBuilder extends BaseConnectionDefinitionB
                 properties.getPassword());
     }
 
-    protected String buildOracleConnectionDefinition(final AdapterProperties properties) {
+    private String getOracleConnectionName(final AdapterProperties properties) {
+        return properties.get(ORACLE_CONNECTION_NAME_PROPERTY);
+    }
+
+    private String buildOracleConnectionDefinitionFromOracleConnectionOnly(final AdapterProperties properties) {
         return "AT " + getOracleConnectionName(properties);
     }
 }

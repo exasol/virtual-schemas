@@ -20,6 +20,7 @@ import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
+import com.exasol.adapter.sql.TestSqlStatementFactory;
 
 class ExasolQueryRewriterTest extends AbstractQueryRewriterTest {
     @BeforeEach
@@ -27,7 +28,7 @@ class ExasolQueryRewriterTest extends AbstractQueryRewriterTest {
         this.exaConnectionInformation = mock(ExaConnectionInformation.class);
         this.exaMetadata = mock(ExaMetadata.class);
         this.rawProperties = new HashMap<>();
-        this.statement = createSimpleSelectStatement();
+        this.statement = TestSqlStatementFactory.createSelectOneFromDual();
     }
 
     @Test

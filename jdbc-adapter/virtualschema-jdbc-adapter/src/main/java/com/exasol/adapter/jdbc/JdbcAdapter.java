@@ -33,8 +33,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
      * @return JSON response, as defined in the Adapter Script API
      * @throws AdapterException in case the request is not recognized
      * @deprecated As of Virtual Schema version 1.8.0 you should use
-     *             {@link com.exasol.adapter.RequestDispatcher#adapterCall(ExaMetadata, String)} as entry point
-     *             instead.
+     *             {@link com.exasol.adapter.RequestDispatcher#adapterCall(ExaMetadata, String)} as entry point instead.
      */
     @Deprecated
     public static String adapterCall(final ExaMetadata metadata, final String rawRequest) throws AdapterException {
@@ -175,19 +174,23 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     }
 
     @Override
-    public GetCapabilitiesResponse getCapabilities(final ExaMetadata metadata, final GetCapabilitiesRequest request)
+    public GetCapabilitiesResponse getCapabilities(final ExaMetadata exaMetadata, final GetCapabilitiesRequest request)
             throws AdapterException {
         LOGGER.fine(() -> "Received request to list the adapter's capabilites.");
         final AdapterProperties properties = getPropertiesFromRequest(request);
-        final Connection connection = null;
-        final SqlDialect dialect = createDialect(connection, properties);
-        final Capabilities capabilities = dialect.getCapabilities();
-        final Capabilities excludedCapabilities = getExcludedCapabilities(properties);
-        capabilities.subtractCapabilities(excludedCapabilities);
-        return GetCapabilitiesResponse //
-                .builder()//
-                .capabilities(capabilities)//
-                .build();
+        try (final Connection connection = this.connectionFactory.createConnection(exaMetadata, properties)) {
+            final SqlDialect dialect = createDialect(connection, properties);
+            final Capabilities capabilities = dialect.getCapabilities();
+            final Capabilities excludedCapabilities = getExcludedCapabilities(properties);
+            capabilities.subtractCapabilities(excludedCapabilities);
+            return GetCapabilitiesResponse //
+                    .builder()//
+                    .capabilities(capabilities)//
+                    .build();
+        } catch (final SQLException exception) {
+            throw new AdapterException(
+                    "Unable to execute request to get capabilities. Cause: " + exception.getMessage(), exception);
+        }
     }
 
     private Capabilities getExcludedCapabilities(final AdapterProperties properties) {

@@ -2,20 +2,18 @@ package com.exasol.adapter.dialects;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
-import java.util.HashMap;
+import java.util.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.exasol.ExaConnectionInformation;
-import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.jdbc.BaseConnectionDefinitionBuilder;
 import com.exasol.adapter.jdbc.ConnectionDefinitionBuilder;
 
-public class BaseConnectionDefinitionBuilderTest extends AbstractConnectionDefinitionBuilderTest {
+class BaseConnectionDefinitionBuilderTest extends AbstractConnectionDefinitionBuilderTest {
     @BeforeEach
     void beforeEach() {
         this.exaConnectionInformation = mock(ExaConnectionInformation.class);
@@ -43,36 +41,28 @@ public class BaseConnectionDefinitionBuilderTest extends AbstractConnectionDefin
     }
 
     @Test
-    void testBuildConnectionDefinitionForJdbcImportWithNamedConnectionAndUsernameOverride() {
-        mockExasolNamedConnection();
+    void testBuildConnectionDefinitionWithoutConnectionInfomationThrowsException() {
+        assertIllegalPropertiesThrowsException(Collections.emptyMap());
+    }
+
+    @Test
+    void testBuildConnectionDefinitionWithExtraUsernameThrowsException() {
         setConnectionNameProperty();
         setUserNameProperty();
-        assertThat(calculateConnectionDefinition(),
-                equalTo("AT '" + CONNECTION_ADDRESS + "' USER '" + USER + "' IDENTIFIED BY '" + CONNECTION_PW + "'"));
+        assertIllegalPropertiesThrowsException(this.rawProperties);
     }
 
     @Test
-    void testBuildConnectionDefinitionForJdbcImportWithNamedConnectionAndPasswordOverride() {
-        mockExasolNamedConnection();
+    void testBuildConnectionDefinitionWithExtraPasswordThrowsException() {
         setConnectionNameProperty();
         setPasswordProperty();
-        assertThat(calculateConnectionDefinition(),
-                equalTo("AT '" + CONNECTION_ADDRESS + "' USER '" + CONNECTION_USER + "' IDENTIFIED BY '" + PW + "'"));
+        assertIllegalPropertiesThrowsException(this.rawProperties);
     }
 
     @Test
-    void testBuildConnectionDefinitionForJdbcImportWithNamedAddressOverride() {
-        mockExasolNamedConnection();
+    void testBuildConnectionDefinitionWithExtraConnectionStringThrowsException() {
         setConnectionNameProperty();
-        final String connectionString = "jdbc:foobar";
-        setConnectionStringProperty(connectionString);
-        assertThat(calculateConnectionDefinition(), equalTo(
-                "AT '" + connectionString + "' USER '" + CONNECTION_USER + "' IDENTIFIED BY '" + CONNECTION_PW + "'"));
-    }
-
-    @Test
-    void testBuildConnectionDefinitionWithoutConnectionInfomationThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> new BaseConnectionDefinitionBuilder()
-                .buildConnectionDefinition(AdapterProperties.emptyProperties(), null));
+        setConnectionStringProperty("irrelevant");
+        assertIllegalPropertiesThrowsException(this.rawProperties);
     }
 }

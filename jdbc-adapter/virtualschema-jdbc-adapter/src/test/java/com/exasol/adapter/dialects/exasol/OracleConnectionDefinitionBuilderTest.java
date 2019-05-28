@@ -41,8 +41,12 @@ class OracleConnectionDefinitionBuilderTest extends AbstractConnectionDefinition
     }
 
     protected void setImportFromOraProperties() {
-        this.rawProperties.put(OracleProperties.ORACLE_IMPORT_PROPERTY, "true");
+        setImportFromOraProperty();
         this.rawProperties.put(OracleProperties.ORACLE_CONNECTION_NAME_PROPERTY, ORACLE_CONNECTION_NAME);
+    }
+
+    private void setImportFromOraProperty() {
+        this.rawProperties.put(OracleProperties.ORACLE_IMPORT_PROPERTY, "true");
     }
 
     @Test
@@ -56,6 +60,34 @@ class OracleConnectionDefinitionBuilderTest extends AbstractConnectionDefinition
     }
 
     @Test
+    void testBuildConnectionDefinitionForImportFromOraWithOnlyOracleConnectionName() {
+        mockExasolNamedConnection();
+        setImportFromOraProperties();
+        assertThat(calculateConnectionDefinition(), equalTo("AT " + ORACLE_CONNECTION_NAME));
+    }
+
+    @Test
+    void testBuildConnectionDefinitionWithExtraUsernameThrowsException() {
+        setConnectionNameProperty();
+        setUserNameProperty();
+        assertIllegalPropertiesThrowsException(this.rawProperties);
+    }
+
+    @Test
+    void testBuildConnectionDefinitionWithExtraPasswordThrowsException() {
+        setConnectionNameProperty();
+        setPasswordProperty();
+        assertIllegalPropertiesThrowsException(this.rawProperties);
+    }
+
+    @Test
+    void testBuildConnectionDefinitionWithExtraConnectionStringThrowsException() {
+        setConnectionNameProperty();
+        setConnectionStringProperty("irrelevant");
+        assertIllegalPropertiesThrowsException(this.rawProperties);
+    }
+
+    @Test
     void testBuildConnectionDefinitionWithoutConnectionInfomationThrowsException() {
         setImportFromOraProperties();
         assertThrows(IllegalArgumentException.class, () -> new BaseConnectionDefinitionBuilder()
@@ -63,9 +95,9 @@ class OracleConnectionDefinitionBuilderTest extends AbstractConnectionDefinition
     }
 
     @Test
-    void testBuildConnectionDefinitionForImportFromOraWithOnlyOracleConnectionName() {
-        mockExasolNamedConnection();
-        setImportFromOraProperties();
-        assertThat(calculateConnectionDefinition(), equalTo("AT " + ORACLE_CONNECTION_NAME));
+    void testBuildConnectionDefinitionWithMissingOracleConnectionNameThrowsException() {
+        setImportFromOraProperty();
+        assertThrows(IllegalArgumentException.class, () -> new BaseConnectionDefinitionBuilder()
+                .buildConnectionDefinition(new AdapterProperties(this.rawProperties), null));
     }
 }

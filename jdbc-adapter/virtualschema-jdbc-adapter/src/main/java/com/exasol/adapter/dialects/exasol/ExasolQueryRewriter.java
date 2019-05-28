@@ -17,9 +17,8 @@ import com.exasol.adapter.sql.SqlStatement;
 /**
  * Exasol-specific query rewriter
  * <p>
- * This query rewriter supports Exasol specific parts of the <code>IMPORT</code>
- * statement: <code>IMPORT ... FROM EXA</code> and 1:1 push-down query
- * take-over.
+ * This query rewriter supports Exasol specific parts of the <code>IMPORT</code> statement:
+ * <code>IMPORT ... FROM EXA</code> and 1:1 push-down query take-over.
  * </p>
  */
 public class ExasolQueryRewriter extends BaseQueryRewriter {
@@ -56,7 +55,7 @@ public class ExasolQueryRewriter extends BaseQueryRewriter {
             throws AdapterException {
         final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
                 properties.getSchemaName(), false);
-        final SqlGenerationVisitor sqlGeneratorVisitor = new SqlGenerationVisitor(this.dialect, context);
+        final SqlGenerationVisitor sqlGeneratorVisitor = this.dialect.getSqlGenerationVisitor(context);
         return statement.accept(sqlGeneratorVisitor);
     }
 
@@ -68,7 +67,7 @@ public class ExasolQueryRewriter extends BaseQueryRewriter {
             final AdapterProperties properties) throws AdapterException {
         final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
                 properties.getSchemaName(), false);
-        final SqlGenerationVisitor sqlGeneratorVisitor = new SqlGenerationVisitor(this.dialect, context);
+        final SqlGenerationVisitor sqlGeneratorVisitor = this.dialect.getSqlGenerationVisitor(context);
         final ExaConnectionInformation exaConnectionInformation = getConnectionInformation(exaMetadata, properties);
         final String connectionDefinition = this.connectionDefinitionBuilder.buildConnectionDefinition(properties,
                 exaConnectionInformation);

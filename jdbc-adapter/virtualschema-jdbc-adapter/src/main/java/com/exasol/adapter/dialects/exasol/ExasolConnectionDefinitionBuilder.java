@@ -12,6 +12,10 @@ import com.exasol.adapter.jdbc.BaseConnectionDefinitionBuilder;
 
 /**
  * This class implements an Exasol-specific connection definition builder.
+ * <p>
+ * In case of an <code>IMPORT FROM EXA</code> we actually need two different connection definitions. The regular one for
+ * reading the remote metadata in the Virtual Schema backend and a specialized one for the import statement, provided in
+ * a separate property.
  */
 public class ExasolConnectionDefinitionBuilder extends BaseConnectionDefinitionBuilder {
     private static final Logger LOGGER = Logger.getLogger(ExasolConnectionDefinitionBuilder.class.getName());
@@ -28,19 +32,17 @@ public class ExasolConnectionDefinitionBuilder extends BaseConnectionDefinitionB
 
     private String buildImportFromExaConnectionDefinition(final AdapterProperties properties,
             final ExaConnectionInformation exaConnectionInformation) {
-        if (properties.containsKey(EXASOL_CONNECTION_STRING_PROPERTY) && properties.hasUsername()
-                && properties.hasPassword()) {
-            return mixConnectionPropertiesWithExasolConnectionString(properties);
-        } else if (properties.hasConnectionName()) {
-            if (properties.hasUsername() || properties.hasPassword()) {
-                return mixNamedConnectionWithPropertiesAndExasolConnectionString(properties, exaConnectionInformation);
-            } else {
-                return mixNamedConnectionWithExasolConnectionString(properties, exaConnectionInformation);
-            }
+        if (hasConflictingConnectionProperties(properties)) {
+            throw new IllegalArgumentException(CONFLICTING_CONNECTION_DETAILS_ERROR);
+        } else if (properties.containsKey(EXASOL_CONNECTION_STRING_PROPERTY)
+                && hasIndividualConnectionPropertiesOnly(properties)) {
+            return mixUsernameAndPasswordPropertiesWithExasolConnectionString(properties);
+        } else if (properties.containsKey(EXASOL_CONNECTION_STRING_PROPERTY) && properties.hasConnectionName()) {
+            return mixNamedConnectionWithExasolConnectionString(properties, exaConnectionInformation);
         } else {
             throw new IllegalArgumentException(
                     "Incomplete remote connection information. Please specify an Exasol connection string with property "
-                            + EXASOL_CONNECTION_STRING_PROPERTY + " plus a named connection with "
+                            + EXASOL_CONNECTION_STRING_PROPERTY + " plus either a named connection with "
                             + CONNECTION_NAME_PROPERTY + " or individual connetion properties "
                             + CONNECTION_STRING_PROPERTY + ", " + USERNAME_PROPERTY + " and " + PASSWORD_PROPERTY
                             + ".");
@@ -59,21 +61,10 @@ public class ExasolConnectionDefinitionBuilder extends BaseConnectionDefinitionB
         return properties.get(EXASOL_CONNECTION_STRING_PROPERTY);
     }
 
-    private String mixConnectionPropertiesWithExasolConnectionString(final AdapterProperties properties) {
+    private String mixUsernameAndPasswordPropertiesWithExasolConnectionString(final AdapterProperties properties) {
         LOGGER.warning(() -> "Defining credentials individually with properties is deprecated."
                 + " Provide a connection name instead in property " + CONNECTION_NAME_PROPERTY + ".");
         return getConnectionDefinition(getExasolConnectionString(properties), properties.getUsername(),
                 properties.getPassword());
-    }
-
-    private String mixNamedConnectionWithPropertiesAndExasolConnectionString(final AdapterProperties properties,
-            final ExaConnectionInformation exaConnectionInformation) {
-        LOGGER.warning(() -> "Overriding details of a named connection with individually with properties is deprecated."
-                + " Provide only the connection name in property " + CONNECTION_NAME_PROPERTY + ".");
-        final String username = properties.hasUsername() ? properties.getUsername()
-                : exaConnectionInformation.getUser();
-        final String password = properties.hasPassword() ? properties.getPassword()
-                : exaConnectionInformation.getPassword();
-        return getConnectionDefinition(getExasolConnectionString(properties), username, password);
     }
 }

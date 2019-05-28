@@ -4,28 +4,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Arrays;
+import java.sql.*;
 import java.util.Map;
 
-import com.exasol.ExaConnectionAccessException;
-import com.exasol.ExaConnectionInformation;
-import com.exasol.ExaMetadata;
+import com.exasol.*;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.metadata.TableMetadata;
-import com.exasol.adapter.sql.SqlLiteralExactnumeric;
-import com.exasol.adapter.sql.SqlNode;
-import com.exasol.adapter.sql.SqlSelectList;
 import com.exasol.adapter.sql.SqlStatement;
-import com.exasol.adapter.sql.SqlStatementSelect;
-import com.exasol.adapter.sql.SqlTable;
 
 public abstract class AbstractQueryRewriterTest {
     protected static final String CONNECTION_NAME = "the_connection";
@@ -48,22 +32,6 @@ public abstract class AbstractQueryRewriterTest {
         this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, CONNECTION_NAME);
     }
 
-    protected void setUserPasswordAndConnectionString() {
-        this.rawProperties.put(AdapterProperties.USERNAME_PROPERTY, CONNECTION_USER);
-        this.rawProperties.put(AdapterProperties.PASSWORD_PROPERTY, CONNECTION_PW);
-        this.rawProperties.put(AdapterProperties.CONNECTION_STRING_PROPERTY, CONNECTION_ADDRESS);
-    }
-
-    protected SqlStatement createSimpleSelectStatement() {
-        final ColumnMetadata columnMetadata = ColumnMetadata.builder().name("the_column")
-                .type(DataType.createDecimal(18, 0)).build();
-        final TableMetadata tableMetadata = new TableMetadata("DUAL", "", Arrays.asList(columnMetadata), "");
-        final SqlNode fromClause = new SqlTable("DUAL", tableMetadata);
-        final SqlSelectList selectList = SqlSelectList
-                .createRegularSelectList(Arrays.asList(new SqlLiteralExactnumeric(BigDecimal.ONE)));
-        return new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
-    }
-
     protected Connection mockConnection() throws SQLException {
         final ResultSetMetaData metadataMock = mock(ResultSetMetaData.class);
         when(metadataMock.getColumnCount()).thenReturn(1);
@@ -74,4 +42,5 @@ public abstract class AbstractQueryRewriterTest {
         when(connectionMock.prepareStatement(any())).thenReturn(statementMock);
         return connectionMock;
     }
+
 }
