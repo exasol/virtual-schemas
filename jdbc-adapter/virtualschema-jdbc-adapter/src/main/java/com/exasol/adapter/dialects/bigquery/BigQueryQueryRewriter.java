@@ -28,48 +28,49 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
     public String rewrite(final SqlStatement statement, final ExaMetadata exaMetadata,
             final AdapterProperties properties) throws AdapterException, SQLException {
         final StringBuilder builder = new StringBuilder();
-
-        try (final Statement jdbcStatement = this.connection.createStatement()) {
-            final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
-                    properties.getSchemaName(), false);
-            final SqlGenerationVisitor visitor = this.dialect.getSqlGenerationVisitor(context);
-            final String query = statement.accept(visitor);
-            LOGGER.info("Query: " + query);
-            try (final ResultSet resultSet = jdbcStatement.executeQuery(query)) {
-                builder.append("SELECT * FROM VALUES");
-                final ResultSetMetaData resultSetNetadata = resultSet.getMetaData();
-                int rowEmpty = 0;
-                boolean first = true;
-                while (resultSet.next()) {
-                    rowEmpty++;
-                    if (!first) {
-                        builder.append(",");
-                    } else {
-                        first = false;
-                    }
-
-                    final int columnCount = resultSetNetadata.getColumnCount();
-                    LOGGER.info("Column count: " + resultSetNetadata.getColumnCount());
-                    builder.append(" (");
-                    for (int i = 1; i <= columnCount; i++) {
-                        final int type = resultSetNetadata.getColumnType(i);
-                        LOGGER.info("Column type: " + type);
-                        LOGGER.info("Column name: " + resultSetNetadata.getColumnName(i));
-                        final String columnName = resultSetNetadata.getColumnName(i);
-                        this.appendColumnValue(builder, resultSet, columnName, type);
-                        if (i < columnCount) {
-                            builder.append(", ");
-                        }
-                    }
-                    builder.append(")");
+        final String query = getQueryFromStatement(statement, properties);
+        LOGGER.fine(() -> "Query to rewrite: " + query);
+        try (final ResultSet resultSet = this.connection.createStatement().executeQuery(query)) {
+            builder.append("SELECT * FROM VALUES");
+            boolean first = true;
+            int rowEmpty = 0;
+            while (resultSet.next()) {
+                rowEmpty++;
+                if (!first) {
+                    builder.append(",");
+                } else {
+                    first = false;
                 }
-                if (rowEmpty == 0) {
-                    builder.append(" (1) WHERE false");
-                    return builder.toString();
-                }
+                appendRow(builder, resultSet, resultSet.getMetaData());
+            }
+            if (rowEmpty == 0) {
+                builder.append(" (1) WHERE false");
+                return builder.toString();
             }
         }
         return builder.toString();
+    }
+
+    private String getQueryFromStatement(final SqlStatement statement, final AdapterProperties properties)
+            throws AdapterException {
+        final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
+                properties.getSchemaName(), false);
+        return statement.accept(this.dialect.getSqlGenerationVisitor(context));
+    }
+
+    private void appendRow(final StringBuilder builder, final ResultSet resultSet,
+            final ResultSetMetaData resultSetNetadata) throws SQLException {
+        final int columnCount = resultSetNetadata.getColumnCount();
+        LOGGER.info("Column count: " + resultSetNetadata.getColumnCount());
+        builder.append(" (");
+        for (int i = 1; i <= columnCount; i++) {
+            final String columnName = resultSetNetadata.getColumnName(i);
+            appendColumnValue(builder, resultSet, columnName, resultSetNetadata.getColumnType(i));
+            if (i < columnCount) {
+                builder.append(", ");
+            }
+        }
+        builder.append(")");
     }
 
     private void appendColumnValue(final StringBuilder builder, final ResultSet resultSet, final String columnName,
