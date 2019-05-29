@@ -1,11 +1,6 @@
 package com.exasol.adapter.dialects;
 
-import org.yaml.snakeyaml.Yaml;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -13,9 +8,11 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.yaml.snakeyaml.Yaml;
+
 public class IntegrationTestConfig {
 
-    Map config;
+    Map<String, Object> config;
 
     private static Pattern jdbcConnectionStringRegEx = Pattern.compile("[/@]+([^:/@]+)(:([0-9]+))?(/.*)?");
 
@@ -23,13 +20,15 @@ public class IntegrationTestConfig {
         this(getMandatorySystemProperty("integrationtest.configfile"));
     }
 
-    public IntegrationTestConfig(String configFile) throws FileNotFoundException {
+    public IntegrationTestConfig(final String configFile) throws FileNotFoundException {
         try {
-            config = loadConfig(configFile);
-        } catch (FileNotFoundException ex) {
-            throw new FileNotFoundException("The specified integration test config file could not be found: " + configFile);
-        } catch (Exception ex) {
-            throw new RuntimeException("The specified integration test config file could not be parsed: " + configFile, ex);
+            this.config = loadConfig(configFile);
+        } catch (final FileNotFoundException ex) {
+            throw new FileNotFoundException(
+                    "The specified integration test config file could not be found: " + configFile);
+        } catch (final Exception ex) {
+            throw new RuntimeException("The specified integration test config file could not be parsed: " + configFile,
+                    ex);
         }
     }
 
@@ -80,6 +79,7 @@ public class IntegrationTestConfig {
     public String getImpalaJdbcPrefixPath() {
         return getProperty("impala", "jdbcDriverPath");
     }
+
     public String getHiveJdbcDriverPath() {
         return getProperty("hive", "jdbcDriverPath");
     }
@@ -145,13 +145,13 @@ public class IntegrationTestConfig {
     }
 
     public URI getURIFor(final String connectionString) {
-        Matcher matcher = jdbcConnectionStringRegEx.matcher(connectionString);
+        final Matcher matcher = jdbcConnectionStringRegEx.matcher(connectionString);
         if (!matcher.find()) {
             throw new RuntimeException("oracle.connectionString '" + connectionString + "' could not be parsed");
         }
 
-        String host = matcher.group(1);
-        String portMatch = matcher.group(3);
+        final String host = matcher.group(1);
+        final String portMatch = matcher.group(3);
         int port = -1;
         if (portMatch != null) {
             port = Integer.parseInt(portMatch);
@@ -159,12 +159,13 @@ public class IntegrationTestConfig {
         if (port == -1) {
             port = 1521;
         }
-        String path = matcher.group(4);
+        final String path = matcher.group(4);
 
         try {
             return new URI(null, null, host, port, path, null, null);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("oracle.connectionString '" + connectionString + "' could not be parsed: " + e.getMessage());
+        } catch (final URISyntaxException e) {
+            throw new RuntimeException(
+                    "oracle.connectionString '" + connectionString + "' could not be parsed: " + e.getMessage());
         }
     }
 
@@ -179,7 +180,7 @@ public class IntegrationTestConfig {
     public String getTeradataJdbcConnectionString() {
         return getProperty("teradata", "connectionString");
     }
-    
+
     public String getTeradataUser() {
         return getProperty("teradata", "user");
     }
@@ -195,14 +196,13 @@ public class IntegrationTestConfig {
     public List<String> getTeradataJdbcJars() {
         return getProperty("teradata", "jdbcDriverJars");
     }
-    
+
     public boolean teradataTestsRequested() {
         return getProperty("teradata", "runIntegrationTests", false);
     }
 
-    
     public String getDB2JdbcConnectionString() {
-    	return getProperty("db2", "connectionString");
+        return getProperty("db2", "connectionString");
     }
 
     public String getDB2User() {
@@ -220,7 +220,7 @@ public class IntegrationTestConfig {
     public List<String> getDB2JdbcJars() {
         return getProperty("db2", "jdbcDriverJars");
     }
-    
+
     public boolean DB2TestsRequested() {
         return getProperty("db2", "runIntegrationTests", false);
     }
@@ -289,43 +289,49 @@ public class IntegrationTestConfig {
         return getProperty("postgresql", "password");
     }
 
-    public String getBucketFSPassword(){
+    public String getBucketFSPassword() {
         return getProperty("general", "bucketFsPassword");
     }
 
-    public String getBucketFSURL(){
+    public String getBucketFSURL() {
         return getProperty("general", "bucketFsUrl");
     }
 
-    private Map loadConfig(String configFile) throws FileNotFoundException {
-        Yaml yaml = new Yaml();
-        File file = new File(configFile);
+    private Map<String, Object> loadConfig(final String configFile) throws FileNotFoundException {
+        final Yaml yaml = new Yaml();
+        final File file = new File(configFile);
         InputStream inputStream = null;
         inputStream = new FileInputStream(file);
-        return (Map) yaml.load(inputStream);
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> configuration = (Map<String, Object>) yaml.load(inputStream);
+        return configuration;
     }
 
-    private <T> T getProperty(String section, String key, T defaultValue) {
+    private <T> T getProperty(final String section, final String key, final T defaultValue) {
         try {
             return getProperty(section, key);
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             return defaultValue;
         }
     }
 
-    private <T> T getProperty(String section, String key) {
-        if (!config.containsKey(section)) {
+    private <T> T getProperty(final String section, final String key) {
+        if (!this.config.containsKey(section)) {
             throw new RuntimeException("Integration test config file has no section '" + section + "'");
         }
-        Map sectionMap = (Map)config.get(section);
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> sectionMap = (Map<String, Object>) this.config.get(section);
         if (!sectionMap.containsKey(key)) {
-            throw new RuntimeException("Integration test config file has no key '" + key + "' in section '" + section + "'");
+            throw new RuntimeException(
+                    "Integration test config file has no key '" + key + "' in section '" + section + "'");
         }
-        return (T)sectionMap.get(key);
+        @SuppressWarnings("unchecked")
+        final T property = (T) sectionMap.get(key);
+        return property;
     }
 
-    private static String getMandatorySystemProperty(String propertyName) {
-        String value = System.getProperty(propertyName);
+    private static String getMandatorySystemProperty(final String propertyName) {
+        final String value = System.getProperty(propertyName);
         if (value == null) {
             throw new RuntimeException("Integration tests requires system property '" + propertyName + "' to be set.");
         }

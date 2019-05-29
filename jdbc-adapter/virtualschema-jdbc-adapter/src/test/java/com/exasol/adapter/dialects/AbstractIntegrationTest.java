@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class AbstractIntegrationTest {
+public abstract class AbstractIntegrationTest {
     private static Connection connection;
     private static IntegrationTestConfig config;
 
