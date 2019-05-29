@@ -7,12 +7,14 @@ import com.exasol.adapter.*;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.*;
 
+import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.ANY_TABLE_TYPE;
+
 /**
  * Metadata reader that reads BigQuery-specific database metadata
  */
 public class BigQueryMetadataReader extends AbstractRemoteMetadataReader {
     /**
-     * Create a new instance of an {@link BigQueryMetadataReader}
+     * Create a new instance of a {@link BigQueryMetadataReader}
      *
      * @param connection JDBC connection to the remote data source
      * @param properties user-defined adapter properties
@@ -34,7 +36,7 @@ public class BigQueryMetadataReader extends AbstractRemoteMetadataReader {
 
     @Override
     public Set<String> getSupportedTableTypes() {
-        return Collections.emptySet();
+        return ANY_TABLE_TYPE;
     }
 
     @Override

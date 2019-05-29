@@ -45,14 +45,13 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTest {
         when(connectionMock.createStatement()).thenReturn(this.mockStatement);
         when(this.mockResultSet.getMetaData()).thenReturn(this.mockResultSetMetaData);
         when(this.mockStatement.executeQuery(any())).thenReturn(this.mockResultSet);
-        when(this.mockResultSet.next()).thenReturn(true, false);
-        when(this.mockResultSetMetaData.getColumnCount()).thenReturn(1);
     }
 
     @Test
     void testRewriteWithJdbcConnectionEmptyTable() throws AdapterException, SQLException {
         when(this.mockResultSet.next()).thenReturn(false);
         when(this.mockResultSetMetaData.getColumnName(1)).thenReturn("1");
+        when(this.mockResultSetMetaData.getColumnCount()).thenReturn(1);
         assertThat(this.queryRewriter.rewrite(this.statement, this.exaMetadata, AdapterProperties.emptyProperties()),
                 equalTo("SELECT * FROM VALUES (1) WHERE false"));
     }
@@ -62,6 +61,8 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTest {
         when(this.mockResultSetMetaData.getColumnName(1)).thenReturn("bigInt");
         when(this.mockResultSet.getInt("bigInt")).thenReturn(1);
         when(this.mockResultSetMetaData.getColumnType(1)).thenReturn(Types.BIGINT);
+        when(this.mockResultSetMetaData.getColumnCount()).thenReturn(1);
+        when(this.mockResultSet.next()).thenReturn(true, false);
         assertThat(this.queryRewriter.rewrite(this.statement, this.exaMetadata, AdapterProperties.emptyProperties()),
                 equalTo("SELECT * FROM VALUES (1)"));
     }
@@ -76,6 +77,8 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTest {
         when(this.mockResultSetMetaData.getColumnName(1)).thenReturn(columnName);
         when(this.mockResultSet.getDouble(columnName)).thenReturn(columnValue);
         when(this.mockResultSetMetaData.getColumnType(1)).thenReturn(type);
+        when(this.mockResultSetMetaData.getColumnCount()).thenReturn(1);
+        when(this.mockResultSet.next()).thenReturn(true, false);
         assertThat(this.queryRewriter.rewrite(this.statement, this.exaMetadata, AdapterProperties.emptyProperties()),
                 equalTo("SELECT * FROM VALUES (" + columnValue + ")"));
     }
@@ -85,24 +88,58 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTest {
         when(this.mockResultSetMetaData.getColumnName(1)).thenReturn("boolean");
         when(this.mockResultSet.getBoolean("boolean")).thenReturn(true);
         when(this.mockResultSetMetaData.getColumnType(1)).thenReturn(Types.BOOLEAN);
+        when(this.mockResultSetMetaData.getColumnCount()).thenReturn(1);
+        when(this.mockResultSet.next()).thenReturn(true, false);
         assertThat(this.queryRewriter.rewrite(this.statement, this.exaMetadata, AdapterProperties.emptyProperties()),
                 equalTo("SELECT * FROM VALUES (true)"));
     }
 
     @CsvSource({ "string, 12, hello", //
             "bytes, -3 ,D7A0FA33B3CDDF0EC29FC989CAB9AB512658F6E9A631FE5008610CBA24A64A5C", //
-            "date, 91, 1111-01-01", //
-            "time, 92, 12:10:09.000", //
-            "timestamp, 93, 2014-09-27 20:30:00.450000", //
-            "datetime, 93, 1111-01-01 12:10:09.000000" })
+            "time, 92, 12:10:09.000" })
     @ParameterizedTest
     void testRewriteWithVarcharValues(final String columnName, final int type, final String columnValue)
             throws AdapterException, SQLException {
         when(this.mockResultSetMetaData.getColumnName(1)).thenReturn(columnName);
         when(this.mockResultSet.getString(columnName)).thenReturn(columnValue);
         when(this.mockResultSetMetaData.getColumnType(1)).thenReturn(type);
+        when(this.mockResultSetMetaData.getColumnCount()).thenReturn(1);
+        when(this.mockResultSet.next()).thenReturn(true, false);
         assertThat(this.queryRewriter.rewrite(this.statement, this.exaMetadata, AdapterProperties.emptyProperties()),
                 equalTo("SELECT * FROM VALUES ('" + columnValue + "')"));
+    }
+
+    @CsvSource({ "1111-01-01, 01.01.1111", //
+            "2019-12-3, 03.12.2019", //
+            "2019-5-02, 02.05.2019" //
+    })
+    @ParameterizedTest
+    void testRewriteWithDate(final String valueToConvert, final String expectedValue)
+            throws AdapterException, SQLException {
+        when(this.mockResultSetMetaData.getColumnName(1)).thenReturn("date");
+        when(this.mockResultSet.getString("date")).thenReturn(valueToConvert);
+        when(this.mockResultSetMetaData.getColumnType(1)).thenReturn(91);
+        when(this.mockResultSetMetaData.getColumnCount()).thenReturn(1);
+        when(this.mockResultSet.next()).thenReturn(true, false);
+        assertThat(this.queryRewriter.rewrite(this.statement, this.exaMetadata, AdapterProperties.emptyProperties()),
+                equalTo("SELECT * FROM VALUES ('" + expectedValue + "')"));
+    }
+
+    @CsvSource({ "1111-01-01 12:10:09.000000, 01.01.1111 12:10:09.000", //
+            "1111-1-1 12:10:9.000000, 01.01.1111 12:10:09.000", //
+            "1111-1-1 12:10:9, 01.01.1111 12:10:09", //
+            "1111-1-1T1:2:30, 01.01.1111 01:02:30" //
+    })
+    @ParameterizedTest
+    void testRewriteWithDatetime(final String valueToConvert, final String expectedValue)
+            throws AdapterException, SQLException {
+        when(this.mockResultSetMetaData.getColumnName(1)).thenReturn("timestamp");
+        when(this.mockResultSet.getString("timestamp")).thenReturn(valueToConvert);
+        when(this.mockResultSetMetaData.getColumnType(1)).thenReturn(93);
+        when(this.mockResultSetMetaData.getColumnCount()).thenReturn(1);
+        when(this.mockResultSet.next()).thenReturn(true, false);
+        assertThat(this.queryRewriter.rewrite(this.statement, this.exaMetadata, AdapterProperties.emptyProperties()),
+                equalTo("SELECT * FROM VALUES ('" + expectedValue + "')"));
     }
 
     @Test

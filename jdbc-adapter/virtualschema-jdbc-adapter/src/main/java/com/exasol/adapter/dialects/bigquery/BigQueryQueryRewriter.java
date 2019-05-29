@@ -9,6 +9,9 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.sql.*;
 
+/**
+ * This class implements a BigQuery-specific query rewriter
+ */
 public class BigQueryQueryRewriter extends BaseQueryRewriter {
     private static final Logger LOGGER = Logger.getLogger(BigQueryQueryRewriter.class.getName());
 
@@ -32,18 +35,15 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
         LOGGER.fine(() -> "Query to rewrite: " + query);
         try (final ResultSet resultSet = this.connection.createStatement().executeQuery(query)) {
             builder.append("SELECT * FROM VALUES");
-            boolean first = true;
-            int rowEmpty = 0;
+            int rowNumber = 0;
             while (resultSet.next()) {
-                rowEmpty++;
-                if (!first) {
+                if (rowNumber > 0) {
                     builder.append(",");
-                } else {
-                    first = false;
                 }
                 appendRow(builder, resultSet, resultSet.getMetaData());
+                ++rowNumber;
             }
-            if (rowEmpty == 0) {
+            if (rowNumber == 0) {
                 builder.append(" (1) WHERE false");
                 return builder.toString();
             }
@@ -59,16 +59,15 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
     }
 
     private void appendRow(final StringBuilder builder, final ResultSet resultSet,
-            final ResultSetMetaData resultSetNetadata) throws SQLException {
-        final int columnCount = resultSetNetadata.getColumnCount();
-        LOGGER.info("Column count: " + resultSetNetadata.getColumnCount());
+            final ResultSetMetaData resultSetMetadata) throws SQLException {
+        final int columnCount = resultSetMetadata.getColumnCount();
         builder.append(" (");
-        for (int i = 1; i <= columnCount; i++) {
-            final String columnName = resultSetNetadata.getColumnName(i);
-            appendColumnValue(builder, resultSet, columnName, resultSetNetadata.getColumnType(i));
-            if (i < columnCount) {
+        for (int i = 1; i <= columnCount; ++i) {
+            final String columnName = resultSetMetadata.getColumnName(i);
+            if (i > 1) {
                 builder.append(", ");
             }
+            appendColumnValue(builder, resultSet, columnName, resultSetMetadata.getColumnType(i));
         }
         builder.append(")");
     }
@@ -87,15 +86,76 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
             builder.append(resultSet.getBoolean(columnName));
             break;
         case Types.DATE:
+            builder.append("'");
+            builder.append(castDate(resultSet.getString(columnName)));
+            builder.append("'");
+            break;
         case Types.TIMESTAMP:
+            builder.append("'");
+            builder.append(castTimestamp(resultSet.getString(columnName)));
+            builder.append("'");
+            break;
+        case Types.VARBINARY:
         case Types.TIME:
         case Types.VARCHAR:
-        case Types.VARBINARY:
         default:
             builder.append("'");
             builder.append(resultSet.getString(columnName));
             builder.append("'");
             break;
         }
+    }
+
+    private String castTimestamp(final String timestampToCast) {
+        final String[] splitTimestamp = getSplitTimestamp(timestampToCast);
+        final StringBuilder builder = new StringBuilder();
+        builder.append(castDate(splitTimestamp[0]));
+        builder.append(" ");
+        builder.append(getTime(splitTimestamp[1]));
+        return builder.toString();
+    }
+
+    private String[] getSplitTimestamp(final String timestampToCast) {
+        if (timestampToCast.contains("T")) {
+            return timestampToCast.split("T");
+        } else {
+            return timestampToCast.split(" ");
+        }
+    }
+
+    private String getTime(final String time) {
+        final String[] splitTime = time.split("\\.");
+        final String[] timeWithoutSeconds = splitTime[0].split(":");
+        final StringBuilder builder = new StringBuilder();
+        final int timeWithoutSecondsLength = timeWithoutSeconds.length;
+        for (int i = 0; i <= timeWithoutSecondsLength - 1; ++i) {
+            if (i <= timeWithoutSecondsLength - 1 && timeWithoutSeconds[i].length() != 2) {
+                builder.append("0");
+            }
+            builder.append(timeWithoutSeconds[i]);
+            if (i < timeWithoutSecondsLength - 1) {
+                builder.append(":");
+            }
+        }
+        if (splitTime.length > 1) {
+            builder.append(".");
+            builder.append(splitTime[1], 0, 3);
+        }
+        return builder.toString();
+    }
+
+    private String castDate(final String dateToCast) {
+        final String[] dates = dateToCast.split("-");
+        final StringBuilder builder = new StringBuilder();
+        for (int i = dates.length - 1; i >= 0; --i) {
+            if (i > 0 && dates[i].length() != 2) {
+                builder.append("0");
+            }
+            builder.append(dates[i]);
+            if (i > 0) {
+                builder.append(".");
+            }
+        }
+        return builder.toString();
     }
 }

@@ -125,11 +125,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String getStringLiteral(final String value) {
-        return "'" + value.replace("'", "''") + "'";
-    }
-
-    @Override
     public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new PostgresSQLSqlGenerationVisitor(this, context);
     }

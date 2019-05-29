@@ -102,15 +102,6 @@ class AthenaSqlDialectTest {
         assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
     }
 
-    @ValueSource(strings = { "ab:\'ab\'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
-    @ParameterizedTest
-    void testGetLiteralString(final String definition) {
-        final int colonPosition = definition.indexOf(':');
-        final String original = definition.substring(0, colonPosition);
-        final String literal = definition.substring(colonPosition + 1);
-        assertThat(this.dialect.getStringLiteral(original), equalTo(literal));
-    }
-
     @Test
     void testMetadataReaderClass() {
         assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),

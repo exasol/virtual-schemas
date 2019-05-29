@@ -101,11 +101,6 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String getStringLiteral(final String value) {
-        return "'" + value.replace("'", "''") + "'";
-    }
-
-    @Override
     public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new RedshiftSqlGenerationVisitor(this, context);
     }

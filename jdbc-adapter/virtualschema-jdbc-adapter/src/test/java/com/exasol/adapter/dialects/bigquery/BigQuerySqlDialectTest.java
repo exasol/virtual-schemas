@@ -26,7 +26,7 @@ class BigQuerySqlDialectTest {
 
     @Test
     void testGetPublicName() {
-        assertThat(BigQuerySqlDialect.getPublicName(), equalTo("BIG QUERY"));
+        assertThat(BigQuerySqlDialect.getPublicName(), equalTo("BIGQUERY"));
     }
 
     @Test
@@ -92,15 +92,6 @@ class BigQuerySqlDialectTest {
     void testGetDefaultNullSorting() {
         assertThat(this.dialect.getDefaultNullSorting(),
                 equalTo(SqlDialect.NullSorting.NULLS_SORTED_AT_END));
-    }
-
-    @ValueSource(strings = { "ab:\'ab\'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''"})
-    @ParameterizedTest
-    void testGetLiteralString(final String definition) {
-        final int colonPosition = definition.indexOf(':');
-        final String original = definition.substring(0, colonPosition);
-        final String literal = definition.substring(colonPosition + 1);
-        assertThat(this.dialect.getStringLiteral(original), equalTo(literal));
     }
 
     @Test

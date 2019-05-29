@@ -8,6 +8,7 @@ import org.mockito.*;
 
 import java.sql.*;
 
+import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.ANY_TABLE_TYPE;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -35,7 +36,7 @@ class BigQueryMetadataReaderTest {
 
     @Test
     void testGetSupportedTableTypes() {
-        assertThat(this.reader.getSupportedTableTypes(), emptyIterableOf(String.class));
+        assertThat(this.reader.getSupportedTableTypes(), equalTo(ANY_TABLE_TYPE));
     }
 
     @Test
