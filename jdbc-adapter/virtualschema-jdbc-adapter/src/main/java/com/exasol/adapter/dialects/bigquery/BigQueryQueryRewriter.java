@@ -2,6 +2,7 @@ package com.exasol.adapter.dialects.bigquery;
 
 import java.sql.*;
 import java.util.logging.*;
+import java.util.regex.*;
 
 import com.exasol.*;
 import com.exasol.adapter.*;
@@ -14,6 +15,9 @@ import com.exasol.adapter.sql.*;
  */
 public class BigQueryQueryRewriter extends BaseQueryRewriter {
     private static final Logger LOGGER = Logger.getLogger(BigQueryQueryRewriter.class.getName());
+    private static final double[] TEN_POWERS = { 10d, 100d, 1000d, 10000d, 100000d, 1000000d };
+    private static final Pattern DATE_PATTERN = Pattern.compile("(\\d{4})-(\\d{1,2})-(\\d{1,2})");
+    private static final Pattern TIME_PATTERN = Pattern.compile("(\\d{1,2}):(\\d{1,2}):(\\d{1,2})(?:\\.(\\d{1,6})?)?");
 
     /**
      * Create a new instance of a {@link BigQueryQueryRewriter}
@@ -111,7 +115,7 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
         final StringBuilder builder = new StringBuilder();
         builder.append(castDate(splitTimestamp[0]));
         builder.append(" ");
-        builder.append(getTime(splitTimestamp[1]));
+        builder.append(castTime(splitTimestamp[1]));
         return builder.toString();
     }
 
@@ -123,39 +127,35 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
         }
     }
 
-    private String getTime(final String time) {
-        final String[] splitTime = time.split("\\.");
-        final String[] timeWithoutSeconds = splitTime[0].split(":");
-        final StringBuilder builder = new StringBuilder();
-        final int timeWithoutSecondsLength = timeWithoutSeconds.length;
-        for (int i = 0; i <= timeWithoutSecondsLength - 1; ++i) {
-            if (i <= timeWithoutSecondsLength - 1 && timeWithoutSeconds[i].length() != 2) {
-                builder.append("0");
+    private String castTime(final String timeToCast) {
+        final Matcher matcher = TIME_PATTERN.matcher(timeToCast);
+        if (matcher.matches()) {
+            final int hour = Integer.parseInt(matcher.group(1));
+            final int minute = Integer.parseInt(matcher.group(2));
+            final int second = Integer.parseInt(matcher.group(3));
+            final String milliseconds = matcher.group(4);
+            if (milliseconds != null) {
+                final int millisecondsInt = Integer.parseInt(milliseconds);
+                final int millisecondsRounded = (int) Math
+                        .round(millisecondsInt / TEN_POWERS[milliseconds.length() - 1] * 1000);
+                return String.format("%02d:%02d:%02d.%03d", hour, minute, second, millisecondsRounded);
+            } else {
+                return String.format("%02d:%02d:%02d", hour, minute, second);
             }
-            builder.append(timeWithoutSeconds[i]);
-            if (i < timeWithoutSecondsLength - 1) {
-                builder.append(":");
-            }
+        } else {
+            throw new IllegalArgumentException("");
         }
-        if (splitTime.length > 1) {
-            builder.append(".");
-            builder.append(splitTime[1], 0, 3);
-        }
-        return builder.toString();
     }
 
     private String castDate(final String dateToCast) {
-        final String[] dates = dateToCast.split("-");
-        final StringBuilder builder = new StringBuilder();
-        for (int i = dates.length - 1; i >= 0; --i) {
-            if (i > 0 && dates[i].length() != 2) {
-                builder.append("0");
-            }
-            builder.append(dates[i]);
-            if (i > 0) {
-                builder.append(".");
-            }
+        final Matcher matcher = DATE_PATTERN.matcher(dateToCast);
+        if (matcher.matches()) {
+            final int year = Integer.parseInt(matcher.group(1));
+            final int month = Integer.parseInt(matcher.group(2));
+            final int day = Integer.parseInt(matcher.group(3));
+            return String.format("%02d.%02d.%04d", day, month, year);
+        } else {
+            throw new IllegalArgumentException("");
         }
-        return builder.toString();
     }
 }
