@@ -1,15 +1,15 @@
 package com.exasol.adapter.dialects.impala;
 
-import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.IdentifierConverter;
-import com.exasol.adapter.dialects.hive.HiveMetadataReader;
-import com.exasol.adapter.jdbc.IdentifierCaseHandling;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.IdentifierConverter;
+import com.exasol.adapter.jdbc.IdentifierCaseHandling;
 
 class ImpalaMetadataReaderTest {
     private ImpalaMetadataReader impalaMetadataReader;

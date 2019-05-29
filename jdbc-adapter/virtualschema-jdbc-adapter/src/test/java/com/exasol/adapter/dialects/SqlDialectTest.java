@@ -88,14 +88,7 @@ class SqlDialectTest {
 
     @Test
     void testInvalidAliases() throws Exception {
-        final TableMetadata clicksMeta = getTestTableMetadata();
-        final SqlTable fromClause = new SqlTable("TEST", clicksMeta);
-        final SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
-        final SqlNode node = new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
-
         final SqlGenerationContext context = new SqlGenerationContext("", "schema", false);
-
-        // Test non-simple scalar functions
         for (final ScalarFunction function : ScalarFunction.values()) {
             if (!function.isSimple()) {
                 final Map<ScalarFunction, String> scalarAliases = ImmutableMap.of(function, "ALIAS");

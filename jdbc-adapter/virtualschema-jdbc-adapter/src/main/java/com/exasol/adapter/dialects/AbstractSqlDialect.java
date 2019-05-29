@@ -16,8 +16,7 @@ import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.sql.*;
 
 /**
- * Abstract implementation of a dialect. We recommend that every dialect should
- * extend this abstract class.
+ * Abstract implementation of a dialect. We recommend that every dialect should extend this abstract class.
  */
 public abstract class AbstractSqlDialect implements SqlDialect {
     private static final Pattern BOOLEAN_PROPERTY_VALUE_PATTERN = Pattern.compile("^TRUE$|^FALSE$",
@@ -42,23 +41,19 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     }
 
     /**
-     * Create the {@link RemoteMetadataReader} that is used to get the database
-     * metadata from the remote source.
+     * Create the {@link RemoteMetadataReader} that is used to get the database metadata from the remote source.
      * <p>
-     * Override this method in the concrete SQL dialect implementation to choose the
-     * right metadata reader.
+     * Override this method in the concrete SQL dialect implementation to choose the right metadata reader.
      *
      * @return metadata reader
      */
     protected abstract RemoteMetadataReader createRemoteMetadataReader();
 
     /**
-     * Create the {@link QueryRewriter} that is used to create the final SQL query
-     * sent back from the Virtual Schema backend to the Virtual Schema frontend in a
-     * push-down scenario.
+     * Create the {@link QueryRewriter} that is used to create the final SQL query sent back from the Virtual Schema
+     * backend to the Virtual Schema frontend in a push-down scenario.
      * <p>
-     * Override this method in the concrete SQL dialect implementation to choose the
-     * right query rewriter.
+     * Override this method in the concrete SQL dialect implementation to choose the right query rewriter.
      *
      * @return query rewriter
      */
@@ -139,11 +134,15 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         final List<String> allProperties = new ArrayList<>(this.properties.keySet());
         for (final String property : allProperties) {
             if (!getSupportedProperties().contains(property)) {
-                throw new PropertyValidationException(
-                        "The dialect " + this.properties.getSqlDialect() + " does not support " + property
-                                + " property. Please, do not set the " + property + " property.");
+                final String unsupportedElement = property;
+                throw new PropertyValidationException(createUnsupportedElementMessage(unsupportedElement, property));
             }
         }
+    }
+
+    protected String createUnsupportedElementMessage(final String unsupportedElement, final String property) {
+        return "The dialect " + this.properties.getSqlDialect() + " does not support " + unsupportedElement
+                + " property. Please, do not set the " + property + " property.";
     }
 
     protected abstract List<String> getSupportedProperties();
@@ -169,16 +168,14 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     private void validateCatalogNameProperty() throws PropertyValidationException {
         if (this.properties.containsKey(CATALOG_NAME_PROPERTY)
                 && (supportsJdbcCatalogs() == StructureElementSupport.NONE)) {
-            throw new PropertyValidationException("The dialect " + this.properties.getSqlDialect()
-                    + " does not support catalogs. Please, do not set the " + CATALOG_NAME_PROPERTY + " property.");
+            throw new PropertyValidationException(createUnsupportedElementMessage("catalogs", CATALOG_NAME_PROPERTY));
         }
     }
 
     private void validateSchemaNameProperty() throws PropertyValidationException {
         if (this.properties.containsKey(SCHEMA_NAME_PROPERTY)
                 && (supportsJdbcSchemas() == StructureElementSupport.NONE)) {
-            throw new PropertyValidationException("The dialect " + this.properties.getSqlDialect()
-                    + " does not support schemas. Please, do not set the " + SCHEMA_NAME_PROPERTY + " property.");
+            throw new PropertyValidationException(createUnsupportedElementMessage("schemas", SCHEMA_NAME_PROPERTY));
         }
     }
 
