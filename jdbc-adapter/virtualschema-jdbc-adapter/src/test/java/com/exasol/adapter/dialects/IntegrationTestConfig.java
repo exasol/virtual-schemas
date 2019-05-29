@@ -12,7 +12,7 @@ import org.yaml.snakeyaml.Yaml;
 
 public class IntegrationTestConfig {
 
-    Map config;
+    Map<String, Object> config;
 
     private static Pattern jdbcConnectionStringRegEx = Pattern.compile("[/@]+([^:/@]+)(:([0-9]+))?(/.*)?");
 
@@ -297,12 +297,14 @@ public class IntegrationTestConfig {
         return getProperty("general", "bucketFsUrl");
     }
 
-    private Map loadConfig(final String configFile) throws FileNotFoundException {
+    private Map<String, Object> loadConfig(final String configFile) throws FileNotFoundException {
         final Yaml yaml = new Yaml();
         final File file = new File(configFile);
         InputStream inputStream = null;
         inputStream = new FileInputStream(file);
-        return (Map) yaml.load(inputStream);
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> configuration = (Map<String, Object>) yaml.load(inputStream);
+        return configuration;
     }
 
     private <T> T getProperty(final String section, final String key, final T defaultValue) {
@@ -317,12 +319,15 @@ public class IntegrationTestConfig {
         if (!this.config.containsKey(section)) {
             throw new RuntimeException("Integration test config file has no section '" + section + "'");
         }
-        final Map sectionMap = (Map) this.config.get(section);
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> sectionMap = (Map<String, Object>) this.config.get(section);
         if (!sectionMap.containsKey(key)) {
             throw new RuntimeException(
                     "Integration test config file has no key '" + key + "' in section '" + section + "'");
         }
-        return (T) sectionMap.get(key);
+        @SuppressWarnings("unchecked")
+        final T property = (T) sectionMap.get(key);
+        return property;
     }
 
     private static String getMandatorySystemProperty(final String propertyName) {
