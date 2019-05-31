@@ -137,12 +137,12 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
             final int hour = Integer.parseInt(matcher.group(1));
             final int minute = Integer.parseInt(matcher.group(2));
             final int second = Integer.parseInt(matcher.group(3));
-            final String nanoseconds = matcher.group(4);
-            if (nanoseconds != null) {
-                final int nanosecondsInt = Integer.parseInt(nanoseconds);
-                final int nanosecondsRounded = (int) Math
-                        .round(nanosecondsInt / TEN_POWERS[nanoseconds.length() - 1] * 1000);
-                return String.format("%02d:%02d:%02d.%03d", hour, minute, second, nanosecondsRounded);
+            final String fractionOfSecond = matcher.group(4);
+            if (fractionOfSecond != null) {
+                final int fractionOfSecondInt = Integer.parseInt(fractionOfSecond);
+                final int fractionOfSecondRounded = (int) Math
+                        .round(fractionOfSecondInt / TEN_POWERS[fractionOfSecond.length() - 1] * 1000);
+                return String.format("%02d:%02d:%02d.%03d", hour, minute, second, fractionOfSecondRounded);
             } else {
                 return String.format("%02d:%02d:%02d", hour, minute, second);
             }
