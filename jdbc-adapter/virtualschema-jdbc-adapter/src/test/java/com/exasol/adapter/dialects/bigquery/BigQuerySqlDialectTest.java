@@ -6,16 +6,17 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.sql.*;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import com.exasol.adapter.*;
-import org.junit.jupiter.params.*;
-import org.junit.jupiter.params.provider.*;
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.sql.AggregateFunction;
+import com.exasol.adapter.sql.ScalarFunction;
 
 class BigQuerySqlDialectTest {
     private BigQuerySqlDialect dialect;
