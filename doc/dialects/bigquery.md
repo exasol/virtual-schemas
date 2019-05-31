@@ -48,21 +48,20 @@ Versions can differ from the list above.
 1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm) 
 1. Upload the driver to BucketFS
 
-
 ## Connecting to Big Query
 
 1. Create schema:
     ```sql
-    CREATE SCHEMA adapter;
+    CREATE SCHEMA ADAPTER;
     ```
 2. Create Adapter Script
 
     You install the adapter script via the special SQL command `CREATE JAVA ADAPTER SCRIPT`. 
-    Please remember to check the versions of your jar-files after downloading driver. They can differ from the list below.
+    Please remember to check the versions of your JAR files after downloading driver. They can differ from the list below.
 
     ```sql
     --/
-    CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
+    CREATE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
     %jar /buckets/bucketfs1/jdbc/virtualschema-jdbc-adapter-dist-1.17.0.jar;
     %jar /buckets/bfsdefault/jars/avro-1.8.2.jar;
@@ -88,19 +87,19 @@ Versions can differ from the list above.
 
     Please follow [this article](https://cloud.google.com/video-intelligence/docs/common/auth]) to get Google service account credentials.
 
-    Upload the key to EXAOperation, then create connection:
+    Upload the key to EXAOperation, then create a named connection:
 
     ```sql
     CREATE OR REPLACE CONNECTION BIGQUERY_CONNECTION
     TO 'jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;ProjectId=<your_project_id>;OAuthType=0;OAuthServiceAcctEmail=<your_service_account_email>;OAuthPvtKeyPath=/<path_to_your_bucket>/<name_of your_key_file>';
     ```
-    Additional information about connection string you can find [here](https://www.simba.com/products/BigQuery/doc/JDBC_InstallGuide/content/jdbc/bq/authenticating/serviceaccount.htm]);
+    You can find additional information about the [JDBC connection string in the Big Query JDBC installation guide](https://www.simba.com/products/BigQuery/doc/JDBC_InstallGuide/content/jdbc/bq/authenticating/serviceaccount.htm]);
 
 4. Creating a Virtual Schema
 
     ```sql
     CREATE VIRTUAL SCHEMA "bigquerytest"
-    USING ADAPTER.jdbc_adapter
+    USING ADAPTER.JDBC_ADAPTER
     WITH
         SQL_DIALECT = 'BIGQUERY'
         CONNECTION_NAME = 'BIGQUERY_CONNECTION'

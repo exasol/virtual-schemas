@@ -17,7 +17,7 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
     private static final Logger LOGGER = Logger.getLogger(BigQueryQueryRewriter.class.getName());
     private static final double[] TEN_POWERS = { 10d, 100d, 1000d, 10000d, 100000d, 1000000d };
     private static final Pattern DATE_PATTERN = Pattern.compile("(\\d{4})-(\\d{1,2})-(\\d{1,2})");
-    private static final Pattern TIME_PATTERN = Pattern.compile("(\\d{1,2}):(\\d{1,2}):(\\d{1,2})(?:\\.(\\d{1,6})?)?");
+    private static final Pattern TIME_PATTERN = Pattern.compile("(\\d{1,2}):(\\d{1,2}):(\\d{1,2})(?:\\.(\\d{1,6}))?");
 
     /**
      * Create a new instance of a {@link BigQueryQueryRewriter}
@@ -44,7 +44,8 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
                 if (rowNumber > 0) {
                     builder.append(",");
                 }
-                appendRow(builder, resultSet, resultSet.getMetaData());
+                final ResultSetMetaData metaData = resultSet.getMetaData();
+                appendRow(builder, resultSet, metaData);
                 ++rowNumber;
             }
             if (rowNumber == 0) {
@@ -111,12 +112,15 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
     }
 
     private String castTimestamp(final String timestampToCast) {
-        final String[] splitTimestamp = getSplitTimestamp(timestampToCast);
-        final StringBuilder builder = new StringBuilder();
-        builder.append(castDate(splitTimestamp[0]));
-        builder.append(" ");
-        builder.append(castTime(splitTimestamp[1]));
-        return builder.toString();
+        if (timestampToCast != null) {
+            final StringBuilder builder = new StringBuilder();
+            final String[] splitTimestamp = getSplitTimestamp(timestampToCast);
+            builder.append(castDate(splitTimestamp[0]));
+            builder.append(" ");
+            builder.append(castTime(splitTimestamp[1]));
+            return builder.toString();
+        }
+        return null;
     }
 
     private String[] getSplitTimestamp(final String timestampToCast) {
@@ -133,29 +137,33 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
             final int hour = Integer.parseInt(matcher.group(1));
             final int minute = Integer.parseInt(matcher.group(2));
             final int second = Integer.parseInt(matcher.group(3));
-            final String milliseconds = matcher.group(4);
-            if (milliseconds != null) {
-                final int millisecondsInt = Integer.parseInt(milliseconds);
-                final int millisecondsRounded = (int) Math
-                        .round(millisecondsInt / TEN_POWERS[milliseconds.length() - 1] * 1000);
-                return String.format("%02d:%02d:%02d.%03d", hour, minute, second, millisecondsRounded);
+            final String nanoseconds = matcher.group(4);
+            if (nanoseconds != null) {
+                final int nanosecondsInt = Integer.parseInt(nanoseconds);
+                final int nanosecondsRounded = (int) Math
+                        .round(nanosecondsInt / TEN_POWERS[nanoseconds.length() - 1] * 1000);
+                return String.format("%02d:%02d:%02d.%03d", hour, minute, second, nanosecondsRounded);
             } else {
                 return String.format("%02d:%02d:%02d", hour, minute, second);
             }
         } else {
-            throw new IllegalArgumentException("");
+            throw new IllegalArgumentException("Time does not match required format: [H]H:[M]M:[S]S[.DDDDDD]]");
         }
     }
 
     private String castDate(final String dateToCast) {
-        final Matcher matcher = DATE_PATTERN.matcher(dateToCast);
-        if (matcher.matches()) {
-            final int year = Integer.parseInt(matcher.group(1));
-            final int month = Integer.parseInt(matcher.group(2));
-            final int day = Integer.parseInt(matcher.group(3));
-            return String.format("%02d.%02d.%04d", day, month, year);
+        if (dateToCast != null) {
+            final Matcher matcher = DATE_PATTERN.matcher(dateToCast);
+            if (matcher.matches()) {
+                final int year = Integer.parseInt(matcher.group(1));
+                final int month = Integer.parseInt(matcher.group(2));
+                final int day = Integer.parseInt(matcher.group(3));
+                return String.format("%02d.%02d.%04d", day, month, year);
+            } else {
+                throw new IllegalArgumentException("Date does not match required format: YYYY-[M]M-[D]D");
+            }
         } else {
-            throw new IllegalArgumentException("");
+            return null;
         }
     }
 }
