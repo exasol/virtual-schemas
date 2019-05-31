@@ -85,7 +85,7 @@ Versions can differ from the list above.
 
 3. Create a connection
 
-    Please follow [this article](https://cloud.google.com/video-intelligence/docs/common/auth]) to get Google service account credentials.
+    Please follow [this article](https://cloud.google.com/video-intelligence/docs/common/auth) to get Google service account credentials.
 
     Upload the key to EXAOperation, then create a named connection:
 
