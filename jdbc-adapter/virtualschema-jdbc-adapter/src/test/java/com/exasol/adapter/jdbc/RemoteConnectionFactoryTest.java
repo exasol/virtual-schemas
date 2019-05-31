@@ -24,6 +24,7 @@ import com.exasol.adapter.AdapterProperties;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
 class RemoteConnectionFactoryTest {
+    private static final String DERBY_INSTANT_JDBC_CONNECTION_STRING = "jdbc:derby:memory:test;create=true;";
     private static final String USER = "testUserName";
     private Map<String, String> rawProperties;
 
@@ -43,7 +44,7 @@ class RemoteConnectionFactoryTest {
         when(this.exaMetadataMock.getConnection("testConnection")).thenReturn(this.exaConnectionMock);
         when(this.exaConnectionMock.getUser()).thenReturn(USER);
         when(this.exaConnectionMock.getPassword()).thenReturn("pass");
-        when(this.exaConnectionMock.getAddress()).thenReturn("jdbc:derby:memory:test;create=true;");
+        when(this.exaConnectionMock.getAddress()).thenReturn(DERBY_INSTANT_JDBC_CONNECTION_STRING);
         assertThat(createConnection().getMetaData().getUserName(), equalTo(USER));
     }
 
@@ -56,7 +57,7 @@ class RemoteConnectionFactoryTest {
 
     @Test
     void testCreateConnectionWithConnectionDetailsInProperties() throws ExaConnectionAccessException, SQLException {
-        this.rawProperties.put("CONNECTION_STRING", "jdbc:derby:memory:test;create=true;");
+        this.rawProperties.put("CONNECTION_STRING", DERBY_INSTANT_JDBC_CONNECTION_STRING);
         this.rawProperties.put("USERNAME", USER);
         this.rawProperties.put("PASSWORD", "testPassword");
         assertThat(createConnection().getMetaData().getUserName(), equalTo(USER));
@@ -66,7 +67,7 @@ class RemoteConnectionFactoryTest {
     void testCreateConnectionWithConnectionDetailsInPropertiesAndEmptyConnectionName()
             throws ExaConnectionAccessException, SQLException {
         this.rawProperties.put("CONNECTION_NAME", "");
-        this.rawProperties.put("CONNECTION_STRING", "jdbc:derby:memory:test;create=true;");
+        this.rawProperties.put("CONNECTION_STRING", DERBY_INSTANT_JDBC_CONNECTION_STRING);
         this.rawProperties.put("USERNAME", USER);
         this.rawProperties.put("PASSWORD", "testPassword");
         assertThat(createConnection().getMetaData().getUserName(), equalTo(USER));
@@ -78,6 +79,14 @@ class RemoteConnectionFactoryTest {
         when(this.exaMetadataMock.getConnection("testConnection"))
                 .thenThrow(new ExaConnectionAccessException("FAKE connection access exception"));
         this.rawProperties.put("CONNECTION_NAME", "testConnection");
+        assertThrows(RemoteConnectionException.class, () -> createConnection());
+    }
+
+    @Test
+    void testCreateConnectionWithKerberosDetailsInNamedConnection() {
+        this.rawProperties.put("CONNECTION_STRING", DERBY_INSTANT_JDBC_CONNECTION_STRING);
+        this.rawProperties.put("USERNAME", USER);
+        this.rawProperties.put("PASSWORD", "ExaAuthType=Kerberos;invalid");
         assertThrows(RemoteConnectionException.class, () -> createConnection());
     }
 }
