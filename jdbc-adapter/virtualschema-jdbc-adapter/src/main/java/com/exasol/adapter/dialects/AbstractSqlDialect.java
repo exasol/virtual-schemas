@@ -122,10 +122,11 @@ public abstract class AbstractSqlDialect implements SqlDialect {
 
     @Override
     public String getStringLiteral(final String value) {
-        final StringBuilder builder = new StringBuilder("'");
-        builder.append(value.replaceAll("'", "''"));
-        builder.append("'");
-        return builder.toString();
+        if (value == null) {
+            return "NULL";
+        } else {
+            return "'" + value.replaceAll("'", "''") + "'";
+        }
     }
 
     @Override

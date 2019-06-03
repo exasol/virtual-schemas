@@ -1,25 +1,30 @@
 package com.exasol.adapter.dialects.bigquery;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.sql.*;
 
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.*;
-import org.junit.jupiter.params.*;
-import org.junit.jupiter.params.provider.*;
-import org.mockito.*;
-import org.mockito.junit.jupiter.*;
-import org.mockito.quality.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
-import com.exasol.*;
-import com.exasol.adapter.*;
+import com.exasol.ExaMetadata;
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.*;
-import com.exasol.adapter.sql.*;
+import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
+import com.exasol.adapter.sql.SqlStatement;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -161,5 +166,61 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTest {
         when(this.mockResultSetMetaData.getColumnCount()).thenReturn(3);
         assertThat(this.queryRewriter.rewrite(this.statement, this.exaMetadata, AdapterProperties.emptyProperties()),
                 equalTo("SELECT * FROM VALUES (1, 'foo', true), (2, 'bar', false), (3, 'cat', true)"));
+    }
+
+    @ValueSource(ints = { Types.VARCHAR, Types.TIME, Types.VARBINARY })
+    @ParameterizedTest
+    void testRewriteStringWithValueNull(final int type) throws AdapterException, SQLException {
+        when(this.mockResultSet.getString(any())).thenReturn(null);
+        mockOneRowWithOneColumnOfType(type);
+        assertNullValueUsedInSelect();
+    }
+
+    private void mockOneRowWithOneColumnOfType(final int type) throws SQLException {
+        when(this.mockResultSet.next()).thenReturn(true, false);
+        when(this.mockResultSetMetaData.getColumnType(1)).thenReturn(type);
+        when(this.mockResultSetMetaData.getColumnCount()).thenReturn(1);
+        when(this.mockResultSet.wasNull()).thenReturn(true);
+    }
+
+    private void assertNullValueUsedInSelect() throws AdapterException, SQLException {
+        assertThat(this.queryRewriter.rewrite(this.statement, this.exaMetadata, AdapterProperties.emptyProperties()),
+                equalTo("SELECT * FROM VALUES (NULL)"));
+    }
+
+    @Test
+    void testRewriteBigIntWithValueNull() throws AdapterException, SQLException {
+        when(this.mockResultSet.getInt(any())).thenReturn(0);
+        mockOneRowWithOneColumnOfType(Types.BIGINT);
+        assertNullValueUsedInSelect();
+    }
+
+    @Test
+    void testRewriteTimestampWithValueNull() throws AdapterException, SQLException {
+        when(this.mockResultSet.getString(any())).thenReturn(null);
+        mockOneRowWithOneColumnOfType(Types.TIMESTAMP);
+        assertNullValueUsedInSelect();
+    }
+
+    @Test
+    void testRewriteDateWithValueNull() throws AdapterException, SQLException {
+        when(this.mockResultSet.getString(any())).thenReturn(null);
+        mockOneRowWithOneColumnOfType(Types.DATE);
+        assertNullValueUsedInSelect();
+    }
+
+    @Test
+    void testRewriteBooleanWithValueNull() throws AdapterException, SQLException {
+        when(this.mockResultSet.getBoolean(any())).thenReturn(false);
+        mockOneRowWithOneColumnOfType(Types.BOOLEAN);
+        assertNullValueUsedInSelect();
+    }
+
+    @ValueSource(ints = { Types.DOUBLE, Types.NUMERIC })
+    @ParameterizedTest
+    void testRewriteNumericWithValueNull(final int type) throws AdapterException, SQLException {
+        when(this.mockResultSet.getDouble(any())).thenReturn(0.0);
+        mockOneRowWithOneColumnOfType(type);
+        assertNullValueUsedInSelect();
     }
 }
