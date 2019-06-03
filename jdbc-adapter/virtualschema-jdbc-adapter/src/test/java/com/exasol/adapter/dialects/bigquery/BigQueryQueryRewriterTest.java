@@ -94,8 +94,7 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTest {
                 equalTo("SELECT * FROM VALUES (true)"));
     }
 
-    @CsvSource({ "string, 12, hello", //
-            "bytes, -3 ,D7A0FA33B3CDDF0EC29FC989CAB9AB512658F6E9A631FE5008610CBA24A64A5C", //
+    @CsvSource({"bytes, -3 ,D7A0FA33B3CDDF0EC29FC989CAB9AB512658F6E9A631FE5008610CBA24A64A5C", //
             "time, 92, 12:10:09.000" })
     @ParameterizedTest
     void testRewriteWithVarcharValues(final String columnName, final int type, final String columnValue)
@@ -107,6 +106,20 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTest {
         when(this.mockResultSet.next()).thenReturn(true, false);
         assertThat(this.queryRewriter.rewrite(this.statement, this.exaMetadata, AdapterProperties.emptyProperties()),
                 equalTo("SELECT * FROM VALUES ('" + columnValue + "')"));
+    }
+
+    @CsvSource({ "string, 12, hello, hello", //
+          "string, 12, i'm, i''m"})
+    @ParameterizedTest
+    void testRewriteWithStringValues(final String columnName, final int type, final String columnValue, final String resultValue)
+          throws AdapterException, SQLException {
+        when(this.mockResultSetMetaData.getColumnName(1)).thenReturn(columnName);
+        when(this.mockResultSet.getString(columnName)).thenReturn(columnValue);
+        when(this.mockResultSetMetaData.getColumnType(1)).thenReturn(type);
+        when(this.mockResultSetMetaData.getColumnCount()).thenReturn(1);
+        when(this.mockResultSet.next()).thenReturn(true, false);
+        assertThat(this.queryRewriter.rewrite(this.statement, this.exaMetadata, AdapterProperties.emptyProperties()),
+              equalTo("SELECT * FROM VALUES ('" + resultValue + "')"));
     }
 
     @CsvSource({ "1111-01-01, 01.01.1111", //

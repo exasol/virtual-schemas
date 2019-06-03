@@ -100,9 +100,11 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
             builder.append(castTimestamp(resultSet.getString(columnName)));
             builder.append("'");
             break;
-        case Types.VARBINARY:
-        case Types.TIME:
         case Types.VARCHAR:
+            builder.append(this.dialect.getStringLiteral(resultSet.getString(columnName)));
+            break;
+        case Types.TIME:
+        case Types.VARBINARY:
         default:
             builder.append("'");
             builder.append(resultSet.getString(columnName));
