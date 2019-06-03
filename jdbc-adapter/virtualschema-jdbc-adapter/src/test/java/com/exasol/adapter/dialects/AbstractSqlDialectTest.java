@@ -7,15 +7,19 @@ import static com.exasol.adapter.dialects.oracle.OracleProperties.*;
 import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.*;
 
+import org.junit.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterProperties;
+import org.junit.jupiter.params.*;
+import org.junit.jupiter.params.provider.*;
 
 class AbstractSqlDialectTest {
     private Map<String, String> rawProperties;
@@ -257,5 +261,16 @@ class AbstractSqlDialectTest {
                 sqlDialect::validateProperties);
         assertThat(exception.getMessage(),
                 containsString("The dialect GENERIC does not support POSTGRESQL_IDENTIFIER_MAPPING property."));
+    }
+
+    @ValueSource(strings = { "ab:\'ab\'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
+    @ParameterizedTest
+    void testGetLiteralString(final String definition) {
+        final int colonPosition = definition.indexOf(':');
+        final String original = definition.substring(0, colonPosition);
+        final String literal = definition.substring(colonPosition + 1);
+        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
+        final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
+        Assert.assertThat(sqlDialect.getStringLiteral(original), equalTo(literal));
     }
 }

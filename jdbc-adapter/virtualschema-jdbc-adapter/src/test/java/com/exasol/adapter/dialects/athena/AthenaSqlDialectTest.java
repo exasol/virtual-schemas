@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialect.NullSorting;
@@ -100,15 +99,6 @@ class AthenaSqlDialectTest {
     @ParameterizedTest
     void testApplyQuote(final String unquoted, final String quoted) {
         assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
-    }
-
-    @ValueSource(strings = { "ab:\'ab\'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
-    @ParameterizedTest
-    void testGetLiteralString(final String definition) {
-        final int colonPosition = definition.indexOf(':');
-        final String original = definition.substring(0, colonPosition);
-        final String literal = definition.substring(colonPosition + 1);
-        assertThat(this.dialect.getStringLiteral(original), equalTo(literal));
     }
 
     @Test

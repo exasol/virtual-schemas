@@ -100,11 +100,6 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String getStringLiteral(final String value) {
-        return "'" + value.replace("'", "''") + "'";
-    }
-
-    @Override
     public void validateProperties() throws PropertyValidationException {
         super.validateDialectName(getPublicName());
         super.validateProperties();

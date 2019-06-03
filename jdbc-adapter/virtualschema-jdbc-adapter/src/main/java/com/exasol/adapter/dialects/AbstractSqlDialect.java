@@ -121,6 +121,14 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     }
 
     @Override
+    public String getStringLiteral(final String value) {
+        final StringBuilder builder = new StringBuilder("'");
+        builder.append(value.replaceAll("'", "''"));
+        builder.append("'");
+        return builder.toString();
+    }
+
+    @Override
     public void validateProperties() throws PropertyValidationException {
         validateSupportedPropertiesList();
         validateConnectionProperties();
