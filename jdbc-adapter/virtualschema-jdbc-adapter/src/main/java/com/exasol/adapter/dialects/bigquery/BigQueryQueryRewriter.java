@@ -1,19 +1,22 @@
 package com.exasol.adapter.dialects.bigquery;
 
 import java.sql.*;
-import java.util.logging.*;
-import java.util.regex.*;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import com.exasol.*;
-import com.exasol.adapter.*;
+import com.exasol.ExaMetadata;
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.*;
-import com.exasol.adapter.sql.*;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.sql.SqlStatement;
 
 /**
  * This class implements a BigQuery-specific query rewriter
  */
 public class BigQueryQueryRewriter extends BaseQueryRewriter {
+    private static final String LITERAL_NULL = "NULL";
     private static final Logger LOGGER = Logger.getLogger(BigQueryQueryRewriter.class.getName());
     private static final double[] TEN_POWERS = { 10d, 100d, 1000d, 10000d, 100000d, 1000000d };
     private static final Pattern DATE_PATTERN = Pattern.compile("(\\d{4})-(\\d{1,2})-(\\d{1,2})");
@@ -81,24 +84,20 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
             final int type) throws SQLException {
         switch (type) {
         case Types.BIGINT:
-            builder.append(resultSet.getInt(columnName));
+            appendBigInt(builder, resultSet, columnName);
             break;
         case Types.NUMERIC:
         case Types.DOUBLE:
-            builder.append(resultSet.getDouble(columnName));
+            appendNumeric(builder, resultSet, columnName);
             break;
         case Types.BOOLEAN:
-            builder.append(resultSet.getBoolean(columnName));
+            appendBoolean(builder, resultSet, columnName);
             break;
         case Types.DATE:
-            builder.append("'");
-            builder.append(castDate(resultSet.getString(columnName)));
-            builder.append("'");
+            appendDate(builder, resultSet, columnName);
             break;
         case Types.TIMESTAMP:
-            builder.append("'");
-            builder.append(castTimestamp(resultSet.getString(columnName)));
-            builder.append("'");
+            appendTimestamp(builder, resultSet, columnName);
             break;
         case Types.VARCHAR:
             builder.append(this.dialect.getStringLiteral(resultSet.getString(columnName)));
@@ -106,10 +105,66 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
         case Types.TIME:
         case Types.VARBINARY:
         default:
-            builder.append("'");
-            builder.append(resultSet.getString(columnName));
-            builder.append("'");
+            appendString(builder, resultSet, columnName);
             break;
+        }
+    }
+
+    private void appendBigInt(final StringBuilder builder, final ResultSet resultSet, final String columnName)
+            throws SQLException {
+        final int value = resultSet.getInt(columnName);
+        builder.append(resultSet.wasNull() ? LITERAL_NULL : value);
+    }
+
+    private void appendNumeric(final StringBuilder builder, final ResultSet resultSet, final String columnName)
+            throws SQLException {
+        final double value = resultSet.getDouble(columnName);
+        builder.append(resultSet.wasNull() ? LITERAL_NULL : value);
+    }
+
+    private void appendBoolean(final StringBuilder builder, final ResultSet resultSet, final String columnName)
+            throws SQLException {
+        final boolean value = resultSet.getBoolean(columnName);
+        builder.append(resultSet.wasNull() ? LITERAL_NULL : value);
+    }
+
+    private void appendDate(final StringBuilder builder, final ResultSet resultSet, final String columnName)
+            throws SQLException {
+        final String value = resultSet.getString(columnName);
+        if (value == null) {
+            builder.append(LITERAL_NULL);
+        } else {
+            builder.append("'");
+            builder.append(castDate(value));
+            builder.append("'");
+        }
+    }
+
+    private String castDate(final String dateToCast) {
+        if (dateToCast != null) {
+            final Matcher matcher = DATE_PATTERN.matcher(dateToCast);
+            if (matcher.matches()) {
+                final int year = Integer.parseInt(matcher.group(1));
+                final int month = Integer.parseInt(matcher.group(2));
+                final int day = Integer.parseInt(matcher.group(3));
+                return String.format("%02d.%02d.%04d", day, month, year);
+            } else {
+                throw new IllegalArgumentException("Date does not match required format: YYYY-[M]M-[D]D");
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private void appendTimestamp(final StringBuilder builder, final ResultSet resultSet, final String columnName)
+            throws SQLException {
+        final String value = resultSet.getString(columnName);
+        if (value == null) {
+            builder.append(LITERAL_NULL);
+        } else {
+            builder.append("'");
+            builder.append(castTimestamp(value));
+            builder.append("'");
         }
     }
 
@@ -143,7 +198,7 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
             if (fractionOfSecond != null) {
                 final int fractionOfSecondInt = Integer.parseInt(fractionOfSecond);
                 final int fractionOfSecondRounded = (int) Math
-                        .round(fractionOfSecondInt / TEN_POWERS[fractionOfSecond.length() - 1] * 1000);
+                        .round((fractionOfSecondInt / TEN_POWERS[fractionOfSecond.length() - 1]) * 1000);
                 return String.format("%02d:%02d:%02d.%03d", hour, minute, second, fractionOfSecondRounded);
             } else {
                 return String.format("%02d:%02d:%02d", hour, minute, second);
@@ -153,19 +208,15 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
         }
     }
 
-    private String castDate(final String dateToCast) {
-        if (dateToCast != null) {
-            final Matcher matcher = DATE_PATTERN.matcher(dateToCast);
-            if (matcher.matches()) {
-                final int year = Integer.parseInt(matcher.group(1));
-                final int month = Integer.parseInt(matcher.group(2));
-                final int day = Integer.parseInt(matcher.group(3));
-                return String.format("%02d.%02d.%04d", day, month, year);
-            } else {
-                throw new IllegalArgumentException("Date does not match required format: YYYY-[M]M-[D]D");
-            }
+    private void appendString(final StringBuilder builder, final ResultSet resultSet, final String columnName)
+            throws SQLException {
+        final String value = resultSet.getString(columnName);
+        if (value == null) {
+            builder.append(LITERAL_NULL);
         } else {
-            return null;
+            builder.append("'");
+            builder.append(value);
+            builder.append("'");
         }
     }
 }
