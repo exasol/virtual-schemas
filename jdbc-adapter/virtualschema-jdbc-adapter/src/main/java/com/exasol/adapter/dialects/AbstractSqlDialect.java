@@ -121,6 +121,15 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     }
 
     @Override
+    public String getStringLiteral(final String value) {
+        if (value == null) {
+            return "NULL";
+        } else {
+            return "'" + value.replaceAll("'", "''") + "'";
+        }
+    }
+
+    @Override
     public void validateProperties() throws PropertyValidationException {
         validateSupportedPropertiesList();
         validateConnectionProperties();

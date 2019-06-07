@@ -23,7 +23,7 @@ cd virtual-schemas/jdbc-adapter/
 mvn clean -DskipTests package
 ```
 
-The resulting fat JAR is stored in `virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.16.4.jar`.
+The resulting fat JAR is stored in `virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.17.1.jar`.
 
 ## Uploading the Adapter JAR Archive
 
@@ -42,10 +42,12 @@ Following steps are required to upload a file to a bucket:
 1. Now upload the file into this bucket, e.g. using curl (adapt the hostname, BucketFS port, bucket name and bucket write password).
 
 ```bash
-curl -X PUT -T virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.16.4.jar \
- http://w:write-password@your.exasol.host.com:2580/bucket1/virtualschema-jdbc-adapter-dist-1.16.4.jar
+curl -X PUT -T virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.17.1.jar \
+ http://w:write-password@your.exasol.host.com:2580/bucket1/virtualschema-jdbc-adapter-dist-1.17.1.jar
 ```
 
+Port number is always 2580.
+Write-password should be set up in the EXAoperation (edit bucket -> write password).
 See chapter 3.6.4. "The synchronous cluster file system BucketFS" in the EXASolution User Manual for more details about BucketFS.
 
 ## Deploying JDBC Driver Files
@@ -71,11 +73,11 @@ CREATE SCHEMA adapter;
 CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
 
   // This is the class implementing the callback method of the adapter script
-  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
+  %scriptclass com.exasol.adapter.RequestDispatcher;
 
   // This will add the adapter jar to the classpath so that it can be used inside the adapter script
   // Replace the names of the bucketfs and the bucket with the ones you used.
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.16.4.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.17.1.jar;
 
   // You have to add all files of the data source jdbc driver here (e.g. Hive JDBC driver files)
   %jar /buckets/your-bucket-fs/your-bucket/name-of-data-source-jdbc-driver.jar;

@@ -122,11 +122,6 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String getStringLiteral(final String value) {
-        return "'" + value.replace("'", "''") + "'";
-    }
-
-    @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
         return new SqlServerMetadataReader(this.connection, this.properties);
     }

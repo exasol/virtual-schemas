@@ -51,6 +51,7 @@ This is an open source project which is officially supported by Exasol. For any 
 * [Deployment Guide](doc/user-guide/deploying_the_virtual_schema_adapter.md) 
 * Supported dialects:
     1. [Athena](doc/dialects/athena.md)
+    1. [Big Query](doc/dialects/bigquery.md)
     1. [DB2](doc/dialects/db2.md)
     1. [Exasol](doc/dialects/exasol.md)
     1. [Hive](doc/dialects/hive.md)

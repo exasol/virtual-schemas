@@ -126,11 +126,6 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         return NullSorting.NULLS_SORTED_HIGH;
     }
 
-    @Override
-    public String getStringLiteral(final String value) {
-        return "'" + value.replace("'", "''") + "'";
-    }
-
     /**
      * Return the type of import the Oracle dialect uses
      *

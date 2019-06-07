@@ -148,14 +148,6 @@ public class AthenaSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String getStringLiteral(final String value) {
-        final StringBuilder builder = new StringBuilder("'");
-        builder.append(value.replaceAll("'", "''"));
-        builder.append("'");
-        return builder.toString();
-    }
-
-    @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
         return new AthenaMetadataReader(this.connection, this.properties);
     }

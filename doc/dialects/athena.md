@@ -43,14 +43,14 @@ You install the adapter script via the special SQL command `CREATE JAVA ADAPTER 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
     %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
-    %jar /buckets/bucketfs1/jdbc/virtualschema-jdbc-adapter-dist-1.16.4.jar;
+    %jar /buckets/bucketfs1/jdbc/virtualschema-jdbc-adapter-dist-1.17.1.jar;
     %jar /buckets/bucketfs1/jdbc/AthenaJDBC42-<JDBC driver version>.jar;
 /
 ```
 
 ## Creating a Virtual Schema
 
-Below you see how a Redshift Virtual Schema is created. Please note that you have to provide the name of the database in the property `SHEMA_NAME` since Redshift simulates catalogs.
+Below you see how an Athena Virtual Schema is created. Please note that you have to provide the name of the database in the property `SHEMA_NAME` since Athena simulates catalogs.
 
 ```sql
 CREATE VIRTUAL SCHEMA <virtual schema name>
