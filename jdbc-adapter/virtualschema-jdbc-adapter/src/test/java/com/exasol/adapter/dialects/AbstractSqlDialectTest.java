@@ -13,13 +13,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.*;
 
+import org.itsallcode.io.Capturable;
+import org.itsallcode.junit.sysextensions.SystemErrGuard;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.exasol.adapter.AdapterProperties;
 
+@ExtendWith(SystemErrGuard.class)
 class AbstractSqlDialectTest {
     private Map<String, String> rawProperties;
 
@@ -114,36 +118,29 @@ class AbstractSqlDialectTest {
     }
 
     @Test
-    void testInvalidDebugAddress1() {
-        getMinimumMandatory();
-        this.rawProperties.put(DEBUG_ADDRESS_PROPERTY, "bla");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
-        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
-                sqlDialect::validateProperties);
-        assertThat(exception.getMessage(), containsString("You specified an invalid hostname and port"));
+    void testValidatePropertiesWithWherePortIsString(final Capturable stderr) throws PropertyValidationException {
+        this.rawProperties.put(DEBUG_ADDRESS_PROPERTY, "host:port_should_be_a_number");
+        assertWarningIssuedOnStdErr(stderr, "Illegal debug output port");
     }
 
-    @Test
-    void testInvalidDebugAddress2() {
+    private void assertWarningIssuedOnStdErr(final Capturable stderr, final String expectedMessagePart)
+            throws PropertyValidationException {
         getMinimumMandatory();
-        this.rawProperties.put(DEBUG_ADDRESS_PROPERTY, "bla:no-number");
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
-        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
-                sqlDialect::validateProperties);
-        assertThat(exception.getMessage(), containsString("You specified an invalid hostname and port"));
+        stderr.capture();
+        sqlDialect.validateProperties();
+        assertThat(stderr.getCapturedData(), containsString(expectedMessagePart));
     }
 
-    @Test
-    void testInvalidDebugAddress3() {
-        getMinimumMandatory();
-        this.rawProperties.put(DEBUG_ADDRESS_PROPERTY, "bla:123:456");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
-        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
-                sqlDialect::validateProperties);
-        assertThat(exception.getMessage(), containsString("You specified an invalid hostname and port"));
+    void testValidatePropertiesWithWherePortTooLow(final Capturable stderr) throws PropertyValidationException {
+        this.rawProperties.put(DEBUG_ADDRESS_PROPERTY, "host:0");
+        assertWarningIssuedOnStdErr(stderr, "Debug output port 0 out of range");
+    }
+
+    void testValidatePropertiesWithWherePortTooHigh(final Capturable stderr) throws PropertyValidationException {
+        this.rawProperties.put(DEBUG_ADDRESS_PROPERTY, "host:65536");
+        assertWarningIssuedOnStdErr(stderr, "Debug output port 65536 out of range");
     }
 
     @Test

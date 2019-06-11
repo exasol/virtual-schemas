@@ -5,6 +5,7 @@ import static com.exasol.adapter.AdapterProperties.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -19,13 +20,14 @@ import com.exasol.adapter.sql.*;
  * Abstract implementation of a dialect. We recommend that every dialect should extend this abstract class.
  */
 public abstract class AbstractSqlDialect implements SqlDialect {
-    private static final Pattern BOOLEAN_PROPERTY_VALUE_PATTERN = Pattern.compile("^TRUE$|^FALSE$",
-            Pattern.CASE_INSENSITIVE);
     protected Set<ScalarFunction> omitParenthesesMap = EnumSet.noneOf(ScalarFunction.class);
     protected RemoteMetadataReader remoteMetadataReader;
     protected AdapterProperties properties;
     protected final Connection connection;
     protected QueryRewriter queryRewriter;
+    private static final Pattern BOOLEAN_PROPERTY_VALUE_PATTERN = Pattern.compile("^TRUE$|^FALSE$",
+            Pattern.CASE_INSENSITIVE);
+    private static final Logger LOGGER = Logger.getLogger(AbstractSqlDialect.class.getName());
 
     /**
      * Create a new instance of an {@link AbstractSqlDialect}
@@ -196,21 +198,33 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         }
     }
 
-    private void validateDebugOutputAddress() throws PropertyValidationException {
+    // Note that this method intentionally does not throw a validation error but rather creates log warnings. This
+    // allows dropping a schema even if the debug output port is misconfigured. Logging falls back to local logging in
+    // this case.
+    private void validateDebugOutputAddress() {
         if (this.properties.containsKey(DEBUG_ADDRESS_PROPERTY)) {
             final String debugAddress = this.properties.getDebugAddress();
             if (!debugAddress.isEmpty()) {
-                final String error = "You specified an invalid hostname and port where a log receiver (e.g. `netcat`) "
-                        + "is listening for incoming connections. The value of the property " + DEBUG_ADDRESS_PROPERTY
-                        + "must adhere to the following format: <host>:<port>, where host is a host name or IP address.";
-                if (debugAddress.split(":").length != 2) {
-                    throw new PropertyValidationException(error);
+                validateDebugPortNumber(debugAddress);
+            }
+        }
+    }
+
+    private void validateDebugPortNumber(final String debugAddress) {
+        final int colonLocation = debugAddress.lastIndexOf(":");
+        if (colonLocation > 0) {
+            final String portAsString = debugAddress.substring(colonLocation + 1);
+            try {
+                final int port = Integer.parseInt(portAsString);
+                if ((port < 1) || (port > 65535)) {
+                    LOGGER.warning(() -> "Debug output port " + port + " out of range. Port specified in property "
+                            + DEBUG_ADDRESS_PROPERTY
+                            + "must have following format: <host>[:<port>], and be between 1 and 65535.");
                 }
-                try {
-                    Integer.parseInt(debugAddress.split(":")[1]);
-                } catch (final NumberFormatException ex) {
-                    throw new PropertyValidationException(error);
-                }
+            } catch (final NumberFormatException ex) {
+                LOGGER.warning(() -> "Illegal debug output port \"" + portAsString + "\". Property "
+                        + DEBUG_ADDRESS_PROPERTY
+                        + "must have following format: <host>[:<port>], where port is a number between 1 and 65535.");
             }
         }
     }
