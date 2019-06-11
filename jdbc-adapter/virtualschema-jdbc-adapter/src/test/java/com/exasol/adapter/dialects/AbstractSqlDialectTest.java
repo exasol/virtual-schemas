@@ -13,13 +13,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.*;
 
-import org.junit.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.exasol.adapter.AdapterProperties;
-import org.junit.jupiter.params.*;
-import org.junit.jupiter.params.provider.*;
 
 class AbstractSqlDialectTest {
     private Map<String, String> rawProperties;
@@ -271,6 +270,12 @@ class AbstractSqlDialectTest {
         final String literal = definition.substring(colonPosition + 1);
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
-        Assert.assertThat(sqlDialect.getStringLiteral(original), equalTo(literal));
+        assertThat(sqlDialect.getStringLiteral(original), equalTo(literal));
+    }
+
+    @Test
+    void testGetStringLiteralWithNull() {
+        final SqlDialect sqlDialect = new DummySqlDialect(null, AdapterProperties.emptyProperties());
+        assertThat(sqlDialect.getStringLiteral(null), equalTo("NULL"));
     }
 }
