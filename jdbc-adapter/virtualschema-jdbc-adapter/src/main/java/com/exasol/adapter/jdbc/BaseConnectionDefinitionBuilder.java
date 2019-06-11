@@ -43,10 +43,6 @@ public class BaseConnectionDefinitionBuilder implements ConnectionDefinitionBuil
         }
     }
 
-    private String getNamedConnection(final AdapterProperties properties) {
-        return "AT " + properties.getConnectionName();
-    }
-
     private String getConnectionFromPropertiesOnly(final AdapterProperties properties) {
         warnConnectionPropertiesDeprecated();
         return getConnectionDefinition(properties.getConnectionString(), properties.getUsername(),
@@ -71,5 +67,9 @@ public class BaseConnectionDefinitionBuilder implements ConnectionDefinitionBuil
     protected boolean hasConflictingConnectionProperties(final AdapterProperties properties) {
         return properties.hasConnectionName()
                 && (properties.hasConnectionString() || properties.hasUsername() || properties.hasPassword());
+    }
+
+    private String getNamedConnection(final AdapterProperties properties) {
+        return "AT " + properties.getConnectionName();
     }
 }

@@ -12,20 +12,16 @@ public class DummyRemoteMetadataReader extends AbstractRemoteMetadataReader {
 
     @Override
     protected ColumnMetadataReader createColumnMetadataReader() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     protected TableMetadataReader createTableMetadataReader() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     protected IdentifierConverter createIdentifierConverter() {
-        // TODO Auto-generated method stub
         return null;
     }
-
 }

@@ -24,7 +24,13 @@ public class KerberosConfigurationCreator {
             .compile(KERBEROS_AUTHENTICATION_PREAMBLE + ";([^;]+);([^;]+)");
     private static final Logger LOGGER = Logger.getLogger(KerberosConfigurationCreator.class.getName());
 
-    public boolean isKerberosAuthentication(final String password) {
+    /**
+     * Check whether the given password contains Kerberos credentials
+     *
+     * @param password password / credential string to be examined
+     * @return <code>true</code> if the password is a Kerberos credential string, <code>false</code> otherwise
+     */
+    public static boolean isKerberosAuthentication(final String password) {
         return password.startsWith(KERBEROS_AUTHENTICATION_PREAMBLE);
     }
 
@@ -56,7 +62,7 @@ public class KerberosConfigurationCreator {
             final Path jaasConfigPath = createTemporaryJaasConfig(temporaryDirectory, user, keyTabPath);
             setKerberosSystemProperties(kerberosConfigPath, jaasConfigPath);
         } catch (final IOException exception) {
-            throw new KerberosConfigurationCreatorException("Unable to create temporary Kerberose configuration file.",
+            throw new KerberosConfigurationCreatorException("Unable to create temporary Kerberos configuration file.",
                     exception);
         }
     }
