@@ -40,7 +40,7 @@ Add the fully qualified class name `com.exasol.adapter.dialects.athena.AthenaSql
 
 Add the dialect name (here `ATHENA`) to the list of dialects for which the `JbdcAdapterFactory` is responsible in the method `getSupportedAdapterNames()`;
 
-Create an empty unit test class for the dialect: `com.exasol.adapter.dialects.athena.AthenaSqlDialectTest` that tests class `AthenaSqlDialectTest`.
+Create an empty unit test class for the dialect: `com.exasol.adapter.dialects.athena.AthenaSqlDialectTest` that tests class `AthenaSqlDialect`.
 
 Now that you have the skeleton of the dialect adapter, it is time to implement the specifics.
 
@@ -64,9 +64,11 @@ Each SQL Dialect adapter consists of one or more classes, depending on how stand
 
 ### Defining the Supported Capabilities
 
-First you need to find out, which capabilities the source supports and looking at the list of [SQL queries, functions and operators](https://docs.aws.amazon.com/athena/latest/ug/functions-operators-reference-section.html) contains what you need to assemble the capability list. All you have to to is read through the SQL reference and each time you come across a capability, mark that to the list.
+First you need to find out, which capabilities the source supports and looking at the list of [SQL queries, functions and operators](https://docs.aws.amazon.com/athena/latest/ug/functions-operators-reference-section.html) contains what you need to assemble the capability list. All you have to do is read through the SQL reference and each time you come across a capability, mark that to the list.
 
 The list of capabilities that Exasol's Virtual Schemas know can be found in `com.exasol.adapter.capabilities.MainCapabilities` from the project [`virtual-schema-common-java`](https://github.com/exasol/virtual-schema-common-java). If you look at the JavaDoc of that class, you find helpful examples of what that capability means.
+
+You only need to pick up the capabilities from the existing lists in the common part of the project. If the source supports something that is not in our lists, you can ignore it.
 
 Write a unit test that checks whether the SQL dialect adapter reports the capabilities that you find in the documentation of the data source. Here is an example from the Athena adapter.
 
@@ -452,3 +454,39 @@ As mentioned before, if the `BaseTableMetadataReader` and `BaseColumnMetadataRea
 If not, you must implement your own variants.
 
 Take a look at the `PostgreSQLColumnMetadataReader` and its unit test for an example of how to instantiate a different sub-reader from the top-level reader.
+
+## Implementing Query Rewriting
+
+At its very core the Virtual Schema JDBC adapter rewrites queries. When a user issues a query at the Virtual Schema frontend, it is first parsed and interpreted by the database core, then pushed down in parts or as a whole to the Virtual Schema backend. In the case of the JDBC adapter we have remote data source that speak SQL &mdash; or a driver that makes it like as if they did. But before the Virtual Schema backend pushes a query further down to the remote data source, it rewrites it to accommodate dialect differences.
+
+If possible the backend does not even execute that query itself, but aims to construct an [IMPORT](https://docs.exasol.com/sql/import.htm) statement and gives that back to the Virtual Schema frontend. That way the Exasol database can directly run `IMPORT` on the remote data source, effectively remove the need for mashalling, transferring and unmarshalling data payload for the communication between Virtual Schema backend and frontend.
+
+###  Pre-Requisites for Using IMPORT
+
+If you plan to use IMPORT there are some things you need to bare in mind:
+
+1. Remote data source must offer a JDBC driver
+   (always the case if you write a dialect for the JDBC adapter instead of an adapter from scratch)
+1. The driver must support switching Auto-Commit off
+
+The ExaLoader needs control over committing during an import, so that it is for example able to roll back incomplete imports.
+
+### Overloading Rewriting
+
+The `AbstractSqlDialect` has a base implementation for query rewriting that should work with most databases that support JDBC. Sometimes you need more though and in that case you have different mechanisms for doing that.
+
+#### Variant a) Implementing Your own QueryRewriter
+
+Our recommended way is to implement a specialized `QueryRewriter` for your dialect. In most cases deriving that from the `BaseQueryRewriter` and adding some minimal changes does the trick.
+
+Check the `ExasolQueryRewriter` or `OracleQueryRewriter` for examples on how to extend the base implementation. In those two examples we added support for the specialized `IMPORT FROM EXA` and `IMPORT FROM ORA` variants which are more efficient than a standard `IMPORT`.
+
+Also take a look at the corresponding unit tests to learn how to verify the behavior of the rewriters without being forced to run slow and cumbersome integration tests against the remote data source during development.
+
+This variant is less effort than implementing query rewriting from scratch.
+
+Make sure to override the method `createQueryRewriter()` in the dialect to instantiate the right implementation for your use case. 
+
+#### Variant b) Override `rewriteQuery(...)` in the Dialect
+
+In those very rare case where the `QueryRewriter` does not work for you, override the method `rewriteQuery(...)` in your dialect.

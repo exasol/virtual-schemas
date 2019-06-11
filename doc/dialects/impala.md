@@ -22,7 +22,7 @@ CREATE SCHEMA adapter;
 CREATE  JAVA  ADAPTER SCRIPT jdbc_adapter AS
   %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
 
-  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.16.2.jar;
+  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.17.1.jar;
 
   %jar /buckets/bucketfs1/bucket1/hive_metastore.jar;
   %jar /buckets/bucketfs1/bucket1/hive_service.jar;

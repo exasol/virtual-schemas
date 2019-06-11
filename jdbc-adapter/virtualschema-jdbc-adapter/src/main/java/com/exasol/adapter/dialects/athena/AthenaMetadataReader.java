@@ -11,7 +11,7 @@ import com.exasol.adapter.jdbc.*;
 /**
  * Metadata reader that reads AWS-Athena-specific database metadata
  */
-public class AthenaMetadataReader extends BaseRemoteMetadataReader {
+public class AthenaMetadataReader extends AbstractRemoteMetadataReader {
     /**
      * Create a new instance of an {@link AthenaMetadataReader}
      *
@@ -31,5 +31,16 @@ public class AthenaMetadataReader extends BaseRemoteMetadataReader {
     protected IdentifierConverter createIdentifierConverter() {
         return new BaseIdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_UPPER,
                 IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE);
+    }
+
+    @Override
+    protected ColumnMetadataReader createColumnMetadataReader() {
+        return new BaseColumnMetadataReader(this.connection, this.properties, this.identifierConverter);
+    }
+
+    @Override
+    protected TableMetadataReader createTableMetadataReader() {
+        return new BaseTableMetadataReader(this.connection, this.columnMetadataReader, this.properties,
+                this.identifierConverter);
     }
 }

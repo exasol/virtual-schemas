@@ -101,11 +101,6 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String getStringLiteral(final String value) {
-        return "'" + value.replace("'", "''") + "'";
-    }
-
-    @Override
     public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new RedshiftSqlGenerationVisitor(this, context);
     }
@@ -113,6 +108,11 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
         return new RedshiftMetadataReader(this.connection, this.properties);
+    }
+
+    @Override
+    protected QueryRewriter createQueryRewriter() {
+        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
     }
 
     @Override

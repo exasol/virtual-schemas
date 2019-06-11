@@ -8,11 +8,12 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.exasol.ExaMetadata;
+import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.jdbc.*;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.SchemaMetadata;
-import com.exasol.adapter.sql.AggregateFunction;
-import com.exasol.adapter.sql.ScalarFunction;
+import com.exasol.adapter.sql.*;
 
 /**
  * Abstract implementation of a dialect. We recommend that every dialect should extend this abstract class.
@@ -24,6 +25,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     protected RemoteMetadataReader remoteMetadataReader;
     protected AdapterProperties properties;
     protected final Connection connection;
+    protected QueryRewriter queryRewriter;
 
     /**
      * Create a new instance of an {@link AbstractSqlDialect}
@@ -35,19 +37,27 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         this.connection = connection;
         this.properties = properties;
         this.remoteMetadataReader = createRemoteMetadataReader();
+        this.queryRewriter = createQueryRewriter();
     }
 
     /**
      * Create the {@link RemoteMetadataReader} that is used to get the database metadata from the remote source.
      * <p>
-     * Override this method in the concrete SQL dialect implementation if the dialect requires non-standard metadata
-     * mapping.
+     * Override this method in the concrete SQL dialect implementation to choose the right metadata reader.
      *
      * @return metadata reader
      */
-    protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new BaseRemoteMetadataReader(this.connection, this.properties);
-    }
+    protected abstract RemoteMetadataReader createRemoteMetadataReader();
+
+    /**
+     * Create the {@link QueryRewriter} that is used to create the final SQL query sent back from the Virtual Schema
+     * backend to the Virtual Schema frontend in a push-down scenario.
+     * <p>
+     * Override this method in the concrete SQL dialect implementation to choose the right query rewriter.
+     *
+     * @return query rewriter
+     */
+    protected abstract QueryRewriter createQueryRewriter();
 
     @Override
     public String getTableCatalogAndSchemaSeparator() {
@@ -95,17 +105,9 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     }
 
     @Override
-    public String generatePushdownSql(final ConnectionInformation connectionInformation, final String columnDescription,
-            final String pushdownSql) {
-        final StringBuilder jdbcImportQuery = new StringBuilder();
-        if (columnDescription == null) {
-            jdbcImportQuery.append("IMPORT FROM JDBC AT ").append(connectionInformation.getCredentials());
-        } else {
-            jdbcImportQuery.append("IMPORT INTO ").append("(").append(columnDescription).append(")");
-            jdbcImportQuery.append(" FROM JDBC AT ").append(connectionInformation.getCredentials());
-        }
-        jdbcImportQuery.append(" STATEMENT '").append(pushdownSql.replace("'", "''")).append("'");
-        return jdbcImportQuery.toString();
+    public String rewriteQuery(final SqlStatement statement, final ExaMetadata exaMetadata)
+            throws AdapterException, SQLException {
+        return this.queryRewriter.rewrite(statement, exaMetadata, this.properties);
     }
 
     @Override
@@ -119,11 +121,12 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     }
 
     @Override
-    public String describeQueryResultColumns(final String query) throws SQLException {
-        final ColumnMetadataReader columnMetadataReader = this.remoteMetadataReader.getColumnMetadataReader();
-        final ResultSetMetadataReader resultSetMetadataReader = new ResultSetMetadataReader(this.connection,
-                columnMetadataReader);
-        return resultSetMetadataReader.describeColumns(query);
+    public String getStringLiteral(final String value) {
+        if (value == null) {
+            return "NULL";
+        } else {
+            return "'" + value.replaceAll("'", "''") + "'";
+        }
     }
 
     @Override
@@ -140,11 +143,15 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         final List<String> allProperties = new ArrayList<>(this.properties.keySet());
         for (final String property : allProperties) {
             if (!getSupportedProperties().contains(property)) {
-                throw new PropertyValidationException(
-                        "The dialect " + this.properties.getSqlDialect() + " does not support " + property
-                                + " property. Please, do not set the " + property + " property.");
+                final String unsupportedElement = property;
+                throw new PropertyValidationException(createUnsupportedElementMessage(unsupportedElement, property));
             }
         }
+    }
+
+    protected String createUnsupportedElementMessage(final String unsupportedElement, final String property) {
+        return "The dialect " + this.properties.getSqlDialect() + " does not support " + unsupportedElement
+                + " property. Please, do not set the " + property + " property.";
     }
 
     protected abstract List<String> getSupportedProperties();
@@ -170,16 +177,14 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     private void validateCatalogNameProperty() throws PropertyValidationException {
         if (this.properties.containsKey(CATALOG_NAME_PROPERTY)
                 && (supportsJdbcCatalogs() == StructureElementSupport.NONE)) {
-            throw new PropertyValidationException("The dialect " + this.properties.getSqlDialect()
-                    + " does not support catalogs. Please, do not set the " + CATALOG_NAME_PROPERTY + " property.");
+            throw new PropertyValidationException(createUnsupportedElementMessage("catalogs", CATALOG_NAME_PROPERTY));
         }
     }
 
     private void validateSchemaNameProperty() throws PropertyValidationException {
         if (this.properties.containsKey(SCHEMA_NAME_PROPERTY)
                 && (supportsJdbcSchemas() == StructureElementSupport.NONE)) {
-            throw new PropertyValidationException("The dialect " + this.properties.getSqlDialect()
-                    + " does not support schemas. Please, do not set the " + SCHEMA_NAME_PROPERTY + " property.");
+            throw new PropertyValidationException(createUnsupportedElementMessage("schemas", SCHEMA_NAME_PROPERTY));
         }
     }
 

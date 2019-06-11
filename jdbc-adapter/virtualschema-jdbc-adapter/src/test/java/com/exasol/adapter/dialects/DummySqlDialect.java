@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 
 public class DummySqlDialect extends AbstractSqlDialect {
@@ -49,7 +50,7 @@ public class DummySqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuote(final String identifier) {
-        return null;
+        return "\"" + identifier + "\"";
     }
 
     @Override
@@ -68,11 +69,6 @@ public class DummySqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String getStringLiteral(final String value) {
-        return null;
-    }
-
-    @Override
     public void validateProperties() throws PropertyValidationException {
         super.validateDialectName("GENERIC");
         super.validateProperties();
@@ -81,5 +77,15 @@ public class DummySqlDialect extends AbstractSqlDialect {
     @Override
     protected List<String> getSupportedProperties() {
         return SUPPORTED_PROPERTIES;
+    }
+
+    @Override
+    protected RemoteMetadataReader createRemoteMetadataReader() {
+        return new BaseRemoteMetadataReader(this.connection, this.properties);
+    }
+
+    @Override
+    protected QueryRewriter createQueryRewriter() {
+        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
     }
 }

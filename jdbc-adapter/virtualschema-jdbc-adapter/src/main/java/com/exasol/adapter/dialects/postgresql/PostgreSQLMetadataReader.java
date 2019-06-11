@@ -9,7 +9,7 @@ import com.exasol.adapter.jdbc.*;
 /**
  * This class implements a reader for PostgreSQL-specific metadata
  */
-public class PostgreSQLMetadataReader extends BaseRemoteMetadataReader {
+public class PostgreSQLMetadataReader extends AbstractRemoteMetadataReader {
     /**
      * Create a new instance of a {@link PostgreSQLMetadataReader}
      *

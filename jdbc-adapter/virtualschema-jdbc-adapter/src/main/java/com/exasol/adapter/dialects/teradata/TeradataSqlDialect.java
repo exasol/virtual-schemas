@@ -31,6 +31,11 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
         return new TeradataMetadataReader(this.connection, this.properties);
     }
 
+    @Override
+    protected QueryRewriter createQueryRewriter() {
+        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
+    }
+
     public TeradataSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
@@ -92,11 +97,6 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_HIGH;
-    }
-
-    @Override
-    public String getStringLiteral(final String value) {
-        return "'" + value.replace("'", "''") + "'";
     }
 
     @Override

@@ -35,6 +35,11 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         return new DB2MetadataReader(this.connection, this.properties);
     }
 
+    @Override
+    protected QueryRewriter createQueryRewriter() {
+        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
+    }
+
     public static String getPublicName() {
         return NAME;
     }
@@ -93,11 +98,6 @@ public class DB2SqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_AT_END;
-    }
-
-    @Override
-    public String getStringLiteral(final String value) {
-        return "'" + value.replace("'", "''") + "'";
     }
 
     @Override

@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
 import com.google.common.collect.ImmutableList;
@@ -86,14 +88,7 @@ class SqlDialectTest {
 
     @Test
     void testInvalidAliases() throws Exception {
-        final TableMetadata clicksMeta = getTestTableMetadata();
-        final SqlTable fromClause = new SqlTable("TEST", clicksMeta);
-        final SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
-        final SqlNode node = new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
-
         final SqlGenerationContext context = new SqlGenerationContext("", "schema", false);
-
-        // Test non-simple scalar functions
         for (final ScalarFunction function : ScalarFunction.values()) {
             if (!function.isSimple()) {
                 final Map<ScalarFunction, String> scalarAliases = ImmutableMap.of(function, "ALIAS");
@@ -101,7 +96,7 @@ class SqlDialectTest {
                         scalarAliases, ImmutableMap.<ScalarFunction, String>of(),
                         ImmutableMap.<ScalarFunction, String>of());
                 try {
-                    final SqlGenerationVisitor generator = new SqlGenerationVisitor(dialect, context);
+                    new SqlGenerationVisitor(dialect, context);
                     throw new Exception("Should never arrive here");
                 } catch (final RuntimeException ex) {
                     // This error is expected
@@ -117,7 +112,7 @@ class SqlDialectTest {
                         ImmutableMap.<ScalarFunction, String>of(), ImmutableMap.<ScalarFunction, String>of(),
                         ImmutableMap.<ScalarFunction, String>of());
                 try {
-                    final SqlGenerationVisitor generator = new SqlGenerationVisitor(dialect, context);
+                    new SqlGenerationVisitor(dialect, context);
                     throw new Exception("Should never arrive here");
                 } catch (final RuntimeException ex) {
                     // This error is expected
@@ -233,6 +228,16 @@ class SqlDialectTest {
         @Override
         public String getStringLiteral(final String value) {
             return "'" + value + "'";
+        }
+
+        @Override
+        protected RemoteMetadataReader createRemoteMetadataReader() {
+            return new BaseRemoteMetadataReader(this.connection, this.properties);
+        }
+
+        @Override
+        protected QueryRewriter createQueryRewriter() {
+            return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
         }
     }
 }

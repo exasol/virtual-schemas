@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import com.exasol.adapter.jdbc.IdentifierCaseHandling;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 
-public class GenericIdentifierConverterTest {
+class GenericIdentifierConverterTest {
     @Test
     void testGetUnquotedIdentifierHandlingUpperIfSupportsMixedCase() {
         final SchemaAdapterNotes.Builder adapterNotesBuilder = SchemaAdapterNotes.builder()

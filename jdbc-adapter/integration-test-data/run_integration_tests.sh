@@ -88,7 +88,7 @@ cleanup_remote_dbs() {
 
 prepare_docker() {
 	docker pull "$docker_image"
-	git clone "$docker_db_repository" "$1/$docker_name"
+	git clone --branch "$exasol_docker_image_version" "$docker_db_repository" "$1/$docker_name"
 	pushd "$1/$docker_name"
 	pipenv install -r exadt_requirements.txt
 	pipenv run ./exadt create-cluster --root "$1"/cluster --create-root "$docker_name"

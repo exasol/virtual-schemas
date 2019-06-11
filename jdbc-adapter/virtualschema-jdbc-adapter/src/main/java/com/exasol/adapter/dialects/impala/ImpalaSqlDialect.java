@@ -16,9 +16,11 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 
 /**
- * Dialect for Impala, using the Cloudera Impala JDBC Driver/Connector (developed by Simba).
+ * Dialect for Impala, using the Cloudera Impala JDBC Driver/Connector
+ * (developed by Simba).
  * <p>
- * See http://www.cloudera.com/documentation/enterprise/latest/topics/impala_langref.html
+ * See
+ * http://www.cloudera.com/documentation/enterprise/latest/topics/impala_langref.html
  */
 public class ImpalaSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "IMPALA";
@@ -85,11 +87,6 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public String getStringLiteral(final String value) {
-        return "'" + value.replace("'", "''") + "'";
-    }
-
-    @Override
     public void validateProperties() throws PropertyValidationException {
         super.validateDialectName(getPublicName());
         super.validateProperties();
@@ -103,5 +100,10 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
         return new ImpalaMetadataReader(this.connection, this.properties);
+    }
+
+    @Override
+    protected QueryRewriter createQueryRewriter() {
+        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
     }
 }
