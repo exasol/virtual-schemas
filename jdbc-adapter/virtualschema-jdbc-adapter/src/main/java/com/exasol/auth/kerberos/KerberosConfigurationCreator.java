@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This class generates the necessary configuration for a successful Kerberos authentication.
@@ -20,8 +18,6 @@ public class KerberosConfigurationCreator {
     public static final String KERBEROS_CONFIG_PROPERTY = "java.security.krb5.conf";
     public static final String LOGIN_CONFIG_PROPERTY = "java.security.auth.login.config";
     public static final String KERBEROS_AUTHENTICATION_PREAMBLE = "ExaAuthType=Kerberos";
-    public static final Pattern KERBEROS_PASSWORD_PATTERN = Pattern
-            .compile(KERBEROS_AUTHENTICATION_PREAMBLE + ";([^;]+);([^;]+)");
     private static final Logger LOGGER = Logger.getLogger(KerberosConfigurationCreator.class.getName());
 
     /**
@@ -41,10 +37,11 @@ public class KerberosConfigurationCreator {
      * @param password connection password containing kerberos configuration and key tab
      */
     public void writeKerberosConfigurationFiles(final String user, final String password) {
-        final Matcher matcher = KERBEROS_PASSWORD_PATTERN.matcher(password);
-        if (matcher.matches()) {
-            final String base64EncodedKerberosConfig = matcher.group(1);
-            final String base64EncodedKeyTab = matcher.group(2);
+        final String[] tokens = password.split(";");
+        final String preamble = tokens[0];
+        if ((tokens.length == 3) && KERBEROS_AUTHENTICATION_PREAMBLE.equals(preamble)) {
+            final String base64EncodedKerberosConfig = tokens[1];
+            final String base64EncodedKeyTab = tokens[2];
             createKerberosConfiguration(user, base64EncodedKerberosConfig, base64EncodedKeyTab);
         } else {
             throw new KerberosConfigurationCreatorException("Syntax error in Kerberos password."

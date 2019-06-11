@@ -15,6 +15,8 @@ import java.nio.file.Paths;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class KerberosConfigurationCreatorTest {
     private static final String KEY_TAB_NAME = "ktbname";
@@ -32,12 +34,12 @@ class KerberosConfigurationCreatorTest {
 
     @Test
     void testIsKerberosAuthenticationTrue() {
-        assertThat(this.creator.isKerberosAuthentication(PW), equalTo(true));
+        assertThat(KerberosConfigurationCreator.isKerberosAuthentication(PW), equalTo(true));
     }
 
     @Test
     void testIsKerberosAuthenticationFalse() {
-        assertThat(this.creator.isKerberosAuthentication("not a kerberose password"), equalTo(false));
+        assertThat(KerberosConfigurationCreator.isKerberosAuthentication("not a kerberose password"), equalTo(false));
     }
 
     @Test
@@ -95,9 +97,11 @@ class KerberosConfigurationCreatorTest {
         assertThat("Key tab file: " + keyTabPath, new File(keyTabPath), anExistingFile());
     }
 
-    @Test
-    void testIllegalKerberosPasswordThrowsException() {
+    @ValueSource(strings = { "", "missing preamble;foo;bar", "ExaAuthType=Kerberos;missing next part",
+            "ExaAuthType=Kerberos;too;many;parts" })
+    @ParameterizedTest
+    void testIllegalKerberosPasswordThrowsException(final String password) {
         assertThrows(KerberosConfigurationCreatorException.class,
-                () -> this.creator.writeKerberosConfigurationFiles("anyone", "ExaAuthType=Kerberos;missing next part"));
+                () -> this.creator.writeKerberosConfigurationFiles("anyone", password));
     }
 }
