@@ -99,9 +99,11 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
         case Types.TIMESTAMP:
             appendTimestamp(builder, resultSet, columnName);
             break;
-        case Types.VARBINARY:
-        case Types.TIME:
         case Types.VARCHAR:
+            builder.append(this.dialect.getStringLiteral(resultSet.getString(columnName)));
+            break;
+        case Types.TIME:
+        case Types.VARBINARY:
         default:
             appendString(builder, resultSet, columnName);
             break;

@@ -136,4 +136,9 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_AT_END;
     }
+
+    @Override
+    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
+        return new BigQuerySqlGenerationVisitor(this, context);
+    }
 }
