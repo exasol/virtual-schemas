@@ -198,9 +198,6 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         }
     }
 
-    // Note that this method intentionally does not throw a validation error but rather creates log warnings. This
-    // allows dropping a schema even if the debug output port is misconfigured. Logging falls back to local logging in
-    // this case.
     private void validateDebugOutputAddress() {
         if (this.properties.containsKey(DEBUG_ADDRESS_PROPERTY)) {
             final String debugAddress = this.properties.getDebugAddress();
@@ -210,8 +207,11 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         }
     }
 
+    // Note that this method intentionally does not throw a validation exception but rather creates log warnings. This
+    // allows dropping a schema even if the debug output port is misconfigured. Logging falls back to local logging in
+    // this case.
     private void validateDebugPortNumber(final String debugAddress) {
-        final int colonLocation = debugAddress.lastIndexOf(":");
+        final int colonLocation = debugAddress.lastIndexOf(':');
         if (colonLocation > 0) {
             final String portAsString = debugAddress.substring(colonLocation + 1);
             try {
