@@ -1,9 +1,10 @@
 package com.exasol.adapter.jdbc;
 
 import java.util.*;
+import java.util.logging.*;
 
-import com.exasol.adapter.AdapterFactory;
-import com.exasol.adapter.VirtualSchemaAdapter;
+import com.exasol.adapter.*;
+import com.exasol.logging.*;
 
 /**
  * This class implements a factory for the {@link JdbcAdapter}.
@@ -21,5 +22,12 @@ public class JdbcAdapterFactory implements AdapterFactory {
     @Override
     public VirtualSchemaAdapter createAdapter() {
         return new JdbcAdapter();
+    }
+
+    @Override
+    public String getAdapterVersion() {
+        final VersionCollector versionCollector = new VersionCollector(
+                "META-INF/maven/com.exasol/virtualschema-jdbc-adapter/pom.properties");
+        return versionCollector.getVersionNumber();
     }
 }
