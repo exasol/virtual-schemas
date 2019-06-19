@@ -97,6 +97,5 @@ Running the Virtual Schema requires a Java Runtime version 8 or later.
 | [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)                                  | Checking for conditions in code via matchers           | BSD License                   |
 | [JSONassert](http://jsonassert.skyscreamer.org/)                                    | Compare JSON documents for semantic equality           | Apache License 2.0            |
 | [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0    |
-| [JUnit 5 System Extensions](https://github.com/itsallcode/junit5-system-extensions) | Capturing `STDOUT` and `STDERR`                        | Eclipse Public License 2.0    |
 | [Mockito](http://site.mockito.org/)                                                 | Mocking framework                                      | MIT License                   |
 | [SnakeYaml](https://bitbucket.org/asomov/snakeyaml/src/default/)                    | YAML parsing                                           | Apache License 2.0            |

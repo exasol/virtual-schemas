@@ -10,7 +10,7 @@
         <module>virtualschema-jdbc-adapter-dist</module>
     </modules>
     <properties>
-        <product.version>1.18.0</product.version>
+        <product.version>1.18.1</product.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
@@ -85,12 +85,6 @@
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
             <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.itsallcode</groupId>
-            <artifactId>junit5-system-extensions</artifactId>
-            <version>1.0.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
