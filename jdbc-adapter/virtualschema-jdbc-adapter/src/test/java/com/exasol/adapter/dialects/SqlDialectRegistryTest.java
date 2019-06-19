@@ -1,7 +1,7 @@
 package com.exasol.adapter.dialects;
 
-import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.Matchers.*;
+import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

@@ -1,14 +1,12 @@
 package com.exasol.adapter.jdbc;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.Properties;
 import java.util.logging.Logger;
 
-import com.exasol.ExaConnectionAccessException;
-import com.exasol.ExaConnectionInformation;
-import com.exasol.ExaMetadata;
+import com.exasol.*;
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.auth.kerberos.KerberosConfigurationCreator;
 
 /**
  * Factory that produces JDBC connections to remote data sources
@@ -19,12 +17,10 @@ public class RemoteConnectionFactory {
     /**
      * Create a JDBC connection to the remote data source
      *
-     * @param exaMetadata Exasol metadata (contains information about stored *
-     *                    connection details)
+     * @param exaMetadata Exasol metadata (contains information about stored * connection details)
      * @param properties  user-defined adapter properties
      * @return JDBC connection to remote data source
-     * @throws SQLException if the connection to the remote source could not be
-     *                      established
+     * @throws SQLException if the connection to the remote source could not be established
      */
     public Connection createConnection(final ExaMetadata exaMetadata, final AdapterProperties properties)
             throws SQLException {
@@ -45,8 +41,9 @@ public class RemoteConnectionFactory {
         return connection;
     }
 
-    protected void logConnectionAttempt(final String address, final String user) {
-        LOGGER.fine(() -> "Connecting to \"" + address + "\" as user \"" + user + "\"");
+    protected void logConnectionAttempt(final String address, final String username) {
+        LOGGER.fine(
+                () -> "Connecting to \"" + address + "\" as user \"" + username + "\" using password authentication.");
     }
 
     protected void logRemoteDatabaseDetails(final Connection connection) throws SQLException {
@@ -59,15 +56,43 @@ public class RemoteConnectionFactory {
             throws SQLException {
         try {
             final ExaConnectionInformation exaConnection = exaMetadata.getConnection(connectionName);
+            final String password = exaConnection.getPassword();
             final String username = exaConnection.getUser();
             final String address = exaConnection.getAddress();
-            logConnectionAttempt(address, username);
-            final Connection connection = DriverManager.getConnection(address, username, exaConnection.getPassword());
-            logRemoteDatabaseDetails(connection);
-            return connection;
+            if (KerberosConfigurationCreator.isKerberosAuthentication(password)) {
+                return establishConnectionWithKerberos(password, username, address);
+            } else {
+                return establishConnectionWithRegularCredentials(password, username, address);
+            }
         } catch (final ExaConnectionAccessException exception) {
             throw new RemoteConnectionException(
-                    "Could not access the connection information of connection \"" + connectionName + "\"", exception);
+                    "Could not access the connection information of connection \"" + connectionName + "\".", exception);
         }
+    }
+
+    private Connection establishConnectionWithKerberos(final String password, final String username,
+            final String address) throws SQLException {
+        logConnectionAttemptWithKerberos(address, username);
+        final Properties jdbcProperties = new Properties();
+        jdbcProperties.put("user", username);
+        jdbcProperties.put("password", password);
+        final KerberosConfigurationCreator kerberosConfigurationCreator = new KerberosConfigurationCreator();
+        kerberosConfigurationCreator.writeKerberosConfigurationFiles(username, password);
+        final Connection connection = DriverManager.getConnection(address, jdbcProperties);
+        logRemoteDatabaseDetails(connection);
+        return connection;
+    }
+
+    private void logConnectionAttemptWithKerberos(final String address, final String username) {
+        LOGGER.fine(
+                () -> "Connecting to \"" + address + "\" as user \"" + username + "\" using Kerberos authentication.");
+    }
+
+    private Connection establishConnectionWithRegularCredentials(final String password, final String username,
+            final String address) throws SQLException {
+        logConnectionAttempt(address, username);
+        final Connection connection = DriverManager.getConnection(address, username, password);
+        logRemoteDatabaseDetails(connection);
+        return connection;
     }
 }

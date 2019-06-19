@@ -1,6 +1,6 @@
 package com.exasol.logging;
 
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.Assert.assertThat;
 
 import java.util.logging.Level;
