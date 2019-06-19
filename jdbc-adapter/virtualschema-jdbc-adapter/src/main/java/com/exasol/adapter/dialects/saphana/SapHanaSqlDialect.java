@@ -113,12 +113,12 @@ public class SapHanaSqlDialect extends AbstractSqlDialect {
 
     @Override
     public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
-        return false;
+        return true;
     }
 
     @Override
     public String applyQuote(final String identifier) {
-        return "`" + identifier + "`";
+        return "\"" + identifier + "\"";
     }
 
     @Override

@@ -101,7 +101,7 @@ class SapHanaSqlDialectTest {
 
     @Test
     void testRequiresSchemaQualifiedTableNames() {
-        Assert.assertThat(this.dialect.requiresSchemaQualifiedTableNames(null), Matchers.equalTo(false));
+        Assert.assertThat(this.dialect.requiresSchemaQualifiedTableNames(null), Matchers.equalTo(true));
     }
 
     @Test
@@ -112,7 +112,7 @@ class SapHanaSqlDialectTest {
 
     @Test
     void testApplyQuote() {
-        assertThat(this.dialect.applyQuote("tableName"), Matchers.equalTo("`tableName`"));
+        assertThat(this.dialect.applyQuote("tableName"), Matchers.equalTo("\"tableName\""));
 
     }
 
