@@ -217,7 +217,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
             try {
                 final int port = Integer.parseInt(portAsString);
                 if ((port < 1) || (port > 65535)) {
-                    LOGGER.warning(() -> "Debug output port " + port + " out of range. Port specified in property "
+                    LOGGER.warning(() -> "Debug output port " + port + " is out of range. Port specified in property "
                             + DEBUG_ADDRESS_PROPERTY
                             + "must have following format: <host>[:<port>], and be between 1 and 65535.");
                 }
