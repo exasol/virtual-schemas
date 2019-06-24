@@ -145,7 +145,7 @@ class AbstractSqlDialectTest {
     @Test
     void testValidatePropertiesWithWherePortTooHigh() throws PropertyValidationException {
         this.rawProperties.put(DEBUG_ADDRESS_PROPERTY, "host:65536");
-        assertWarningIssued("Debug output port 65536 out of range");
+        assertWarningIssued("Debug output port 65536 is out of range");
     }
 
     @Test
