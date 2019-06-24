@@ -139,7 +139,7 @@ class AbstractSqlDialectTest {
     @Test
     void testValidatePropertiesWithWherePortTooLow() throws PropertyValidationException {
         this.rawProperties.put(DEBUG_ADDRESS_PROPERTY, "host:0");
-        assertWarningIssued("Debug output port 0 out of range");
+        assertWarningIssued("Debug output port 0 is out of range");
     }
 
     @Test
