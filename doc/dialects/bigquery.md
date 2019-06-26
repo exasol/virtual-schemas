@@ -26,7 +26,7 @@ Download the [Simba JDBC Driver for Google BigQuery](https://cloud.google.com/bi
     --/
     CREATE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.18.1.jar;
+    %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.18.2.jar;
     %jar /buckets/bfsdefault/jars/avro-1.8.2.jar;
     %jar /buckets/bfsdefault/jars/gax-1.40.0.jar;
     %jar /buckets/bfsdefault/jars/google-api-client-1.28.0.jar;
