@@ -17,7 +17,7 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 
 /**
- * This class implement the SQL dialect of Amazon's AWS Athena
+ * This class implements the SQL dialect of Amazon's AWS Athena
  *
  * @see <a href="https://aws.amazon.com/athena/">AWS Athena</a>
  */

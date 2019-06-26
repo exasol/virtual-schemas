@@ -11,7 +11,7 @@ import java.util.*;
 import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.ANY_TABLE_TYPE;
 
 /**
- * Metadata reader that reads Sap Hana-specific database metadata
+ * Metadata reader that reads SAP HANA-specific database metadata
  */
 public class SapHanaMetadataReader extends AbstractRemoteMetadataReader {
     /**
@@ -26,13 +26,13 @@ public class SapHanaMetadataReader extends AbstractRemoteMetadataReader {
 
     @Override
     protected ColumnMetadataReader createColumnMetadataReader() {
-        return new BaseColumnMetadataReader(this.connection, this.properties, this.identifierConverter);
+        return new SapHanaColumnMetadataReader(this.connection, this.properties, this.identifierConverter);
     }
 
     @Override
     protected TableMetadataReader createTableMetadataReader() {
         return new BaseTableMetadataReader(this.connection, this.columnMetadataReader, this.properties,
-              this.identifierConverter);
+                this.identifierConverter);
     }
 
     @Override
@@ -43,7 +43,6 @@ public class SapHanaMetadataReader extends AbstractRemoteMetadataReader {
     @Override
     protected IdentifierConverter createIdentifierConverter() {
         return new BaseIdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_UPPER,
-              IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE);
+                IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE);
     }
 }
-

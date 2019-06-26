@@ -119,7 +119,7 @@ class SapHanaSqlDialectTest {
     @Test
     void testMetadataReaderClass() {
         Assert.assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
-                instanceOf(BaseRemoteMetadataReader.class));
+                instanceOf(SapHanaMetadataReader.class));
     }
 
     @Test

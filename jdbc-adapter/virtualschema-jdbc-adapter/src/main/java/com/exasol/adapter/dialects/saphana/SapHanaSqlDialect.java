@@ -18,11 +18,9 @@ import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.sql.*;
 
 /**
- * This class implement the SAP HANA SQL dialect.
+ * This class implements the SAP HANA SQL dialect.
  *
- * @see <a href=
- *      "https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.03/en-US/f327b70cae564c53a766367a8aad0164.html">SAP
- *      HANA SQL</a>
+ * @see <a href= "https://help.sap.com/viewer/product/SAP_HANA_PLATFORM/2.0.04/en-US">SAP HANA SQL</a>
  */
 public class SapHanaSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "SAPHANA";
@@ -33,7 +31,7 @@ public class SapHanaSqlDialect extends AbstractSqlDialect {
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
     /**
-     * Get the Sap Hana dialect name
+     * Get the SAP HANA dialect name
      *
      * @return always "SAPHANA"
      */
@@ -84,7 +82,7 @@ public class SapHanaSqlDialect extends AbstractSqlDialect {
     /**
      * Create a new instance of the {@link SapHanaSqlDialect}
      *
-     * @param connection JDBC connection to the Sap Hana
+     * @param connection JDBC connection to the SAP HANA
      * @param properties user-defined adapter properties
      */
     public SapHanaSqlDialect(final Connection connection, final AdapterProperties properties) {
@@ -128,7 +126,7 @@ public class SapHanaSqlDialect extends AbstractSqlDialect {
 
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new BaseRemoteMetadataReader(this.connection, this.properties);
+        return new SapHanaMetadataReader(this.connection, this.properties);
     }
 
     @Override

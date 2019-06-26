@@ -271,7 +271,7 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
         return colType;
     }
 
-    private static DataType convertDecimal(final int jdbcPrecision, final int scale) {
+    protected DataType convertDecimal(final int jdbcPrecision, final int scale) {
         final DataType colType;
         if (jdbcPrecision <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
             colType = DataType.createDecimal(jdbcPrecision, scale);
