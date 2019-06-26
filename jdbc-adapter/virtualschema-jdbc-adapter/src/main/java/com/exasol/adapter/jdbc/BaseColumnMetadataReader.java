@@ -197,6 +197,8 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
             return convertBigInteger(jdbcTypeDescription.getPrecisionOrSize());
         case Types.DECIMAL:
             return convertDecimal(jdbcTypeDescription.getPrecisionOrSize(), jdbcTypeDescription.getDecimalScale());
+        case Types.NUMERIC:
+            return fallBackToMaximumSizeVarChar();
         case Types.REAL:
         case Types.FLOAT:
         case Types.DOUBLE:
@@ -213,19 +215,19 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
             return DataType.createDate();
         case Types.TIMESTAMP:
             return DataType.createTimestamp(false);
+        case Types.TIME:
+            return fallBackToMaximumSizeVarChar();
         case Types.BIT:
         case Types.BOOLEAN:
             return DataType.createBool();
         case Types.BINARY:
+        case Types.VARBINARY:
+        case Types.LONGVARBINARY:
+        case Types.BLOB:
         case Types.CLOB:
-        case Types.TIME:
-        case Types.NUMERIC:
+        case Types.NCLOB:
             return fallBackToMaximumSizeVarChar();
         case Types.OTHER:
-        case Types.BLOB:
-        case Types.NCLOB:
-        case Types.LONGVARBINARY:
-        case Types.VARBINARY:
         case Types.JAVA_OBJECT:
         case Types.DISTINCT:
         case Types.STRUCT:
@@ -234,7 +236,6 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
         case Types.DATALINK:
         case Types.SQLXML:
         case Types.NULL:
-        case Types.REF_CURSOR:
         default:
             throw new RemoteMetadataReaderException("Unsupported JBDC data type \"" + jdbcTypeDescription.getJdbcType()
                     + "\" found trying to map remote schema metadata to Exasol.");

@@ -13,6 +13,7 @@ public final class ReflectionUtils {
     }
 
     /**
+     * Get the return value of a method via reflection
      *
      * @param object     instance on which the method is invoked
      * @param methodName name of the method to be invoked
@@ -20,9 +21,23 @@ public final class ReflectionUtils {
      * @throws ReflectionException if the method does not exist or is inaccessible
      */
     public static Object getMethodReturnViaReflection(final Object object, final String methodName) {
+        return getMethodReturnViaReflection(object, object.getClass(), methodName);
+    }
+
+    /**
+     * Get the return value of a method via reflection
+     *
+     * @param object     instance on which the method is invoked
+     * @param theClass   class of the instance or one of its parent classes
+     * @param methodName name of the method to be invoked
+     * @return resulting return value of the method invocation
+     * @throws ReflectionException if the method does not exist or is inaccessible
+     */
+    public static Object getMethodReturnViaReflection(final Object object, final Class<? extends Object> theClass,
+            final String methodName) {
         Method method;
         try {
-            method = object.getClass().getDeclaredMethod(methodName);
+            method = theClass.getDeclaredMethod(methodName);
             method.setAccessible(true);
             return method.invoke(object);
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException

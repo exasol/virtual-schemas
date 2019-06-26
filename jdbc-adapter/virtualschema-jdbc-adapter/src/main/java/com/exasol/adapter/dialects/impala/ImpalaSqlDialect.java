@@ -101,9 +101,4 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
     protected RemoteMetadataReader createRemoteMetadataReader() {
         return new ImpalaMetadataReader(this.connection, this.properties);
     }
-
-    @Override
-    protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
-    }
 }

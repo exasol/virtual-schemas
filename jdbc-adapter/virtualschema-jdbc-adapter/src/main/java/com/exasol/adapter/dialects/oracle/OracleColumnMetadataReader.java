@@ -44,8 +44,6 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
         case Types.DECIMAL:
         case Types.NUMERIC:
             return mapNumericType(jdbcTypeDescription);
-        case Types.BLOB:
-        case Types.NCLOB:
         case ORACLE_CLOB:
         case INTERVAL_YEAR_TO_MONTH:
         case INTERVAL_DAY_TO_SECOND:

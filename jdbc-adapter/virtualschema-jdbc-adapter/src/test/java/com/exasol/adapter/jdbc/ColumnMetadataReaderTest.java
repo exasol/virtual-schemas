@@ -259,7 +259,7 @@ class ColumnMetadataReaderTest {
         assertSqlTypeConvertedToExasolType(Types.TIME, TYPE_MAX_VARCHAR_UTF8);
     }
 
-    @ValueSource(ints = { Types.BINARY, Types.CLOB })
+    @ValueSource(ints = { Types.BINARY, Types.VARBINARY, Types.LONGVARBINARY, Types.BLOB, Types.CLOB, Types.NCLOB })
     @ParameterizedTest
     void testBinary(final int typeId) throws SQLException {
         assertSqlTypeConvertedToExasolType(typeId, TYPE_MAX_VARCHAR_UTF8);

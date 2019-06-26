@@ -59,7 +59,9 @@ public abstract class AbstractSqlDialect implements SqlDialect {
      *
      * @return query rewriter
      */
-    protected abstract QueryRewriter createQueryRewriter();
+    protected QueryRewriter createQueryRewriter() {
+        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
+    }
 
     @Override
     public String getTableCatalogAndSchemaSeparator() {

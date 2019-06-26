@@ -35,11 +35,6 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         return new DB2MetadataReader(this.connection, this.properties);
     }
 
-    @Override
-    protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
-    }
-
     public static String getPublicName() {
         return NAME;
     }

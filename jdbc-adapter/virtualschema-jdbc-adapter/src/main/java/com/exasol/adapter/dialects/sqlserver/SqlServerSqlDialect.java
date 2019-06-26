@@ -127,11 +127,6 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
-    }
-
-    @Override
     public void validateProperties() throws PropertyValidationException {
         super.validateDialectName(getPublicName());
         super.validateProperties();

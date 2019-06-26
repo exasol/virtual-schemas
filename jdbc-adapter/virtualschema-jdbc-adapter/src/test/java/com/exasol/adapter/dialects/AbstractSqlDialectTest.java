@@ -8,6 +8,7 @@ import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGR
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -20,6 +21,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.logging.CapturingLogHandler;
+import com.exasol.reflect.ReflectionUtils;
 
 class AbstractSqlDialectTest {
     private Map<String, String> rawProperties;
@@ -279,5 +281,13 @@ class AbstractSqlDialectTest {
     void testGetStringLiteralWithNull() {
         final SqlDialect sqlDialect = new DummySqlDialect(null, AdapterProperties.emptyProperties());
         assertThat(sqlDialect.getStringLiteral(null), equalTo("NULL"));
+    }
+
+    @Test
+    void testCreateQueryRewriter() {
+        final SqlDialect dialect = new DummySqlDialect(null, AdapterProperties.emptyProperties());
+        assertThat(
+                ReflectionUtils.getMethodReturnViaReflection(dialect, AbstractSqlDialect.class, "createQueryRewriter"),
+                instanceOf(BaseQueryRewriter.class));
     }
 }

@@ -125,9 +125,4 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     protected RemoteMetadataReader createRemoteMetadataReader() {
         return new HiveMetadataReader(this.connection, this.properties);
     }
-
-    @Override
-    protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
-    }
 }

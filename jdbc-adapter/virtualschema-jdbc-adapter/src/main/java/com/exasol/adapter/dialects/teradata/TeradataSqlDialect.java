@@ -31,11 +31,6 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
         return new TeradataMetadataReader(this.connection, this.properties);
     }
 
-    @Override
-    protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
-    }
-
     public TeradataSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }

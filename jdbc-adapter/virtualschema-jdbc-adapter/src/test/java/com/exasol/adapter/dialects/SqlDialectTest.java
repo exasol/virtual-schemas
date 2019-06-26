@@ -234,10 +234,5 @@ class SqlDialectTest {
         protected RemoteMetadataReader createRemoteMetadataReader() {
             return new BaseRemoteMetadataReader(this.connection, this.properties);
         }
-
-        @Override
-        protected QueryRewriter createQueryRewriter() {
-            return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
-        }
     }
 }

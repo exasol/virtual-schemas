@@ -94,9 +94,4 @@ public class GenericSqlDialect extends AbstractSqlDialect {
     protected RemoteMetadataReader createRemoteMetadataReader() {
         return new GenericMetadataReader(this.connection, this.properties);
     }
-
-    @Override
-    protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
-    }
 }

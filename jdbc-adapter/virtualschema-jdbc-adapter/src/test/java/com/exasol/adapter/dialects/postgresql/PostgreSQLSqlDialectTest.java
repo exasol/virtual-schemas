@@ -25,7 +25,8 @@ import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.dialects.PropertyValidationException;
+import com.exasol.adapter.dialects.SqlDialect;
 
 class PostgreSQLSqlDialectTest {
     private PostgreSQLSqlDialect dialect;
@@ -41,12 +42,6 @@ class PostgreSQLSqlDialectTest {
     void testCreateRemoteMetadataReader() {
         assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
                 instanceOf(PostgreSQLMetadataReader.class));
-    }
-
-    @Test
-    void testCreateQueryRewriter() {
-        assertThat(getMethodReturnViaReflection(this.dialect, "createQueryRewriter"),
-                instanceOf(BaseQueryRewriter.class));
     }
 
     @Test
