@@ -1,11 +1,11 @@
 package com.exasol.adapter.dialects.saphana;
 
-import java.sql.*;
-
 import com.exasol.adapter.*;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.metadata.*;
+
+import java.sql.*;
 
 /**
  * This class implements SAP HANA-specific reading of column metadata
@@ -26,9 +26,19 @@ public class SapHanaColumnMetadataReader extends BaseColumnMetadataReader {
 
     @Override
     public DataType mapJdbcType(final JdbcTypeDescription jdbcTypeDescription) {
-        if (jdbcTypeDescription.getJdbcType() == Types.DECIMAL) {
+        switch (jdbcTypeDescription.getJdbcType()) {
+        case Types.DECIMAL:
+            return mapDecimal(jdbcTypeDescription.getPrecisionOrSize(), jdbcTypeDescription.getDecimalScale());
+        default:
+            return super.mapJdbcType(jdbcTypeDescription);
+        }
+    }
+
+    private DataType mapDecimal(final int precision, final int scale) {
+        if (scale > 0) {
+            return convertDecimal(precision, scale);
+        } else {
             return DataType.createDouble();
         }
-        return super.mapJdbcType(jdbcTypeDescription);
     }
 }
