@@ -2,7 +2,6 @@ package com.exasol.adapter.dialects.saphana;
 
 import com.exasol.adapter.*;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.dialects.bigquery.*;
 import com.exasol.adapter.jdbc.*;
 
 import java.sql.*;
