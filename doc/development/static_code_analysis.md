@@ -10,7 +10,7 @@ We are using Sonar's **standard rule set** with the following exceptions:
 
 The SQL dialects and the metadata readers that are part of them are in many parts quite similar. Most duplications are one-liners that configure the behavior of a SQL dialect. This can't be reduced any further without sacrificing self-documentation of dialects and proper abstraction.
 
-Even if the duplications are only configuration and they are small, the numbers add up.
+Even if the duplications are only configurations and they are small, the numbers add up.
 
 Sonar does not support `@SuppressWarnings` for code duplication checks. The only option at the time of this writing is to exclude whole Files from the duplication check using Filename patterns.
 
