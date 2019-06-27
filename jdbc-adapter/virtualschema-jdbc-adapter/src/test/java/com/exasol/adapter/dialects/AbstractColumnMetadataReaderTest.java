@@ -5,7 +5,6 @@ import static org.junit.Assert.assertThat;
 
 import java.sql.Types;
 
-import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.jdbc.ColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 

@@ -17,7 +17,7 @@ import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.sql.*;
 
 /**
- * This class implement the SQL dialect of Google's Big Query
+ * This class implements the SQL dialect of Google's Big Query
  *
  * @see <a href="https://cloud.google.com/bigquery/">BigQuery</a>
  */
