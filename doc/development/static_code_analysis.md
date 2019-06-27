@@ -4,7 +4,7 @@ This Open Source project uses [SonarCloud](https://sonarcloud.io/) as static cod
 
 ## Rules and Exceptions
 
-We are using Sonar's **standard rule set** with the following exceptions-
+We are using Sonar's **standard rule set** with the following exceptions:
 
 ### Code Duplication Check Exceptions
 
