@@ -12,7 +12,7 @@ The SQL dialects and the metadata readers that are part of them are in many part
 
 Even if the duplications are only configurations and they are small, the numbers add up.
 
-Sonar does not support `@SuppressWarnings` for code duplication checks. The only option at the time of this writing is to exclude whole Files from the duplication check using Filename patterns.
+Sonar does not support `@SuppressWarnings` for code duplication checks. The only option at the time of this writing is to exclude whole files from the duplication check using Filename patterns.
 
 The following patterns are excluded:
 
