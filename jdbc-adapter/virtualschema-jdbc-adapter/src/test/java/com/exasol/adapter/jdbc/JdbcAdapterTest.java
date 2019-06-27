@@ -1,8 +1,7 @@
 package com.exasol.adapter.jdbc;
 
 import static com.exasol.adapter.AdapterProperties.*;
-import static org.hamcrest.Matchers.emptyCollectionOf;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -14,22 +13,21 @@ import org.mockito.Mockito;
 
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.MainCapability;
 import com.exasol.adapter.dialects.generic.GenericSqlDialect;
 import com.exasol.adapter.metadata.SchemaMetadataInfo;
 import com.exasol.adapter.metadata.TableMetadata;
-import com.exasol.adapter.request.GetCapabilitiesRequest;
-import com.exasol.adapter.request.PushDownRequest;
-import com.exasol.adapter.response.GetCapabilitiesResponse;
-import com.exasol.adapter.response.PushDownResponse;
+import com.exasol.adapter.request.*;
+import com.exasol.adapter.response.*;
 import com.exasol.adapter.sql.SqlStatement;
 import com.exasol.adapter.sql.TestSqlStatementFactory;
 
 public class JdbcAdapterTest {
     private static final String SCHEMA_NAME = "THE_SCHEMA";
+    private static final String GENERIC_ADAPTER_NAME = GenericSqlDialect.getPublicName();
     private final JdbcAdapter adapter = new JdbcAdapter();
     private Map<String, String> rawProperties;
-    private final String GENERIC_ADAPTER_NAME = GenericSqlDialect.getPublicName();
 
     @BeforeEach
     void beforeEach() {
@@ -50,15 +48,15 @@ public class JdbcAdapterTest {
         setDerbyConnectionProperties();
         this.rawProperties.put(SCHEMA_NAME_PROPERTY, "SYSIBM");
         final List<TableMetadata> involvedTablesMetadata = null;
-        final PushDownRequest request = new PushDownRequest(this.GENERIC_ADAPTER_NAME, createSchemaMetadataInfo(),
-                statement, involvedTablesMetadata);
+        final PushDownRequest request = new PushDownRequest(JdbcAdapterTest.GENERIC_ADAPTER_NAME,
+                createSchemaMetadataInfo(), statement, involvedTablesMetadata);
         final ExaMetadata exaMetadataMock = Mockito.mock(ExaMetadata.class);
         final PushDownResponse response = this.adapter.pushdown(exaMetadataMock, request);
         return response;
     }
 
     private void setGenericSqlDialectProperty() {
-        this.rawProperties.put(SQL_DIALECT_PROPERTY, this.GENERIC_ADAPTER_NAME);
+        this.rawProperties.put(SQL_DIALECT_PROPERTY, JdbcAdapterTest.GENERIC_ADAPTER_NAME);
     }
 
     private void setDerbyConnectionProperties() {
@@ -82,10 +80,22 @@ public class JdbcAdapterTest {
         setGenericSqlDialectProperty();
         setDerbyConnectionProperties();
         this.rawProperties.put(SCHEMA_NAME_PROPERTY, "SYSIBM");
-        final GetCapabilitiesRequest request = new GetCapabilitiesRequest(this.GENERIC_ADAPTER_NAME,
+        final GetCapabilitiesRequest request = new GetCapabilitiesRequest(GENERIC_ADAPTER_NAME,
                 createSchemaMetadataInfo());
         final ExaMetadata exaMetadataMock = Mockito.mock(ExaMetadata.class);
         final GetCapabilitiesResponse response = this.adapter.getCapabilities(exaMetadataMock, request);
         assertThat(response.getCapabilities().getMainCapabilities(), emptyCollectionOf(MainCapability.class));
+    }
+
+    @Test
+    public void testDropVirtualSchemaMustSucceedEvenIfDebugAddressIsInvalid() throws AdapterException {
+        setGenericSqlDialectProperty();
+        setDerbyConnectionProperties();
+        final ExaMetadata exaMetadataMock = Mockito.mock(ExaMetadata.class);
+        this.rawProperties.put(AdapterProperties.DEBUG_ADDRESS_PROPERTY, "this_is_an:invalid_debug_address");
+        final DropVirtualSchemaRequest dropRequest = new DropVirtualSchemaRequest(GENERIC_ADAPTER_NAME,
+                createSchemaMetadataInfo());
+        final DropVirtualSchemaResponse response = this.adapter.dropVirtualSchema(exaMetadataMock, dropRequest);
+        assertThat(response, notNullValue());
     }
 }

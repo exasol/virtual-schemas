@@ -1,22 +1,23 @@
 package com.exasol.adapter.dialects.bigquery;
 
-import com.exasol.adapter.*;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.*;
-import com.exasol.adapter.sql.*;
-import com.google.common.collect.*;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.*;
-import org.mockito.*;
-import org.mockito.junit.jupiter.*;
-
-import java.sql.*;
-import java.util.*;
-
 import static com.exasol.adapter.dialects.DialectTestData.getClicksTableMetadata;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+
+import java.sql.Connection;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.metadata.TableMetadata;
+import com.exasol.adapter.sql.SqlColumn;
+import com.exasol.adapter.sql.SqlOrderBy;
+import com.google.common.collect.ImmutableList;
 
 @ExtendWith(MockitoExtension.class)
 class BigQuerySqlGenerationVisitorTest {

@@ -19,7 +19,9 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
     private static final String LITERAL_NULL = "NULL";
     private static final Logger LOGGER = Logger.getLogger(BigQueryQueryRewriter.class.getName());
     private static final double[] TEN_POWERS = { 10d, 100d, 1000d, 10000d, 100000d, 1000000d };
+    @SuppressWarnings("squid:S4784") // this pattern is secure
     private static final Pattern DATE_PATTERN = Pattern.compile("(\\d{4})-(\\d{1,2})-(\\d{1,2})");
+    @SuppressWarnings("squid:S4784") // this pattern is secure
     private static final Pattern TIME_PATTERN = Pattern.compile("(\\d{1,2}):(\\d{1,2}):(\\d{1,2})(?:\\.(\\d{1,6}))?");
 
     /**

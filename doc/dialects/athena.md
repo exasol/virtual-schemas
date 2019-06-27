@@ -2,6 +2,11 @@
 
 The Athena SQL Dialect supports Amazon's [AWS Athena](https://aws.amazon.com/athena/), a managed service that lets you read files on S3 as if they were part of a relational database.
 
+>(i) Information for DbVisualizer users
+>To tell DbVisualizer that a part of a script should be handled as a single statement, you can insert an SQL block begin identifier just >before the block and an end identifier after the block. The delimiter must be the only text on the line. The default value for the >Begin Identifier is --/ and for the End Identifier it is /.
+
+
+
 ## JDBC Driver
 
 ### Registering the JDBC Driver in EXAOperation
