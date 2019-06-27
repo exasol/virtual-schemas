@@ -1,6 +1,6 @@
 # Static Code Analysis
 
-This Open Source project uses [SonarCloud](https://sonarcloud.io/) as static code analysis tool.
+This Open Source project uses [SonarCloud](https://sonarcloud.io/) as a static code analysis tool.
 
 ## Rules and Exceptions
 
