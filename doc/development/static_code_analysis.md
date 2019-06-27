@@ -8,7 +8,7 @@ We are using Sonar's **standard rule set** with the following exceptions:
 
 ### Code Duplication Check Exceptions
 
-The SQL dialects and the metadata readers that are part of them are in many parts quite similar. Most duplications are one-liners that configure the behavior of a SQL dialect. This can't be reduced any further without sacrificing self-documentation of dialects and proper abstraction.
+The SQL dialects and the metadata readers that are part of dialects are in many places quite similar. Most duplications are one-liners that configure the behavior of a SQL dialect. This can't be reduced any further without sacrificing self-documentation of dialects and proper abstraction.
 
 Even if the duplications are only configurations and they are small, the numbers add up.
 
