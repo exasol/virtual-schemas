@@ -1,10 +1,10 @@
 # SAP HANA SQL Dialect
 
-The SAP HANA SQL dialect allows you to reach [HANA](https://www.sap.com/products/hana.html) databases via Virtual Schemas.
+The SAP HANA SQL dialect allows you to access [HANA](https://www.sap.com/products/hana.html) databases via Virtual Schemas.
 
 ## JDBC Driver
 
-Download the latest version of [SAP HANA JDBC driver](https://search.maven.org/search?q=g:com.sap.cloud.db.jdbc%20AND%20a:ngdbc&core=gav).
+Download the latest version of the [SAP HANA JDBC driver](https://search.maven.org/search?q=g:com.sap.cloud.db.jdbc%20AND%20a:ngdbc&core=gav).
 
 ### Upload JDBC Driver to EXAOperation
 
@@ -36,15 +36,14 @@ Download the latest version of [SAP HANA JDBC driver](https://search.maven.org/s
     ```sql
     CREATE OR REPLACE CONNECTION SAPHANA_CONNECTION 
     TO 'jdbc:sap://write.ip.address.here:port' 
-    USER 'SYSTEM' 
+    USER 'username' 
     IDENTIFIED BY 'yourpassword';
     ```
-    SAP HANA's default username is SYSTEM.
 
 4. Create a Virtual Schema
 
     ```sql
-    CREATE VIRTUAL SCHEMA "saphanatest"
+    CREATE VIRTUAL SCHEMA SAPHANATEST
     USING adapter_sap_hana.jdbc_adapter_sap_hana_script
     WITH
         SQL_DIALECT = 'SAPHANA'
