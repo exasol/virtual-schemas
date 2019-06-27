@@ -129,3 +129,4 @@ Please also remember to [document the SQL dialect](../dialects).
 * [Integration testing with containers](integration_testing_with_containers.md)
 * [Remote debugging](remote_debugging.md)
 * [Versioning](versioning.md)
+* [Static code analysis](static_code_analysis.md)

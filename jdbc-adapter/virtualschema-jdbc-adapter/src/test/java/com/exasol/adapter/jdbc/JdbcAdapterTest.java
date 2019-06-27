@@ -1,8 +1,7 @@
 package com.exasol.adapter.jdbc;
 
 import static com.exasol.adapter.AdapterProperties.*;
-import static org.hamcrest.Matchers.emptyCollectionOf;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -20,8 +19,7 @@ import com.exasol.adapter.dialects.generic.GenericSqlDialect;
 import com.exasol.adapter.metadata.SchemaMetadataInfo;
 import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.request.*;
-import com.exasol.adapter.response.GetCapabilitiesResponse;
-import com.exasol.adapter.response.PushDownResponse;
+import com.exasol.adapter.response.*;
 import com.exasol.adapter.sql.SqlStatement;
 import com.exasol.adapter.sql.TestSqlStatementFactory;
 
@@ -97,6 +95,7 @@ public class JdbcAdapterTest {
         this.rawProperties.put(AdapterProperties.DEBUG_ADDRESS_PROPERTY, "this_is_an:invalid_debug_address");
         final DropVirtualSchemaRequest dropRequest = new DropVirtualSchemaRequest(GENERIC_ADAPTER_NAME,
                 createSchemaMetadataInfo());
-        this.adapter.dropVirtualSchema(exaMetadataMock, dropRequest);
+        final DropVirtualSchemaResponse response = this.adapter.dropVirtualSchema(exaMetadataMock, dropRequest);
+        assertThat(response, notNullValue());
     }
 }
