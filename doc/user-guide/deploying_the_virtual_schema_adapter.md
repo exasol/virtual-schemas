@@ -41,7 +41,7 @@ Following steps are required to upload a file to a bucket:
     
     1. Set the write password.
     
-    1. To keep this example simple we assume that the bucket is defined as a public bucket, i.e. it can be read by any script.
+    1. To keep this example simple we assume that the bucket is defined publicly readable.
 
 1. Now upload the file into this bucket, e.g. using curl (adapt the hostname, BucketFS port, bucket name and bucket write password).
 
