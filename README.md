@@ -59,6 +59,7 @@ This is an open source project which is officially supported by Exasol. For any 
     1. [Oracle](doc/dialects/oracle.md)
     1. [PostgreSQL](doc/dialects/postgresql.md)
     1. [Redshift](doc/dialects/redshift.md)
+    1. [SAP HANA](.../dialects/saphana.md)
     1. [SQL Server](doc/dialects/sql_server.md)
     1. [Sybase ASE](doc/dialects/sybase.md)
     1. [Teradata](doc/dialects/teradata.md)

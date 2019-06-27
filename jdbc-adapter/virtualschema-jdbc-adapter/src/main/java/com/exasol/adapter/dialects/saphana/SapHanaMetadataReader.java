@@ -25,7 +25,7 @@ public class SapHanaMetadataReader extends AbstractRemoteMetadataReader {
 
     @Override
     protected ColumnMetadataReader createColumnMetadataReader() {
-        return new SapHanaColumnMetadataReader(this.connection, this.properties, this.identifierConverter);
+        return new BaseColumnMetadataReader(this.connection, this.properties, this.identifierConverter);
     }
 
     @Override
