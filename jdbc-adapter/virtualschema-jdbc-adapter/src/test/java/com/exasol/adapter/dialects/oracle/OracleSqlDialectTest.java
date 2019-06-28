@@ -32,7 +32,7 @@ import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.sql.*;
 
-import utils.SqlTestUtil;
+import utils.SqlNormalizer;
 
 class OracleSqlDialectTest {
     private static final String SCHEMA_NAME = "SCHEMA";
@@ -94,7 +94,7 @@ class OracleSqlDialectTest {
                 "    ORDER BY \"USER_ID\" " + //
                 ") LIMIT_SUBSELECT WHERE ROWNUM <= 10"; //
         final String actualSql = this.node.accept(this.generator);
-        assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
+        assertEquals(SqlNormalizer.normalizeSql(expectedSql), SqlNormalizer.normalizeSql(actualSql));
     }
 
     @Test
@@ -111,7 +111,7 @@ class OracleSqlDialectTest {
                 "  ) LIMIT_SUBSELECT WHERE ROWNUM <= 15 " + //
                 ") WHERE ROWNUM_SUB > 5";
         final String actualSql = this.node.accept(this.generator);
-        assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
+        assertEquals(SqlNormalizer.normalizeSql(expectedSql), SqlNormalizer.normalizeSql(actualSql));
     }
 
     @Test
@@ -131,7 +131,7 @@ class OracleSqlDialectTest {
                 "  ) LIMIT_SUBSELECT WHERE ROWNUM <= 15 " + //
                 ") WHERE ROWNUM_SUB > 5";
         final String actualSql = node.accept(this.generator);
-        assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
+        assertEquals(SqlNormalizer.normalizeSql(expectedSql), SqlNormalizer.normalizeSql(actualSql));
     }
 
     @CsvSource({ "FALSE, FALSE, JDBC", //

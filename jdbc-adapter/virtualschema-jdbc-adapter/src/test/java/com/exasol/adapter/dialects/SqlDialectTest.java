@@ -17,7 +17,7 @@ import com.exasol.adapter.sql.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import utils.SqlTestUtil;
+import utils.SqlNormalizer;
 
 class SqlDialectTest {
     @Test
@@ -50,7 +50,7 @@ class SqlDialectTest {
         final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
         final SqlGenerationVisitor generator = new SqlGenerationVisitor(dialect, context);
         final String actualSql = node.accept(generator);
-        assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
+        assertEquals(SqlNormalizer.normalizeSql(expectedSql), SqlNormalizer.normalizeSql(actualSql));
     }
 
     @Test
@@ -83,7 +83,7 @@ class SqlDialectTest {
         final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
         final SqlGenerationVisitor generator = new SqlGenerationVisitor(dialect, context);
         final String actualSql = node.accept(generator);
-        assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
+        assertEquals(SqlNormalizer.normalizeSql(expectedSql), SqlNormalizer.normalizeSql(actualSql));
     }
 
     @Test

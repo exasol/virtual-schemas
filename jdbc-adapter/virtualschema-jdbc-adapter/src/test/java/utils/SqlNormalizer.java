@@ -1,7 +1,7 @@
 package utils;
 
-public final class SqlTestUtil {
-    private SqlTestUtil(){
+public final class SqlNormalizer {
+    private SqlNormalizer(){
         //Intentionally left blank
     }
 
