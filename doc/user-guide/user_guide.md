@@ -23,6 +23,7 @@ Please note that the syntax for creating adapter scripts is not recognized by al
 1. [Oracle](../dialects/oracle.md)
 1. [Teradata](../dialects/teradata.md)
 1. [Redshift](../dialects/redshift.md)
+1. [SAP HANA](.../dialects/saphana.md)
 1. [SQL Server](../dialects/sql_server.md)
 1. [Sybase ASE](../dialects/sybase.md)
 1. [PostgresSQL](../dialects/postgresql.md)
