@@ -14,7 +14,7 @@ import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 
 /**
- * This class implements Oracle-specific reading of column metadata
+ * This class implements Oracle-specific reading of column metadata.
  */
 public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
     private static final int ORACLE_TIMESTAMP_WITH_LOCAL_TIME_ZONE = -101;
@@ -27,7 +27,7 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
     static final int ORACLE_MAGIC_NUMBER_SCALE = -127;
 
     /**
-     * Create a new instance of an {@link OracleColumnMetadataReader}
+     * Create a new instance of the {@link OracleColumnMetadataReader}
      *
      * @param connection          connection to the remote data source
      * @param properties          user-defined adapter properties
@@ -72,10 +72,12 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
         }
     }
 
-    // Oracle JDBC driver returns scale -127 if NUMBER data type was specified
-    // without scale and precision. Convert to VARCHAR.
-    // See http://docs.oracle.com/cd/B28359_01/server.111/b28318/datatype.htm#i16209
-    // and https://docs.oracle.com/cd/E19501-01/819-3659/gcmaz/
+    /**
+     * @return Oracle JDBC driver returns scale -127 if NUMBER data type was specified
+     * without scale and precision. Convert to VARCHAR.
+     * See http://docs.oracle.com/cd/B28359_01/server.111/b28318/datatype.htm#i16209
+     * and https://docs.oracle.com/cd/E19501-01/819-3659/gcmaz/
+     */
     private DataType workAroundNumberWithoutScaleAndPrecision() {
         return getOracleNumberTargetType();
     }

@@ -20,7 +20,7 @@ public class ResultSetMetadataReader {
     private final ColumnMetadataReader columnMetadataReader;
 
     /**
-     * Create a new instance of a {@link ResultSetMetadataReader}
+     * Create a new instance of a {@link ResultSetMetadataReader}.
      *
      * @param connection           connection to the remote data source
      * @param columnMetadataReader column metadata reader used to translate the column types
@@ -31,7 +31,7 @@ public class ResultSetMetadataReader {
     }
 
     /**
-     * Generate a textual description of the result columns of the push-down query
+     * Generate a textual description of the result columns of the push-down query.
      *
      * @param query push-down query
      * @return string describing the columns (names and types)

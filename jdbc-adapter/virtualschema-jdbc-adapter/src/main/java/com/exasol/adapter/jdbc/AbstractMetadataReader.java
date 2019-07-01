@@ -16,7 +16,7 @@ public abstract class AbstractMetadataReader implements MetadataReader {
     protected final Connection connection;
 
     /**
-     * Create an {@link AbstractMetadataReader}
+     * Create an {@link AbstractMetadataReader}.
      *
      * @param connection JDBC connection to remote data source
      * @param properties user-defined adapter properties
@@ -27,7 +27,7 @@ public abstract class AbstractMetadataReader implements MetadataReader {
     }
 
     /**
-     * Get the catalog name that is applied as filter criteria when looking up remote metadata
+     * Get the catalog name that is applied as filter criteria when looking up remote metadata.
      *
      * @return catalog name or <code>null</code> if metadata lookups are not limited by catalog
      */
@@ -37,7 +37,7 @@ public abstract class AbstractMetadataReader implements MetadataReader {
     }
 
     /**
-     * Get the schema name that is applied as filter criteria when looking up remote metadata
+     * Get the schema name that is applied as filter criteria when looking up remote metadata.
      *
      * @return schema name or <code>null</code> if metadata lookups are not limited by schema
      */

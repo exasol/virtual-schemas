@@ -8,14 +8,13 @@ import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.*;
 
 /**
- * This class reads Impala-specific database metadata
+ * This class reads Impala-specific database metadata.
  */
 public class ImpalaMetadataReader extends AbstractRemoteMetadataReader {
     /**
-     * Create a new instance of a {@link ImpalaMetadataReader}
+     * Create a new instance of the {@link ImpalaMetadataReader}.
      *
-     * @param connection database connection through which the reader retrieves the metadata from the remote
-     *                   source
+     * @param connection database connection through which the reader retrieves the metadata from the remote source
      * @param properties user-defined properties
      */
     public ImpalaMetadataReader(final Connection connection, final AdapterProperties properties) {

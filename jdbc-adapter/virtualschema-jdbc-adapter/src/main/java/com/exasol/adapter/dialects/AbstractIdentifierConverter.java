@@ -3,14 +3,14 @@ package com.exasol.adapter.dialects;
 import com.exasol.adapter.jdbc.IdentifierCaseHandling;
 
 /**
- * Abstract base class for all identifier converters
+ * Abstract base class for all identifier converters.
  */
 public abstract class AbstractIdentifierConverter implements IdentifierConverter {
     protected final IdentifierCaseHandling unquotedIdentifierHandling;
     protected final IdentifierCaseHandling quotedIdentifierHandling;
 
     /**
-     * Create a new instance of an {@link AbstractIdentifierConverter} derived class
+     * Create a new instance of an {@link AbstractIdentifierConverter} derived class.
      *
      * @param unquotedIdentifierHandling handling for unquoted identifiers
      * @param quotedIdentifierHandling   handling for quoted identifiers

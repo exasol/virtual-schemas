@@ -32,21 +32,21 @@ public interface RemoteMetadataReader extends MetadataReader {
     public SchemaAdapterNotes getSchemaAdapterNotes();
 
     /**
-     * Get the remote column metadata reader
+     * Get the remote column metadata reader.
      *
      * @return column metadata reader
      */
     public ColumnMetadataReader getColumnMetadataReader();
 
     /**
-     * Get the table metadata reader
+     * Get the table metadata reader.
      *
      * @return table metadata reader
      */
     public TableMetadataReader getTableMetadataReader();
 
     /**
-     * Get the table types the remote metadata reader supports
+     * Get the table types the remote metadata reader supports.
      *
      * @return set of table type names
      */

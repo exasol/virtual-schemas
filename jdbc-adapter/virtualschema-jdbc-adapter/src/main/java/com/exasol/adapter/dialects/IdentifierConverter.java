@@ -3,7 +3,7 @@ package com.exasol.adapter.dialects;
 import com.exasol.adapter.jdbc.IdentifierCaseHandling;
 
 /**
- * Common interface for database identifier converters
+ * Common interface for database identifier converters.
  */
 public interface IdentifierConverter {
     /**

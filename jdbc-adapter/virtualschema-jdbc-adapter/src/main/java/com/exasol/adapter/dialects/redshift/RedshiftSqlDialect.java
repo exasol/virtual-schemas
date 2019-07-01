@@ -17,6 +17,9 @@ import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
+/**
+ * This class implements the Redshift SQL dialect.
+ */
 public class RedshiftSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "REDSHIFT";
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
@@ -24,10 +27,21 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
+    /**
+     * Create a new instance of the {@link RedshiftSqlDialect}.
+     *
+     * @param connection JDBC connection
+     * @param properties user-defined adapter properties
+     */
     public RedshiftSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
 
+    /**
+     * Get the Redshift dialect name.
+     *
+     * @return always "REDSHIFT"
+     */
     public static String getPublicName() {
         return NAME;
     }

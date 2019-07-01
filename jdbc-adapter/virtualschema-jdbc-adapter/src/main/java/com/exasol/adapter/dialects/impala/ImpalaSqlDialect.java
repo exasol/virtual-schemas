@@ -16,8 +16,7 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 
 /**
- * Dialect for Impala, using the Cloudera Impala JDBC Driver/Connector
- * (developed by Simba).
+ * Dialect for Impala, using the Cloudera Impala JDBC Driver/Connector (developed by Simba).
  * <p>
  * See
  * http://www.cloudera.com/documentation/enterprise/latest/topics/impala_langref.html
@@ -29,10 +28,21 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
+    /**
+     * Get the Impala dialect name.
+     *
+     * @return always "IMPALA"
+     */
     public static String getPublicName() {
         return NAME;
     }
 
+    /**
+     * Create a new instance of the {@link ImpalaSqlDialect}.
+     *
+     * @param connection JDBC connection
+     * @param properties user-defined adapter properties
+     */
     public ImpalaSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }

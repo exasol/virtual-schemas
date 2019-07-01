@@ -22,23 +22,30 @@ import com.exasol.adapter.sql.SqlStatementSelect;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
+/**
+ * This class generates SQL queries for the {@link PostgreSQLSqlDialect}.
+ */
 public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
 
-    public PostgresSQLSqlGenerationVisitor(SqlDialect dialect, SqlGenerationContext context) {
+    /**
+     * Create a new instance of the {@link PostgresSQLSqlGenerationVisitor}.
+     *
+     * @param dialect {@link PostgreSQLSqlDialect} SQL dialect
+     * @param context SQL generation context
+     */
+    public PostgresSQLSqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         super(dialect, context);
       
     }
     
     @Override
-    public String visit(SqlFunctionScalar function) throws AdapterException {
+    public String visit(final SqlFunctionScalar function) throws AdapterException {
         String sql = super.visit(function);
-        
-        
-		List<String> argumentsSql = new ArrayList<>();
-        for (SqlNode node : function.getArguments()) {
+		final List<String> argumentsSql = new ArrayList<>();
+        for (final SqlNode node : function.getArguments()) {
             argumentsSql.add(node.accept(this));
         }
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         
         switch (function.getFunction()) {
         
@@ -47,12 +54,9 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
         case ADD_MINUTES:
         case ADD_SECONDS:
         case ADD_WEEKS:
-        case ADD_YEARS: { 
-        	
+        case ADD_YEARS: {
             builder.append( argumentsSql.get(0) );
             builder.append(" + ");
-
-
             switch (function.getFunction()) {
 	            case ADD_DAYS:
 	                builder.append(" interval '"+  argumentsSql.get(1) +" day'" );
@@ -161,35 +165,31 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
             sql = builder.toString();
  
         }
-        	
         break;
 		default:
 			break;
-        
-        
         }
         return sql;
     }
     
     @Override
-    public String visit(SqlSelectList selectList) throws AdapterException {
+    public String visit(final SqlSelectList selectList) throws AdapterException {
         if (selectList.isRequestAnyColumn()) {
-            // The system requested any column
             return "1";
         }
-        List<String> selectListElements = new ArrayList<>();
+        final List<String> selectListElements = new ArrayList<>();
         if (selectList.isSelectStar()) {
             if (SqlGenerationHelper.selectListRequiresCasts(selectList, nodeRequiresCast)) {
 
                 // Do as if the user has all columns in select list
-                SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
+                final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
                 
                 int columnId = 0;
-                List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
-                SqlGenerationHelper.getMetadataFrom(select.getFromClause(), tableMetadata );
-                for (TableMetadata tableMeta : tableMetadata) {
-                    for (ColumnMetadata columnMeta : tableMeta.getColumns()) {
-                        SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
+                final List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
+                SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata );
+                for (final TableMetadata tableMeta : tableMetadata) {
+                    for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
+                        final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
                         selectListElements.add( getColumnProjectionStringNoCheck(sqlColumn,  super.visit(sqlColumn)  )   );
                         ++columnId;
                     }
@@ -199,7 +199,7 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
                 selectListElements.add("*");
             }
         } else {
-            for (SqlNode node : selectList.getExpressions()) {
+            for (final SqlNode node : selectList.getExpressions()) {
                 selectListElements.add(node.accept(this));
             }
         }
@@ -209,34 +209,27 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
 
     
     @Override
-    public String visit(SqlColumn column) throws AdapterException {
+    public String visit(final SqlColumn column) throws AdapterException {
         return getColumnProjectionString(column, super.visit(column));
     }
 
-    private String getColumnProjectionString(SqlColumn column, String projString) throws AdapterException {
-        boolean isDirectlyInSelectList = (column.hasParent() && column.getParent().getType() == SqlNodeType.SELECT_LIST);
+    private String getColumnProjectionString(final SqlColumn column, final String projString) throws AdapterException {
+        final boolean isDirectlyInSelectList = (column.hasParent() && column.getParent().getType() == SqlNodeType.SELECT_LIST);
         if (!isDirectlyInSelectList) {
             return projString;
         }
-       
-        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        
-        return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
-       
+        final String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+        return getColumnProjectionStringNoCheckImpl(typeName, projString);
     }
 
     
-    private String getColumnProjectionStringNoCheck(SqlColumn column, String projString) throws AdapterException {
-
-        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        
-        return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
-        
+    private String getColumnProjectionStringNoCheck(final SqlColumn column, final String projString) throws AdapterException {
+        final String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+        return getColumnProjectionStringNoCheckImpl(typeName, projString);
     }
     
 
-    private String getColumnProjectionStringNoCheckImpl(String typeName, SqlColumn column, String projString) {
-    	
+    private String getColumnProjectionStringNoCheckImpl(final String typeName, String projString) {
     	if (
 	    		typeName.startsWith("varbit") ||  
 	    		typeName.startsWith("point") ||
@@ -256,11 +249,8 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
 	    		typeName.startsWith("uuid") ||
 	    		typeName.startsWith("tsquery") ||
 	    		typeName.startsWith("tsvector") ||
-	    		typeName.startsWith("xml") 
-
+	    		typeName.startsWith("xml")
     		) {
-    		
-            //projString = "CAST(" + projString + "  as VARCHAR("+PostgreSQLSqlDialect.maxPostgresSQLVarcharSize+") )";
             projString = "CAST(" + projString + "  as VARCHAR )";
 
         }
@@ -281,14 +271,12 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
         	
         return projString;
     }
-    
-    
+
     private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("varbit","point","line","lseg","box","path","polygon","circle","cidr","citext","inet","macaddr","interval","json","jsonb","uuid","tsquery", "tsvector","xml","smallserial","serial","bigserial");
     
     private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("bytea"); 
 
-
-    private Predicate<SqlNode> nodeRequiresCast = node -> {
+    private final Predicate<SqlNode> nodeRequiresCast = node -> {
         try {
             if (node.getType() == SqlNodeType.COLUMN) {
                 SqlColumn column = (SqlColumn)node;
@@ -305,13 +293,13 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
 
     
     @Override
-    public String visit(SqlFunctionAggregateGroupConcat function) throws AdapterException {
-        StringBuilder builder = new StringBuilder();
+    public String visit(final SqlFunctionAggregateGroupConcat function) throws AdapterException {
+        final StringBuilder builder = new StringBuilder();
         builder.append("STRING_AGG");
         builder.append("(");
         assert(function.getArguments() != null);
         assert(function.getArguments().size() == 1 && function.getArguments().get(0) != null);
-        String expression = function.getArguments().get(0).accept(this);
+        final String expression = function.getArguments().get(0).accept(this);
         builder.append(expression);
         builder.append(", ");
         String separator = ",";
@@ -324,6 +312,4 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
 
         return builder.toString();
     }
-
-   
 }

@@ -9,13 +9,13 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.auth.kerberos.KerberosConfigurationCreator;
 
 /**
- * Factory that produces JDBC connections to remote data sources
+ * Factory that produces JDBC connections to remote data sources.
  */
 public class RemoteConnectionFactory {
     private static final Logger LOGGER = Logger.getLogger(RemoteConnectionFactory.class.getName());
 
     /**
-     * Create a JDBC connection to the remote data source
+     * Create a JDBC connection to the remote data source.
      *
      * @param exaMetadata Exasol metadata (contains information about stored * connection details)
      * @param properties  user-defined adapter properties

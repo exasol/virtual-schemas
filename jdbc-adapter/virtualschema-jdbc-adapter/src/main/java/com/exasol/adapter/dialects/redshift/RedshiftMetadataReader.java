@@ -9,11 +9,11 @@ import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.*;
 
 /**
- * This class implements a Redshift-specific metadata reader
+ * This class implements a Redshift-specific metadata reader.
  */
 public class RedshiftMetadataReader extends AbstractRemoteMetadataReader {
     /**
-     * Create a new instance of a {@link RedshiftMetadataReader}
+     * Create a new instance of the {@link RedshiftMetadataReader}.
      *
      * @param connection JDBC connection to the remote data source
      * @param properties user-defined adapter properties

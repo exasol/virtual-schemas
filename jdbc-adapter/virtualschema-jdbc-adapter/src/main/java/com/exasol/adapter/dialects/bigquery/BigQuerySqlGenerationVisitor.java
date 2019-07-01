@@ -7,13 +7,13 @@ import com.exasol.adapter.sql.*;
 import java.util.*;
 
 /**
- * This class implements a Google-Big-Query-specific variant of a SQL generation visitor.
+ * This class implements a Google-Big-Query-specific variant of an SQL generation visitor.
  */
 public class BigQuerySqlGenerationVisitor extends SqlGenerationVisitor {
     /**
-     * Create a new instance of {@link BigQuerySqlGenerationVisitor}.
+     * Create a new instance of the {@link BigQuerySqlGenerationVisitor}.
      * 
-     * @param dialect SQL dialect
+     * @param dialect Big Query SQL dialect
      * @param context SQL generation context
      */
     public BigQuerySqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {

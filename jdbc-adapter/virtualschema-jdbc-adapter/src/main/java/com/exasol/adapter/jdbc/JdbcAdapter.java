@@ -14,6 +14,9 @@ import com.exasol.adapter.metadata.SchemaMetadataInfo;
 import com.exasol.adapter.request.*;
 import com.exasol.adapter.response.*;
 
+/**
+ * This class implements main logic for different types of requests a virtual schema JDBC adapter can receive.
+ */
 public class JdbcAdapter implements VirtualSchemaAdapter {
     private static final String SCALAR_FUNCTION_PREFIX = "FN_";
     private static final String PREDICATE_PREFIX = "FN_PRED_";

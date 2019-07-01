@@ -18,6 +18,9 @@ import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
+/**
+ * This class implements the Sybase SQL dialect.
+ */
 public class SybaseSqlDialect extends AbstractSqlDialect {
     static final int MAX_SYBASE_VARCHAR_SIZE = 8000;
     static final int MAX_SYBASE_N_VARCHAR_SIZE = 4000;
@@ -27,10 +30,21 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
+    /**
+     * Create a new instance of the {@link SybaseSqlDialect}.
+     *
+     * @param connection JDBC connection
+     * @param properties user-defined adapter properties
+     */
     public SybaseSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
 
+    /**
+     * Get the Sybase dialect name.
+     *
+     * @return always "SYBASE"
+     */
     public static String getPublicName() {
         return NAME;
     }

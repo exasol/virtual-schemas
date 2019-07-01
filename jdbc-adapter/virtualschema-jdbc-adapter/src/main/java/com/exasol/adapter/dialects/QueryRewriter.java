@@ -26,7 +26,7 @@ import com.exasol.adapter.sql.SqlStatement;
  */
 public interface QueryRewriter {
     /**
-     * Set the original push-down statement
+     * Set the original push-down statement.
      *
      * @param statement   SQL statement that represents the original push-down query
      * @param properties  user-defined adapter properties

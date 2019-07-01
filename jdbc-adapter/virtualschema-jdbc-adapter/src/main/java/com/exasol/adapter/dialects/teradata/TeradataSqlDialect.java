@@ -17,7 +17,7 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 
 /**
- * This class implements the Teradata SQL dialect
+ * This class implements the Teradata SQL dialect.
  */
 public class TeradataSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "TERADATA";
@@ -36,10 +36,21 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
         return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
     }
 
+    /**
+     * Create a new instance of the {@link TeradataSqlDialect}.
+     *
+     * @param connection JDBC connection
+     * @param properties user-defined adapter properties
+     */
     public TeradataSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
 
+    /**
+     * Get the Teradata dialect name.
+     *
+     * @return always "TERADATA"
+     */
     public static String getPublicName() {
         return NAME;
     }

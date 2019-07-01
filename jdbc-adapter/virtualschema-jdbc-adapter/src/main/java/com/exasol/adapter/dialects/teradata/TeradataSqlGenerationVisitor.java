@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+/**
+ * This class generates SQL queries for the {@link TeradataSqlDialect}.
+ */
 public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
     private static final String CAST = "CAST(";
     private static final List<String> TYPE_NAMES_REQUIRING_CAST =
@@ -38,6 +41,12 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
         }
     };
 
+    /**
+     * Create a new instance of the {@link TeradataSqlGenerationVisitor}.
+     *
+     * @param dialect instance of {@link TeradataSqlDialect}
+     * @param context SQL generation context
+     */
     public TeradataSqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         super(dialect, context);
     }
@@ -53,7 +62,7 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
                 final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
                 int columnId = 0;
                 final List<TableMetadata> tableMetadata = new ArrayList<>();
-                SqlGenerationHelper.getMetadataFrom(select.getFromClause(), tableMetadata);
+                SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata);
                 for (final TableMetadata tableMeta : tableMetadata) {
                     for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
                         final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);

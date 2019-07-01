@@ -10,11 +10,11 @@ import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 
 /**
- * This class implements DB2-specific reading of column metadata
+ * This class implements DB2-specific reading of column metadata.
  */
 public class DB2ColumnMetadataReader extends BaseColumnMetadataReader {
     /**
-     * Create a new instance of an {@link DB2ColumnMetadataReader}
+     * Create a new instance of the {@link DB2ColumnMetadataReader}.
      *
      * @param connection          connection to the remote data source
      * @param properties          user-defined adapter properties

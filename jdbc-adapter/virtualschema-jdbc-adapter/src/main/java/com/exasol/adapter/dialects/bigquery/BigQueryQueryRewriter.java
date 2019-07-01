@@ -13,7 +13,7 @@ import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.SqlStatement;
 
 /**
- * This class implements a BigQuery-specific query rewriter
+ * This class implements a BigQuery-specific query rewriter.
  */
 public class BigQueryQueryRewriter extends BaseQueryRewriter {
     private static final String LITERAL_NULL = "NULL";
@@ -25,9 +25,9 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
     private static final Pattern TIME_PATTERN = Pattern.compile("(\\d{1,2}):(\\d{1,2}):(\\d{1,2})(?:\\.(\\d{1,6}))?");
 
     /**
-     * Create a new instance of a {@link BigQueryQueryRewriter}
+     * Create a new instance of the {@link BigQueryQueryRewriter}.
      *
-     * @param dialect              dialect
+     * @param dialect              Big Query dialect
      * @param remoteMetadataReader remote metadata reader
      * @param connection           JDBC connection to remote data source
      */

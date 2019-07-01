@@ -10,6 +10,9 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.sql.SqlStatement;
 
+/**
+ * Base implementation of {@link QueryRewriter}.
+ */
 public class BaseQueryRewriter implements QueryRewriter {
     private static final Logger LOGGER = Logger.getLogger(BaseQueryRewriter.class.getName());
     protected final SqlDialect dialect;
@@ -18,7 +21,7 @@ public class BaseQueryRewriter implements QueryRewriter {
     protected final ConnectionDefinitionBuilder connectionDefinitionBuilder;
 
     /**
-     * Create a new instance of a {@link BaseQueryRewriter}
+     * Create a new instance of a {@link BaseQueryRewriter}.
      *
      * @param dialect              dialect
      * @param remoteMetadataReader remote metadata reader
@@ -33,7 +36,7 @@ public class BaseQueryRewriter implements QueryRewriter {
     }
 
     /**
-     * Create the connection definition builder
+     * Create the connection definition builder.
      * <p>
      * Override this method in case you need connection definitions that differ from the regular JDBC style.
      *
@@ -78,7 +81,7 @@ public class BaseQueryRewriter implements QueryRewriter {
 
     protected ExaConnectionInformation getConnectionInformation(final ExaMetadata exaMetadata,
             final AdapterProperties properties) throws AdapterException {
-        ExaConnectionInformation exaConnectionInformation;
+        final ExaConnectionInformation exaConnectionInformation;
         if (properties.hasConnectionName()) {
             final String connectionName = properties.getConnectionName();
             try {

@@ -14,7 +14,7 @@ import com.exasol.adapter.jdbc.SchemaAdapterNotes;
  */
 public class GenericIdentifierConverter extends BaseIdentifierConverter {
     /**
-     * Create a new instance of a {@link GenericIdentifierConverter}
+     * Create a new instance of the {@link GenericIdentifierConverter}.
      *
      * @param adapterNotes cached metadata of the remote data source
      */

@@ -34,9 +34,9 @@ public class BaseIdentifierConverter extends AbstractIdentifierConverter {
     }
 
     /**
-     * Create a new instance of an {@link IdentifierConverter} with the default behavior
+     * Create a new instance of an {@link IdentifierConverter} with the default behavior.
      *
-     * @return new instance
+     * @return new instance of {@link IdentifierConverter}
      */
     public static IdentifierConverter createDefault() {
         return new BaseIdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_UPPER,

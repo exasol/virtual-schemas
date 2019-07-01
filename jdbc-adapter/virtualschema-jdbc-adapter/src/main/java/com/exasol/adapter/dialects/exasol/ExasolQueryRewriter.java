@@ -15,7 +15,7 @@ import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.SqlStatement;
 
 /**
- * Exasol-specific query rewriter
+ * Exasol-specific query rewriter.
  * <p>
  * This query rewriter supports Exasol specific parts of the <code>IMPORT</code> statement:
  * <code>IMPORT ... FROM EXA</code> and 1:1 push-down query take-over.
@@ -23,7 +23,7 @@ import com.exasol.adapter.sql.SqlStatement;
  */
 public class ExasolQueryRewriter extends BaseQueryRewriter {
     /**
-     * Create a new instance of an {@link ExasolQueryRewriter}
+     * Create a new instance of the {@link ExasolQueryRewriter}.
      *
      * @param dialect              dialect
      * @param remoteMetadataReader remote metadata reader

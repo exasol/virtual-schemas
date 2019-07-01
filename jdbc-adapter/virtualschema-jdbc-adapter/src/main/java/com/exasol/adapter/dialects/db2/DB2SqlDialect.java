@@ -26,6 +26,12 @@ public class DB2SqlDialect extends AbstractSqlDialect {
             SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY,
             LOG_LEVEL_PROPERTY);
 
+    /**
+     * Create a new instance of the {@link DB2SqlDialect}.
+     *
+     * @param connection JDBC connection
+     * @param properties user-defined adapter properties
+     */
     public DB2SqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
@@ -40,6 +46,11 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
     }
 
+    /**
+     * Get the DB2 dialect name.
+     *
+     * @return always "DB2"
+     */
     public static String getPublicName() {
         return NAME;
     }

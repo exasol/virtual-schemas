@@ -6,7 +6,7 @@ import com.exasol.adapter.AdapterException;
 import com.exasol.utils.JsonHelper;
 
 /**
- * Converts schema adapter Notes into JSON format and back
+ * Converts schema adapter Notes into JSON format and back.
  */
 public final class SchemaAdapterNotesJsonConverter {
     private static final String CATALOG_SEPARATOR = "catalogSeparator";
@@ -26,7 +26,7 @@ public final class SchemaAdapterNotesJsonConverter {
     private static final SchemaAdapterNotesJsonConverter SCHEMA_ADAPTER_NOTES_JSON_CONVERTER = new SchemaAdapterNotesJsonConverter();
 
     /**
-     * Returns instance of {@link SchemaAdapterNotesJsonConverter} singleton class
+     * Returns instance of {@link SchemaAdapterNotesJsonConverter} singleton class.
      *
      * @return {@link SchemaAdapterNotesJsonConverter} instance
      */
@@ -39,7 +39,7 @@ public final class SchemaAdapterNotesJsonConverter {
     }
 
     /**
-     * Converts schema adapter notes into a JSON format
+     * Converts schema adapter notes into a JSON format.
      *
      * @param schemaAdapterNotes instance
      * @return string representation of a JSON Object
@@ -66,7 +66,7 @@ public final class SchemaAdapterNotesJsonConverter {
 
     /**
      * Converts JSON representation of schema adapter notes into instance of {@link SchemaAdapterNotesJsonConverter}
-     * class
+     * class.
      *
      * @param adapterNotes JSON representation of schema adapter notes
      * @param schemaName   name of virtual schema

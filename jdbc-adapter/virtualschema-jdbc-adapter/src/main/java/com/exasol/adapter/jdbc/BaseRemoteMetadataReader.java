@@ -7,7 +7,7 @@ import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.dialects.IdentifierConverter;
 
 /**
- * This class implements basic reading of database metadata from JDBC
+ * This class implements basic reading of database metadata from JDBC.
  *
  * <p>
  * See <a href=
@@ -15,10 +15,9 @@ import com.exasol.adapter.dialects.IdentifierConverter;
  */
 public final class BaseRemoteMetadataReader extends AbstractRemoteMetadataReader {
     /**
-     * Create a new instance of a {@link BaseTableMetadataReader}
+     * Create a new instance of a {@link BaseTableMetadataReader}.
      *
-     * @param connection database connection through which the reader retrieves the metadata from the remote
-     *                   source
+     * @param connection database connection through which the reader retrieves the metadata from the remote source
      * @param properties user-defined properties
      */
     public BaseRemoteMetadataReader(final Connection connection, final AdapterProperties properties) {
@@ -26,7 +25,7 @@ public final class BaseRemoteMetadataReader extends AbstractRemoteMetadataReader
     }
 
     /**
-     * Create a reader that handles column metadata
+     * Create a reader that handles column metadata.
      * <p>
      * Override this method in cases where a remote data source needs specific handling of column metadata
      *
@@ -38,7 +37,7 @@ public final class BaseRemoteMetadataReader extends AbstractRemoteMetadataReader
     }
 
     /**
-     * Create a reader that handles table metadata
+     * Create a reader that handles table metadata.
      * <p>
      * Override this method in cases where a remote data source needs specific handling of table metadata
      *
@@ -51,7 +50,7 @@ public final class BaseRemoteMetadataReader extends AbstractRemoteMetadataReader
     }
 
     /**
-     * Create a converter that translates identifiers from the remote data source to the Exasol representation
+     * Create a converter that translates identifiers from the remote data source to the Exasol representation.
      *
      * @return identifier converter
      */

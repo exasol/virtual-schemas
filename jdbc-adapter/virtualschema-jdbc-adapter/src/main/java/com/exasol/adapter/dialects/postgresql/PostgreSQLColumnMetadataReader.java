@@ -11,12 +11,15 @@ import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 
+/**
+ * This class implements PostgreSQL-specific reading of column metadata.
+ */
 public class PostgreSQLColumnMetadataReader extends BaseColumnMetadataReader {
     private static final Logger LOGGER = Logger.getLogger(PostgreSQLMetadataReader.class.getName());
     private static final String POSTGRES_VARBIT_TYPE_NAME = "varbit";
 
     /**
-     * Create a new instance of a {@link PostgreSQLColumnMetadataReader}
+     * Create a new instance of the {@link PostgreSQLColumnMetadataReader}.
      *
      * @param connection          JDBC connection to the remote data source
      * @param properties          user-defined adapter properties

@@ -26,14 +26,18 @@ import java.util.List;
  * is a better way.
  */
 public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
-
     private final SqlDialect dialect;
     private final SqlGenerationContext context;
 
+    /**
+     * Creates a new instance of the {@link SqlGenerationVisitor}.
+     *
+     * @param dialect SQl dialect
+     * @param context SQL generation context
+     */
     public SqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         this.dialect = dialect;
         this.context = context;
-
         checkDialectAliases();
     }
 

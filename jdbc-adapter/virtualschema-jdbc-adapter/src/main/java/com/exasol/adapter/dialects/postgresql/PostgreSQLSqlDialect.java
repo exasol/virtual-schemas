@@ -16,6 +16,9 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.ScalarFunction;
 
+/**
+ * This class implements the PostgreSQL dialect.
+ */
 public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "POSTGRESQL";
     public static final String POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY = "POSTGRESQL_IDENTIFIER_MAPPING";
@@ -27,10 +30,21 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             IGNORE_ERRORS_PROPERTY, POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
+    /**
+     * Create a new instance of the {@link PostgreSQLSqlDialect}.
+     *
+     * @param connection JDBC connection
+     * @param properties user-defined adapter properties
+     */
     public PostgreSQLSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
 
+    /**
+     * Get the PostgreSQL dialect name.
+     *
+     * @return always "POSTGRESQL"
+     */
     public static String getPublicName() {
         return NAME;
     }
