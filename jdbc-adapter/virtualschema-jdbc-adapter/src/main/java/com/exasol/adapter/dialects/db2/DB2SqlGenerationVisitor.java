@@ -44,18 +44,16 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
             return projString;
         }
         final String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
+        return getColumnProjectionStringNoCheckImpl(typeName, projString);
     }
-
 
     private String getColumnProjectionStringNoCheck(final SqlColumn column, final String projString) throws AdapterException {
 
         final String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
+        return getColumnProjectionStringNoCheckImpl(typeName, projString);
     }
 
-
-    private String getColumnProjectionStringNoCheckImpl(final String typeName, final SqlColumn column, String projString) {
+    private String getColumnProjectionStringNoCheckImpl(final String typeName, String projString) {
 
             switch (typeName) {
                 case "XML":
@@ -120,7 +118,6 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
             return sql.toString();
         }
     }
-
 
     @Override
     public String visit(final SqlSelectList selectList) throws AdapterException {
@@ -313,7 +310,6 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         return sql;
     }
 
-
         @Override
         public String visit(final SqlFunctionAggregate function) throws AdapterException {
                 String sql = super.visit(function);
@@ -328,7 +324,6 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
 
                 return sql;
         }
-
 
     @Override
     public String visit(final SqlFunctionAggregateGroupConcat function) throws AdapterException {

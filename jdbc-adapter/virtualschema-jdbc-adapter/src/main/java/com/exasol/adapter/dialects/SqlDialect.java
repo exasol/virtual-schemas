@@ -66,7 +66,7 @@ public interface SqlDialect {
     }
 
     /**
-     * Define whether the remote source supports catalogs and if it does, whether is supports a single "pseudo" catalog
+     * Define whether the remote source supports catalogs and if it does, check if it supports a single "pseudo" catalog
      * or multiple catalogs.
      *
      * @return <code>NONE</code> if the dialect does not support catalogs at all, <code>SINGLE</code> if it supports
@@ -75,7 +75,7 @@ public interface SqlDialect {
     public StructureElementSupport supportsJdbcCatalogs();
 
     /**
-     * Define whether the remote source supports schemas and if it does, whether is supports a single "pseudo" schema or
+     * Define whether the remote source supports schemas and if it does, check if it supports a single "pseudo" schema or
      * multiple schemas.
      *
      * @return <code>NONE</code> if the dialect does not support schemas at all, <code>SINGLE</code> if it supports
@@ -98,7 +98,7 @@ public interface SqlDialect {
      * <p>
      * <code>SELECT * FROM MY_CATALOG.MY_TABLE</code>
      * <p>
-     * Can be combined with {@link #requiresSchemaQualifiedTableNames(SqlGenerationContext)}
+     * Can be combined with {@link #requiresSchemaQualifiedTableNames(SqlGenerationContext)}.
      *
      * @param context context for SQL generation
      *
@@ -114,7 +114,7 @@ public interface SqlDialect {
      * <p>
      * <code>SELECT * FROM MY_SCHEMA.MY_TABLE</code>
      * <p>
-     * Can be combined with {@link #requiresCatalogQualifiedTableNames(SqlGenerationContext)}
+     * Can be combined with {@link #requiresCatalogQualifiedTableNames(SqlGenerationContext)}.
      *
      * @param context context for SQL generation
      *
@@ -159,7 +159,7 @@ public interface SqlDialect {
 
     /**
      * @param value a string literal value
-     * @return the string literal in valid SQL syntax, e.g. "value" becomes "'value'". This might include escaping
+     * @return the string literal in valid SQL syntax, e.g. "value" becomes "'value'". This might include escaping.
      */
     public String getStringLiteral(String value);
 

@@ -19,7 +19,7 @@ public final class SqlGenerationHelper {
     }
 
     /**
-     * Check is selected node requires cast or not.
+     * Check if selected node requires cast or not.
      *
      * @param selectList SQL select list
      * @param nodeRequiresCast node that requires cast

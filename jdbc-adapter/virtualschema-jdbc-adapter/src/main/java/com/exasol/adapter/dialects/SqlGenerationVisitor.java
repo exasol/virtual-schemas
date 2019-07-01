@@ -30,7 +30,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     private final SqlGenerationContext context;
 
     /**
-     * Creates a new instance of the {@link SqlGenerationVisitor}
+     * Creates a new instance of the {@link SqlGenerationVisitor}.
      *
      * @param dialect SQl dialect
      * @param context SQL generation context

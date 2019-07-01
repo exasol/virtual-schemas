@@ -219,17 +219,17 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
             return projString;
         }
         final String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
+        return getColumnProjectionStringNoCheckImpl(typeName, projString);
     }
 
     
     private String getColumnProjectionStringNoCheck(final SqlColumn column, final String projString) throws AdapterException {
         final String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
+        return getColumnProjectionStringNoCheckImpl(typeName, projString);
     }
     
 
-    private String getColumnProjectionStringNoCheckImpl(final String typeName, final SqlColumn column, String projString) {
+    private String getColumnProjectionStringNoCheckImpl(final String typeName, String projString) {
     	if (
 	    		typeName.startsWith("varbit") ||  
 	    		typeName.startsWith("point") ||

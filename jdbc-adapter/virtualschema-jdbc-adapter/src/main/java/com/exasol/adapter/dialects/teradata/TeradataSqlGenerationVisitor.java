@@ -42,7 +42,7 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
     };
 
     /**
-     * Create a new instance of the {@link TeradataSqlGenerationVisitor}
+     * Create a new instance of the {@link TeradataSqlGenerationVisitor}.
      *
      * @param dialect instance of {@link TeradataSqlDialect}
      * @param context SQL generation context
