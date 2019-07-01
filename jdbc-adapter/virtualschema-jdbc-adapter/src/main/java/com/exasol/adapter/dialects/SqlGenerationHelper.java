@@ -23,7 +23,7 @@ public final class SqlGenerationHelper {
      *
      * @param selectList SQL select list
      * @param nodeRequiresCast node that requires cast
-     * @return
+     * @return true if selected node requires cast
      */
     public static boolean selectListRequiresCasts(final SqlSelectList selectList,
           final Predicate<SqlNode> nodeRequiresCast) {

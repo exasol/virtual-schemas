@@ -39,7 +39,6 @@ public interface SqlDialect {
 
     /**
      * Multiplicity that the remote data source supports for a structural element like catalogs or a schemas.
-     * <p>
      * <dl>
      * <dt><code>NONE</code></dt>
      * <dd>database does not support the structural element</dd>
@@ -50,7 +49,6 @@ public interface SqlDialect {
      * <dt><code>AUTO_DETECT</code></dt>
      * <dd>dialect auto-detects support for this element</dd>
      * </dl>
-     * </p>
      * Dialects that support a single database should not use <code>AUTO_DETECT</code> because this unnecessarily costs
      * performance.
      */
@@ -144,6 +142,7 @@ public interface SqlDialect {
      * <dt><code>NULLS_SORTED_LOW</code></dt>
      * <dd><code>NULL</code>values appear at the end of the result set when sorted in descending order, and at the start
      * when sorted ascending</dd>
+     * </dl>
      */
     public enum NullSorting {
         NULLS_SORTED_AT_END, NULLS_SORTED_AT_START, NULLS_SORTED_HIGH, NULLS_SORTED_LOW

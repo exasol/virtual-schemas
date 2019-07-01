@@ -75,12 +75,12 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     private final Set<ScalarFunction> scalarFunctionsCast = new HashSet<>();
 
     /**
-     * ORACLE Syntax (before 12c) for LIMIT 10:</br>
-     * SELECT LIMIT_SUBSELECT.* FROM ( <query-with-aliases> ) LIMIT_SUBSELECT WHERE ROWNUM <= 30
+     * ORACLE Syntax (before 12c) for LIMIT 10:<br>
+     * SELECT LIMIT_SUBSELECT.* FROM ( &lt;query-with-aliases&gt; ) LIMIT_SUBSELECT WHERE ROWNUM &lt;= 30
      *
-     * ORACLE Syntax (before 12c) for LIMIT 10 OFFSET 20:</br>
-     * SELECT c1, c2, ... FROM ( SELECT LIMIT_SUBSELECT.*, ROWNUM ROWNUM_SUB FROM ( <query-with-aliases> )
-     * LIMIT_SUBSELECT WHERE ROWNUM <= 30 ) WHERE ROWNUM_SUB > 20
+     * ORACLE Syntax (before 12c) for LIMIT 10 OFFSET 20:<br>
+     * SELECT c1, c2, ... FROM ( SELECT LIMIT_SUBSELECT.*, ROWNUM ROWNUM_SUB FROM ( &lt;query-with-aliases&gt; )
+     * LIMIT_SUBSELECT WHERE ROWNUM &lt;= 30 ) WHERE ROWNUM_SUB &gt; 20
      *
      * The rownum filter is evaluated before ORDER BY, which is why we need subselects
      */

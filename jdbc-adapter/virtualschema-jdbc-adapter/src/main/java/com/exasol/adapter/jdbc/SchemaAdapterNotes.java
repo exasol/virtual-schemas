@@ -72,7 +72,7 @@ public final class SchemaAdapterNotes {
 
     /**
      * @return true if remote database treats mixed case quoted SQL identifiers as case sensitive
-     * and as a result stores them in mixed case. TRUE for EXASOL & Oracle.
+     * and as a result stores them in mixed case. TRUE for EXASOL and Oracle.
      */
     public boolean supportsMixedCaseQuotedIdentifiers() {
         return this.supportsMixedCaseQuotedIdentifiers;
@@ -88,7 +88,7 @@ public final class SchemaAdapterNotes {
 
     /**
      * @return true if remote database treats mixed case unquoted SQL identifiers
-     * as case insensitive and stores them in upper case. TRUE for EXASOL & Oracle
+     * as case insensitive and stores them in upper case. TRUE for EXASOL and Oracle
      */
     public boolean storesUpperCaseIdentifiers() {
         return this.storesUpperCaseIdentifiers;
