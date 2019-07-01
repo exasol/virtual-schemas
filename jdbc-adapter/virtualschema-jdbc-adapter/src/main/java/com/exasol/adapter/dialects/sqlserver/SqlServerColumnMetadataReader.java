@@ -10,7 +10,7 @@ import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 
 /**
- * This class implements a SQLServer-specific column metadata reader
+ * This class implements a SQLServer-specific column metadata reader.
  */
 public class SqlServerColumnMetadataReader extends BaseColumnMetadataReader {
     static final int SQLSERVER_BLOB_SIZE = 100;
@@ -24,14 +24,14 @@ public class SqlServerColumnMetadataReader extends BaseColumnMetadataReader {
     static final String SQLSERVER_HIERARCHYID_TYPE_NAME = "hierarchyid";
 
     /**
-     * Create a new instance of a {@link SqlServerColumnMetadataReader}
+     * Create a new instance of the {@link SqlServerColumnMetadataReader}.
      *
      * @param connection          JDBC connection to the remote data source
      * @param properties          user-defined adapter properties
      * @param identifierConverter converter between source and Exasol identifiers
      */
     public SqlServerColumnMetadataReader(final Connection connection, final AdapterProperties properties,
-            IdentifierConverter identifierConverter) {
+            final IdentifierConverter identifierConverter) {
         super(connection, properties, identifierConverter);
     }
 

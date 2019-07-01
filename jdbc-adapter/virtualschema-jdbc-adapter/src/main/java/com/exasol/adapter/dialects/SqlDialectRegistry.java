@@ -19,7 +19,7 @@ public final class SqlDialectRegistry {
     private static final Logger LOGGER = Logger.getLogger(SqlDialectRegistry.class.getName());
 
     /**
-     * Get an instance of the {@link SqlDialectRegistry} class
+     * Get an instance of the {@link SqlDialectRegistry} class.
      *
      * @return the instance
      */
@@ -60,7 +60,7 @@ public final class SqlDialectRegistry {
         }
     }
 
-    public void registerDialect(final String className) {
+    protected void registerDialect(final String className) {
         try {
             @SuppressWarnings("unchecked")
             final Class<? extends SqlDialect> dialect = (Class<? extends SqlDialect>) Class.forName(className);
@@ -73,7 +73,7 @@ public final class SqlDialectRegistry {
     }
 
     /**
-     * Check whether a dialect is supported
+     * Check whether a dialect is supported.
      *
      * @param wantedDialectName the name of the dialect
      * @return <code>true</code> if the dialect is supported
@@ -114,14 +114,14 @@ public final class SqlDialectRegistry {
     }
 
     /**
-     * Delete the singleton instance (necessary for tests)
+     * Delete the singleton instance (necessary for tests).
      */
     public static void deleteInstance() {
         instance = null;
     }
 
     /**
-     * Get SQL dialect class for name
+     * Get SQL dialect class for name.
      *
      * @param name name of the SQL dialect
      * @return subclass of {@link SqlDialect} according to the name

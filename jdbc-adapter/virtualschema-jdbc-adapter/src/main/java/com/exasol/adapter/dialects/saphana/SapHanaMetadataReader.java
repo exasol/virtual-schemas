@@ -10,11 +10,11 @@ import java.util.*;
 import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.ANY_TABLE_TYPE;
 
 /**
- * Metadata reader that reads SAP HANA-specific database metadata
+ * Metadata reader that reads SAP HANA-specific database metadata.
  */
 public class SapHanaMetadataReader extends AbstractRemoteMetadataReader {
     /**
-     * Create a new instance of a {@link SapHanaMetadataReader}
+     * Create a new instance of a {@link SapHanaMetadataReader}.
      *
      * @param connection JDBC connection to the remote data source
      * @param properties user-defined adapter properties

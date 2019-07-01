@@ -18,7 +18,7 @@ public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
     private static final String POSTGRESQL_UPPERCASE_TABLES_SWITCH = "POSTGRESQL_UPPERCASE_TABLES";
 
     /**
-     * Create a new {@link PostgreSQLTableMetadataReader} instance
+     * Create a new {@link PostgreSQLTableMetadataReader} instance.
      *
      * @param connection           JDBC connection to the remote data source
      * @param columnMetadataReader reader to be used to map the metadata of the tables columns
@@ -31,7 +31,7 @@ public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
     }
 
     /**
-     * Get the identifier mapping that the metadata reader uses when mapping PostgreSQL tables to Exasol
+     * Get the identifier mapping that the metadata reader uses when mapping PostgreSQL tables to Exasol.
      *
      * @return identifier mapping
      */
@@ -42,7 +42,7 @@ public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
     }
 
     /**
-     * Check if the metadata reader should ignore tables where the name contains upper-case characters
+     * Check if the metadata reader should ignore tables where the name contains upper-case characters.
      *
      * @return <code>true</code> if the reader should ignore upper-case tables
      */

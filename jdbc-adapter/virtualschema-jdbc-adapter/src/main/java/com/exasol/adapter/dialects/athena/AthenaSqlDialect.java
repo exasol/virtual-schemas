@@ -17,7 +17,7 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 
 /**
- * This class implements the SQL dialect of Amazon's AWS Athena
+ * This class implements the SQL dialect of Amazon's AWS Athena.
  *
  * @see <a href="https://aws.amazon.com/athena/">AWS Athena</a>
  */
@@ -30,7 +30,7 @@ public class AthenaSqlDialect extends AbstractSqlDialect {
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
     /**
-     * Get the Athena dialect name
+     * Get the Athena dialect name.
      *
      * @return always "ATHENA"
      */
@@ -58,7 +58,7 @@ public class AthenaSqlDialect extends AbstractSqlDialect {
     }
 
     /**
-     * Create a new instance of the {@link AthenaSqlDialect}
+     * Create a new instance of the {@link AthenaSqlDialect}.
      *
      * @param connection JDBC connection to the Athena service
      * @param properties user-defined adapter properties

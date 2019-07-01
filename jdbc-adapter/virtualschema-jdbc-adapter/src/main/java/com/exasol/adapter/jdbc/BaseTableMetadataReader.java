@@ -12,7 +12,7 @@ import com.exasol.adapter.metadata.TableMetadata;
 import com.google.common.base.Strings;
 
 /**
- * This class maps metadata of tables from the remote source to Exasol
+ * This class maps metadata of tables from the remote source to Exasol.
  */
 public class BaseTableMetadataReader extends AbstractMetadataReader implements TableMetadataReader {
     static final String NAME_COLUMN = "TABLE_NAME";
@@ -24,7 +24,7 @@ public class BaseTableMetadataReader extends AbstractMetadataReader implements T
     private final IdentifierConverter identifierConverter;
 
     /**
-     * Create a new instance of a {@link TableMetadata}
+     * Create a new instance of a {@link TableMetadata}.
      *
      * @param connection           JDBC connection to remote data source
      * @param columnMetadataReader reader to be used to map the tables columns

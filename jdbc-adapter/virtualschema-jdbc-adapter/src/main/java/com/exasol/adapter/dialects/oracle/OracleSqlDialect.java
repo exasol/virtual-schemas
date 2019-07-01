@@ -23,7 +23,7 @@ import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
 /**
- * This class implements the Oracle SQL dialect
+ * This class implements the Oracle SQL dialect.
  */
 public class OracleSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "ORACLE";
@@ -33,12 +33,23 @@ public class OracleSqlDialect extends AbstractSqlDialect {
             EXCLUDED_CAPABILITIES_PROPERTY, ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY, DEBUG_ADDRESS_PROPERTY,
             LOG_LEVEL_PROPERTY);
 
+    /**
+     * Create a new instance of the {@link OracleSqlDialect}.
+     *
+     * @param connection JDBC connection
+     * @param properties user-defined adapter properties
+     */
     public OracleSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
         this.omitParenthesesMap.add(ScalarFunction.SYSDATE);
         this.omitParenthesesMap.add(ScalarFunction.SYSTIMESTAMP);
     }
 
+    /**
+     * Get the Oracle dialect name.
+     *
+     * @return always "ORACLE"
+     */
     public static String getPublicName() {
         return NAME;
     }
@@ -127,7 +138,7 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     /**
-     * Return the type of import the Oracle dialect uses
+     * Return the type of import the Oracle dialect uses.
      *
      * @return import type
      */

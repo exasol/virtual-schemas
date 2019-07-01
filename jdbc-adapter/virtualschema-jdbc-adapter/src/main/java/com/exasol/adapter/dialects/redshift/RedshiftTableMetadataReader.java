@@ -8,12 +8,12 @@ import com.exasol.adapter.jdbc.BaseTableMetadataReader;
 import com.exasol.adapter.jdbc.ColumnMetadataReader;
 
 /**
- * This class implements a reader for Redshift database metadata
+ * This class implements a reader for Redshift database metadata.
  */
 public class RedshiftTableMetadataReader extends BaseTableMetadataReader {
 
     /**
-     * Create a new {@link RedshiftTableMetadataReader} instance
+     * Create a new {@link RedshiftTableMetadataReader} instance.
      *
      * @param connection           JDBC connection to the remote data source
      * @param columnMetadataReader reader to be used to map the metadata of the tables columns

@@ -8,11 +8,11 @@ import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.*;
 
 /**
- * This class implement a SQLServer-specific metadata reader
+ * This class implement a SQLServer-specific metadata reader.
  */
 public class SqlServerMetadataReader extends AbstractRemoteMetadataReader {
     /**
-     * Create a new instance of a {@link SqlServerMetadataReader}
+     * Create a new instance of a {@link SqlServerMetadataReader}.
      *
      * @param connection JDBC connection to the remote data source
      * @param properties user-defined adapter properties

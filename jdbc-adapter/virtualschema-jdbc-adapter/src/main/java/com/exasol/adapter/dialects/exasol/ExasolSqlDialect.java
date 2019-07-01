@@ -16,7 +16,7 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 
 /**
- * Exasol SQL dialect
+ * Exasol SQL dialect.
  */
 public class ExasolSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "EXASOL";
@@ -27,6 +27,12 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
             EXASOL_CONNECTION_STRING_PROPERTY, IS_LOCAL_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
+    /**
+     * Create a new instance of the {@link ExasolSqlDialect}.
+     * 
+     * @param connection SQL connection
+     * @param properties adapter properties
+     */
     public ExasolSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
         this.omitParenthesesMap.add(SYSDATE);
@@ -38,9 +44,9 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     }
 
     /**
-     * Get the name under which the dialect is listed.
+     * Get the Exasol dialect name.
      *
-     * @return name of the dialect
+     * @return always "EXASOL"
      */
     public static String getPublicName() {
         return NAME;
@@ -101,7 +107,7 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     }
 
     /**
-     * Return the type of import the Exasol dialect uses
+     * Return the type of import the Exasol dialect uses.
      *
      * @return import type
      */

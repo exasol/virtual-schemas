@@ -33,7 +33,7 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
     private final IdentifierConverter identifierConverter;
 
     /**
-     * Create a new instance of a {@link ColumnMetadataReader}
+     * Create a new instance of a {@link ColumnMetadataReader}.
      *
      * @param connection          JDBC connection through which the column metadata is read from the remote database
      * @param properties          user-defined adapter properties
@@ -46,7 +46,7 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
     }
 
     /**
-     * Map a metadata for a list of columns to Exasol metadata
+     * Map a metadata for a list of columns to Exasol metadata.
      *
      * @param tableName the table for which the columns are mapped
      * @return list of Exasol column metadata objects
@@ -172,7 +172,7 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
         return (columnTypeName == null) ? "" : columnTypeName;
     }
 
-    public String readColumnName(final ResultSet columns) throws SQLException {
+    protected String readColumnName(final ResultSet columns) throws SQLException {
         return this.identifierConverter.convert(columns.getString(NAME_COLUMN));
     }
 

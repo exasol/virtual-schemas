@@ -1,7 +1,7 @@
 package com.exasol.adapter.dialects.oracle;
 
 /**
- * This class contains Oracle-specific adapter properties
+ * This class contains Oracle-specific adapter properties.
  */
 public final class OracleProperties {
     public static final String ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY = "ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE";

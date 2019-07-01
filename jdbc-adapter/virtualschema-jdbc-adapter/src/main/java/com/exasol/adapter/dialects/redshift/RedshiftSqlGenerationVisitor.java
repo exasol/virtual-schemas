@@ -6,21 +6,29 @@ import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.sql.SqlFunctionAggregateGroupConcat;
 
+/**
+ * This class generates SQL queries for the {@link RedshiftSqlGenerationVisitor}.
+ */
 public class RedshiftSqlGenerationVisitor extends SqlGenerationVisitor {
 
-    public RedshiftSqlGenerationVisitor(SqlDialect dialect, SqlGenerationContext context) {
+    /**
+     * Create a new instance of the {@link RedshiftSqlGenerationVisitor}.
+     *
+     * @param dialect {@link RedshiftSqlDialect} SQL dialect
+     * @param context SQL generation context
+     */
+    public RedshiftSqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         super(dialect, context);
-      
     }
  
     @Override
-    public String visit(SqlFunctionAggregateGroupConcat function) throws AdapterException {
-        StringBuilder builder = new StringBuilder();
+    public String visit(final SqlFunctionAggregateGroupConcat function) throws AdapterException {
+        final StringBuilder builder = new StringBuilder();
         builder.append("LISTAGG");
         builder.append("(");
         assert(function.getArguments() != null);
         assert(function.getArguments().size() == 1 && function.getArguments().get(0) != null);
-        String expression = function.getArguments().get(0).accept(this);
+        final String expression = function.getArguments().get(0).accept(this);
         builder.append(expression);
         builder.append(", ");
         String separator = ",";
@@ -50,6 +58,4 @@ public class RedshiftSqlGenerationVisitor extends SqlGenerationVisitor {
         builder.append(")");
         return builder.toString();
     }
-
-   
 }

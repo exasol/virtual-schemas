@@ -9,7 +9,7 @@ import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 
 /**
- * This class implements Exasol-specific reading of column metadata
+ * This class implements Exasol-specific reading of column metadata.
  */
 public class ExasolColumnMetadataReader extends BaseColumnMetadataReader {
     static final int EXASOL_INTERVAL_DAY_TO_SECONDS = -104;
@@ -22,7 +22,7 @@ public class ExasolColumnMetadataReader extends BaseColumnMetadataReader {
     private static final int DEFAULT_SPACIAL_REFERENCE_SYSTEM_IDENTIFIER = 3857;
 
     /**
-     * Create a new instance of a {@link ExasolColumnMetadataReader}
+     * Create a new instance of the {@link ExasolColumnMetadataReader}.
      *
      * @param connection          JDBC connection through which the column metadata is read from the remote database
      * @param properties          user-defined adapter properties

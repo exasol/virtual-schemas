@@ -8,7 +8,7 @@ public enum PostgreSQLIdentifierMapping {
     CONVERT_TO_UPPER, PRESERVE_ORIGINAL_CASE;
 
     /**
-     * Parse the identifier mapping from a string
+     * Parse the identifier mapping from a string.
      *
      * @param mapping string describing the mapping
      * @return PosgreSQL identifier mapping

@@ -3,7 +3,7 @@ package com.exasol.adapter.jdbc;
 import java.util.*;
 
 /**
- * This class contains constants that are relevant for any of the classes involved with reading remote metadata
+ * This class contains constants that are relevant for any of the classes involved with reading remote metadata.
  */
 public final class RemoteMetadataReaderConstants {
     private RemoteMetadataReaderConstants() {

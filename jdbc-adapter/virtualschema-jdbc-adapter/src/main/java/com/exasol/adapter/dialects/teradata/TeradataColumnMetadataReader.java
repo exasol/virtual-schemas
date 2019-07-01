@@ -15,13 +15,13 @@ import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 
 /**
- * This class implements Teradata-specific reading of column metadata
+ * This class implements Teradata-specific reading of column metadata.
  */
 public class TeradataColumnMetadataReader extends BaseColumnMetadataReader {
     static final int MAX_TERADATA_VARCHAR_SIZE = 32000;
 
     /**
-     * Create a new instance of a {@link TeradataColumnMetadataReader}
+     * Create a new instance of the {@link TeradataColumnMetadataReader}.
      *
      * @param connection          JDBC connection through which the column metadata is read from the remote database
      * @param properties          user-defined adapter properties

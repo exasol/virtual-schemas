@@ -10,25 +10,33 @@ import com.google.common.base.Joiner;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class generates SQL queries for the {@link ImpalaSqlDialect}.
+ */
 public class ImpalaSqlGenerationVisitor extends SqlGenerationVisitor {
+    private final SqlDialect dialect;
 
-    SqlDialect dialect;
-
-    public ImpalaSqlGenerationVisitor(SqlDialect dialect, SqlGenerationContext context) {
+    /**
+     * Create a new instance of the {@link ImpalaSqlGenerationVisitor}.
+     *
+     * @param dialect {@link ImpalaSqlDialect} SQL dialect
+     * @param context SQL generation context
+     */
+    public ImpalaSqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         super(dialect, context);
         this.dialect = dialect;
     }
 
     @Override
-    public String visit(SqlPredicateLikeRegexp predicate) throws AdapterException {
+    public String visit(final SqlPredicateLikeRegexp predicate) throws AdapterException {
         return predicate.getLeft().accept(this) + " REGEXP "
                 + predicate.getPattern().accept(this);
     }
 
     @Override
-    public String visit(SqlFunctionAggregateGroupConcat function) throws AdapterException {
+    public String visit(final SqlFunctionAggregateGroupConcat function) throws AdapterException {
         // Note that GROUP_CONCAT with DISTINCT is not supported by Impala
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         builder.append(function.getFunctionName());
         builder.append("(");
         // To use it group_concat with numeric values we would need to sync group_concat(cast(x as string)). Since we cannot compute the type, we always cast
@@ -48,16 +56,16 @@ public class ImpalaSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     @Override
-    public String visit(SqlFunctionAggregate function) throws AdapterException {
-        boolean isDirectlyInSelectList = (function.hasParent() && function.getParent().getType() == SqlNodeType.SELECT_LIST);
+    public String visit(final SqlFunctionAggregate function) throws AdapterException {
+        final boolean isDirectlyInSelectList = (function.hasParent() && function.getParent().getType() == SqlNodeType.SELECT_LIST);
         if (function.getFunction() != AggregateFunction.SUM || !isDirectlyInSelectList) {
             return super.visit(function);
         } else {
             // For SUM, the JDBC driver returns type DOUBLE in prepared statement but the actual
             // query returns DECIMAL in ResultSetMetadata, so that IMPORT fails. Casting to DOUBLE
             // solves the problem.
-            List<String> argumentsSql = new ArrayList<>();
-            for (SqlNode node : function.getArguments()) {
+            final List<String> argumentsSql = new ArrayList<>();
+            for (final SqlNode node : function.getArguments()) {
                 argumentsSql.add(node.accept(this));
             }
             String distinctSql = "";

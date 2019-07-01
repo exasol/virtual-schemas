@@ -40,7 +40,7 @@ public final class SchemaAdapterNotes {
     }
 
     /**
-     * Create a new builder for {@link SchemaAdapterNotes}
+     * Create a new builder for {@link SchemaAdapterNotes}.
      *
      * @return builder instance
      */
@@ -211,7 +211,7 @@ public final class SchemaAdapterNotes {
     }
 
     /**
-     * Builder for {@link SchemaAdapterNotes}
+     * Builder for {@link SchemaAdapterNotes}.
      */
     public static class Builder {
         private String catalogSeparator = ".";
@@ -230,7 +230,7 @@ public final class SchemaAdapterNotes {
         private boolean areNullsSortedLow = false;
 
         /**
-         * Set the catalog separator
+         * Set the catalog separator.
          *
          * @param catalogSeparator catalog separator
          * @return builder instance for fluent programming
@@ -241,7 +241,7 @@ public final class SchemaAdapterNotes {
         }
 
         /**
-         * Set the identifier quote string
+         * Set the identifier quote string.
          *
          * @param identifierQuoteString identifier quote string
          * @return builder instance for fluent programming
@@ -252,7 +252,7 @@ public final class SchemaAdapterNotes {
         }
 
         /**
-         * Set true if schema stores lower case identifiers
+         * Set true if schema stores lower case identifiers.
          *
          * @param storesLowerCaseIdentifiers true if stores lower case identifiers
          * @return builder instance for fluent programming
@@ -263,7 +263,7 @@ public final class SchemaAdapterNotes {
         }
 
         /**
-         * Set true if stores upper case identifiers
+         * Set true if stores upper case identifiers.
          *
          * @param storesUpperCaseIdentifiers true if stores upper case identifiers
          * @return builder instance for fluent programming
@@ -274,7 +274,7 @@ public final class SchemaAdapterNotes {
         }
 
         /**
-         * Set true if stores mixed case identifiers
+         * Set true if stores mixed case identifiers.
          *
          * @param storesMixedCaseIdentifiers true if stores mixed case identifiers
          * @return builder instance for fluent programming
@@ -285,7 +285,7 @@ public final class SchemaAdapterNotes {
         }
 
         /**
-         * Set true if supports mixed case identifiers
+         * Set true if supports mixed case identifiers.
          *
          * @param supportsMixedCaseIdentifiers true if supports mixed case identifiers
          * @return builder instance for fluent programming
@@ -296,7 +296,7 @@ public final class SchemaAdapterNotes {
         }
 
         /**
-         * Set true if stores lower case quoted identifiers
+         * Set true if stores lower case quoted identifiers.
          *
          * @param storesLowerCaseQuotedIdentifiers true if stores lower case quoted identifiers
          * @return builder instance for fluent programming
@@ -307,7 +307,7 @@ public final class SchemaAdapterNotes {
         }
 
         /**
-         * Set true if stores upper case quoted identifiers
+         * Set true if stores upper case quoted identifiers.
          *
          * @param storesUpperCaseQuotedIdentifiers true if stores upper case quoted identifiers
          * @return builder instance for fluent programming
@@ -318,7 +318,7 @@ public final class SchemaAdapterNotes {
         }
 
         /**
-         * Set true if stores mixed case quoted identifiers
+         * Set true if stores mixed case quoted identifiers.
          *
          * @param storesMixedCaseQuotedIdentifiers true if stores mixed case quoted identifiers
          * @return builder instance for fluent programming
@@ -329,7 +329,7 @@ public final class SchemaAdapterNotes {
         }
 
         /**
-         * Set true if supports mixed case quoted identifiers
+         * Set true if supports mixed case quoted identifiers.
          *
          * @param supportsMixedCaseQuotedIdentifiers true if supports mixed case quoted identifiers
          * @return builder instance for fluent programming
@@ -340,7 +340,7 @@ public final class SchemaAdapterNotes {
         }
 
         /**
-         * Set true if nulls are sorted at end
+         * Set true if nulls are sorted at end.
          *
          * @param nullsAreSortedAtEnd true if nulls are sorted at end
          * @return builder instance for fluent programming
@@ -351,7 +351,7 @@ public final class SchemaAdapterNotes {
         }
 
         /**
-         * Set true if nulls are sorted at start
+         * Set true if nulls are sorted at start.
          *
          * @param nullsAreSortedAtStart true if nulls are sorted at start
          * @return builder instance for fluent programming
@@ -362,7 +362,7 @@ public final class SchemaAdapterNotes {
         }
 
         /**
-         * Set true if nulls are sorted high
+         * Set true if nulls are sorted high.
          *
          * @param nullsAreSortedHigh true if nulls are sorted high
          * @return builder instance for fluent programming
@@ -373,7 +373,7 @@ public final class SchemaAdapterNotes {
         }
 
         /**
-         * Set true if nulls are sorted low
+         * Set true if nulls are sorted low.
          *
          * @param nullsAreSortedLow true if nulls are sorted low
          * @return builder instance for fluent programming
@@ -384,7 +384,7 @@ public final class SchemaAdapterNotes {
         }
 
         /**
-         * Builds and returns instance of {@link SchemaAdapterNotes} class
+         * Builds and returns instance of {@link SchemaAdapterNotes} class.
          *
          * @return instance of {@link SchemaAdapterNotes} class
          */

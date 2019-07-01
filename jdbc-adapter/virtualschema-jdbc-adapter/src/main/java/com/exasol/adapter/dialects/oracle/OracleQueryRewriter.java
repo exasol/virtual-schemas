@@ -13,11 +13,11 @@ import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.SqlStatement;
 
 /**
- * This class implements an Oracle-specific query rewriter
+ * This class implements an Oracle-specific query rewriter.
  */
 public class OracleQueryRewriter extends BaseQueryRewriter {
     /**
-     * Create a new instance of an {@link OracleQueryRewriter}
+     * Create a new instance of the {@link OracleQueryRewriter}.
      *
      * @param dialect              Oracle SQl dialect
      * @param remoteMetadataReader reader for metadata from the remote data source

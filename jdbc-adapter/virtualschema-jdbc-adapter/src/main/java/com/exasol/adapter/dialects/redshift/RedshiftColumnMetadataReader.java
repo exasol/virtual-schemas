@@ -11,13 +11,13 @@ import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 
 /**
- * This class implements a Redshift-specific column metadata reader
+ * This class implements a Redshift-specific column metadata reader.
  */
 public class RedshiftColumnMetadataReader extends BaseColumnMetadataReader {
     private static final Logger LOGGER = Logger.getLogger(RedshiftColumnMetadataReader.class.getName());
 
     /**
-     * Create a new instance of a {@link RedshiftColumnMetadataReader}
+     * Create a new instance of the {@link RedshiftColumnMetadataReader}.
      *
      * @param connection          JDBC connection to the remote data source
      * @param properties          user-defined adapter properties

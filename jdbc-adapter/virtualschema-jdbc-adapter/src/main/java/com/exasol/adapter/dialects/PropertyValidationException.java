@@ -9,7 +9,7 @@ public class PropertyValidationException extends AdapterException {
     public static final long serialVersionUID = 1659958371335354081L;
 
     /**
-     * Create a new {@link PropertyValidationException}
+     * Create a new {@link PropertyValidationException}.
      *
      * @param message error message
      */

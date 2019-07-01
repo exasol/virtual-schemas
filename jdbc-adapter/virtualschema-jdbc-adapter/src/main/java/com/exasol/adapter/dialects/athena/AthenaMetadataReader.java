@@ -9,11 +9,11 @@ import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.*;
 
 /**
- * Metadata reader that reads AWS-Athena-specific database metadata
+ * Metadata reader that reads AWS-Athena-specific database metadata.
  */
 public class AthenaMetadataReader extends AbstractRemoteMetadataReader {
     /**
-     * Create a new instance of an {@link AthenaMetadataReader}
+     * Create a new instance of the {@link AthenaMetadataReader}.
      *
      * @param connection JDBC connection to the remote data source
      * @param properties user-defined adapter properties

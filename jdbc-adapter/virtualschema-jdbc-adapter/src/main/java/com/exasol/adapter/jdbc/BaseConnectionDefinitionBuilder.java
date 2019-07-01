@@ -23,7 +23,7 @@ public class BaseConnectionDefinitionBuilder implements ConnectionDefinitionBuil
             + USERNAME_PROPERTY + " and " + PASSWORD_PROPERTY + " is not allowed.";
 
     /**
-     * Get the connection definition part of a push-down query
+     * Get the connection definition part of a push-down query.
      *
      * @param properties               user-defined adapter properties
      * @param exaConnectionInformation details of a named Exasol connection

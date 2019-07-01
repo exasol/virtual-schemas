@@ -15,9 +15,17 @@ import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * This class generates SQL queries for the {@link SqlServerSqlDialect}.
+ */
 public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
 
+    /**
+     * Create a new instance of the {@link SqlServerSqlGenerationVisitor}.
+     *
+     * @param dialect {@link SqlServerSqlDialect} SQL dialect
+     * @param context SQL generation context
+     */
     public SqlServerSqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         super(dialect, context);
 
@@ -38,7 +46,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
 
                 int columnId = 0;
                 final List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
-                SqlGenerationHelper.getMetadataFrom(select.getFromClause(), tableMetadata);
+                SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata);
                 for (final TableMetadata tableMeta : tableMetadata) {
                     for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
                         final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);

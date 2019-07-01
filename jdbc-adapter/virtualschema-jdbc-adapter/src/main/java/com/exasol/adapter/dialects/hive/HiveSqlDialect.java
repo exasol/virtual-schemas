@@ -19,7 +19,7 @@ import com.exasol.adapter.sql.ScalarFunction;
 /**
  * Dialect for Hive, using the Cloudera Hive JDBC Driver/Connector (developed by
  * Simba). Only supports Hive 2.1.0 and later because of the order by (nulls
- * first/last option)
+ * first/last option).
  */
 public class HiveSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "HIVE";
@@ -28,10 +28,21 @@ public class HiveSqlDialect extends AbstractSqlDialect {
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
+    /**
+     * Create a new instance of the {@link HiveSqlDialect}.
+     *
+     * @param connection JDBC connection
+     * @param properties user-defined adapter properties
+     */
     public HiveSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
 
+    /**
+     * Get the Hive dialect name.
+     *
+     * @return always "HIVE"
+     */
     public static String getPublicName() {
         return NAME;
     }

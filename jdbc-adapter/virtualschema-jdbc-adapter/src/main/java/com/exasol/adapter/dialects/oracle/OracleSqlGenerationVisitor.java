@@ -10,8 +10,17 @@ import com.exasol.adapter.sql.*;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
+/**
+ * This class generates SQL queries for the {@link OracleSqlGenerationVisitor}.
+ */
 public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
 
+    /**
+     * Create a new instance of the {@link OracleSqlGenerationVisitor}.
+     *
+     * @param dialect {@link OracleSqlDialect} SQL dialect
+     * @param context SQL generation context
+     */
     public OracleSqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         super(dialect, context);
 
@@ -93,7 +102,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                 } else if (select.getSelectList().isSelectStar()) {
                     int numberOfColumns = 0;
                     final List<TableMetadata> tableMetadata = new ArrayList<>();
-                    SqlGenerationHelper.getMetadataFrom(select.getFromClause(), tableMetadata);
+                    SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata);
                     for (final TableMetadata tableMeta : tableMetadata) {
                         numberOfColumns += tableMeta.getColumns().size();
                     }
@@ -158,7 +167,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         boolean selectListRequiresCasts = false;
         int columnId = 0;
         final List<TableMetadata> tableMetadata = new ArrayList<>();
-        SqlGenerationHelper.getMetadataFrom(select.getFromClause(), tableMetadata);
+        SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata);
         for (final TableMetadata tableMeta : tableMetadata) {
             for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
                 final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
