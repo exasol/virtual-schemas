@@ -9,6 +9,7 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
@@ -18,7 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hamcrest.MatcherAssert;
+import com.exasol.adapter.sql.*;
+import org.hamcrest.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -109,5 +111,75 @@ class SqlServerSqlDialectTest {
     private void setMandatoryProperties(final String sqlDialectProperty) {
         this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
         this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN");
+    }
+
+    @Test
+    void testGetScalarFunctionAliases() {
+        assertAll(
+                () -> assertThat(this.dialect.getScalarFunctionAliases().get(ScalarFunction.ATAN2),
+                        Matchers.equalTo("ATN2")), //
+                () -> assertThat(this.dialect.getScalarFunctionAliases().get(ScalarFunction.CEIL),
+                        Matchers.equalTo("CEILING")), //
+                () -> assertThat(this.dialect.getScalarFunctionAliases().get(ScalarFunction.CHR),
+                        Matchers.equalTo("CHAR")), //
+                () -> assertThat(this.dialect.getScalarFunctionAliases().get(ScalarFunction.LENGTH),
+                        Matchers.equalTo("LEN")), //
+                () -> assertThat(this.dialect.getScalarFunctionAliases().get(ScalarFunction.LOCATE),
+                        Matchers.equalTo("CHARINDEX")), //
+                () -> assertThat(this.dialect.getScalarFunctionAliases().get(ScalarFunction.REPEAT),
+                        Matchers.equalTo("REPLICATE")), //
+                () -> assertThat(this.dialect.getScalarFunctionAliases().get(ScalarFunction.SUBSTR),
+                        Matchers.equalTo("SUBSTRING")), //
+                () -> assertThat(this.dialect.getScalarFunctionAliases().get(ScalarFunction.NULLIFZERO),
+                        Matchers.equalTo("NULLIF")));
+    }
+
+    @Test
+    void testGetAggregateFunctionAliases() {
+        assertAll(
+                () -> assertThat(this.dialect.getAggregateFunctionAliases().get(AggregateFunction.STDDEV),
+                        Matchers.equalTo("STDEV")), //
+                () -> assertThat(this.dialect.getAggregateFunctionAliases().get(AggregateFunction.STDDEV_POP),
+                        Matchers.equalTo("STDEVP")), //
+                () -> assertThat(this.dialect.getAggregateFunctionAliases().get(AggregateFunction.VARIANCE),
+                        Matchers.equalTo("VAR")), //
+                () -> assertThat(this.dialect.getAggregateFunctionAliases().get(AggregateFunction.VAR_POP),
+                        Matchers.equalTo("VARP")));
+    }
+
+    @Test
+    void testApplyQuote() {
+        assertThat(this.dialect.applyQuote("tableName"), equalTo("[tableName]"));
+    }
+
+    @Test
+    void testRequiresCatalogQualifiedTableNames() {
+        assertThat(this.dialect.requiresCatalogQualifiedTableNames(null), equalTo(true));
+    }
+
+    @Test
+    void testRequiresSchemaQualifiedTableNames() {
+        assertThat(this.dialect.requiresSchemaQualifiedTableNames(null), equalTo(true));
+    }
+
+    @Test
+    void testGetDefaultNullSorting() {
+        assertThat(this.dialect.getDefaultNullSorting(), equalTo(SqlDialect.NullSorting.NULLS_SORTED_AT_START));
+    }
+
+    @Test
+    void testGetSqlGenerationVisitor() {
+        assertThat(this.dialect.getSqlGenerationVisitor(null),
+                CoreMatchers.instanceOf(SqlServerSqlGenerationVisitor.class));
+    }
+
+    @Test
+    void testSupportsJdbcCatalogs() {
+        assertThat(this.dialect.supportsJdbcCatalogs(), equalTo(SqlDialect.StructureElementSupport.MULTIPLE));
+    }
+
+    @Test
+    void testSupportsJdbcSchemas() {
+        assertThat(this.dialect.supportsJdbcSchemas(), equalTo(SqlDialect.StructureElementSupport.MULTIPLE));
     }
 }

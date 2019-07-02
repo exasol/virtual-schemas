@@ -44,8 +44,7 @@ public class GenericSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Capabilities getCapabilities() {
-        final Capabilities.Builder builder = Capabilities.builder();
-        return builder.build();
+        return Capabilities.builder().build();
     }
 
     @Override

@@ -9,6 +9,7 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
@@ -19,7 +20,7 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hamcrest.MatcherAssert;
+import org.hamcrest.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -114,5 +115,40 @@ class DB2SqlDialectTest {
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DB2SqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
+    }
+
+    @Test
+    void testSupportsJdbcCatalogs() {
+        assertThat(this.dialect.supportsJdbcCatalogs(), equalTo(SqlDialect.StructureElementSupport.NONE));
+    }
+
+    @Test
+    void testSupportsJdbcSchemas() {
+        assertThat(this.dialect.supportsJdbcSchemas(), equalTo(SqlDialect.StructureElementSupport.MULTIPLE));
+    }
+
+    @Test
+    void testApplyQuote() {
+        assertThat(this.dialect.applyQuote("tableName"), equalTo("\"tableName\""));
+    }
+
+    @Test
+    void testRequiresCatalogQualifiedTableNames() {
+        assertThat(this.dialect.requiresCatalogQualifiedTableNames(null), equalTo(false));
+    }
+
+    @Test
+    void testRequiresSchemaQualifiedTableNames() {
+        assertThat(this.dialect.requiresSchemaQualifiedTableNames(null), equalTo(true));
+    }
+
+    @Test
+    void testGetSqlGenerationVisitor() {
+        assertThat(this.dialect.getSqlGenerationVisitor(null), CoreMatchers.instanceOf(DB2SqlGenerationVisitor.class));
+    }
+
+    @Test
+    void testGetDefaultNullSorting() {
+        assertThat(this.dialect.getDefaultNullSorting(), equalTo(SqlDialect.NullSorting.NULLS_SORTED_AT_END));
     }
 }
