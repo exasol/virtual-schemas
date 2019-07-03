@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hamcrest.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -150,5 +151,11 @@ class RedshiftSqlDialectTest {
     @Test
     void testGetStringLiteral() {
         assertThat(this.dialect.getStringLiteral("Foo'Bar"), equalTo("'Foo''Bar'"));
+    }
+
+    @Test
+    void testGetSqlGenerationVisitor() {
+        assertThat(this.dialect.getSqlGenerationVisitor(null),
+                CoreMatchers.instanceOf(RedshiftSqlGenerationVisitor.class));
     }
 }

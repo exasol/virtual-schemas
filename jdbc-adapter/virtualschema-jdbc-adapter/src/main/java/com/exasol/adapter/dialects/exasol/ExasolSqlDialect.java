@@ -20,7 +20,7 @@ import com.exasol.adapter.jdbc.RemoteMetadataReader;
  */
 public class ExasolSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "EXASOL";
-
+    private static final Capabilities CAPABILITIES = createCapabilityList();
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXASOL_IMPORT_PROPERTY,
@@ -52,6 +52,20 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
         return NAME;
     }
 
+    private static Capabilities createCapabilityList() {
+        return Capabilities.builder() //
+                .addMain(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS, AGGREGATE_SINGLE_GROUP,
+                        AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_GROUP_BY_EXPRESSION, AGGREGATE_GROUP_BY_TUPLE,
+                        AGGREGATE_HAVING, ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT, LIMIT_WITH_OFFSET, JOIN,
+                        JOIN_TYPE_INNER, JOIN_TYPE_LEFT_OUTER, JOIN_TYPE_RIGHT_OUTER, JOIN_TYPE_FULL_OUTER,
+                        JOIN_CONDITION_EQUI) //
+                .addLiteral(LiteralCapability.values()) //
+                .addPredicate(PredicateCapability.values()) //
+                .addAggregateFunction(AggregateFunctionCapability.values()) //
+                .addScalarFunction(ScalarFunctionCapability.values()) //
+                .build();
+    }
+
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
         return new ExasolMetadataReader(this.connection, this.properties);
@@ -74,16 +88,7 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
 
     @Override
     public Capabilities getCapabilities() {
-        final Capabilities.Builder builder = Capabilities.builder();
-        builder.addMain(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS, AGGREGATE_SINGLE_GROUP,
-                AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_GROUP_BY_EXPRESSION, AGGREGATE_GROUP_BY_TUPLE, AGGREGATE_HAVING,
-                ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT, LIMIT_WITH_OFFSET, JOIN, JOIN_TYPE_INNER,
-                JOIN_TYPE_LEFT_OUTER, JOIN_TYPE_RIGHT_OUTER, JOIN_TYPE_FULL_OUTER, JOIN_CONDITION_EQUI);
-        builder.addLiteral(LiteralCapability.values());
-        builder.addPredicate(PredicateCapability.values());
-        builder.addAggregateFunction(AggregateFunctionCapability.values());
-        builder.addScalarFunction(ScalarFunctionCapability.values());
-        return builder.build();
+        return CAPABILITIES;
     }
 
     @Override

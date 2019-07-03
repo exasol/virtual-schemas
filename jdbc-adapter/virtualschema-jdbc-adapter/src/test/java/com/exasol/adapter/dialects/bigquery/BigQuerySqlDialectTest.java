@@ -6,6 +6,7 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -121,5 +122,10 @@ class BigQuerySqlDialectTest {
     @Test
     void testGetScalarFunctionAliases() {
         assertThat(this.dialect.getScalarFunctionAliases().get(ScalarFunction.HASH_MD5), equalTo("MD5"));
+    }
+
+    @Test
+    void testGetSqlGenerationVisitor() {
+        assertThat(this.dialect.getSqlGenerationVisitor(null), instanceOf(BigQuerySqlGenerationVisitor.class));
     }
 }
