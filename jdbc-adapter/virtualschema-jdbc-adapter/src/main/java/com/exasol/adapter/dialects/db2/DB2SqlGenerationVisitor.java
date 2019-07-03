@@ -17,39 +17,44 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * This class generates SQL queries for the {@link DB2SqlDialect}.
+ */
 public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
+    private final Set<ScalarFunction> scalarFunctionsCast = new HashSet<>();
 
-    private Set<ScalarFunction> scalarFunctionsCast = new HashSet<>();
+    /**
+     * Create a new instance of the {@link DB2SqlGenerationVisitor}.
+     *
+     * @param dialect {@link DB2SqlDialect} SQL dialect
+     * @param context SQL generation context
+     */
+    public DB2SqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
+        super(dialect, context);
+    }
 
-        public DB2SqlGenerationVisitor(SqlDialect dialect, SqlGenerationContext context) {
-                super(dialect, context);
-                
-        }
-        
     @Override
-    public String visit(SqlColumn column) throws AdapterException {
+    public String visit(final SqlColumn column) throws AdapterException {
         return getColumnProjectionString(column, super.visit(column));
     }
 
-    private String getColumnProjectionString(SqlColumn column, String projString) throws AdapterException {
-        boolean isDirectlyInSelectList = (column.hasParent() && column.getParent().getType() == SqlNodeType.SELECT_LIST);
+    private String getColumnProjectionString(final SqlColumn column, final String projString) throws AdapterException {
+        final boolean isDirectlyInSelectList = (column.hasParent() && column.getParent().getType() == SqlNodeType.SELECT_LIST);
         if (!isDirectlyInSelectList) {
             return projString;
         }
-        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
+        final String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+        return getColumnProjectionStringNoCheckImpl(typeName, projString);
     }
 
-    
-    private String getColumnProjectionStringNoCheck(SqlColumn column, String projString) throws AdapterException {
+    private String getColumnProjectionStringNoCheck(final SqlColumn column, final String projString) throws AdapterException {
 
-        String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
+        final String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+        return getColumnProjectionStringNoCheckImpl(typeName, projString);
     }
-    
-    
-    private String getColumnProjectionStringNoCheckImpl(String typeName, SqlColumn column, String projString) {
-            
+
+    private String getColumnProjectionStringNoCheckImpl(final String typeName, String projString) {
+
             switch (typeName) {
                 case "XML":
             projString = "XMLSERIALIZE(" + projString + " as VARCHAR(32000) INCLUDING XMLDECLARATION)";
@@ -70,26 +75,26 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
                 default:
                         break;
                 }
-            
+
         if (TYPE_NAME_NOT_SUPPORTED.contains(typeName)){
-                
+
                 projString = "'"+typeName+" NOT SUPPORTED'"; //returning a string constant for unsupported data types
-                
+
         }
-                
+
         return projString;
     }
-        
+
     @Override
-    public String visit(SqlStatementSelect select) throws AdapterException {
+    public String visit(final SqlStatementSelect select) throws AdapterException {
         if (!select.hasLimit()) {
             return super.visit(select);
         } else {
-                SqlLimit limit = select.getLimit();
-                
-            StringBuilder sql = new StringBuilder();
+                final SqlLimit limit = select.getLimit();
+
+            final StringBuilder sql = new StringBuilder();
             sql.append("SELECT ");
-            
+
             sql.append(select.getSelectList().accept(this));
             sql.append(" FROM ");
             sql.append(select.getFromClause().accept(this));
@@ -110,58 +115,57 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
                 sql.append(select.getOrderBy().accept(this));
             }
             sql.append(" FETCH FIRST " + limit.getLimit() + " ROWS ONLY");
-            return sql.toString();   
+            return sql.toString();
         }
     }
 
-        
     @Override
-    public String visit(SqlSelectList selectList) throws AdapterException {
+    public String visit(final SqlSelectList selectList) throws AdapterException {
         if (selectList.isRequestAnyColumn()) {
             // The system requested any column
             return "1";
         }
-        List<String> selectListElements = new ArrayList<>();
+        final List<String> selectListElements = new ArrayList<>();
         if (selectList.isSelectStar()) {
             if (SqlGenerationHelper.selectListRequiresCasts(selectList, nodeRequiresCast)) {
 
                 // Do as if the user has all columns in select list
-                SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
-                
+                final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
+
                 int columnId = 0;
-                List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
-                SqlGenerationHelper.getMetadataFrom(select.getFromClause(), tableMetadata );
-                for (TableMetadata tableMeta : tableMetadata) {
-                    for (ColumnMetadata columnMeta : tableMeta.getColumns()) {
-                        SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
+                final List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
+                SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata );
+                for (final TableMetadata tableMeta : tableMetadata) {
+                    for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
+                        final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
                         selectListElements.add( getColumnProjectionStringNoCheck(sqlColumn,  super.visit(sqlColumn)  )   );
                         ++columnId;
                     }
                 }
-                
+
             } else {
                 selectListElements.add("*");
             }
         } else {
-            for (SqlNode node : selectList.getExpressions()) {
+            for (final SqlNode node : selectList.getExpressions()) {
                 selectListElements.add(node.accept(this));
             }
         }
-       
+
         return Joiner.on(", ").join(selectListElements);
     }
-        
+
         @Override
-        public String visit(SqlFunctionScalar function) throws AdapterException {
+        public String visit(final SqlFunctionScalar function) throws AdapterException {
         String sql = super.visit(function);
-                
+
                 switch (function.getFunction()) {
         case TRIM: {
-            List<String> argumentsSql = new ArrayList<>();
-            for (SqlNode node : function.getArguments()) {
+            final List<String> argumentsSql = new ArrayList<>();
+            for (final SqlNode node : function.getArguments()) {
                 argumentsSql.add(node.accept(this));
             }
-            StringBuilder builder = new StringBuilder();
+            final StringBuilder builder = new StringBuilder();
             builder.append("TRIM(");
             if (argumentsSql.size() > 1) {
                 builder.append(argumentsSql.get(1));
@@ -180,17 +184,17 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         case ADD_SECONDS:
         case ADD_WEEKS:
         case ADD_YEARS: {
-            List<String> argumentsSql = new ArrayList<>();
+            final List<String> argumentsSql = new ArrayList<>();
             Boolean isTimestamp = false; //special cast required
-            
-            for (SqlNode node : function.getArguments()) {
+
+            for (final SqlNode node : function.getArguments()) {
                 argumentsSql.add(node.accept(this));
             }
-            StringBuilder builder = new StringBuilder();
-            SqlColumn column = (SqlColumn) function.getArguments().get(0);
-            String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+            final StringBuilder builder = new StringBuilder();
+            final SqlColumn column = (SqlColumn) function.getArguments().get(0);
+            final String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
             System.out.println("!DB2 : " + typeName);
-            if (typeName.contains("TIMESTAMP")) 
+            if (typeName.contains("TIMESTAMP"))
                 {
                     isTimestamp = true;
                     System.out.println("!DB2 : we got a timestamp");
@@ -256,11 +260,11 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
                     sql = sql.replaceFirst("^BIT_TO_NUM", "BIN_TO_NUM");
                     break;
         case NULLIFZERO: {
-                    List<String> argumentsSql = new ArrayList<>();
-                    for (SqlNode node : function.getArguments()) {
+                    final List<String> argumentsSql = new ArrayList<>();
+                    for (final SqlNode node : function.getArguments()) {
                         argumentsSql.add(node.accept(this));
                     }
-                    StringBuilder builder = new StringBuilder();
+                    final StringBuilder builder = new StringBuilder();
                     builder.append("NULLIF(");
                     builder.append(argumentsSql.get(0));
                     builder.append(", 0)");
@@ -268,11 +272,11 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
                     break;
                 }
         case ZEROIFNULL: {
-                    List<String> argumentsSql = new ArrayList<>();
-                    for (SqlNode node : function.getArguments()) {
+                    final List<String> argumentsSql = new ArrayList<>();
+                    for (final SqlNode node : function.getArguments()) {
                         argumentsSql.add(node.accept(this));
                     }
-                    StringBuilder builder = new StringBuilder();
+                    final StringBuilder builder = new StringBuilder();
                     builder.append("IFNULL(");
                     builder.append(argumentsSql.get(0));
                     builder.append(", 0)");
@@ -280,11 +284,11 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
                     break;
                 }
         case DIV: {
-                    List<String> argumentsSql = new ArrayList<>();
-                    for (SqlNode node : function.getArguments()) {
+                    final List<String> argumentsSql = new ArrayList<>();
+                    for (final SqlNode node : function.getArguments()) {
                         argumentsSql.add(node.accept(this));
                     }
-                    StringBuilder builder = new StringBuilder();
+                    final StringBuilder builder = new StringBuilder();
                     builder.append("CAST(FLOOR(");
                     builder.append(argumentsSql.get(0));
                     builder.append(" / FLOOR(");
@@ -297,7 +301,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
             break;
         }
 
-        boolean isDirectlyInSelectList = (function.hasParent() && function.getParent().getType() == SqlNodeType.SELECT_LIST);
+        final boolean isDirectlyInSelectList = (function.hasParent() && function.getParent().getType() == SqlNodeType.SELECT_LIST);
         if (isDirectlyInSelectList && scalarFunctionsCast.contains(function.getFunction())) {
             // Cast to FLOAT because result set metadata has precision = 0, scale = 0
             sql = "CAST("  + sql + " AS FLOAT)";
@@ -305,12 +309,11 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
 
         return sql;
     }
-                
-        
+
         @Override
-        public String visit(SqlFunctionAggregate function) throws AdapterException {
+        public String visit(final SqlFunctionAggregate function) throws AdapterException {
                 String sql = super.visit(function);
-                
+
                 switch (function.getFunction()) {
                 case VAR_SAMP:
                         sql = sql.replaceFirst("^VAR_SAMP", "VARIANCE_SAMP");
@@ -318,19 +321,18 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
                 default:
                         break;
                 }
-                
+
                 return sql;
         }
-        
-        
+
     @Override
-    public String visit(SqlFunctionAggregateGroupConcat function) throws AdapterException {
-        StringBuilder builder = new StringBuilder();
+    public String visit(final SqlFunctionAggregateGroupConcat function) throws AdapterException {
+        final StringBuilder builder = new StringBuilder();
         builder.append("LISTAGG");
         builder.append("(");
         assert(function.getArguments() != null);
         assert(function.getArguments().size() == 1 && function.getArguments().get(0) != null);
-        String expression = function.getArguments().get(0).accept(this);
+        final String expression = function.getArguments().get(0).accept(this);
         builder.append(expression);
         builder.append(", ");
         String separator = ",";
@@ -358,11 +360,11 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         return builder.toString();
     }
 
-    
-    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("TIMESTAMP","DECFLOAT","CLOB","XML","TIME");
-    private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("BLOB"); 
 
-    private java.util.function.Predicate<SqlNode> nodeRequiresCast = node -> {
+    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("TIMESTAMP","DECFLOAT","CLOB","XML","TIME");
+    private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("BLOB");
+
+    private final java.util.function.Predicate<SqlNode> nodeRequiresCast = node -> {
         try {
             if (node.getType() == SqlNodeType.COLUMN) {
                 SqlColumn column = (SqlColumn)node;

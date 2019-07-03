@@ -7,14 +7,13 @@ import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.*;
 
 /**
- * This class reads Generic database metadata
+ * This class reads Generic database metadata.
  */
 public class GenericMetadataReader extends AbstractRemoteMetadataReader {
     /**
-     * Create a new instance of a {@link GenericMetadataReader}
+     * Create a new instance of the {@link GenericMetadataReader}.
      *
-     * @param connection database connection through which the reader retrieves the metadata from the remote
-     *                   source
+     * @param connection database connection through which the reader retrieves the metadata from the remote source
      * @param properties user-defined properties
      */
     public GenericMetadataReader(final Connection connection, final AdapterProperties properties) {

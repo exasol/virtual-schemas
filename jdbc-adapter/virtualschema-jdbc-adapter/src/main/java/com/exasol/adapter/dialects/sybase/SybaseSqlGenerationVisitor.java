@@ -16,9 +16,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-
+/**
+ * This class generates SQL queries for the {@link SybaseSqlGenerationVisitor}.
+ */
 public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
 
+    /**
+     * Create a new instance of the {@link SybaseSqlGenerationVisitor}.
+     *
+     * @param dialect {@link SybaseSqlDialect} SQL dialect
+     * @param context SQL generation context
+     */
     public SybaseSqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         super(dialect, context);
 
@@ -39,7 +47,7 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
 
                 int columnId = 0;
                 final List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
-                SqlGenerationHelper.getMetadataFrom(select.getFromClause(), tableMetadata );
+                SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata );
                 for (final TableMetadata tableMeta : tableMetadata) {
                     for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
                         final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
@@ -626,5 +634,4 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
         }
         return "ORDER BY " + Joiner.on(", ").join(sqlOrderElement);
     }
-
 }

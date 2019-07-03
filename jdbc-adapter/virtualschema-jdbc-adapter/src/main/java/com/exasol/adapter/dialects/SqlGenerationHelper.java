@@ -18,13 +18,20 @@ public final class SqlGenerationHelper {
         //intentionally left blank
     }
 
+    /**
+     * Check if selected node requires cast or not.
+     *
+     * @param selectList SQL select list
+     * @param nodeRequiresCast node that requires cast
+     * @return true if selected node requires cast
+     */
     public static boolean selectListRequiresCasts(final SqlSelectList selectList,
           final Predicate<SqlNode> nodeRequiresCast) {
         boolean requiresCasts = false;
         final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
         final int columnId = 0;
         final List<TableMetadata> tableMetadata = new ArrayList<>();
-        getMetadataFrom(select.getFromClause(), tableMetadata);
+        addMetadata(select.getFromClause(), tableMetadata);
         for (final TableMetadata tableMeta : tableMetadata) {
             for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
                 if (nodeRequiresCast.test(new SqlColumn(columnId, columnMeta))) {
@@ -35,14 +42,20 @@ public final class SqlGenerationHelper {
         return requiresCasts;
     }
 
-    public static void getMetadataFrom(final SqlNode node, final List<TableMetadata> metadata) {
+    /**
+     * Add metadata to the list.
+     *
+     * @param node SQL node to get metadata from
+     * @param metadata list of TableMetadata
+     */
+    public static void addMetadata(final SqlNode node, final List<TableMetadata> metadata) {
         if (node.getType() == SqlNodeType.TABLE) {
             final SqlTable table = (SqlTable) node;
             metadata.add(table.getMetadata());
         } else if (node.getType() == SqlNodeType.JOIN) {
             final SqlJoin join = (SqlJoin) node;
-            getMetadataFrom(join.getLeft(), metadata);
-            getMetadataFrom(join.getRight(), metadata);
+            addMetadata(join.getLeft(), metadata);
+            addMetadata(join.getRight(), metadata);
         }
     }
 }

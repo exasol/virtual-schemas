@@ -30,7 +30,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     private static final Logger LOGGER = Logger.getLogger(AbstractSqlDialect.class.getName());
 
     /**
-     * Create a new instance of an {@link AbstractSqlDialect}
+     * Create a new instance of an {@link AbstractSqlDialect}.
      *
      * @param connection JDBC connection to remote data source
      * @param properties user properties

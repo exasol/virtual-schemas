@@ -8,14 +8,13 @@ import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.*;
 
 /**
- * This class reads Hive-specific database metadata
+ * This class reads Hive-specific database metadata.
  */
 public class HiveMetadataReader extends AbstractRemoteMetadataReader {
     /**
-     * Create a new instance of a {@link HiveMetadataReader}
+     * Create a new instance of the {@link HiveMetadataReader}
      *
-     * @param connection database connection through which the reader retrieves the metadata from the remote
-     *                   source
+     * @param connection database connection through which the reader retrieves the metadata from the remote source
      * @param properties user-defined properties
      */
     public HiveMetadataReader(final Connection connection, final AdapterProperties properties) {

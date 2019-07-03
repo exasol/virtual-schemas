@@ -8,14 +8,13 @@ import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.*;
 
 /**
- * This class reads and Teradata-specific database metadata
+ * This class reads Teradata-specific database metadata.
  */
 public class TeradataMetadataReader extends AbstractRemoteMetadataReader {
     /**
-     * Create a new instance of a {@link TeradataMetadataReader}
+     * Create a new instance of a {@link TeradataMetadataReader}.
      *
-     * @param connection database connection through which the reader retrieves the metadata from the remote
-     *                   source
+     * @param connection database connection through which the reader retrieves the metadata from the remote source
      * @param properties user-defined properties
      */
     public TeradataMetadataReader(final Connection connection, final AdapterProperties properties) {

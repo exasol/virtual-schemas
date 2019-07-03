@@ -11,7 +11,7 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.exasol.adapter.dialects.SqlGenerationHelper.getMetadataFrom;
+import static com.exasol.adapter.dialects.SqlGenerationHelper.addMetadata;
 import static org.junit.Assert.assertEquals;
 
 class SqlGenerationHelperTest {
@@ -32,7 +32,7 @@ class SqlGenerationHelperTest {
         final TableMetadata metadataT1 = new TableMetadata(TABLE_NAME_1, "", this.columns, "");
         final SqlNode t1 = new SqlTable(TABLE_NAME_1, metadataT1);
         final List<TableMetadata> allMetadata = new ArrayList<>();
-        getMetadataFrom(t1, allMetadata);
+        addMetadata(t1, allMetadata);
         assertEquals(1, allMetadata.size());
         assertEquals(TABLE_NAME_1, allMetadata.get(0).getName());
     }
@@ -47,7 +47,7 @@ class SqlGenerationHelperTest {
         final SqlNode join = new SqlJoin(t1, t2, Mockito.mock(SqlPredicateEqual.class), JoinType.INNER);
 
         final List<TableMetadata> allMetadata = new ArrayList<>();
-        getMetadataFrom(join, allMetadata);
+        addMetadata(join, allMetadata);
         assertEquals(2, allMetadata.size());
         assertEquals(TABLE_NAME_1, allMetadata.get(0).getName());
         assertEquals(TABLE_NAME_2, allMetadata.get(1).getName());
@@ -66,7 +66,7 @@ class SqlGenerationHelperTest {
         final SqlNode join = new SqlJoin(joinT1T2, table3, Mockito.mock(SqlPredicateEqual.class), JoinType.INNER);
 
         final List<TableMetadata> allMetadata = new ArrayList<>();
-        getMetadataFrom(join, allMetadata);
+        addMetadata(join, allMetadata);
         assertEquals(3, allMetadata.size());
         assertEquals(TABLE_NAME_1, allMetadata.get(0).getName());
         assertEquals(TABLE_NAME_2, allMetadata.get(1).getName());
@@ -89,7 +89,7 @@ class SqlGenerationHelperTest {
         final SqlNode join = new SqlJoin(joinT1T2, joinT3T4, Mockito.mock(SqlPredicateEqual.class), JoinType.INNER);
 
         final List<TableMetadata> allMetadata = new ArrayList<>();
-        getMetadataFrom(join, allMetadata);
+        addMetadata(join, allMetadata);
         assertEquals(4, allMetadata.size());
         assertEquals(TABLE_NAME_1, allMetadata.get(0).getName());
         assertEquals(TABLE_NAME_2, allMetadata.get(1).getName());

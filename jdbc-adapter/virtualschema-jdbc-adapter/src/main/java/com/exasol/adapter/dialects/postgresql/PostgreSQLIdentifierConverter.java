@@ -8,10 +8,18 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.IdentifierCaseHandling;
 
+/**
+ * This class implements database identifier converter for {@link PostgreSQLSqlDialect}.
+ */
 public class PostgreSQLIdentifierConverter implements IdentifierConverter {
     private static final Pattern UNQUOTED_IDENTIFIER_PATTERN = Pattern.compile("^[a-z][0-9a-z_]*");
     private final AdapterProperties properties;
 
+    /**
+     * Create a new instance of the {@link PostgreSQLIdentifierConverter}.
+     * 
+     * @param properties adapter properties
+     */
     public PostgreSQLIdentifierConverter(final AdapterProperties properties) {
         this.properties = properties;
     }
@@ -30,7 +38,7 @@ public class PostgreSQLIdentifierConverter implements IdentifierConverter {
     }
 
     /**
-     * Get the identifier mapping that the metadata reader uses when mapping PostgreSQL tables to Exasol
+     * Get the identifier mapping that the metadata reader uses when mapping PostgreSQL tables to Exasol.
      *
      * @return identifier mapping
      */

@@ -13,9 +13,8 @@ import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 
 /**
- * This dialect can be used for data sources where a custom dialect
- * implementation does not yet exists. It will obtain all information from the
- * JDBC Metadata.
+ * This dialect can be used for data sources where a custom dialect implementation does not yet exists. It will obtain
+ * all information from the JDBC Metadata.
  */
 public class GenericSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "GENERIC";
@@ -24,18 +23,28 @@ public class GenericSqlDialect extends AbstractSqlDialect {
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
+    /**
+     * Create a new instance of the {@link GenericSqlDialect}.
+     *
+     * @param connection SQL connection
+     * @param properties user-defined adapter properties
+     */
     public GenericSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
 
+    /**
+     * Get the Generic dialect name.
+     *
+     * @return always "GENERIC"
+     */
     public static String getPublicName() {
         return NAME;
     }
 
     @Override
     public Capabilities getCapabilities() {
-        final Capabilities.Builder builder = Capabilities.builder();
-        return builder.build();
+        return Capabilities.builder().build();
     }
 
     @Override

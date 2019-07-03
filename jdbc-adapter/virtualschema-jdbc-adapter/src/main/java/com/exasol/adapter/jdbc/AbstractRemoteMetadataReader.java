@@ -11,12 +11,21 @@ import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.metadata.TableMetadata;
 
+/**
+ * Contains a common part of remote metadata readers.
+ */
 public abstract class AbstractRemoteMetadataReader extends AbstractMetadataReader implements RemoteMetadataReader {
     private static final Logger LOGGER = Logger.getLogger(AbstractRemoteMetadataReader.class.getName());
     protected final ColumnMetadataReader columnMetadataReader;
     protected final TableMetadataReader tableMetadataReader;
     protected final IdentifierConverter identifierConverter;
 
+    /**
+     * Create a new instance of {@link AbstractRemoteMetadataReader}.
+     *
+     * @param connection SQl connection
+     * @param properties adapter properties
+     */
     public AbstractRemoteMetadataReader(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
         this.identifierConverter = createIdentifierConverter();
@@ -25,7 +34,7 @@ public abstract class AbstractRemoteMetadataReader extends AbstractMetadataReade
     }
 
     /**
-     * Create a reader that handles column metadata
+     * Create a reader that handles column metadata.
      * <p>
      * Override this method in cases where a remote data source needs specific handling of column metadata
      *
@@ -34,7 +43,7 @@ public abstract class AbstractRemoteMetadataReader extends AbstractMetadataReade
     protected abstract ColumnMetadataReader createColumnMetadataReader();
 
     /**
-     * Create a reader that handles table metadata
+     * Create a reader that handles table metadata.
      * <p>
      * Override this method in cases where a remote data source needs specific handling of table metadata
      *
@@ -43,14 +52,14 @@ public abstract class AbstractRemoteMetadataReader extends AbstractMetadataReade
     protected abstract TableMetadataReader createTableMetadataReader();
 
     /**
-     * Create a converter that translates identifiers from the remote data source to the Exasol representation
+     * Create a converter that translates identifiers from the remote data source to the Exasol representation.
      *
      * @return identifier converter
      */
     protected abstract IdentifierConverter createIdentifierConverter();
 
     /**
-     * Get the remote column metadata reader
+     * Get the remote column metadata reader.
      *
      * @return column metadata reader
      */
@@ -60,7 +69,7 @@ public abstract class AbstractRemoteMetadataReader extends AbstractMetadataReade
     }
 
     /**
-     * Get the table metadata reader
+     * Get the table metadata reader.
      *
      * @return table metadata reader
      */
@@ -69,6 +78,11 @@ public abstract class AbstractRemoteMetadataReader extends AbstractMetadataReade
         return this.tableMetadataReader;
     }
 
+    /**
+     * Get the identifier converter.
+     *
+     * @return identifier converter
+     */
     public IdentifierConverter getIdentifierConverter() {
         return this.identifierConverter;
     }
@@ -183,5 +197,4 @@ public abstract class AbstractRemoteMetadataReader extends AbstractMetadataReade
             return Optional.empty();
         }
     }
-
 }

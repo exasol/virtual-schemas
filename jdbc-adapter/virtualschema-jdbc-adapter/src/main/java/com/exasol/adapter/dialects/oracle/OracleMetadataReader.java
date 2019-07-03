@@ -8,14 +8,13 @@ import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.*;
 
 /**
- * This class reads and Oracle-specific database metadata
+ * This class reads Oracle-specific database metadata.
  */
 public class OracleMetadataReader extends AbstractRemoteMetadataReader {
     /**
-     * Create a new instance of a {@link OracleMetadataReader}
+     * Create a new instance of the {@link OracleMetadataReader}
      *
-     * @param connection database connection through which the reader retrieves the metadata from the remote
-     *                   source
+     * @param connection database connection through which the reader retrieves the metadata from the remote source
      * @param properties user-defined properties
      */
     public OracleMetadataReader(final Connection connection, final AdapterProperties properties) {

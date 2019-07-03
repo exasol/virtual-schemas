@@ -21,7 +21,7 @@ public class CustomSqlGenerationVisitorTest {
      * This tests uses a SQL with nested expressions (NOT), to make sure that the custom sql generation visitor is used
      * for all levels of recursion.
      *
-     * @throws AdapterException
+     * @throws AdapterException if SQL node can't accept generator
      */
     @Test
     public void testSqlGenerator() throws AdapterException {

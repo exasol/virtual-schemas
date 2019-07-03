@@ -11,7 +11,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.jdbc.BaseConnectionDefinitionBuilder;
 
 /**
- * This class implements an Oracle-specific connection definition builder
+ * This class implements an Oracle-specific connection definition builder.
  */
 public class OracleConnectionDefinitionBuilder extends BaseConnectionDefinitionBuilder {
     private static final Logger LOGGER = Logger.getLogger(OracleConnectionDefinitionBuilder.class.getName());

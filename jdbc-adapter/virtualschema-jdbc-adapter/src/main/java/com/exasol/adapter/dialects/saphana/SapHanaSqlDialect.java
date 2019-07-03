@@ -31,7 +31,7 @@ public class SapHanaSqlDialect extends AbstractSqlDialect {
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
     /**
-     * Get the SAP HANA dialect name
+     * Get the SAP HANA dialect name.
      *
      * @return always "SAPHANA"
      */

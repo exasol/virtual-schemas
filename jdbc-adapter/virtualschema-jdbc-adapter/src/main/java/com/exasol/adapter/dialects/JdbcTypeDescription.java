@@ -16,7 +16,7 @@ public class JdbcTypeDescription {
     private final String typeName;
 
     /**
-     * Create a new instance of a JDBC data type
+     * Create a new instance of a JDBC data type.
      *
      * @param jdbcType        type identifier as presented by the JDBC driver of the database
      * @param decimalScale    number of digits behind the point
@@ -34,7 +34,7 @@ public class JdbcTypeDescription {
     }
 
     /**
-     * Get the JDBC type identifier
+     * Get the JDBC type identifier.
      *
      * @return type identifier as number
      */
@@ -43,7 +43,7 @@ public class JdbcTypeDescription {
     }
 
     /**
-     * Get the decimal scale
+     * Get the decimal scale.
      *
      * @return decimal scale
      */
@@ -52,7 +52,7 @@ public class JdbcTypeDescription {
     }
 
     /**
-     * Get the precision for numeric types or size for size types (like <code>VARCHAR</code>)
+     * Get the precision for numeric types or size for size types (like <code>VARCHAR</code>).
      *
      * @return precision or size
      */
@@ -61,7 +61,7 @@ public class JdbcTypeDescription {
     }
 
     /**
-     * Storage size in eight-bit bytes (aka. octets)
+     * Storage size in eight-bit bytes (aka. octets).
      *
      * @return size in bytes
      */
@@ -70,7 +70,7 @@ public class JdbcTypeDescription {
     }
 
     /**
-     * Get the original name of the data type
+     * Get the original name of the data type.
      *
      * @return original type name
      */

@@ -7,11 +7,11 @@ import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.*;
 
 /**
- * This class implements a reader for PostgreSQL-specific metadata
+ * This class implements a reader for PostgreSQL-specific metadata.
  */
 public class PostgreSQLMetadataReader extends AbstractRemoteMetadataReader {
     /**
-     * Create a new instance of a {@link PostgreSQLMetadataReader}
+     * Create a new instance of the {@link PostgreSQLMetadataReader}.
      *
      * @param connection connection to the PostgreSQL database
      * @param properties user-defined adapter properties

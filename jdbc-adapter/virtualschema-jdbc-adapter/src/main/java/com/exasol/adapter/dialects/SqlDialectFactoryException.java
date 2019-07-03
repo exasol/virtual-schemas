@@ -7,7 +7,7 @@ public class SqlDialectFactoryException extends RuntimeException {
     private static final long serialVersionUID = 8924159119956437193L;
 
     /**
-     * Create a new {@link SqlDialectFactoryException}
+     * Create a new {@link SqlDialectFactoryException}.
      *
      * @param message error message
      */
@@ -16,7 +16,7 @@ public class SqlDialectFactoryException extends RuntimeException {
     }
 
     /**
-     * Create a new {@link SqlDialectFactoryException}
+     * Create a new {@link SqlDialectFactoryException}.
      *
      * @param message error message
      * @param cause   root cause

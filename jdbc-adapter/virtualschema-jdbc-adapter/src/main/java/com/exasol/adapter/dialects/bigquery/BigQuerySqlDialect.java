@@ -17,7 +17,7 @@ import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.sql.*;
 
 /**
- * This class implements the SQL dialect of Google's Big Query
+ * This class implements the SQL dialect of Google's Big Query.
  *
  * @see <a href="https://cloud.google.com/bigquery/">BigQuery</a>
  */
@@ -30,7 +30,7 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
     /**
-     * Get the Big Query dialect name
+     * Get the Big Query dialect name.
      *
      * @return always "BIGQUERY"
      */
@@ -39,7 +39,7 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
     }
 
     /**
-     * Create a new instance of the {@link BigQuerySqlDialect}
+     * Create a new instance of the {@link BigQuerySqlDialect}.
      *
      * @param connection JDBC connection to the Big Query service
      * @param properties user-defined adapter properties

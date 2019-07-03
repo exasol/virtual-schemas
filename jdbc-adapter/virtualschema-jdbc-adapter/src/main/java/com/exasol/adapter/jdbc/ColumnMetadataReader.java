@@ -7,11 +7,11 @@ import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 
 /**
- * Common interface for all remote column metadata readers
+ * Common interface for all remote column metadata readers.
  */
 public interface ColumnMetadataReader {
     /**
-     * Map a metadata for a list of columns to Exasol metadata
+     * Map a metadata for a list of columns to Exasol metadata.
      *
      * @param tableName the table for which the columns are mapped
      * @return list of Exasol column metadata objects

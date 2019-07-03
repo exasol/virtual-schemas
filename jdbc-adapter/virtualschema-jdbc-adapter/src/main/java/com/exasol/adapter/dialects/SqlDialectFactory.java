@@ -16,7 +16,7 @@ public class SqlDialectFactory {
     private final Connection connection;
 
     /**
-     * Create a new instance of an {@link SqlDialectFactory}
+     * Create a new instance of an {@link SqlDialectFactory}.
      *
      * @param connection         JDBC connection to the remote data source
      * @param sqlDialectRegistry registry where the available dialect implementations are listed
@@ -30,7 +30,7 @@ public class SqlDialectFactory {
     }
 
     /**
-     * Create an instance of the SQL dialect adapter matching the dialect name
+     * Create an instance of the SQL dialect adapter matching the dialect name.
      *
      * @param dialectName name of the SQL dialect for which the factory should instantiate an adapter
      * @return SQL dialect adapter

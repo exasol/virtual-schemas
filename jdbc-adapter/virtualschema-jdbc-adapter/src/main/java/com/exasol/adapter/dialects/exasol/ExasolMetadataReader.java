@@ -8,14 +8,13 @@ import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.*;
 
 /**
- * This class reads and Exasol-specific database metadata
+ * This class reads Exasol-specific database metadata.
  */
 public class ExasolMetadataReader extends AbstractRemoteMetadataReader {
     /**
-     * Create a new instance of a {@link ExasolMetadataReader}
+     * Create a new instance of the {@link ExasolMetadataReader}.
      *
-     * @param connection database connection through which the reader retrieves the metadata from the remote
-     *                   source
+     * @param connection database connection through which the reader retrieves the metadata from the remote source
      * @param properties user-defined properties
      */
     public ExasolMetadataReader(final Connection connection, final AdapterProperties properties) {

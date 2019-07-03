@@ -5,22 +5,21 @@ import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.Connection;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.sql.*;
 
 /**
- * Dialect for Impala, using the Cloudera Impala JDBC Driver/Connector
- * (developed by Simba).
+ * Dialect for Impala, using the Cloudera Impala JDBC Driver/Connector (developed by Simba).
  * <p>
- * See
- * http://www.cloudera.com/documentation/enterprise/latest/topics/impala_langref.html
+ * See http://www.cloudera.com/documentation/enterprise/latest/topics/impala_langref.html
  */
 public class ImpalaSqlDialect extends AbstractSqlDialect {
     private static final String NAME = "IMPALA";
@@ -29,10 +28,21 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
+    /**
+     * Get the Impala dialect name.
+     *
+     * @return always "IMPALA"
+     */
     public static String getPublicName() {
         return NAME;
     }
 
+    /**
+     * Create a new instance of the {@link ImpalaSqlDialect}.
+     *
+     * @param connection JDBC connection
+     * @param properties user-defined adapter properties
+     */
     public ImpalaSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
@@ -42,13 +52,41 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
         final Capabilities.Builder builder = Capabilities.builder();
         builder.addMain(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS, AGGREGATE_SINGLE_GROUP,
                 AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_GROUP_BY_EXPRESSION, AGGREGATE_GROUP_BY_TUPLE, AGGREGATE_HAVING,
-                ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT, LIMIT_WITH_OFFSET);
-        builder.addLiteral(NULL, DOUBLE, EXACTNUMERIC, STRING, BOOL);
-        builder.addPredicate(AND, OR, NOT, EQUAL, NOTEQUAL, LESS, LESSEQUAL, LIKE, REGEXP_LIKE, BETWEEN, IN_CONSTLIST,
-                IS_NULL, IS_NOT_NULL);
-        builder.addAggregateFunction(COUNT, COUNT_STAR, COUNT_DISTINCT, GROUP_CONCAT, GROUP_CONCAT_SEPARATOR, SUM,
-                SUM_DISTINCT, MIN, MAX, AVG);
+                ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT, LIMIT_WITH_OFFSET)
+                .addLiteral(NULL, DOUBLE, EXACTNUMERIC, STRING, BOOL) //
+                .addPredicate(AND, OR, NOT, EQUAL, NOTEQUAL, LESS, LESSEQUAL, LIKE, REGEXP_LIKE, BETWEEN, IN_CONSTLIST,
+                        IS_NULL, IS_NOT_NULL) //
+                .addAggregateFunction(COUNT, COUNT_STAR, COUNT_DISTINCT, GROUP_CONCAT, GROUP_CONCAT_SEPARATOR, SUM,
+                        SUM_DISTINCT, MIN, MAX, AVG) //
+                .addScalarFunction(ABS, ACOS, ASIN, ATAN, ATAN2, CEIL, COS, COSH, COT, DEGREES, EXP, FLOOR, GREATEST,
+                        LEAST, LN, LOG, MOD, NEG, POWER, RADIANS, RAND, ROUND, SIGN, SIN, SINH, SQRT, TAN, TANH, TRUNC,
+                        BIT_AND, BIT_NOT, BIT_OR, BIT_XOR, BIT_SET, CAST, ADD_MONTHS, CURRENT_TIMESTAMP, DAY, ADD_DAYS,
+                        ADD_HOURS, MINUTE, ADD_MINUTES, MONTH, MONTHS_BETWEEN, SECOND, ADD_SECONDS, TO_DATE,
+                        TO_TIMESTAMP, ADD_WEEKS, YEAR, ADD_YEARS, ASCII, CONCAT, INSTR, LENGTH, LOCATE, LOWER, LPAD,
+                        LTRIM, REGEXP_REPLACE, REPEAT, REVERSE, RPAD, RTRIM, SPACE, SUBSTR, TRANSLATE, TRIM, UPPER,
+                        SYSDATE);
         return builder.build();
+    }
+
+    @Override
+    public Map<ScalarFunction, String> getScalarFunctionAliases() {
+        final Map<ScalarFunction, String> aliases = new EnumMap<>(ScalarFunction.class);
+        aliases.put(ScalarFunction.NEG, "NEGATIVE");
+        aliases.put(ScalarFunction.TRUNC, "TRUNCATE");
+        aliases.put(ScalarFunction.BIT_AND, "BITAND");
+        aliases.put(ScalarFunction.BIT_NOT, "BITNOT");
+        aliases.put(ScalarFunction.BIT_OR, "BITOR");
+        aliases.put(ScalarFunction.BIT_XOR, "BITXOR");
+        aliases.put(ScalarFunction.BIT_SET, "SETBIT");
+        aliases.put(ScalarFunction.ADD_DAYS, "DAYS_ADD");
+        aliases.put(ScalarFunction.MONTHS_BETWEEN, "INT_MONTHS_BETWEEN");
+        aliases.put(ScalarFunction.ADD_MINUTES, "MINUTES_ADD");
+        aliases.put(ScalarFunction.ADD_MONTHS, "MONTHS_ADD");
+        aliases.put(ScalarFunction.ADD_SECONDS, "SECONDS_ADD");
+        aliases.put(ScalarFunction.ADD_WEEKS, "WEEKS_ADD");
+        aliases.put(ScalarFunction.ADD_YEARS, "YEARS_ADD");
+        aliases.put(ScalarFunction.SYSDATE, "NOW");
+        return aliases;
     }
 
     @Override

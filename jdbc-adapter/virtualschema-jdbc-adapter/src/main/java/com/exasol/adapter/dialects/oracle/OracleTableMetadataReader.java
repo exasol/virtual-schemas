@@ -7,13 +7,13 @@ import com.exasol.adapter.jdbc.ColumnMetadataReader;
 import java.sql.Connection;
 
 /**
- * This class implements a reader for Oracle database metadata
+ * This class implements a reader for Oracle database metadata.
  */
 public class OracleTableMetadataReader extends BaseTableMetadataReader {
     private static final String TRASH_BIN_TABLE_NAME_PREFIX = "BIN$";
 
     /**
-     * Create a new {@link OracleTableMetadataReader} instance
+     * Create a new {@link OracleTableMetadataReader} instance.
      *
      * @param connection           connection to the remote data source
      * @param columnMetadataReader reader to be used to map the metadata of the tables columns
