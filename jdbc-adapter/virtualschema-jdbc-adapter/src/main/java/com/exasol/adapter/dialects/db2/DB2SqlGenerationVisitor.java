@@ -267,14 +267,16 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         }
         builder.append(argumentsSql.get(0));
         builder.append(" + ");
-        builder.append(argumentsSql.get(1));
+        if (function.getFunction() == ScalarFunction.ADD_WEEKS) {
+            builder.append(7 * Integer.parseInt(argumentsSql.get(1)));
+        } else {
+            builder.append(argumentsSql.get(1));
+        }
         builder.append(" ");
         switch (function.getFunction()) {
         case ADD_DAYS:
-            builder.append("DAYS");
-            break;
         case ADD_WEEKS:
-            builder.append("WEEKS");
+            builder.append("DAYS");
             break;
         case ADD_HOURS:
             builder.append("HOURS");
@@ -361,7 +363,8 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         return builder.toString();
     }
 
-    private void getOrderBy(final SqlFunctionAggregateGroupConcat function, final StringBuilder builder) throws AdapterException {
+    private void getOrderBy(final SqlFunctionAggregateGroupConcat function, final StringBuilder builder)
+            throws AdapterException {
         for (int i = 0; i < function.getOrderBy().getExpressions().size(); i++) {
             if (i > 0) {
                 builder.append(", ");

@@ -19,6 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static utils.SqlNodesCreator.*;
 
 class DB2SqlGenerationVisitorTest {
     private SqlGenerationVisitor visitor;
@@ -33,7 +34,7 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlColumnWithoutParent() throws AdapterException {
+    void testVisitSqlColumnWithoutParent() throws AdapterException {
         final ColumnMetadata columnMetadata = ColumnMetadata.builder().name("test_column").type(DataType.createBool())
                 .build();
         final SqlColumn column = new SqlColumn(1, columnMetadata);
@@ -41,7 +42,7 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlColumnWithParentXml() throws AdapterException {
+    void testVisitSqlColumnWithParentXml() throws AdapterException {
         final ColumnMetadata columnMetadata = ColumnMetadata.builder().name("test_column").type(DataType.createBool())
                 .adapterNotes("{\"jdbcDataType\":2009, \"typeName\":\"XML\"}").build();
         final SqlColumn column = new SqlColumn(1, columnMetadata);
@@ -52,7 +53,7 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlColumnWithParentClob() throws AdapterException {
+    void testVisitSqlColumnWithParentClob() throws AdapterException {
         final ColumnMetadata columnMetadata = ColumnMetadata.builder().name("test_column").type(DataType.createBool())
                 .adapterNotes("{\"jdbcDataType\":2005, \"typeName\":\"CLOB\"}").build();
         final SqlColumn column = new SqlColumn(1, columnMetadata);
@@ -62,7 +63,7 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlColumnWithParentChar() throws AdapterException {
+    void testVisitSqlColumnWithParentChar() throws AdapterException {
         final ColumnMetadata columnMetadata = ColumnMetadata.builder().name("test_column").type(DataType.createBool())
                 .adapterNotes("{\"jdbcDataType\":1, \"typeName\":\"CHAR () FOR BIT DATA\"}").build();
         final SqlColumn column = new SqlColumn(1, columnMetadata);
@@ -72,7 +73,7 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlColumnWithParentVarchar() throws AdapterException {
+    void testVisitSqlColumnWithParentVarchar() throws AdapterException {
         final ColumnMetadata columnMetadata = ColumnMetadata.builder().name("test_column").type(DataType.createBool())
                 .adapterNotes("{\"jdbcDataType\":12, \"typeName\":\"VARCHAR () FOR BIT DATA\"}").build();
         final SqlColumn column = new SqlColumn(1, columnMetadata);
@@ -82,7 +83,7 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlColumnWithParentTime() throws AdapterException {
+    void testVisitSqlColumnWithParentTime() throws AdapterException {
         final ColumnMetadata columnMetadata = ColumnMetadata.builder().name("test_column").type(DataType.createBool())
                 .adapterNotes("{\"jdbcDataType\":92, \"typeName\":\"TIME\"}").build();
         final SqlColumn column = new SqlColumn(1, columnMetadata);
@@ -92,7 +93,7 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlColumnWithParentTimestamp() throws AdapterException {
+    void testVisitSqlColumnWithParentTimestamp() throws AdapterException {
         final ColumnMetadata columnMetadata = ColumnMetadata.builder().name("test_column").type(DataType.createBool())
                 .adapterNotes("{\"jdbcDataType\":93, \"typeName\":\"TIMESTAMP\"}").build();
         final SqlColumn column = new SqlColumn(1, columnMetadata);
@@ -102,7 +103,7 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlColumnWithParentTypeNameIsNotSupported() throws AdapterException {
+    void testVisitSqlColumnWithParentTypeNameIsNotSupported() throws AdapterException {
         final ColumnMetadata columnMetadata = ColumnMetadata.builder().name("test_column").type(DataType.createBool())
                 .adapterNotes("{\"jdbcDataType\":2004, \"typeName\":\"BLOB\"}").build();
         final SqlColumn column = new SqlColumn(1, columnMetadata);
@@ -112,7 +113,7 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlStatementSelect() throws AdapterException {
+    void testVisitSqlStatementSelect() throws AdapterException {
         final SqlStatementSelect select = (SqlStatementSelect) DialectTestData.getTestSqlNode();
         assertThat(visitor.visit(select), //
                 equalTo("SELECT \"USER_ID\", " //
@@ -124,51 +125,46 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlSelectListAnyValue() throws AdapterException {
+    void testVisitSqlSelectListAnyValue() throws AdapterException {
         final SqlSelectList sqlSelectList = SqlSelectList.createAnyValueSelectList();
         assertThat(visitor.visit(sqlSelectList), equalTo("1"));
     }
 
     @Test
-    void visitSqlSelectListSelectStar() throws AdapterException {
+    void testVisitSqlSelectListSelectStar() throws AdapterException {
         final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
-        final TableMetadata tableMetadata = new TableMetadata("test_table", "", Collections.EMPTY_LIST, "");
-        final SqlTable fromClause = new SqlTable("test_table_name", tableMetadata);
-        final SqlNode select = new SqlStatementSelect(fromClause, sqlSelectList, null, null, null, null, null);
-        sqlSelectList.setParent(select);
+        final SqlNode sqlStatementSelect = createSqlStatementSelect(sqlSelectList, Collections.EMPTY_LIST,
+                "test_table");
+        sqlSelectList.setParent(sqlStatementSelect);
         assertThat(visitor.visit(sqlSelectList), equalTo("*"));
     }
 
     @Test
-    void visitSqlSelectListSelectStarRequiresCast() throws AdapterException {
+    void testVisitSqlSelectListSelectStarRequiresCast() throws AdapterException {
         final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
         final List<ColumnMetadata> columns = new ArrayList<>();
         columns.add(ColumnMetadata.builder().name("test_column")
                 .adapterNotes("{\"jdbcDataType\":2009, \"typeName\":\"XML\"}")
                 .type(DataType.createVarChar(10, DataType.ExaCharset.UTF8)).build());
-        final TableMetadata tableMetadata = new TableMetadata("test_table", "", columns, "");
-        final SqlTable fromClause = new SqlTable("test_table_name", tableMetadata);
-        final SqlNode select = new SqlStatementSelect(fromClause, sqlSelectList, null, null, null, null, null);
-        sqlSelectList.setParent(select);
+        final SqlNode sqlStatementSelect = createSqlStatementSelect(sqlSelectList, columns, "test_table");
+        sqlSelectList.setParent(sqlStatementSelect);
         assertThat(visitor.visit(sqlSelectList),
                 equalTo("XMLSERIALIZE(\"test_column\" as VARCHAR(32000) INCLUDING XMLDECLARATION)"));
     }
 
     @Test
-    void visitSqlSelectListSelectStarThrowsException() {
+    void testVisitSqlSelectListSelectStarThrowsException() {
         final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
         final List<ColumnMetadata> columns = new ArrayList<>();
         columns.add(ColumnMetadata.builder().name("test_column")
                 .type(DataType.createVarChar(10, DataType.ExaCharset.UTF8)).build());
-        final TableMetadata tableMetadata = new TableMetadata("test_table", "", columns, "");
-        final SqlTable fromClause = new SqlTable("test_table_name", tableMetadata);
-        final SqlNode select = new SqlStatementSelect(fromClause, sqlSelectList, null, null, null, null, null);
-        sqlSelectList.setParent(select);
+        final SqlNode sqlStatementSelect = createSqlStatementSelect(sqlSelectList, columns, "test_table");
+        sqlSelectList.setParent(sqlStatementSelect);
         assertThrows(SqlGenerationVisitorException.class, () -> visitor.visit(sqlSelectList));
     }
 
     @Test
-    void visitSqlFunctionScalarTrimOneArgument() throws AdapterException {
+    void testVisitSqlFunctionScalarTrimOneArgument() throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralString("test"));
         final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.TRIM, arguments, true, false);
@@ -176,16 +172,14 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlFunctionScalarTrimOTwoArguments() throws AdapterException {
-        final List<SqlNode> arguments = new ArrayList<>();
-        arguments.add(new SqlLiteralString("test"));
-        arguments.add(new SqlLiteralString("test2"));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.TRIM, arguments, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("TRIM('test2' FROM 'test')"));
+    void testVisitSqlFunctionScalarTrimOTwoArguments() throws AdapterException {
+        final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarWithTwoStringArguments(ScalarFunction.TRIM,
+                "ab cdef", "ab");
+        assertThat(visitor.visit(sqlFunctionScalar), equalTo("TRIM('ab' FROM 'ab cdef')"));
     }
 
     @Test
-    void visitSqlFunctionScalarAddDays() throws AdapterException {
+    void testVisitSqlFunctionScalarAddDays() throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlColumn(1,
                 ColumnMetadata.builder().name("test_column").type(DataType.createChar(20, DataType.ExaCharset.UTF8))
@@ -197,7 +191,7 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlFunctionScalarAddHours() throws AdapterException {
+    void testVisitSqlFunctionScalarAddHours() throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlColumn(1,
                 ColumnMetadata.builder().name("test_column").type(DataType.createChar(20, DataType.ExaCharset.UTF8))
@@ -209,7 +203,7 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlFunctionScalarAddMinutes() throws AdapterException {
+    void testVisitSqlFunctionScalarAddMinutes() throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlColumn(1,
                 ColumnMetadata.builder().name("test_column").type(DataType.createChar(20, DataType.ExaCharset.UTF8))
@@ -221,7 +215,7 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlFunctionScalarAddSeconds() throws AdapterException {
+    void testVisitSqlFunctionScalarAddSeconds() throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlColumn(1,
                 ColumnMetadata.builder().name("test_column").type(DataType.createChar(20, DataType.ExaCharset.UTF8))
@@ -233,7 +227,7 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlFunctionScalarAddYears() throws AdapterException {
+    void testVisitSqlFunctionScalarAddYears() throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlColumn(1,
                 ColumnMetadata.builder().name("test_column").type(DataType.createChar(20, DataType.ExaCharset.UTF8))
@@ -245,7 +239,7 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlFunctionScalarAddWeeks() throws AdapterException {
+    void testVisitSqlFunctionScalarAddWeeks() throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlColumn(1,
                 ColumnMetadata.builder().name("test_column").type(DataType.createChar(20, DataType.ExaCharset.UTF8))
@@ -253,31 +247,31 @@ class DB2SqlGenerationVisitorTest {
         arguments.add(new SqlLiteralExactnumeric(new BigDecimal(10)));
         final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.ADD_WEEKS, arguments, true,
                 false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("VARCHAR(\"test_column\" + 10 WEEKS)"));
+        assertThat(visitor.visit(sqlFunctionScalar), equalTo("VARCHAR(\"test_column\" + 70 DAYS)"));
     }
 
     @CsvSource({ "SYSDATE", "CURRENT_DATE" })
     @ParameterizedTest
-    void visitSqlFunctionScalarCurrentDate(final ScalarFunction scalarFunction) throws AdapterException {
+    void testVisitSqlFunctionScalarCurrentDate(final ScalarFunction scalarFunction) throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, null, true, false);
         assertThat(visitor.visit(sqlFunctionScalar), equalTo("CURRENT DATE"));
     }
 
     @Test
-    void visitSqlFunctionScalarCurrentTimestamp() throws AdapterException {
+    void testVisitSqlFunctionScalarDbTimezone() throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.DBTIMEZONE, null, true, false);
         assertThat(visitor.visit(sqlFunctionScalar), equalTo("DBTIMEZONE"));
     }
 
     @Test
-    void visitSqlFunctionScalarLocalTimestamp() throws AdapterException {
+    void testVisitSqlFunctionScalarLocalTimestamp() throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.LOCALTIMESTAMP, null, true,
                 false);
         assertThat(visitor.visit(sqlFunctionScalar), equalTo("LOCALTIMESTAMP"));
     }
 
     @Test
-    void visitSqlFunctionScalarSessionTimezone() throws AdapterException {
+    void testVisitSqlFunctionScalarSessionTimezone() throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.SESSIONTIMEZONE, null, true,
                 false);
         assertThat(visitor.visit(sqlFunctionScalar), equalTo("SESSIONTIMEZONE"));
@@ -285,13 +279,13 @@ class DB2SqlGenerationVisitorTest {
 
     @CsvSource({ "SYSTIMESTAMP", "CURRENT_TIMESTAMP" })
     @ParameterizedTest
-    void visitSqlFunctionScalarTimestamp(final ScalarFunction scalarFunction) throws AdapterException {
+    void testVisitSqlFunctionScalarTimestamp(final ScalarFunction scalarFunction) throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, null, true, false);
         assertThat(visitor.visit(sqlFunctionScalar), equalTo("VARCHAR(CURRENT TIMESTAMP)"));
     }
 
     @Test
-    void visitSqlFunctionScalarBitAnd() throws AdapterException {
+    void testVisitSqlFunctionScalarBitAnd() throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralString("test"));
         final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.BIT_AND, arguments, true,
@@ -300,7 +294,7 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlFunctionScalarBitToNum() throws AdapterException {
+    void testVisitSqlFunctionScalarBitToNum() throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralString("test"));
         final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.BIT_TO_NUM, arguments, true,
@@ -309,7 +303,7 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlFunctionScalarNullIfZero() throws AdapterException {
+    void testVisitSqlFunctionScalarNullIfZero() throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralString("test"));
         final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.NULLIFZERO, arguments, true,
@@ -318,7 +312,7 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlFunctionScalarZeroIfNull() throws AdapterException {
+    void testVisitSqlFunctionScalarZeroIfNull() throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralString("test"));
         final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.ZEROIFNULL, arguments, true,
@@ -327,29 +321,19 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlFunctionScalarDiv() throws AdapterException {
-        final List<SqlNode> arguments = new ArrayList<>();
-        arguments.add(new SqlLiteralString("test"));
-        arguments.add(new SqlLiteralString("test2"));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.DIV, arguments, true, false);
+    void testVisitSqlFunctionScalarDiv() throws AdapterException {
+        final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarWithTwoStringArguments(ScalarFunction.DIV,
+                "test", "test2");
         assertThat(visitor.visit(sqlFunctionScalar), equalTo("CAST(FLOOR('test' / FLOOR('test2')) AS DECIMAL(36, 0))"));
+    }
+    @Test
+    void testVisitSqlFunctionAggregate() throws AdapterException {
+        final SqlFunctionAggregate sqlFunctionAggregate = createSqlFunctionAggregate();
+        assertThat(visitor.visit(sqlFunctionAggregate), equalTo("AVG(DISTINCT \"test_column\")"));
     }
 
     @Test
-    void visitSqlFunctionScalarWithParent() throws AdapterException {
-        final List<SqlNode> arguments = new ArrayList<>();
-        arguments.add(new SqlLiteralString("test"));
-        arguments.add(new SqlLiteralString("test2"));
-        final ColumnMetadata columnMetadata = ColumnMetadata.builder().name("test_column").type(DataType.createBool())
-                .adapterNotes("{\"jdbcDataType\":2009, \"typeName\":\"XML\"}").build();
-        final SqlNode node = SqlSelectList.createSelectStarSelectList();
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.DIV, arguments, true, false);
-        sqlFunctionScalar.setParent(node);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("CAST(FLOOR('test' / FLOOR('test2')) AS DECIMAL(36, 0))"));
-    }
-
-    @Test
-    void visitSqlFunctionAggregate() throws AdapterException {
+    void testVisitSqlFunctionAggregateVarSamp() throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralString("test"));
         final SqlFunctionAggregate sqlFunctionAggregate = new SqlFunctionAggregate(AggregateFunction.VAR_SAMP,
@@ -358,18 +342,13 @@ class DB2SqlGenerationVisitorTest {
     }
 
     @Test
-    void visitSqlFunctionAggregateGroupConcat() throws AdapterException {
+    void testVisitSqlFunctionAggregateGroupConcat() throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralString("test"));
-        final List<Boolean> nulls = new ArrayList<>();
-        nulls.add(false);
-        nulls.add(true);
-        final List<SqlNode> orderByArguments = new ArrayList<>();
-        orderByArguments.add(new SqlLiteralString("orderBy1"));
-        orderByArguments.add(new SqlLiteralString("orderBy2"));
+        final SqlOrderBy orderBy = createSqlOrderByDescNullsFirst();
         final SqlFunctionAggregateGroupConcat sqlFunctionAggregateGroupConcat = new SqlFunctionAggregateGroupConcat(
-                AggregateFunction.AVG, arguments, new SqlOrderBy(orderByArguments, nulls, null), false, "'");
+                AggregateFunction.AVG, arguments, orderBy, false, "'");
         assertThat(visitor.visit(sqlFunctionAggregateGroupConcat),
-                equalTo("LISTAGG('test', ''') WITHIN GROUP(ORDER BY 'orderBy1' DESC, 'orderBy2')"));
+                equalTo("LISTAGG('test', ''') WITHIN GROUP(ORDER BY \"test_column\" DESC, \"test_column2\")"));
     }
 }
