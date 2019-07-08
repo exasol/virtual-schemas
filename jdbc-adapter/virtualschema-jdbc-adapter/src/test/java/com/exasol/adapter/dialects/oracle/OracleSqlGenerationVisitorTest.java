@@ -272,182 +272,50 @@ class OracleSqlGenerationVisitorTest {
         assertThat(visitor.visit(sqlFunctionScalar), equalTo("TRIM('ab' FROM 'ab cdef')"));
     }
 
-    @Test
-    void testVisitSqlFunctionScalarAddDays() throws AdapterException {
-        final List<SqlNode> arguments = new ArrayList<>();
-        arguments.add(new SqlColumn(1,
-                ColumnMetadata.builder().name("test_column").type(DataType.createChar(20, DataType.ExaCharset.UTF8))
-                        .adapterNotes("{\"jdbcDataType\":93, " + "\"typeName\":\"TIMESTAMP\"}").build()));
-        arguments.add(new SqlLiteralExactnumeric(new BigDecimal(10)));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ADD_DAYS, arguments, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("(\"test_column\" + INTERVAL '10' DAY)"));
+    @CsvSource({ "ADD_DAYS, '10' DAY", //
+            "ADD_HOURS,  '10' HOUR", //
+            "ADD_MINUTES,  '10' MINUTE", //
+            "ADD_SECONDS,  '10' SECOND", //
+            "ADD_YEARS,  '10' YEAR", //
+            "ADD_WEEKS, '70' DAY" })
+    @ParameterizedTest
+    void testVisitSqlFunctionScalarAddDateValues(final ScalarFunction scalarFunction, final String expected)
+            throws AdapterException {
+        final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarForDateTest(scalarFunction, 10);
+        assertThat(visitor.visit(sqlFunctionScalar), equalTo("(\"test_column\" + INTERVAL " + expected + ")"));
     }
 
-    @Test
-    void testVisitSqlFunctionScalarAddHours() throws AdapterException {
-        final List<SqlNode> arguments = new ArrayList<>();
-        arguments.add(new SqlColumn(1,
-                ColumnMetadata.builder().name("test_column").type(DataType.createChar(20, DataType.ExaCharset.UTF8))
-                        .adapterNotes("{\"jdbcDataType\":93, " + "\"typeName\":\"TIMESTAMP\"}").build()));
-        arguments.add(new SqlLiteralExactnumeric(new BigDecimal(10)));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ADD_HOURS, arguments, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("(\"test_column\" + INTERVAL '10' HOUR)"));
+    @CsvSource({ "CURRENT_DATE, CURRENT_DATE", //
+            "CURRENT_TIMESTAMP,  CURRENT_TIMESTAMP", //
+            "DBTIMEZONE,  DBTIMEZONE", //
+            "LOCALTIMESTAMP,  LOCALTIMESTAMP", //
+            "SESSIONTIMEZONE, SESSIONTIMEZONE", //
+            "SYSDATE, TO_DATE(SYSDATE)", //
+            "SYSTIMESTAMP, SYSTIMESTAMP" })
+    @ParameterizedTest
+    void testVisitSqlFunctionScalar1(final ScalarFunction scalarFunction, final String expected)
+            throws AdapterException {
+        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, null, true, false);
+        assertThat(visitor.visit(sqlFunctionScalar), equalTo(expected));
     }
 
-    @Test
-    void testVisitSqlFunctionScalarAddMinutes() throws AdapterException {
-        final List<SqlNode> arguments = new ArrayList<>();
-        arguments.add(new SqlColumn(1,
-                ColumnMetadata.builder().name("test_column").type(DataType.createChar(20, DataType.ExaCharset.UTF8))
-                        .adapterNotes("{\"jdbcDataType\":93, " + "\"typeName\":\"TIMESTAMP\"}").build()));
-        arguments.add(new SqlLiteralExactnumeric(new BigDecimal(10)));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ADD_MINUTES, arguments, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("(\"test_column\" + INTERVAL '10' MINUTE)"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarAddSeconds() throws AdapterException {
-        final List<SqlNode> arguments = new ArrayList<>();
-        arguments.add(new SqlColumn(1,
-                ColumnMetadata.builder().name("test_column").type(DataType.createChar(20, DataType.ExaCharset.UTF8))
-                        .adapterNotes("{\"jdbcDataType\":93, " + "\"typeName\":\"TIMESTAMP\"}").build()));
-        arguments.add(new SqlLiteralExactnumeric(new BigDecimal(10)));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ADD_SECONDS, arguments, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("(\"test_column\" + INTERVAL '10' SECOND)"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarAddYears() throws AdapterException {
-        final List<SqlNode> arguments = new ArrayList<>();
-        arguments.add(new SqlColumn(1,
-                ColumnMetadata.builder().name("test_column").type(DataType.createChar(20, DataType.ExaCharset.UTF8))
-                        .adapterNotes("{\"jdbcDataType\":93, " + "\"typeName\":\"TIMESTAMP\"}").build()));
-        arguments.add(new SqlLiteralExactnumeric(new BigDecimal(10)));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ADD_YEARS, arguments, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("(\"test_column\" + INTERVAL '10' YEAR)"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarAddWeeks() throws AdapterException {
-        final List<SqlNode> arguments = new ArrayList<>();
-        arguments.add(new SqlColumn(1,
-                ColumnMetadata.builder().name("test_column").type(DataType.createChar(20, DataType.ExaCharset.UTF8))
-                        .adapterNotes("{\"jdbcDataType\":93, " + "\"typeName\":\"TIMESTAMP\"}").build()));
-        arguments.add(new SqlLiteralExactnumeric(new BigDecimal(10)));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ADD_WEEKS, arguments, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("(\"test_column\" + INTERVAL '70' DAY)"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarCurrentDate() throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(CURRENT_DATE, null, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("CURRENT_DATE"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarCurrentTimestamp() throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(CURRENT_TIMESTAMP, null, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("CURRENT_TIMESTAMP"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarDbTimezone() throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(DBTIMEZONE, null, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("DBTIMEZONE"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarLocalTimestamp() throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(LOCALTIMESTAMP, null, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("LOCALTIMESTAMP"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarSessionTimezone() throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(SESSIONTIMEZONE, null, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("SESSIONTIMEZONE"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarSysdate() throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(SYSDATE, null, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("TO_DATE(SYSDATE)"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarSysdtemstamp() throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(SYSTIMESTAMP, null, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("SYSTIMESTAMP"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarBitAnd() throws AdapterException {
-        final List<SqlNode> arguments = new ArrayList<>();
-        arguments.add(new SqlLiteralString("test"));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(BIT_AND, arguments, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("BITAND('test')"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarBitToNum() throws AdapterException {
-        final List<SqlNode> arguments = new ArrayList<>();
-        arguments.add(new SqlLiteralString("test"));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(BIT_TO_NUM, arguments, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("BIN_TO_NUM('test')"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarNullIfZero() throws AdapterException {
-        final List<SqlNode> arguments = new ArrayList<>();
-        arguments.add(new SqlLiteralString("test"));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(NULLIFZERO, arguments, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("NULLIF('test', 0)"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarZeroIfNull() throws AdapterException {
-        final List<SqlNode> arguments = new ArrayList<>();
-        arguments.add(new SqlLiteralString("test"));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ZEROIFNULL, arguments, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("NVL('test', 0)"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarDiv() throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarWithTwoStringArguments(DIV, "test", "test2");
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("CAST(FLOOR('test' / 'test2') AS NUMBER(36, 0))"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarCot() throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarWithTwoStringArguments(COT, "test", "");
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("(1 / TAN('test'))"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarDegrees() throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarWithTwoStringArguments(DEGREES, "test", "");
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("(('test') * 180 / ACOS(-1))"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarRadians() throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarWithTwoStringArguments(RADIANS, "test", "");
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("(('test') * ACOS(-1) / 180)"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarRepeat() throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarWithTwoStringArguments(REPEAT, "test",
-                "test2");
-        assertThat(visitor.visit(sqlFunctionScalar),
-                equalTo("RPAD(TO_CHAR('test'), LENGTH('test') * ROUND('test2'), 'test')"));
-    }
-
-    @Test
-    void testVisitSqlFunctionScalarReverse() throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarWithTwoStringArguments(REVERSE, "test", "");
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("REVERSE(TO_CHAR('test'))"));
+    @CsvSource(value = { "BIT_AND : BITAND('test', 'test2')", //
+            "BIT_TO_NUM : BIN_TO_NUM('test', 'test2')", //
+            "NULLIFZERO : NULLIF('test', 0)", //
+            "ZEROIFNULL : NVL('test', 0)", //
+            "DIV : CAST(FLOOR('test' / 'test2') AS NUMBER(36, 0))", //
+            "COT : (1 / TAN('test'))", //
+            "DEGREES : (('test') * 180 / ACOS(-1))", //
+            "RADIANS : (('test') * ACOS(-1) / 180)", //
+            "REPEAT : RPAD(TO_CHAR('test'), LENGTH('test') * ROUND('test2'), 'test')", //
+            "REVERSE : REVERSE(TO_CHAR('test'))" //
+    }, delimiter = ':')
+    @ParameterizedTest
+    void testVisitSqlFunctionScalar2(final ScalarFunction scalarFunction, final String expected)
+            throws AdapterException {
+        final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarWithTwoStringArguments(scalarFunction,
+                "test", "test2");
+        assertThat(visitor.visit(sqlFunctionScalar), equalTo(expected));
     }
 
     @Test

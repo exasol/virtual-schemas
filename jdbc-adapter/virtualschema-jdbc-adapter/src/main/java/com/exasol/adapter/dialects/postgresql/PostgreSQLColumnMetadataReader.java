@@ -15,7 +15,7 @@ import com.exasol.adapter.metadata.DataType;
  * This class implements PostgreSQL-specific reading of column metadata.
  */
 public class PostgreSQLColumnMetadataReader extends BaseColumnMetadataReader {
-    private static final Logger LOGGER = Logger.getLogger(PostgreSQLMetadataReader.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(PostgreSQLColumnMetadataReader.class.getName());
     private static final String POSTGRES_VARBIT_TYPE_NAME = "varbit";
 
     /**

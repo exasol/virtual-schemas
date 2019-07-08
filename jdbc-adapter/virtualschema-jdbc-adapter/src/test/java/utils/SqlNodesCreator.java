@@ -3,6 +3,7 @@ package utils;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
 
+import java.math.*;
 import java.util.*;
 
 import static com.exasol.adapter.sql.AggregateFunction.AVG;
@@ -54,11 +55,22 @@ public class SqlNodesCreator {
         return new SqlStatementSelect(fromClause, sqlSelectList, null, null, null, null, null);
     }
 
-    public static SqlFunctionScalar createSqlFunctionScalarWithTwoStringArguments(ScalarFunction scalarFunction,
-            String argument1, String argument2) {
+    public static SqlFunctionScalar createSqlFunctionScalarWithTwoStringArguments(final ScalarFunction scalarFunction,
+            final String argument1, final String argument2) {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralString(argument1));
         arguments.add(new SqlLiteralString(argument2));
+        return new SqlFunctionScalar(scalarFunction, arguments, true, false);
+    }
+
+    public static SqlFunctionScalar createSqlFunctionScalarForDateTest(final ScalarFunction scalarFunction,
+            final int numericValue) {
+        final List<SqlNode> arguments = new ArrayList<>();
+        arguments.add(new SqlColumn(1,
+                ColumnMetadata.builder().name("test_column")
+                        .adapterNotes("{\"jdbcDataType\":93, " + "\"typeName\":\"TIMESTAMP\"}")
+                        .type(DataType.createChar(20, DataType.ExaCharset.UTF8)).build()));
+        arguments.add(new SqlLiteralExactnumeric(new BigDecimal(numericValue)));
         return new SqlFunctionScalar(scalarFunction, arguments, true, false);
     }
 }

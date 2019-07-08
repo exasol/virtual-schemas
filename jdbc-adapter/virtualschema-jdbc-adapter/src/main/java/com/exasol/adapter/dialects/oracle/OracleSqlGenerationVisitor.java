@@ -339,7 +339,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
             return builder.toString();
         } else {
             throw new SqlGenerationVisitorException(
-                    "Arguments of SqlFunctionAggregateGroupConcat should have one argument.");
+                    "List of arguments of SqlFunctionAggregateGroupConcat should have one argument.");
         }
     }
 
