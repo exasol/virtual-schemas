@@ -1,21 +1,21 @@
 package com.exasol.adapter.dialects.db2;
 
-import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.ColumnAdapterNotes;
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.TableMetadata;
-import com.exasol.adapter.sql.*;
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.exasol.adapter.*;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.*;
+import com.exasol.adapter.sql.*;
+import com.google.common.collect.*;
 
 /**
  * This class generates SQL queries for the {@link DB2SqlDialect}.
  */
-public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
+public class DB2SqlGenerationVisitor extends AbstractSqlGenerationVisitor {
+    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("TIMESTAMP", "DECFLOAT", "CLOB",
+            "XML", "TIME");
+    private static final List<String> TYPE_NAMES_NOT_SUPPORTED = ImmutableList.of("BLOB");
+
     /**
      * Create a new instance of the {@link DB2SqlGenerationVisitor}.
      *
@@ -24,6 +24,16 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
      */
     public DB2SqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         super(dialect, context);
+    }
+
+    @Override
+    protected List<String> getListOfTypeNamesRequiringCast() {
+        return TYPE_NAMES_REQUIRING_CAST;
+    }
+
+    @Override
+    protected List<String> getListOfTypeNamesNotSupported() {
+        return TYPE_NAMES_NOT_SUPPORTED;
     }
 
     @Override
@@ -40,7 +50,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         } else {
             final String typeName = ColumnAdapterNotes
                     .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-            return getColumnProjectionStringNoCheck(typeName, projectionString);
+            return buildColumnProjectionString(typeName, projectionString);
         }
     }
 
@@ -48,8 +58,9 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         return column.hasParent() && column.getParent().getType() == SqlNodeType.SELECT_LIST;
     }
 
-    private String getColumnProjectionStringNoCheck(final String typeName, String projectionString) {
-        if (TYPE_NAME_NOT_SUPPORTED.contains(typeName)) {
+    @Override
+    protected String buildColumnProjectionString(final String typeName, String projectionString) {
+        if (TYPE_NAMES_NOT_SUPPORTED.contains(typeName)) {
             projectionString = "'" + typeName + " NOT SUPPORTED'";
         } else {
             projectionString = getProjectionStringWithSupportedTypes(typeName, projectionString);
@@ -117,59 +128,6 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         builder.append(limit.getLimit());
         builder.append(" ROWS ONLY");
         return builder.toString();
-    }
-
-    @Override
-    public String visit(final SqlSelectList selectList) throws AdapterException {
-        if (selectList.isRequestAnyColumn()) {
-            // The system requested any column
-            return "1";
-        } else {
-            return getSelectList(selectList);
-        }
-    }
-
-    private String getSelectList(final SqlSelectList selectList) throws AdapterException {
-        final List<String> selectListElements = new ArrayList<>();
-        if (selectList.isSelectStar()) {
-            buildSelectStar(selectList, selectListElements);
-        } else {
-            for (final SqlNode node : selectList.getExpressions()) {
-                selectListElements.add(node.accept(this));
-            }
-        }
-        return Joiner.on(", ").join(selectListElements);
-    }
-
-    private void buildSelectStar(final SqlSelectList selectList, final List<String> selectListElements)
-            throws AdapterException {
-        if (SqlGenerationHelper.selectListRequiresCasts(selectList, nodeRequiresCast)) {
-            buildSelectStarWithNodeCast(selectList, selectListElements);
-        } else {
-            selectListElements.add("*");
-        }
-    }
-
-    private void buildSelectStarWithNodeCast(final SqlSelectList selectList, final List<String> selectListElements)
-            throws AdapterException {
-        final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
-        int columnId = 0;
-        final List<TableMetadata> tableMetadata = new ArrayList<>();
-        SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata);
-        for (final TableMetadata tableMeta : tableMetadata) {
-            for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
-                final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-                selectListElements.add(getColumnProjectionStringNoCheck(sqlColumn, super.visit(sqlColumn)));
-                ++columnId;
-            }
-        }
-    }
-
-    private String getColumnProjectionStringNoCheck(final SqlColumn column, final String projectionString)
-            throws AdapterException {
-        final String typeName = ColumnAdapterNotes
-                .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        return getColumnProjectionStringNoCheck(typeName, projectionString);
     }
 
     @Override
@@ -375,24 +333,4 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
             }
         }
     }
-
-    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("TIMESTAMP", "DECFLOAT", "CLOB",
-            "XML", "TIME");
-    private static final List<String> TYPE_NAME_NOT_SUPPORTED = ImmutableList.of("BLOB");
-
-    private final java.util.function.Predicate<SqlNode> nodeRequiresCast = node -> {
-        try {
-            if (node.getType() == SqlNodeType.COLUMN) {
-                SqlColumn column = (SqlColumn) node;
-                String typeName = ColumnAdapterNotes
-                        .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName())
-                        .getTypeName();
-                return TYPE_NAMES_REQUIRING_CAST.contains(typeName);
-            }
-            return false;
-        } catch (AdapterException exception) {
-            throw new SqlGenerationVisitorException("Exception during deserialization of ColumnAdapterNotes. ",
-                    exception);
-        }
-    };
 }
