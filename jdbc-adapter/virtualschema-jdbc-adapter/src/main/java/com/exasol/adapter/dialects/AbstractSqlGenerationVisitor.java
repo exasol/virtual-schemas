@@ -9,7 +9,7 @@ import com.exasol.adapter.sql.*;
 import com.google.common.base.*;
 
 /**
- * This class contains common logic from the next dialects: DB2, PostgreSQL, SqlServer. It helps to avoid code
+ * This class contains common logic from the next dialects: DB2, PostgreSQL, SqlServer, Sybase. It helps to avoid code
  * duplication.
  */
 public abstract class AbstractSqlGenerationVisitor extends SqlGenerationVisitor {

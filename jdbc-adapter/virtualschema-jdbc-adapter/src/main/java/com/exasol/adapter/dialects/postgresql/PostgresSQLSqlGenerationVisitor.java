@@ -4,7 +4,6 @@ import java.util.*;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.sql.*;
 import com.google.common.collect.ImmutableList;
 

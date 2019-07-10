@@ -54,7 +54,7 @@ public class SqlServerSqlGenerationVisitor extends AbstractSqlGenerationVisitor 
         } else if (typeName.startsWith("xml")) {
             return getCastAs(projectionString, castTypeNVarchar);
         } else if (TYPE_NAME_NOT_SUPPORTED.contains(typeName)) {
-            return getScalarFunctionBit("'", typeName, " NOT SUPPORTED'");
+            return "'" + typeName + " NOT SUPPORTED'";
         } else {
             return projectionString;
         }
@@ -62,10 +62,6 @@ public class SqlServerSqlGenerationVisitor extends AbstractSqlGenerationVisitor 
 
     private String getCastAs(final String projectionString, final String castType) {
         return "CAST(" + projectionString + "  as " + castType + " )";
-    }
-
-    private String getScalarFunctionBit(final String s, final String s2, final String s3) {
-        return s + s2 + s3;
     }
 
     @Override
@@ -177,7 +173,7 @@ public class SqlServerSqlGenerationVisitor extends AbstractSqlGenerationVisitor 
             sql = argumentsSql.get(0) + ".STNumPoints()";
             break;
         case ST_POINTN:
-            sql = getStPointn(argumentsSql, ".STPointN(");
+            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STPointN(");
             break;
         case ST_STARTPOINT:
             sql = getScalarFunctionWithVarcharCast(argumentsSql, ".STStartPoint()");
@@ -189,13 +185,13 @@ public class SqlServerSqlGenerationVisitor extends AbstractSqlGenerationVisitor 
             sql = getScalarFunctionWithVarcharCast(argumentsSql, ".STExteriorRing()");
             break;
         case ST_INTERIORRINGN:
-            sql = getStPointn(argumentsSql, ".STInteriorRingN (");
+            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STInteriorRingN (");
             break;
         case ST_NUMINTERIORRINGS:
             sql = argumentsSql.get(0) + ".STNumInteriorRing()";
             break;
         case ST_GEOMETRYN:
-            sql = getStPointn(argumentsSql, ".STGeometryN(");
+            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STGeometryN(");
             break;
         case ST_NUMGEOMETRIES:
             sql = argumentsSql.get(0) + ".STNumGeometries()";
@@ -204,7 +200,7 @@ public class SqlServerSqlGenerationVisitor extends AbstractSqlGenerationVisitor 
             sql = getScalarFunctionWithVarcharCast(argumentsSql, ".STBoundary()");
             break;
         case ST_BUFFER:
-            sql = getStPointn(argumentsSql, ".STBuffer(");
+            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STBuffer(");
             break;
         case ST_CENTROID:
             sql = getScalarFunctionWithVarcharCast(argumentsSql, ".STCentroid()");
@@ -219,13 +215,13 @@ public class SqlServerSqlGenerationVisitor extends AbstractSqlGenerationVisitor 
             sql = argumentsSql.get(0) + ".STCrosses(" + argumentsSql.get(1) + ")";
             break;
         case ST_DIFFERENCE:
-            sql = getStPointn(argumentsSql, ".STDifference(");
+            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STDifference(");
             break;
         case ST_DIMENSION:
             sql = argumentsSql.get(0) + ".STDimension()";
             break;
         case ST_DISJOINT:
-            sql = getStPointn(argumentsSql, ".STDisjoint(");
+            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STDisjoint(");
             break;
         case ST_DISTANCE:
             sql = argumentsSql.get(0) + ".STDistance(" + argumentsSql.get(1) + ")";
@@ -240,7 +236,7 @@ public class SqlServerSqlGenerationVisitor extends AbstractSqlGenerationVisitor 
             sql = argumentsSql.get(0) + ".STGeometryType()";
             break;
         case ST_INTERSECTION:
-            sql = getStPointn(argumentsSql, ".STIntersection(");
+            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STIntersection(");
             break;
         case ST_INTERSECTS:
             sql = argumentsSql.get(0) + ".STIntersects(" + argumentsSql.get(1) + ")";
@@ -255,40 +251,40 @@ public class SqlServerSqlGenerationVisitor extends AbstractSqlGenerationVisitor 
             sql = argumentsSql.get(0) + ".STOverlaps(" + argumentsSql.get(1) + ")";
             break;
         case ST_SYMDIFFERENCE:
-            sql = getStPointn(argumentsSql, ".STSymDifference (");
+            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STSymDifference (");
             break;
         case ST_TOUCHES:
             sql = argumentsSql.get(0) + ".STTouches(" + argumentsSql.get(1) + ")";
             break;
         case ST_UNION:
-            sql = getStPointn(argumentsSql, ".STUnion(");
+            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STUnion(");
             break;
         case ST_WITHIN:
             sql = argumentsSql.get(0) + ".STWithin(" + argumentsSql.get(1) + ")";
             break;
         case BIT_AND:
-            sql = getScalarFunctionBit(argumentsSql.get(0), " & ", argumentsSql.get(1));
+            sql = argumentsSql.get(0) + " & " + argumentsSql.get(1);
             break;
         case BIT_OR:
-            sql = getScalarFunctionBit(argumentsSql.get(0), " | ", argumentsSql.get(1));
+            sql = argumentsSql.get(0) + " | " + argumentsSql.get(1);
             break;
         case BIT_XOR:
-            sql = getScalarFunctionBit(argumentsSql.get(0), " ^ ", argumentsSql.get(1));
+            sql = argumentsSql.get(0) + " ^ " + argumentsSql.get(1);
             break;
         case BIT_NOT:
             sql = "~ " + argumentsSql.get(0);
             break;
         case HASH_MD5:
-            sql = getScalarFunctionBit("CONVERT(Char, HASHBYTES('MD5',", argumentsSql.get(0), "), 2)");
+            sql = "CONVERT(Char, HASHBYTES('MD5'," + argumentsSql.get(0) + "), 2)";
             break;
         case HASH_SHA1:
-            sql = getScalarFunctionBit("CONVERT(Char, HASHBYTES('SHA1',", argumentsSql.get(0), "), 2)");
+            sql = "CONVERT(Char, HASHBYTES('SHA1'," + argumentsSql.get(0) + "), 2)";
             break;
         case HASH_SHA:
-            sql = getScalarFunctionBit("CONVERT(Char, HASHBYTES('SHA',", argumentsSql.get(0), "), 2)");
+            sql = "CONVERT(Char, HASHBYTES('SHA'," + argumentsSql.get(0) + "), 2)";
             break;
         case ZEROIFNULL:
-            sql = getScalarFunctionBit("ISNULL(", argumentsSql.get(0), ",0)");
+            sql = "ISNULL(" + argumentsSql.get(0) + ",0)";
             break;
         default:
             break;
@@ -424,8 +420,9 @@ public class SqlServerSqlGenerationVisitor extends AbstractSqlGenerationVisitor 
         return "CAST(" + argumentsSql.get(0) + function + "as VARCHAR(" + MAX_SQLSERVER_VARCHAR_SIZE + ") )";
     }
 
-    private String getStPointn(final List<String> argumentsSql, final String s) {
-        return "CAST(" + (argumentsSql.get(0) + s + argumentsSql.get(1) + ")") + "as VARCHAR("
+    private String getScalarFunctionWithVarcharCastTwoArguments(final List<String> argumentsSql,
+            final String function) {
+        return "CAST(" + (argumentsSql.get(0) + function + argumentsSql.get(1) + ")") + "as VARCHAR("
                 + MAX_SQLSERVER_VARCHAR_SIZE + ") )";
     }
 }
