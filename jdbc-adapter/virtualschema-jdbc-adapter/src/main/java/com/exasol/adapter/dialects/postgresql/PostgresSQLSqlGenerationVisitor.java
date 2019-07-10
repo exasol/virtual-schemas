@@ -184,23 +184,6 @@ public class PostgresSQLSqlGenerationVisitor extends AbstractSqlGenerationVisito
     }
 
     @Override
-    public String visit(final SqlColumn column) throws AdapterException {
-        return getColumnProjectionString(column, super.visit(column));
-    }
-
-    private String getColumnProjectionString(final SqlColumn column, final String projectionString)
-            throws AdapterException {
-        final boolean isDirectlyInSelectList = (column.hasParent()
-                && column.getParent().getType() == SqlNodeType.SELECT_LIST);
-        if (!isDirectlyInSelectList) {
-            return projectionString;
-        }
-        final String typeName = ColumnAdapterNotes
-                .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        return buildColumnProjectionString(typeName, projectionString);
-    }
-
-    @Override
     protected String buildColumnProjectionString(final String typeName, String projectionString) {
         if (checkIfNeedToCastToVarchar(typeName)) {
             projectionString = "CAST(" + projectionString + "  as VARCHAR )";

@@ -37,28 +37,6 @@ public class DB2SqlGenerationVisitor extends AbstractSqlGenerationVisitor {
     }
 
     @Override
-    public String visit(final SqlColumn column) throws AdapterException {
-        final String projectionString = super.visit(column);
-        return getColumnProjectionString(column, projectionString);
-    }
-
-    private String getColumnProjectionString(final SqlColumn column, final String projectionString)
-            throws AdapterException {
-        final boolean isDirectlyInSelectList = checkIfColumnIsDirectlyInSelectList(column);
-        if (!isDirectlyInSelectList) {
-            return projectionString;
-        } else {
-            final String typeName = ColumnAdapterNotes
-                    .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-            return buildColumnProjectionString(typeName, projectionString);
-        }
-    }
-
-    private boolean checkIfColumnIsDirectlyInSelectList(final SqlColumn column) {
-        return column.hasParent() && column.getParent().getType() == SqlNodeType.SELECT_LIST;
-    }
-
-    @Override
     protected String buildColumnProjectionString(final String typeName, String projectionString) {
         if (TYPE_NAMES_NOT_SUPPORTED.contains(typeName)) {
             projectionString = "'" + typeName + " NOT SUPPORTED'";

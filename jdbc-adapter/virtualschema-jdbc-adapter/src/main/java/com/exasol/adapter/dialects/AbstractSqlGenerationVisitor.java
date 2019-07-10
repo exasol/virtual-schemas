@@ -9,7 +9,8 @@ import com.exasol.adapter.sql.*;
 import com.google.common.base.*;
 
 /**
- * This class contains common logic from the next dialects: DB2, PostgreSQL. It helps to avoid code duplication.
+ * This class contains common logic from the next dialects: DB2, PostgreSQL, SqlServer. It helps to avoid code
+ * duplication.
  */
 public abstract class AbstractSqlGenerationVisitor extends SqlGenerationVisitor {
     /**
@@ -50,7 +51,7 @@ public abstract class AbstractSqlGenerationVisitor extends SqlGenerationVisitor 
         return Joiner.on(", ").join(selectListElements);
     }
 
-    protected List<String> buildSelectStar(final SqlSelectList selectList) throws AdapterException {
+    private List<String> buildSelectStar(final SqlSelectList selectList) throws AdapterException {
         final List<String> selectListElements = new ArrayList<>();
         if (SqlGenerationHelper.selectListRequiresCasts(selectList, this.nodeRequiresCast)) {
             buildSelectStarWithNodeCast(selectList, selectListElements);
@@ -82,7 +83,7 @@ public abstract class AbstractSqlGenerationVisitor extends SqlGenerationVisitor 
         return buildColumnProjectionString(typeName, projectionString);
     }
 
-    protected final java.util.function.Predicate<SqlNode> nodeRequiresCast = node -> {
+    private final java.util.function.Predicate<SqlNode> nodeRequiresCast = node -> {
         try {
             if (node.getType() == SqlNodeType.COLUMN) {
                 SqlColumn column = (SqlColumn) node;
@@ -98,4 +99,26 @@ public abstract class AbstractSqlGenerationVisitor extends SqlGenerationVisitor 
                     exception);
         }
     };
+
+    @Override
+    public String visit(final SqlColumn column) throws AdapterException {
+        final String projectionString = super.visit(column);
+        return getColumnProjectionString(column, projectionString);
+    }
+
+    private String getColumnProjectionString(final SqlColumn column, final String projectionString)
+            throws AdapterException {
+        final boolean isDirectlyInSelectList = checkIfColumnIsDirectlyInSelectList(column);
+        if (!isDirectlyInSelectList) {
+            return projectionString;
+        } else {
+            final String typeName = ColumnAdapterNotes
+                    .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+            return buildColumnProjectionString(typeName, projectionString);
+        }
+    }
+
+    private boolean checkIfColumnIsDirectlyInSelectList(final SqlColumn column) {
+        return column.hasParent() && column.getParent().getType() == SqlNodeType.SELECT_LIST;
+    }
 }
