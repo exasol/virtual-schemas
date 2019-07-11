@@ -96,215 +96,159 @@ public class SybaseSqlGenerationVisitor extends AbstractSqlGenerationVisitor {
             return super.visit(select);
         } else {
             final SqlLimit limit = select.getLimit();
-            final StringBuilder sql = new StringBuilder();
-            sql.append("SELECT TOP " + limit.getLimit() + " ");
-            sql.append(select.getSelectList().accept(this));
-            sql.append(" FROM ");
-            sql.append(select.getFromClause().accept(this));
+            final StringBuilder builder = new StringBuilder();
+            builder.append("SELECT TOP " + limit.getLimit() + " ");
+            builder.append(select.getSelectList().accept(this));
+            builder.append(" FROM ");
+            builder.append(select.getFromClause().accept(this));
             if (select.hasFilter()) {
-                sql.append(" WHERE ");
-                sql.append(select.getWhereClause().accept(this));
+                builder.append(" WHERE ");
+                builder.append(select.getWhereClause().accept(this));
             }
             if (select.hasGroupBy()) {
-                sql.append(" GROUP BY ");
-                sql.append(select.getGroupBy().accept(this));
+                builder.append(" GROUP BY ");
+                builder.append(select.getGroupBy().accept(this));
             }
             if (select.hasHaving()) {
-                sql.append(" HAVING ");
-                sql.append(select.getHaving().accept(this));
+                builder.append(" HAVING ");
+                builder.append(select.getHaving().accept(this));
             }
             if (select.hasOrderBy()) {
-                sql.append(" ");
-                sql.append(select.getOrderBy().accept(this));
+                builder.append(" ");
+                builder.append(select.getOrderBy().accept(this));
             }
-            return sql.toString();
+            return builder.toString();
         }
     }
 
     @Override
     public String visit(final SqlFunctionScalar function) throws AdapterException {
-        String sql = super.visit(function);
         final List<String> argumentsSql = new ArrayList<>();
         for (final SqlNode node : function.getArguments()) {
             argumentsSql.add(node.accept(this));
         }
         switch (function.getFunction()) {
         case INSTR:
-            sql = getInstr(argumentsSql);
-            break;
+            return getInstr(argumentsSql);
         case LPAD:
-            sql = getLdap(argumentsSql);
-            break;
+            return getLdap(argumentsSql);
         case RPAD:
-            sql = getRpad(argumentsSql);
-            break;
+            return getRpad(argumentsSql);
         case ADD_DAYS:
         case ADD_HOURS:
         case ADD_MINUTES:
         case ADD_SECONDS:
         case ADD_WEEKS:
         case ADD_YEARS:
-            sql = getAddDateTime(function, argumentsSql);
-            break;
+            return getAddDateTime(function, argumentsSql);
         case SECONDS_BETWEEN:
         case MINUTES_BETWEEN:
         case HOURS_BETWEEN:
         case DAYS_BETWEEN:
         case MONTHS_BETWEEN:
         case YEARS_BETWEEN:
-            sql = getDateTimeBetween(function, argumentsSql);
-            break;
+            return getDateTimeBetween(function, argumentsSql);
         case CURRENT_DATE:
-            sql = "CAST( GETDATE() AS DATE)";
-            break;
+            return "CAST( GETDATE() AS DATE)";
         case CURRENT_TIMESTAMP:
-            sql = "GETDATE()";
-            break;
+            return "GETDATE()";
         case SYSDATE:
-            sql = "CAST( SYSDATETIME() AS DATE)";
-            break;
+            return "CAST( SYSDATETIME() AS DATE)";
         case SYSTIMESTAMP:
-            sql = "SYSDATETIME()";
-            break;
+            return "SYSDATETIME()";
         case ST_X:
-            sql = argumentsSql.get(0) + ".STX";
-            break;
+            return argumentsSql.get(0) + ".STX";
         case ST_Y:
-            sql = argumentsSql.get(0) + ".STY";
-            break;
+            return argumentsSql.get(0) + ".STY";
         case ST_ENDPOINT:
-            sql = getScalarFunctionWithVarcharCast(argumentsSql, ".STEndPoint()");
-            break;
+            return getScalarFunctionWithVarcharCast(argumentsSql, ".STEndPoint()");
         case ST_ISCLOSED:
-            sql = argumentsSql.get(0) + ".STIsClosed()";
-            break;
+            return argumentsSql.get(0) + ".STIsClosed()";
         case ST_ISRING:
-            sql = argumentsSql.get(0) + ".STIsRing()";
-            break;
+            return argumentsSql.get(0) + ".STIsRing()";
         case ST_LENGTH:
-            sql = argumentsSql.get(0) + ".STLength()";
-            break;
+            return argumentsSql.get(0) + ".STLength()";
         case ST_NUMPOINTS:
-            sql = argumentsSql.get(0) + ".STNumPoints()";
-            break;
+            return argumentsSql.get(0) + ".STNumPoints()";
         case ST_POINTN:
-            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STPointN(");
-            break;
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STPointN(");
         case ST_STARTPOINT:
-            sql = getScalarFunctionWithVarcharCast(argumentsSql, ".STStartPoint()");
-            break;
+            return getScalarFunctionWithVarcharCast(argumentsSql, ".STStartPoint()");
         case ST_AREA:
-            sql = argumentsSql.get(0) + ".STArea()";
-            break;
+            return argumentsSql.get(0) + ".STArea()";
         case ST_EXTERIORRING:
-            sql = getScalarFunctionWithVarcharCast(argumentsSql, ".STExteriorRing()");
-            break;
+            return getScalarFunctionWithVarcharCast(argumentsSql, ".STExteriorRing()");
         case ST_INTERIORRINGN:
-            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STInteriorRingN (");
-            break;
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STInteriorRingN (");
         case ST_NUMINTERIORRINGS:
-            sql = argumentsSql.get(0) + ".STNumInteriorRing()";
-            break;
+            return argumentsSql.get(0) + ".STNumInteriorRing()";
         case ST_GEOMETRYN:
-            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STGeometryN(");
-            break;
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STGeometryN(");
         case ST_NUMGEOMETRIES:
-            sql = argumentsSql.get(0) + ".STNumGeometries()";
-            break;
+            return argumentsSql.get(0) + ".STNumGeometries()";
         case ST_BOUNDARY:
-            sql = getScalarFunctionWithVarcharCast(argumentsSql, ".STBoundary()");
-            break;
+            return getScalarFunctionWithVarcharCast(argumentsSql, ".STBoundary()");
         case ST_BUFFER:
-            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STBuffer(");
-            break;
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STBuffer(");
         case ST_CENTROID:
-            sql = getScalarFunctionWithVarcharCast(argumentsSql, ".STCentroid()");
-            break;
+            return getScalarFunctionWithVarcharCast(argumentsSql, ".STCentroid()");
         case ST_CONTAINS:
-            sql = argumentsSql.get(0) + ".STContains(" + argumentsSql.get(1) + ")";
-            break;
+            return argumentsSql.get(0) + ".STContains(" + argumentsSql.get(1) + ")";
         case ST_CONVEXHULL:
-            sql = getScalarFunctionWithVarcharCast(argumentsSql, ".STConvexHull()");
-            break;
+            return getScalarFunctionWithVarcharCast(argumentsSql, ".STConvexHull()");
         case ST_CROSSES:
-            sql = argumentsSql.get(0) + ".STCrosses(" + argumentsSql.get(1) + ")";
-            break;
+            return argumentsSql.get(0) + ".STCrosses(" + argumentsSql.get(1) + ")";
         case ST_DIFFERENCE:
-            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STDifference(");
-            break;
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STDifference(");
         case ST_DIMENSION:
-            sql = argumentsSql.get(0) + ".STDimension()";
-            break;
+            return argumentsSql.get(0) + ".STDimension()";
         case ST_DISJOINT:
-            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STDisjoint(");
-            break;
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STDisjoint(");
         case ST_DISTANCE:
-            sql = argumentsSql.get(0) + ".STDistance(" + argumentsSql.get(1) + ")";
-            break;
+            return argumentsSql.get(0) + ".STDistance(" + argumentsSql.get(1) + ")";
         case ST_ENVELOPE:
-            sql = getScalarFunctionWithVarcharCast(argumentsSql, ".STEnvelope()");
-            break;
+            return getScalarFunctionWithVarcharCast(argumentsSql, ".STEnvelope()");
         case ST_EQUALS:
-            sql = argumentsSql.get(0) + ".STEquals(" + argumentsSql.get(1) + ")";
-            break;
+            return argumentsSql.get(0) + ".STEquals(" + argumentsSql.get(1) + ")";
         case ST_GEOMETRYTYPE:
-            sql = argumentsSql.get(0) + ".STGeometryType()";
-            break;
+            return argumentsSql.get(0) + ".STGeometryType()";
         case ST_INTERSECTION:
-            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STIntersection(");
-            break;
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STIntersection(");
         case ST_INTERSECTS:
-            sql = argumentsSql.get(0) + ".STIntersects(" + argumentsSql.get(1) + ")";
-            break;
+            return argumentsSql.get(0) + ".STIntersects(" + argumentsSql.get(1) + ")";
         case ST_ISEMPTY:
-            sql = argumentsSql.get(0) + ".STIsEmpty()";
-            break;
+            return argumentsSql.get(0) + ".STIsEmpty()";
         case ST_ISSIMPLE:
-            sql = argumentsSql.get(0) + ".STIsSimple()";
-            break;
+            return argumentsSql.get(0) + ".STIsSimple()";
         case ST_OVERLAPS:
-            sql = argumentsSql.get(0) + ".STOverlaps(" + argumentsSql.get(1) + ")";
-            break;
+            return argumentsSql.get(0) + ".STOverlaps(" + argumentsSql.get(1) + ")";
         case ST_SYMDIFFERENCE:
-            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STSymDifference (");
-            break;
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STSymDifference (");
         case ST_TOUCHES:
-            sql = argumentsSql.get(0) + ".STTouches(" + argumentsSql.get(1) + ")";
-            break;
+            return argumentsSql.get(0) + ".STTouches(" + argumentsSql.get(1) + ")";
         case ST_UNION:
-            sql = getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STUnion(");
-            break;
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STUnion(");
         case ST_WITHIN:
-            sql = argumentsSql.get(0) + ".STWithin(" + argumentsSql.get(1) + ")";
-            break;
+            return argumentsSql.get(0) + ".STWithin(" + argumentsSql.get(1) + ")";
         case BIT_AND:
-            sql = argumentsSql.get(0) + " & " + argumentsSql.get(1);
-            break;
+            return argumentsSql.get(0) + " & " + argumentsSql.get(1);
         case BIT_OR:
-            sql = argumentsSql.get(0) + " | " + argumentsSql.get(1);
-            break;
+            return argumentsSql.get(0) + " | " + argumentsSql.get(1);
         case BIT_XOR:
-            sql = argumentsSql.get(0) + " ^ " + argumentsSql.get(1);
-            break;
+            return argumentsSql.get(0) + " ^ " + argumentsSql.get(1);
         case BIT_NOT:
-            sql = "~ " + argumentsSql.get(0);
-            break;
+            return "~ " + argumentsSql.get(0);
         case HASH_MD5:
-            sql = "CONVERT(Char, HASHBYTES('MD5'," + argumentsSql.get(0) + "), 2)";
-            break;
+            return "CONVERT(Char, HASHBYTES('MD5'," + argumentsSql.get(0) + "), 2)";
         case HASH_SHA1:
-            sql = "CONVERT(Char, HASHBYTES('SHA1'," + argumentsSql.get(0) + "), 2)";
-            break;
+            return "CONVERT(Char, HASHBYTES('SHA1'," + argumentsSql.get(0) + "), 2)";
         case HASH_SHA:
-            sql = "CONVERT(Char, HASHBYTES('SHA'," + argumentsSql.get(0) + "), 2)";
-            break;
+            return "CONVERT(Char, HASHBYTES('SHA'," + argumentsSql.get(0) + "), 2)";
         case ZEROIFNULL:
-            sql = "ISNULL(" + argumentsSql.get(0) + ",0)";
-            break;
+            return "ISNULL(" + argumentsSql.get(0) + ",0)";
         default:
-            break;
+            return super.visit(function);
         }
-        return sql;
     }
 
     private String getInstr(final List<String> argumentsSql) {
