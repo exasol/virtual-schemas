@@ -16,11 +16,15 @@ import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.SqlNodeVisitor;
+import com.google.common.collect.*;
 
 /**
  * Dialect for DB2 using the DB2 Connector JDBC driver.
  */
 public class DB2SqlDialect extends AbstractSqlDialect {
+    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("TIMESTAMP", "DECFLOAT", "CLOB",
+            "XML", "TIME");
+    private static final List<String> TYPE_NAMES_NOT_SUPPORTED = ImmutableList.of("BLOB");
     private static final String NAME = "DB2";
     private static final Capabilities CAPABILITIES = createCapabilityList();
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
