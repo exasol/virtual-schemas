@@ -18,6 +18,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.request.AdapterRequest;
 import com.exasol.adapter.request.PushDownRequest;
 import com.exasol.adapter.request.parser.RequestParser;
+import com.exasol.adapter.sql.SqlNodeVisitor;
 import com.exasol.utils.JsonHelper;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -127,7 +128,7 @@ public class FileBasedIntegrationTest {
         final SqlDialect sqlDialect = (SqlDialect) dialectClass
                 .getConstructor(Connection.class, AdapterProperties.class)
                 .newInstance(null, AdapterProperties.emptyProperties());
-        final SqlGenerationVisitor sqlGeneratorVisitor = sqlDialect.getSqlGenerationVisitor(context);
+        final SqlNodeVisitor<String> sqlGeneratorVisitor = sqlDialect.getSqlGenerationVisitor(context);
         try {
             return PushDownRequest.getSelect().accept(sqlGeneratorVisitor);
         } catch (final Exception e) {

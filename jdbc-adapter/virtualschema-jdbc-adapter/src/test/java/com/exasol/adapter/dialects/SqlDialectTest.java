@@ -48,7 +48,7 @@ class SqlDialectTest {
         final SqlDialect dialect = new AliasesSqlDialect(aggAliases, scalarAliases, infixAliases, prefixAliases);
 
         final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
-        final SqlGenerationVisitor generator = new SqlGenerationVisitor(dialect, context);
+        final SqlNodeVisitor<String> generator = new SqlGenerationVisitor(dialect, context);
         final String actualSql = node.accept(generator);
         assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
     }
@@ -81,7 +81,7 @@ class SqlDialectTest {
                 ImmutableMap.<ScalarFunction, String>of(), ImmutableMap.<ScalarFunction, String>of());
 
         final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
-        final SqlGenerationVisitor generator = new SqlGenerationVisitor(dialect, context);
+        final SqlNodeVisitor<String> generator = new SqlGenerationVisitor(dialect, context);
         final String actualSql = node.accept(generator);
         assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
     }

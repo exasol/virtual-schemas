@@ -15,8 +15,7 @@ import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.metadata.TableMetadata;
-import com.exasol.adapter.sql.SqlColumn;
-import com.exasol.adapter.sql.SqlOrderBy;
+import com.exasol.adapter.sql.*;
 import com.google.common.collect.ImmutableList;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,7 +26,7 @@ class BigQuerySqlGenerationVisitorTest {
     @Test
     void visit() throws AdapterException {
         final SqlDialect dialect = new BigQuerySqlDialect(this.connection, AdapterProperties.emptyProperties());
-        final SqlGenerationVisitor visitor = new BigQuerySqlGenerationVisitor(dialect,
+        final SqlNodeVisitor<String> visitor = new BigQuerySqlGenerationVisitor(dialect,
                 new SqlGenerationContext("catalog", "schema", false));
         final TableMetadata clicksMeta = getClicksTableMetadata();
         final SqlOrderBy orderBy = new SqlOrderBy(ImmutableList.of(new SqlColumn(0, clicksMeta.getColumns().get(0))),

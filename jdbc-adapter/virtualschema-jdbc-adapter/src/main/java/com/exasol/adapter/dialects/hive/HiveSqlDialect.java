@@ -15,6 +15,7 @@ import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.ScalarFunction;
+import com.exasol.adapter.sql.SqlNodeVisitor;
 
 /**
  * Dialect for Hive, using the Cloudera Hive JDBC Driver/Connector (developed by Simba). Only supports Hive 2.1.0 and
@@ -109,7 +110,7 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
+    public SqlNodeVisitor<String> getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new HiveSqlGenerationVisitor(this, context);
     }
 

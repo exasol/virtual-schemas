@@ -29,7 +29,7 @@ public class CustomSqlGenerationVisitorTest {
         final String schemaName = "SCHEMA";
         final String expectedSql = "SELECT NOT_CUSTOM (NOT_CUSTOM (\"C1\")) FROM \"" + schemaName + "\".\"TEST\"";
         final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
-        final SqlGenerationVisitor generator = new TestSqlGenerationVisitor(
+        final SqlNodeVisitor<String> generator = new TestSqlGenerationVisitor(
                 new ExasolSqlDialect(null, AdapterProperties.emptyProperties()), context);
         final String actualSql = node.accept(generator);
         assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));

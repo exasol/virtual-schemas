@@ -14,8 +14,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
-import com.exasol.adapter.sql.AggregateFunction;
-import com.exasol.adapter.sql.ScalarFunction;
+import com.exasol.adapter.sql.*;
 
 /**
  * This class implements the SqlServer SQL dialect.
@@ -117,7 +116,7 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
+    public SqlNodeVisitor<String> getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new SqlServerSqlGenerationVisitor(this, context);
     }
 

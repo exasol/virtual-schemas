@@ -48,12 +48,9 @@ import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.capabilities.LiteralCapability;
 import com.exasol.adapter.capabilities.PredicateCapability;
 import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.DialectTestData;
-import com.exasol.adapter.dialects.PropertyValidationException;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.sql.SqlNode;
+import com.exasol.adapter.sql.SqlNodeVisitor;
 
 import utils.SqlTestUtil;
 
@@ -106,7 +103,7 @@ class ExasolSqlDialectTest {
                 + " WHERE 1 < \"USER_ID\"" + " GROUP BY \"USER_ID\"" + " HAVING 1 < COUNT(\"URL\")"
                 + " ORDER BY \"USER_ID\"" + " LIMIT 10";
         final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
-        final SqlGenerationVisitor generator = this.dialect.getSqlGenerationVisitor(context);
+        final SqlNodeVisitor<String> generator = this.dialect.getSqlGenerationVisitor(context);
         final String actualSql = node.accept(generator);
         assertThat(SqlTestUtil.normalizeSql(actualSql), equalTo(SqlTestUtil.normalizeSql(expectedSql)));
     }

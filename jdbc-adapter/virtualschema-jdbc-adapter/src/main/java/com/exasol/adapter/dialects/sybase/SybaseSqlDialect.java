@@ -15,8 +15,7 @@ import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
-import com.exasol.adapter.sql.AggregateFunction;
-import com.exasol.adapter.sql.ScalarFunction;
+import com.exasol.adapter.sql.*;
 
 /**
  * This class implements the Sybase SQL dialect.
@@ -117,7 +116,7 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
+    public SqlNodeVisitor<String> getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new SybaseSqlGenerationVisitor(this, context);
     }
 

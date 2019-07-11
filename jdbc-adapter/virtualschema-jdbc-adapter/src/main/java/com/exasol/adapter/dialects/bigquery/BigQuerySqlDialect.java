@@ -138,7 +138,7 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
+    public SqlNodeVisitor<String> getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new BigQuerySqlGenerationVisitor(this, context);
     }
 }

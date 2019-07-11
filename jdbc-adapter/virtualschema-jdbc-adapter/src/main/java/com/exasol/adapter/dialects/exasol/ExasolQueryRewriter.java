@@ -12,6 +12,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionDefinitionBuilder;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.sql.SqlNodeVisitor;
 import com.exasol.adapter.sql.SqlStatement;
 
 /**
@@ -55,7 +56,7 @@ public class ExasolQueryRewriter extends BaseQueryRewriter {
             throws AdapterException {
         final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
                 properties.getSchemaName(), false);
-        final SqlGenerationVisitor sqlGeneratorVisitor = this.dialect.getSqlGenerationVisitor(context);
+        final SqlNodeVisitor<String> sqlGeneratorVisitor = this.dialect.getSqlGenerationVisitor(context);
         return statement.accept(sqlGeneratorVisitor);
     }
 
@@ -67,7 +68,7 @@ public class ExasolQueryRewriter extends BaseQueryRewriter {
             final AdapterProperties properties) throws AdapterException {
         final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
                 properties.getSchemaName(), false);
-        final SqlGenerationVisitor sqlGeneratorVisitor = this.dialect.getSqlGenerationVisitor(context);
+        final SqlNodeVisitor<String> sqlGeneratorVisitor = this.dialect.getSqlGenerationVisitor(context);
         final ExaConnectionInformation exaConnectionInformation = getConnectionInformation(exaMetadata, properties);
         final String connectionDefinition = this.connectionDefinitionBuilder.buildConnectionDefinition(properties,
                 exaConnectionInformation);

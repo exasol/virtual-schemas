@@ -38,7 +38,7 @@ class OracleSqlDialectTest {
     private static final String SCHEMA_NAME = "SCHEMA";
     private SqlNode node;
     private SqlDialect dialect;
-    private SqlGenerationVisitor generator;
+    private SqlNodeVisitor<String> generator;
     private Map<String, String> rawProperties;
 
     @BeforeEach

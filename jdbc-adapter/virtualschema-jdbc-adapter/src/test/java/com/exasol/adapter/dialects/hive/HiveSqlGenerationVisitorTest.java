@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static utils.SqlNodesCreator.createSqlFunctionScalarWithTwoStringArguments;
 
 class HiveSqlGenerationVisitorTest {
-    private SqlGenerationVisitor visitor;
+    private SqlNodeVisitor<String> visitor;
     @Mock
     private Connection connectionMock;
 

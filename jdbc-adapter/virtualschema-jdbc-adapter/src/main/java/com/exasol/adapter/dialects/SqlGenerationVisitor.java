@@ -1,11 +1,11 @@
 package com.exasol.adapter.dialects;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class has the logic to generate SQL queries based on a graph of {@link SqlNode} elements. It uses the visitor
@@ -26,6 +26,7 @@ import java.util.List;
  * is a better way.
  */
 public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
+
     private final SqlDialect dialect;
     private final SqlGenerationContext context;
 
@@ -95,16 +96,57 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
 
     @Override
     public String visit(final SqlSelectList selectList) throws AdapterException {
-        final List<String> selectElement = new ArrayList<>();
         if (selectList.isRequestAnyColumn()) {
-            // The system requested any column
-            selectElement.add("true");
+            return representAnyColumnInSelectList();
         } else if (selectList.isSelectStar()) {
-            selectElement.add("*");
+            return representAsteriskInSelectList();
         } else {
-            for (final SqlNode node : selectList.getExpressions()) {
-                selectElement.add(node.accept(this));
-            }
+            return createExplicitColumnsSelectList(selectList);
+        }
+    }
+
+    /**
+     * Represent "any column" in the <code>SELECT</code> list.
+     * <p>
+     * A typical example are queries where the only thing that matters if what you searched for exists or not. Different
+     * databases have different preferred ways of expressing this kind of result.
+     * </p>
+     *
+     * @return always <code>"true"</code>
+     */
+    protected String representAnyColumnInSelectList() {
+        return SqlConstants.TRUE;
+    }
+
+    /**
+     * Represent "all columns" (the asterisk) in the <code>SELECT</code> list.
+     * <p>
+     * In most cases simply taking over the original asterisk will be sufficient and is therefore implemented in this
+     * base class.
+     * </p>
+     * <p>
+     * Override this method in case conversions are necessary.
+     * </p>
+     *
+     * @return always <code>"true"</code>
+     */
+    protected String representAsteriskInSelectList() {
+        return SqlConstants.ASTERISK;
+    }
+
+    /**
+     * Create a list of explicitly specified columns (where columns can also be expressions) for a <code>SELECT</code>
+     * list.
+     *
+     * @param selectList list of columns (or expressions) in the <code>SELECT</code> part
+     * @return string representing the <code>SELECT</code> list
+     * @throws AdapterException in case the expressions in the list can't be rendered to SQL
+     */
+    protected String createExplicitColumnsSelectList(final SqlSelectList selectList) throws AdapterException {
+        final List<SqlNode> expressions = selectList.getExpressions();
+        final List<String> selectElement = new ArrayList<>(expressions.size());
+        for (final SqlNode node : expressions) {
+            selectElement.add(node.accept(this));
         }
         return String.join(", ", selectElement);
     }
@@ -115,7 +157,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         if (column.hasTableAlias()) {
             tablePrefix = this.dialect.applyQuote(column.getTableAlias())
                     + this.dialect.getTableCatalogAndSchemaSeparator();
-        } else if (column.getTableName() != null && !column.getTableName().isEmpty()) {
+        } else if ((column.getTableName() != null) && !column.getTableName().isEmpty()) {
             tablePrefix = this.dialect.applyQuote(column.getTableName())
                     + this.dialect.getTableCatalogAndSchemaSeparator();
         }
@@ -168,7 +210,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
             argumentsSql.add(node.accept(this));
         }
         if (function.getFunctionName().equalsIgnoreCase("count") && argumentsSql.isEmpty()) {
-            argumentsSql.add("*");
+            argumentsSql.add(SqlConstants.ASTERISK);
         }
         String distinctSql = "";
         if (function.hasDistinct()) {
@@ -297,9 +339,9 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     @Override
     public String visit(final SqlLiteralBool literal) {
         if (literal.getValue()) {
-            return "true";
+            return SqlConstants.TRUE;
         } else {
-            return "false";
+            return SqlConstants.FALSE;
         }
     }
 

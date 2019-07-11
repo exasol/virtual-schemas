@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 import static utils.SqlNodesCreator.*;
 
 class DB2SqlGenerationVisitorTest {
-    private SqlGenerationVisitor visitor;
+    private SqlNodeVisitor<String> visitor;
     @Mock
     private Connection connectionMock;
 

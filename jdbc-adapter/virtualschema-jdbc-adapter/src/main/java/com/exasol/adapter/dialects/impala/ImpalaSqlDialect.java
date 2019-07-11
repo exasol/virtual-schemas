@@ -115,7 +115,7 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
+    public SqlNodeVisitor<String> getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new ImpalaSqlGenerationVisitor(this, context);
     }
 
