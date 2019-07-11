@@ -65,12 +65,8 @@ public class SqlServerSqlGenerationVisitor extends AbstractSqlGenerationVisitor 
     }
 
     @Override
-    public String visit(final SqlSelectList selectList) throws AdapterException {
-        if (selectList.isRequestAnyColumn()) {
-            return "true";
-        } else {
-            return super.getSelectList(selectList);
-        }
+    protected String representAnyColumnInSelectList() {
+        return SqlConstants.TRUE;
     }
 
     @Override

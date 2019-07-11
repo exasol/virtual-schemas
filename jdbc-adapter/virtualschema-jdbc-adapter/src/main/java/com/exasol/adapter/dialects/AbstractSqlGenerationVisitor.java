@@ -6,13 +6,13 @@ import com.exasol.adapter.*;
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
-import com.google.common.base.*;
 
 /**
  * This class contains common logic from the next dialects: DB2, PostgreSQL, SqlServer, Sybase. It helps to avoid code
  * duplication.
  */
 public abstract class AbstractSqlGenerationVisitor extends SqlGenerationVisitor {
+
     /**
      * Creates a new instance of the {@link SqlGenerationVisitor}.
      *
@@ -30,25 +30,16 @@ public abstract class AbstractSqlGenerationVisitor extends SqlGenerationVisitor 
     protected abstract String buildColumnProjectionString(final String typeName, String projectionString);
 
     @Override
-    public String visit(final SqlSelectList selectList) throws AdapterException {
-        if (selectList.isRequestAnyColumn()) {
-            return "1";
-        } else {
-            return getSelectList(selectList);
-        }
+    protected String representAnyColumnInSelectList() {
+        return SqlConstants.ONE;
     }
 
-    protected String getSelectList(final SqlSelectList selectList) throws AdapterException {
-        final List<String> selectListElements = new ArrayList<>();
-        if (selectList.isSelectStar()) {
-            final List<String> selectStarList = buildSelectStar(selectList);
-            selectListElements.addAll(selectStarList);
-        } else {
-            for (final SqlNode node : selectList.getExpressions()) {
-                selectListElements.add(node.accept(this));
-            }
-        }
-        return Joiner.on(", ").join(selectListElements);
+    @Override
+    protected String representAsteriskInSelectList(final SqlSelectList selectList) throws AdapterException {
+        final List<String> selectStarList = buildSelectStar(selectList);
+        final List<String> selectListElements = new ArrayList<>(selectStarList.size());
+        selectListElements.addAll(selectStarList);
+        return String.join(", ", selectListElements);
     }
 
     private List<String> buildSelectStar(final SqlSelectList selectList) throws AdapterException {

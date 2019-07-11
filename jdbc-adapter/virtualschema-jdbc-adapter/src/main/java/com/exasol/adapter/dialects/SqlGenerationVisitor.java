@@ -99,7 +99,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         if (selectList.isRequestAnyColumn()) {
             return representAnyColumnInSelectList();
         } else if (selectList.isSelectStar()) {
-            return representAsteriskInSelectList();
+            return representAsteriskInSelectList(selectList);
         } else {
             return createExplicitColumnsSelectList(selectList);
         }
@@ -127,10 +127,11 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
      * <p>
      * Override this method in case conversions are necessary.
      * </p>
-     *
+     * 
+     * @param selectList list of columns (or expressions) in the <code>SELECT</code> part
      * @return always <code>"true"</code>
      */
-    protected String representAsteriskInSelectList() {
+    protected String representAsteriskInSelectList(final SqlSelectList selectList) throws AdapterException {
         return SqlConstants.ASTERISK;
     }
 
