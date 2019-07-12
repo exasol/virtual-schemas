@@ -82,12 +82,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.itsallcode</groupId>
             <artifactId>junit5-system-extensions</artifactId>
             <version>1.0.3</version>
