@@ -2,6 +2,7 @@ package com.exasol.adapter.jdbc;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -265,16 +266,19 @@ class ColumnMetadataReaderTest {
         assertSqlTypeConvertedToExasolType(typeId, TYPE_MAX_VARCHAR_UTF8);
     }
 
-//    @ValueSource(ints = { Types.OTHER, Types.JAVA_OBJECT, Types.DISTINCT, Types.STRUCT, Types.ARRAY, Types.REF,
-//            Types.DATALINK, Types.SQLXML, Types.NULL
-//
-//    })
-//
-//    @ParameterizedTest
-//    void testUnsupportedTypes(final int typeId) throws SQLException {
-//        mockDatatype(typeId);
-//        assertThrows(RemoteMetadataReaderException.class, () -> mapSingleMockedColumn());
-//    }
+    @ValueSource(ints = { Types.OTHER, Types.JAVA_OBJECT, Types.DISTINCT, Types.STRUCT, Types.ARRAY, Types.REF,
+            Types.DATALINK, Types.SQLXML, Types.NULL
+
+    })
+    @ParameterizedTest
+    void testUnsupportedTypes(final int typeId) throws SQLException {
+        mockDatatype(typeId);
+        when(this.columnsMock.next()).thenReturn(true, false);
+        when(this.columnsMock.getString(BaseColumnMetadataReader.NAME_COLUMN)).thenReturn(COLUMN_A);
+        when(this.remoteMetadataMock.getColumns(null, null, "THE_TABLE", "%")).thenReturn(this.columnsMock);
+        final List<ColumnMetadata> columns = mapMockedColumns(this.columnsMock);
+        assertTrue(columns.isEmpty());
+    }
 
     @CsvSource({ RemoteMetadataReaderConstants.JDBC_FALSE + ", false",
             RemoteMetadataReaderConstants.JDBC_TRUE + ", true", "'', true" })
