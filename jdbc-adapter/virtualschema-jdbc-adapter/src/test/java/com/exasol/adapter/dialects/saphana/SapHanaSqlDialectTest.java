@@ -6,22 +6,21 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
-import static com.exasol.reflect.ReflectionUtils.*;
+import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.exasol.adapter.sql.*;
-import org.hamcrest.*;
-import org.junit.*;
-import org.junit.jupiter.api.*;
+import org.hamcrest.Matchers;
+import org.junit.Assert;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.exasol.adapter.*;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.*;
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.sql.ScalarFunction;
 
 class SapHanaSqlDialectTest {
     private SapHanaSqlDialect dialect;
