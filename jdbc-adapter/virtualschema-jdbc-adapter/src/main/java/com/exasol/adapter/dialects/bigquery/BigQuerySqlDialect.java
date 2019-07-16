@@ -51,12 +51,11 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
         return new BigQueryMetadataReader(this.connection, this.properties);
-
     }
 
     @Override
     protected QueryRewriter createQueryRewriter() {
-        return new BigQueryQueryRewriter(this, this.remoteMetadataReader, this.connection);
+        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
     }
 
     private static Capabilities createCapabilityList() {

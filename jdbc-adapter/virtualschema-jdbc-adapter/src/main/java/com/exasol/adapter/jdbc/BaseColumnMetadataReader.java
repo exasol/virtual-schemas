@@ -71,7 +71,9 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
         final List<ColumnMetadata> columns = new ArrayList<>();
         while (remoteColumns.next()) {
             final ColumnMetadata metadata = mapColumn(remoteColumns);
-            columns.add(metadata);
+            if (metadata != null) {
+                columns.add(metadata);
+            }
         }
         return columns;
     }
@@ -85,18 +87,24 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
         final String typeName = readTypeName(remoteColumn);
         final JdbcTypeDescription jdbcTypeDescription = new JdbcTypeDescription(jdbcType, decimalScale, precisionOrSize,
                 charOctedLength, typeName);
-        final String originalTypeName = readColumnTypeName(remoteColumn);
-        final String adapterNotes = ColumnAdapterNotes.serialize(new ColumnAdapterNotes(jdbcType, originalTypeName));
-        return ColumnMetadata.builder() //
-                .name(columnName) //
-                .adapterNotes(adapterNotes) //
-                .type(mapJdbcType(jdbcTypeDescription)) //
-                .nullable(isRemoteColumnNullable(remoteColumn, columnName)) //
-                .identity(isAutoIncrementColmun(remoteColumn, columnName)) //
-                .defaultValue(readDefaultValue(remoteColumn)) //
-                .comment(readComment(remoteColumn)) //
-                .originalTypeName(originalTypeName) //
-                .build();
+        final DataType type = mapJdbcType(jdbcTypeDescription);
+        if (type.getExaDataType().equals(DataType.ExaDataType.UNSUPPORTED)) {
+            return null;
+        } else {
+            final String originalTypeName = readColumnTypeName(remoteColumn);
+            final String adapterNotes = ColumnAdapterNotes
+                    .serialize(new ColumnAdapterNotes(jdbcType, originalTypeName));
+            return ColumnMetadata.builder() //
+                    .name(columnName) //
+                    .adapterNotes(adapterNotes) //
+                    .type(type) //
+                    .nullable(isRemoteColumnNullable(remoteColumn, columnName)) //
+                    .identity(isAutoIncrementColmun(remoteColumn, columnName)) //
+                    .defaultValue(readDefaultValue(remoteColumn)) //
+                    .comment(readComment(remoteColumn)) //
+                    .originalTypeName(originalTypeName) //
+                    .build();
+        }
     }
 
     private int readJdbcDataType(final ResultSet remoteColumn) throws SQLException {
@@ -236,8 +244,7 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
         case Types.NULL:
         case Types.REF_CURSOR:
         default:
-            throw new RemoteMetadataReaderException("Unsupported JBDC data type \"" + jdbcTypeDescription.getJdbcType()
-                    + "\" found trying to map remote schema metadata to Exasol.");
+            return DataType.createUnsupported();
         }
     }
 

@@ -11,8 +11,8 @@ import com.exasol.adapter.metadata.DataType;
 /**
  * This class creates a textual description of the result columns of a push-down query.
  * <p>
- * The columns description is necessary to prepare the <code>IMPORT</code> statement in which the push-down query
- * is executed.
+ * The columns description is necessary to prepare the <code>IMPORT</code> statement in which the push-down query is
+ * executed.
  */
 public class ResultSetMetadataReader {
     private static final Logger LOGGER = Logger.getLogger(ResultSetMetadataReader.class.getName());
@@ -76,7 +76,13 @@ public class ResultSetMetadataReader {
         for (int columnNumber = 1; columnNumber <= columnCount; ++columnNumber) {
             final JdbcTypeDescription jdbcTypeDescription = getJdbcTypeDescription(metadata, columnNumber);
             final DataType type = this.columnMetadataReader.mapJdbcType(jdbcTypeDescription);
-            types.add(type);
+            if (type.getExaDataType() == DataType.ExaDataType.UNSUPPORTED) {
+                throw new RemoteMetadataReaderException(
+                        "Unsupported JBDC data type \"" + jdbcTypeDescription.getJdbcType()
+                                + "\" found trying to map remote schema metadata to Exasol.");
+            } else {
+                types.add(type);
+            }
         }
         return types;
     }
