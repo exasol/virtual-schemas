@@ -1,7 +1,7 @@
-package utils;
+package com.exasol.sql;
 
-public final class SqlTestUtil {
-    private SqlTestUtil(){
+public final class SqlNormalizer {
+    private SqlNormalizer(){
         //Intentionally left blank
     }
 
