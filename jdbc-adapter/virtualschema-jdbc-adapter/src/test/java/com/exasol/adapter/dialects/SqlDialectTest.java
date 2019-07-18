@@ -17,7 +17,7 @@ import com.exasol.adapter.sql.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import utils.SqlNormalizer;
+import com.exasol.sql.SqlNormalizer;
 
 class SqlDialectTest {
     @Test

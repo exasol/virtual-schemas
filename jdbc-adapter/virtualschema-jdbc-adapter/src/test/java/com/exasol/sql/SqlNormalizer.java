@@ -1,4 +1,4 @@
-package utils;
+package com.exasol.sql;
 
 public final class SqlNormalizer {
     private SqlNormalizer(){

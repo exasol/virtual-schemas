@@ -32,7 +32,7 @@ import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.sql.*;
 
-import utils.SqlNormalizer;
+import com.exasol.sql.SqlNormalizer;
 
 class OracleSqlDialectTest {
     private static final String SCHEMA_NAME = "SCHEMA";

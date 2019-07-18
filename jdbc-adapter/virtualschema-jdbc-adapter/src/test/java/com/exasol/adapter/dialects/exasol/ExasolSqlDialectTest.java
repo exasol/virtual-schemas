@@ -55,7 +55,7 @@ import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.sql.SqlNode;
 
-import utils.SqlNormalizer;
+import com.exasol.sql.SqlNormalizer;
 
 class ExasolSqlDialectTest {
     private ExasolSqlDialect dialect;
