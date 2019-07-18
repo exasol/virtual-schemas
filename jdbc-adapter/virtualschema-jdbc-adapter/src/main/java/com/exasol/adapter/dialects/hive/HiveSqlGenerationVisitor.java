@@ -40,7 +40,7 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
                 selectListElements.addAll(getSelectList(selectList));
             }
         }
-        return Joiner.on(", ").join(selectListElements);
+        return String.join(", ", selectListElements);
     }
 
     private List<String> getSelectStarList(final SqlSelectList selectList) throws AdapterException {
@@ -242,8 +242,8 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
     private final Predicate<SqlNode> nodeRequiresCast = node -> {
         try {
             if (node.getType() == SqlNodeType.COLUMN) {
-                SqlColumn column = (SqlColumn) node;
-                String typeName = ColumnAdapterNotes
+                final SqlColumn column = (SqlColumn) node;
+                final String typeName = ColumnAdapterNotes
                         .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName())
                         .getTypeName();
                 return typeName.equals(BINARY_TYPE_NAME);

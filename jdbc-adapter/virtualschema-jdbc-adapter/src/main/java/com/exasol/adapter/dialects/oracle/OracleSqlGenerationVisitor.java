@@ -165,7 +165,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                 selectListElements.set(i, selectListElements.get(i) + " AS c" + i);
             }
         }
-        return Joiner.on(", ").join(selectListElements);
+        return String.join(", ", selectListElements);
     }
 
     private boolean isSelectListRequiresCasts(final SqlSelectList selectList, final List<String> selectListElements,

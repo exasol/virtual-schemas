@@ -60,7 +60,7 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private void buildSelectStarWithNodeCast(final SqlSelectList selectList, final List<String> selectListElements)
-          throws AdapterException {
+            throws AdapterException {
         final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
         int columnId = 0;
         final List<TableMetadata> tableMetadata = new ArrayList<>();
@@ -75,26 +75,26 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private String buildColumnProjectionString(final SqlColumn column, final String projectionString)
-          throws AdapterException {
+            throws AdapterException {
         final String typeName = ColumnAdapterNotes
-              .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+                .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
         return buildColumnProjectionString(typeName, projectionString);
     }
 
     private final java.util.function.Predicate<SqlNode> nodeRequiresCast = node -> {
         try {
             if (node.getType() == SqlNodeType.COLUMN) {
-                SqlColumn column = (SqlColumn) node;
-                String typeName = ColumnAdapterNotes
-                      .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName())
-                      .getTypeName();
+                final SqlColumn column = (SqlColumn) node;
+                final String typeName = ColumnAdapterNotes
+                        .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName())
+                        .getTypeName();
                 return getListOfTypeNamesRequiringCast().contains(typeName)
-                      || getListOfTypeNamesNotSupported().contains(typeName);
+                        || getListOfTypeNamesNotSupported().contains(typeName);
             }
             return false;
         } catch (AdapterException exception) {
             throw new SqlGenerationVisitorException("Exception during deserialization of ColumnAdapterNotes. ",
-                  exception);
+                    exception);
         }
     };
 
@@ -105,19 +105,18 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private String getColumnProjectionString(final SqlColumn column, final String projectionString)
-          throws AdapterException {
-        final boolean isDirectlyInSelectList = checkIfColumnIsDirectlyInSelectList(column);
-        if (!isDirectlyInSelectList) {
+            throws AdapterException {
+        if (!isDirectlyInSelectList(column)) {
             return projectionString;
         } else {
             final String typeName = ColumnAdapterNotes
-                  .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+                    .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
             return buildColumnProjectionString(typeName, projectionString);
         }
     }
 
-    private boolean checkIfColumnIsDirectlyInSelectList(final SqlColumn column) {
-        return column.hasParent() && column.getParent().getType() == SqlNodeType.SELECT_LIST;
+    private boolean isDirectlyInSelectList(final SqlColumn column) {
+        return column.hasParent() && (column.getParent().getType() == SqlNodeType.SELECT_LIST);
     }
 
     @Override

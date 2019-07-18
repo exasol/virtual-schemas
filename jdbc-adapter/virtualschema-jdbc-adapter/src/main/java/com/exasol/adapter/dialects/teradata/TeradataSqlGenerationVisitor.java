@@ -25,8 +25,8 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
     private final Predicate<SqlNode> nodeRequiresCast = node -> {
         try {
             if (node.getType() == SqlNodeType.COLUMN) {
-                SqlColumn column = (SqlColumn) node;
-                String typeName = ColumnAdapterNotes
+                final SqlColumn column = (SqlColumn) node;
+                final String typeName = ColumnAdapterNotes
                         .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName())
                         .getTypeName();
                 return TYPE_NAMES_REQUIRING_CAST.contains(typeName) || TYPE_NAME_NOT_SUPPORTED.contains(typeName)
@@ -76,7 +76,7 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
                 selectListElements.add(node.accept(this));
             }
         }
-        return Joiner.on(", ").join(selectListElements);
+        return String.join(", ", selectListElements);
     }
 
     @Override
