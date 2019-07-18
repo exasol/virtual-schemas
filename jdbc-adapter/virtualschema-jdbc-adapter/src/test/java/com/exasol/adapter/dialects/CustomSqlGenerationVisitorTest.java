@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
@@ -16,7 +16,7 @@ import com.google.common.collect.ImmutableList;
 
 import utils.SqlNormalizer;
 
-public class CustomSqlGenerationVisitorTest {
+class CustomSqlGenerationVisitorTest {
     /**
      * This tests uses a SQL with nested expressions (NOT), to make sure that the custom sql generation visitor is used
      * for all levels of recursion.
@@ -24,7 +24,7 @@ public class CustomSqlGenerationVisitorTest {
      * @throws AdapterException if SQL node can't accept generator
      */
     @Test
-    public void testSqlGenerator() throws AdapterException {
+    void testSqlGenerator() throws AdapterException {
         final SqlNode node = getTestSqlNode();
         final String schemaName = "SCHEMA";
         final String expectedSql = "SELECT NOT_CUSTOM (NOT_CUSTOM (\"C1\")) FROM \"" + schemaName + "\".\"TEST\"";
@@ -51,7 +51,6 @@ public class CustomSqlGenerationVisitorTest {
     }
 
     public static class TestSqlGenerationVisitor extends SqlGenerationVisitor {
-
         public TestSqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
             super(dialect, context);
         }
@@ -60,7 +59,5 @@ public class CustomSqlGenerationVisitorTest {
         public String visit(final SqlPredicateNot predicate) throws AdapterException {
             return "NOT_CUSTOM (" + predicate.getExpression().accept(this) + ")";
         }
-
     }
-
 }
