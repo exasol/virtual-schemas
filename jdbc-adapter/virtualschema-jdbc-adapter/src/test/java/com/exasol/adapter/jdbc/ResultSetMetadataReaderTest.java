@@ -2,6 +2,7 @@ package com.exasol.adapter.jdbc;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -38,5 +39,18 @@ class ResultSetMetadataReaderTest {
                 AdapterProperties.emptyProperties(), BaseIdentifierConverter.createDefault());
         final ResultSetMetadataReader reader = new ResultSetMetadataReader(this.connectionMock, columnMetadataReader);
         assertThat(reader.describeColumns("irrelevant"), equalTo(columnDescription));
+    }
+
+    @Test
+    void testDescribeColumnWithUnsupportedDataType() throws SQLException {
+        when(this.resultSetMetadataMock.getColumnCount()).thenReturn(1);
+        when(this.resultSetMetadataMock.getColumnType(1)).thenReturn(Types.VARBINARY);
+        when(this.statementMock.getMetaData()).thenReturn(this.resultSetMetadataMock);
+        when(this.connectionMock.prepareStatement(any())).thenReturn(this.statementMock);
+        final ColumnMetadataReader columnMetadataReader = new BaseColumnMetadataReader(this.connectionMock,
+                AdapterProperties.emptyProperties(), BaseIdentifierConverter.createDefault());
+        final ResultSetMetadataReader reader = new ResultSetMetadataReader(this.connectionMock, columnMetadataReader);
+        assertThrows(RemoteMetadataReaderException.class, () -> reader.describeColumns("irrelevant"),
+                "Unsupported JBDC data type \"-3\" found trying to map remote schema metadata to Exasol.");
     }
 }
