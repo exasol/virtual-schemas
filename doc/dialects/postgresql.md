@@ -9,8 +9,8 @@ The PostgreSQL dialect is with JDBC drivers of version 42.0.0 and later and Post
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.1.jar;
-  %jar /buckets/bfsdefault/jars/postgresql-<version>.jar;
+  %jar /buckets/<BFS service>/<bucket>/jars/virtualschema-jdbc-adapter-dist-1.19.1.jar;
+  %jar /buckets/<BFS service>/<bucket>/jars/postgresql-<version>.jar;
 /
 ```
 

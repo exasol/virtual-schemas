@@ -11,8 +11,8 @@ to upload the `jtds.jar` to a bucket for the adapter script.
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.sql_server_jdbc_adapter AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.1.jar;
-  %jar /buckets/bfsdefault/jars/jtds.jar;
+  %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-1.19.1.jar;
+  %jar /buckets/<BFS service>/<bucket>/jtds.jar;
 /
 ```
 

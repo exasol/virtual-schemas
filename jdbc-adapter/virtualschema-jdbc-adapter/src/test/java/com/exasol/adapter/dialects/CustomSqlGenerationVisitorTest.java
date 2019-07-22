@@ -14,7 +14,7 @@ import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
 import com.google.common.collect.ImmutableList;
 
-import utils.SqlTestUtil;
+import com.exasol.sql.SqlNormalizer;
 
 class CustomSqlGenerationVisitorTest {
     /**
@@ -32,7 +32,7 @@ class CustomSqlGenerationVisitorTest {
         final SqlGenerationVisitor generator = new TestSqlGenerationVisitor(
                 new ExasolSqlDialect(null, AdapterProperties.emptyProperties()), context);
         final String actualSql = node.accept(generator);
-        assertEquals(SqlTestUtil.normalizeSql(expectedSql), SqlTestUtil.normalizeSql(actualSql));
+        assertEquals(SqlNormalizer.normalizeSql(expectedSql), SqlNormalizer.normalizeSql(actualSql));
     }
 
     private SqlNode getTestSqlNode() {

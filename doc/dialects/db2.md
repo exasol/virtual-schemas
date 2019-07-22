@@ -24,7 +24,7 @@ Casting of Data Types
 Casting of Functions
 
 * `LIMIT` will replaced by `FETCH FIRST x ROWS ONLY`
-* `OFFSET` is currently not supported as only DB2 V11 support this nativly
+* `OFFSET` is currently not supported as only DB2 V11 support this natively
 * `ADD_DAYS`, `ADD_WEEKS` ... will be replaced by `COLUMN + DAYS`, `COLUMN + ....`
 
 
@@ -36,16 +36,38 @@ You have to specify the following settings when adding the JDBC driver via EXAOp
 * Main: `com.ibm.db2.jcc.DB2Driver`
 * Prefix: `jdbc:db2:`
 
-## Adapter script
+## Installing the Adapter Script
+
+Upload the [Virtual Schema JDBC Adapter JAR](https://github.com/exasol/virtual-schemas/releases/download/1.19.0/virtualschema-jdbc-adapter-dist-1.19.0.jar) to Bucket FS.
+
+Then create a schema to hold the adapter script.
+
+```sql
+CREATE SCHEMA ADAPTER;
+```
+
+The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
+
+### For Regular DB2 Servers
 
 ```sql
 CREATE or replace JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.1.jar;
-  %jar /buckets/bucketfs1/bucket1/db2jcc4.jar;
-  %jar /buckets/bucketfs1/bucket1/db2jcc_license_cu.jar;
-  // uncomment for mainframe connection and upload  db2jcc_license_cisuz.jar;
-  //%jar /buckets/bucketfs1/bucket1/db2jcc_license_cisuz.jar;
+  %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-1.19.1.jar;
+  %jar /buckets/<BFS service>/<bucket>/db2jcc4.jar;
+  %jar /buckets/<BFS service>/<bucket>/db2jcc_license_cu.jar;
+/
+```
+
+### For Mainframes
+
+```sql
+CREATE or replace JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
+  %scriptclass com.exasol.adapter.RequestDispatcher;
+  %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-1.19.1.jar;
+  %jar /buckets/<BFS service>/<bucket>/db2jcc4.jar;
+  %jar /buckets/<BFS service>/<bucket>/db2jcc_license_cu.jar;
+  %jar /buckets/<BFS service>/<bucket>/db2jcc_license_cisuz.jar;
 /
 ```
 
@@ -59,12 +81,12 @@ create or replace connection DB2_CON to 'jdbc:db2://host:port/database' user 'db
 create  virtual schema db2 using adapter.jdbc_adapter with
 	SQL_DIALECT = 'DB2'
 	CONNECTION_NAME = 'DB2_CON'
-	SCHEMA_NAME = '<schemaname>'
+	SCHEMA_NAME = '<schema>'
 ;
 ```
 
-`<schemaname>` has to be replaced by the actual db2 schema you want to connect to.
+`<schema>` has to be replaced by the actual DB2 schema you want to connect to.
 
 ## Running the DB2 Integration Tests
 
-A how to has been included in the [setup sql file](../../jdbc-adapter/integration-test-data/db2-testdata.sql)
+A how to has been included in the [setup SQL file](../../jdbc-adapter/integration-test-data/db2-testdata.sql)

@@ -16,8 +16,8 @@ SELECT @@version;
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter  AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.1.jar;
-  %jar /buckets/bfsdefault/jars/jtds-<version>.jar;
+  %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-1.19.1.jar;
+  %jar /buckets/<BFS service>/<bucket>/jtds-<version>.jar;
 /
 ```
 

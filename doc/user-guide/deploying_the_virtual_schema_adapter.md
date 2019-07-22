@@ -71,22 +71,20 @@ Note that some JDBC drivers consist of several files and that you have to upload
 
 ## Deploying the Adapter Script
 
-Then run the following SQL commands to deploy the adapter in the database:
+Create a schema to hold the adapter script.
 
 ```sql
--- The adapter is simply a script. It has to be stored in any regular schema.
+CREATE SCHEMA ADAPTER;
+```
+
+The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
+
+```sql
 CREATE SCHEMA adapter;
 CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
-
-  // This is the class implementing the callback method of the adapter script
   %scriptclass com.exasol.adapter.RequestDispatcher;
-
-  // This will add the adapter jar to the classpath so that it can be used inside the adapter script
-  // Replace the names of the bucketfs and the bucket with the ones you used.
   %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.19.1.jar;
-
-  // You have to add all files of the data source jdbc driver here (e.g. Hive JDBC driver files)
-  %jar /buckets/your-bucket-fs/your-bucket/name-of-data-source-jdbc-driver.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/<JDBC driver>.jar;
 /
 ```
 

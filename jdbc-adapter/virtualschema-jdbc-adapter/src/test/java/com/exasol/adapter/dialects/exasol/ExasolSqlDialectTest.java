@@ -55,7 +55,7 @@ import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.sql.SqlNode;
 
-import utils.SqlTestUtil;
+import com.exasol.sql.SqlNormalizer;
 
 class ExasolSqlDialectTest {
     private ExasolSqlDialect dialect;
@@ -108,7 +108,7 @@ class ExasolSqlDialectTest {
         final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
         final SqlGenerationVisitor generator = this.dialect.getSqlGenerationVisitor(context);
         final String actualSql = node.accept(generator);
-        assertThat(SqlTestUtil.normalizeSql(actualSql), equalTo(SqlTestUtil.normalizeSql(expectedSql)));
+        assertThat(SqlNormalizer.normalizeSql(actualSql), equalTo(SqlNormalizer.normalizeSql(expectedSql)));
     }
 
     @CsvSource({ "FALSE, FALSE, JDBC", //

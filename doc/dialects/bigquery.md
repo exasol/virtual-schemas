@@ -14,9 +14,11 @@ Download the [Simba JDBC Driver for Google BigQuery](https://cloud.google.com/bi
 ## Connecting to Big Query
 
 1. Create schema:
+
     ```sql
     CREATE SCHEMA ADAPTER;
     ```
+
 2. Create Adapter Script
 
     You install the adapter script via the special SQL command `CREATE JAVA ADAPTER SCRIPT`. 
