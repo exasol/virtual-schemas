@@ -24,9 +24,9 @@ CREATE SCHEMA ADAPTER;
 The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
 
 ```sql
-CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
-  %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.1.jar;
+CREATE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
+    %scriptclass com.exasol.adapter.RequestDispatcher;
+    %jar /buckets/<BFS service>/<buckets>/jars/virtualschema-jdbc-adapter-dist-1.19.1.jar;
 /
 ```
 
@@ -41,10 +41,10 @@ CREATE CONNECTION EXASOL_CONNECTION TO 'jdbc:exa:<host>:<port>' USER '<user>' ID
 ## Creating a Virtual Schema
 
 ```sql
-CREATE VIRTUAL SCHEMA virtual_exasol USING adapter.jdbc_adapter WITH
-  SQL_DIALECT     = 'EXASOL'
-  CONNECTION_NAME = 'EXASOL_CONNECTION'
-  SCHEMA_NAME     = 'default';
+CREATE VIRTUAL SCHEMA VIRTUAL_EXASOL USING ADAPTER.JDBC_ADAPTER WITH
+    SQL_DIALECT     = 'EXASOL'
+    CONNECTION_NAME = 'EXASOL_CONNECTION'
+    SCHEMA_NAME     = 'default';
 ```
 
 ## Using IMPORT FROM EXA Instead of IMPORT FROM JDBC
@@ -54,7 +54,7 @@ Exasol provides the faster and parallel `IMPORT FROM EXA` command for loading da
 ```sql
 CREATE CONNECTION EXASOL_CONNECTION TO 'jdbc:exa:<host>:<port>' USER '<user>' IDENTIFIED BY '<password>';
 
-CREATE VIRTUAL SCHEMA virtual_exasol USING adapter.jdbc_adapter WITH
+CREATE VIRTUAL SCHEMA VIRTUAL_EXASOL USING ADAPTER.JDBC_ADAPTER WITH
   SQL_DIALECT     = 'EXASOL'
   CONNECTION_NAME = 'EXASOL_CONNECTION'
   SCHEMA_NAME     = 'default'
