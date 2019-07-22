@@ -56,6 +56,7 @@ Download the [Simba JDBC Driver for Google BigQuery](https://cloud.google.com/bi
     CREATE OR REPLACE CONNECTION BIGQUERY_CONNECTION
     TO 'jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;ProjectId=<your_project_id>;OAuthType=0;OAuthServiceAcctEmail=<your_service_account_email>;OAuthPvtKeyPath=/<path_to_your_bucket>/<name_of your_key_file>';
     ```
+    
     You can find additional information about the [JDBC connection string in the Big Query JDBC installation guide](https://www.simba.com/products/BigQuery/doc/JDBC_InstallGuide/content/jdbc/bq/authenticating/serviceaccount.htm]);
 
 4. Creating a Virtual Schema

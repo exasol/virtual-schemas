@@ -6,7 +6,7 @@ The SAP HANA SQL dialect allows you to access [HANA](https://www.sap.com/product
 
 Download the latest version of the [SAP HANA JDBC driver](https://search.maven.org/search?q=g:com.sap.cloud.db.jdbc%20AND%20a:ngdbc&core=gav).
 
-### Upload JDBC Driver to EXAOperation
+### Uploading the JDBC Driver to EXAOperation
 
 1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm) 
 1. Upload the driver to BucketFS
@@ -14,19 +14,20 @@ Download the latest version of the [SAP HANA JDBC driver](https://search.maven.o
 ## Connecting to SAP HANA
 
 1. Create schema
+
     ```sql
     CREATE SCHEMA ADAPTER;
     ```
+
 2. Create Adapter Script
 
     You can install the adapter script via the special SQL command `CREATE JAVA ADAPTER SCRIPT`
     
     ```sql
-     --/
-        CREATE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
-    %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/bfsdefault/saphana/virtualschema-jdbc-adapter-dist-1.19.6.jar;
-    %jar /buckets/bfsdefault/saphana/ngdbc-2.4.56.jar;
+    CREATE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
+        %scriptclass com.exasol.adapter.RequestDispatcher;
+        %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.6.jar;
+        %jar /buckets/bfsdefault/jars/ngdbc-2.4.56.jar;
     /
     ;
     ```
@@ -35,9 +36,9 @@ Download the latest version of the [SAP HANA JDBC driver](https://search.maven.o
     
     ```sql
     CREATE OR REPLACE CONNECTION SAPHANA_CONNECTION 
-    TO 'jdbc:sap://write.ip.address.here:port' 
-    USER 'username' 
-    IDENTIFIED BY 'yourpassword';
+    TO 'jdbc:sap://<HANA host or IP address>:<port>' 
+    USER '<user>' 
+    IDENTIFIED BY '<password>';
     ```
 
 4. Create a Virtual Schema
@@ -50,10 +51,11 @@ Download the latest version of the [SAP HANA JDBC driver](https://search.maven.o
         CONNECTION_NAME = 'SAPHANA_CONNECTION'
         SCHEMA_NAME = 'TESTSAPHANASCHEMA';
     ```
+    
     If you want to use [logging](../development/remote_logging.md), please, add additional parameters:
     
     ```sql
-        DEBUG_ADDRESS = 'write.ip.address.here:port'
+        DEBUG_ADDRESS = '<debug listener host or IP address>:<port>'
         LOG_LEVEL = 'FINE' 
     ``` 
     

@@ -20,21 +20,19 @@ The adapter can be created similar to Hive:
 
 CREATE SCHEMA adapter;
 CREATE  JAVA  ADAPTER SCRIPT jdbc_adapter AS
-  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
-
-  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.19.6.jar;
-
-  %jar /buckets/bucketfs1/bucket1/hive_metastore.jar;
-  %jar /buckets/bucketfs1/bucket1/hive_service.jar;
-  %jar /buckets/bucketfs1/bucket1/ImpalaJDBC41.jar;
-  %jar /buckets/bucketfs1/bucket1/libfb303-0.9.0.jar;
-  %jar /buckets/bucketfs1/bucket1/libthrift-0.9.0.jar;
-  %jar /buckets/bucketfs1/bucket1/log4j-1.2.14.jar;
-  %jar /buckets/bucketfs1/bucket1/ql.jar;
-  %jar /buckets/bucketfs1/bucket1/slf4j-api-1.5.11.jar;
-  %jar /buckets/bucketfs1/bucket1/slf4j-log4j12-1.5.11.jar;
-  %jar /buckets/bucketfs1/bucket1/TCLIServiceClient.jar;
-  %jar /buckets/bucketfs1/bucket1/zookeeper-3.4.6.jar;
+  %scriptclass com.exasol.adapter.RequestDispatcher;
+  %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.6.jar;
+  %jar /buckets/bfsdefault/jars/hive_metastore.jar;
+  %jar /buckets/bfsdefault/jars/hive_service.jar;
+  %jar /buckets/bfsdefault/jars/ImpalaJDBC41.jar;
+  %jar /buckets/bfsdefault/jars/libfb303-0.9.0.jar;
+  %jar /buckets/bfsdefault/jars/libthrift-0.9.0.jar;
+  %jar /buckets/bfsdefault/jars/log4j-1.2.14.jar;
+  %jar /buckets/bfsdefault/jars/ql.jar;
+  %jar /buckets/bfsdefault/jars/slf4j-api-1.5.11.jar;
+  %jar /buckets/bfsdefault/jars/slf4j-log4j12-1.5.11.jar;
+  %jar /buckets/bfsdefault/jars/TCLIServiceClient.jar;
+  %jar /buckets/bfsdefault/jars/zookeeper-3.4.6.jar;
 /
 ```
 

@@ -40,15 +40,8 @@ You have to specify the following settings when adding the JDBC driver via EXAOp
 
 ```sql
 CREATE or replace JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
-
-  // This is the class implementing the callback method of the adapter script
-  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
-
-  // This will add the adapter jar to the classpath so that it can be used inside the adapter script
-  // Replace the names of the bucketfs and the bucket with the ones you used.
-  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.19.6.jar;
-
-  // DB2 Driver files
+  %scriptclass com.exasol.adapter.RequestDispatcher;
+  %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.6.jar;
   %jar /buckets/bucketfs1/bucket1/db2jcc4.jar;
   %jar /buckets/bucketfs1/bucket1/db2jcc_license_cu.jar;
   // uncomment for mainframe connection and upload  db2jcc_license_cisuz.jar;

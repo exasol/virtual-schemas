@@ -2,14 +2,7 @@
 
 The Athena SQL Dialect supports Amazon's [AWS Athena](https://aws.amazon.com/athena/), a managed service that lets you read files on S3 as if they were part of a relational database.
 
->(i) Information for DbVisualizer users
->To tell DbVisualizer that a part of a script should be handled as a single statement, you can insert an SQL block begin identifier just >before the block and an end identifier after the block. The delimiter must be the only text on the line. The default value for the >Begin Identifier is --/ and for the End Identifier it is /.
-
-
-
-## JDBC Driver
-
-### Registering the JDBC Driver in EXAOperation
+## Registering the JDBC Driver in EXAOperation
 
 First download the [Athena JDBC driver](https://docs.aws.amazon.com/athena/latest/ug/connect-with-jdbc.html).
 
@@ -34,23 +27,36 @@ You need to specify the following settings when adding the JDBC driver via EXAOp
 
 Please refer to the [documentation on configuring JDBC connections to Athena](https://docs.aws.amazon.com/athena/latest/ug/connect-with-jdbc.html) for details.
 
-### Upload JDBC Driver to EXAOperation
+## Uploading the JDBC Driver to EXAOperation
 
-1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm) (recommended: `jdbc`)
+1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm)
 1. Upload the driver to BucketFS
 
 This step is necessary since the UDF container the adapter runs in has no access to the JDBC drivers installed via EXAOperation but it can access BucketFS.
 
-## Adapter Script
+## Installing the Adapter Script
 
-You install the adapter script via the special SQL command `CREATE JAVA ADAPTER SCRIPT`. Please remember to replace the placeholders in pointy brackets (e.g. `<JDBC driver version>`) with their actual values.
+The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
+
+Please remember to replace the placeholders in pointy brackets (e.g. `<JDBC driver version>`) with their actual values.
 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
-    %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
-    %jar /buckets/bucketfs1/jdbc/virtualschema-jdbc-adapter-dist-1.19.6.jar;
-    %jar /buckets/bucketfs1/jdbc/AthenaJDBC42-<JDBC driver version>.jar;
+    %scriptclass com.exasol.adapter.RequestDispatcher;
+    %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-1.19.6.jar;
+    %jar /buckets/<BFS service>/<bucket>/AthenaJDBC42-<JDBC driver version>.jar;
 /
+```
+
+## Defining a Named Connection
+
+Define the connection to Athena as shown below. We recommend using TLS to secure the connection.
+
+```sql
+CREATE OR REPLACE CONNECTION ATHENA_CONNECTION
+TO 'jdbc:awsathena://AwsRegion=<region>;S3OutputLocation=s3://<path to query results>'
+USER '<access key ID>'
+IDENTIFIED BY '<access key>';
 ```
 
 ## Creating a Virtual Schema
@@ -62,6 +68,6 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
     USING ADAPTER.JDBC_ADAPTER
     WITH
     SQL_DIALECT = 'ATHENA'
-    CONNECTION_NAME = '<connection name>'
+    CONNECTION_NAME = 'ATHENA_CONNECTION'
     SCHEMA_NAME = '<database name>';
 ```

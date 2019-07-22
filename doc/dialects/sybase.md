@@ -14,12 +14,10 @@ SELECT @@version;
 ## Adapter script
 
 ```sql
-CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter
-  AS
-
-  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
-  %jar /buckets/bucketfs1/virtualschema/virtualschema-jdbc-adapter-dist-1.19.6.jar;
-  %jar /buckets/bucketfs1/virtualschema/jtds-1.3.1.jar;
+CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter  AS
+  %scriptclass com.exasol.adapter.RequestDispatcher;
+  %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.6.jar;
+  %jar /buckets/bfsdefault/jars/jtds-<version>.jar;
 /
 ```
 

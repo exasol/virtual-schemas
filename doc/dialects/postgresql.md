@@ -2,37 +2,28 @@
 
 ## JDBC Driver
 
-The PostgreSQL dialect is tested with JDBC driver version 42.0.0 and PostgreSQL 11.
+The PostgreSQL dialect is with JDBC drivers of version 42.0.0 and later and PostgreSQL 11. Driver version 42.2.6 or later are recommended if you want to establish a TLS-secured connection. 
 
 ## Adapter Script
 
 ```sql
-CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter 
-  AS
-  
-  // This is the class implementing the callback method of the adapter script
-  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
-
-  // This will add the adapter jar to the classpath so that it can be used inside the adapter script
-  // Replace the names of the bucketfs and the bucket with the ones you used.
-  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.19.6.jar;
-									 
-  // You have to add all files of the data source jdbc driver here (e.g. MySQL or Hive)
-  %jar /buckets/bucketfs1/bucket1/postgresql-42.0.0.jar;
-
+CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
+  %scriptclass com.exasol.adapter.RequestDispatcher;
+  %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.6.jar;
+  %jar /buckets/bfsdefault/jars/postgresql-<version>.jar;
 /
 ```
 
 ## Creating a Virtual Schema
 
 ```sql
-CREATE VIRTUAL SCHEMA postgres
-	USING adapter.jdbc_adapter 
+CREATE VIRTUAL SCHEMA POSTGRES
+	USING ADAPTER.JDBC_ADAPTER 
 	WITH
 	SQL_DIALECT = 'POSTGRESQL'
 	CATALOG_NAME = 'postgres'
 	SCHEMA_NAME = 'public'
-	CONNECTION_NAME = 'POSTGRES_DOCKER'
+	CONNECTION_NAME = 'POSTGRES_CONNECTION'
 	;
 ```
 

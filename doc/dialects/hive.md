@@ -21,11 +21,9 @@ You have to add all files of the JDBC driver to the classpath using `%jar` as fo
 ```sql
 CREATE SCHEMA adapter;
 CREATE  JAVA  ADAPTER SCRIPT jdbc_adapter AS
-  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
-
-  %jar /buckets/bucketfs1/bucket1/virtualschema-jdbc-adapter-dist-1.19.6.jar;
-
-  %jar /buckets/bucketfs1/bucket1/HiveJDBC41.jar;
+  %scriptclass com.exasol.adapter.RequestDispatcher;
+  %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.6.jar;
+  %jar /buckets/bfsdefault/jars/HiveJDBC41.jar;
 /
 ```
 

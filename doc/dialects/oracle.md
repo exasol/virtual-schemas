@@ -28,14 +28,9 @@ After uploading the adapter jar we are ready to create an Oracle adapter script.
 ```sql
 CREATE SCHEMA adapter;
 CREATE JAVA ADAPTER SCRIPT adapter.jdbc_oracle AS
-  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;
-
-  // You need to replace `your-bucket-fs` and `your-bucket` to match the actual location
-  // of the adapter jar.
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.19.6.jar;
-
-  // Add the oracle jdbc driver to the classpath
-  %jar /buckets/bucketfs1/bucket1/ojdbc7-12.1.0.2.jar
+  %scriptclass com.exasol.adapter.RequestDispatcher;
+  %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.6.jar;
+  %jar /buckets/bfsdefault/jars/ojdbc7-12.1.0.2.jar
 /
 ```
 
