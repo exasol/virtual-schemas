@@ -26,7 +26,7 @@ Download the latest version of the [SAP HANA JDBC driver](https://search.maven.o
     ```sql
     CREATE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
         %scriptclass com.exasol.adapter.RequestDispatcher;
-        %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.6.jar;
+        %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.1.jar;
         %jar /buckets/bfsdefault/jars/ngdbc-2.4.56.jar;
     /
     ;

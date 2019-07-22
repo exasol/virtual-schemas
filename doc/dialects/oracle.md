@@ -29,7 +29,7 @@ After uploading the adapter jar we are ready to create an Oracle adapter script.
 CREATE SCHEMA adapter;
 CREATE JAVA ADAPTER SCRIPT adapter.jdbc_oracle AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.6.jar;
+  %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.1.jar;
   %jar /buckets/bfsdefault/jars/ojdbc7-12.1.0.2.jar
 /
 ```

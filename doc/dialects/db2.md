@@ -41,7 +41,7 @@ You have to specify the following settings when adding the JDBC driver via EXAOp
 ```sql
 CREATE or replace JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.6.jar;
+  %jar /buckets/bfsdefault/jars/virtualschema-jdbc-adapter-dist-1.19.1.jar;
   %jar /buckets/bucketfs1/bucket1/db2jcc4.jar;
   %jar /buckets/bucketfs1/bucket1/db2jcc_license_cu.jar;
   // uncomment for mainframe connection and upload  db2jcc_license_cisuz.jar;

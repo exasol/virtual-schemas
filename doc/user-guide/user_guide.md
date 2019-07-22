@@ -15,6 +15,7 @@ Please note that the syntax for creating adapter scripts is not recognized by al
 ## List of Supported Dialects
 
 1. [Athena](../dialects/athena.md)
+1. [Aurora](../dialects/aurora.md)
 1. [Big Query](../dialects/bigquery.md)
 1. [EXASOL](../dialects/exasol.md)
 1. [Hive](../dialects/hive.md)
@@ -166,3 +167,7 @@ Property                    | Value
 **EXCEPTION_HANDLING**      | Activates or deactivates different exception handling modes. Supported values: `IGNORE_INVALID_VIEWS` and `NONE` (default). Currently this property only affects the Teradata dialect.
 **EXCLUDED_CAPABILITIES**   | A comma-separated list of capabilities that you want to deactivate (although the adapter might support them).
 **IGNORE_ERRORS**           | Is used to ignore errors thrown by the adapter. Supported values: 'POSTGRESQL_UPPERCASE_TABLES' (see PostgreSQL dialect documentation).
+
+## See Also
+
+* [SQL Client Specifics](sql_clients.md)
