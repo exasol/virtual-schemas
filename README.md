@@ -24,6 +24,18 @@ Regardless of whether that source is a relational database like ours, or it's li
 
 This means an user familiar with SQL will immediately feel at home when accessing remote data through Virtual Schemas.
 
+## Deprecation Warning
+
+The old entry point (Java class) for Virtual Schemas
+
+    com.exasol.adapter.jdbc.JdbcAdapter
+
+is deprecated. Please use the new entry point
+
+    com.exasol.adapter.RequestDispatcher
+
+in all your `CREATE JAVA ADAPTER SCRIPT` statements. The old entry point will be removed with the upcoming Version 2.0.0 of Exasol's Virtual Schema.
+
 ## Features
 
 * Read access to data on remote data sources
