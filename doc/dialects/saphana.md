@@ -2,64 +2,86 @@
 
 The SAP HANA SQL dialect allows you to access [HANA](https://www.sap.com/products/hana.html) databases via Virtual Schemas.
 
-## JDBC Driver
+## Registering the JDBC Driver in EXAOperation
 
 Download the latest version of the [SAP HANA JDBC driver](https://search.maven.org/search?q=g:com.sap.cloud.db.jdbc%20AND%20a:ngdbc&core=gav).
 
-### Uploading the JDBC Driver to EXAOperation
+Now register the driver in EXAOperation:
+
+1. Click "Software"
+1. Switch to tab "JDBC Drivers"
+1. Click "Browse..."
+1. Select JDBC driver file
+1. Click "Upload"
+1. Click "Add"
+1. In dialog "Add EXACluster JDBC driver" configure the JDBC driver (see below)
+
+You need to specify the following settings when adding the JDBC driver via EXAOperation.
+
+| Parameter | Value                                               |
+|-----------|-----------------------------------------------------|
+| Name      | `SAPHANA`                                           |
+| Main      | `com.sap.db.jdbc.Driver`                            |
+| Prefix    | `jdbc:sap:`                                         |
+| Files     | `ngdbc-<JDBC driver version>.jar`                   |
+
+## Uploading the JDBC Driver to EXAOperation
 
 1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm) 
 1. Upload the driver to BucketFS
 
-## Connecting to SAP HANA
+This step is necessary since the UDF container the adapter runs in has no access to the JDBC drivers installed via EXAOperation but it can access BucketFS.
 
-1. Create schema
+## Installing the Adapter Script
 
-    ```sql
-    CREATE SCHEMA ADAPTER;
-    ```
+Upload the last available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
 
-2. Create Adapter Script
+Then create a schema to hold the adapter script.
 
-    You can install the adapter script via the special SQL command `CREATE JAVA ADAPTER SCRIPT`
+```sql
+CREATE SCHEMA ADAPTER;
+```
+
+The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
+
+```sql
+CREATE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
+     %scriptclass com.exasol.adapter.RequestDispatcher;
+     %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-1.19.1.jar;
+     %jar /buckets/<BFS service>/<bucket>/ngdbc-<JDBC driver version>.jar;
+/
+;
+```
+
+## Defining a Named Connection
     
-    ```sql
-    CREATE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
-        %scriptclass com.exasol.adapter.RequestDispatcher;
-        %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-1.19.1.jar;
-        %jar /buckets/<BFS service>/<bucket>/ngdbc-2.4.56.jar;
-    /
-    ;
-    ```
+```sql
+CREATE OR REPLACE CONNECTION SAPHANA_CONNECTION 
+TO 'jdbc:sap://<HANA host or IP address>:<port>' 
+USER '<user>' 
+IDENTIFIED BY '<password>';
+```
 
-3. Create a connection
-    
-    ```sql
-    CREATE OR REPLACE CONNECTION SAPHANA_CONNECTION 
-    TO 'jdbc:sap://<HANA host or IP address>:<port>' 
-    USER '<user>' 
-    IDENTIFIED BY '<password>';
-    ```
+## Creating a Virtual Schema
 
-4. Create a Virtual Schema
+Below you see how a Sap Hana Virtual Schema is created. Please note that you have to provide the name of the database in the property `SHEMA_NAME`.
 
-    ```sql
-    CREATE VIRTUAL SCHEMA SAPHANATEST
-    USING adapter_sap_hana.jdbc_adapter_sap_hana_script
+```sql
+CREATE VIRTUAL SCHEMA <virtual schema name>
+    USING ADAPTER.JDBC_ADAPTER 
     WITH
-        SQL_DIALECT = 'SAPHANA'
-        CONNECTION_NAME = 'SAPHANA_CONNECTION'
-        SCHEMA_NAME = 'TESTSAPHANASCHEMA';
-    ```
+    SQL_DIALECT = 'SAPHANA'
+    CONNECTION_NAME = 'SAPHANA_CONNECTION'
+    SCHEMA_NAME = '<schema name>';
+```
+If you want to use [logging](../development/remote_logging.md), please, add additional parameters:
     
-    If you want to use [logging](../development/remote_logging.md), please, add additional parameters:
+```sql
+    DEBUG_ADDRESS = '<debug listener host or IP address>:<port>'
+    LOG_LEVEL = 'FINE' 
+``` 
     
-    ```sql
-        DEBUG_ADDRESS = '<debug listener host or IP address>:<port>'
-        LOG_LEVEL = 'FINE' 
-    ``` 
-    
-## Know Issues
+## Known Issues
 
 ### Unsupported Column Types
 

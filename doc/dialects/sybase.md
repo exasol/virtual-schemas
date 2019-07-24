@@ -1,43 +1,62 @@
 # Sybase SQL Dialect
 
-## JDBC driver
+[SAP ASE](https://www.sap.com/products/sybase-ase.html), originally known as Sybase SQL Server is a relational model database server developed by Sybase Corporation, which later became part of SAP AG.
 
-The Sybase dialect was tested with the [jTDS 1.3.1 JDBC driver](https://sourceforge.net/projects/jtds/files/jtds/1.3.1/) and Sybase 16.0.
+## Uploading the JDBC Driver to EXAOperation
+
 While the jTDS driver is pre-installed in EXAOperation, you still need to upload `jdts.jar` to BucketFS.
-
 You can check the Sybase version with the following SQL command:
 
 ```sql
 SELECT @@version;
 ```
 
-## Adapter script
+1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm)
+1. Upload the driver to BucketFS
+
+## Installing the Adapter Script
+
+Upload the last available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
+
+Then create a schema to hold the adapter script.
 
 ```sql
-CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.jdbc_adapter  AS
+CREATE SCHEMA ADAPTER;
+```
+
+The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
+
+```sql
+CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
   %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-1.19.1.jar;
   %jar /buckets/<BFS service>/<bucket>/jtds-<version>.jar;
 /
 ```
 
-## Installing the Test Data
+## Defining a Named Connection
 
-Create and populate the test database using the [sybase-testdata.sql](../../jdbc-adapter/integration-test-data/sybase.sql) SQL script.
+Define the connection to Sybase as shown below. 
+
+```sql
+CREATE OR REPLACE CONNECTION SYBASE_CONNECTION
+TO 'jdbc:jtds:sybase://<host>:<port>/<database name>'
+USER '<user>'
+IDENTIFIED BY '<password>';
+```
 
 ## Creating a Virtual Schema
 
-```sql
-CREATE OR REPLACE CONNECTION "conn_sybase"
-	TO 'jdbc:jtds:sybase://172.17.0.1:5000/testdb'
-	USER 'tester'
-	IDENTIFIED BY 'pass'
+Below you see how a Sybase Virtual Schema is created. Please note that you have to provide the name of the database in the property `SHEMA_NAME` since Athena simulates catalogs.
 
-CREATE VIRTUAL SCHEMA sybase USING adapter.jdbc_adapter WITH
+```sql
+CREATE VIRTUAL SCHEMA <virtual schema name>
+    USING ADAPTER.JDBC_ADAPTER
+    WITH
 	SQL_DIALECT = 'SYBASE'
-	CONNECTION_NAME = 'CONN_SYBASE'
-	CATALOG_NAME = 'testdb'
-	SCHEMA_NAME = 'tester';
+	CONNECTION_NAME = 'SYBASE_CONNECTION'
+	CATALOG_NAME = '<catalog name>'
+	SCHEMA_NAME = '<schema name>';
 ```
 
 ## Supported Data types
@@ -46,3 +65,7 @@ CREATE VIRTUAL SCHEMA sybase USING adapter.jdbc_adapter WITH
 * The Sybase data type `CHAR(n > 2000)` is mapped to Exasol's `VARCHAR(n)`. Exasol only supports `n <= 2000` for data type `CHAR`.
 * The Sybase data types `TEXT` and `UNITEXT` are mapped to `VARCHAR(2000000) UTF8`. If the virtual schema is queried and a row of the text column is matched that contains a value that exceed Exasol's column size, an error is shown.
 * The Sybase data types `BINARY`, `VARBINARY`, and `IMAGE` are not supported.
+
+## Testing information
+
+The Sybase dialect was tested with the [jTDS 1.3.1 JDBC driver](https://sourceforge.net/projects/jtds/files/jtds/1.3.1/) and Sybase 16.0.

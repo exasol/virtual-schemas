@@ -4,9 +4,7 @@ The Redshift SQL Dialect supports Amazon's [AWS Redshift](https://aws.amazon.com
 
 In addition to reading from the regular relational database, this SQL dialect adapter also supports reading from [Redshift Spectrum](https://docs.aws.amazon.com/redshift/latest/dg/c-getting-started-using-spectrum.html). This allows reading file based data from S3.
 
-## JDBC Driver
-
-### Registering the JDBC Driver in EXAOperation
+## Registering the JDBC Driver in EXAOperation
 
 First download the [Redshift JDBC driver](https://docs.aws.amazon.com/redshift/latest/mgmt/configure-jdbc-connection.html#download-jdbc-driver).
 
@@ -31,16 +29,24 @@ You need to specify the following settings when adding the JDBC driver via EXAOp
 
 Please refer to the [documentation on configuring JDBC connections to Redshift](https://docs.aws.amazon.com/redshift/latest/mgmt/configure-jdbc-connection.html) for details.
 
-### Upload JDBC Driver to EXAOperation
+## Upload JDBC Driver to EXAOperation
 
 1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm) (recommended: `jdbc`)
 1. Upload the driver to BucketFS
 
 This step is necessary since the UDF container the adapter runs in has no access to the JDBC drivers installed via EXAOperation but it can access BucketFS.
 
-## Adapter Script
+## Installing the Adapter Script
 
-You install the adapter script via the special SQL command `CREATE JAVA ADAPTER SCRIPT`. Please remember to replace the placeholders in pointy brackets (e.g. `<JDBC driver version>`) with their actual values.
+Upload the last available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
+
+Then create a schema to hold the adapter script.
+
+```sql
+CREATE SCHEMA ADAPTER;
+```
+
+The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
@@ -48,6 +54,18 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
     %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-1.19.1.jar;
     %jar /buckets/<BFS service>/<bucket>/RedshiftJDBC42-<JDBC driver version>.jar;
 /
+;
+```
+
+## Defining a Named Connection
+
+Define the connection to Redshift as shown below. We recommend using TLS to secure the connection.
+
+```sql
+CREATE OR REPLACE CONNECTION REDSHIFT_CONNECTION
+TO 'jdbc:redshift://<cluster>.<region>.redshift.amazonaws.com:<port>/<database>'
+USER '<user>'
+IDENTIFIED BY '<password>';
 ```
 
 ## Creating a Virtual Schema
@@ -59,7 +77,7 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
     USING ADAPTER.JDBC_ADAPTER
     WITH
     SQL_DIALECT = 'REDSHIFT'
-    CONNECTION_NAME = '<connection name>'
+    CONNECTION_NAME = 'REDSHIFT_CONNECTION'
     CATALOG_NAME = '<database name>'
     SCHEMA_NAME = 'public';
 ```

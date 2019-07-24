@@ -1,28 +1,58 @@
 # PostgreSQL SQL Dialect
 
-## JDBC Driver
+[PostgreSQL](https://www.postgresql.org/) is an open-source relational database management system (RDBMS).
 
 The PostgreSQL dialect is with JDBC drivers of version 42.0.0 and later and PostgreSQL 11. Driver version 42.2.6 or later are recommended if you want to establish a TLS-secured connection. 
 
-## Adapter Script
+## Uploading the JDBC Driver to EXAOperation
+
+First download the [PostgreSQL JDBC driver](https://jdbc.postgresql.org/).
+
+1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm)
+1. Upload the driver to BucketFS
+
+## Installing the Adapter Script
+
+Upload the last available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
+
+Then create a schema to hold the adapter script.
+
+```sql
+CREATE SCHEMA ADAPTER;
+```
+
+The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/<BFS service>/<bucket>/jars/virtualschema-jdbc-adapter-dist-1.19.1.jar;
-  %jar /buckets/<BFS service>/<bucket>/jars/postgresql-<version>.jar;
+  %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-1.19.1.jar;
+  %jar /buckets/<BFS service>/<bucket>/postgresql-<version>.jar;
 /
+```
+
+## Defining a Named Connection
+
+Define the connection to Athena as shown below. We recommend using TLS to secure the connection.
+
+```sql
+CREATE OR REPLACE CONNECTION ATHENA_CONNECTION
+TO 'jdbc:postgresql://<host>:<port>/<database name>'
+USER '<user>'
+IDENTIFIED BY '<password>';
 ```
 
 ## Creating a Virtual Schema
 
+Below you see how a PostreSQL Virtual Schema is created. Please note that you have to provide the name of the database in the property `SHEMA_NAME` since Athena simulates catalogs.
+
 ```sql
-CREATE VIRTUAL SCHEMA POSTGRES
+CREATE VIRTUAL SCHEMA <virtual schema name>
 	USING ADAPTER.JDBC_ADAPTER 
 	WITH
 	SQL_DIALECT = 'POSTGRESQL'
-	CATALOG_NAME = 'postgres'
-	SCHEMA_NAME = 'public'
+	CATALOG_NAME = '<catalog name>'
+	SCHEMA_NAME = '<schema name>'
 	CONNECTION_NAME = 'POSTGRES_CONNECTION'
 	;
 ```
@@ -35,19 +65,20 @@ In contrast to Exasol, PostgreSQL does not treat identifiers as specified in the
 
 This is the default mode for handling identifiers, but identifier conversion can also be set explicitly using the following property:
 ```sql
-ALTER VIRTUAL SCHEMA postgres SET POSTGRESQL_IDENTIFIER_MAPPING = 'CONVERT_TO_UPPER';
+ALTER VIRTUAL SCHEMA <virtual schema name> SET POSTGRESQL_IDENTIFIER_MAPPING = 'CONVERT_TO_UPPER';
 ```
 
 In this mode you do not have to care about identifier handling. Everything will work as expected out of the box as long as you **do not use quoted identifiers** (in the PostgreSQL Schema as well as in the Exasol Virtual Schema). More specifically everything will work as long as there are no identifiers in the PostgreSQL database that contain upper case characters. If that is the case an error is thrown when creating or refreshing the virtual schema.
 Regardless of this, you can create or refresh the virtual schema by specifying the adapter to ignore this particular error as shown below:
+
 ```sql
-CREATE VIRTUAL SCHEMA postgres
-	USING adapter.jdbc_adapter 
+CREATE VIRTUAL SCHEMA <virtual schema name>
+	USING ADAPTER.JDBC_ADAPTER 
 	WITH
 	SQL_DIALECT = 'POSTGRESQL'
-	CATALOG_NAME = 'postgres'
-	SCHEMA_NAME = 'public'
-	CONNECTION_NAME = 'POSTGRES_DOCKER'
+	CATALOG_NAME = '<catalog name>'
+	SCHEMA_NAME = '<schema name>'
+	CONNECTION_NAME = 'POSTGRES_CONNECTION'
 	IGNORE_ERRORS = 'POSTGRESQL_UPPERCASE_TABLES'
 ;
 ```
@@ -73,13 +104,13 @@ SELECT Col1 FROM MySecondTable;
 ```
 ```sql
 --Create Virtual Schema on EXASOL side
-CREATE VIRTUAL SCHEMA postgres
-	USING adapter.jdbc_adapter 
+CREATE VIRTUAL SCHEMA <virtual schema name>
+	USING ADAPTER.JDBC_ADAPTER 
 	WITH
 	SQL_DIALECT = 'POSTGRESQL'
-	CATALOG_NAME = 'postgres'
-	SCHEMA_NAME = 'public'
-	CONNECTION_NAME = 'POSTGRES_DOCKER'
+	CATALOG_NAME = '<catalog name>'
+	SCHEMA_NAME = '<schema name>'
+	CONNECTION_NAME = 'POSTGRES_CONNECTION'
 	POSTGRESQL_IDENTIFIER_MAPPING = 'PRESERVE_ORIGINAL_CASE'
 ;
 -- Open Schema and see what tables are there
