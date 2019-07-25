@@ -64,7 +64,7 @@ IDENTIFIED BY '<password>';
 
 ## Creating a Virtual Schema
 
-Below you see how a Sap Hana Virtual Schema is created. Please note that you have to provide the name of the database in the property `SHEMA_NAME`.
+Below you see how a SAP HANA Virtual Schema is created. Please note that you have to provide the name of the database in the property `SHEMA_NAME`.
 
 ```sql
 CREATE VIRTUAL SCHEMA <virtual schema name>
