@@ -1,6 +1,6 @@
 # DB2 SQL Dialect
 
-DB2 is a database product from IBM. It is a Relational Database Management System (RDBMS). DB2 is extended with the support of Object-Oriented features and non-relational structures with XML.
+[DB2](https://www.ibm.com/db2/) is an IBM database product. It is a Relational Database Management System (RDBMS). DB2 is extended with the support of Object-Oriented features and non-relational structures with XML.
 
 ## Registering the JDBC Driver in EXAOperation
 
@@ -26,6 +26,7 @@ You need to specify the following settings when adding the JDBC driver via EXAOp
 | Files     | `db2jcc4.jar`, `db2jcc_license_cu.jar`              |
 
 Additionally there are 2 files for the DB2 Driver.
+
 * `db2jcc_license_cu.jar` - License File for DB2 on Linux Unix and Windows
 * `db2jcc_license_cisuz.jar` - License File for DB2 on zOS (Mainframe)
 
@@ -40,7 +41,7 @@ This step is necessary since the UDF container the adapter runs in has no access
 
 ## Installing the Adapter Script
 
-Upload the [Virtual Schema JDBC Adapter JAR](https://github.com/exasol/virtual-schemas/releases/download/1.19.0/virtualschema-jdbc-adapter-dist-1.19.1.jar) to Bucket FS.
+Upload the latest available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
 
 Then create a schema to hold the adapter script.
 
@@ -104,17 +105,17 @@ DB2 was tested with the IBM DB2 JCC Drivers that come with DB2 LUW V10.1 and V11
 
 ## Supported Capabilities
 
-The DB2 dialect handles some casts in regards of time data types and functions.
+The DB2 dialect handles implements specific casts for time data types and functions.
 
 ## Casting of Data Types
 
-* `TIMESTAMP` and `TIMESTAMP(x)` will be cast to `VARCHAR` to not lose precision.
+* `TIMESTAMP` and `TIMESTAMP(x)` is cast to `VARCHAR` to not lose precision.
 * `VARCHAR` and `CHAR` for bit data will be cast to a hex string with double the original size
 * `TIME` will be cast to `VARCHAR(8)`
 * `XML` will be cast to `VARCHAR(DB2_MAX_LENGTH)`
 * `BLOB` is not supported
 
-Casting of Functions
+## Casting of Functions
 
 * `LIMIT` will replaced by `FETCH FIRST x ROWS ONLY`
 * `OFFSET` is currently not supported as only DB2 V11 support this natively

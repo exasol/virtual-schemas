@@ -1,10 +1,10 @@
 # SQL Client Specifics
 
-This section covers specifics of SQL client that are good to know when you are setting up Virtual Schemas or are working with them.
+This section covers specifics of SQL clients that are good to know when you are setting up Virtual Schemas or are working with them.
 
 ## DBeaver
 
-DBeaver has trouble telling where scripts end that contain multiple semicolons or newlines. The simplest way to get around that problem is to mark the whole script and execute it as a single step.
+DBeaver has trouble telling where scripts end that contain multiple semicolons or newlines. The simplest way to get around that problem is to highlight the whole script and execute it as a single step.
 
 ## DbVisualizer
 

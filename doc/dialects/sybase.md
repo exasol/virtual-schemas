@@ -16,7 +16,7 @@ SELECT @@version;
 
 ## Installing the Adapter Script
 
-Upload the last available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
+Upload the latest available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
 
 Then create a schema to hold the adapter script.
 
@@ -47,7 +47,7 @@ IDENTIFIED BY '<password>';
 
 ## Creating a Virtual Schema
 
-Below you see how a Sybase Virtual Schema is created. Please note that you have to provide the name of the database in the property `SHEMA_NAME` since Athena simulates catalogs.
+Below you see how a Sybase Virtual Schema is created.
 
 ```sql
 CREATE VIRTUAL SCHEMA <virtual schema name>

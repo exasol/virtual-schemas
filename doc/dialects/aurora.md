@@ -49,7 +49,7 @@ This step is necessary since the UDF container the adapter runs in has no access
 
 ### Installing the Adapter Script
 
-Upload the [Virtual Schema JDBC Adapter JAR](https://github.com/exasol/virtual-schemas/releases/download/1.19.0/virtualschema-jdbc-adapter-dist-1.19.1.jar) to Bucket FS.
+Upload the latest available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
 
 Then create a schema to hold the adapter script.
 

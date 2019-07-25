@@ -1,6 +1,6 @@
 # Impala SQL Dialect
 
-[Impala](https://www.cloudera.com/documentation/enterprise/5-8-x/topics/impala.html) is a MPP (Massive Parallel Processing) SQL query engine for processing data that is stored in Hadoop cluster.  
+[Impala](https://www.cloudera.com/documentation/enterprise/5-8-x/topics/impala.html) is a MPP (Massive Parallel Processing) SQL query engine for processing data that is stored on a Hadoop cluster.  
 
 ## Registering the JDBC Driver in EXAOperation
 
@@ -34,7 +34,7 @@ This step is necessary since the UDF container the adapter runs in has no access
 
 ## Installing the Adapter Script
 
-Upload the last available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
+Upload the latest available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
 
 Then create a schema to hold the adapter script.
 
@@ -114,7 +114,7 @@ Output:
 CREATE CONNECTION krb_conn TO 'jdbc:impala://<Impala host>:<port>;AuthMech=1;KrbRealm=EXAMPLE.COM;KrbHostFQDN=host.example.com;KrbServiceName=impala' USER 'krbuser@EXAMPLE.COM' IDENTIFIED BY 'ExaAuthType=Kerberos;enp6Cg==;YWFhCg=='
 ```
 
-### Creating the CONNECTION
+### Creating the connection
 
 You have to execute the generated `CREATE CONNECTION` statement directly in EXASOL to actually create the Kerberos `CONNECTION` object. For more detailed information about the script, use the help option:
 

@@ -80,8 +80,9 @@ CREATE SCHEMA ADAPTER;
 The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
 
 ```sql
-CREATE SCHEMA adapter;
-CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
+CREATE SCHEMA ADAPTER;
+
+CREATE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
   %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.19.1.jar;
   %jar /buckets/your-bucket-fs/your-bucket/<JDBC driver>.jar;

@@ -1,8 +1,6 @@
 # PostgreSQL SQL Dialect
 
-[PostgreSQL](https://www.postgresql.org/) is an open-source relational database management system (RDBMS).
-
-The PostgreSQL dialect is with JDBC drivers of version 42.0.0 and later and PostgreSQL 11. Driver version 42.2.6 or later are recommended if you want to establish a TLS-secured connection. 
+[PostgreSQL](https://www.postgresql.org/) is an open-source  Relational Database Management System (RDBMS).
 
 ## Uploading the JDBC Driver to EXAOperation
 
@@ -13,7 +11,7 @@ First download the [PostgreSQL JDBC driver](https://jdbc.postgresql.org/).
 
 ## Installing the Adapter Script
 
-Upload the last available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
+Upload the latest available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
 
 Then create a schema to hold the adapter script.
 
@@ -33,18 +31,18 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
 
 ## Defining a Named Connection
 
-Define the connection to Athena as shown below. We recommend using TLS to secure the connection.
+Define the connection to PostgreSQL as shown below. We recommend using TLS to secure the connection.
 
 ```sql
-CREATE OR REPLACE CONNECTION ATHENA_CONNECTION
-TO 'jdbc:postgresql://<host>:<port>/<database name>'
+CREATE OR REPLACE CONNECTION POSTGRESQL_CONNECTION
+TO 'jdbc:postgresql://<host>:<port>/<database name>?ssl=true&sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory'
 USER '<user>'
 IDENTIFIED BY '<password>';
 ```
 
 ## Creating a Virtual Schema
 
-Below you see how a PostreSQL Virtual Schema is created. Please note that you have to provide the name of the database in the property `SHEMA_NAME` since Athena simulates catalogs.
+Below you see how a PostreSQL Virtual Schema is created.
 
 ```sql
 CREATE VIRTUAL SCHEMA <virtual schema name>
@@ -53,7 +51,7 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
 	SQL_DIALECT = 'POSTGRESQL'
 	CATALOG_NAME = '<catalog name>'
 	SCHEMA_NAME = '<schema name>'
-	CONNECTION_NAME = 'POSTGRES_CONNECTION'
+	CONNECTION_NAME = 'POSTGRESQL_CONNECTION'
 	;
 ```
 
@@ -64,6 +62,7 @@ In contrast to Exasol, PostgreSQL does not treat identifiers as specified in the
 ### Automatic Identifier conversion
 
 This is the default mode for handling identifiers, but identifier conversion can also be set explicitly using the following property:
+
 ```sql
 ALTER VIRTUAL SCHEMA <virtual schema name> SET POSTGRESQL_IDENTIFIER_MAPPING = 'CONVERT_TO_UPPER';
 ```
@@ -78,11 +77,12 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
 	SQL_DIALECT = 'POSTGRESQL'
 	CATALOG_NAME = '<catalog name>'
 	SCHEMA_NAME = '<schema name>'
-	CONNECTION_NAME = 'POSTGRES_CONNECTION'
+	CONNECTION_NAME = 'POSTGRESQL_CONNECTION'
 	IGNORE_ERRORS = 'POSTGRESQL_UPPERCASE_TABLES'
 ;
 ```
 You can also set this property to an existing virtual schema:
+
 ```sql
 ALTER VIRTUAL SCHEMA postgres SET IGNORE_ERRORS = 'POSTGRESQL_UPPERCASE_TABLES';
 ```
@@ -110,7 +110,7 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
 	SQL_DIALECT = 'POSTGRESQL'
 	CATALOG_NAME = '<catalog name>'
 	SCHEMA_NAME = '<schema name>'
-	CONNECTION_NAME = 'POSTGRES_CONNECTION'
+	CONNECTION_NAME = 'POSTGRESQL_CONNECTION'
 	POSTGRESQL_IDENTIFIER_MAPPING = 'PRESERVE_ORIGINAL_CASE'
 ;
 -- Open Schema and see what tables are there
@@ -139,3 +139,8 @@ SELECT "col1" FROM postgres."mysecondtable";
 Unquoted identifiers are converted to lowercase on the PostgreSQL side, and since there is no catalog conversion these identifiers are also lowercase in Exasol. To query a lowercase identifier you must use quotes in Exasol, because everything that is unquoted gets folded to uppercase.
 
 A best practice for this mode is: **always quote identifiers** (in the PostgreSQL Schema as well as in the Exasol Virtual Schema). This way everything works without having to change your queries.
+
+## Testing information
+
+The PostgreSQL dialect was tested with JDBC drivers of version 42.0.0 and later and PostgreSQL 10 and 11.
+Driver version 42.2.6 or later are recommended if you want to establish a TLS-secured connection. 

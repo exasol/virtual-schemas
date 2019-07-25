@@ -35,7 +35,7 @@ This step is necessary since the UDF container the adapter runs in has no access
 
 ## Installing the Adapter Script
 
-Upload the last available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
+Upload the latest available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
 
 Then create a schema to hold the adapter script.
 
@@ -65,7 +65,7 @@ CREATE OR REPLACE CONNECTION ORACLE_JDBC_CONNECTION
   IDENTIFIED BY '<password>';
 ```
 
-A quick option to test the `ORACLE_CONNECTION` connection is to run an `IMPORT FROM JDBC` query. The connection works, if `42` is returned.
+A quick option to test the `ORACLE_JDBC_CONNECTION` connection is to run an `IMPORT FROM JDBC` query. The connection works, if `42` is returned.
 
 ```sql
 IMPORT FROM JDBC AT jdbc_oracle
@@ -118,7 +118,7 @@ IMPORT FROM ORA at ORA_CONNECTION
   STATEMENT 'SELECT 42 FROM DUAL';
 ```
 
-### Creating a Virtual schema
+### Creating a Virtual Schema USING an ORA CONNECTION
 
 Assuming you already setup the JDBC connection `ORACLE_JDBC_CONNECTION` as shown in the previous section, you can continue with creating the virtual schema.
 
@@ -139,9 +139,12 @@ The Oracle dialect does not support all capabilities. A complete list can be fou
 
 Oracle data types are mapped to their equivalents in Exasol. The following exceptions apply:
 
-- `NUMBER`, `NUMBER with precision > 36` and `LONG` are casted to `VARCHAR` to prevent a loss of precision. <br>
-    If you want to return a DECIMAL type for these types you can set the property ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE: <br>
-    `ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE='36,20'` <br>
+- `NUMBER`, `NUMBER with precision > 36` and `LONG` are casted to `VARCHAR` to prevent a loss of precision. 
+
+    If you want to return a DECIMAL type for these types you can set the property ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE: 
+    
+    `ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE='36,20'` 
+    
     This will cast NUMBER with precision > 36, NUMBER without precision and LONG to DECIMAL(36,20).
     Keep in mind that this will yield errors if the data in the Oracle database does not fit into the specified DECIMAL type.
 - `DATE` is casted to `TIMESTAMP`. This data type is only supported for positive year values, i.e., years > 0001.

@@ -1,17 +1,17 @@
 # SQL Server SQL Dialect
 
-[Microsoft SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-2017) is a relational database management system developed by Microsoft. 
+[Microsoft SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-2017) is a Relational Database Management System (RDBMS) developed by Microsoft. 
 
 ## Uploading the JDBC Driver to EXAOperation
 
-First download the [SQL Server JDBC driver](https://sourceforge.net/projects/jtds/files/).
+First download the [jTDS JDBC driver](https://sourceforge.net/projects/jtds/files/).
 
 1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm)
 1. Upload the driver to BucketFS
 
 ## Installing the Adapter Script
 
-Upload the last available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
+Upload the latest available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
 
 Then create a schema to hold the adapter script.
 
@@ -19,10 +19,10 @@ Then create a schema to hold the adapter script.
 CREATE SCHEMA ADAPTER;
 ```
 
-The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.l
+The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
 
 ```sql
-CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.sql_server_jdbc_adapter AS
+CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
   %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-1.19.1.jar;
   %jar /buckets/<BFS service>/<bucket>/jtds.jar;
@@ -31,18 +31,18 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT adapter.sql_server_jdbc_adapter AS
 
 ## Defining a Named Connection
 
-Define the connection to Athena as shown below. We recommend using TLS to secure the connection.
+Define the connection to SQL Server as shown below. We recommend using TLS to secure the connection.
 
 ```sql
 CREATE OR REPLACE CONNECTION SQLSERVER_CONNECTION
 TO 'jdbc:jtds:sqlserver://<server name>:<port>/<database name>'
-USER '<access key ID>'
-IDENTIFIED BY '<access key>';
+USER '<user>'
+IDENTIFIED BY '<passsword>';
 ```
 
 ## Creating a Virtual Schema
 
-Below you see how an SQL Server Virtual Schema is created. Please note that you have to provide the name of the database in the property `SHEMA_NAME` since Athena simulates catalogs.
+Below you see how an SQL Server Virtual Schema is created.
 
 ```sql
 CREATE VIRTUAL SCHEMA <virtual schema name>

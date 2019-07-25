@@ -1,6 +1,6 @@
 # Teradata SQL Dialect
 
-Teradata is one of the Relational Database Management System based on Massively Parallel Processing (MPP) Architecture.
+Teradata is one of the Relational Database Management System based on a Massively Parallel Processing (MPP) Architecture.
 
 ## Registering the JDBC Driver in EXAOperation
 
@@ -34,7 +34,7 @@ This step is necessary since the UDF container the adapter runs in has no access
 
 ## Installing the Adapter Script
 
-Upload the last available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
+Upload the latest available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
 
 Then create a schema to hold the adapter script.
 
@@ -43,7 +43,6 @@ CREATE SCHEMA ADAPTER;
 ```
 
 The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
-
 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
@@ -61,9 +60,9 @@ Define the connection to Teradata as shown below.
 
 ```sql
 CREATE OR REPLACE CONNECTION TERADATA_CONNECTION
-TO 'jdbc:teradata://<Database server>/database=<Database name>'
-USER '<access key ID>'
-IDENTIFIED BY '<access key>';
+TO 'jdbc:teradata://<database server>/database=<database name>'
+USER '<user>'
+IDENTIFIED BY '<password>';
 ```
 
 ## Creating a Virtual Schema

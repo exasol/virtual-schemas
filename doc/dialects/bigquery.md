@@ -13,7 +13,7 @@ Download the [Simba JDBC Driver for Google BigQuery](https://cloud.google.com/bi
 
 ## Installing the Adapter Script
 
-Upload the last available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
+Upload the latest available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
 
 Then create a schema to hold the adapter script.
 
@@ -77,4 +77,4 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
 ## How to improve performance?
 
 Please be aware that the current implementation of the dialect can only handle result sets with limited size (a few thousand rows).
-If you need to proceed a large amount of data, please, contact our support team and create a support ticket. We can provide another implementation of the dialect the with a speed improvement that is not available officially on our github yet due to the hard installation process.
+If you need to proceed a large amount of data, please, contact our support team and create a support ticket. We can provide another implementation of the dialect the with a speed improvement that is not available officially on our GitHub yet due to the complex installation process.

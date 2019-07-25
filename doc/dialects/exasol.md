@@ -1,11 +1,11 @@
 # Exasol SQL Dialect
 
-Connecting to an Exasol database is the simplest way to start with virtual schemas.
-You don't have to install any JDBC driver, because it is already installed in the Exasol database and also included in the jar of the JDBC adapter.
+Connecting to an Exasol database is the simplest way to get started with Virtual Schemas.
+You don't have to install any JDBC driver, because it is already installed in the Exasol database and also included in the JAR of the JDBC adapter.
 
 ## Installing the Adapter Script
 
-Upload the last available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
+Upload the latest available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
 
 Then create a schema to hold the adapter script.
 
@@ -20,30 +20,6 @@ CREATE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
     %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-1.19.1.jar;
 /
-```
-
-## Using IMPORT FROM JDBC
-
-### Defining a Named Connection
-
-Define the connection to the other Exasol instance as shown below.
-
-```sql
-CREATE CONNECTION EXASOL_CONNECTION 
-TO 'jdbc:exa:<host>:<port>' 
-USER '<user>' 
-IDENTIFIED BY '<password>';
-```
-
-### Creating a Virtual Schema
-
-```sql
-CREATE VIRTUAL SCHEMA <virtual schema name> 
-    USING ADAPTER.JDBC_ADAPTER 
-    WITH
-    SQL_DIALECT     = 'EXASOL'
-    CONNECTION_NAME = 'EXASOL_CONNECTION'
-    SCHEMA_NAME     = '<schema name>';
 ```
 
 ## Using IMPORT FROM EXA Instead of IMPORT FROM JDBC
@@ -71,6 +47,30 @@ CREATE VIRTUAL SCHEMA VIRTUAL_EXASOL
     SCHEMA_NAME     = '<schema name>'
     IMPORT_FROM_EXA = 'true'
     EXA_CONNECTION_STRING = '<host>:<port>';
+```
+
+## Using IMPORT FROM JDBC
+
+### Defining a Named Connection
+
+Define the connection to the other Exasol cluster as shown below.
+
+```sql
+CREATE CONNECTION EXASOL_CONNECTION 
+TO 'jdbc:exa:<host>:<port>' 
+USER '<user>' 
+IDENTIFIED BY '<password>';
+```
+
+### Creating a Virtual Schema
+
+```sql
+CREATE VIRTUAL SCHEMA <virtual schema name> 
+    USING ADAPTER.JDBC_ADAPTER 
+    WITH
+    SQL_DIALECT     = 'EXASOL'
+    CONNECTION_NAME = 'EXASOL_CONNECTION'
+    SCHEMA_NAME     = '<schema name>';
 ```
 
 ## Supported Capabilities
