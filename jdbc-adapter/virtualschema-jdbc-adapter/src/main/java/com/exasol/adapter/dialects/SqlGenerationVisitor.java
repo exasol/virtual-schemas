@@ -1,11 +1,11 @@
 package com.exasol.adapter.dialects;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class has the logic to generate SQL queries based on a graph of {@link SqlNode} elements. It uses the visitor
@@ -49,14 +49,14 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         // Check if dialect provided invalid aliases, which would never be applied.
         for (final ScalarFunction function : this.dialect.getScalarFunctionAliases().keySet()) {
             if (!function.isSimple()) {
-                throw new RuntimeException("The dialect " + SqlDialect.getPublicName()
+                throw new RuntimeException("The dialect " + this.dialect.getName()
                         + " provided an alias for the non-simple scalar function " + function.name()
                         + ". This alias will never be considered.");
             }
         }
         for (final AggregateFunction function : this.dialect.getAggregateFunctionAliases().keySet()) {
             if (!function.isSimple()) {
-                throw new RuntimeException("The dialect " + SqlDialect.getPublicName()
+                throw new RuntimeException("The dialect " + this.dialect.getName()
                         + " provided an alias for the non-simple aggregate function " + function.name()
                         + ". This alias will never be considered.");
             }
@@ -115,7 +115,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         if (column.hasTableAlias()) {
             tablePrefix = this.dialect.applyQuote(column.getTableAlias())
                     + this.dialect.getTableCatalogAndSchemaSeparator();
-        } else if (column.getTableName() != null && !column.getTableName().isEmpty()) {
+        } else if ((column.getTableName() != null) && !column.getTableName().isEmpty()) {
             tablePrefix = this.dialect.applyQuote(column.getTableName())
                     + this.dialect.getTableCatalogAndSchemaSeparator();
         }

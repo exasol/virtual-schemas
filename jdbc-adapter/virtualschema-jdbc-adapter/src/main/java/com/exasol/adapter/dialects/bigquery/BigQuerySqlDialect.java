@@ -7,14 +7,15 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
-import java.sql.*;
+import java.sql.Connection;
 import java.util.*;
 
-import com.exasol.adapter.*;
-import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.*;
-import com.exasol.adapter.sql.*;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.sql.AggregateFunction;
+import com.exasol.adapter.sql.ScalarFunction;
 
 /**
  * This class implements the SQL dialect of Google's Big Query.
@@ -29,12 +30,8 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
-    /**
-     * Get the Big Query dialect name.
-     *
-     * @return always "BIGQUERY"
-     */
-    public static String getPublicName() {
+    @Override
+    public String getName() {
         return NAME;
     }
 

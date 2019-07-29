@@ -19,6 +19,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.dummy.DummySqlDialect;
 import com.exasol.logging.CapturingLogHandler;
 
 class AbstractSqlDialectTest {

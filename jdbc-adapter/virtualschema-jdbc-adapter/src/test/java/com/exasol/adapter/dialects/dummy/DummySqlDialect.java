@@ -1,4 +1,4 @@
-package com.exasol.adapter.dialects;
+package com.exasol.adapter.dialects.dummy;
 
 import static com.exasol.adapter.AdapterProperties.*;
 
@@ -8,6 +8,9 @@ import java.util.List;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.dialects.SqlDialect.NullSorting;
+import com.exasol.adapter.dialects.SqlDialect.StructureElementSupport;
 import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 

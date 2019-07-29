@@ -91,7 +91,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     }
 
     private SqlDialect createDialect(final Connection connection, final AdapterProperties properties) {
-        final SqlDialectFactory dialectFactory = new SqlDialectFactory(connection, SqlDialectRegistry.getInstance(),
+        final SqlDialectFactory dialectFactory = new SqlDialectFactoryOld(connection, SqlDialectRegistry.getInstance(),
                 properties);
         return dialectFactory.createSqlDialect(properties.getSqlDialect());
     }

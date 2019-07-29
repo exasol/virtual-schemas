@@ -22,19 +22,15 @@ import com.exasol.adapter.jdbc.RemoteMetadataReader;
  * @see <a href="https://aws.amazon.com/athena/">AWS Athena</a>
  */
 public class AthenaSqlDialect extends AbstractSqlDialect {
-    private static final String NAME = "ATHENA";
+    static final String NAME = "ATHENA";
     private static final Capabilities CAPABILITIES = createCapabilityList();
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
-    /**
-     * Get the Athena dialect name.
-     *
-     * @return always "ATHENA"
-     */
-    public static String getPublicName() {
+    @Override
+    public String getName() {
         return NAME;
     }
 
@@ -75,17 +71,15 @@ public class AthenaSqlDialect extends AbstractSqlDialect {
     /**
      * Get the type of support Athena has for catalogs.
      * <p>
-     * While Athena itself does not use catalogs, the JDBC driver simulates a single
-     * catalog for better compatibility with standard products like BI tools.
+     * While Athena itself does not use catalogs, the JDBC driver simulates a single catalog for better compatibility
+     * with standard products like BI tools.
      * <p>
      *
-     * @return always
-     *         {@link com.exasol.adapter.dialects.SqlDialect.StructureElementSupport#SINGLE}
+     * @return always {@link com.exasol.adapter.dialects.SqlDialect.StructureElementSupport#SINGLE}
      *
      * @see <a href=
      *      "https://s3.amazonaws.com/athena-downloads/drivers/JDBC/SimbaAthenaJDBC_2.0.7/docs/Simba+Athena+JDBC+Driver+Install+and+Configuration+Guide.pdf">
-     *      Simba Athena JDBC Driver Install and Configuration Guide, section
-     *      "Catalog and Schema Support"</a>
+     *      Simba Athena JDBC Driver Install and Configuration Guide, section "Catalog and Schema Support"</a>
      */
     @Override
     public StructureElementSupport supportsJdbcCatalogs() {
@@ -97,12 +91,9 @@ public class AthenaSqlDialect extends AbstractSqlDialect {
      * <p>
      * Athena knows schemas as a mirror of databases.
      *
-     * @return always
-     *         {@link com.exasol.adapter.dialects.SqlDialect.StructureElementSupport#MULTIPLE}
+     * @return always {@link com.exasol.adapter.dialects.SqlDialect.StructureElementSupport#MULTIPLE}
      *
-     * @see <a href=
-     *      "https://docs.aws.amazon.com/athena/latest/ug/show-databases.html">SHOW
-     *      DATABASES documentation</a>
+     * @see <a href= "https://docs.aws.amazon.com/athena/latest/ug/show-databases.html">SHOW DATABASES documentation</a>
      */
     @Override
     public StructureElementSupport supportsJdbcSchemas() {
