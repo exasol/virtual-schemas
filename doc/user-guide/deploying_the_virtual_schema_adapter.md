@@ -23,7 +23,7 @@ cd virtual-schemas/jdbc-adapter/
 mvn clean -DskipTests package
 ```
 
-The resulting fat JAR is stored in `virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.19.1.jar`.
+The resulting fat JAR is stored in `virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.19.2.jar`.
 
 ## Uploading the Adapter JAR Archive
 
@@ -46,8 +46,8 @@ Following steps are required to upload a file to a bucket:
 1. Now upload the file into this bucket, e.g. using curl (adapt the hostname, BucketFS port, bucket name and bucket write password).
 
 ```bash
-curl -X PUT -T virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.19.1.jar \
- http://w:write-password@your.exasol.host.com:2580/bucket1/virtualschema-jdbc-adapter-dist-1.19.1.jar
+curl -X PUT -T virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.19.2.jar \
+ http://w:write-password@your.exasol.host.com:2580/bucket1/virtualschema-jdbc-adapter-dist-1.19.2.jar
 ```
 
 If you later need to change the bucket passwords, select the bucket and click "Edit".
@@ -84,7 +84,7 @@ CREATE SCHEMA ADAPTER;
 
 CREATE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.19.1.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.19.2.jar;
   %jar /buckets/your-bucket-fs/your-bucket/<JDBC driver>.jar;
 /
 ```

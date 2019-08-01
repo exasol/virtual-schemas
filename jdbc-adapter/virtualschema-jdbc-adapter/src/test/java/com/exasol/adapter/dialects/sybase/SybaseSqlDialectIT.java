@@ -10,7 +10,6 @@ import java.sql.SQLException;
 import java.util.*;
 
 import org.junit.Assume;
-import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -31,9 +30,9 @@ class SybaseSqlDialectIT extends AbstractIntegrationTest {
         createSybaseJDBCAdapter();
         final String catalogName = "testdb"; // This only works for the database in our test environment
         final String schemaName = "tester";
-        createVirtualSchema(VS_NAME, SybaseSqlDialect.getPublicName(), catalogName, schemaName, "",
-                getConfig().getSybaseUser(), getConfig().getSybasePassword(), "ADAPTER.JDBC_ADAPTER",
-                getConfig().getSybaseJdbcConnectionString(), IS_LOCAL, getConfig().debugAddress(), "", null, "");
+        createVirtualSchema(VS_NAME, SybaseSqlDialect.NAME, catalogName, schemaName, "", getConfig().getSybaseUser(),
+                getConfig().getSybasePassword(), "ADAPTER.JDBC_ADAPTER", getConfig().getSybaseJdbcConnectionString(),
+                IS_LOCAL, getConfig().debugAddress(), "", null, "");
     }
 
     private static void createSybaseJDBCAdapter() throws SQLException, FileNotFoundException {
@@ -124,7 +123,6 @@ class SybaseSqlDialectIT extends AbstractIntegrationTest {
         assertEquals(2, result.getRow());
     }
 
-    // TODO: add datatype tests
     @Test
     void testTypeSmalldatetime() throws SQLException {
         final ResultSet result = executeQuery("SELECT \"c_smalldatetime\" FROM vs_sybase.\"timetypes\"");
@@ -147,16 +145,6 @@ class SybaseSqlDialectIT extends AbstractIntegrationTest {
     void testTypeTime() throws SQLException {
         final ResultSet result = executeQuery("SELECT \"c_time\" FROM vs_sybase.\"timetypes\"");
         matchNextRow(result, "11:22:33.456");
-    }
-
-    @Test
-    @Ignore
-    void testTypeBigdatetime() throws SQLException {
-        final ResultSet result = executeQuery("SELECT \"c_bigdatetime\" FROM vs_sybase.\"timetypes\"");
-        matchNextRow(result, getSqlTimestamp(1753, 1, 1, 1, 2, 3, 100));
-        // SQL Error [22001]: Data truncation
-        // Arithmetic overflow during implicit conversion of BIGDATETIME value to a
-        // DATETIME field .
     }
 
     @Test

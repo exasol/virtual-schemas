@@ -15,12 +15,12 @@ public interface SqlDialectFactory {
      * @param properties user-defined adapter properties
      * @return SQL dialect adapter
      */
-    SqlDialect createSqlDialect(final Connection connection, final AdapterProperties properties);
+    public SqlDialect createSqlDialect(final Connection connection, final AdapterProperties properties);
 
     /**
      * Get the name of the SQL dialect this factory can produce
      *
      * @return SQL dialect name
      */
-    String getSqlDialectName();
+    public String getSqlDialectName();
 }

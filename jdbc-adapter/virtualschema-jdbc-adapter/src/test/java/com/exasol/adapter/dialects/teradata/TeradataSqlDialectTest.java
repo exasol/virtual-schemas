@@ -19,7 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hamcrest.*;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -82,17 +83,6 @@ class TeradataSqlDialectTest {
                 sqlDialect::validateProperties);
         MatcherAssert.assertThat(exception.getMessage(), containsString(
                 "The dialect TERADATA does not support CATALOG_NAME property. Please, do not set the CATALOG_NAME property."));
-    }
-
-    @Test
-    void testValidateDialectNameProperty() {
-        setMandatoryProperties("ORACLE");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new TeradataSqlDialect(null, adapterProperties);
-        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
-                sqlDialect::validateProperties);
-        MatcherAssert.assertThat(exception.getMessage(), containsString(
-                "The dialect TERADATA cannot have the name ORACLE. You specified the wrong dialect name or created the wrong dialect class."));
     }
 
     @Test

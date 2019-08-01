@@ -29,7 +29,7 @@ class AthenaSqlDialectTest {
 
     @Test
     void testGetName() {
-        assertThat(this.getName(), equalTo("ATHENA"));
+        assertThat(this.dialect.getName(), equalTo("ATHENA"));
     }
 
     @Test

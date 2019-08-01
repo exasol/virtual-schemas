@@ -9,16 +9,11 @@ import java.util.List;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.dialects.SqlDialect.NullSorting;
-import com.exasol.adapter.dialects.SqlDialect.StructureElementSupport;
 import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 
 public class DummySqlDialect extends AbstractSqlDialect {
-    public static String getPublicName() {
-        return "dummy dialect";
-    }
-
+    static final String NAME = "DUMMYDIALECT";
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY,
             PASSWORD_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY,
@@ -26,6 +21,11 @@ public class DummySqlDialect extends AbstractSqlDialect {
 
     public DummySqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
     public AdapterProperties getProperties() {
@@ -69,12 +69,6 @@ public class DummySqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return null;
-    }
-
-    @Override
-    public void validateProperties() throws PropertyValidationException {
-        super.validateDialectName("GENERIC");
-        super.validateProperties();
     }
 
     @Override

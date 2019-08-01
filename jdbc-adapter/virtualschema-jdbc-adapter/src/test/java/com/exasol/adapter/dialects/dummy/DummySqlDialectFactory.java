@@ -1,18 +1,19 @@
 package com.exasol.adapter.dialects.dummy;
 
-import com.exasol.adapter.dialects.AbstractSqlDialectFactory;
+import java.sql.Connection;
+
+import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.dialects.SqlDialectFactory;
 
-public class DummySqlDialectFactory extends AbstractSqlDialectFactory {
-    private static final String DIALECT_NAME = "DUMMYDIALECT";
-
+public class DummySqlDialectFactory implements SqlDialectFactory {
     @Override
     public String getSqlDialectName() {
-        return DIALECT_NAME;
+        return DummySqlDialect.NAME;
     }
 
     @Override
-    protected Class<? extends SqlDialect> getSqlDialectClass() {
-        return DummySqlDialect.class;
+    public SqlDialect createSqlDialect(final Connection connection, final AdapterProperties properties) {
+        return new DummySqlDialect(connection, properties);
     }
 }

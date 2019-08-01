@@ -13,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
 import com.exasol.adapter.dialects.IntegrationTestConfigurationCondition;
-import com.exasol.adapter.dialects.impala.ImpalaSqlDialect;
 
 /**
  * Integration test for the Impala SQL dialect
@@ -32,14 +31,13 @@ public class ImpalaSqlDialectIT extends AbstractIntegrationTest {
         Assume.assumeTrue(getConfig().impalaTestsRequested());
         setConnection(connectToExa());
         createImpalaJDBCAdapter();
-        createVirtualSchema(VIRTUAL_SCHEMA, ImpalaSqlDialect.getPublicName(), "", IMPALA_SCHEMA, "", "no-user",
-                "no-password", "ADAPTER.JDBC_ADAPTER", getConfig().getImpalaJdbcConnectionString(), IS_LOCAL,
+        createVirtualSchema(VIRTUAL_SCHEMA, ImpalaSqlDialect.NAME, "", IMPALA_SCHEMA, "", "no-user", "no-password",
+                "ADAPTER.JDBC_ADAPTER", getConfig().getImpalaJdbcConnectionString(), IS_LOCAL,
                 getConfig().debugAddress(), "SAMPLE_07,ALL_HIVE_IMPALA_TYPES,SIMPLE,SIMPLE_WITH_NULLS", null, "");
     }
 
     @Test
     void testTypeMapping() throws SQLException {
-        // TODO Test type mapping for tables with invalid Impala Types
         final ResultSet result = executeQuery(
                 "SELECT COLUMN_NAME, COLUMN_TYPE, COLUMN_MAXSIZE, COLUMN_NUM_PREC, COLUMN_NUM_SCALE, COLUMN_DEFAULT FROM EXA_DBA_COLUMNS WHERE COLUMN_SCHEMA = '"
                         + VIRTUAL_SCHEMA

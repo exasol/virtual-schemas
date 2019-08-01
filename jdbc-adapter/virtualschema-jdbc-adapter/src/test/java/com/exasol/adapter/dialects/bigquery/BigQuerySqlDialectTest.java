@@ -28,8 +28,8 @@ class BigQuerySqlDialectTest {
     }
 
     @Test
-    void testGetPublicName() {
-        assertThat(BigQuerySqlDialect.getPublicName(), equalTo("BIGQUERY"));
+    void testGetName() {
+        assertThat(this.dialect.getName(), equalTo("BIGQUERY"));
     }
 
     @Test

@@ -31,8 +31,8 @@ class SapHanaSqlDialectTest {
     }
 
     @Test
-    void testGetPublicName() {
-        assertThat(SapHanaSqlDialect.getPublicName(), equalTo("SAPHANA"));
+    void testGetName() {
+        assertThat(this.dialect.getName(), equalTo("SAPHANA"));
     }
 
     @Test

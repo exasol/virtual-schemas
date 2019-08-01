@@ -29,11 +29,6 @@ public class AthenaSqlDialect extends AbstractSqlDialect {
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
-    @Override
-    public String getName() {
-        return NAME;
-    }
-
     private static Capabilities createCapabilityList() {
         return Capabilities //
                 .builder() //
@@ -61,6 +56,11 @@ public class AthenaSqlDialect extends AbstractSqlDialect {
      */
     public AthenaSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
     @Override

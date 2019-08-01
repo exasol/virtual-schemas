@@ -2,15 +2,12 @@ package com.exasol.adapter.dialects.generic;
 
 import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
 import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,17 +41,6 @@ class GenericSqlDialectTest {
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new GenericSqlDialect(this.connectionMock, adapterProperties);
         sqlDialect.validateProperties();
-    }
-
-    @Test
-    void testValidateDialectNameProperty() {
-        setMandatoryProperties("ORACLE");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new GenericSqlDialect(this.connectionMock, adapterProperties);
-        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
-                sqlDialect::validateProperties);
-        MatcherAssert.assertThat(exception.getMessage(), containsString(
-                "The dialect GENERIC cannot have the name ORACLE. You specified the wrong dialect name or created the wrong dialect class."));
     }
 
     @Test

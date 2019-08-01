@@ -5,9 +5,9 @@ import static org.hamcrest.junit.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.sql.Connection;
-import java.util.Collections;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,8 +19,7 @@ import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractSqlDialectFactoryTest {
-    private static final String DIALECT_NAME = "dummy dialect";
-    private static final AdapterProperties DUMMY_PROPERTIES = new AdapterProperties(Collections.emptyMap());
+    private static final AdapterProperties DUMMY_PROPERTIES = AdapterProperties.emptyProperties();
     private SqlDialectFactory sqlDialectFactory;
     @Mock
     private Connection connectionMock;
@@ -30,14 +29,9 @@ class AbstractSqlDialectFactoryTest {
         this.sqlDialectFactory = new DummySqlDialectFactory();
     }
 
-    @AfterAll
-    static void afterAll() {
-        SqlDialectRegistry.deleteInstance();
-    }
-
     @Test
     void testGetSqlDialecName() {
-        assertThat(this.sqlDialectFactory.getSqlDialectName(), equalTo(DIALECT_NAME));
+        assertThat(this.sqlDialectFactory.getSqlDialectName(), equalTo("DUMMYDIALECT"));
     }
 
     @Test
