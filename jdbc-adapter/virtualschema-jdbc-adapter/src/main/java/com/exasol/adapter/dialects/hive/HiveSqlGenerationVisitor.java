@@ -6,10 +6,8 @@ import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.sql.*;
-import com.google.common.base.Joiner;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -44,27 +42,23 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private List<String> getSelectStarList(final SqlSelectList selectList) throws AdapterException {
-        final List<String> selectListElements = new ArrayList<>();
         if (SqlGenerationHelper.selectListRequiresCasts(selectList, nodeRequiresCast)) {
             final List<TableMetadata> tableMetadata = new ArrayList<>();
             final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
             SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata);
-            addColumns(selectListElements, tableMetadata);
+            return getSelectListWithColumns(tableMetadata);
         } else {
-            selectListElements.add("*");
+            return new ArrayList<>(Collections.singletonList("*"));
         }
-        return selectListElements;
     }
 
-    private void addColumns(final List<String> selectListElements, final List<TableMetadata> tableMetadata)
-            throws AdapterException {
+    private List<String> getSelectListWithColumns(final List<TableMetadata> tableMetadata) throws AdapterException {
+        final List<String> selectListElements = new ArrayList<>();
         int columnId = 0;
         for (final TableMetadata tableMeta : tableMetadata) {
             for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
                 final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-                final String typeName = ColumnAdapterNotes
-                        .deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName())
-                        .getTypeName();
+                final String typeName = getTypeName(sqlColumn);
                 if (typeName.equals(BINARY_TYPE_NAME)) {
                     selectListElements.add("base64(" + super.visit(sqlColumn) + ")");
                 } else {
@@ -73,6 +67,12 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
                 ++columnId;
             }
         }
+        return selectListElements;
+    }
+
+    private String getTypeName(final SqlColumn sqlColumn) throws AdapterException {
+        return ColumnAdapterNotes
+              .deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
     }
 
     private List<String> getSelectList(final SqlSelectList selectList) throws AdapterException {
@@ -80,9 +80,7 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
         for (final SqlNode node : selectList.getExpressions()) {
             if (node.getType().equals(SqlNodeType.COLUMN)) {
                 final SqlColumn sqlColumn = (SqlColumn) node;
-                final String typeName = ColumnAdapterNotes
-                        .deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName())
-                        .getTypeName();
+                final String typeName = getTypeName(sqlColumn);
                 if (typeName.equals(BINARY_TYPE_NAME)) {
                     selectListElements.add("base64(" + node.accept(this) + ")");
                 } else {
@@ -128,54 +126,41 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
 
     @Override
     public String visit(final SqlFunctionScalar function) throws AdapterException {
-        String sql = super.visit(function);
         switch (function.getFunction()) {
         case CONCAT:
-            sql = getCastedFunction("CONCAT", function);
-            break;
+            return getCastedFunction("CONCAT", function);
         case REPEAT:
-            sql = getCastedFunction("REPEAT", function);
-            break;
+            return getCastedFunction("REPEAT", function);
         case UPPER:
-            sql = getCastedFunction("UPPER", function);
-            break;
+            return getCastedFunction("UPPER", function);
         case LOWER:
-            sql = getCastedFunction("LOWER", function);
-            break;
+            return getCastedFunction("LOWER", function);
         case DIV:
-            sql = getChangedFunction(function, "DIV");
-            break;
+            return getChangedFunction(function, "DIV");
         case MOD:
-            sql = getChangedFunction(function, "%");
-            break;
+            return getChangedFunction(function, "%");
         case SUBSTR:
-            sql = getChangedSubstringFunction(function);
-            break;
+            return getChangedSubstringFunction(function);
         case CURRENT_DATE:
-            sql = "CURRENT_DATE";
-            break;
+            return "CURRENT_DATE";
         case DATE_TRUNC:
-            sql = changeDateTrunc(function);
-            break;
+            return changeDateTrunc(function);
         case BIT_AND:
-            sql = getChangedFunction(function, "&");
-            break;
+            return getChangedFunction(function, "&");
         case BIT_OR:
-            sql = getChangedFunction(function, "|");
-            break;
+            return getChangedFunction(function, "|");
         case BIT_XOR:
-            sql = getChangedFunction(function, "^");
-            break;
+            return getChangedFunction(function, "^");
         default:
-            break;
+            return super.visit(function);
         }
-        return sql;
     }
 
     private String getCastedFunction(final String functionName, final SqlFunctionScalar function)
             throws AdapterException {
-        final List<String> argumentsSql = new ArrayList<>();
-        for (final SqlNode node : function.getArguments()) {
+        final List<SqlNode> arguments = function.getArguments();
+        final List<String> argumentsSql = new ArrayList<>(arguments.size());
+        for (final SqlNode node : arguments) {
             argumentsSql.add(node.accept(this));
         }
         final StringBuilder builder = new StringBuilder();
@@ -194,8 +179,9 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
 
     private String getChangedFunction(final SqlFunctionScalar function, final String replacement)
             throws AdapterException {
-        final List<String> argumentsSql = new ArrayList<>();
-        for (final SqlNode node : function.getArguments()) {
+        final List<SqlNode> arguments = function.getArguments();
+        final List<String> argumentsSql = new ArrayList<>(arguments.size());
+        for (final SqlNode node : arguments) {
             argumentsSql.add(node.accept(this));
         }
         final StringBuilder builder = new StringBuilder();
@@ -208,8 +194,9 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private String getChangedSubstringFunction(final SqlFunctionScalar function) throws AdapterException {
-        final List<String> argumentsSql = new ArrayList<>();
-        for (final SqlNode node : function.getArguments()) {
+        final List<SqlNode> arguments = function.getArguments();
+        final List<String> argumentsSql = new ArrayList<>(arguments.size());
+        for (final SqlNode node : arguments) {
             argumentsSql.add(node.accept(this));
         }
         if (function.toSimpleSql().toUpperCase().contains("FROM")) {
@@ -226,8 +213,9 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private String changeDateTrunc(final SqlFunctionScalar function) throws AdapterException {
-        final List<String> argumentsSql = new ArrayList<>();
-        for (final SqlNode node : function.getArguments()) {
+        final List<SqlNode> arguments = function.getArguments();
+        final List<String> argumentsSql = new ArrayList<>(arguments.size());
+        for (final SqlNode node : arguments) {
             argumentsSql.add(node.accept(this));
         }
         final StringBuilder builder = new StringBuilder();
@@ -243,9 +231,7 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
         try {
             if (node.getType() == SqlNodeType.COLUMN) {
                 final SqlColumn column = (SqlColumn) node;
-                final String typeName = ColumnAdapterNotes
-                        .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName())
-                        .getTypeName();
+                final String typeName = getTypeName(column);
                 return typeName.equals(BINARY_TYPE_NAME);
             }
             return false;

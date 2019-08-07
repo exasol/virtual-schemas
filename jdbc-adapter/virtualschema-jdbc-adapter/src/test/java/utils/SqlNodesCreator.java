@@ -5,6 +5,7 @@ import com.exasol.adapter.sql.*;
 
 import java.math.*;
 import java.util.*;
+import java.util.stream.*;
 
 import static com.exasol.adapter.sql.AggregateFunction.AVG;
 
@@ -16,18 +17,16 @@ public class SqlNodesCreator {
     private SqlNodesCreator() {
     }
 
-    public static SqlOrderBy createSqlOrderByDescNullsFirst() {
+    public static SqlOrderBy createSqlOrderByDescNullsFirst(final String columnName1, final String columnName2) {
         final List<SqlNode> orderByArguments = new ArrayList<>();
         final ColumnMetadata columnMetadata = ColumnMetadata.builder().name("test_column").type(DataType.createBool())
                 .build();
         final ColumnMetadata columnMetadata2 = ColumnMetadata.builder().name("test_column2")
                 .type(DataType.createDouble()).build();
-        final List<Boolean> nulls = new ArrayList<>();
-        nulls.add(false);
-        nulls.add(true);
         orderByArguments.add(new SqlColumn(1, columnMetadata));
         orderByArguments.add(new SqlColumn(2, columnMetadata2));
-        return new SqlOrderBy(orderByArguments, nulls, nulls);
+        return new SqlOrderBy(orderByArguments, Stream.of(false, true).collect(Collectors.toList()),
+                Stream.of(false, true).collect(Collectors.toList()));
     }
 
     public static SqlTable createFromClause(final List<ColumnMetadata> columns, final String tableName) {
@@ -72,5 +71,23 @@ public class SqlNodesCreator {
                         .type(DataType.createChar(20, DataType.ExaCharset.UTF8)).build()));
         arguments.add(new SqlLiteralExactnumeric(new BigDecimal(numericValue)));
         return new SqlFunctionScalar(scalarFunction, arguments, true, false);
+    }
+
+    public static SqlSelectList createSqlSelectStarListWithOneColumn(final String adapterNotes, final DataType dataType,
+            final String columnName) {
+        final SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
+        final List<ColumnMetadata> columns = new ArrayList<>();
+        columns.add(ColumnMetadata.builder().name(columnName).adapterNotes(adapterNotes).type(dataType).build());
+        final SqlNode sqlStatementSelect = createSqlStatementSelect(selectList, columns, "");
+        selectList.setParent(sqlStatementSelect);
+        return selectList;
+    }
+
+    public static SqlSelectList createSqlSelectStarListWithoutColumns() {
+        final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
+        final SqlNode sqlStatementSelect = createSqlStatementSelect(sqlSelectList, Collections.emptyList(),
+                "test_table");
+        sqlSelectList.setParent(sqlStatementSelect);
+        return sqlSelectList;
     }
 }

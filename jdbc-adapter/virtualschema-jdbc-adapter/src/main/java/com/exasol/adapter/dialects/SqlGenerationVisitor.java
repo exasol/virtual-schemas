@@ -26,7 +26,6 @@ import com.exasol.adapter.sql.*;
  * is a better way.
  */
 public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
-
     private final SqlDialect dialect;
     private final SqlGenerationContext context;
 
@@ -62,6 +61,10 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
                         + ". This alias will never be considered.");
             }
         }
+    }
+
+    protected boolean isDirectlyInSelectList(final SqlColumn column) {
+        return column.hasParent() && (column.getParent().getType() == SqlNodeType.SELECT_LIST);
     }
 
     @Override

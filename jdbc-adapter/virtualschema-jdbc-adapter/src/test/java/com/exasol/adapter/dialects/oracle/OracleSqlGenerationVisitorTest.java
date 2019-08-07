@@ -13,12 +13,15 @@ import java.math.*;
 import java.sql.*;
 import java.util.*;
 
+import static com.exasol.adapter.dialects.VisitorAssertions.assertSqlNodeConvertedToAsterisk;
+import static com.exasol.adapter.dialects.VisitorAssertions.assertSqlNodeConvertedToOne;
 import static com.exasol.adapter.sql.AggregateFunction.*;
 import static com.exasol.adapter.sql.ScalarFunction.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static utils.SqlNodesCreator.*;
+import static utils.SqlNodesCreator.createSqlSelectStarListWithOneColumn;
 
 class OracleSqlGenerationVisitorTest {
     private OracleSqlGenerationVisitor visitor;
@@ -48,7 +51,7 @@ class OracleSqlGenerationVisitorTest {
     @Test
     void testVisitSqlStatementSelect() throws AdapterException {
         final SqlSelectList selectList = SqlSelectList.createAnyValueSelectList();
-        final SqlStatementSelect sqlStatementSelect = createSqlStatementSelect(selectList, Collections.EMPTY_LIST,
+        final SqlStatementSelect sqlStatementSelect = createSqlStatementSelect(selectList, Collections.emptyList(),
                 "test_table_name");
         assertThat(visitor.visit(sqlStatementSelect), equalTo("SELECT 1 FROM \"test_schema\".\"test_table_name\""));
     }
@@ -56,7 +59,7 @@ class OracleSqlGenerationVisitorTest {
     @Test
     void testVisitSqlStatementSelectWithLimitAnyValue() throws AdapterException {
         final SqlSelectList selectList = SqlSelectList.createAnyValueSelectList();
-        final SqlTable fromClause = createFromClause(Collections.EMPTY_LIST, "");
+        final SqlTable fromClause = createFromClause(Collections.emptyList(), "");
         final SqlLimit limit = new SqlLimit(10, 3);
         final SqlStatementSelect sqlStatementSelect = new SqlStatementSelect(fromClause, selectList, null, null, null,
                 null, limit);
@@ -66,7 +69,7 @@ class OracleSqlGenerationVisitorTest {
     @Test
     void testVisitSqlStatementSelectWithLimitSelectStar() throws AdapterException {
         final SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
-        final SqlTable fromClause = createFromClause(Collections.EMPTY_LIST, "test_table_name");
+        final SqlTable fromClause = createFromClause(Collections.emptyList(), "test_table_name");
         final SqlLimit limit = new SqlLimit(10, 3);
         final SqlStatementSelect sqlStatementSelect = new SqlStatementSelect(fromClause, selectList, null, null, null,
                 null, limit);
@@ -79,7 +82,7 @@ class OracleSqlGenerationVisitorTest {
     @Test
     void testVisitSqlStatementSelectWithLimitRegularSelectList() throws AdapterException {
         final SqlSelectList selectList = createRegularSqlSelectListWithTwoColumns();
-        final SqlTable fromClause = createFromClause(Collections.EMPTY_LIST, "test_table_name");
+        final SqlTable fromClause = createFromClause(Collections.emptyList(), "test_table_name");
         final SqlLimit limit = new SqlLimit(10, 3);
         final SqlStatementSelect sqlStatementSelect = new SqlStatementSelect(fromClause, selectList, null, null, null,
                 null, limit);
@@ -92,7 +95,7 @@ class OracleSqlGenerationVisitorTest {
     @Test
     void testVisitSqlStatementSelectWithLimitRegularSelectListWithoutOffset() throws AdapterException {
         final SqlSelectList selectList = createRegularSqlSelectListWithTwoColumns();
-        final SqlTable fromClause = createFromClause(Collections.EMPTY_LIST, "test_table_name");
+        final SqlTable fromClause = createFromClause(Collections.emptyList(), "test_table_name");
         final SqlLimit limit = new SqlLimit(10);
         final SqlStatementSelect sqlStatementSelect = new SqlStatementSelect(fromClause, selectList, null, null, null,
                 null, limit);
@@ -104,55 +107,38 @@ class OracleSqlGenerationVisitorTest {
     @Test
     void testVisitSqlSelectListRequiresAnyColumn() throws AdapterException {
         final SqlSelectList sqlSelectList = SqlSelectList.createAnyValueSelectList();
-        assertThat(visitor.visit(sqlSelectList), equalTo("1"));
+        assertSqlNodeConvertedToOne(sqlSelectList, visitor);
     }
 
     @Test
     void testVisitSqlSelectListSelectStar() throws AdapterException {
-        final SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
-        final List<ColumnMetadata> columns = new ArrayList<>();
-        columns.add(ColumnMetadata.builder().name("test_column")
-                .adapterNotes("{\"jdbcDataType\":16, \"typeName\":\"BOOLEAN\"}").type(DataType.createBool()).build());
-        final SqlNode sqlStatementSelect = createSqlStatementSelect(selectList, columns, "");
-        selectList.setParent(sqlStatementSelect);
-        assertThat(visitor.visit(selectList), equalTo("*"));
+        final SqlSelectList selectList = createSqlSelectStarListWithOneColumn(
+                "{\"jdbcDataType\":16, \"typeName\":\"BOOLEAN\"}", DataType.createBool(), "test_column");
+        assertSqlNodeConvertedToAsterisk(selectList, visitor);
     }
 
     @CsvSource({ "NUMBER", "TIMESTAMP", "INTERVAL", "BINARY_FLOAT", "BINARY_DOUBLE", "CLOB", "NCLOB" })
     @ParameterizedTest
     void testVisitSqlSelectListSelectStarCastToChar(final String dataType) throws AdapterException {
-        final SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
-        final List<ColumnMetadata> columns = new ArrayList<>();
-        columns.add(ColumnMetadata.builder().name("test_column")
-                .adapterNotes("{\"jdbcDataType\":2, \"typeName\":\"" + dataType + "\"}")
-                .type(DataType.createVarChar(50, DataType.ExaCharset.UTF8)).build());
-        final SqlNode select = createSqlStatementSelect(selectList, columns, "");
-        selectList.setParent(select);
+        final SqlSelectList selectList = createSqlSelectStarListWithOneColumn(
+                "{\"jdbcDataType\":2, \"typeName\":\"" + dataType + "\"}",
+                DataType.createVarChar(50, DataType.ExaCharset.UTF8), "test_column");
         assertThat(visitor.visit(selectList), equalTo("TO_CHAR(\"test_column\")"));
     }
 
     @CsvSource({ "ROWID", "UROWID" })
     @ParameterizedTest
     void testVisitSqlSelectListSelectStarNumberCastRowidToChar(final String dataType) throws AdapterException {
-        final SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
-        final List<ColumnMetadata> columns = new ArrayList<>();
-        columns.add(ColumnMetadata.builder().name("test_column")
-                .adapterNotes("{\"jdbcDataType\":2, \"typeName\":\"" + dataType + "\"}")
-                .type(DataType.createVarChar(50, DataType.ExaCharset.UTF8)).build());
-        final SqlNode select = createSqlStatementSelect(selectList, columns, "");
-        selectList.setParent(select);
+        final SqlSelectList selectList = createSqlSelectStarListWithOneColumn(
+                "{\"jdbcDataType\":2, \"typeName\":\"" + dataType + "\"}",
+                DataType.createVarChar(50, DataType.ExaCharset.UTF8), "test_column");
         assertThat(visitor.visit(selectList), equalTo("ROWIDTOCHAR(\"test_column\")"));
     }
 
     @Test
     void testVisitSqlSelectListSelectStarNumberCastBlobToChar() throws AdapterException {
-        final SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
-        final List<ColumnMetadata> columns = new ArrayList<>();
-        columns.add(
-                ColumnMetadata.builder().name("test_column").adapterNotes("{\"jdbcDataType\":2, \"typeName\":\"BLOB\"}")
-                        .type(DataType.createVarChar(50, DataType.ExaCharset.UTF8)).build());
-        final SqlNode select = createSqlStatementSelect(selectList, columns, "");
-        selectList.setParent(select);
+        final SqlSelectList selectList = createSqlSelectStarListWithOneColumn("{\"jdbcDataType\":2, \"typeName\":\"BLOB\"}",
+                DataType.createVarChar(50, DataType.ExaCharset.UTF8), "test_column");
         assertThat(visitor.visit(selectList), equalTo("UTL_RAW.CAST_TO_VARCHAR2(\"test_column\")"));
     }
 
@@ -171,7 +157,7 @@ class OracleSqlGenerationVisitorTest {
     @Test
     void testVisitSqlSelectListRegularSelectList() throws AdapterException {
         final SqlSelectList selectList = createRegularSqlSelectListWithTwoColumns();
-        final SqlTable fromClause = createFromClause(Collections.EMPTY_LIST, "");
+        final SqlTable fromClause = createFromClause(Collections.emptyList(), "");
         final SqlNode select = new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
         selectList.setParent(select);
         assertThat(visitor.visit(selectList), equalTo("true, 'string'"));
@@ -226,7 +212,7 @@ class OracleSqlGenerationVisitorTest {
     void testVisitSqlFunctionAggregateGroupConcatWithOrderBy() throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralDouble(10.5));
-        final SqlOrderBy orderBy = createSqlOrderByDescNullsFirst();
+        final SqlOrderBy orderBy = createSqlOrderByDescNullsFirst("test_column", "test_column2");
         final SqlFunctionAggregateGroupConcat aggregateGroupConcat = new SqlFunctionAggregateGroupConcat(AVG, arguments,
                 orderBy, true, "'");
         assertThat(visitor.visit(aggregateGroupConcat), equalTo(
@@ -299,22 +285,22 @@ class OracleSqlGenerationVisitorTest {
         assertThat(visitor.visit(sqlFunctionScalar), equalTo(expected));
     }
 
-    @CsvSource(value = { "BIT_AND : BITAND('test', 'test2')", //
-            "BIT_TO_NUM : BIN_TO_NUM('test', 'test2')", //
-            "NULLIFZERO : NULLIF('test', 0)", //
-            "ZEROIFNULL : NVL('test', 0)", //
-            "DIV : CAST(FLOOR('test' / 'test2') AS NUMBER(36, 0))", //
-            "COT : (1 / TAN('test'))", //
-            "DEGREES : (('test') * 180 / ACOS(-1))", //
-            "RADIANS : (('test') * ACOS(-1) / 180)", //
-            "REPEAT : RPAD(TO_CHAR('test'), LENGTH('test') * ROUND('test2'), 'test')", //
-            "REVERSE : REVERSE(TO_CHAR('test'))" //
+    @CsvSource(value = { "BIT_AND : BITAND('left', 'right')", //
+            "BIT_TO_NUM : BIN_TO_NUM('left', 'right')", //
+            "NULLIFZERO : NULLIF('left', 0)", //
+            "ZEROIFNULL : NVL('left', 0)", //
+            "DIV : CAST(FLOOR('left' / 'right') AS NUMBER(36, 0))", //
+            "COT : (1 / TAN('left'))", //
+            "DEGREES : (('left') * 180 / ACOS(-1))", //
+            "RADIANS : (('left') * ACOS(-1) / 180)", //
+            "REPEAT : RPAD(TO_CHAR('left'), LENGTH('left') * ROUND('right'), 'left')", //
+            "REVERSE : REVERSE(TO_CHAR('left'))" //
     }, delimiter = ':')
     @ParameterizedTest
     void testVisitSqlFunctionScalar2(final ScalarFunction scalarFunction, final String expected)
             throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarWithTwoStringArguments(scalarFunction,
-                "test", "test2");
+                "left", "right");
         assertThat(visitor.visit(sqlFunctionScalar), equalTo(expected));
     }
 

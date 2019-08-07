@@ -201,7 +201,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
             if (node.getMetadata().getType().getExaDataType() == DataType.ExaDataType.VARCHAR) {
                 return true;
             } else {
-                return checkIfneedToCastNumberToDecimal(node);
+                return checkIfNeedToCastNumberToDecimal(node);
             }
         } else {
             for (final String typeRequiringCast : TYPE_NAMES_REQUIRING_CAST) {
@@ -222,7 +222,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
      * @param column a NUMBER column
      * @return true if a cast is necessary for the NUMBER column
      */
-    private boolean checkIfneedToCastNumberToDecimal(final SqlColumn column) {
+    private boolean checkIfNeedToCastNumberToDecimal(final SqlColumn column) {
         final AbstractSqlDialect dialect = (AbstractSqlDialect) getDialect();
         final DataType columnType = column.getMetadata().getType();
         final DataType castNumberToDecimalType = ((OracleSqlDialect) dialect).getOracleNumberTargetType();
@@ -259,22 +259,23 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         }
     }
 
-    private String getProjectionString(final SqlColumn column, String projectionString) throws AdapterException {
+    private String getProjectionString(final SqlColumn column, final String projectionString) throws AdapterException {
         final AbstractSqlDialect dialect = (AbstractSqlDialect) getDialect();
         final String typeName = ColumnAdapterNotes
                 .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
         if ((typeName.startsWith("TIMESTAMP") && (((OracleSqlDialect) dialect).getImportType() == ImportType.JDBC))
                 || typeName.startsWith("INTERVAL") || typeName.equals("BINARY_FLOAT")
                 || typeName.equals("BINARY_DOUBLE") || typeName.equals("CLOB") || typeName.equals("NCLOB")) {
-            projectionString = "TO_CHAR(" + projectionString + ")";
+            return "TO_CHAR(" + projectionString + ")";
         } else if (typeName.equals("NUMBER")) {
-            projectionString = getNumberProjectionString(column, projectionString, (OracleSqlDialect) dialect);
+            return getNumberProjectionString(column, projectionString, (OracleSqlDialect) dialect);
         } else if (typeName.equals("ROWID") || typeName.equals("UROWID")) {
-            projectionString = "ROWIDTOCHAR(" + projectionString + ")";
+            return "ROWIDTOCHAR(" + projectionString + ")";
         } else if (typeName.equals("BLOB")) {
-            projectionString = "UTL_RAW.CAST_TO_VARCHAR2(" + projectionString + ")";
+            return "UTL_RAW.CAST_TO_VARCHAR2(" + projectionString + ")";
+        } else {
+            return projectionString;
         }
-        return projectionString;
     }
 
     private String getNumberProjectionString(final SqlColumn column, final String projectionString,
@@ -282,7 +283,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         if (column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.VARCHAR) {
             return "TO_CHAR(" + projectionString + ")";
         } else {
-            if (checkIfneedToCastNumberToDecimal(column)) {
+            if (checkIfNeedToCastNumberToDecimal(column)) {
                 final DataType castNumberToDecimalType = dialect.getOracleNumberTargetType();
                 return "CAST(" + projectionString + " AS DECIMAL(" + castNumberToDecimalType.getPrecision() + ","
                         + castNumberToDecimalType.getScale() + "))";
@@ -454,8 +455,9 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private String getTrim(final SqlFunctionScalar function) throws AdapterException {
-        final List<String> argumentsSql = new ArrayList<>();
-        for (final SqlNode node : function.getArguments()) {
+        final List<SqlNode> arguments = function.getArguments();
+        final List<String> argumentsSql = new ArrayList<>(arguments.size());
+        for (final SqlNode node : arguments) {
             argumentsSql.add(node.accept(this));
         }
         final StringBuilder builder = new StringBuilder();
@@ -472,8 +474,9 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private String getLocate(final SqlFunctionScalar function) throws AdapterException {
-        final List<String> argumentsSql = new ArrayList<>();
-        for (final SqlNode node : function.getArguments()) {
+        final List<SqlNode> arguments = function.getArguments();
+        final List<String> argumentsSql = new ArrayList<>(arguments.size());
+        for (final SqlNode node : arguments) {
             argumentsSql.add(node.accept(this));
         }
         final StringBuilder builder = new StringBuilder();
@@ -490,8 +493,9 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private String getTimeOrDate(final SqlFunctionScalar function) throws AdapterException {
-        final List<String> argumentsSql = new ArrayList<>();
-        for (final SqlNode node : function.getArguments()) {
+        final List<SqlNode> arguments = function.getArguments();
+        final List<String> argumentsSql = new ArrayList<>(arguments.size());
+        for (final SqlNode node : arguments) {
             argumentsSql.add(node.accept(this));
         }
         final StringBuilder builder = new StringBuilder();
@@ -530,8 +534,9 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
 
     private String getSqlFunctionScalar(final SqlFunctionScalar function, final String s, final String s2)
             throws AdapterException {
-        final List<String> argumentsSql = new ArrayList<>();
-        for (final SqlNode node : function.getArguments()) {
+        final List<SqlNode> arguments = function.getArguments();
+        final List<String> argumentsSql = new ArrayList<>(arguments.size());
+        for (final SqlNode node : arguments) {
             argumentsSql.add(node.accept(this));
         }
         final StringBuilder builder = new StringBuilder();
@@ -542,8 +547,9 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private String getRepeat(final SqlFunctionScalar function) throws AdapterException {
-        final List<String> argumentsSql = new ArrayList<>();
-        for (final SqlNode node : function.getArguments()) {
+        final List<SqlNode> arguments = function.getArguments();
+        final List<String> argumentsSql = new ArrayList<>(arguments.size());
+        for (final SqlNode node : arguments) {
             argumentsSql.add(node.accept(this));
         }
         final StringBuilder builder = new StringBuilder();
@@ -560,8 +566,9 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private String getDiv(final SqlFunctionScalar function) throws AdapterException {
-        final List<String> argumentsSql = new ArrayList<>();
-        for (final SqlNode node : function.getArguments()) {
+        final List<SqlNode> arguments = function.getArguments();
+        final List<String> argumentsSql = new ArrayList<>(arguments.size());
+        for (final SqlNode node : arguments) {
             argumentsSql.add(node.accept(this));
         }
         final StringBuilder builder = new StringBuilder();

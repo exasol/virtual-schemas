@@ -12,10 +12,12 @@ import org.mockito.*;
 import java.sql.*;
 import java.util.*;
 
+import static com.exasol.adapter.dialects.VisitorAssertions.assertSqlNodeConvertedToAsterisk;
+import static com.exasol.adapter.dialects.VisitorAssertions.assertSqlNodeConvertedToOne;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static utils.SqlNodesCreator.createSqlStatementSelect;
+import static utils.SqlNodesCreator.*;
 
 class TeradataSqlGenerationVisitorTest {
     private TeradataSqlGenerationVisitor visitor;
@@ -32,16 +34,13 @@ class TeradataSqlGenerationVisitorTest {
     @Test
     void testVisitSqlSelectListAnyValue() throws AdapterException {
         final SqlSelectList sqlSelectList = SqlSelectList.createAnyValueSelectList();
-        assertThat(visitor.visit(sqlSelectList), equalTo("1"));
+        assertSqlNodeConvertedToOne(sqlSelectList, visitor);
     }
 
     @Test
     void testVisitSqlSelectListSelectStar() throws AdapterException {
-        final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
-        final SqlNode sqlStatementSelect = createSqlStatementSelect(sqlSelectList, Collections.EMPTY_LIST,
-                "test_table");
-        sqlSelectList.setParent(sqlStatementSelect);
-        assertThat(visitor.visit(sqlSelectList), equalTo("*"));
+        final SqlSelectList sqlSelectList = createSqlSelectStarListWithoutColumns();
+        assertSqlNodeConvertedToAsterisk(sqlSelectList, visitor);
     }
 
     @Test
@@ -67,13 +66,9 @@ class TeradataSqlGenerationVisitorTest {
     @ParameterizedTest
     void testVisitSqlSelectListSelectStarRequiresCast(final String typeName, final String expected)
             throws AdapterException {
-        final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
-        final List<ColumnMetadata> columns = new ArrayList<>();
-        columns.add(ColumnMetadata.builder().name("test_column")
-                .adapterNotes("{\"jdbcDataType\":2009, \"typeName\":\"" + typeName + "\"}")
-                .type(DataType.createVarChar(10, DataType.ExaCharset.UTF8)).build());
-        final SqlNode sqlStatementSelect = createSqlStatementSelect(sqlSelectList, columns, "test_table");
-        sqlSelectList.setParent(sqlStatementSelect);
+        final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn(
+                "{\"jdbcDataType\":2009, \"typeName\":\"" + typeName + "\"}",
+                DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
         assertThat(visitor.visit(sqlSelectList), equalTo(expected));
     }
 
@@ -84,24 +79,16 @@ class TeradataSqlGenerationVisitorTest {
     })
     @ParameterizedTest
     void testVisitSqlSelectListSelectStarUnsupportedType(final String typeName) throws AdapterException {
-        final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
-        final List<ColumnMetadata> columns = new ArrayList<>();
-        columns.add(ColumnMetadata.builder().name("test_column")
-                .adapterNotes("{\"jdbcDataType\":2009, \"typeName\":\"" + typeName + "\"}")
-                .type(DataType.createVarChar(10, DataType.ExaCharset.UTF8)).build());
-        final SqlNode sqlStatementSelect = createSqlStatementSelect(sqlSelectList, columns, "test_table");
-        sqlSelectList.setParent(sqlStatementSelect);
+        final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn(
+                "{\"jdbcDataType\":2009, \"typeName\":\"" + typeName + "\"}",
+                DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
         assertThat(visitor.visit(sqlSelectList), equalTo("'" + typeName + " NOT SUPPORTED'"));
     }
 
     @Test
     void testVisitSqlSelectListSelectStarThrowsException() {
-        final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
-        final List<ColumnMetadata> columns = new ArrayList<>();
-        columns.add(ColumnMetadata.builder().name("test_column")
-                .type(DataType.createVarChar(10, DataType.ExaCharset.UTF8)).build());
-        final SqlNode sqlStatementSelect = createSqlStatementSelect(sqlSelectList, columns, "test_table");
-        sqlSelectList.setParent(sqlStatementSelect);
+        final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn("",
+                DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
         assertThrows(SqlGenerationVisitorException.class, () -> visitor.visit(sqlSelectList));
     }
 }

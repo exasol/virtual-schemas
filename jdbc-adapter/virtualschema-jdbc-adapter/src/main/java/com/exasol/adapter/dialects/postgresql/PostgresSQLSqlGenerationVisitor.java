@@ -50,21 +50,19 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private List<String> buildSelectStar(final SqlSelectList selectList) throws AdapterException {
-        final List<String> selectListElements = new ArrayList<>();
         if (SqlGenerationHelper.selectListRequiresCasts(selectList, this.nodeRequiresCast)) {
-            buildSelectStarWithNodeCast(selectList, selectListElements);
+            return buildSelectStarWithNodeCast(selectList);
         } else {
-            selectListElements.add("*");
+            return new ArrayList<>(Collections.singletonList("*"));
         }
-        return selectListElements;
     }
 
-    private void buildSelectStarWithNodeCast(final SqlSelectList selectList, final List<String> selectListElements)
-            throws AdapterException {
+    private List<String> buildSelectStarWithNodeCast(final SqlSelectList selectList) throws AdapterException {
         final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
         int columnId = 0;
         final List<TableMetadata> tableMetadata = new ArrayList<>();
         SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata);
+        final List<String> selectListElements = new ArrayList<>();
         for (final TableMetadata tableMeta : tableMetadata) {
             for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
                 final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
@@ -72,6 +70,7 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
                 ++columnId;
             }
         }
+        return selectListElements;
     }
 
     private String buildColumnProjectionString(final SqlColumn column, final String projectionString)
@@ -106,7 +105,7 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
 
     private String getColumnProjectionString(final SqlColumn column, final String projectionString)
             throws AdapterException {
-        if (!isDirectlyInSelectList(column)) {
+        if (!super.isDirectlyInSelectList(column)) {
             return projectionString;
         } else {
             final String typeName = ColumnAdapterNotes
@@ -115,15 +114,11 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
         }
     }
 
-    private boolean isDirectlyInSelectList(final SqlColumn column) {
-        return column.hasParent() && (column.getParent().getType() == SqlNodeType.SELECT_LIST);
-    }
-
     @Override
     public String visit(final SqlFunctionScalar function) throws AdapterException {
-        String sql = super.visit(function);
-        final List<String> argumentsSql = new ArrayList<>();
-        for (final SqlNode node : function.getArguments()) {
+        final List<SqlNode> arguments = function.getArguments();
+        final List<String> argumentsSql = new ArrayList<>(arguments.size());
+        for (final SqlNode node : arguments) {
             argumentsSql.add(node.accept(this));
         }
         final ScalarFunction scalarFunction = function.getFunction();
@@ -134,31 +129,26 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
         case ADD_SECONDS:
         case ADD_WEEKS:
         case ADD_YEARS:
-            sql = getAddDateTime(argumentsSql, scalarFunction);
-            break;
+            return getAddDateTime(argumentsSql, scalarFunction);
         case SECONDS_BETWEEN:
         case MINUTES_BETWEEN:
         case HOURS_BETWEEN:
         case DAYS_BETWEEN:
         case MONTHS_BETWEEN:
         case YEARS_BETWEEN:
-            sql = getDateTimeBetween(argumentsSql, scalarFunction);
-            break;
+            return getDateTimeBetween(argumentsSql, scalarFunction);
         case SECOND:
         case MINUTE:
         case DAY:
         case WEEK:
         case MONTH:
         case YEAR:
-            sql = getDateTime(argumentsSql, scalarFunction);
-            break;
+            return getDateTime(argumentsSql, scalarFunction);
         case POSIX_TIME:
-            sql = getPosixTime(argumentsSql);
-            break;
+            return getPosixTime(argumentsSql);
         default:
-            break;
+            return super.visit(function);
         }
-        return sql;
     }
 
     private String getAddDateTime(final List<String> argumentsSql, final ScalarFunction scalarFunction) {
@@ -265,19 +255,20 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
         return "EXTRACT(EPOCH FROM " + argumentsSql.get(0) + ")";
     }
 
-    protected String buildColumnProjectionString(final String typeName, String projectionString) {
+    private String buildColumnProjectionString(final String typeName, final String projectionString) {
         if (checkIfNeedToCastToVarchar(typeName)) {
-            projectionString = "CAST(" + projectionString + "  as VARCHAR )";
+            return "CAST(" + projectionString + "  as VARCHAR )";
         } else if (typeName.startsWith("smallserial")) {
-            projectionString = "CAST(" + projectionString + "  as SMALLINT )";
+            return "CAST(" + projectionString + "  as SMALLINT )";
         } else if (typeName.startsWith("serial")) {
-            projectionString = "CAST(" + projectionString + "  as INTEGER )";
+            return "CAST(" + projectionString + "  as INTEGER )";
         } else if (typeName.startsWith("bigserial")) {
-            projectionString = "CAST(" + projectionString + "  as BIGINT )";
+            return "CAST(" + projectionString + "  as BIGINT )";
         } else if (TYPE_NAMES_NOT_SUPPORTED.contains(typeName)) {
-            projectionString = "cast('" + typeName + " NOT SUPPORTED' as varchar) as not_supported";
+            return "cast('" + typeName + " NOT SUPPORTED' as varchar) as not_supported";
+        } else {
+            return projectionString;
         }
-        return projectionString;
     }
 
     private boolean checkIfNeedToCastToVarchar(final String typeName) {

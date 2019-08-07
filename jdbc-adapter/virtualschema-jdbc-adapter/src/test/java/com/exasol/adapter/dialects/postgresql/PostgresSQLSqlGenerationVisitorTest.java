@@ -13,6 +13,8 @@ import org.mockito.*;
 import java.sql.*;
 import java.util.*;
 
+import static com.exasol.adapter.dialects.VisitorAssertions.assertSqlNodeConvertedToAsterisk;
+import static com.exasol.adapter.dialects.VisitorAssertions.assertSqlNodeConvertedToOne;
 import static com.exasol.adapter.sql.ScalarFunction.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -20,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static utils.SqlNodesCreator.*;
 
 class PostgresSQLSqlGenerationVisitorTest {
-    private PostgresSQLSqlGenerationVisitor visitor;
+    private SqlNodeVisitor<String> visitor;
     @Mock
     private Connection connectionMock;
 
@@ -79,16 +81,13 @@ class PostgresSQLSqlGenerationVisitorTest {
     @Test
     void testVisitSqlSelectListAnyValue() throws AdapterException {
         final SqlSelectList sqlSelectList = SqlSelectList.createAnyValueSelectList();
-        assertThat(visitor.visit(sqlSelectList), equalTo("1"));
+        assertSqlNodeConvertedToOne(sqlSelectList, visitor);
     }
 
     @Test
     void testVisitSqlSelectListSelectStar() throws AdapterException {
-        final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
-        final SqlNode sqlStatementSelect = createSqlStatementSelect(sqlSelectList, Collections.EMPTY_LIST,
-                "test_table");
-        sqlSelectList.setParent(sqlStatementSelect);
-        assertThat(visitor.visit(sqlSelectList), equalTo("*"));
+        final SqlSelectList sqlSelectList = createSqlSelectStarListWithoutColumns();
+        assertSqlNodeConvertedToAsterisk(sqlSelectList, visitor);
     }
 
     @CsvSource({ "varbit, VARCHAR", //
@@ -117,25 +116,17 @@ class PostgresSQLSqlGenerationVisitorTest {
     @ParameterizedTest
     void testVisitSqlSelectListSelectStarRequiresCast(final String typeName, final String expectedCastType)
             throws AdapterException {
-        final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
-        final List<ColumnMetadata> columns = new ArrayList<>();
-        columns.add(ColumnMetadata.builder().name("test_column")
-                .adapterNotes("{\"jdbcDataType\":2009, \"typeName\":\"" + typeName + "\"}")
-                .type(DataType.createVarChar(10, DataType.ExaCharset.UTF8)).build());
-        final SqlNode sqlStatementSelect = createSqlStatementSelect(sqlSelectList, columns, "test_table");
-        sqlSelectList.setParent(sqlStatementSelect);
+        final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn(
+                "{\"jdbcDataType\":2009, \"typeName\":\"" + typeName + "\"}",
+                DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
         assertThat(visitor.visit(sqlSelectList), equalTo("CAST(\"test_column\"  as " + expectedCastType + " )"));
     }
 
     @Test
     void testVisitSqlSelectListSelectStarUnsupportedType() throws AdapterException {
-        final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
-        final List<ColumnMetadata> columns = new ArrayList<>();
-        columns.add(ColumnMetadata.builder().name("test_column")
-                .adapterNotes("{\"jdbcDataType\":2009, \"typeName\":\"bytea\"}")
-                .type(DataType.createVarChar(10, DataType.ExaCharset.UTF8)).build());
-        final SqlNode sqlStatementSelect = createSqlStatementSelect(sqlSelectList, columns, "test_table");
-        sqlSelectList.setParent(sqlStatementSelect);
+        final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn(
+                "{\"jdbcDataType\":2009, \"typeName\":\"bytea\"}", DataType.createVarChar(10, DataType.ExaCharset.UTF8),
+                "test_column");
         assertThat(visitor.visit(sqlSelectList), equalTo("cast('bytea NOT SUPPORTED' as varchar) as not_supported"));
     }
 
@@ -153,12 +144,8 @@ class PostgresSQLSqlGenerationVisitorTest {
 
     @Test
     void testVisitSqlSelectListSelectStarThrowsException() {
-        final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
-        final List<ColumnMetadata> columns = new ArrayList<>();
-        columns.add(ColumnMetadata.builder().name("test_column")
-                .type(DataType.createVarChar(10, DataType.ExaCharset.UTF8)).build());
-        final SqlNode sqlStatementSelect = createSqlStatementSelect(sqlSelectList, columns, "test_table");
-        sqlSelectList.setParent(sqlStatementSelect);
+        final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn("",
+                DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
         assertThrows(SqlGenerationVisitorException.class, () -> visitor.visit(sqlSelectList));
     }
 
@@ -166,7 +153,7 @@ class PostgresSQLSqlGenerationVisitorTest {
     void testVisitSqlFunctionAggregateGroupConcat() throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralString("test"));
-        final SqlOrderBy orderBy = createSqlOrderByDescNullsFirst();
+        final SqlOrderBy orderBy = createSqlOrderByDescNullsFirst("test_column", "test_column2");
         final SqlFunctionAggregateGroupConcat sqlFunctionAggregateGroupConcat = new SqlFunctionAggregateGroupConcat(
                 AggregateFunction.AVG, arguments, orderBy, false, "'");
         assertThat(visitor.visit(sqlFunctionAggregateGroupConcat), equalTo("STRING_AGG('test', ''') "));

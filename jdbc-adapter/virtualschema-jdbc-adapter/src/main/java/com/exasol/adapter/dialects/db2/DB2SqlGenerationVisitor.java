@@ -49,21 +49,19 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private List<String> buildSelectStar(final SqlSelectList selectList) throws AdapterException {
-        final List<String> selectListElements = new ArrayList<>();
         if (SqlGenerationHelper.selectListRequiresCasts(selectList, this.nodeRequiresCast)) {
-            buildSelectStarWithNodeCast(selectList, selectListElements);
+            return buildSelectStarWithNodeCast(selectList);
         } else {
-            selectListElements.add("*");
+            return new ArrayList<>(Collections.singletonList("*"));
         }
-        return selectListElements;
     }
 
-    private void buildSelectStarWithNodeCast(final SqlSelectList selectList, final List<String> selectListElements)
-            throws AdapterException {
+    private List<String> buildSelectStarWithNodeCast(final SqlSelectList selectList) throws AdapterException {
         final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
         int columnId = 0;
         final List<TableMetadata> tableMetadata = new ArrayList<>();
         SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata);
+        final List<String> selectListElements = new ArrayList<>();
         for (final TableMetadata tableMeta : tableMetadata) {
             for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
                 final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
@@ -71,6 +69,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
                 ++columnId;
             }
         }
+        return selectListElements;
     }
 
     private String buildColumnProjectionString(final SqlColumn column, final String projectionString)
@@ -105,7 +104,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
 
     private String getColumnProjectionString(final SqlColumn column, final String projectionString)
             throws AdapterException {
-        if (!isDirectlyInSelectList(column)) {
+        if (!super.isDirectlyInSelectList(column)) {
             return projectionString;
         } else {
             final String typeName = ColumnAdapterNotes
@@ -114,41 +113,31 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         }
     }
 
-    private boolean isDirectlyInSelectList(final SqlColumn column) {
-        return column.hasParent() && (column.getParent().getType() == SqlNodeType.SELECT_LIST);
-    }
-
-    protected String buildColumnProjectionString(final String typeName, String projectionString) {
+    private String buildColumnProjectionString(final String typeName, final String projectionString) {
         if (TYPE_NAMES_NOT_SUPPORTED.contains(typeName)) {
-            projectionString = "'" + typeName + " NOT SUPPORTED'";
+            return "'" + typeName + " NOT SUPPORTED'";
         } else {
-            projectionString = getProjectionStringWithSupportedTypes(typeName, projectionString);
+            return getProjectionStringWithSupportedTypes(typeName, projectionString);
         }
-        return projectionString;
     }
 
-    private String getProjectionStringWithSupportedTypes(final String typeName, String projectionString) {
+    private String getProjectionStringWithSupportedTypes(final String typeName, final String projectionString) {
         switch (typeName) {
         case "XML":
-            projectionString = "XMLSERIALIZE(" + projectionString + " as VARCHAR(32000) INCLUDING XMLDECLARATION)";
-            break;
+            return "XMLSERIALIZE(" + projectionString + " as VARCHAR(32000) INCLUDING XMLDECLARATION)";
         // db2 does not support cast of clobs to varchar in full length -> max 32672
         case "CLOB":
-            projectionString = "CAST(SUBSTRING(" + projectionString + ",32672) AS VARCHAR(32672))";
-            break;
+            return "CAST(SUBSTRING(" + projectionString + ",32672) AS VARCHAR(32672))";
         case "CHAR () FOR BIT DATA":
         case "VARCHAR () FOR BIT DATA":
-            projectionString = "HEX(" + projectionString + ")";
-            break;
+            return "HEX(" + projectionString + ")";
         case "TIME":
             // cast timestamp to not lose precision
         case "TIMESTAMP":
-            projectionString = "VARCHAR(" + projectionString + ")";
-            break;
+            return "VARCHAR(" + projectionString + ")";
         default:
-            break;
+            return projectionString;
         }
-        return projectionString;
     }
 
     @Override
@@ -191,60 +180,47 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
 
     @Override
     public String visit(final SqlFunctionScalar function) throws AdapterException {
-        String sql = super.visit(function);
         switch (function.getFunction()) {
         case TRIM:
-            sql = getTrim(function);
-            break;
+            return getTrim(function);
         case ADD_DAYS:
         case ADD_HOURS:
         case ADD_MINUTES:
         case ADD_SECONDS:
         case ADD_WEEKS:
         case ADD_YEARS:
-            sql = getAddTimeOrDate(function);
-            break;
+            return getAddTimeOrDate(function);
         case CURRENT_DATE:
         case SYSDATE:
-            sql = "CURRENT DATE";
-            break;
+            return "CURRENT DATE";
         case CURRENT_TIMESTAMP:
         case SYSTIMESTAMP:
-            sql = "VARCHAR(CURRENT TIMESTAMP)";
-            break;
+            return "VARCHAR(CURRENT TIMESTAMP)";
         case DBTIMEZONE:
-            sql = "DBTIMEZONE";
-            break;
+            return "DBTIMEZONE";
         case LOCALTIMESTAMP:
-            sql = "LOCALTIMESTAMP";
-            break;
+            return "LOCALTIMESTAMP";
         case SESSIONTIMEZONE:
-            sql = "SESSIONTIMEZONE";
-            break;
+            return "SESSIONTIMEZONE";
         case BIT_AND:
-            sql = sql.replaceFirst("^BIT_AND", "BITAND");
-            break;
+            return super.visit(function).replaceFirst("^BIT_AND", "BITAND");
         case BIT_TO_NUM:
-            sql = sql.replaceFirst("^BIT_TO_NUM", "BIN_TO_NUM");
-            break;
+            return super.visit(function).replaceFirst("^BIT_TO_NUM", "BIN_TO_NUM");
         case NULLIFZERO:
-            sql = getNullZero(function, "NULLIF(");
-            break;
+            return getNullZero(function, "NULLIF(");
         case ZEROIFNULL:
-            sql = getNullZero(function, "IFNULL(");
-            break;
+            return getNullZero(function, "IFNULL(");
         case DIV:
-            sql = getDiv(function);
-            break;
+            return getDiv(function);
         default:
-            break;
+            return super.visit(function);
         }
-        return sql;
     }
 
     private String getDiv(final SqlFunctionScalar function) throws AdapterException {
-        final List<String> argumentsSql = new ArrayList<>();
-        for (final SqlNode node : function.getArguments()) {
+        final List<SqlNode> arguments = function.getArguments();
+        final List<String> argumentsSql = new ArrayList<>(arguments.size());
+        for (final SqlNode node : arguments) {
             argumentsSql.add(node.accept(this));
         }
         final StringBuilder builder = new StringBuilder();

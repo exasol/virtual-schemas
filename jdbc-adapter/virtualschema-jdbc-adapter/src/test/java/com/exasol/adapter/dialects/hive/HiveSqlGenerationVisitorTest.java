@@ -13,10 +13,12 @@ import utils.*;
 import java.sql.*;
 import java.util.*;
 
+import static com.exasol.adapter.dialects.VisitorAssertions.assertSqlNodeConvertedToAsterisk;
+import static com.exasol.adapter.dialects.VisitorAssertions.assertSqlNodeConvertedToOne;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static utils.SqlNodesCreator.createSqlFunctionScalarWithTwoStringArguments;
+import static utils.SqlNodesCreator.*;
 
 class HiveSqlGenerationVisitorTest {
     private SqlNodeVisitor<String> visitor;
@@ -32,11 +34,8 @@ class HiveSqlGenerationVisitorTest {
 
     @Test
     void testVisitSqlSelectListSelectStar() throws AdapterException {
-        final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
-        final SqlNode sqlStatementSelect = SqlNodesCreator.createSqlStatementSelect(sqlSelectList,
-                Collections.EMPTY_LIST, "");
-        sqlSelectList.setParent(sqlStatementSelect);
-        assertThat(visitor.visit(sqlSelectList), equalTo("*"));
+        final SqlSelectList sqlSelectList = createSqlSelectStarListWithoutColumns();
+        assertSqlNodeConvertedToAsterisk(sqlSelectList, visitor);
     }
 
     @Test
@@ -54,7 +53,7 @@ class HiveSqlGenerationVisitorTest {
     @Test
     void testVisitSqlSelectListRequiresAnyColumn() throws AdapterException {
         final SqlSelectList sqlSelectList = SqlSelectList.createAnyValueSelectList();
-        assertThat(visitor.visit(sqlSelectList), equalTo("1"));
+        assertSqlNodeConvertedToOne(sqlSelectList, visitor);
     }
 
     @Test
@@ -77,12 +76,9 @@ class HiveSqlGenerationVisitorTest {
 
     @Test
     void testVisitSqlSelectListSelectStarThrowsException() {
-        final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
-        final List<ColumnMetadata> columns = new ArrayList<>();
-        columns.add(ColumnMetadata.builder().name("test_column")
-                .type(DataType.createVarChar(10, DataType.ExaCharset.UTF8)).build());
-        final SqlNode sqlStatementSelect = SqlNodesCreator.createSqlStatementSelect(sqlSelectList, columns, "");
-        sqlSelectList.setParent(sqlStatementSelect);
+        final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn("",
+                DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
+        SqlSelectList.createSelectStarSelectList();
         assertThrows(SqlGenerationVisitorException.class, () -> visitor.visit(sqlSelectList));
     }
 
@@ -154,8 +150,8 @@ class HiveSqlGenerationVisitorTest {
             "BIT_OR, |", //
             "BIT_XOR, ^" })
     @ParameterizedTest
-    void testVisitSqlFunctionScalarWithChangedFunctions(final ScalarFunction scalarFunction, final String expectedString)
-            throws AdapterException {
+    void testVisitSqlFunctionScalarWithChangedFunctions(final ScalarFunction scalarFunction,
+            final String expectedString) throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralDouble(10.5));
         arguments.add(new SqlLiteralDouble(10.10));

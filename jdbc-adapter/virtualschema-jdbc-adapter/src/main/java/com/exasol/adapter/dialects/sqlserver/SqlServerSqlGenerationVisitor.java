@@ -7,8 +7,7 @@ import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
 import com.google.common.collect.ImmutableList;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static com.exasol.adapter.dialects.sqlserver.SqlServerSqlDialect.*;
 import static com.exasol.adapter.dialects.sqlserver.SqlServerSqlDialect.MAX_SQLSERVER_NVARCHAR_SIZE;
@@ -72,21 +71,20 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private List<String> buildSelectStar(final SqlSelectList selectList) throws AdapterException {
-        final List<String> selectListElements = new ArrayList<>();
+
         if (SqlGenerationHelper.selectListRequiresCasts(selectList, this.nodeRequiresCast)) {
-            buildSelectStarWithNodeCast(selectList, selectListElements);
+            return buildSelectStarWithNodeCast(selectList);
         } else {
-            selectListElements.add("*");
+            return new ArrayList<>(Collections.singletonList("*"));
         }
-        return selectListElements;
     }
 
-    private void buildSelectStarWithNodeCast(final SqlSelectList selectList, final List<String> selectListElements)
-            throws AdapterException {
+    private List<String> buildSelectStarWithNodeCast(final SqlSelectList selectList) throws AdapterException {
         final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
         int columnId = 0;
         final List<TableMetadata> tableMetadata = new ArrayList<>();
         SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata);
+        final List<String> selectListElements = new ArrayList<>();
         for (final TableMetadata tableMeta : tableMetadata) {
             for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
                 final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
@@ -94,6 +92,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
                 ++columnId;
             }
         }
+        return selectListElements;
     }
 
     private String buildColumnProjectionString(final SqlColumn column, final String projectionString)
@@ -128,17 +127,13 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
 
     private String getColumnProjectionString(final SqlColumn column, final String projectionString)
             throws AdapterException {
-        if (!isDirectlyInSelectList(column)) {
+        if (!super.isDirectlyInSelectList(column)) {
             return projectionString;
         } else {
             final String typeName = ColumnAdapterNotes
                     .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
             return buildColumnProjectionString(typeName, projectionString);
         }
-    }
-
-    private boolean isDirectlyInSelectList(final SqlColumn column) {
-        return column.hasParent() && (column.getParent().getType() == SqlNodeType.SELECT_LIST);
     }
 
     @Override

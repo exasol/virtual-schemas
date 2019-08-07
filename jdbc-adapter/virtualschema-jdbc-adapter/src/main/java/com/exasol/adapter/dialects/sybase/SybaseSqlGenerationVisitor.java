@@ -8,8 +8,7 @@ import com.exasol.adapter.sql.*;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static com.exasol.adapter.dialects.sybase.SybaseSqlDialect.MAX_SYBASE_N_VARCHAR_SIZE;
 import static com.exasol.adapter.dialects.sybase.SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE;
@@ -68,21 +67,19 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private List<String> buildSelectStar(final SqlSelectList selectList) throws AdapterException {
-        final List<String> selectListElements = new ArrayList<>();
         if (SqlGenerationHelper.selectListRequiresCasts(selectList, this.nodeRequiresCast)) {
-            buildSelectStarWithNodeCast(selectList, selectListElements);
+            return buildSelectStarWithNodeCast(selectList);
         } else {
-            selectListElements.add("*");
+            return new ArrayList<>(Collections.singletonList("*"));
         }
-        return selectListElements;
     }
 
-    private void buildSelectStarWithNodeCast(final SqlSelectList selectList, final List<String> selectListElements)
-            throws AdapterException {
+    private List<String> buildSelectStarWithNodeCast(final SqlSelectList selectList) throws AdapterException {
         final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
         int columnId = 0;
         final List<TableMetadata> tableMetadata = new ArrayList<>();
         SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata);
+        final List<String> selectListElements = new ArrayList<>();
         for (final TableMetadata tableMeta : tableMetadata) {
             for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
                 final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
@@ -90,6 +87,7 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
                 ++columnId;
             }
         }
+        return selectListElements;
     }
 
     private String buildColumnProjectionString(final SqlColumn column, final String projectionString)
@@ -124,17 +122,13 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
 
     private String getColumnProjectionString(final SqlColumn column, final String projectionString)
             throws AdapterException {
-        if (!isDirectlyInSelectList(column)) {
+        if (!super.isDirectlyInSelectList(column)) {
             return projectionString;
         } else {
             final String typeName = ColumnAdapterNotes
                     .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
             return buildColumnProjectionString(typeName, projectionString);
         }
-    }
-
-    private boolean isDirectlyInSelectList(final SqlColumn column) {
-        return column.hasParent() && (column.getParent().getType() == SqlNodeType.SELECT_LIST);
     }
 
     @Override
@@ -191,8 +185,9 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
 
     @Override
     public String visit(final SqlFunctionScalar function) throws AdapterException {
-        final List<String> argumentsSql = new ArrayList<>();
-        for (final SqlNode node : function.getArguments()) {
+        final List<SqlNode> arguments = function.getArguments();
+        final List<String> argumentsSql = new ArrayList<>(arguments.size());
+        for (final SqlNode node : arguments) {
             argumentsSql.add(node.accept(this));
         }
         switch (function.getFunction()) {
