@@ -12,15 +12,17 @@ Start by creating a new package called `com.exasol.adapter.dialects.athena` for 
 
 Now create a stub class for the dialect: `com.exasol.adapter.dialects.athena.AthenaSqlDialect` that extends `AbstractDialect`.
 
-Add a static method to report the name of the dialect:
+Add a method to report the name of the dialect:
 
 ```java
-private static final String NAME = "ATHENA";
+static final String NAME = "ATHENA";
 
-public static String getPublicName() {
+public static String getName() {
     return NAME;
 }
 ```
+
+The constant `NAME` is package-scoped because we also need it in a method of the [factory](#creating-the-sql-dialect-factory) that instantiates the dialect _before_ an instance is available.
 
 Add a constructor that takes a [JDBC database connection](https://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html) and user properties as parameters.
 
@@ -43,6 +45,32 @@ Add the dialect name (here `ATHENA`) to the list of dialects for which the `Jbdc
 Create an empty unit test class for the dialect: `com.exasol.adapter.dialects.athena.AthenaSqlDialectTest` that tests class `AthenaSqlDialect`.
 
 Now that you have the skeleton of the dialect adapter, it is time to implement the specifics.
+
+## Creating the SQL Dialect Factory
+
+Each dialect is accompanied by factory that is responsible for instantiating that dialect. The [Java Service](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) loader takes care of finding an loading the factory. It looks up the fully qualified class name of the dialect factories in the file [`com.exasol.adapter.dialects.SqlDialectFactory`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/resources/META-INF/services/com.exasol.adapter.dialects.SqlDialectFactory).
+
+The factory itself is very simple. It only has two methods that you need to implement and that implementation is surprisingly simple. First the factory needs to be able to provide the dialect name since the JDBC adapter takes identifies dialect by name.
+
+```java
+@Override
+public String getSqlDialectName() {
+    return AthenaSqlDialect.NAME;
+}
+```
+
+Note that at this point we don't have an instance of the dialect yet and thus are using the constant directly.
+
+The other method in the factory is the one that creates the instance.
+
+```java
+@Override
+public SqlDialect createSqlDialect(final Connection connection, final AdapterProperties properties) {
+    return new AthenaSqlDialect(connection, properties);
+}
+```
+
+Pretty straight forward. The main reason for having a factory is that dialects are loaded lazily. It is more resource-efficient and secure to load only the one single dialect that we actually need. The factories are very lightweight, dialects not so much.
 
 ## Acquiring Information About the Specifics of the Dialect
 

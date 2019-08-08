@@ -11,15 +11,15 @@ This article describes how you can develop and test an SQL dialect adapter based
 
 Before you start writing your own SQL adapter that integrates Virtual Schemas with the SQL dialect a specific data source uses, we first need to briefly discuss how Virtual Schemas are structured in general and the JDBC adapter in particular.
 
-[Adapters](https://www.gofpatterns.com/structural-design-patterns/structural-patterns/adapter-pattern.php) (also known as wrappers) are a piece of code that enable interaction between two previously incompatible objects by planting an adapter layer in between that serves as a translator. In our case a Virtual Schema adapter implements an API defined by Exasol Virtual Schemas and translates all data accesses and type conversions between the adapted source and the Exasol database.
+[Adapters](https://www.gofpatterns.com/structural-design-patterns/structural-patterns/adapter-pattern.php) (also known as wrappers) are a piece of code that enable interaction between two previously incompatible objects by planting an adapter layer in between that serves as a translator. In our case a Virtual Schema adapter implements an API defined by Exasol Virtual Schemas and translates all data accesses and manages type conversions between the adapted source and the Exasol database.
 
-In the case of the JDBC adapter there are _two_ different adapter layers in between Exasol and the source. The first one from Exasol's perspective is the JDBC adapter which contains the common part of the translation between Exasol and a source for which a JDBC driver exists. The second layer is a SQL dialect adapter, that evens out the specialties of the source databases.
+In the case of the JDBC adapter there are _two_ different adapter layers in between Exasol and the source. The first one from Exasol's perspective is the JDBC adapter which contains the common part of the translation between Exasol and a source for which a JDBC driver exists. The second layer is an SQL dialect adapter, that takes care of the specialties of the source databases.
 
 The name SQL dialect adapter is derived from the non-standard implementation parts of SQL databases which are often referred to as "dialects" of the SQL language.
 
 As an example, PostgreSQL handles some of the data types subtly different from Exasol and the SQL dialect adapter needs to deal with those differences by implementing conversion functions.
 
-Below you can see a layer model of the Virtual Schemas when implemented with the JDBC adapter. The layers in the middle -- i.e. everything that deals with translating between the source and Exasol -- are provided in this repository.
+Below you can see a layer model of the Virtual Schemas when implemented with the JDBC adapter. The layers in the middle &mdash; i.e. everything that deals with translating between the source and Exasol &mdash; are provided in this repository.
 
     .-----------------------------------------.
     |  Exasol    |          Exasol            |
@@ -92,27 +92,28 @@ The Java package structure of the `virtualschema-jdbc-adapter` reflects the sepa
 
 ### Interfaces
 
-| Interface                                                                                                                                                 | Implementation                | Purpose                                                                                |
-|-----------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|----------------------------------------------------------------------------------------|
-| [`com.exasol.adapter.dialects.SqlDialect`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/SqlDialect.java)             | mandatory                     | Define capabilities and which kind of support the dialect has for catalogs and schemas |
-| [`com.exasol.adapter.jdbc.RemoteMetadataReader`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/RemoteMetadataReader.java) | optional depending on dialect | Read top-level metadata and find remote tables                                         |
-| [`com.exasol.adapter.jdbc.TableMetadataReader`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/TableMetadataReader.java)   | optional depending on dialect | Decide which tables should be mapped and map data on table level                       |
-| [`com.exasol.adapter.jdbc.ColumnMetadataReader`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/ColumnMetadataReader.java) | optional depending on dialect | Map data on column level                                                               |
+| Interface                                                                                                                                                         | Implementation                | Purpose                                                                                |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|----------------------------------------------------------------------------------------|
+| [`com.exasol.adapter.dialects.SqlDialect`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/SqlDialect.java)               | mandatory                     | Define capabilities and which kind of support the dialect has for catalogs and schemas |
+| [`com.exasol.adapter.dialects.SqlDialectFactory`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/SqlDialectFactory.java) | mandatory                     | Provide a way to instantiate the SQL dialect                                           |
+| [`com.exasol.adapter.jdbc.RemoteMetadataReader`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/RemoteMetadataReader.java)   | optional depending on dialect | Read top-level metadata and find remote tables                                         |
+| [`com.exasol.adapter.jdbc.TableMetadataReader`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/TableMetadataReader.java)     | optional depending on dialect | Decide which tables should be mapped and map data on table level                       |
+| [`com.exasol.adapter.jdbc.ColumnMetadataReader`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/ColumnMetadataReader.java)   | optional depending on dialect | Map data on column level                                                               |
+| [`com.exasol.adapter.dialects.QueryRewriter`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/QueryRewriter.java)         | optional depending on dialect | Rewrite the original query into a dialect-specific one                                 |
 
 ### Registering the Dialect
 
-The Virtual Schema adapter creates an instance of an SQL dialect on demand. You can pick any dialect that is listed in the `SqlDialects` registry.
+The Virtual Schema adapter creates an instance of an SQL dialect on demand. You can pick any dialect that is listed in the `SqlDialects` registry. Each dialect need a factory that can create an instance of that dialect. That factory must implement the interface 'SqlDialectFactory'.
 
-To register your new dialect add it to the list in [sql_dialects.properties](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/resources/sql_dialects.properties).
+We use Java's [Service Loader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) in order to load the dialect implementation. That means you need to register the factory your new dialect as a service in the list in [`com.exasol.adapter.dialects.SqlDialectFactory`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/resources/META-INF/services/com.exasol.adapter.dialects.SqlDialectFactory).
 
 ```properties
-com.exasol.adapter.dialects.supported=\
+com.exasol.adapter.dialects.athena.AthenaSqlDialectFactory
+com.exasol.adapter.dialects.bigquery.BigQuerySqlDialectFactory
 ...
-com.exasol.adapter.dialects.myawesomedialect.MyAweSomeSqlDialect
+com.exasol.adapter.dialects.myawesomedialect.MyAweSomeSqlDialectFactory
+...
 ```
-
-For tests or in case you want to exclude existing dialects in certain scenarios you can override the contents of this file 
-by setting the system property `com.exasol.adapter.dialects.supported`.
 
 ### Writing the Dialect and its Unit Tests
 
