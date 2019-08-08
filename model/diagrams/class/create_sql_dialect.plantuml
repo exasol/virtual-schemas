@@ -4,8 +4,8 @@
 class JdbcAdapter
 
 class SqlDialectFactory {
-    + SqlDialectFactory(connection : Connection, properties: AdapterProperties, dialectRegistry : SqlDialectRegistry)
-    + createSqlDialect(dialectName : String) : SqlDialect
+    + createSqlDialect(connection : Connection, properties: AdapterProperties, dialectRegistry : SqlDialectRegistry) : SqlDialect
+    + getSqlDialectName() : String
 }
 
 interface SqlDialect
