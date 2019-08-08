@@ -7,7 +7,7 @@ import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectFactory;
 
 /**
- * Factory for the HANA dialect
+ * Factory for the HANA dialect.
  */
 public class SapHanaSqlDialectFactory implements SqlDialectFactory {
     @Override

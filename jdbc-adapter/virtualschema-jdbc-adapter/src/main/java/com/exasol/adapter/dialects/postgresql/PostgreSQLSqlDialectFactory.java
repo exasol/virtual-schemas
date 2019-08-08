@@ -7,7 +7,7 @@ import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectFactory;
 
 /**
- * Factory for the PostgreSQL SQL dialect
+ * Factory for the PostgreSQL SQL dialect.
  */
 public class PostgreSQLSqlDialectFactory implements SqlDialectFactory {
     @Override

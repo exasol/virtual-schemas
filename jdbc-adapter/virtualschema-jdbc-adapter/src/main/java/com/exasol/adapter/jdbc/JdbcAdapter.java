@@ -46,7 +46,7 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     }
 
     /**
-     * Create a new instance of type {@link JdbcAdapter}
+     * Create a new instance of type {@link JdbcAdapter}.
      */
     public JdbcAdapter() {
         SqlDialectRegistry.getInstance().loadSqlDialectFactories();

@@ -103,9 +103,9 @@ The Java package structure of the `virtualschema-jdbc-adapter` reflects the sepa
 
 ### Registering the Dialect
 
-The Virtual Schema adapter creates an instance of an SQL dialect on demand. You can pick any dialect that is listed in the `SqlDialects` registry. Each dialect need a factory that can create an instance of that dialect. That factory must implement the interface 'SqlDialectFactory'.
+The Virtual Schema adapter creates an instance of an SQL dialect on demand. You can pick any dialect that is listed in the `SqlDialects` registry. Each dialect needs a factory that can create an instance of that dialect. That factory must implement the interface 'SqlDialectFactory'.
 
-We use Java's [Service Loader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) in order to load the dialect implementation. That means you need to register the factory your new dialect as a service in the list in [`com.exasol.adapter.dialects.SqlDialectFactory`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/resources/META-INF/services/com.exasol.adapter.dialects.SqlDialectFactory).
+We use Java's [Service Loader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) in order to load the dialect implementation. That means you need to register the factory of your new dialect as a service on the list in [`com.exasol.adapter.dialects.SqlDialectFactory`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/resources/META-INF/services/com.exasol.adapter.dialects.SqlDialectFactory).
 
 ```properties
 com.exasol.adapter.dialects.athena.AthenaSqlDialectFactory

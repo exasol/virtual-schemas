@@ -7,7 +7,7 @@ import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectFactory;
 
 /**
- * Factory for the Redshift SQL dialect
+ * Factory for the Redshift SQL dialect.
  */
 public class RedshiftSqlDialectFactory implements SqlDialectFactory {
     @Override

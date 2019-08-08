@@ -71,7 +71,7 @@ public class AthenaSqlDialect extends AbstractSqlDialect {
     /**
      * Get the type of support Athena has for catalogs.
      * <p>
-     * While Athena itself does not use catalogs, the JDBC driver simulates a single catalog for better compatibility
+     * While Athena itself does not use catalogs, the JDBC driver simulates a single catalog for a better compatibility
      * with standard products like BI tools.
      * <p>
      *

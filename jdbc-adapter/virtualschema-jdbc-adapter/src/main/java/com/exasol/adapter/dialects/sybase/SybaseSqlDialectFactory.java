@@ -7,7 +7,7 @@ import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectFactory;
 
 /**
- * Factory for the Sybase dialect
+ * Factory for the Sybase dialect.
  */
 public class SybaseSqlDialectFactory implements SqlDialectFactory {
     @Override

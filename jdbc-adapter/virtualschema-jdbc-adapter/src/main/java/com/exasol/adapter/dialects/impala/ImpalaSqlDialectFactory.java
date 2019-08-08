@@ -7,7 +7,7 @@ import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectFactory;
 
 /**
- * Factory for the Impala SQL dialect
+ * Factory for the Impala SQL dialect.
  */
 public class ImpalaSqlDialectFactory implements SqlDialectFactory {
     @Override

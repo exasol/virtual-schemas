@@ -24,7 +24,7 @@ import com.exasol.adapter.sql.*;
  */
 public interface SqlDialect {
     /**
-     * Get the dialect name
+     * Get the dialect name.
      *
      * @return the name of the Dialect
      */

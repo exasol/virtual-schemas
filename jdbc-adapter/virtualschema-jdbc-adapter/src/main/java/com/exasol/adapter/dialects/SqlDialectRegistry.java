@@ -16,7 +16,7 @@ public final class SqlDialectRegistry {
     private final Map<String, SqlDialectFactory> registeredFactories = new HashMap<>();
 
     /**
-     * Get the singleton instance of the {@link SqlDialectRegistry}
+     * Get the singleton instance of the {@link SqlDialectRegistry}.
      *
      * @return singleton instance
      */
@@ -25,7 +25,7 @@ public final class SqlDialectRegistry {
     }
 
     /**
-     * Load available dialect factories
+     * Load available dialect factories.
      */
     public void loadSqlDialectFactories() {
         final ServiceLoader<SqlDialectFactory> serviceLoader = ServiceLoader.load(SqlDialectFactory.class);
@@ -38,7 +38,7 @@ public final class SqlDialectRegistry {
     }
 
     /**
-     * Register a factory for an {@link SqlDialect}
+     * Register a factory for an {@link SqlDialect}.
      *
      * @param factory factory that can create the SqlDialect
      */
@@ -56,7 +56,7 @@ public final class SqlDialectRegistry {
     }
 
     /**
-     * Get the SQL dialect registered under the given name
+     * Get the SQL dialect registered under the given name.
      *
      * @param name       name of the SQL dialect
      * @param connection JDBC connection to the remote data source
@@ -75,7 +75,7 @@ public final class SqlDialectRegistry {
     }
 
     /**
-     * Check if an SQL dialect with the given name is registered
+     * Check if an SQL dialect with the given name is registered.
      *
      * @param name adapter name to be searched for
      * @return <code>true</code> if an adapter is registered under that name
@@ -85,14 +85,14 @@ public final class SqlDialectRegistry {
     }
 
     /**
-     * Remove all registered adapters from the registry
+     * Remove all registered adapters from the registry.
      */
     public void clear() {
         this.registeredFactories.clear();
     }
 
     /**
-     * Describe the contents of the registry
+     * Describe the contents of the registry.
      *
      * @return description
      */
@@ -101,7 +101,7 @@ public final class SqlDialectRegistry {
     }
 
     /**
-     * List the names of all registered SQL dialects
+     * List the names of all registered SQL dialects.
      *
      * @return comma-separated string containing list of SQL dialect names
      */

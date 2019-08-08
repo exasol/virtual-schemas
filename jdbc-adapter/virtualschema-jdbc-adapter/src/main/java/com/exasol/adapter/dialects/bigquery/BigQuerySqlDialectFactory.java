@@ -7,7 +7,7 @@ import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectFactory;
 
 /**
- * Factory for the BigQuery SQL dialect
+ * Factory for the BigQuery SQL dialect.
  */
 public class BigQuerySqlDialectFactory implements SqlDialectFactory {
     @Override

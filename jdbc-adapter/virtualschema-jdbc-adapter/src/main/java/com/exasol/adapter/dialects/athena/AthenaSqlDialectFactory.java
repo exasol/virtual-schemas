@@ -7,7 +7,7 @@ import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectFactory;
 
 /**
- * Factory for the Athena SQL dialect
+ * Factory for the Athena SQL dialect.
  */
 public class AthenaSqlDialectFactory implements SqlDialectFactory {
     @Override

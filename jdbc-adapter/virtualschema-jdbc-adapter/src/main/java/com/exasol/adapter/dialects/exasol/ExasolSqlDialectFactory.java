@@ -7,7 +7,7 @@ import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectFactory;
 
 /**
- * Factory for the Exasol SQL dialect
+ * Factory for the Exasol SQL dialect.
  */
 public class ExasolSqlDialectFactory implements SqlDialectFactory {
     @Override

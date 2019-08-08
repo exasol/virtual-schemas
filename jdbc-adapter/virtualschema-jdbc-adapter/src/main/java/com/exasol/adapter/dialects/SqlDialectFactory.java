@@ -9,7 +9,7 @@ import com.exasol.adapter.AdapterProperties;
  */
 public interface SqlDialectFactory {
     /**
-     * Create an instance of the SQL dialect adapter matching the dialect name
+     * Create an instance of the SQL dialect adapter matching the dialect name.
      *
      * @param connection JDBC connection to the remote data source
      * @param properties user-defined adapter properties
@@ -18,7 +18,7 @@ public interface SqlDialectFactory {
     public SqlDialect createSqlDialect(final Connection connection, final AdapterProperties properties);
 
     /**
-     * Get the name of the SQL dialect this factory can produce
+     * Get the name of the SQL dialect this factory can produce.
      *
      * @return SQL dialect name
      */

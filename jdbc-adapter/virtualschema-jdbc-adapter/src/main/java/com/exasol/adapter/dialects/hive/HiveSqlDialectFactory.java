@@ -7,7 +7,7 @@ import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectFactory;
 
 /**
- * Factory for the Hive SQL dialect
+ * Factory for the Hive SQL dialect.
  */
 public class HiveSqlDialectFactory implements SqlDialectFactory {
     @Override
