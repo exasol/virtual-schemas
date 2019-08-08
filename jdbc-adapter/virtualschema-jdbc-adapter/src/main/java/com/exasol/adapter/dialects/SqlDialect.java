@@ -26,7 +26,7 @@ public interface SqlDialect {
     /**
      * Get the dialect name.
      *
-     * @return the name of the Dialect
+     * @return the name of the dialect
      */
     public String getName();
 

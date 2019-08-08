@@ -47,7 +47,7 @@ public final class SqlDialectRegistry {
     }
 
     /**
-     * Get a list of all currently registered Virtual Schema Adapters
+     * Get a list of all currently registered Virtual Schema Adapters.
      *
      * @return list of adapter factories
      */
