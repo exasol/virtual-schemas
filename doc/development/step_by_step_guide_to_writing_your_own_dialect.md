@@ -50,7 +50,7 @@ Now that you have the skeleton of the dialect adapter, it is time to implement t
 
 Each dialect is accompanied by a factory that is responsible for instantiating that dialect. The [Java Service](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) loader takes care of finding and loading the factory. It looks up the fully qualified class name of the dialect factories in the file [`com.exasol.adapter.dialects.SqlDialectFactory`](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/resources/META-INF/services/com.exasol.adapter.dialects.SqlDialectFactory).
 
-The factory itself is very simple. It only has two methods that you need to implement and that implementation is surprisingly simple. First the factory needs to be able to provide the dialect name since the JDBC adapter takes identifies dialect by name.
+The factory itself is very simple. It only has two methods that you need to implement and that implementation is surprisingly simple. First the factory needs to be able to provide the dialect name since the JDBC adapter identifies dialect by name.
 
 ```java
 @Override
