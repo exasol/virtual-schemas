@@ -19,6 +19,9 @@ addons:
 before_script:
   - sudo pip install pipenv
   - ./jdbc-adapter/tools/version.sh verify
+  
+install:
+    - travis_retry mvn dependency:resolve
 
 script:
   - ./jdbc-adapter/integration-test-data/run_integration_tests.sh
