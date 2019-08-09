@@ -61,7 +61,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         int columnId = 0;
         final List<TableMetadata> tableMetadata = new ArrayList<>();
         SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata);
-        final List<String> selectListElements = new ArrayList<>();
+        final List<String> selectListElements = new ArrayList<>(tableMetadata.size());
         for (final TableMetadata tableMeta : tableMetadata) {
             for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
                 final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);

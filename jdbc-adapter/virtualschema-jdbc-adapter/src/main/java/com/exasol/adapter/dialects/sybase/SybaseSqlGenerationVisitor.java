@@ -79,7 +79,7 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
         int columnId = 0;
         final List<TableMetadata> tableMetadata = new ArrayList<>();
         SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata);
-        final List<String> selectListElements = new ArrayList<>();
+        final List<String> selectListElements = new ArrayList<>(tableMetadata.size());
         for (final TableMetadata tableMeta : tableMetadata) {
             for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
                 final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
@@ -133,8 +133,9 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
 
     @Override
     public String visit(final SqlOrderBy orderBy) throws AdapterException {
-        final List<String> sqlOrderElement = new ArrayList<>();
-        for (int i = 0; i < orderBy.getExpressions().size(); ++i) {
+        int size = orderBy.getExpressions().size();
+        final List<String> sqlOrderElement = new ArrayList<>(size);
+        for (int i = 0; i < size; ++i) {
             String elementSql = orderBy.getExpressions().get(i).accept(this);
             final boolean isNullsLast = orderBy.nullsLast().get(i);
             final boolean isAscending = orderBy.isAscending().get(i);

@@ -118,7 +118,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private List<String> buildAliases(final int numSelectListElements) {
-        final List<String> aliases = new ArrayList<>();
+        final List<String> aliases = new ArrayList<>(numSelectListElements);
         for (int i = 0; i < numSelectListElements; i++) {
             aliases.add("c" + i);
         }

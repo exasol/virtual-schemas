@@ -33,7 +33,7 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
             selectListElements.addAll(getSelectStarList(selectList));
         } else {
             if (selectList.isRequestAnyColumn()) {
-                return "1";
+                return SqlConstants.ONE;
             } else {
                 selectListElements.addAll(getSelectList(selectList));
             }
@@ -53,7 +53,7 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private List<String> getSelectListWithColumns(final List<TableMetadata> tableMetadata) throws AdapterException {
-        final List<String> selectListElements = new ArrayList<>();
+        final List<String> selectListElements = new ArrayList<>(tableMetadata.size());
         int columnId = 0;
         for (final TableMetadata tableMeta : tableMetadata) {
             for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
@@ -72,12 +72,14 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
 
     private String getTypeName(final SqlColumn sqlColumn) throws AdapterException {
         return ColumnAdapterNotes
-              .deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName()).getTypeName();
+                .deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName())
+                .getTypeName();
     }
 
     private List<String> getSelectList(final SqlSelectList selectList) throws AdapterException {
-        final List<String> selectListElements = new ArrayList<>();
-        for (final SqlNode node : selectList.getExpressions()) {
+        final List<SqlNode> expressions = selectList.getExpressions();
+        final List<String> selectListElements = new ArrayList<>(expressions.size());
+        for (final SqlNode node : expressions) {
             if (node.getType().equals(SqlNodeType.COLUMN)) {
                 final SqlColumn sqlColumn = (SqlColumn) node;
                 final String typeName = getTypeName(sqlColumn);
