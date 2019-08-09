@@ -12,8 +12,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import com.exasol.adapter.dialects.exasol.ExasolSqlDialect;
-
 /**
  * Integration test for JDBC drivers requiring Kerberos authentication. This is currently only tested for the Cloudera
  * Hive JDBC driver developed by Simba (probably also works for the Cloudera Impala Driver developed by Simba)
@@ -38,8 +36,8 @@ class KerberosIT extends AbstractIntegrationTest {
 
     @Test
     void testKerberosVirtualSchema() throws SQLException, FileNotFoundException {
-        createVirtualSchema(VIRTUAL_SCHEMA, ExasolSqlDialect.getPublicName(), "", "default", CONNECTION_NAME, "", "",
-                "ADAPTER.JDBC_ADAPTER", "", IS_LOCAL, getConfig().debugAddress(), "", null, "");
+        createVirtualSchema(VIRTUAL_SCHEMA, "EXASOL", "", "default", CONNECTION_NAME, "", "", "ADAPTER.JDBC_ADAPTER",
+                "", IS_LOCAL, getConfig().debugAddress(), "", null, "");
         final Statement stmt = getConnection().createStatement();
         final ResultSet result = stmt.executeQuery("SELECT * FROM \"sample_07\"");
         result.next();
@@ -64,8 +62,8 @@ class KerberosIT extends AbstractIntegrationTest {
         stmt.execute("COMMIT");
         final Connection conn2 = connectToExa(userName, userName);
         final Statement stmt2 = conn2.createStatement();
-        createVirtualSchema(conn2, VIRTUAL_SCHEMA, ExasolSqlDialect.getPublicName(), "", "default", CONNECTION_NAME, "",
-                "", adapterName, "", false, getConfig().debugAddress(), "", null, "");
+        createVirtualSchema(conn2, VIRTUAL_SCHEMA, "EXASOL", "", "default", CONNECTION_NAME, "", "", adapterName, "",
+                false, getConfig().debugAddress(), "", null, "");
         final ResultSet result = stmt2.executeQuery("SELECT * FROM \"sample_07\"");
         result.next();
         assertEquals("00-0000", result.getString(1));

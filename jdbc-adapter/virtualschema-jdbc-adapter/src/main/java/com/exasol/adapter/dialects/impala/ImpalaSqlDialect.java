@@ -14,7 +14,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
-import com.exasol.adapter.sql.*;
+import com.exasol.adapter.sql.ScalarFunction;
 
 /**
  * Dialect for Impala, using the Cloudera Impala JDBC Driver/Connector (developed by Simba).
@@ -22,30 +22,11 @@ import com.exasol.adapter.sql.*;
  * See http://www.cloudera.com/documentation/enterprise/latest/topics/impala_langref.html
  */
 public class ImpalaSqlDialect extends AbstractSqlDialect {
-    private static final String NAME = "IMPALA";
+    static final String NAME = "IMPALA";
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
-
-    /**
-     * Get the Impala dialect name.
-     *
-     * @return always "IMPALA"
-     */
-    public static String getPublicName() {
-        return NAME;
-    }
-
-    /**
-     * Create a new instance of the {@link ImpalaSqlDialect}.
-     *
-     * @param connection JDBC connection
-     * @param properties user-defined adapter properties
-     */
-    public ImpalaSqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
-    }
 
     @Override
     public Capabilities getCapabilities() {
@@ -66,6 +47,21 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
                         LTRIM, REGEXP_REPLACE, REPEAT, REVERSE, RPAD, RTRIM, SPACE, SUBSTR, TRANSLATE, TRIM, UPPER,
                         SYSDATE);
         return builder.build();
+    }
+
+    /**
+     * Create a new instance of the {@link ImpalaSqlDialect}.
+     *
+     * @param connection JDBC connection
+     * @param properties user-defined adapter properties
+     */
+    public ImpalaSqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
     @Override
@@ -115,19 +111,13 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public SqlNodeVisitor<String> getSqlGenerationVisitor(final SqlGenerationContext context) {
+    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new ImpalaSqlGenerationVisitor(this, context);
     }
 
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_HIGH;
-    }
-
-    @Override
-    public void validateProperties() throws PropertyValidationException {
-        super.validateDialectName(getPublicName());
-        super.validateProperties();
     }
 
     @Override

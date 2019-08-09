@@ -49,14 +49,14 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         // Check if dialect provided invalid aliases, which would never be applied.
         for (final ScalarFunction function : this.dialect.getScalarFunctionAliases().keySet()) {
             if (!function.isSimple()) {
-                throw new RuntimeException("The dialect " + SqlDialect.getPublicName()
+                throw new UnsupportedOperationException("The dialect " + this.dialect.getName()
                         + " provided an alias for the non-simple scalar function " + function.name()
                         + ". This alias will never be considered.");
             }
         }
         for (final AggregateFunction function : this.dialect.getAggregateFunctionAliases().keySet()) {
             if (!function.isSimple()) {
-                throw new RuntimeException("The dialect " + SqlDialect.getPublicName()
+                throw new UnsupportedOperationException("The dialect " + this.dialect.getName()
                         + " provided an alias for the non-simple aggregate function " + function.name()
                         + ". This alias will never be considered.");
             }

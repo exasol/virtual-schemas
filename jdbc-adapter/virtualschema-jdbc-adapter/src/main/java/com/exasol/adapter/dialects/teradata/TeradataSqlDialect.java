@@ -21,41 +21,12 @@ import com.exasol.adapter.sql.SqlNodeVisitor;
  * This class implements the Teradata SQL dialect.
  */
 public class TeradataSqlDialect extends AbstractSqlDialect {
-    private static final String NAME = "TERADATA";
+    static final String NAME = "TERADATA";
     private static final Capabilities CAPABILITIES = createCapabilityList();
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, EXCEPTION_HANDLING_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
-
-    @Override
-    protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new TeradataMetadataReader(this.connection, this.properties);
-    }
-
-    @Override
-    protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
-    }
-
-    /**
-     * Create a new instance of the {@link TeradataSqlDialect}.
-     *
-     * @param connection JDBC connection
-     * @param properties user-defined adapter properties
-     */
-    public TeradataSqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
-    }
-
-    /**
-     * Get the Teradata dialect name.
-     *
-     * @return always "TERADATA"
-     */
-    public static String getPublicName() {
-        return NAME;
-    }
 
     private static Capabilities createCapabilityList() {
         return Capabilities.builder()
@@ -76,9 +47,34 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
                 .build();
     }
 
+    /**
+     * Create a new instance of the {@link TeradataSqlDialect}.
+     *
+     * @param connection JDBC connection
+     * @param properties user-defined adapter properties
+     */
+    public TeradataSqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
+    }
+
     @Override
     public Capabilities getCapabilities() {
         return CAPABILITIES;
+    }
+
+    @Override
+    protected RemoteMetadataReader createRemoteMetadataReader() {
+        return new TeradataMetadataReader(this.connection, this.properties);
+    }
+
+    @Override
+    protected QueryRewriter createQueryRewriter() {
+        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
     }
 
     @Override
@@ -114,12 +110,6 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_HIGH;
-    }
-
-    @Override
-    public void validateProperties() throws PropertyValidationException {
-        super.validateDialectName(getPublicName());
-        super.validateProperties();
     }
 
     @Override

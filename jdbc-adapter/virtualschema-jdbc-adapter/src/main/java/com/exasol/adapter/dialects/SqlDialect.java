@@ -24,13 +24,15 @@ import com.exasol.adapter.sql.*;
  */
 public interface SqlDialect {
     /**
-     * @return the name that can be used to choose this dialect (user can give this name). Case insensitive.
+     * Get the dialect name.
+     *
+     * @return the name of the dialect
      */
-    public static String getPublicName() {
-        return "SqlDialect interface";
-    }
+    public String getName();
 
     /**
+     * Get the capabilities the SQL dialect supports.
+     *
      * @return The set of capabilities supported by this SQL-Dialect
      */
     public Capabilities getCapabilities();
@@ -71,8 +73,8 @@ public interface SqlDialect {
     public StructureElementSupport supportsJdbcCatalogs();
 
     /**
-     * Define whether the remote source supports schemas and if it does, check if it supports a single "pseudo" schema or
-     * multiple schemas.
+     * Define whether the remote source supports schemas and if it does, check if it supports a single "pseudo" schema
+     * or multiple schemas.
      *
      * @return <code>NONE</code> if the dialect does not support schemas at all, <code>SINGLE</code> if it supports
      *         exactly one (like e.g. Exasol) or <code>MULTIPLE</code> if real schemas are supported.

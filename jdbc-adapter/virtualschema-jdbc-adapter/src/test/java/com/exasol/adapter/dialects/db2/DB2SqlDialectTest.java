@@ -20,7 +20,8 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hamcrest.*;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -78,17 +79,6 @@ class DB2SqlDialectTest {
     void testMetadataReaderClass() {
         assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
                 instanceOf(DB2MetadataReader.class));
-    }
-
-    @Test
-    void testValidateDialectNameProperty() {
-        setMandatoryProperties("ORACLE");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new DB2SqlDialect(null, adapterProperties);
-        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
-                sqlDialect::validateProperties);
-        MatcherAssert.assertThat(exception.getMessage(), containsString(
-                "The dialect DB2 cannot have the name ORACLE. You specified the wrong dialect name or created the wrong dialect class."));
     }
 
     @Test

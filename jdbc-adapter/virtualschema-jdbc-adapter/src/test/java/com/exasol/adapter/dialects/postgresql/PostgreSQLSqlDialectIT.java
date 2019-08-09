@@ -4,8 +4,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
@@ -50,17 +50,17 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
         createTestSchema();
         createTestSchemaUpperCaseTable();
         createPostgreSQLJDBCAdapter();
-        createVirtualSchema(VIRTUAL_SCHEMA, PostgreSQLSqlDialect.getPublicName(), POSTGRES_CATALOG, POSTGRES_SCHEMA, "",
+        createVirtualSchema(VIRTUAL_SCHEMA, PostgreSQLSqlDialect.NAME, POSTGRES_CATALOG, POSTGRES_SCHEMA, "",
                 getConfig().getPostgresqlUser(), getConfig().getPostgresqlPassword(), "ADAPTER.JDBC_ADAPTER",
                 getConfig().getPostgresqlDockerJdbcConnectionString(), IS_LOCAL, getConfig().debugAddress(), "", null,
                 "");
-        createVirtualSchema(VIRTUAL_SCHEMA_UPPERCASE_TABLE, PostgreSQLSqlDialect.getPublicName(), POSTGRES_CATALOG,
+        createVirtualSchema(VIRTUAL_SCHEMA_UPPERCASE_TABLE, PostgreSQLSqlDialect.NAME, POSTGRES_CATALOG,
                 POSTGRES_SCHEMA_UPPERCASE_TABLE, "", getConfig().getPostgresqlUser(),
                 getConfig().getPostgresqlPassword(), "ADAPTER.JDBC_ADAPTER",
                 getConfig().getPostgresqlDockerJdbcConnectionString(), IS_LOCAL, getConfig().debugAddress(), "",
                 "ignore_errors='POSTGRESQL_UPPERCASE_TABLES'", "");
-        createVirtualSchema(VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE, PostgreSQLSqlDialect.getPublicName(),
-                POSTGRES_CATALOG, POSTGRES_SCHEMA_UPPERCASE_TABLE, "", getConfig().getPostgresqlUser(),
+        createVirtualSchema(VIRTUAL_SCHEMA_PRESERVE_ORIGINAL_CASE, PostgreSQLSqlDialect.NAME, POSTGRES_CATALOG,
+                POSTGRES_SCHEMA_UPPERCASE_TABLE, "", getConfig().getPostgresqlUser(),
                 getConfig().getPostgresqlPassword(), "ADAPTER.JDBC_ADAPTER",
                 getConfig().getPostgresqlDockerJdbcConnectionString(), IS_LOCAL, getConfig().debugAddress(), "",
                 "POSTGRESQL_IDENTIFIER_MAPPING = 'PRESERVE_ORIGINAL_CASE'", "");
@@ -252,8 +252,7 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a LEFT OUTER JOIN  " + VIRTUAL_SCHEMA
                 + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, 1L, "aaa", null, null),
-                () -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
+        assertAll(() -> matchNextRow(result, 1L, "aaa", null, null), () -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
                 () -> assertFalse(result.next()));
     }
 
@@ -262,8 +261,8 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a RIGHT OUTER JOIN  " + VIRTUAL_SCHEMA
                 + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
-                () -> matchNextRow(result, null, null, 3L, "ccc"), () -> assertFalse(result.next()));
+        assertAll(() -> matchNextRow(result, 2L, "bbb", 2L, "bbb"), () -> matchNextRow(result, null, null, 3L, "ccc"),
+                () -> assertFalse(result.next()));
     }
 
     @Test
@@ -271,8 +270,7 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a FULL OUTER JOIN  " + VIRTUAL_SCHEMA
                 + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, 1L, "aaa", null, null),
-                () -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
+        assertAll(() -> matchNextRow(result, 1L, "aaa", null, null), () -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
                 () -> matchNextRow(result, null, null, 3L, "ccc"), () -> assertFalse(result.next()));
     }
 
@@ -281,8 +279,8 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a RIGHT OUTER JOIN  " + VIRTUAL_SCHEMA
                 + ".t2 b ON a.x||a.y=b.x||b.y ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
-                () -> matchNextRow(result, null, null, 3L, "ccc"), () -> assertFalse(result.next()));
+        assertAll(() -> matchNextRow(result, 2L, "bbb", 2L, "bbb"), () -> matchNextRow(result, null, null, 3L, "ccc"),
+                () -> assertFalse(result.next()));
     }
 
     @Test
@@ -290,8 +288,7 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a FULL OUTER JOIN  " + VIRTUAL_SCHEMA
                 + ".t2 b ON a.x-b.x=0 ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, 1L, "aaa", null, null),
-                () -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
+        assertAll(() -> matchNextRow(result, 1L, "aaa", null, null), () -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
                 () -> matchNextRow(result, null, null, 3L, "ccc"), () -> assertFalse(result.next()));
     }
 
@@ -299,9 +296,8 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
     @Test
     void testCreateSchemaWithUpperCaseTables() {
         final Throwable throwable = assertThrows(DataException.class, () -> //
-        createVirtualSchema("FOO", PostgreSQLSqlDialect.getPublicName(), POSTGRES_CATALOG,
-                POSTGRES_SCHEMA_UPPERCASE_TABLE, "", getConfig().getPostgresqlUser(),
-                getConfig().getPostgresqlPassword(), "ADAPTER.JDBC_ADAPTER",
+        createVirtualSchema("FOO", PostgreSQLSqlDialect.NAME, POSTGRES_CATALOG, POSTGRES_SCHEMA_UPPERCASE_TABLE, "",
+                getConfig().getPostgresqlUser(), getConfig().getPostgresqlPassword(), "ADAPTER.JDBC_ADAPTER",
                 getConfig().getPostgresqlDockerJdbcConnectionString(), IS_LOCAL, getConfig().debugAddress(), "", null,
                 "JOIN"));
         assertThat(throwable.getMessage(), containsString(

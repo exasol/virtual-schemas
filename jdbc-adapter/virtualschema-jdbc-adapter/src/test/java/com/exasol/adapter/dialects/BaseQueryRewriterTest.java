@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import com.exasol.*;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.dummy.DummySqlDialect;
 import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
 import com.exasol.adapter.sql.TestSqlStatementFactory;
 

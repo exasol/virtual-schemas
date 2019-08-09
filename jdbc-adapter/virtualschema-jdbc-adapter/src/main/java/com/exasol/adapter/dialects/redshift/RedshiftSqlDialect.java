@@ -20,31 +20,12 @@ import com.exasol.adapter.sql.*;
  * This class implements the Redshift SQL dialect.
  */
 public class RedshiftSqlDialect extends AbstractSqlDialect {
-    private static final String NAME = "REDSHIFT";
+    static final String NAME = "REDSHIFT";
     private static final Capabilities CAPABILITIES = createCapabilityList();
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
-
-    /**
-     * Create a new instance of the {@link RedshiftSqlDialect}.
-     *
-     * @param connection JDBC connection
-     * @param properties user-defined adapter properties
-     */
-    public RedshiftSqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
-    }
-
-    /**
-     * Get the Redshift dialect name.
-     *
-     * @return always "REDSHIFT"
-     */
-    public static String getPublicName() {
-        return NAME;
-    }
 
     private static Capabilities createCapabilityList() {
         return Capabilities.builder()
@@ -66,6 +47,21 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
                         SYSDATE, YEAR, CURRENT_DATE, CURRENT_TIMESTAMP, EXTRACT, CAST, TO_NUMBER, TO_TIMESTAMP, TO_DATE,
                         HASH_SHA1, HASH_MD5, CURRENT_SCHEMA, CURRENT_USER)
                 .build();
+    }
+
+    /**
+     * Create a new instance of the {@link RedshiftSqlDialect}.
+     *
+     * @param connection JDBC connection
+     * @param properties user-defined adapter properties
+     */
+    public RedshiftSqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
     @Override
@@ -132,12 +128,6 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
     @Override
     protected QueryRewriter createQueryRewriter() {
         return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
-    }
-
-    @Override
-    public void validateProperties() throws PropertyValidationException {
-        super.validateDialectName(getPublicName());
-        super.validateProperties();
     }
 
     @Override

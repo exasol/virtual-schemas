@@ -8,10 +8,10 @@ import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGR
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.*;
@@ -19,6 +19,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.dummy.DummySqlDialect;
 import com.exasol.logging.CapturingLogHandler;
 
 class AbstractSqlDialectTest {
@@ -100,29 +101,6 @@ class AbstractSqlDialectTest {
     }
 
     @Test
-    void testNoDialect() {
-        this.rawProperties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
-        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
-                sqlDialect::validateProperties);
-        assertThat(exception.getMessage(), containsString("You have to specify the SQL dialect "));
-    }
-
-    @Test
-    void testInvalidDialect() {
-        this.rawProperties.put(CONNECTION_NAME_PROPERTY, "MY_CONN");
-        this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
-        this.rawProperties.put(SQL_DIALECT_PROPERTY, "INVALID_DIALECT");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
-        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
-                sqlDialect::validateProperties);
-        assertThat(exception.getMessage(), containsString("SQL Dialect \"INVALID_DIALECT\" is not supported."));
-    }
-
-    @Test
     void testValidatePropertiesWithWherePortIsString() throws PropertyValidationException {
         this.rawProperties.put(DEBUG_ADDRESS_PROPERTY, "host:port_should_be_a_number");
         assertWarningIssued("Illegal debug output port");
@@ -176,20 +154,6 @@ class AbstractSqlDialectTest {
                 sqlDialect::validateProperties);
         assertThat(exception.getMessage(), containsString(
                 "Invalid value 'IGNORE_ALL' for property EXCEPTION_HANDLING. Choose one of: IGNORE_INVALID_VIEWS, NONE"));
-    }
-
-    @Test
-    void getIgnoreErrors() {
-        final Map<String, String> rawProperties = new HashMap<>();
-        rawProperties.put("IGNORE_ERRORS", "ERrror_foo, error_bar    ,  another_error, уккщк");
-        final List<String> expectedErrorList = new ArrayList<>();
-        final AdapterProperties adapterProperties = new AdapterProperties(rawProperties);
-        final DummySqlDialect sqlDialect = new DummySqlDialect(null, adapterProperties);
-        expectedErrorList.add("ERRROR_FOO");
-        expectedErrorList.add("ERROR_BAR");
-        expectedErrorList.add("ANOTHER_ERROR");
-        expectedErrorList.add("УККЩК");
-        assertEquals(expectedErrorList, sqlDialect.getIgnoredErrors());
     }
 
     @Test

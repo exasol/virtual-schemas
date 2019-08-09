@@ -45,6 +45,13 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
         return RequestDispatcher.adapterCall(metadata, rawRequest);
     }
 
+    /**
+     * Create a new instance of type {@link JdbcAdapter}.
+     */
+    public JdbcAdapter() {
+        SqlDialectRegistry.getInstance().loadSqlDialectFactories();
+    }
+
     @Override
     public CreateVirtualSchemaResponse createVirtualSchema(final ExaMetadata exasolMetadata,
             final CreateVirtualSchemaRequest request) throws AdapterException {
@@ -91,9 +98,8 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     }
 
     private SqlDialect createDialect(final Connection connection, final AdapterProperties properties) {
-        final SqlDialectFactory dialectFactory = new SqlDialectFactory(connection, SqlDialectRegistry.getInstance(),
-                properties);
-        return dialectFactory.createSqlDialect(properties.getSqlDialect());
+        final String dialectName = properties.getSqlDialect();
+        return SqlDialectRegistry.getInstance().getDialectForName(dialectName, connection, properties);
     }
 
     @Override

@@ -7,16 +7,13 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -38,31 +35,28 @@ class HiveSqlDialectTest {
     @Test
     void testGetCapabilities() {
         final Capabilities capabilities = this.dialect.getCapabilities();
-        assertAll(() -> assertThat(capabilities.getMainCapabilities(),
-                containsInAnyOrder(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS,
-                        FILTER_EXPRESSIONS, AGGREGATE_SINGLE_GROUP, AGGREGATE_GROUP_BY_COLUMN,
-                        AGGREGATE_HAVING, ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT, JOIN,
-                        JOIN_TYPE_INNER, JOIN_TYPE_LEFT_OUTER, JOIN_TYPE_RIGHT_OUTER,
-                        JOIN_TYPE_FULL_OUTER, JOIN_CONDITION_EQUI)), //
+        assertAll(
+                () -> assertThat(capabilities.getMainCapabilities(),
+                        containsInAnyOrder(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS,
+                                AGGREGATE_SINGLE_GROUP, AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_HAVING, ORDER_BY_COLUMN,
+                                ORDER_BY_EXPRESSION, LIMIT, JOIN, JOIN_TYPE_INNER, JOIN_TYPE_LEFT_OUTER,
+                                JOIN_TYPE_RIGHT_OUTER, JOIN_TYPE_FULL_OUTER, JOIN_CONDITION_EQUI)), //
                 () -> assertThat(capabilities.getLiteralCapabilities(),
-                        containsInAnyOrder(NULL, BOOL, DATE, TIMESTAMP, DOUBLE, EXACTNUMERIC,
-                                STRING)),
+                        containsInAnyOrder(NULL, BOOL, DATE, TIMESTAMP, DOUBLE, EXACTNUMERIC, STRING)),
                 () -> assertThat(capabilities.getPredicateCapabilities(),
-                        containsInAnyOrder(AND, OR, NOT, EQUAL, NOTEQUAL, LESS, LESSEQUAL, LIKE,
-                                REGEXP_LIKE, BETWEEN, IN_CONSTLIST, IS_NULL, IS_NOT_NULL)),
+                        containsInAnyOrder(AND, OR, NOT, EQUAL, NOTEQUAL, LESS, LESSEQUAL, LIKE, REGEXP_LIKE, BETWEEN,
+                                IN_CONSTLIST, IS_NULL, IS_NOT_NULL)),
                 () -> assertThat(capabilities.getAggregateFunctionCapabilities(),
-                        containsInAnyOrder(COUNT, COUNT_STAR, COUNT_DISTINCT, SUM, SUM_DISTINCT,
-                                MIN, MAX, AVG, AVG_DISTINCT, STDDEV_POP, STDDEV_POP_DISTINCT,
-                                STDDEV_SAMP, STDDEV_SAMP_DISTINCT, VAR_POP, VAR_POP_DISTINCT,
-                                VAR_SAMP, VAR_SAMP_DISTINCT)),
+                        containsInAnyOrder(COUNT, COUNT_STAR, COUNT_DISTINCT, SUM, SUM_DISTINCT, MIN, MAX, AVG,
+                                AVG_DISTINCT, STDDEV_POP, STDDEV_POP_DISTINCT, STDDEV_SAMP, STDDEV_SAMP_DISTINCT,
+                                VAR_POP, VAR_POP_DISTINCT, VAR_SAMP, VAR_SAMP_DISTINCT)),
                 () -> assertThat(capabilities.getScalarFunctionCapabilities(),
-                        containsInAnyOrder(ADD, SUB, MULT, FLOAT_DIV, NEG, ABS, ACOS, ASIN, ATAN,
-                                CEIL, COS, DEGREES, DIV, EXP, FLOOR, LN, LOG, MOD, POWER, RADIANS,
-                                SIGN, SIN, SQRT, TAN, ASCII, CONCAT, LENGTH, LOWER, LPAD, REPEAT,
-                                REVERSE, RPAD, SOUNDEX, SPACE, SUBSTR, TRANSLATE, UPPER, ADD_DAYS,
-                                ADD_MONTHS, CURRENT_DATE, CURRENT_TIMESTAMP, DATE_TRUNC, DAY,
-                                DAYS_BETWEEN, MINUTE, MONTH, MONTHS_BETWEEN, SECOND, WEEK, CAST,
-                                BIT_AND, BIT_OR, BIT_XOR, CURRENT_USER)));
+                        containsInAnyOrder(ADD, SUB, MULT, FLOAT_DIV, NEG, ABS, ACOS, ASIN, ATAN, CEIL, COS, DEGREES,
+                                DIV, EXP, FLOOR, LN, LOG, MOD, POWER, RADIANS, SIGN, SIN, SQRT, TAN, ASCII, CONCAT,
+                                LENGTH, LOWER, LPAD, REPEAT, REVERSE, RPAD, SOUNDEX, SPACE, SUBSTR, TRANSLATE, UPPER,
+                                ADD_DAYS, ADD_MONTHS, CURRENT_DATE, CURRENT_TIMESTAMP, DATE_TRUNC, DAY, DAYS_BETWEEN,
+                                MINUTE, MONTH, MONTHS_BETWEEN, SECOND, WEEK, CAST, BIT_AND, BIT_OR, BIT_XOR,
+                                CURRENT_USER)));
     }
 
     @Test
@@ -72,17 +66,6 @@ class HiveSqlDialectTest {
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new HiveSqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
-    }
-
-    @Test
-    void testValidateDialectNameProperty() {
-        setMandatoryProperties("ORACLE");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new HiveSqlDialect(null, adapterProperties);
-        final PropertyValidationException exception = assertThrows(
-                PropertyValidationException.class, sqlDialect::validateProperties);
-        MatcherAssert.assertThat(exception.getMessage(), containsString(
-                "The dialect HIVE cannot have the name ORACLE. You specified the wrong dialect name or created the wrong dialect class."));
     }
 
     @Test
