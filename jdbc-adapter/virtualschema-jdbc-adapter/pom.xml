@@ -28,11 +28,16 @@
             </dependencies>
             <dependencyManagement>
                 <dependencies>
-                    <!-- Force transient dependency to version 2.0.0 (would be an alpha version otherwise) -->
+                    <!-- Force transient dependency versions to avoid using snapshot releases -->
                     <dependency>
                         <groupId>org.apache.hbase</groupId>
                         <artifactId>hbase-server</artifactId>
                         <version>2.2.0</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.glassfish</groupId>
+                        <artifactId>javax.el</artifactId>
+                        <version>3.0.1-b11</version>
                     </dependency>
                 </dependencies>
             </dependencyManagement>
