@@ -23,7 +23,7 @@ cd virtual-schemas/jdbc-adapter/
 mvn clean -DskipTests package
 ```
 
-The resulting fat JAR is stored in `virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.19.7.jar`.
+The resulting fat JAR is stored in `virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.19.1.jar`.
 
 ## Uploading the Adapter JAR Archive
 
@@ -46,8 +46,8 @@ Following steps are required to upload a file to a bucket:
 1. Now upload the file into this bucket, e.g. using curl (adapt the hostname, BucketFS port, bucket name and bucket write password).
 
 ```bash
-curl -X PUT -T virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.19.7.jar \
- http://w:write-password@your.exasol.host.com:2580/bucket1/virtualschema-jdbc-adapter-dist-1.19.7.jar
+curl -X PUT -T virtualschema-jdbc-adapter-dist/target/virtualschema-jdbc-adapter-dist-1.19.1.jar \
+ http://w:write-password@your.exasol.host.com:2580/bucket1/virtualschema-jdbc-adapter-dist-1.19.1.jar
 ```
 
 If you later need to change the bucket passwords, select the bucket and click "Edit".
@@ -71,22 +71,21 @@ Note that some JDBC drivers consist of several files and that you have to upload
 
 ## Deploying the Adapter Script
 
-Then run the following SQL commands to deploy the adapter in the database:
+Create a schema to hold the adapter script.
 
 ```sql
--- The adapter is simply a script. It has to be stored in any regular schema.
-CREATE SCHEMA adapter;
-CREATE JAVA ADAPTER SCRIPT adapter.jdbc_adapter AS
+CREATE SCHEMA ADAPTER;
+```
 
-  // This is the class implementing the callback method of the adapter script
+The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
+
+```sql
+CREATE SCHEMA ADAPTER;
+
+CREATE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-
-  // This will add the adapter jar to the classpath so that it can be used inside the adapter script
-  // Replace the names of the bucketfs and the bucket with the ones you used.
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.19.7.jar;
-
-  // You have to add all files of the data source jdbc driver here (e.g. Hive JDBC driver files)
-  %jar /buckets/your-bucket-fs/your-bucket/name-of-data-source-jdbc-driver.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-1.19.1.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/<JDBC driver>.jar;
 /
 ```
 

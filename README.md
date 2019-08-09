@@ -24,6 +24,18 @@ Regardless of whether that source is a relational database like ours, or it's li
 
 This means an user familiar with SQL will immediately feel at home when accessing remote data through Virtual Schemas.
 
+## Deprecation Warning
+
+The old entry point (Java class) for Virtual Schemas
+
+    com.exasol.adapter.jdbc.JdbcAdapter
+
+is deprecated. Please use the new entry point
+
+    com.exasol.adapter.RequestDispatcher
+
+in all your `CREATE JAVA ADAPTER SCRIPT` statements. The old entry point will be removed with the upcoming Version 2.0.0 of Exasol's Virtual Schema.
+
 ## Features
 
 * Read access to data on remote data sources
@@ -49,21 +61,24 @@ This is an open source project which is officially supported by Exasol. For any 
 
 * [User Guide](doc/user-guide/user_guide.md)
 * [Deployment Guide](doc/user-guide/deploying_the_virtual_schema_adapter.md) 
-* Supported dialects:
-    1. [Athena](doc/dialects/athena.md)
-    1. [Big Query](doc/dialects/bigquery.md)
-    1. [DB2](doc/dialects/db2.md)
-    1. [Exasol](doc/dialects/exasol.md)
-    1. [Hive](doc/dialects/hive.md)
-    1. [Impala](doc/dialects/impala.md)
-    1. [Oracle](doc/dialects/oracle.md)
-    1. [PostgreSQL](doc/dialects/postgresql.md)
-    1. [Redshift](doc/dialects/redshift.md)
-    1. [SAP HANA](.../dialects/saphana.md)
-    1. [SQL Server](doc/dialects/sql_server.md)
-    1. [Sybase ASE](doc/dialects/sybase.md)
-    1. [Teradata](doc/dialects/teradata.md)
-    1. Generic
+
+Supported dialects:
+
+1. [Athena](doc/dialects/athena.md)
+1. [Aurora](doc/dialects/aurora.md)
+1. [Big Query](doc/dialects/bigquery.md)
+1. [DB2](doc/dialects/db2.md)
+1. [Exasol](doc/dialects/exasol.md)
+1. [Hive](doc/dialects/hive.md)
+1. [Impala](doc/dialects/impala.md)
+1. [Oracle](doc/dialects/oracle.md)
+1. [PostgreSQL](doc/dialects/postgresql.md)
+1. [Redshift](doc/dialects/redshift.md)
+1. [SAP HANA](.../dialects/saphana.md)
+1. [SQL Server](doc/dialects/sql_server.md)
+1. [Sybase ASE](doc/dialects/sybase.md)
+1. [Teradata](doc/dialects/teradata.md)
+1. Generic
 
 ## Information for Developers 
 
