@@ -21,6 +21,7 @@ before_script:
   - ./jdbc-adapter/tools/version.sh verify
   
 install:
+    - cd  jdbc-adapter
     - travis_retry mvn dependency:resolve
 
 script:
