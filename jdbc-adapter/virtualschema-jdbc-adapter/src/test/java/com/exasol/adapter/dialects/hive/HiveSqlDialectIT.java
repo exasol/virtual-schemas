@@ -39,7 +39,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
 
         createHiveJDBCAdapter();
         createHiveConnection();
-        createVirtualSchema(VIRTUAL_SCHEMA, HiveSqlDialect.getPublicName(), "", HIVE_SCHEMA, HIVE_CONNECTION, "", "",
+        createVirtualSchema(VIRTUAL_SCHEMA, HiveSqlDialect.NAME, "", HIVE_SCHEMA, HIVE_CONNECTION, "", "",
                 "ADAPTER.JDBC_ADAPTER", "", IS_LOCAL, getConfig().debugAddress(), "", null, "");
     }
 

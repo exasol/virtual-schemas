@@ -7,14 +7,15 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
-import java.sql.*;
+import java.sql.Connection;
 import java.util.*;
 
-import com.exasol.adapter.*;
-import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.*;
-import com.exasol.adapter.sql.*;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.sql.AggregateFunction;
+import com.exasol.adapter.sql.ScalarFunction;
 
 /**
  * This class implements the SQL dialect of Google's Big Query.
@@ -22,21 +23,12 @@ import com.exasol.adapter.sql.*;
  * @see <a href="https://cloud.google.com/bigquery/">BigQuery</a>
  */
 public class BigQuerySqlDialect extends AbstractSqlDialect {
-    private static final String NAME = "BIGQUERY";
+    static final String NAME = "BIGQUERY";
     private static final Capabilities CAPABILITIES = createCapabilityList();
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
-
-    /**
-     * Get the Big Query dialect name.
-     *
-     * @return always "BIGQUERY"
-     */
-    public static String getPublicName() {
-        return NAME;
-    }
 
     /**
      * Create a new instance of the {@link BigQuerySqlDialect}.
@@ -57,6 +49,11 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
     @Override
     protected QueryRewriter createQueryRewriter() {
         return new BigQueryQueryRewriter(this, this.remoteMetadataReader, this.connection);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
     private static Capabilities createCapabilityList() {

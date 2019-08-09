@@ -29,9 +29,9 @@ class GenericSqlDialectIT extends AbstractIntegrationTest {
         createGenericJDBCAdapter();
         final String catalogName = "jm3450"; // This only works for the database in our test environment
         final String schemaName = "";
-        createVirtualSchema("VS_GENERIC_MYSQL", GenericSqlDialect.getPublicName(), catalogName, schemaName, "",
-                getConfig().getGenericUser(), getConfig().getGenericPassword(), "ADAPTER.JDBC_ADAPTER",
-                connectionString, IS_LOCAL, getConfig().debugAddress(), "", null, "");
+        createVirtualSchema("VS_GENERIC_MYSQL", "GENERIC", catalogName, schemaName, "", getConfig().getGenericUser(),
+                getConfig().getGenericPassword(), "ADAPTER.JDBC_ADAPTER", connectionString, IS_LOCAL,
+                getConfig().debugAddress(), "", null, "");
     }
 
     @Test

@@ -15,7 +15,6 @@ import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.MainCapability;
-import com.exasol.adapter.dialects.generic.GenericSqlDialect;
 import com.exasol.adapter.metadata.SchemaMetadataInfo;
 import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.request.*;
@@ -25,7 +24,7 @@ import com.exasol.adapter.sql.TestSqlStatementFactory;
 
 public class JdbcAdapterTest {
     private static final String SCHEMA_NAME = "THE_SCHEMA";
-    private static final String GENERIC_ADAPTER_NAME = GenericSqlDialect.getPublicName();
+    private static final String GENERIC_ADAPTER_NAME = "GENERIC";
     private final JdbcAdapter adapter = new JdbcAdapter();
     private Map<String, String> rawProperties;
 
@@ -48,15 +47,15 @@ public class JdbcAdapterTest {
         setDerbyConnectionProperties();
         this.rawProperties.put(SCHEMA_NAME_PROPERTY, "SYSIBM");
         final List<TableMetadata> involvedTablesMetadata = null;
-        final PushDownRequest request = new PushDownRequest(JdbcAdapterTest.GENERIC_ADAPTER_NAME,
-                createSchemaMetadataInfo(), statement, involvedTablesMetadata);
+        final PushDownRequest request = new PushDownRequest(GENERIC_ADAPTER_NAME, createSchemaMetadataInfo(), statement,
+                involvedTablesMetadata);
         final ExaMetadata exaMetadataMock = Mockito.mock(ExaMetadata.class);
         final PushDownResponse response = this.adapter.pushdown(exaMetadataMock, request);
         return response;
     }
 
     private void setGenericSqlDialectProperty() {
-        this.rawProperties.put(SQL_DIALECT_PROPERTY, JdbcAdapterTest.GENERIC_ADAPTER_NAME);
+        this.rawProperties.put(SQL_DIALECT_PROPERTY, GENERIC_ADAPTER_NAME);
     }
 
     private void setDerbyConnectionProperties() {

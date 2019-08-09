@@ -1,13 +1,8 @@
 package com.exasol.adapter.dialects.oracle;
 
-import com.exasol.adapter.dialects.AbstractIntegrationTest;
-import com.exasol.adapter.dialects.IntegrationTestConfigurationCondition;
-import org.junit.Assume;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
@@ -15,8 +10,12 @@ import java.net.URI;
 import java.sql.*;
 import java.util.*;
 
-import static org.junit.Assert.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.Assume;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import com.exasol.adapter.dialects.AbstractIntegrationTest;
+import com.exasol.adapter.dialects.IntegrationTestConfigurationCondition;
 
 @Tag("integration")
 @ExtendWith(IntegrationTestConfigurationCondition.class)
@@ -58,29 +57,29 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         createOracleConnection();
 
         // create JDBC virtual schema
-        createVirtualSchema(VIRTUAL_SCHEMA_JDBC, OracleSqlDialect.getPublicName(), "", ORACLE_SCHEMA, "",
+        createVirtualSchema(VIRTUAL_SCHEMA_JDBC, OracleSqlDialect.NAME, "", ORACLE_SCHEMA, "",
                 getConfig().getOracleUser(), getConfig().getOraclePassword(),
                 // "ADAPTER.JDBC_ORACLE_DEBUG",
                 "ADAPTER.JDBC_ADAPTER", getConfig().getOracleDockerJdbcConnectionString(), IS_LOCAL,
                 getConfig().debugAddress(), "", null, "");
 
         // create IMPORT FROM ORA virtual schema
-        createVirtualSchema(VIRTUAL_SCHEMA_ORA, OracleSqlDialect.getPublicName(), "", ORACLE_SCHEMA, "",
+        createVirtualSchema(VIRTUAL_SCHEMA_ORA, OracleSqlDialect.NAME, "", ORACLE_SCHEMA, "",
                 getConfig().getOracleUser(), getConfig().getOraclePassword(),
                 // "ADAPTER.JDBC_ORACLE_DEBUG",
                 "ADAPTER.JDBC_ADAPTER", getConfig().getOracleDockerJdbcConnectionString(), IS_LOCAL,
                 getConfig().debugAddress(), "", "IMPORT_FROM_ORA='true' ORA_CONNECTION_NAME='CONN_ORACLE'", "");
 
         // create JDBC virtual schema with special NUMBER handling
-        createVirtualSchema(VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL, OracleSqlDialect.getPublicName(), "", ORACLE_SCHEMA,
-                "", getConfig().getOracleUser(), getConfig().getOraclePassword(),
+        createVirtualSchema(VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL, OracleSqlDialect.NAME, "", ORACLE_SCHEMA, "",
+                getConfig().getOracleUser(), getConfig().getOraclePassword(),
                 // "ADAPTER.JDBC_ORACLE_DEBUG",
                 "ADAPTER.JDBC_ADAPTER", getConfig().getOracleDockerJdbcConnectionString(), IS_LOCAL,
                 getConfig().debugAddress(), "", "oracle_cast_number_to_decimal_with_precision_and_scale='36,1'", "");
 
         // create IMPORT FROM ORA virtual schema with special NUMBER handling
-        createVirtualSchema(VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL, OracleSqlDialect.getPublicName(), "", ORACLE_SCHEMA,
-                "", getConfig().getOracleUser(), getConfig().getOraclePassword(),
+        createVirtualSchema(VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL, OracleSqlDialect.NAME, "", ORACLE_SCHEMA, "",
+                getConfig().getOracleUser(), getConfig().getOraclePassword(),
                 // "ADAPTER.JDBC_ORACLE_DEBUG",
                 "ADAPTER.JDBC_ADAPTER", getConfig().getOracleDockerJdbcConnectionString(), IS_LOCAL,
                 getConfig().debugAddress(), "",
@@ -320,9 +319,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA_ORA + ".t1 a LEFT OUTER JOIN  " + VIRTUAL_SCHEMA_ORA
                 + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll (() -> matchNextRow(result, "1", "aaa", null, null),
-                () -> matchNextRow(result, "2", "bbb", "2", "bbb"),
-                () -> assertFalse(result.next()));
+        assertAll(() -> matchNextRow(result, "1", "aaa", null, null),
+                () -> matchNextRow(result, "2", "bbb", "2", "bbb"), () -> assertFalse(result.next()));
     }
 
     @Test
@@ -340,8 +338,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
                 + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
         assertAll(() -> matchNextRow(result, "1", "aaa", null, null),
-                () -> matchNextRow(result, "2", "bbb", "2", "bbb"),
-                () -> matchNextRow(result, null, null, "3", "ccc"), () -> assertFalse(result.next()));
+                () -> matchNextRow(result, "2", "bbb", "2", "bbb"), () -> matchNextRow(result, null, null, "3", "ccc"),
+                () -> assertFalse(result.next()));
     }
 
     @Test
@@ -359,8 +357,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
                 + ".t2 b ON a.x-b.x=0 ORDER BY a.x";
         final ResultSet result = executeQuery(query);
         assertAll(() -> matchNextRow(result, "1", "aaa", null, null),
-                () -> matchNextRow(result, "2", "bbb", "2", "bbb"),
-                () -> matchNextRow(result, null, null, "3", "ccc"), () -> assertFalse(result.next()));
+                () -> matchNextRow(result, "2", "bbb", "2", "bbb"), () -> matchNextRow(result, null, null, "3", "ccc"),
+                () -> assertFalse(result.next()));
     }
 
     // Type Tests -------------------------------------------------------------

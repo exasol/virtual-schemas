@@ -2,20 +2,19 @@ package com.exasol.adapter.dialects.saphana;
 
 import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
-import static com.exasol.adapter.capabilities.AggregateFunctionCapability.VAR_SAMP;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
-import java.sql.*;
+import java.sql.Connection;
 import java.util.*;
 
-import com.exasol.adapter.*;
-import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.*;
-import com.exasol.adapter.sql.*;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.sql.ScalarFunction;
 
 /**
  * This class implements the SAP HANA SQL dialect.
@@ -23,21 +22,12 @@ import com.exasol.adapter.sql.*;
  * @see <a href= "https://help.sap.com/viewer/product/SAP_HANA_PLATFORM/2.0.04/en-US">SAP HANA SQL</a>
  */
 public class SapHanaSqlDialect extends AbstractSqlDialect {
-    private static final String NAME = "SAPHANA";
+    static final String NAME = "SAPHANA";
     private static final Capabilities CAPABILITIES = createCapabilityList();
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
-
-    /**
-     * Get the SAP HANA dialect name.
-     *
-     * @return always "SAPHANA"
-     */
-    public static String getPublicName() {
-        return NAME;
-    }
 
     private static Capabilities createCapabilityList() {
         return Capabilities //
@@ -63,6 +53,11 @@ public class SapHanaSqlDialect extends AbstractSqlDialect {
                 .addAggregateFunction(COUNT, COUNT_STAR, COUNT_DISTINCT, SUM, MIN, MAX, AVG, MEDIAN, FIRST_VALUE,
                         LAST_VALUE, STDDEV_POP, STDDEV_SAMP, VAR_POP, VAR_SAMP) //
                 .build();
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
     @Override

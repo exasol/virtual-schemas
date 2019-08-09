@@ -19,7 +19,7 @@ import com.exasol.adapter.jdbc.RemoteMetadataReader;
  * Exasol SQL dialect.
  */
 public class ExasolSqlDialect extends AbstractSqlDialect {
-    private static final String NAME = "EXASOL";
+    static final String NAME = "EXASOL";
     private static final Capabilities CAPABILITIES = createCapabilityList();
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
@@ -29,7 +29,7 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
 
     /**
      * Create a new instance of the {@link ExasolSqlDialect}.
-     * 
+     *
      * @param connection SQL connection
      * @param properties adapter properties
      */
@@ -43,12 +43,8 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
         this.omitParenthesesMap.add(CURRENT_USER);
     }
 
-    /**
-     * Get the Exasol dialect name.
-     *
-     * @return always "EXASOL"
-     */
-    public static String getPublicName() {
+    @Override
+    public String getName() {
         return NAME;
     }
 
@@ -128,11 +124,10 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
 
     @Override
     public void validateProperties() throws PropertyValidationException {
-        super.validateDialectName(getPublicName());
         super.validateProperties();
-        super.checkImportPropertyConsistency(EXASOL_IMPORT_PROPERTY, EXASOL_CONNECTION_STRING_PROPERTY);
-        super.validateBooleanProperty(EXASOL_IMPORT_PROPERTY);
-        super.validateBooleanProperty(IS_LOCAL_PROPERTY);
+        checkImportPropertyConsistency(EXASOL_IMPORT_PROPERTY, EXASOL_CONNECTION_STRING_PROPERTY);
+        validateBooleanProperty(EXASOL_IMPORT_PROPERTY);
+        validateBooleanProperty(IS_LOCAL_PROPERTY);
     }
 
     @Override

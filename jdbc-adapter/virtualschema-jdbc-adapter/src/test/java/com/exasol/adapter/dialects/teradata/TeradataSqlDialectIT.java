@@ -29,7 +29,7 @@ class TeradataSqlDialectIT extends AbstractIntegrationTest {
         setConnection(connectToExa());
 
         createTeradataJDBCAdapter();
-        createVirtualSchema(VIRTUAL_SCHEMA, TeradataSqlDialect.getPublicName(), "", TERADATA_SCHEMA, "",
+        createVirtualSchema(VIRTUAL_SCHEMA, TeradataSqlDialect.NAME, "", TERADATA_SCHEMA, "",
                 getConfig().getTeradataUser(), getConfig().getTeradataPassword(), "ADAPTER.JDBC_ADAPTER",
                 getConfig().getTeradataJdbcConnectionString(), false, getConfig().debugAddress(),
                 "numeric_data_types, REGION, DateTime_and_Interval_Data_Types, Period_Data_Types", null, "");

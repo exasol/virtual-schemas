@@ -22,33 +22,14 @@ import com.exasol.adapter.sql.ScalarFunction;
  * This class implements the Sybase SQL dialect.
  */
 public class SybaseSqlDialect extends AbstractSqlDialect {
+    static final String NAME = "SYBASE";
     static final int MAX_SYBASE_VARCHAR_SIZE = 8000;
     static final int MAX_SYBASE_N_VARCHAR_SIZE = 4000;
-    private static final String NAME = "SYBASE";
     private static final Capabilities CAPABILITIES = createCapabilityList();
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
-
-    /**
-     * Create a new instance of the {@link SybaseSqlDialect}.
-     *
-     * @param connection JDBC connection
-     * @param properties user-defined adapter properties
-     */
-    public SybaseSqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
-    }
-
-    /**
-     * Get the Sybase dialect name.
-     *
-     * @return always "SYBASE"
-     */
-    public static String getPublicName() {
-        return NAME;
-    }
 
     private static Capabilities createCapabilityList() {
         return Capabilities.builder()
@@ -75,6 +56,21 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
                         ST_ISSIMPLE, ST_OVERLAPS, ST_SYMDIFFERENCE, ST_TOUCHES, ST_UNION, ST_WITHIN, BIT_AND, BIT_NOT,
                         BIT_OR, BIT_XOR, CASE, HASH_MD5, HASH_SHA, HASH_SHA1, NULLIFZERO, ZEROIFNULL)
                 .build();
+    }
+
+    /**
+     * Create a new instance of the {@link SybaseSqlDialect}.
+     *
+     * @param connection JDBC connection
+     * @param properties user-defined adapter properties
+     */
+    public SybaseSqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
     @Override
@@ -139,12 +135,6 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_LOW;
-    }
-
-    @Override
-    public void validateProperties() throws PropertyValidationException {
-        super.validateDialectName(getPublicName());
-        super.validateProperties();
     }
 
     @Override

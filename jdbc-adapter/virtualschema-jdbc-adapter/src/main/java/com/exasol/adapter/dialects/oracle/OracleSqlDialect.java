@@ -26,34 +26,13 @@ import com.exasol.adapter.sql.ScalarFunction;
  * This class implements the Oracle SQL dialect.
  */
 public class OracleSqlDialect extends AbstractSqlDialect {
-    private static final String NAME = "ORACLE";
+    static final String NAME = "ORACLE";
     private static final Capabilities CAPABILITIES = createCapabilityList();
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, ORACLE_IMPORT_PROPERTY, ORACLE_CONNECTION_NAME_PROPERTY,
             EXCLUDED_CAPABILITIES_PROPERTY, ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY, DEBUG_ADDRESS_PROPERTY,
             LOG_LEVEL_PROPERTY);
-
-    /**
-     * Create a new instance of the {@link OracleSqlDialect}.
-     *
-     * @param connection JDBC connection
-     * @param properties user-defined adapter properties
-     */
-    public OracleSqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
-        this.omitParenthesesMap.add(ScalarFunction.SYSDATE);
-        this.omitParenthesesMap.add(ScalarFunction.SYSTIMESTAMP);
-    }
-
-    /**
-     * Get the Oracle dialect name.
-     *
-     * @return always "ORACLE"
-     */
-    public static String getPublicName() {
-        return NAME;
-    }
 
     private static Capabilities createCapabilityList() {
         return Capabilities.builder()
@@ -80,6 +59,23 @@ public class OracleSqlDialect extends AbstractSqlDialect {
                         SESSIONTIMEZONE, SYSDATE, SYSTIMESTAMP, CAST, TO_CHAR, TO_DATE, TO_DSINTERVAL, TO_YMINTERVAL,
                         TO_NUMBER, TO_TIMESTAMP, BIT_AND, BIT_TO_NUM, CASE, NULLIFZERO, ZEROIFNULL)
                 .build();
+    }
+
+    /**
+     * Create a new instance of the {@link OracleSqlDialect}.
+     *
+     * @param connection JDBC connection
+     * @param properties user-defined adapter properties
+     */
+    public OracleSqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
+        this.omitParenthesesMap.add(ScalarFunction.SYSDATE);
+        this.omitParenthesesMap.add(ScalarFunction.SYSTIMESTAMP);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
     @Override
@@ -170,10 +166,9 @@ public class OracleSqlDialect extends AbstractSqlDialect {
 
     @Override
     public void validateProperties() throws PropertyValidationException {
-        super.validateDialectName(getPublicName());
         super.validateProperties();
-        super.checkImportPropertyConsistency(ORACLE_IMPORT_PROPERTY, ORACLE_CONNECTION_NAME_PROPERTY);
-        super.validateBooleanProperty(ORACLE_IMPORT_PROPERTY);
+        checkImportPropertyConsistency(ORACLE_IMPORT_PROPERTY, ORACLE_CONNECTION_NAME_PROPERTY);
+        validateBooleanProperty(ORACLE_IMPORT_PROPERTY);
         validateCastNumberToDecimalProperty();
     }
 

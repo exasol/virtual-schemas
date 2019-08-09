@@ -21,31 +21,12 @@ import com.exasol.adapter.sql.ScalarFunction;
  * later because of the order by (nulls first/last option).
  */
 public class HiveSqlDialect extends AbstractSqlDialect {
-    private static final String NAME = "HIVE";
+    static final String NAME = "HIVE";
     private static final Capabilities CAPABILITIES = createCapabilityList();
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
-
-    /**
-     * Create a new instance of the {@link HiveSqlDialect}.
-     *
-     * @param connection JDBC connection
-     * @param properties user-defined adapter properties
-     */
-    public HiveSqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
-    }
-
-    /**
-     * Get the Hive dialect name.
-     *
-     * @return always "HIVE"
-     */
-    public static String getPublicName() {
-        return NAME;
-    }
 
     private static Capabilities createCapabilityList() {
         return Capabilities.builder()
@@ -65,6 +46,21 @@ public class HiveSqlDialect extends AbstractSqlDialect {
                         CURRENT_DATE, CURRENT_TIMESTAMP, DATE_TRUNC, DAY, DAYS_BETWEEN, MINUTE, MONTH, MONTHS_BETWEEN,
                         SECOND, WEEK, CAST, BIT_AND, BIT_OR, BIT_XOR, CURRENT_USER) //
                 .build();
+    }
+
+    /**
+     * Create a new instance of the {@link HiveSqlDialect}.
+     *
+     * @param connection JDBC connection
+     * @param properties user-defined adapter properties
+     */
+    public HiveSqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
     @Override
@@ -121,12 +117,6 @@ public class HiveSqlDialect extends AbstractSqlDialect {
         scalarAliases.put(ScalarFunction.WEEK, "WEEKOFYEAR");
         scalarAliases.put(ScalarFunction.CURRENT_USER, "CURRENT_USER()");
         return scalarAliases;
-    }
-
-    @Override
-    public void validateProperties() throws PropertyValidationException {
-        super.validateDialectName(getPublicName());
-        super.validateProperties();
     }
 
     @Override
