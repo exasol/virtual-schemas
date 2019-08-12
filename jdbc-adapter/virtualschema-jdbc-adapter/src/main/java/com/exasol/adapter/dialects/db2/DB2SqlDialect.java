@@ -15,6 +15,8 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.sql.SqlNodeVisitor;
+import com.google.common.collect.*;
 
 /**
  * Dialect for DB2 using the DB2 Connector JDBC driver.
@@ -113,7 +115,7 @@ public class DB2SqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
+    public SqlNodeVisitor<String> getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new DB2SqlGenerationVisitor(this, context);
     }
 

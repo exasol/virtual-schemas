@@ -15,6 +15,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.sql.SqlNodeVisitor;
 
 /**
  * This class implements the Teradata SQL dialect.
@@ -87,7 +88,7 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
+    public SqlNodeVisitor<String> getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new TeradataSqlGenerationVisitor(this, context);
     }
 

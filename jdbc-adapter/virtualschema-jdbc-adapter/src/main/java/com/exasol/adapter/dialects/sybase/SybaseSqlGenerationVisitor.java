@@ -1,25 +1,24 @@
 package com.exasol.adapter.dialects.sybase;
 
 import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationHelper;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
-import com.exasol.adapter.jdbc.ColumnAdapterNotes;
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.TableMetadata;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.*;
+import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Predicate;
+import java.util.*;
+
+import static com.exasol.adapter.dialects.sybase.SybaseSqlDialect.MAX_SYBASE_N_VARCHAR_SIZE;
+import static com.exasol.adapter.dialects.sybase.SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE;
 
 /**
  * This class generates SQL queries for the {@link SybaseSqlGenerationVisitor}.
  */
 public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
+    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("text", "time", "bigtime", "xml");
+    private static final List<String> TYPE_NAME_NOT_SUPPORTED = ImmutableList.of("varbinary", "binary", "image");
 
     /**
      * Create a new instance of the {@link SybaseSqlGenerationVisitor}.
@@ -29,45 +28,130 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
      */
     public SybaseSqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         super(dialect, context);
+    }
 
+    protected List<String> getListOfTypeNamesRequiringCast() {
+        return TYPE_NAMES_REQUIRING_CAST;
+    }
+
+    protected List<String> getListOfTypeNamesNotSupported() {
+        return TYPE_NAME_NOT_SUPPORTED;
+    }
+
+    protected String buildColumnProjectionString(final String typeName, final String projectionString) {
+        if (typeName.startsWith("text")) {
+            return getCastAs(projectionString, "NVARCHAR(" + MAX_SYBASE_N_VARCHAR_SIZE + ")");
+        } else if (typeName.equals("time")) {
+            return "CONVERT(VARCHAR(12), " + projectionString + ", 137)";
+        } else if (typeName.equals("bigtime")) {
+            return "CONVERT(VARCHAR(16), " + projectionString + ", 137)";
+        } else if (typeName.startsWith("xml")) {
+            return getCastAs(projectionString, "NVARCHAR(" + MAX_SYBASE_N_VARCHAR_SIZE + ")");
+        } else if (TYPE_NAME_NOT_SUPPORTED.contains(typeName)) {
+            return "'" + typeName + " NOT SUPPORTED'";
+        } else {
+            return projectionString;
+        }
+    }
+
+    private String getCastAs(final String projectionString, final String castType) {
+        return "CAST(" + projectionString + "  as " + castType + " )";
     }
 
     @Override
-    public String visit(final SqlSelectList selectList) throws AdapterException {
-        if (selectList.isRequestAnyColumn()) {
-            // The system requested any column
-            return "true";
-        }
-        final List<String> selectListElements = new ArrayList<>();
-        if (selectList.isSelectStar()) {
-            if (SqlGenerationHelper.selectListRequiresCasts(selectList, this.nodeRequiresCast)) {
-
-                // Do as if the user has all columns in select list
-                final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
-
-                int columnId = 0;
-                final List<TableMetadata> tableMetadata = new ArrayList<TableMetadata>();
-                SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata );
-                for (final TableMetadata tableMeta : tableMetadata) {
-                    for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
-                        final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-                        selectListElements.add( getColumnProjectionStringNoCheck(sqlColumn,  super.visit(sqlColumn)  )   );
-                        ++columnId;
-                    }
-                }
-
-            } else {
-                selectListElements.add("*");
-            }
-        } else {
-            for (final SqlNode node : selectList.getExpressions()) {
-                selectListElements.add(node.accept(this));
-            }
-        }
-
-        return Joiner.on(", ").join(selectListElements);
+    protected String representAsteriskInSelectList(final SqlSelectList selectList) throws AdapterException {
+        final List<String> selectStarList = buildSelectStar(selectList);
+        final List<String> selectListElements = new ArrayList<>(selectStarList.size());
+        selectListElements.addAll(selectStarList);
+        return String.join(", ", selectListElements);
     }
 
+    private List<String> buildSelectStar(final SqlSelectList selectList) throws AdapterException {
+        if (SqlGenerationHelper.selectListRequiresCasts(selectList, this.nodeRequiresCast)) {
+            return buildSelectStarWithNodeCast(selectList);
+        } else {
+            return new ArrayList<>(Collections.singletonList("*"));
+        }
+    }
+
+    private List<String> buildSelectStarWithNodeCast(final SqlSelectList selectList) throws AdapterException {
+        final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
+        int columnId = 0;
+        final List<TableMetadata> tableMetadata = new ArrayList<>();
+        SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata);
+        final List<String> selectListElements = new ArrayList<>(tableMetadata.size());
+        for (final TableMetadata tableMeta : tableMetadata) {
+            for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
+                final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
+                selectListElements.add(buildColumnProjectionString(sqlColumn, super.visit(sqlColumn)));
+                ++columnId;
+            }
+        }
+        return selectListElements;
+    }
+
+    private String buildColumnProjectionString(final SqlColumn column, final String projectionString)
+            throws AdapterException {
+        final String typeName = ColumnAdapterNotes
+                .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+        return buildColumnProjectionString(typeName, projectionString);
+    }
+
+    private final java.util.function.Predicate<SqlNode> nodeRequiresCast = node -> {
+        try {
+            if (node.getType() == SqlNodeType.COLUMN) {
+                final SqlColumn column = (SqlColumn) node;
+                final String typeName = ColumnAdapterNotes
+                        .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName())
+                        .getTypeName();
+                return getListOfTypeNamesRequiringCast().contains(typeName)
+                        || getListOfTypeNamesNotSupported().contains(typeName);
+            }
+            return false;
+        } catch (AdapterException exception) {
+            throw new SqlGenerationVisitorException("Exception during deserialization of ColumnAdapterNotes. ",
+                    exception);
+        }
+    };
+
+    @Override
+    public String visit(final SqlColumn column) throws AdapterException {
+        final String projectionString = super.visit(column);
+        return getColumnProjectionString(column, projectionString);
+    }
+
+    private String getColumnProjectionString(final SqlColumn column, final String projectionString)
+            throws AdapterException {
+        if (!super.isDirectlyInSelectList(column)) {
+            return projectionString;
+        } else {
+            final String typeName = ColumnAdapterNotes
+                    .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+            return buildColumnProjectionString(typeName, projectionString);
+        }
+    }
+
+    @Override
+    public String visit(final SqlOrderBy orderBy) throws AdapterException {
+        int size = orderBy.getExpressions().size();
+        final List<String> sqlOrderElement = new ArrayList<>(size);
+        for (int i = 0; i < size; ++i) {
+            String elementSql = orderBy.getExpressions().get(i).accept(this);
+            final boolean isNullsLast = orderBy.nullsLast().get(i);
+            final boolean isAscending = orderBy.isAscending().get(i);
+            if (!isAscending && !isNullsLast) {
+                elementSql = "(CASE WHEN " + elementSql + " IS NULL THEN 0 ELSE 1 END), " + elementSql;
+            }
+            if (isAscending && isNullsLast) {
+                elementSql = "(CASE WHEN " + elementSql + " IS NULL THEN 1 ELSE 0 END), " + elementSql;
+            }
+            if (!isAscending) {
+                elementSql += " DESC";
+            }
+            sqlOrderElement.add(elementSql);
+        }
+        return "ORDER BY " + Joiner.on(", ").join(sqlOrderElement);
+    }
 
     @Override
     public String visit(final SqlStatementSelect select) throws AdapterException {
@@ -75,563 +159,293 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
             return super.visit(select);
         } else {
             final SqlLimit limit = select.getLimit();
-
-            final StringBuilder sql = new StringBuilder();
-            sql.append("SELECT TOP "+limit.getLimit()+ " ");
-
-            sql.append(select.getSelectList().accept(this));
-            sql.append(" FROM ");
-            sql.append(select.getFromClause().accept(this));
+            final StringBuilder builder = new StringBuilder();
+            builder.append("SELECT TOP " + limit.getLimit() + " ");
+            builder.append(select.getSelectList().accept(this));
+            builder.append(" FROM ");
+            builder.append(select.getFromClause().accept(this));
             if (select.hasFilter()) {
-                sql.append(" WHERE ");
-                sql.append(select.getWhereClause().accept(this));
+                builder.append(" WHERE ");
+                builder.append(select.getWhereClause().accept(this));
             }
             if (select.hasGroupBy()) {
-                sql.append(" GROUP BY ");
-                sql.append(select.getGroupBy().accept(this));
+                builder.append(" GROUP BY ");
+                builder.append(select.getGroupBy().accept(this));
             }
             if (select.hasHaving()) {
-                sql.append(" HAVING ");
-                sql.append(select.getHaving().accept(this));
+                builder.append(" HAVING ");
+                builder.append(select.getHaving().accept(this));
             }
             if (select.hasOrderBy()) {
-                sql.append(" ");
-                sql.append(select.getOrderBy().accept(this));
+                builder.append(" ");
+                builder.append(select.getOrderBy().accept(this));
             }
-
-            return sql.toString();
+            return builder.toString();
         }
     }
-
-
-    @Override
-    public String visit(final SqlColumn column) throws AdapterException {
-        return getColumnProjectionString(column, super.visit(column));
-    }
-
-    private String getColumnProjectionString(final SqlColumn column, final String projString) throws AdapterException {
-        final boolean isDirectlyInSelectList = (column.hasParent() && column.getParent().getType() == SqlNodeType.SELECT_LIST);
-        if (!isDirectlyInSelectList) {
-            return projString;
-        }
-        final String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(),
-                                                         column.getMetadata().getName()).getTypeName();
-        return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
-    }
-
-
-    private String getColumnProjectionStringNoCheck(final SqlColumn column, final String projString) throws AdapterException {
-        final String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(),
-                                                         column.getMetadata().getName()).getTypeName();
-        return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
-    }
-
-    private String getColumnProjectionStringNoCheckImpl(final String typeName, final SqlColumn column, String projString) {
-      if ( typeName.startsWith("text") ) {
-            projString = "CAST(" + projString + "  as NVARCHAR("+SybaseSqlDialect.MAX_SYBASE_N_VARCHAR_SIZE +") )";
-        } else if (typeName.equals("time") ){
-            projString = "CONVERT(VARCHAR(12), " + projString + ", 137)";
-        } else if (typeName.equals("bigtime") ){
-          projString = "CONVERT(VARCHAR(16), " + projString + ", 137)";
-        } else if (typeName.startsWith("xml")) {
-            projString = "CAST(" + projString + "  as NVARCHAR("+SybaseSqlDialect.MAX_SYBASE_N_VARCHAR_SIZE +") )";
-        } else if (TYPE_NAME_NOT_SUPPORTED.contains(typeName)){
-          projString = "'"+typeName+" NOT SUPPORTED'"; //returning a string constant for unsupported data types
-        }
-
-        return projString;
-    }
-
-    private static final List<String> TYPE_NAMES_REQUIRING_CAST =
-        ImmutableList.of("text", "time", "bigtime", "xml");
-
-  private static final List<String>  TYPE_NAME_NOT_SUPPORTED =  ImmutableList.of("varbinary","binary","image");
-
-    private final Predicate<SqlNode> nodeRequiresCast = node -> {
-        try {
-            if (node.getType() == SqlNodeType.COLUMN) {
-                SqlColumn column = (SqlColumn)node;
-                String typeName = ColumnAdapterNotes.deserialize(column.getMetadata().getAdapterNotes(),
-                                                                 column.getMetadata().getName()).getTypeName();
-                return TYPE_NAMES_REQUIRING_CAST.contains(typeName) || TYPE_NAME_NOT_SUPPORTED.contains(typeName) ;
-            }
-            return false;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    };
-
 
     @Override
     public String visit(final SqlFunctionScalar function) throws AdapterException {
-
-        String sql = super.visit(function);
-    final List<String> argumentsSql = new ArrayList<>();
-        for (final SqlNode node : function.getArguments()) {
+        final List<SqlNode> arguments = function.getArguments();
+        final List<String> argumentsSql = new ArrayList<>(arguments.size());
+        for (final SqlNode node : arguments) {
             argumentsSql.add(node.accept(this));
         }
-        final StringBuilder builder = new StringBuilder();
-
         switch (function.getFunction()) {
-        case INSTR: {
-
-            builder.append("CHARINDEX(");
-            builder.append(argumentsSql.get(1));
-            builder.append(", ");
-            builder.append(argumentsSql.get(0));
-            if (argumentsSql.size() > 2) {
-                builder.append(", ");
-                builder.append(argumentsSql.get(2));
-            }
-            builder.append(")");
-            sql = builder.toString();
-            break;
-        }
-
-
-
-        case LPAD: {  //RIGHT(REPLICATE(pad_char, length) + LEFT(string, length), length)
-
-            String padChar = "' '";
-
-            if (argumentsSql.size() > 2) {
-              padChar = argumentsSql.get(2);
-            }
-
-
-            final String string = argumentsSql.get(0);
-
-            final String length = argumentsSql.get(1);
-
-
-            builder.append("RIGHT ( REPLICATE(");
-            builder.append(padChar);
-            builder.append(",");
-            builder.append(length);
-            builder.append(") + LEFT(");
-            builder.append(string);
-            builder.append(",");
-            builder.append(length);
-            builder.append("),");
-            builder.append(length);
-            builder.append(")");
-            sql = builder.toString();
-            break;
-        }
-
-
-        case RPAD: {   //LEFT(RIGHT(string, length) + REPLICATE(pad_char, length) , length);
-
-            String padChar = "' '";
-
-            if (argumentsSql.size() > 2) {
-              padChar = argumentsSql.get(2);
-            }
-
-            final String string = argumentsSql.get(0);
-
-            final String length = argumentsSql.get(1);
-
-            builder.append("LEFT(RIGHT(");
-            builder.append(string);
-            builder.append(",");
-            builder.append(length);
-            builder.append(") + REPLICATE(");
-            builder.append(padChar);
-            builder.append(",");
-            builder.append(length);
-            builder.append("),");
-            builder.append(length);
-            builder.append(")");
-            sql = builder.toString();
-            break;
-
-        }
+        case INSTR:
+            return getInstr(argumentsSql);
+        case LPAD:
+            return getLdap(argumentsSql);
+        case RPAD:
+            return getRpad(argumentsSql);
         case ADD_DAYS:
         case ADD_HOURS:
         case ADD_MINUTES:
         case ADD_SECONDS:
         case ADD_WEEKS:
-        case ADD_YEARS: { //DATEADD(datepart,number,date)
-
-            builder.append("DATEADD(");
-
-            switch (function.getFunction()) {
-              case ADD_DAYS:
-                  builder.append("DAY");
-                  break;
-              case ADD_HOURS:
-                  builder.append("HOUR");
-                  break;
-              case ADD_MINUTES:
-                  builder.append("MINUTE");
-                  break;
-              case ADD_SECONDS:
-                  builder.append("SECOND");
-                  break;
-              case ADD_WEEKS:
-                  builder.append("WEEK");
-                  break;
-              case ADD_YEARS:
-                  builder.append("YEAR");
-                  break;
-              default:
-                  break;
-            }
-
-            builder.append(",");
-            builder.append( argumentsSql.get(1) );
-            builder.append(",");
-            builder.append( argumentsSql.get(0) );
-            builder.append(")");
-            sql = builder.toString();
-            break;
-        }
+        case ADD_YEARS:
+            return getAddDateTime(function, argumentsSql);
         case SECONDS_BETWEEN:
         case MINUTES_BETWEEN:
         case HOURS_BETWEEN:
         case DAYS_BETWEEN:
         case MONTHS_BETWEEN:
-        case YEARS_BETWEEN: {
-
-             builder.append("DATEDIFF(");
-
-             switch (function.getFunction()) {
-              case SECONDS_BETWEEN:
-                  builder.append("SECOND");
-                  break;
-              case MINUTES_BETWEEN:
-                  builder.append("MINUTE");
-                  break;
-              case HOURS_BETWEEN:
-                  builder.append("HOUR");
-                  break;
-              case DAYS_BETWEEN:
-                  builder.append("DAY");
-                  break;
-              case MONTHS_BETWEEN:
-                  builder.append("MONTH");
-                  break;
-              case YEARS_BETWEEN:
-                  builder.append("YEAR");
-                  break;
-              default:
-                  break;
-             }
-
-             builder.append(",");
-             builder.append( argumentsSql.get(1) );
-             builder.append(",");
-             builder.append( argumentsSql.get(0) );
-             builder.append(")");
-             sql = builder.toString();
-             break;
-        }
+        case YEARS_BETWEEN:
+            return getDateTimeBetween(function, argumentsSql);
         case CURRENT_DATE:
-            sql = "CAST( GETDATE() AS DATE)";
-            break;
-
+            return "CAST( GETDATE() AS DATE)";
         case CURRENT_TIMESTAMP:
-            sql = "GETDATE()";
-            break;
-
+            return "GETDATE()";
         case SYSDATE:
-            sql = "CAST( SYSDATETIME() AS DATE)";
-            break;
-
+            return "CAST( SYSDATETIME() AS DATE)";
         case SYSTIMESTAMP:
-            sql = "SYSDATETIME()";
-            break;
-
-
+            return "SYSDATETIME()";
         case ST_X:
-          builder.append(argumentsSql.get(0)+".STX") ;
-          sql = builder.toString();
-          break;
+            return argumentsSql.get(0) + ".STX";
+        case ST_Y:
+            return argumentsSql.get(0) + ".STY";
+        case ST_ENDPOINT:
+            return getScalarFunctionWithVarcharCast(argumentsSql, ".STEndPoint()");
+        case ST_ISCLOSED:
+            return argumentsSql.get(0) + ".STIsClosed()";
+        case ST_ISRING:
+            return argumentsSql.get(0) + ".STIsRing()";
+        case ST_LENGTH:
+            return argumentsSql.get(0) + ".STLength()";
+        case ST_NUMPOINTS:
+            return argumentsSql.get(0) + ".STNumPoints()";
+        case ST_POINTN:
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STPointN(");
+        case ST_STARTPOINT:
+            return getScalarFunctionWithVarcharCast(argumentsSql, ".STStartPoint()");
+        case ST_AREA:
+            return argumentsSql.get(0) + ".STArea()";
+        case ST_EXTERIORRING:
+            return getScalarFunctionWithVarcharCast(argumentsSql, ".STExteriorRing()");
+        case ST_INTERIORRINGN:
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STInteriorRingN (");
+        case ST_NUMINTERIORRINGS:
+            return argumentsSql.get(0) + ".STNumInteriorRing()";
+        case ST_GEOMETRYN:
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STGeometryN(");
+        case ST_NUMGEOMETRIES:
+            return argumentsSql.get(0) + ".STNumGeometries()";
+        case ST_BOUNDARY:
+            return getScalarFunctionWithVarcharCast(argumentsSql, ".STBoundary()");
+        case ST_BUFFER:
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STBuffer(");
+        case ST_CENTROID:
+            return getScalarFunctionWithVarcharCast(argumentsSql, ".STCentroid()");
+        case ST_CONTAINS:
+            return argumentsSql.get(0) + ".STContains(" + argumentsSql.get(1) + ")";
+        case ST_CONVEXHULL:
+            return getScalarFunctionWithVarcharCast(argumentsSql, ".STConvexHull()");
+        case ST_CROSSES:
+            return argumentsSql.get(0) + ".STCrosses(" + argumentsSql.get(1) + ")";
+        case ST_DIFFERENCE:
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STDifference(");
+        case ST_DIMENSION:
+            return argumentsSql.get(0) + ".STDimension()";
+        case ST_DISJOINT:
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STDisjoint(");
+        case ST_DISTANCE:
+            return argumentsSql.get(0) + ".STDistance(" + argumentsSql.get(1) + ")";
+        case ST_ENVELOPE:
+            return getScalarFunctionWithVarcharCast(argumentsSql, ".STEnvelope()");
+        case ST_EQUALS:
+            return argumentsSql.get(0) + ".STEquals(" + argumentsSql.get(1) + ")";
+        case ST_GEOMETRYTYPE:
+            return argumentsSql.get(0) + ".STGeometryType()";
+        case ST_INTERSECTION:
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STIntersection(");
+        case ST_INTERSECTS:
+            return argumentsSql.get(0) + ".STIntersects(" + argumentsSql.get(1) + ")";
+        case ST_ISEMPTY:
+            return argumentsSql.get(0) + ".STIsEmpty()";
+        case ST_ISSIMPLE:
+            return argumentsSql.get(0) + ".STIsSimple()";
+        case ST_OVERLAPS:
+            return argumentsSql.get(0) + ".STOverlaps(" + argumentsSql.get(1) + ")";
+        case ST_SYMDIFFERENCE:
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STSymDifference (");
+        case ST_TOUCHES:
+            return argumentsSql.get(0) + ".STTouches(" + argumentsSql.get(1) + ")";
+        case ST_UNION:
+            return getScalarFunctionWithVarcharCastTwoArguments(argumentsSql, ".STUnion(");
+        case ST_WITHIN:
+            return argumentsSql.get(0) + ".STWithin(" + argumentsSql.get(1) + ")";
+        case BIT_AND:
+            return argumentsSql.get(0) + " & " + argumentsSql.get(1);
+        case BIT_OR:
+            return argumentsSql.get(0) + " | " + argumentsSql.get(1);
+        case BIT_XOR:
+            return argumentsSql.get(0) + " ^ " + argumentsSql.get(1);
+        case BIT_NOT:
+            return "~ " + argumentsSql.get(0);
+        case HASH_MD5:
+            return "CONVERT(Char, HASHBYTES('MD5'," + argumentsSql.get(0) + "), 2)";
+        case HASH_SHA1:
+            return "CONVERT(Char, HASHBYTES('SHA1'," + argumentsSql.get(0) + "), 2)";
+        case HASH_SHA:
+            return "CONVERT(Char, HASHBYTES('SHA'," + argumentsSql.get(0) + "), 2)";
+        case ZEROIFNULL:
+            return "ISNULL(" + argumentsSql.get(0) + ",0)";
+        default:
+            return super.visit(function);
+        }
+    }
 
-      case ST_Y:
-          builder.append(argumentsSql.get(0)+".STY") ;
-          sql = builder.toString();
-          break;
+    private String getInstr(final List<String> argumentsSql) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("CHARINDEX(");
+        builder.append(argumentsSql.get(1));
+        builder.append(", ");
+        builder.append(argumentsSql.get(0));
+        if (argumentsSql.size() > 2) {
+            builder.append(", ");
+            builder.append(argumentsSql.get(2));
+        }
+        builder.append(")");
+        return builder.toString();
+    }
 
-      case ST_ENDPOINT:
-              builder.append("CAST(");
-          builder.append(argumentsSql.get(0)+".STEndPoint()") ;
-              builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
-          sql = builder.toString();
-          break;
+    private String getLdap(final List<String> argumentsSql) {
+        final StringBuilder builder = new StringBuilder();
+        String padChar = "' '";
+        if (argumentsSql.size() > 2) {
+            padChar = argumentsSql.get(2);
+        }
+        final String string = argumentsSql.get(0);
+        final String length = argumentsSql.get(1);
+        builder.append("RIGHT ( REPLICATE(");
+        builder.append(padChar);
+        builder.append(",");
+        builder.append(length);
+        builder.append(") + LEFT(");
+        builder.append(string);
+        builder.append(",");
+        builder.append(length);
+        builder.append("),");
+        builder.append(length);
+        builder.append(")");
+        return builder.toString();
+    }
 
-      case ST_ISCLOSED:
-          builder.append(argumentsSql.get(0)+".STIsClosed()") ;
-          sql = builder.toString();
-          break;
+    private String getRpad(final List<String> argumentsSql) {
+        final StringBuilder builder = new StringBuilder();
+        String padChar = "' '";
+        if (argumentsSql.size() > 2) {
+            padChar = argumentsSql.get(2);
+        }
+        final String string = argumentsSql.get(0);
+        final String length = argumentsSql.get(1);
+        builder.append("LEFT(RIGHT(");
+        builder.append(string);
+        builder.append(",");
+        builder.append(length);
+        builder.append(") + REPLICATE(");
+        builder.append(padChar);
+        builder.append(",");
+        builder.append(length);
+        builder.append("),");
+        builder.append(length);
+        builder.append(")");
+        return builder.toString();
+    }
 
-      case ST_ISRING:
-          builder.append(argumentsSql.get(0)+".STIsRing()") ;
-          sql = builder.toString();
-          break;
-
-      case ST_LENGTH:
-          builder.append(argumentsSql.get(0)+".STLength()") ;
-          sql = builder.toString();
-          break;
-
-      case ST_NUMPOINTS:
-          builder.append(argumentsSql.get(0)+".STNumPoints()") ;
-          sql = builder.toString();
-          break;
-
-      case ST_POINTN:
-            builder.append("CAST(");
-          builder.append(argumentsSql.get(0)+".STPointN("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
-          sql = builder.toString();
-          break;
-
-      case ST_STARTPOINT:
-          builder.append("CAST(");
-          builder.append(argumentsSql.get(0)+".STStartPoint()") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
-          sql = builder.toString();
-          break;
-
-      case ST_AREA:
-          builder.append(argumentsSql.get(0)+".STArea()") ;
-          sql = builder.toString();
-          break;
-
-      case ST_EXTERIORRING:
-        builder.append("CAST(");
-          builder.append(argumentsSql.get(0)+".STExteriorRing()") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
-          sql = builder.toString();
-          break;
-
-      case ST_INTERIORRINGN:
-        builder.append("CAST(");
-          builder.append(argumentsSql.get(0)+".STInteriorRingN ("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
-          sql = builder.toString();
-          break;
-
-      case ST_NUMINTERIORRINGS:
-          builder.append(argumentsSql.get(0)+".STNumInteriorRing()") ;
-          sql = builder.toString();
-          break;
-
-      case ST_GEOMETRYN:
-        builder.append("CAST(");
-          builder.append(argumentsSql.get(0)+".STGeometryN("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
-          sql = builder.toString();
-          break;
-
-      case ST_NUMGEOMETRIES:
-          builder.append(argumentsSql.get(0)+".STNumGeometries()") ;
-          sql = builder.toString();
-          break;
-
-      case ST_BOUNDARY:
-        builder.append("CAST(");
-          builder.append(argumentsSql.get(0)+".STBoundary()") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
-          sql = builder.toString();
-          break;
-
-      case ST_BUFFER:
-        builder.append("CAST(");
-          builder.append(argumentsSql.get(0)+".STBuffer("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
-          sql = builder.toString();
-          break;
-
-      case ST_CENTROID:
-        builder.append("CAST(");
-          builder.append(argumentsSql.get(0)+".STCentroid()") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
-          sql = builder.toString();
-          break;
-
-      case ST_CONTAINS:
-          builder.append(argumentsSql.get(0)+".STContains("+argumentsSql.get(1)+")") ;
-          sql = builder.toString();
-          break;
-
-      case ST_CONVEXHULL:
-        builder.append("CAST(");
-          builder.append(argumentsSql.get(0)+".STConvexHull()") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
-          sql = builder.toString();
-          break;
-
-      case ST_CROSSES:
-          builder.append(argumentsSql.get(0)+".STCrosses("+argumentsSql.get(1)+")") ;
-          sql = builder.toString();
-          break;
-
-      case ST_DIFFERENCE:
-        builder.append("CAST(");
-          builder.append(argumentsSql.get(0)+".STDifference("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
-          sql = builder.toString();
-          break;
-
-      case ST_DIMENSION:
-          builder.append(argumentsSql.get(0)+".STDimension()") ;
-          sql = builder.toString();
-          break;
-
-      case ST_DISJOINT:
-        builder.append("CAST(");
-          builder.append(argumentsSql.get(0)+".STDisjoint("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
-          sql = builder.toString();
-          break;
-
-      case ST_DISTANCE:
-          builder.append(argumentsSql.get(0)+".STDistance("+argumentsSql.get(1)+")") ;
-          sql = builder.toString();
-          break;
-
-      case ST_ENVELOPE:
-        builder.append("CAST(");
-          builder.append(argumentsSql.get(0)+".STEnvelope()") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
-          sql = builder.toString();
-          break;
-
-      case ST_EQUALS:
-          builder.append(argumentsSql.get(0)+".STEquals("+argumentsSql.get(1)+")") ;
-          sql = builder.toString();
-          break;
-
-
-      case ST_GEOMETRYTYPE:
-          builder.append(argumentsSql.get(0)+".STGeometryType()") ;
-          sql = builder.toString();
-          break;
-
-      case ST_INTERSECTION:
-        builder.append("CAST(");
-          builder.append(argumentsSql.get(0)+".STIntersection("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
-          sql = builder.toString();
-          break;
-
-      case ST_INTERSECTS:
-          builder.append(argumentsSql.get(0)+".STIntersects("+argumentsSql.get(1)+")") ;
-          sql = builder.toString();
-          break;
-
-      case ST_ISEMPTY:
-          builder.append(argumentsSql.get(0)+".STIsEmpty()") ;
-          sql = builder.toString();
-          break;
-
-      case ST_ISSIMPLE:
-          builder.append(argumentsSql.get(0)+".STIsSimple()") ;
-          sql = builder.toString();
-          break;
-      case ST_OVERLAPS:
-          builder.append(argumentsSql.get(0)+".STOverlaps("+argumentsSql.get(1)+")") ;
-          sql = builder.toString();
-          break;
-
-      case ST_SYMDIFFERENCE:
-        builder.append("CAST(");
-          builder.append(argumentsSql.get(0)+".STSymDifference ("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
-          sql = builder.toString();
-          break;
-
-      case ST_TOUCHES:
-          builder.append(argumentsSql.get(0)+".STTouches("+argumentsSql.get(1)+")") ;
-          sql = builder.toString();
-          break;
-
-      case ST_UNION:
-        builder.append("CAST(");
-          builder.append(argumentsSql.get(0)+".STUnion("+argumentsSql.get(1)+")") ;
-            builder.append("as VARCHAR("+SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE +") )");
-          sql = builder.toString();
-          break;
-
-      case ST_WITHIN:
-          builder.append(argumentsSql.get(0)+".STWithin("+argumentsSql.get(1)+")") ;
-          sql = builder.toString();
-          break;
-
-      case BIT_AND:
-           builder.append(argumentsSql.get(0)+" & "+argumentsSql.get(1));
-           sql = builder.toString();
-           break;
-
-      case BIT_OR:
-           builder.append(argumentsSql.get(0)+" | "+argumentsSql.get(1));
-           sql = builder.toString();
-           break;
-
-      case BIT_XOR:
-           builder.append(argumentsSql.get(0)+" ^ "+argumentsSql.get(1));
-           sql = builder.toString();
-           break;
-
-      case BIT_NOT:
-           builder.append("~ "+argumentsSql.get(0));
-           sql = builder.toString();
-           break;
-
-      case HASH_MD5:
-          builder.append("CONVERT(Char, HASHBYTES('MD5',"+argumentsSql.get(0)+"), 2)");
-          sql = builder.toString();
-          break;
-      case HASH_SHA1:
-          builder.append("CONVERT(Char, HASHBYTES('SHA1',"+argumentsSql.get(0)+"), 2)");
-          sql = builder.toString();
-          break;
-
-      case HASH_SHA:
-          builder.append("CONVERT(Char, HASHBYTES('SHA',"+argumentsSql.get(0)+"), 2)");
-          sql = builder.toString();
-          break;
-
-      case ZEROIFNULL:
-        builder.append("ISNULL("+argumentsSql.get(0)+",0)");
-        sql = builder.toString();
-        break;
-
+    private String getAddDateTime(final SqlFunctionScalar function, final List<String> argumentsSql) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("DATEADD(");
+        switch (function.getFunction()) {
+        case ADD_DAYS:
+            builder.append("DAY");
+            break;
+        case ADD_HOURS:
+            builder.append("HOUR");
+            break;
+        case ADD_MINUTES:
+            builder.append("MINUTE");
+            break;
+        case ADD_SECONDS:
+            builder.append("SECOND");
+            break;
+        case ADD_WEEKS:
+            builder.append("WEEK");
+            break;
+        case ADD_YEARS:
+            builder.append("YEAR");
+            break;
         default:
             break;
         }
-
-
-        return sql;
+        builder.append(",");
+        builder.append(argumentsSql.get(1));
+        builder.append(",");
+        builder.append(argumentsSql.get(0));
+        builder.append(")");
+        return builder.toString();
     }
 
-    @Override
-    public String visit(final SqlOrderBy orderBy) throws AdapterException {
-        // ORDER BY <expr> [ASC/DESC] [NULLS FIRST/LAST]
-        // ASC and NULLS LAST are default in EXASOL
-        final List<String> sqlOrderElement = new ArrayList<>();
-        for (int i = 0; i < orderBy.getExpressions().size(); ++i) {
-            String elementSql = orderBy.getExpressions().get(i).accept(this);
-            final boolean isNullsLast = orderBy.nullsLast().get(i);
-            final boolean isAscending = orderBy.isAscending().get(i);
-
-            if (!isAscending && !isNullsLast) {
-                elementSql = "(CASE WHEN " + elementSql + " IS NULL THEN 0 ELSE 1 END), " + elementSql;
-            }
-
-            if (isAscending && isNullsLast) {
-                elementSql = "(CASE WHEN " + elementSql + " IS NULL THEN 1 ELSE 0 END), " + elementSql;
-            }
-
-            if (!isAscending) {
-              elementSql += " DESC";
-            }
-
-            sqlOrderElement.add(elementSql);
+    private String getDateTimeBetween(final SqlFunctionScalar function, final List<String> argumentsSql) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("DATEDIFF(");
+        switch (function.getFunction()) {
+        case SECONDS_BETWEEN:
+            builder.append("SECOND");
+            break;
+        case MINUTES_BETWEEN:
+            builder.append("MINUTE");
+            break;
+        case HOURS_BETWEEN:
+            builder.append("HOUR");
+            break;
+        case DAYS_BETWEEN:
+            builder.append("DAY");
+            break;
+        case MONTHS_BETWEEN:
+            builder.append("MONTH");
+            break;
+        case YEARS_BETWEEN:
+            builder.append("YEAR");
+            break;
+        default:
+            break;
         }
-        return "ORDER BY " + Joiner.on(", ").join(sqlOrderElement);
+        builder.append(",");
+        builder.append(argumentsSql.get(1));
+        builder.append(",");
+        builder.append(argumentsSql.get(0));
+        builder.append(")");
+        return builder.toString();
+    }
+
+    private String getScalarFunctionWithVarcharCast(final List<String> argumentsSql, final String function) {
+        return "CAST(" + argumentsSql.get(0) + function + "as VARCHAR(" + MAX_SYBASE_VARCHAR_SIZE + ") )";
+    }
+
+    private String getScalarFunctionWithVarcharCastTwoArguments(final List<String> argumentsSql,
+            final String function) {
+        return "CAST(" + (argumentsSql.get(0) + function + argumentsSql.get(1) + ")") + "as VARCHAR("
+                + MAX_SYBASE_VARCHAR_SIZE + ") )";
     }
 }

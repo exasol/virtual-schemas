@@ -19,8 +19,17 @@ addons:
 before_script:
   - sudo pip install pipenv
   - ./jdbc-adapter/tools/version.sh verify
+  
+install:
+    - cd  jdbc-adapter/virtualschema-jdbc-adapter
+    - travis_retry mvn dependency:resolve
+    - cd ../..
 
 script:
   - ./jdbc-adapter/integration-test-data/run_integration_tests.sh
   - cd  jdbc-adapter
   - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar
+
+cache:
+  directories:
+  - $HOME/.m2

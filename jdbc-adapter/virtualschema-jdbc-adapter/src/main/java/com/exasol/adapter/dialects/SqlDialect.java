@@ -203,7 +203,7 @@ public interface SqlDialect {
      * @param context context information for the SQL generation visitor
      * @return the SqlGenerationVisitor to be used for this dialect
      */
-    public SqlGenerationVisitor getSqlGenerationVisitor(SqlGenerationContext context);
+    public SqlNodeVisitor<String> getSqlGenerationVisitor(SqlGenerationContext context);
 
     /**
      * Read the remote schema metadata for all tables from the remote source.

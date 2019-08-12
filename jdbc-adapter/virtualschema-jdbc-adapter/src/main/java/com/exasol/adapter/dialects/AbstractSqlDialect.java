@@ -71,7 +71,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     }
 
     @Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
+    public SqlNodeVisitor<String> getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new SqlGenerationVisitor(this, context);
     }
 
