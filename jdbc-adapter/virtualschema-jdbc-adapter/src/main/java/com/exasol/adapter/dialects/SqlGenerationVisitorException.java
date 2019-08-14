@@ -15,4 +15,13 @@ public class SqlGenerationVisitorException extends RuntimeException {
     public SqlGenerationVisitorException(final String message, final Throwable cause) {
         super(message, cause);
     }
+
+    /**
+     * Creates a new instance of {@link SqlGenerationVisitorException}.
+     *
+     * @param message error message
+     */
+    public SqlGenerationVisitorException(final String message) {
+        super(message);
+    }
 }

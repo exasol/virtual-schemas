@@ -8,6 +8,7 @@ import com.exasol.*;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.jdbc.*;
+import com.exasol.adapter.sql.SqlNodeVisitor;
 import com.exasol.adapter.sql.SqlStatement;
 
 /**
@@ -63,7 +64,7 @@ public class BaseQueryRewriter implements QueryRewriter {
             throws AdapterException {
         final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
                 properties.getSchemaName(), false);
-        final SqlGenerationVisitor sqlGeneratorVisitor = this.dialect.getSqlGenerationVisitor(context);
+        final SqlNodeVisitor<String> sqlGeneratorVisitor = this.dialect.getSqlGenerationVisitor(context);
         final String pushdownQuery = statement.accept(sqlGeneratorVisitor);
         LOGGER.finer(() -> "Push-down query generated with " + sqlGeneratorVisitor.getClass().getSimpleName() + ":\n"
                 + pushdownQuery);

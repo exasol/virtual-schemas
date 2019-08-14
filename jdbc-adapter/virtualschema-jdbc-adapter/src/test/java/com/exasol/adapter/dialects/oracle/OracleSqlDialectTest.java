@@ -31,14 +31,13 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.sql.*;
-
 import com.exasol.sql.SqlNormalizer;
 
 class OracleSqlDialectTest {
     private static final String SCHEMA_NAME = "SCHEMA";
     private SqlNode node;
     private SqlDialect dialect;
-    private SqlGenerationVisitor generator;
+    private SqlNodeVisitor<String> generator;
     private Map<String, String> rawProperties;
 
     @BeforeEach
@@ -164,17 +163,6 @@ class OracleSqlDialectTest {
                 sqlDialect::validateProperties);
         MatcherAssert.assertThat(exception.getMessage(), containsString(
                 "The dialect ORACLE does not support CATALOG_NAME property. Please, do not set the CATALOG_NAME property."));
-    }
-
-    @Test
-    void testValidateDialectNameProperty() {
-        setMandatoryProperties("IMPALA");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new OracleSqlDialect(null, adapterProperties);
-        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
-                sqlDialect::validateProperties);
-        MatcherAssert.assertThat(exception.getMessage(), containsString(
-                "The dialect ORACLE cannot have the name IMPALA. You specified the wrong dialect name or created the wrong dialect class."));
     }
 
     @Test

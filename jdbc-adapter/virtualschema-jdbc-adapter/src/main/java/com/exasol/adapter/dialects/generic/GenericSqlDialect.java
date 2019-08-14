@@ -17,7 +17,7 @@ import com.exasol.adapter.jdbc.SchemaAdapterNotes;
  * all information from the JDBC Metadata.
  */
 public class GenericSqlDialect extends AbstractSqlDialect {
-    private static final String NAME = "GENERIC";
+    static final String NAME = "GENERIC";
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
@@ -33,12 +33,8 @@ public class GenericSqlDialect extends AbstractSqlDialect {
         super(connection, properties);
     }
 
-    /**
-     * Get the Generic dialect name.
-     *
-     * @return always "GENERIC"
-     */
-    public static String getPublicName() {
+    @Override
+    public String getName() {
         return NAME;
     }
 
@@ -86,12 +82,6 @@ public class GenericSqlDialect extends AbstractSqlDialect {
             assert (notes.areNullsSortedHigh());
             return NullSorting.NULLS_SORTED_HIGH;
         }
-    }
-
-    @Override
-    public void validateProperties() throws PropertyValidationException {
-        super.validateDialectName(getPublicName());
-        super.validateProperties();
     }
 
     @Override

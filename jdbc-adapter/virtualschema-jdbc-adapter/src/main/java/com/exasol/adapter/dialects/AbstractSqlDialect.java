@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
@@ -72,7 +71,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     }
 
     @Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
+    public SqlNodeVisitor<String> getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new SqlGenerationVisitor(this, context);
     }
 
@@ -246,35 +245,6 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         }
     }
 
-    protected void validateDialectName(final String dialectName) throws PropertyValidationException {
-        final String availableDialects = "Available dialects: " + SqlDialectRegistry.getInstance().getDialectsString();
-        checkIfContainsDialectName(availableDialects);
-        checkIfDialectIsSupported(availableDialects);
-        checkIfNameIsConsistent(dialectName);
-    }
-
-    private void checkIfContainsDialectName(final String availableDialects) throws PropertyValidationException {
-        if (!this.properties.containsKey(SQL_DIALECT_PROPERTY)) {
-            throw new PropertyValidationException(
-                    "You have to specify the SQL dialect (" + SQL_DIALECT_PROPERTY + "). " + availableDialects);
-        }
-    }
-
-    private void checkIfDialectIsSupported(final String availableDialects) throws PropertyValidationException {
-        if (!SqlDialectRegistry.getInstance().isSupported(this.properties.getSqlDialect())) {
-            throw new PropertyValidationException(
-                    "SQL Dialect \"" + this.properties.getSqlDialect() + "\" is not supported. " + availableDialects);
-        }
-    }
-
-    private void checkIfNameIsConsistent(final String dialectName) throws PropertyValidationException {
-        if (!this.properties.getSqlDialect().equals(dialectName)) {
-            throw new PropertyValidationException(
-                    "The dialect " + dialectName + " cannot have the name " + this.properties.getSqlDialect()
-                            + ". You specified the wrong dialect name or created the wrong dialect class.");
-        }
-    }
-
     protected void checkImportPropertyConsistency(final String importFromProperty, final String connectionProperty)
             throws PropertyValidationException {
         final boolean isDirectImport = this.properties.isEnabled(importFromProperty);
@@ -291,9 +261,5 @@ public abstract class AbstractSqlDialect implements SqlDialect {
                         + " without setting " + importFromProperty + " to 'TRUE'. This is not allowed");
             }
         }
-    }
-
-    List<String> getIgnoredErrors() {
-        return this.properties.getIgnoredErrors().stream().map(String::toUpperCase).collect(Collectors.toList());
     }
 }

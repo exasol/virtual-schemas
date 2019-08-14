@@ -4,7 +4,7 @@ general:
   debug:                   true
   debugAddress:            ''
   bucketFsUrl:             http://127.0.0.1:6594/default
-  jdbcAdapterPath:         /buckets/bfsdefault/default/virtualschema-jdbc-adapter-dist-1.19.1.jar
+  jdbcAdapterPath:         /buckets/bfsdefault/default/virtualschema-jdbc-adapter-dist-1.19.2.jar
   additionalJDBCDriverDir: /vagrant/drivers/
 
 exasol:

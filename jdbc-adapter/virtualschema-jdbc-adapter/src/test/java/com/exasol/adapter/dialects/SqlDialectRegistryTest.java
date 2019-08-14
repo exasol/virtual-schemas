@@ -1,21 +1,22 @@
 package com.exasol.adapter.dialects;
 
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import com.exasol.adapter.dialects.db2.DB2SqlDialect;
-import com.exasol.adapter.dialects.exasol.ExasolSqlDialect;
+import com.exasol.adapter.dialects.dummy.DummySqlDialect;
+import com.exasol.adapter.dialects.dummy.DummySqlDialectFactory;
+import com.exasol.adapter.dialects.exasol.ExasolSqlDialectFactory;
 
 class SqlDialectRegistryTest {
-    @BeforeEach
-    void before() {
-        SqlDialectRegistry.deleteInstance();
-        System.clearProperty(SqlDialectRegistry.SQL_DIALECTS_PROPERTY);
+    final SqlDialectRegistry registry = SqlDialectRegistry.getInstance();
+
+    @AfterEach
+    void afterEach() {
+        this.registry.clear();
     }
 
     @Test
@@ -30,50 +31,40 @@ class SqlDialectRegistryTest {
     }
 
     @Test
+    void testLoadSqlDialectFactories() {
+        this.registry.loadSqlDialectFactories();
+        assertThat(this.registry.getRegisteredAdapterFactories(), hasItem(instanceOf(DummySqlDialectFactory.class)));
+    }
+
+    @Test
     void testIsSupported() {
-        assertThat(SqlDialectRegistry.getInstance().isSupported(ExasolSqlDialect.getPublicName()), is(true));
+        this.registry.registerSqlDialectFactory(new DummySqlDialectFactory());
+        assertThat(this.registry.hasDialectWithName("DUMMYDIALECT"), is(true));
     }
 
     @Test
     void testIsNotSupported() {
-        assertThat(SqlDialectRegistry.getInstance().isSupported("Unknown Dialect"), is(false));
+        assertThat(SqlDialectRegistry.getInstance().hasDialectWithName("Unknown Dialect"), is(false));
     }
 
     @Test
-    void testGetDialectNames() {
-        assertThat(SqlDialectRegistry.getInstance().getDialectsString(), matchesPattern(
-                ".*" + DB2SqlDialect.getPublicName() + ".*,.* " + ExasolSqlDialect.getPublicName() + ".*"));
+    void testGetSqlDialectForName() {
+        this.registry.registerSqlDialectFactory(new DummySqlDialectFactory());
+        assertThat(SqlDialectRegistry.getInstance().getDialectForName("DUMMYDIALECT", null, null),
+                instanceOf(DummySqlDialect.class));
     }
 
     @Test
-    void testReadDialectsFromSystemProperty() {
-        System.setProperty(SqlDialectRegistry.SQL_DIALECTS_PROPERTY,
-                "com.exasol.adapter.dialects.exasol.ExasolSqlDialect");
-        assertThat(SqlDialectRegistry.getInstance().getDialectsString(), equalTo("EXASOL"));
-    }
-
-    @Test
-    void testUsingDialectWithoutNameMethodThrowsException() {
-        System.setProperty(SqlDialectRegistry.SQL_DIALECTS_PROPERTY,
-                "com.exasol.adapter.dialects.dummy.DummyDialectWithoutNameMethod");
-        assertThrows(SqlDialectRegistryException.class, () -> SqlDialectRegistry.getInstance().getDialectsString());
-    }
-
-    @Test
-    void testRegisteringNonExistentDialectThrowsException() {
-        System.setProperty(SqlDialectRegistry.SQL_DIALECTS_PROPERTY, "this.dialect.does.not.exist.DummySqlDialect");
-        assertThrows(SqlDialectRegistryException.class, SqlDialectRegistry::getInstance);
-    }
-
-    @Test
-    void testGetSqlDialectClassForName() {
-        assertThat(SqlDialectRegistry.getInstance().getSqlDialectClassForName("exasol"),
-                equalTo(ExasolSqlDialect.class));
+    void testListRegisteredDialects() {
+        this.registry.registerSqlDialectFactory(new ExasolSqlDialectFactory());
+        this.registry.registerSqlDialectFactory(new DummySqlDialectFactory());
+        final String dialectNames = this.registry.listRegisteredSqlDialectNames();
+        assertThat(dialectNames, equalTo("\"DUMMYDIALECT\", \"EXASOL\""));
     }
 
     @Test
     void testGetSqlDialectClassForNameThrowsException() {
         assertThrows(IllegalArgumentException.class,
-                () -> SqlDialectRegistry.getInstance().getSqlDialectClassForName("exsol"));
+                () -> SqlDialectRegistry.getInstance().getDialectForName("DOESNOTEXIST", null, null));
     }
 }

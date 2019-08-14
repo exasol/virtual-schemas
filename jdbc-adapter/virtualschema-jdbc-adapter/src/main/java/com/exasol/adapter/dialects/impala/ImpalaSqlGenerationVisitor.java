@@ -64,8 +64,9 @@ public class ImpalaSqlGenerationVisitor extends SqlGenerationVisitor {
             // For SUM, the JDBC driver returns type DOUBLE in prepared statement but the actual
             // query returns DECIMAL in ResultSetMetadata, so that IMPORT fails. Casting to DOUBLE
             // solves the problem.
-            final List<String> argumentsSql = new ArrayList<>();
-            for (final SqlNode node : function.getArguments()) {
+            final List<SqlNode> arguments = function.getArguments();
+            final List<String> argumentsSql = new ArrayList<>(arguments.size());
+            for (final SqlNode node : arguments) {
                 argumentsSql.add(node.accept(this));
             }
             String distinctSql = "";

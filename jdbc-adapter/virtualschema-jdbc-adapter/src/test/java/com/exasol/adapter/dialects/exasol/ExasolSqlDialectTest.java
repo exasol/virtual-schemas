@@ -1,26 +1,7 @@
 package com.exasol.adapter.dialects.exasol;
 
-import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.IS_LOCAL_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
-import static com.exasol.adapter.capabilities.MainCapability.AGGREGATE_GROUP_BY_COLUMN;
-import static com.exasol.adapter.capabilities.MainCapability.AGGREGATE_GROUP_BY_EXPRESSION;
-import static com.exasol.adapter.capabilities.MainCapability.AGGREGATE_GROUP_BY_TUPLE;
-import static com.exasol.adapter.capabilities.MainCapability.AGGREGATE_HAVING;
-import static com.exasol.adapter.capabilities.MainCapability.AGGREGATE_SINGLE_GROUP;
-import static com.exasol.adapter.capabilities.MainCapability.FILTER_EXPRESSIONS;
-import static com.exasol.adapter.capabilities.MainCapability.JOIN;
-import static com.exasol.adapter.capabilities.MainCapability.JOIN_CONDITION_EQUI;
-import static com.exasol.adapter.capabilities.MainCapability.JOIN_TYPE_FULL_OUTER;
-import static com.exasol.adapter.capabilities.MainCapability.JOIN_TYPE_INNER;
-import static com.exasol.adapter.capabilities.MainCapability.JOIN_TYPE_LEFT_OUTER;
-import static com.exasol.adapter.capabilities.MainCapability.JOIN_TYPE_RIGHT_OUTER;
-import static com.exasol.adapter.capabilities.MainCapability.LIMIT;
-import static com.exasol.adapter.capabilities.MainCapability.LIMIT_WITH_OFFSET;
-import static com.exasol.adapter.capabilities.MainCapability.ORDER_BY_COLUMN;
-import static com.exasol.adapter.capabilities.MainCapability.ORDER_BY_EXPRESSION;
-import static com.exasol.adapter.capabilities.MainCapability.SELECTLIST_EXPRESSIONS;
-import static com.exasol.adapter.capabilities.MainCapability.SELECTLIST_PROJECTION;
+import static com.exasol.adapter.AdapterProperties.*;
+import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_CONNECTION_STRING_PROPERTY;
 import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_IMPORT_PROPERTY;
 import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
@@ -48,12 +29,9 @@ import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.capabilities.LiteralCapability;
 import com.exasol.adapter.capabilities.PredicateCapability;
 import com.exasol.adapter.capabilities.ScalarFunctionCapability;
-import com.exasol.adapter.dialects.DialectTestData;
-import com.exasol.adapter.dialects.PropertyValidationException;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.sql.SqlNode;
+import com.exasol.adapter.sql.SqlNodeVisitor;
 
 import com.exasol.sql.SqlNormalizer;
 
@@ -106,7 +84,7 @@ class ExasolSqlDialectTest {
                 + " WHERE 1 < \"USER_ID\"" + " GROUP BY \"USER_ID\"" + " HAVING 1 < COUNT(\"URL\")"
                 + " ORDER BY \"USER_ID\"" + " LIMIT 10";
         final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
-        final SqlGenerationVisitor generator = this.dialect.getSqlGenerationVisitor(context);
+        final SqlNodeVisitor<String> generator = this.dialect.getSqlGenerationVisitor(context);
         final String actualSql = node.accept(generator);
         assertThat(SqlNormalizer.normalizeSql(actualSql), equalTo(SqlNormalizer.normalizeSql(expectedSql)));
     }
@@ -175,17 +153,6 @@ class ExasolSqlDialectTest {
                 sqlDialect::validateProperties);
         MatcherAssert.assertThat(exception.getMessage(),
                 containsString("You defined the property IMPORT_FROM_EXA, please also define EXA_CONNECTION_STRING"));
-    }
-
-    @Test
-    void testValidateDialectNameProperty() {
-        setMandatoryProperties("ORACLE");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new ExasolSqlDialect(null, adapterProperties);
-        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
-                sqlDialect::validateProperties);
-        MatcherAssert.assertThat(exception.getMessage(), containsString(
-                "The dialect EXASOL cannot have the name ORACLE. You specified the wrong dialect name or created the wrong dialect class."));
     }
 
     @Test

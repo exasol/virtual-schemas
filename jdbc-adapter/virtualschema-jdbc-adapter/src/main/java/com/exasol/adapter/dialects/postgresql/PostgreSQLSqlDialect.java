@@ -15,12 +15,13 @@ import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.ScalarFunction;
+import com.exasol.adapter.sql.SqlNodeVisitor;
 
 /**
  * This class implements the PostgreSQL dialect.
  */
 public class PostgreSQLSqlDialect extends AbstractSqlDialect {
-    private static final String NAME = "POSTGRESQL";
+    static final String NAME = "POSTGRESQL";
     public static final String POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY = "POSTGRESQL_IDENTIFIER_MAPPING";
     private static final String POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE_VALUE = "PRESERVE_ORIGINAL_CASE";
     private static final String POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE = "CONVERT_TO_UPPER";
@@ -30,25 +31,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             IGNORE_ERRORS_PROPERTY, POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
-
-    /**
-     * Create a new instance of the {@link PostgreSQLSqlDialect}.
-     *
-     * @param connection JDBC connection
-     * @param properties user-defined adapter properties
-     */
-    public PostgreSQLSqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
-    }
-
-    /**
-     * Get the PostgreSQL dialect name.
-     *
-     * @return always "POSTGRESQL"
-     */
-    public static String getPublicName() {
-        return NAME;
-    }
 
     private static Capabilities createCapabilityList() {
         return Capabilities.builder()
@@ -73,6 +55,21 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
                         MONTHS_BETWEEN, YEARS_BETWEEN, MINUTE, SECOND, DAY, WEEK, MONTH, YEAR, CURRENT_DATE,
                         CURRENT_TIMESTAMP, DATE_TRUNC, EXTRACT, LOCALTIMESTAMP, POSIX_TIME, TO_CHAR, CASE, HASH_MD5)
                 .build();
+    }
+
+    /**
+     * Create a new instance of the {@link PostgreSQLSqlDialect}.
+     *
+     * @param connection JDBC connection
+     * @param properties user-defined adapter properties
+     */
+    public PostgreSQLSqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
     @Override
@@ -145,13 +142,12 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
+    public SqlNodeVisitor<String> getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new PostgresSQLSqlGenerationVisitor(this, context);
     }
 
     @Override
     public void validateProperties() throws PropertyValidationException {
-        super.validateDialectName(getPublicName());
         super.validateProperties();
         checkPostgreSQLIdentifierPropertyConsistency();
     }
