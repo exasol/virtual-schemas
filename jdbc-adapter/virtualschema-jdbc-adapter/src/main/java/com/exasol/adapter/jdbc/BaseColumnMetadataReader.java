@@ -92,7 +92,7 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
                 .adapterNotes(adapterNotes) //
                 .type(mapJdbcType(jdbcTypeDescription)) //
                 .nullable(isRemoteColumnNullable(remoteColumn, columnName)) //
-                .identity(isAutoIncrementColmun(remoteColumn, columnName)) //
+                .identity(isAutoIncrementColumn(remoteColumn, columnName)) //
                 .defaultValue(readDefaultValue(remoteColumn)) //
                 .comment(readComment(remoteColumn)) //
                 .originalTypeName(originalTypeName) //
@@ -130,7 +130,7 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
         }
     }
 
-    private boolean isAutoIncrementColmun(final ResultSet remoteColumn, final String columnName) {
+    private boolean isAutoIncrementColumn(final ResultSet remoteColumn, final String columnName) {
         try {
             final String identity = remoteColumn.getString(AUTOINCREMENT_COLUMN);
             return JDBC_TRUE.equalsIgnoreCase(identity);
@@ -236,7 +236,7 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
         case Types.NULL:
         case Types.REF_CURSOR:
         default:
-            throw new RemoteMetadataReaderException("Unsupported JBDC data type \"" + jdbcTypeDescription.getJdbcType()
+            throw new RemoteMetadataReaderException("Unsupported JDBC data type \"" + jdbcTypeDescription.getJdbcType()
                     + "\" found trying to map remote schema metadata to Exasol.");
         }
     }

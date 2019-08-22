@@ -22,7 +22,7 @@ import com.exasol.adapter.response.*;
 import com.exasol.adapter.sql.SqlStatement;
 import com.exasol.adapter.sql.TestSqlStatementFactory;
 
-public class JdbcAdapterTest {
+class JdbcAdapterTest {
     private static final String SCHEMA_NAME = "THE_SCHEMA";
     private static final String GENERIC_ADAPTER_NAME = "GENERIC";
     private final JdbcAdapter adapter = new JdbcAdapter();
@@ -34,7 +34,7 @@ public class JdbcAdapterTest {
     }
 
     @Test
-    public void testPushdown() throws AdapterException {
+    void testPushdown() throws AdapterException {
         final PushDownResponse response = pushStatementDown(TestSqlStatementFactory.createSelectOneFromSysDummy());
         assertThat(response.getPushDownSql(), equalTo("IMPORT INTO (c1 DECIMAL(10, 0))" //
                 + " FROM JDBC" //
@@ -69,13 +69,13 @@ public class JdbcAdapterTest {
     }
 
     @Test
-    public void testPushdownWithIllegalStatementThrowsException() throws AdapterException {
-        assertThrows(AdapterException.class,
+    void testPushdownWithIllegalStatementThrowsException() {
+        assertThrows(RemoteMetadataReaderException.class,
                 () -> pushStatementDown(TestSqlStatementFactory.createSelectOneFromDual()));
     }
 
     @Test
-    public void testGetCapabilities() throws AdapterException {
+    void testGetCapabilities() throws AdapterException {
         setGenericSqlDialectProperty();
         setDerbyConnectionProperties();
         this.rawProperties.put(SCHEMA_NAME_PROPERTY, "SYSIBM");
@@ -87,7 +87,7 @@ public class JdbcAdapterTest {
     }
 
     @Test
-    public void testDropVirtualSchemaMustSucceedEvenIfDebugAddressIsInvalid() throws AdapterException {
+    void testDropVirtualSchemaMustSucceedEvenIfDebugAddressIsInvalid() throws AdapterException {
         setGenericSqlDialectProperty();
         setDerbyConnectionProperties();
         final ExaMetadata exaMetadataMock = Mockito.mock(ExaMetadata.class);
