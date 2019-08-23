@@ -1,18 +1,15 @@
 package com.exasol.adapter.dialects.teradata;
 
-import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.ColumnAdapterNotes;
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.metadata.TableMetadata;
-import com.exasol.adapter.sql.*;
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.ColumnAdapterNotes;
+import com.exasol.adapter.metadata.*;
+import com.exasol.adapter.sql.*;
+import com.google.common.collect.ImmutableList;
 
 /**
  * This class generates SQL queries for the {@link TeradataSqlDialect}.
@@ -31,10 +28,10 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
                         .getTypeName();
                 return TYPE_NAMES_REQUIRING_CAST.contains(typeName) || TYPE_NAME_NOT_SUPPORTED.contains(typeName)
                         || (typeName.startsWith("NUMBER")
-                                && column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.DOUBLE);
+                                && (column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.DOUBLE));
             }
             return false;
-        } catch (AdapterException adapterException) {
+        } catch (final AdapterException adapterException) {
             throw new SqlGenerationVisitorException("Deserialization failed.", adapterException);
         }
     };
@@ -117,7 +114,7 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
 
     private String getColumnProjectionString(final SqlColumn column, final String projString) throws AdapterException {
         final boolean isDirectlyInSelectList = (column.hasParent()
-                && column.getParent().getType() == SqlNodeType.SELECT_LIST);
+                && (column.getParent().getType() == SqlNodeType.SELECT_LIST));
         if (!isDirectlyInSelectList) {
             return projString;
         }
@@ -144,7 +141,7 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
             projString = "XMLSERIALIZE(DOCUMENT " + projString + " as VARCHAR("
                     + TeradataColumnMetadataReader.MAX_TERADATA_VARCHAR_SIZE + ") INCLUDING XMLDECLARATION) ";
         } else if (typeName.startsWith("NUMBER")
-                && column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.DOUBLE) {
+                && (column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.DOUBLE)) {
             projString = "CAST(" + projString + "  as DOUBLE PRECISION)";
         } else if (typeName.equals("TIME") || typeName.equals("TIME WITH TIME ZONE")) {
             projString = "CAST(" + projString + "  as VARCHAR(21) )";

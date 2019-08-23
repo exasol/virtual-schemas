@@ -1,23 +1,27 @@
 package com.exasol.adapter.dialects.teradata;
 
-import com.exasol.adapter.*;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.*;
-import com.exasol.adapter.sql.*;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.*;
-import org.junit.jupiter.params.provider.*;
-import org.mockito.*;
-
-import java.sql.*;
-import java.util.*;
-
 import static com.exasol.adapter.dialects.VisitorAssertions.assertSqlNodeConvertedToAsterisk;
 import static com.exasol.adapter.dialects.VisitorAssertions.assertSqlNodeConvertedToOne;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static utils.SqlNodesCreator.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static utils.SqlNodesCreator.createSqlSelectStarListWithOneColumn;
+import static utils.SqlNodesCreator.createSqlSelectStarListWithoutColumns;
+
+import java.sql.Connection;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mock;
+
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.sql.SqlSelectList;
+import com.exasol.adapter.sql.SqlStatementSelect;
 
 class TeradataSqlGenerationVisitorTest {
     private TeradataSqlGenerationVisitor visitor;
@@ -34,19 +38,19 @@ class TeradataSqlGenerationVisitorTest {
     @Test
     void testVisitSqlSelectListAnyValue() throws AdapterException {
         final SqlSelectList sqlSelectList = SqlSelectList.createAnyValueSelectList();
-        assertSqlNodeConvertedToOne(sqlSelectList, visitor);
+        assertSqlNodeConvertedToOne(sqlSelectList, this.visitor);
     }
 
     @Test
     void testVisitSqlSelectListSelectStar() throws AdapterException {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithoutColumns();
-        assertSqlNodeConvertedToAsterisk(sqlSelectList, visitor);
+        assertSqlNodeConvertedToAsterisk(sqlSelectList, this.visitor);
     }
 
     @Test
     void testVisitSqlStatementSelect() throws AdapterException {
         final SqlStatementSelect select = (SqlStatementSelect) DialectTestData.getTestSqlNode();
-        assertThat(visitor.visit(select), //
+        assertThat(this.visitor.visit(select), //
                 equalTo("SELECT TOP 10 \"USER_ID\", COUNT(\"URL\") " //
                         + "FROM \"test_schema\".\"CLICKS\" " //
                         + "WHERE 1 < \"USER_ID\" " //
@@ -69,7 +73,7 @@ class TeradataSqlGenerationVisitorTest {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn(
                 "{\"jdbcDataType\":2009, \"typeName\":\"" + typeName + "\"}",
                 DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
-        assertThat(visitor.visit(sqlSelectList), equalTo(expected));
+        assertThat(this.visitor.visit(sqlSelectList), equalTo(expected));
     }
 
     @CsvSource({ "BYTE", //
@@ -82,13 +86,13 @@ class TeradataSqlGenerationVisitorTest {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn(
                 "{\"jdbcDataType\":2009, \"typeName\":\"" + typeName + "\"}",
                 DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
-        assertThat(visitor.visit(sqlSelectList), equalTo("'" + typeName + " NOT SUPPORTED'"));
+        assertThat(this.visitor.visit(sqlSelectList), equalTo("'" + typeName + " NOT SUPPORTED'"));
     }
 
     @Test
     void testVisitSqlSelectListSelectStarThrowsException() {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn("",
                 DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
-        assertThrows(SqlGenerationVisitorException.class, () -> visitor.visit(sqlSelectList));
+        assertThrows(SqlGenerationVisitorException.class, () -> this.visitor.visit(sqlSelectList));
     }
 }

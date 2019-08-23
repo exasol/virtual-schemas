@@ -81,6 +81,7 @@ class BaseRemoteMetadataReaderTest {
     private void mockTableA(final DatabaseMetaData remoteMetadataMock) throws SQLException {
         final ResultSet tableAColumns = Mockito.mock(ResultSet.class);
         when(tableAColumns.next()).thenReturn(true, true, false);
+        when(tableAColumns.getString(BaseColumnMetadataReader.TYPE_NAME_COLUMN)).thenReturn("BOOLEAN", "DATE");
         when(tableAColumns.getString(BaseColumnMetadataReader.NAME_COLUMN)).thenReturn("COLUMN_A1", "COLUMN_A2");
         when(tableAColumns.getInt(BaseColumnMetadataReader.DATA_TYPE_COLUMN)).thenReturn(Types.BOOLEAN, Types.DATE);
         when(remoteMetadataMock.getColumns(any(), any(), eq(TABLE_A), any())).thenReturn(tableAColumns);
@@ -89,6 +90,7 @@ class BaseRemoteMetadataReaderTest {
     private void mockTableB(final DatabaseMetaData remoteMetadataMock) throws SQLException {
         final ResultSet tableBColumns = Mockito.mock(ResultSet.class);
         when(tableBColumns.next()).thenReturn(true, true, true, false);
+        when(tableBColumns.getString(BaseColumnMetadataReader.TYPE_NAME_COLUMN)).thenReturn("BOOLEAN", "DOUBLE");
         when(tableBColumns.getInt(BaseColumnMetadataReader.DATA_TYPE_COLUMN)).thenReturn(Types.BOOLEAN, Types.DOUBLE);
         when(tableBColumns.getString(BaseColumnMetadataReader.NAME_COLUMN)).thenReturn("COLUMN_B1", "COLUMN_B2",
                 "COLUMN_B3");
@@ -186,7 +188,7 @@ class BaseRemoteMetadataReaderTest {
 
     @Test
     void testGetCatalogNameFilterDefaultsToAny() {
-        final AbstractRemoteMetadataReader reader = new BaseRemoteMetadataReader(null, AdapterProperties.emptyProperties());
+        final RemoteMetadataReader reader = new BaseRemoteMetadataReader(null, AdapterProperties.emptyProperties());
         assertThat(reader.getCatalogNameFilter(), equalTo(RemoteMetadataReaderConstants.ANY_CATALOG));
     }
 
@@ -195,14 +197,13 @@ class BaseRemoteMetadataReaderTest {
         final Map<String, String> rawProperties = new HashMap<>();
         final String expectedCatalog = "FOO";
         rawProperties.put(AdapterProperties.CATALOG_NAME_PROPERTY, expectedCatalog);
-        final AbstractRemoteMetadataReader reader = new BaseRemoteMetadataReader(null,
-                new AdapterProperties(rawProperties));
+        final RemoteMetadataReader reader = new BaseRemoteMetadataReader(null, new AdapterProperties(rawProperties));
         assertThat(reader.getCatalogNameFilter(), equalTo(expectedCatalog));
     }
 
     @Test
     void testGetSchemaNameFilterDefaultsToAny() {
-        final AbstractRemoteMetadataReader reader = new BaseRemoteMetadataReader(null, AdapterProperties.emptyProperties());
+        final RemoteMetadataReader reader = new BaseRemoteMetadataReader(null, AdapterProperties.emptyProperties());
         assertThat(reader.getSchemaNameFilter(), equalTo(RemoteMetadataReaderConstants.ANY_SCHEMA));
     }
 
@@ -211,8 +212,7 @@ class BaseRemoteMetadataReaderTest {
         final Map<String, String> rawProperties = new HashMap<>();
         final String expectedSchema = "BAR";
         rawProperties.put(AdapterProperties.SCHEMA_NAME_PROPERTY, expectedSchema);
-        final AbstractRemoteMetadataReader reader = new BaseRemoteMetadataReader(null,
-                new AdapterProperties(rawProperties));
+        final RemoteMetadataReader reader = new BaseRemoteMetadataReader(null, new AdapterProperties(rawProperties));
         assertThat(reader.getSchemaNameFilter(), equalTo(expectedSchema));
     }
 
@@ -225,7 +225,7 @@ class BaseRemoteMetadataReaderTest {
         final Connection connectionMock = mockConnection(remoteMetadataMock);
         mockGetTableCalls(remoteMetadataMock);
         mockTableA(remoteMetadataMock);
-        final AbstractRemoteMetadataReader reader = new BaseRemoteMetadataReader(connectionMock,
+        final RemoteMetadataReader reader = new BaseRemoteMetadataReader(connectionMock,
                 AdapterProperties.emptyProperties());
         final SchemaMetadata metadata = reader.readRemoteSchemaMetadata(Arrays.asList(TABLE_A));
         final List<TableMetadata> tables = metadata.getTables();
@@ -253,14 +253,10 @@ class BaseRemoteMetadataReaderTest {
 
     @Test
     void testConvertToOptional() {
-        final AbstractRemoteMetadataReader reader = new BaseRemoteMetadataReader(null, AdapterProperties.emptyProperties());
-        assertAll(
-                () -> assertThat(reader.convertToOptional(Collections.emptyList()),
-                        equalTo(Optional.empty())),
-                () -> assertThat(reader.convertToOptional(null),
-                        equalTo(Optional.empty())),
+        final BaseRemoteMetadataReader reader = new BaseRemoteMetadataReader(null, AdapterProperties.emptyProperties());
+        assertAll(() -> assertThat(reader.convertToOptional(Collections.emptyList()), equalTo(Optional.empty())),
+                () -> assertThat(reader.convertToOptional(null), equalTo(Optional.empty())),
                 () -> assertThat(reader.convertToOptional(Arrays.asList("T1")),
-                        equalTo(Optional.of(Arrays.asList("T1"))))
-        );
+                        equalTo(Optional.of(Arrays.asList("T1")))));
     }
 }

@@ -126,7 +126,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         if (value == null) {
             return "NULL";
         } else {
-            return "'" + value.replaceAll("'", "''") + "'";
+            return "'" + value.replace("'", "''") + "'";
         }
     }
 
@@ -150,12 +150,17 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         }
     }
 
+    /**
+     * Get the list of user-defined adapter properties which the dialect supports.
+     *
+     * @return list of supported properties
+     */
+    protected abstract List<String> getSupportedProperties();
+
     protected String createUnsupportedElementMessage(final String unsupportedElement, final String property) {
         return "The dialect " + this.properties.getSqlDialect() + " does not support " + unsupportedElement
                 + " property. Please, do not set the " + property + " property.";
     }
-
-    protected abstract List<String> getSupportedProperties();
 
     private void validateConnectionProperties() throws PropertyValidationException {
         if (this.properties.containsKey(CONNECTION_NAME_PROPERTY)) {
@@ -232,8 +237,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         if (this.properties.containsKey(EXCEPTION_HANDLING_PROPERTY)) {
             final String exceptionHandling = this.properties.getExceptionHandling();
             if (!((exceptionHandling == null) || exceptionHandling.isEmpty())) {
-                for (final AbstractSqlDialect.ExceptionHandlingMode mode : AbstractSqlDialect.ExceptionHandlingMode
-                        .values()) {
+                for (final SqlDialect.ExceptionHandlingMode mode : SqlDialect.ExceptionHandlingMode.values()) {
                     if (!mode.name().equals(exceptionHandling)) {
                         throw new PropertyValidationException(
                                 "Invalid value '" + exceptionHandling + "' for property " + EXCEPTION_HANDLING_PROPERTY

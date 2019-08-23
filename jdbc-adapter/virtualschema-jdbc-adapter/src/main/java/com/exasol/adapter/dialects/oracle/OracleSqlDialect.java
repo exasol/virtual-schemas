@@ -172,7 +172,7 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    protected List<String> getSupportedProperties() {
+    public List<String> getSupportedProperties() {
         return SUPPORTED_PROPERTIES;
     }
 

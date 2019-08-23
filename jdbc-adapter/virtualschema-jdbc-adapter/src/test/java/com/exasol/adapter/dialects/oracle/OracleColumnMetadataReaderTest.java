@@ -16,6 +16,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.DataType.ExaCharset;
 
 class OracleColumnMetadataReaderTest {
     private OracleColumnMetadataReader columnMetadataReader;
@@ -39,8 +40,7 @@ class OracleColumnMetadataReaderTest {
         final int castScale = 2;
         final Map<String, String> rawProperties = new HashMap<>();
         rawProperties.put(OracleProperties.ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY, castPrecision + "," + castScale);
-        this.columnMetadataReader = new OracleColumnMetadataReader(null, new AdapterProperties(rawProperties),
-                BaseIdentifierConverter.createDefault());
+        this.columnMetadataReader = createParameterizedColumnMetadataReader(rawProperties);
         final JdbcTypeDescription typeDescription = createTypeDescriptionForNumeric(precision, scale);
         assertThat(this.columnMetadataReader.mapJdbcType(typeDescription),
                 equalTo(DataType.createDecimal(castPrecision, castScale)));
@@ -67,5 +67,25 @@ class OracleColumnMetadataReaderTest {
         final JdbcTypeDescription typeDescription = createTypeDescriptionForNumeric(precision, scale);
         assertThat(this.columnMetadataReader.mapJdbcType(typeDescription),
                 equalTo(DataType.createDecimal(precision, scale)));
+    }
+
+    @Test
+    void testMapBlobMappedToUnsupportedTypeByDefault() {
+        final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.BLOB, 0, 0, 0, null);
+        assertThat(this.columnMetadataReader.mapJdbcType(typeDescription), equalTo(DataType.createUnsupported()));
+    }
+
+    @Test
+    void testMapBlobMappedToMaximumSizeVarCharIfBase64EncodingEnabled() {
+        final Map<String, String> rawProperties = new HashMap<>();
+        rawProperties.put("BINARY_COLUMN_HANDLING", "ENCODE_BASE64");
+        final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.BLOB, 0, 0, 0, null);
+        assertThat(createParameterizedColumnMetadataReader(rawProperties).mapJdbcType(typeDescription),
+                equalTo(DataType.createMaximumSizeVarChar(ExaCharset.UTF8)));
+    }
+
+    public OracleColumnMetadataReader createParameterizedColumnMetadataReader(final Map<String, String> rawProperties) {
+        return new OracleColumnMetadataReader(null, new AdapterProperties(rawProperties),
+                BaseIdentifierConverter.createDefault());
     }
 }
