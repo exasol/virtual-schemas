@@ -39,7 +39,7 @@ class TeradataSqlDialectIT extends AbstractIntegrationTest {
     void testSelectNumericDataTypes() throws SQLException, ClassNotFoundException, FileNotFoundException {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".\"numeric_data_types\"";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (short) 1, 2, (long) 3, new BigDecimal(4), new BigDecimal("7.22"), 1214325.1234,
+        assertNextRow(result, (short) 1, 2, (long) 3, new BigDecimal(4), new BigDecimal("7.22"), 1214325.1234,
                 1.3451345135541E9, 1.234513245783E9, 113.321, 3143.0, 2.3452345E7, new BigDecimal("1234.1"),
                 (short) 132);
         matchSingleRowExplain(query,
@@ -51,7 +51,7 @@ class TeradataSqlDialectIT extends AbstractIntegrationTest {
             throws SQLException, ClassNotFoundException, FileNotFoundException {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".\"DateTime_and_Interval_Data_Types\"";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, getSqlDate(2017, 1, 11), "13:09:52.000000", getSqlTimestamp(2017, 01, 11, 13, 9, 52, 430),
+        assertNextRow(result, getSqlDate(2017, 1, 11), "13:09:52.000000", getSqlTimestamp(2017, 01, 11, 13, 9, 52, 430),
                 "13:09:52.000000+00:00", getSqlTimestamp(2017, 01, 11, 13, 9, 52, 430),
                 " -2                           ", " 10-10                        ", "   30 12:30:30.5000           ",
                 " 6:15.24                      ");
@@ -63,7 +63,7 @@ class TeradataSqlDialectIT extends AbstractIntegrationTest {
     void testSelectPeriod_Data_Types() throws SQLException, ClassNotFoundException, FileNotFoundException {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".\"Period_Data_Types\"";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 1, "hans           ", "('05/02/03', '06/02/04')",
+        assertNextRow(result, (long) 1, "hans           ", "('05/02/03', '06/02/04')",
                 "('10:00:00.123456', '11:00:00.123456')", "('10:37:58.123456+08:00', '11:37:58.123456+08:00')",
                 "('2005-02-03 10:00:00.123', '2005-02-03 11:00:00.123')",
                 "('2005-02-03 10:37:58.123+08:00', '2005-02-03 11:37:58.123+08:00')"
@@ -77,7 +77,7 @@ class TeradataSqlDialectIT extends AbstractIntegrationTest {
     void testProjection() throws SQLException, ClassNotFoundException, FileNotFoundException {
         final String query = "SELECT R_REGIONKEY FROM  " + VIRTUAL_SCHEMA + ".REGION order by R_REGIONKEY";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 0);
+        assertNextRow(result, (long) 0);
         matchSingleRowExplain(query, "SELECT R_REGIONKEY FROM \"retail\".REGION ORDER BY R_REGIONKEY");
     }
 

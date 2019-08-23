@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.BinaryColumnHandling;
 import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
@@ -44,16 +45,18 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
         case Types.DECIMAL:
         case Types.NUMERIC:
             return mapNumericType(jdbcTypeDescription);
-        case Types.BLOB:
+        case ORACLE_TIMESTAMP_WITH_TIME_ZONE:
+        case ORACLE_TIMESTAMP_WITH_LOCAL_TIME_ZONE:
+            return DataType.createTimestamp(false);
         case Types.NCLOB:
         case ORACLE_CLOB:
         case INTERVAL_YEAR_TO_MONTH:
         case INTERVAL_DAY_TO_SECOND:
-        case ORACLE_TIMESTAMP_WITH_TIME_ZONE:
-        case ORACLE_TIMESTAMP_WITH_LOCAL_TIME_ZONE:
         case ORACLE_BINARY_FLOAT:
         case ORACLE_BINARY_DOUBLE:
             return DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
+        case Types.BLOB:
+            return mapBlobType();
         default:
             return super.mapJdbcType(jdbcTypeDescription);
         }
@@ -73,10 +76,9 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
     }
 
     /**
-     * @return Oracle JDBC driver returns scale -127 if NUMBER data type was specified
-     * without scale and precision. Convert to VARCHAR.
-     * See http://docs.oracle.com/cd/B28359_01/server.111/b28318/datatype.htm#i16209
-     * and https://docs.oracle.com/cd/E19501-01/819-3659/gcmaz/
+     * @return Oracle JDBC driver returns scale -127 if NUMBER data type was specified without scale and precision.
+     *         Convert to VARCHAR. See http://docs.oracle.com/cd/B28359_01/server.111/b28318/datatype.htm#i16209 and
+     *         https://docs.oracle.com/cd/E19501-01/819-3659/gcmaz/
      */
     private DataType workAroundNumberWithoutScaleAndPrecision() {
         return getOracleNumberTargetType();
@@ -101,7 +103,15 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
         } else {
             throw new IllegalArgumentException("Unable to parse adapter property "
                     + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " value \"" + oraclePrecisionAndScale
-                    + " into a number precison and scale. The required format is \"<precision>.<scale>\", where both are integer numbers.");
+                    + " into a number precision and scale. The required format is \"<precision>.<scale>\", where both are integer numbers.");
+        }
+    }
+
+    public DataType mapBlobType() {
+        if (this.properties.getBinaryColumnHandling() == BinaryColumnHandling.IGNORE) {
+            return DataType.createUnsupported();
+        } else {
+            return DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
         }
     }
 }

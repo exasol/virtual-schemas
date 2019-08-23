@@ -70,7 +70,7 @@ public abstract class AbstractIntegrationTest {
         final Statement stmt = conn.createStatement();
         stmt.execute("CREATE SCHEMA IF NOT EXISTS ADAPTER");
         String sql = "CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS\n";
-        sql += "  %scriptclass com.exasol.adapter.jdbc.JdbcAdapter;\n";
+        sql += "  %scriptclass com.exasol.adapter.RequestDispatcher;\n";
         for (final String includePath : jarIncludes) {
             sql += "  %jar " + includePath + ";\n";
         }
@@ -175,14 +175,14 @@ public abstract class AbstractIntegrationTest {
         return getPortOfConnectedDatabase(connection);
     }
 
-    public static void matchNextRow(final ResultSet result, final Object... expectedElements) throws SQLException {
+    public static void assertNextRow(final ResultSet result, final Object... expectedElements) throws SQLException {
         result.next();
         assertEquals(getDiffWithTypes(Arrays.asList(expectedElements), rowToObject(result)),
                 Arrays.asList(expectedElements), rowToObject(result));
     }
 
-    public static void matchLastRow(final ResultSet result, final Object... expectedElements) throws SQLException {
-        matchNextRow(result, expectedElements);
+    public static void assertLastRow(final ResultSet result, final Object... expectedElements) throws SQLException {
+        assertNextRow(result, expectedElements);
         assertFalse(result.next());
     }
 

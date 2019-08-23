@@ -142,21 +142,21 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
         final ResultSet result = executeQuery(
                 "SELECT COLUMN_NAME, COLUMN_TYPE, COLUMN_MAXSIZE, COLUMN_NUM_PREC, COLUMN_NUM_SCALE, COLUMN_DEFAULT FROM EXA_DBA_COLUMNS WHERE COLUMN_SCHEMA = '"
                         + VIRTUAL_SCHEMA + "' AND COLUMN_TABLE='ALL_EXA_TYPES' ORDER BY COLUMN_ORDINAL_POSITION");
-        matchNextRow(result, "C1", "VARCHAR(100) UTF8", (long) 100, null, null, "'bar'");
-        matchNextRow(result, "C2", "VARCHAR(100) ASCII", (long) 100, null, null, "'bar'");
-        matchNextRow(result, "C3", "CHAR(10) UTF8", (long) 10, null, null, "'foo'");
-        matchNextRow(result, "C4", "CHAR(10) ASCII", (long) 10, null, null, "'bar'");
-        matchNextRow(result, "C5", "DECIMAL(5,0)", (long) 5, (long) 5, (long) 0, "1");
-        matchNextRow(result, "C6", "DECIMAL(6,3)", (long) 6, (long) 6, (long) 3, "1.2");
-        matchNextRow(result, "C7", "DOUBLE", (long) 64, null, null, "100");
-        matchNextRow(result, "C8", "BOOLEAN", (long) 1, null, null, "TRUE");
-        matchNextRow(result, "C9", "DATE", (long) 10, null, null, "'2016-06-01'");
-        matchNextRow(result, "C10", "TIMESTAMP", (long) 29, null, null, "'2016-06-01 00:00:01.000'");
-        matchNextRow(result, "C11", "TIMESTAMP WITH LOCAL TIME ZONE", (long) 29, null, null,
+        assertNextRow(result, "C1", "VARCHAR(100) UTF8", (long) 100, null, null, "'bar'");
+        assertNextRow(result, "C2", "VARCHAR(100) ASCII", (long) 100, null, null, "'bar'");
+        assertNextRow(result, "C3", "CHAR(10) UTF8", (long) 10, null, null, "'foo'");
+        assertNextRow(result, "C4", "CHAR(10) ASCII", (long) 10, null, null, "'bar'");
+        assertNextRow(result, "C5", "DECIMAL(5,0)", (long) 5, (long) 5, (long) 0, "1");
+        assertNextRow(result, "C6", "DECIMAL(6,3)", (long) 6, (long) 6, (long) 3, "1.2");
+        assertNextRow(result, "C7", "DOUBLE", (long) 64, null, null, "100");
+        assertNextRow(result, "C8", "BOOLEAN", (long) 1, null, null, "TRUE");
+        assertNextRow(result, "C9", "DATE", (long) 10, null, null, "'2016-06-01'");
+        assertNextRow(result, "C10", "TIMESTAMP", (long) 29, null, null, "'2016-06-01 00:00:01.000'");
+        assertNextRow(result, "C11", "TIMESTAMP WITH LOCAL TIME ZONE", (long) 29, null, null,
                 "'2016-06-01 00:00:02.000'");
-        matchNextRow(result, "C12", "INTERVAL YEAR(2) TO MONTH", (long) 13, null, null, "'3-5'");
-        matchNextRow(result, "C13", "INTERVAL DAY(2) TO SECOND(3)", (long) 29, null, null, "'2 12:50:10.123'");
-        matchLastRow(result, "C14", "GEOMETRY(3857)", (long) 8000000, null, null, "'POINT(2 5)'"); // srid not yet
+        assertNextRow(result, "C12", "INTERVAL YEAR(2) TO MONTH", (long) 13, null, null, "'3-5'");
+        assertNextRow(result, "C13", "INTERVAL DAY(2) TO SECOND(3)", (long) 29, null, null, "'2 12:50:10.123'");
+        assertLastRow(result, "C14", "GEOMETRY(3857)", (long) 8000000, null, null, "'POINT(2 5)'"); // srid not yet
                                                                                                    // supported, so will
                                                                                                    // always default to
                                                                                                    // 3857
@@ -165,7 +165,7 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
     @Test
     void testDataTypeSelect() throws SQLException {
         final ResultSet result = executeQuery("SELECT * FROM " + VIRTUAL_SCHEMA + ".ALL_EXA_TYPES");
-        matchNextRow(result, "a茶", "b", "c茶        ", "d         ", 123, new BigDecimal("123.456"), 2.2, false,
+        assertNextRow(result, "a茶", "b", "c茶        ", "d         ", 123, new BigDecimal("123.456"), 2.2, false,
                 getSqlDate(2016, 8, 1), getSqlTimestamp(2016, 8, 1, 0, 0, 1, 0),
                 getSqlTimestamp(2016, 8, 1, 0, 0, 2, 0), "+04-06", "+03 12:50:10.123", "POINT (2 5)");
     }
@@ -173,14 +173,14 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
     @Test
     void testIdentifierCaseSensitivityOnTable() throws SQLException {
         final ResultSet result = executeQuery("SELECT * FROM " + VIRTUAL_SCHEMA_MIXED_CASE + ".\"Table_Mixed_Case\"");
-        matchLastRow(result, 1L, 2L, 3L);
+        assertLastRow(result, 1L, 2L, 3L);
     }
 
     @Test
     void testIdentifierCaseSensitivityOnColumns() throws SQLException {
         final ResultSet result = executeQuery(
                 "SELECT \"Column1\", \"column2\", COLUMN3 FROM " + VIRTUAL_SCHEMA_MIXED_CASE + ".\"Table_Mixed_Case\"");
-        matchLastRow(result, 1L, 2L, 3L);
+        assertLastRow(result, 1L, 2L, 3L);
     }
 
     @Test
@@ -203,40 +203,40 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
     void testGroupConcat() throws SQLException {
         String query = "SELECT GROUP_CONCAT(A) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         ResultSet result = executeQuery(query);
-        matchLastRow(result, "1,1,2,2,3,3");
+        assertLastRow(result, "1,1,2,2,3,3");
         matchSingleRowExplain(query,
                 "SELECT GROUP_CONCAT(\"SIMPLE_VALUES\".\"A\") FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
                 IS_LOCAL);
         query = "SELECT GROUP_CONCAT(DISTINCT A) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
-        matchLastRow(result, "1,2,3");
+        assertLastRow(result, "1,2,3");
         matchSingleRowExplain(query,
                 "SELECT GROUP_CONCAT(DISTINCT \"SIMPLE_VALUES\".\"A\") FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
                 IS_LOCAL);
         query = "SELECT GROUP_CONCAT(A ORDER BY C) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
-        matchLastRow(result, "1,2,3,1,2,3");
+        assertLastRow(result, "1,2,3,1,2,3");
         matchSingleRowExplain(query,
                 "SELECT GROUP_CONCAT(\"SIMPLE_VALUES\".\"A\" ORDER BY \"SIMPLE_VALUES\".\"C\") FROM \"" + TEST_SCHEMA
                         + "\".\"SIMPLE_VALUES\"",
                 IS_LOCAL);
         query = "SELECT GROUP_CONCAT(A ORDER BY C DESC) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
-        matchLastRow(result, "3,2,1,3,2,1");
+        assertLastRow(result, "3,2,1,3,2,1");
         matchSingleRowExplain(query,
                 "SELECT GROUP_CONCAT(\"SIMPLE_VALUES\".\"A\" ORDER BY \"SIMPLE_VALUES\".\"C\" DESC) FROM \""
                         + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
                 IS_LOCAL);
         query = "SELECT GROUP_CONCAT(A ORDER BY C DESC NULLS LAST) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
-        matchLastRow(result, "3,2,1,3,2,1");
+        assertLastRow(result, "3,2,1,3,2,1");
         matchSingleRowExplain(query,
                 "SELECT GROUP_CONCAT(\"SIMPLE_VALUES\".\"A\" ORDER BY \"SIMPLE_VALUES\".\"C\" DESC NULLS LAST) FROM \""
                         + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
                 IS_LOCAL);
         query = "SELECT GROUP_CONCAT(A SEPARATOR ';'||' ')  FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
-        matchLastRow(result, "1; 1; 2; 2; 3; 3");
+        assertLastRow(result, "1; 1; 2; 2; 3; 3");
         matchSingleRowExplain(query, "SELECT GROUP_CONCAT(\"SIMPLE_VALUES\".\"A\" SEPARATOR '; ') FROM \"" + TEST_SCHEMA
                 + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
     }
@@ -245,13 +245,13 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
     void testExtract() throws SQLException {
         String query = "SELECT EXTRACT(MONTH FROM C9) FROM " + VIRTUAL_SCHEMA + ".ALL_EXA_TYPES";
         ResultSet result = executeQuery(query);
-        matchLastRow(result, (short) 8);
+        assertLastRow(result, (short) 8);
         matchSingleRowExplain(query,
                 "SELECT EXTRACT(MONTH FROM \"ALL_EXA_TYPES\".\"C9\") FROM \"" + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"",
                 IS_LOCAL);
         query = "SELECT EXTRACT(MONTH FROM C12) FROM " + VIRTUAL_SCHEMA + ".ALL_EXA_TYPES";
         result = executeQuery(query);
-        matchLastRow(result, (short) 6);
+        assertLastRow(result, (short) 6);
         matchSingleRowExplain(query,
                 "SELECT EXTRACT(MONTH FROM \"ALL_EXA_TYPES\".\"C12\") FROM \"" + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"",
                 IS_LOCAL);
@@ -261,37 +261,37 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
     void testCast() throws SQLException {
         String query = "SELECT CAST(A AS CHAR(15)) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         ResultSet result = executeQuery(query);
-        matchNextRow(result, "1              ");
+        assertNextRow(result, "1              ");
         matchSingleRowExplain(query,
                 "SELECT CAST(\"SIMPLE_VALUES\".\"A\" AS CHAR(15) UTF8) FROM \"" + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
                 IS_LOCAL);
         query = "SELECT CAST(CAST(A > 0 AS VARCHAR(15)) AS BOOLEAN) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
-        matchNextRow(result, true);
+        assertNextRow(result, true);
         matchSingleRowExplain(query,
                 "SELECT CAST(CAST(0 < \"SIMPLE_VALUES\".\"A\" AS VARCHAR(15) UTF8) AS BOOLEAN) FROM \"" + TEST_SCHEMA
                         + "\".\"SIMPLE_VALUES\"",
                 IS_LOCAL);
         query = "SELECT CAST(CAST(C9 AS VARCHAR(30)) AS DATE) FROM " + VIRTUAL_SCHEMA + ".ALL_EXA_TYPES";
         result = executeQuery(query);
-        matchNextRow(result, getSqlDate(2016, 8, 1));
+        assertNextRow(result, getSqlDate(2016, 8, 1));
         matchSingleRowExplain(query, "SELECT CAST(CAST(\"ALL_EXA_TYPES\".\"C9\" AS VARCHAR(30) UTF8) AS DATE) FROM \""
                 + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"", IS_LOCAL);
         query = "SELECT CAST(CAST(A AS VARCHAR(15)) AS DECIMAL(8, 1)) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
-        matchNextRow(result, new BigDecimal("1.0"));
+        assertNextRow(result, new BigDecimal("1.0"));
         matchSingleRowExplain(query,
                 "SELECT CAST(CAST(\"SIMPLE_VALUES\".\"A\" AS VARCHAR(15) UTF8) AS DECIMAL(8, 1)) FROM \"" + TEST_SCHEMA
                         + "\".\"SIMPLE_VALUES\"",
                 IS_LOCAL);
         query = "SELECT CAST(CAST(C AS VARCHAR(15)) AS DOUBLE) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
-        matchNextRow(result, 1.1d);
+        assertNextRow(result, 1.1d);
         matchSingleRowExplain(query, "SELECT CAST(CAST(\"SIMPLE_VALUES\".\"C\" AS VARCHAR(15) UTF8) AS DOUBLE) FROM \""
                 + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
         query = "SELECT CAST(CAST(C14 AS VARCHAR(100)) AS GEOMETRY(5)) FROM " + VIRTUAL_SCHEMA + ".ALL_EXA_TYPES";
         result = executeQuery(query);
-        matchNextRow(result, "POINT (2 5)");
+        assertNextRow(result, "POINT (2 5)");
         matchSingleRowExplain(query,
                 "SELECT CAST(CAST(\"ALL_EXA_TYPES\".\"C14\" AS VARCHAR(100) UTF8) AS GEOMETRY(5)) FROM \"" + TEST_SCHEMA
                         + "\".\"ALL_EXA_TYPES\"",
@@ -299,7 +299,7 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
         query = "SELECT CAST(CAST(C13 AS VARCHAR(100)) AS INTERVAL DAY (5) TO SECOND (2)) FROM " + VIRTUAL_SCHEMA
                 + ".ALL_EXA_TYPES";
         result = executeQuery(query);
-        matchNextRow(result, "+00003 12:50:10.12");
+        assertNextRow(result, "+00003 12:50:10.12");
         matchSingleRowExplain(query,
                 "SELECT CAST(CAST(\"ALL_EXA_TYPES\".\"C13\" AS VARCHAR(100) UTF8) AS INTERVAL DAY (5) TO SECOND (2)) FROM \""
                         + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"",
@@ -307,14 +307,14 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
         query = "SELECT CAST(CAST(C12 AS VARCHAR(100)) AS INTERVAL YEAR (5) TO MONTH) FROM " + VIRTUAL_SCHEMA
                 + ".ALL_EXA_TYPES";
         result = executeQuery(query);
-        matchNextRow(result, "+00004-06");
+        assertNextRow(result, "+00004-06");
         matchSingleRowExplain(query,
                 "SELECT CAST(CAST(\"ALL_EXA_TYPES\".\"C12\" AS VARCHAR(100) UTF8) AS INTERVAL YEAR (5) TO MONTH) FROM \""
                         + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"",
                 IS_LOCAL);
         query = "SELECT CAST(CAST(C10 AS VARCHAR(100)) AS TIMESTAMP) FROM " + VIRTUAL_SCHEMA + ".ALL_EXA_TYPES";
         result = executeQuery(query);
-        matchNextRow(result, getSqlTimestamp(2016, 8, 1, 0, 0, 1, 0));
+        assertNextRow(result, getSqlTimestamp(2016, 8, 1, 0, 0, 1, 0));
         matchSingleRowExplain(query,
                 "SELECT CAST(CAST(\"ALL_EXA_TYPES\".\"C10\" AS VARCHAR(100) UTF8) AS TIMESTAMP) FROM \"" + TEST_SCHEMA
                         + "\".\"ALL_EXA_TYPES\"",
@@ -322,14 +322,14 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
         query = "SELECT CAST(CAST(C11 AS VARCHAR(100)) AS TIMESTAMP WITH LOCAL TIME ZONE) FROM " + VIRTUAL_SCHEMA
                 + ".ALL_EXA_TYPES";
         result = executeQuery(query);
-        matchNextRow(result, getSqlTimestamp(2016, 8, 1, 0, 0, 2, 0));
+        assertNextRow(result, getSqlTimestamp(2016, 8, 1, 0, 0, 2, 0));
         matchSingleRowExplain(query,
                 "SELECT CAST(CAST(\"ALL_EXA_TYPES\".\"C11\" AS VARCHAR(100) UTF8) AS TIMESTAMP WITH LOCAL TIME ZONE) FROM \""
                         + TEST_SCHEMA + "\".\"ALL_EXA_TYPES\"",
                 IS_LOCAL);
         query = "SELECT CAST(A AS VARCHAR(15)) FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
-        matchNextRow(result, "1");
+        assertNextRow(result, "1");
         matchSingleRowExplain(query, "SELECT CAST(\"SIMPLE_VALUES\".\"A\" AS VARCHAR(15) UTF8) FROM \"" + TEST_SCHEMA
                 + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
     }
@@ -339,14 +339,14 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
         String query = "SELECT CASE A WHEN 1 THEN 'YES' WHEN 2 THEN 'PERHAPS' ELSE 'NO' END FROM " + VIRTUAL_SCHEMA
                 + ".SIMPLE_VALUES";
         ResultSet result = executeQuery(query);
-        matchNextRow(result, "YES");
+        assertNextRow(result, "YES");
         matchSingleRowExplain(query,
                 "SELECT CASE \"SIMPLE_VALUES\".\"A\" WHEN 1 THEN 'YES' WHEN 2 THEN 'PERHAPS' ELSE 'NO' END FROM \""
                         + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"",
                 IS_LOCAL);
         query = "SELECT CASE WHEN A > 1 THEN 'YES' ELSE 'NO' END FROM " + VIRTUAL_SCHEMA + ".SIMPLE_VALUES";
         result = executeQuery(query);
-        matchNextRow(result, "NO");
+        assertNextRow(result, "NO");
         matchSingleRowExplain(query, "SELECT CASE WHEN 1 < \"SIMPLE_VALUES\".\"A\" THEN 'YES' ELSE 'NO' END FROM \""
                 + TEST_SCHEMA + "\".\"SIMPLE_VALUES\"", IS_LOCAL);
     }
@@ -370,7 +370,7 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
                 "VS_JDBC_WITH_CONNNAME_CONNECTION", "", "", "ADAPTER.JDBC_ADAPTER", "", false, "", "", null, "");
         final String query = "SELECT 1 FROM VS_JDBC_WITH_CONNNAME.SIMPLE_VALUES";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, new Short("1"));
+        assertNextRow(result, new Short("1"));
         matchSingleRowExplain(query,
                 "IMPORT INTO (c1 DECIMAL(1, 0)) FROM JDBC AT VS_JDBC_WITH_CONNNAME_CONNECTION STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
@@ -388,7 +388,7 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
                 "");
         final String query = "SELECT 1 FROM VS_EXA_WITH_CONNNAME.SIMPLE_VALUES";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, new Short("1"));
+        assertNextRow(result, new Short("1"));
         matchSingleRowExplain(query,
                 "IMPORT FROM EXA AT 'localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
@@ -402,7 +402,7 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
                 false, "", "", null, "");
         final String query = "SELECT 1 FROM VS_JDBC_WITH_USER_PW.SIMPLE_VALUES";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, new Short("1"));
+        assertNextRow(result, new Short("1"));
         matchSingleRowExplain(query,
                 "IMPORT INTO (c1 DECIMAL(1, 0)) FROM JDBC AT 'jdbc:exa:localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
@@ -418,7 +418,7 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
                 "");
         final String query = "SELECT 1 FROM VS_EXA_WITH_USER_PW.SIMPLE_VALUES";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, new Short("1"));
+        assertNextRow(result, new Short("1"));
         matchSingleRowExplain(query,
                 "IMPORT FROM EXA AT 'localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
@@ -430,7 +430,7 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
         final String query = String.format("SELECT * FROM  %1$s.t1 a INNER JOIN  %1$s.t2 b ON a.x=b.x",
                 VIRTUAL_SCHEMA_JDBC);
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
+        assertNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
         assertFalse(result.next());
     }
 
@@ -439,7 +439,7 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
         final String query = String.format(
                 "SELECT b.y || %1$s.t1.y FROM  %1$s.t1 INNER JOIN  %1$s.t2 b ON %1$s.t1.x=b.x", VIRTUAL_SCHEMA_JDBC);
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, "bbbbbb");
+        assertNextRow(result, "bbbbbb");
         assertFalse(result.next());
     }
 
@@ -448,8 +448,8 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
         final String query = String.format(
                 "SELECT * FROM  %1$s.t1 a LEFT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_JDBC);
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 1, "aaa", null, null);
-        matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
+        assertNextRow(result, (long) 1, "aaa", null, null);
+        assertNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
         assertFalse(result.next());
     }
 
@@ -458,8 +458,8 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
         final String query = String.format(
                 "SELECT * FROM  %1$s.t1 a RIGHT OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_JDBC);
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
-        matchNextRow(result, null, null, (long) 3, "ccc");
+        assertNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
+        assertNextRow(result, null, null, (long) 3, "ccc");
         assertFalse(result.next());
     }
 
@@ -468,9 +468,9 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
         final String query = String.format(
                 "SELECT * FROM  %1$s.t1 a FULL OUTER JOIN  %1$s.t2 b ON a.x=b.x ORDER BY a.x", VIRTUAL_SCHEMA_JDBC);
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, (long) 1, "aaa", null, null);
-        matchNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
-        matchNextRow(result, null, null, (long) 3, "ccc");
+        assertNextRow(result, (long) 1, "aaa", null, null);
+        assertNextRow(result, (long) 2, "bbb", (long) 2, "bbb");
+        assertNextRow(result, null, null, (long) 3, "ccc");
         assertFalse(result.next());
     }
 }

@@ -16,7 +16,6 @@ import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.SqlNodeVisitor;
-import com.google.common.collect.*;
 
 /**
  * Dialect for DB2 using the DB2 Connector JDBC driver.

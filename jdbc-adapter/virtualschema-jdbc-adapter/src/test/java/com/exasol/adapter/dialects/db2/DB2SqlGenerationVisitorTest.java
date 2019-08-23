@@ -1,27 +1,28 @@
 package com.exasol.adapter.dialects.db2;
 
-import com.exasol.adapter.*;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.*;
-import com.exasol.adapter.metadata.*;
-import com.exasol.adapter.sql.*;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.*;
-import org.junit.jupiter.params.provider.*;
-import org.mockito.*;
-
-import java.math.*;
-import java.sql.*;
-import java.util.*;
-
-import static com.exasol.adapter.dialects.VisitorAssertions.*;
-import static com.exasol.adapter.sql.ScalarFunction.*;
+import static com.exasol.adapter.dialects.VisitorAssertions.assertSqlNodeConvertedToAsterisk;
+import static com.exasol.adapter.dialects.VisitorAssertions.assertSqlNodeConvertedToOne;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static utils.SqlNodesCreator.*;
+
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mock;
+
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.metadata.ColumnMetadata;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.sql.*;
 
 class DB2SqlGenerationVisitorTest {
     private SqlNodeVisitor<String> visitor;
@@ -40,7 +41,7 @@ class DB2SqlGenerationVisitorTest {
         final ColumnMetadata columnMetadata = ColumnMetadata.builder().name("test_column").type(DataType.createBool())
                 .build();
         final SqlColumn column = new SqlColumn(1, columnMetadata);
-        assertThat(visitor.visit(column), equalTo("\"test_column\""));
+        assertThat(this.visitor.visit(column), equalTo("\"test_column\""));
     }
 
     @CsvSource(value = { "XML : XMLSERIALIZE(\"test_column\" as VARCHAR(32000) INCLUDING XMLDECLARATION)", //
@@ -55,7 +56,7 @@ class DB2SqlGenerationVisitorTest {
         final SqlColumn column = getSqlColumn(typeName);
         final SqlNode node = SqlSelectList.createSelectStarSelectList();
         column.setParent(node);
-        assertThat(visitor.visit(column), equalTo(expected));
+        assertThat(this.visitor.visit(column), equalTo(expected));
     }
 
     private SqlColumn getSqlColumn(final String typeName) {
@@ -69,13 +70,13 @@ class DB2SqlGenerationVisitorTest {
         final SqlColumn column = getSqlColumn("BLOB");
         final SqlNode node = SqlSelectList.createSelectStarSelectList();
         column.setParent(node);
-        assertThat(visitor.visit(column), equalTo("'BLOB NOT SUPPORTED'"));
+        assertThat(this.visitor.visit(column), equalTo("'BLOB NOT SUPPORTED'"));
     }
 
     @Test
     void testVisitSqlStatementSelect() throws AdapterException {
         final SqlStatementSelect select = (SqlStatementSelect) DialectTestData.getTestSqlNode();
-        assertThat(visitor.visit(select), //
+        assertThat(this.visitor.visit(select), //
                 equalTo("SELECT \"USER_ID\", " //
                         + "COUNT(\"URL\") FROM \"test_schema\".\"CLICKS\" " //
                         + "WHERE 1 < \"USER_ID\" " //
@@ -87,13 +88,13 @@ class DB2SqlGenerationVisitorTest {
     @Test
     void testVisitSqlSelectListAnyValue() throws AdapterException {
         final SqlSelectList sqlSelectList = SqlSelectList.createAnyValueSelectList();
-        assertSqlNodeConvertedToOne(sqlSelectList, visitor);
+        assertSqlNodeConvertedToOne(sqlSelectList, this.visitor);
     }
 
     @Test
     void testVisitSqlSelectListSelectStar() throws AdapterException {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithoutColumns();
-        assertSqlNodeConvertedToAsterisk(sqlSelectList, visitor);
+        assertSqlNodeConvertedToAsterisk(sqlSelectList, this.visitor);
     }
 
     @Test
@@ -101,7 +102,7 @@ class DB2SqlGenerationVisitorTest {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn(
                 "{\"jdbcDataType\":2009, \"typeName\":\"XML\"}", DataType.createVarChar(10, DataType.ExaCharset.UTF8),
                 "test_column");
-        assertThat(visitor.visit(sqlSelectList),
+        assertThat(this.visitor.visit(sqlSelectList),
                 equalTo("XMLSERIALIZE(\"test_column\" as VARCHAR(32000) INCLUDING XMLDECLARATION)"));
     }
 
@@ -109,7 +110,7 @@ class DB2SqlGenerationVisitorTest {
     void testVisitSqlSelectListSelectStarThrowsException() {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn("",
                 DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
-        assertThrows(SqlGenerationVisitorException.class, () -> visitor.visit(sqlSelectList));
+        assertThrows(SqlGenerationVisitorException.class, () -> this.visitor.visit(sqlSelectList));
     }
 
     @Test
@@ -117,14 +118,14 @@ class DB2SqlGenerationVisitorTest {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralString("test"));
         final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.TRIM, arguments, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("TRIM('test')"));
+        assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("TRIM('test')"));
     }
 
     @Test
     void testVisitSqlFunctionScalarTrimOTwoArguments() throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarWithTwoStringArguments(ScalarFunction.TRIM,
                 "ab cdef", "ab");
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("TRIM('ab' FROM 'ab cdef')"));
+        assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("TRIM('ab' FROM 'ab cdef')"));
     }
 
     @CsvSource({ "ADD_DAYS, 10, 10 DAYS", //
@@ -137,7 +138,7 @@ class DB2SqlGenerationVisitorTest {
     void testVisitSqlFunctionScalarAddDateValues(final ScalarFunction scalarFunction, final int value,
             final String expected) throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarForDateTest(scalarFunction, value);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("VARCHAR(\"test_column\" + " + expected + ")"));
+        assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("VARCHAR(\"test_column\" + " + expected + ")"));
     }
 
     @CsvSource({ "SYSDATE, CURRENT DATE", //
@@ -152,7 +153,7 @@ class DB2SqlGenerationVisitorTest {
     void testVisitSqlFunctionScalar1(final ScalarFunction scalarFunction, final String expected)
             throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, null, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo(expected));
+        assertThat(this.visitor.visit(sqlFunctionScalar), equalTo(expected));
     }
 
     @CsvSource(value = { "BIT_AND : BITAND('left', 'right')", //
@@ -166,20 +167,21 @@ class DB2SqlGenerationVisitorTest {
             throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarWithTwoStringArguments(scalarFunction,
                 "left", "right");
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo(expected));
+        assertThat(this.visitor.visit(sqlFunctionScalar), equalTo(expected));
     }
 
     @Test
     void testVisitSqlFunctionScalarDiv() throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarWithTwoStringArguments(ScalarFunction.DIV,
                 "left", "right");
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("CAST(FLOOR('left' / FLOOR('right')) AS DECIMAL(36, 0))"));
+        assertThat(this.visitor.visit(sqlFunctionScalar),
+                equalTo("CAST(FLOOR('left' / FLOOR('right')) AS DECIMAL(36, 0))"));
     }
 
     @Test
     void testVisitSqlFunctionAggregate() throws AdapterException {
         final SqlFunctionAggregate sqlFunctionAggregate = createSqlFunctionAggregate();
-        assertThat(visitor.visit(sqlFunctionAggregate), equalTo("AVG(DISTINCT \"test_column\")"));
+        assertThat(this.visitor.visit(sqlFunctionAggregate), equalTo("AVG(DISTINCT \"test_column\")"));
     }
 
     @Test
@@ -188,7 +190,7 @@ class DB2SqlGenerationVisitorTest {
         arguments.add(new SqlLiteralString("test"));
         final SqlFunctionAggregate sqlFunctionAggregate = new SqlFunctionAggregate(AggregateFunction.VAR_SAMP,
                 arguments, false);
-        assertThat(visitor.visit(sqlFunctionAggregate), equalTo("VARIANCE_SAMP('test')"));
+        assertThat(this.visitor.visit(sqlFunctionAggregate), equalTo("VARIANCE_SAMP('test')"));
     }
 
     @Test
@@ -198,7 +200,7 @@ class DB2SqlGenerationVisitorTest {
         final SqlOrderBy orderBy = createSqlOrderByDescNullsFirst("test_column", "test_column2");
         final SqlFunctionAggregateGroupConcat sqlFunctionAggregateGroupConcat = new SqlFunctionAggregateGroupConcat(
                 AggregateFunction.AVG, arguments, orderBy, false, "'");
-        assertThat(visitor.visit(sqlFunctionAggregateGroupConcat),
+        assertThat(this.visitor.visit(sqlFunctionAggregateGroupConcat),
                 equalTo("LISTAGG('test', ''') WITHIN GROUP(ORDER BY \"test_column\" DESC, \"test_column2\")"));
     }
 }

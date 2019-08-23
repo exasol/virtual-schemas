@@ -26,14 +26,14 @@ public interface SqlDialect {
     /**
      * Get the dialect name.
      *
-     * @return the name of the dialect
+     * @return name of the dialect
      */
     public String getName();
 
     /**
      * Get the capabilities the SQL dialect supports.
      *
-     * @return The set of capabilities supported by this SQL-Dialect
+     * @return set of capabilities supported by this SQL-Dialect
      */
     public Capabilities getCapabilities();
 

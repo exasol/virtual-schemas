@@ -265,17 +265,6 @@ class ColumnMetadataReaderTest {
         assertSqlTypeConvertedToExasolType(typeId, TYPE_MAX_VARCHAR_UTF8);
     }
 
-    @ValueSource(ints = { Types.OTHER, Types.JAVA_OBJECT, Types.DISTINCT, Types.STRUCT, Types.ARRAY, Types.REF,
-            Types.DATALINK, Types.SQLXML, Types.NULL
-
-    })
-
-    @ParameterizedTest
-    void testUnsupportedTypes(final int typeId) throws SQLException {
-        mockDatatype(typeId);
-        assertThrows(RemoteMetadataReaderException.class, () -> mapSingleMockedColumn());
-    }
-
     @CsvSource({ RemoteMetadataReaderConstants.JDBC_FALSE + ", false",
             RemoteMetadataReaderConstants.JDBC_TRUE + ", true", "'', true" })
     @ParameterizedTest

@@ -1,5 +1,8 @@
 package com.exasol.adapter.dialects.oracle;
 
+import static com.exasol.adapter.sql.AggregateFunction.*;
+import static com.exasol.adapter.sql.ScalarFunction.*;
+
 import java.util.*;
 
 import com.exasol.adapter.AdapterException;
@@ -7,20 +10,15 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-
-import static com.exasol.adapter.sql.AggregateFunction.*;
-import static com.exasol.adapter.sql.ScalarFunction.*;
-import static com.exasol.adapter.sql.ScalarFunction.TANH;
 
 /**
  * This class generates SQL queries for the {@link OracleSqlGenerationVisitor}.
  */
 public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
-    // If set to true, the selectlist elements will get aliases such as c1, c2, ...
-    // Can be refactored if we find a better way to implement it
+    // If set to true, the SELECT list elements will get aliases such as c1, c2, ...
     private boolean requiresSelectListAliasesForLimit = false;
+    private static final String TIMESTAMP_FORMAT = "'YYYY-MM-DD HH24:MI:SS.FF3'";
     private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("TIMESTAMP", "INTERVAL",
             "BINARY_FLOAT", "BINARY_DOUBLE", "CLOB", "NCLOB", "ROWID", "UROWID", "BLOB");
     private final Set<AggregateFunction> aggregateFunctionsCast = EnumSet.noneOf(AggregateFunction.class);
@@ -50,11 +48,11 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     Set<AggregateFunction> getAggregateFunctionsCast() {
-        return aggregateFunctionsCast;
+        return this.aggregateFunctionsCast;
     }
 
     Set<ScalarFunction> getScalarFunctionsCast() {
-        return scalarFunctionsCast;
+        return this.scalarFunctionsCast;
     }
 
     /**
@@ -94,7 +92,8 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         } else if (select.getSelectList().isSelectStar()) {
             appendSelectStar(select, builder);
         } else {
-            builder.append(Joiner.on(", ").join(buildAliases(select.getSelectList().getExpressions().size())));
+            final int numberOfExpressions = select.getSelectList().getExpressions().size();
+            builder.append(String.join(", ", buildAliases(numberOfExpressions)));
         }
         builder.append(" FROM ( ");
         builder.append("SELECT LIMIT_SUBSELECT.*, ROWNUM ROWNUM_SUB FROM ( ");
@@ -114,7 +113,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         for (final TableMetadata tableMeta : tableMetadata) {
             numberOfColumns += tableMeta.getColumns().size();
         }
-        builder.append(Joiner.on(", ").join(buildAliases(numberOfColumns)));
+        builder.append(String.join(", ", buildAliases(numberOfColumns)));
     }
 
     private List<String> buildAliases(final int numSelectListElements) {
@@ -263,16 +262,19 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         final AbstractSqlDialect dialect = (AbstractSqlDialect) getDialect();
         final String typeName = ColumnAdapterNotes
                 .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        if ((typeName.startsWith("TIMESTAMP") && (((OracleSqlDialect) dialect).getImportType() == ImportType.JDBC))
-                || typeName.startsWith("INTERVAL") || typeName.equals("BINARY_FLOAT")
-                || typeName.equals("BINARY_DOUBLE") || typeName.equals("CLOB") || typeName.equals("NCLOB")) {
+        if (typeName.startsWith("INTERVAL") || typeName.equals("BINARY_FLOAT") || typeName.equals("BINARY_DOUBLE")
+                || typeName.equals("CLOB") || typeName.equals("NCLOB")) {
             return "TO_CHAR(" + projectionString + ")";
+        } else if (typeName.startsWith("TIMESTAMP")
+                && ((OracleSqlDialect) dialect).getImportType() == ImportType.JDBC) {
+            return "TO_TIMESTAMP(TO_CHAR(" + projectionString + ", " + TIMESTAMP_FORMAT + "), " + TIMESTAMP_FORMAT
+                    + ")";
         } else if (typeName.equals("NUMBER")) {
             return getNumberProjectionString(column, projectionString, (OracleSqlDialect) dialect);
         } else if (typeName.equals("ROWID") || typeName.equals("UROWID")) {
             return "ROWIDTOCHAR(" + projectionString + ")";
         } else if (typeName.equals("BLOB")) {
-            return "UTL_RAW.CAST_TO_VARCHAR2(" + projectionString + ")";
+            return "UTL_RAW.CAST_TO_VARCHAR2(UTL_ENCODE.BASE64_DECODE(" + projectionString + "))";
         } else {
             return projectionString;
         }
@@ -318,8 +320,8 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         final StringBuilder builder = new StringBuilder();
         builder.append("LISTAGG");
         builder.append("(");
-        if (function.getArguments() != null && function.getArguments().size() == 1
-                && function.getArguments().get(0) != null) {
+        if ((function.getArguments() != null) && (function.getArguments().size() == 1)
+                && (function.getArguments().get(0) != null)) {
             final String expression = function.getArguments().get(0).accept(this);
             builder.append(expression);
             builder.append(", ");
@@ -351,10 +353,10 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                 builder.append(", ");
             }
             builder.append(function.getOrderBy().getExpressions().get(i).accept(this));
-            if (!function.getOrderBy().isAscending().get(i)) {
+            if (function.getOrderBy().isAscending().get(i).equals(false)) {
                 builder.append(" DESC");
             }
-            if (!function.getOrderBy().nullsLast().get(i)) {
+            if (function.getOrderBy().nullsLast().get(i).equals(false)) {
                 builder.append(" NULLS FIRST");
             }
         }
