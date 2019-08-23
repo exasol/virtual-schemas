@@ -19,9 +19,6 @@ import com.exasol.adapter.sql.*;
  * Abstract implementation of a dialect. We recommend that every dialect should extend this abstract class.
  */
 public abstract class AbstractSqlDialect implements SqlDialect {
-    protected static final List<String> SHARED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
-            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
-            SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, BINARY_COLUMN_HANDLING_PROPERTY);
     protected Set<ScalarFunction> omitParenthesesMap = EnumSet.noneOf(ScalarFunction.class);
     protected RemoteMetadataReader remoteMetadataReader;
     protected AdapterProperties properties;
