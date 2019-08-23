@@ -44,7 +44,6 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
         case Types.DECIMAL:
         case Types.NUMERIC:
             return mapNumericType(jdbcTypeDescription);
-        case Types.TIMESTAMP:
         case ORACLE_TIMESTAMP_WITH_TIME_ZONE:
         case ORACLE_TIMESTAMP_WITH_LOCAL_TIME_ZONE:
             return DataType.createTimestamp(false);
@@ -102,7 +101,7 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
         } else {
             throw new IllegalArgumentException("Unable to parse adapter property "
                     + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " value \"" + oraclePrecisionAndScale
-                    + " into a number precison and scale. The required format is \"<precision>.<scale>\", where both are integer numbers.");
+                    + " into a number precision and scale. The required format is \"<precision>.<scale>\", where both are integer numbers.");
         }
     }
 }

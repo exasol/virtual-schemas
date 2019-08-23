@@ -21,7 +21,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     // If set to true, the selectlist elements will get aliases such as c1, c2, ...
     // Can be refactored if we find a better way to implement it
     private boolean requiresSelectListAliasesForLimit = false;
-    private static final String TIMESTAMP_FORMAT = "'HH24:MI:SS.FF3 DD-MM-YYYY'";
+    private static final String TIMESTAMP_FORMAT = "'YYYY-MM-DD HH24:MI:SS.FF3'";
     private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("TIMESTAMP", "INTERVAL",
             "BINARY_FLOAT", "BINARY_DOUBLE", "CLOB", "NCLOB", "ROWID", "UROWID", "BLOB");
     private final Set<AggregateFunction> aggregateFunctionsCast = EnumSet.noneOf(AggregateFunction.class);

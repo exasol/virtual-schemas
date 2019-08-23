@@ -132,7 +132,7 @@ class OracleSqlGenerationVisitorTest {
                 "{\"jdbcDataType\":2, \"typeName\":\"TIMESTAMP\"}",
                 DataType.createVarChar(50, DataType.ExaCharset.UTF8), "test_column");
         assertThat(visitor.visit(selectList), equalTo(
-                "TO_TIMESTAMP(TO_CHAR(\"test_column\", 'HH24:MI:SS.FF3 DD-MM-YYYY'), 'HH24:MI:SS.FF3 DD-MM-YYYY')"));
+                "TO_TIMESTAMP(TO_CHAR(\"test_column\", 'YYYY-MM-DD HH24:MI:SS.FF3'), 'YYYY-MM-DD HH24:MI:SS.FF3')"));
     }
 
     @CsvSource({ "ROWID", "UROWID" })
