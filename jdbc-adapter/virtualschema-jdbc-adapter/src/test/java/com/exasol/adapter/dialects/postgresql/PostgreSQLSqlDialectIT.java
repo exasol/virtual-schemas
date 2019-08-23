@@ -227,7 +227,7 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
     void testSelectSingleColumn() throws SQLException {
         final String query = String.format("SELECT x FROM %s.t", VIRTUAL_SCHEMA);
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, 1L);
+        assertNextRow(result, 1L);
     }
 
     // Join Tests -------------------------------------------------------------
@@ -236,7 +236,7 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a INNER JOIN  " + VIRTUAL_SCHEMA
                 + ".t2 b ON a.x=b.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, 2L, "bbb", 2L, "bbb"), () -> assertFalse(result.next()));
+        assertAll(() -> assertNextRow(result, 2L, "bbb", 2L, "bbb"), () -> assertFalse(result.next()));
     }
 
     @Test
@@ -244,7 +244,7 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT b.y || " + VIRTUAL_SCHEMA + ".t1.y FROM  " + VIRTUAL_SCHEMA + ".t1 INNER JOIN  "
                 + VIRTUAL_SCHEMA + ".t2 b ON " + VIRTUAL_SCHEMA + ".t1.x=b.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, "bbbbbb"), () -> assertFalse(result.next()));
+        assertAll(() -> assertNextRow(result, "bbbbbb"), () -> assertFalse(result.next()));
     }
 
     @Test
@@ -252,7 +252,7 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a LEFT OUTER JOIN  " + VIRTUAL_SCHEMA
                 + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, 1L, "aaa", null, null), () -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
+        assertAll(() -> assertNextRow(result, 1L, "aaa", null, null), () -> assertNextRow(result, 2L, "bbb", 2L, "bbb"),
                 () -> assertFalse(result.next()));
     }
 
@@ -261,7 +261,7 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a RIGHT OUTER JOIN  " + VIRTUAL_SCHEMA
                 + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, 2L, "bbb", 2L, "bbb"), () -> matchNextRow(result, null, null, 3L, "ccc"),
+        assertAll(() -> assertNextRow(result, 2L, "bbb", 2L, "bbb"), () -> assertNextRow(result, null, null, 3L, "ccc"),
                 () -> assertFalse(result.next()));
     }
 
@@ -270,8 +270,8 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a FULL OUTER JOIN  " + VIRTUAL_SCHEMA
                 + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, 1L, "aaa", null, null), () -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
-                () -> matchNextRow(result, null, null, 3L, "ccc"), () -> assertFalse(result.next()));
+        assertAll(() -> assertNextRow(result, 1L, "aaa", null, null), () -> assertNextRow(result, 2L, "bbb", 2L, "bbb"),
+                () -> assertNextRow(result, null, null, 3L, "ccc"), () -> assertFalse(result.next()));
     }
 
     @Test
@@ -279,7 +279,7 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a RIGHT OUTER JOIN  " + VIRTUAL_SCHEMA
                 + ".t2 b ON a.x||a.y=b.x||b.y ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, 2L, "bbb", 2L, "bbb"), () -> matchNextRow(result, null, null, 3L, "ccc"),
+        assertAll(() -> assertNextRow(result, 2L, "bbb", 2L, "bbb"), () -> assertNextRow(result, null, null, 3L, "ccc"),
                 () -> assertFalse(result.next()));
     }
 
@@ -288,8 +288,8 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA + ".t1 a FULL OUTER JOIN  " + VIRTUAL_SCHEMA
                 + ".t2 b ON a.x-b.x=0 ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, 1L, "aaa", null, null), () -> matchNextRow(result, 2L, "bbb", 2L, "bbb"),
-                () -> matchNextRow(result, null, null, 3L, "ccc"), () -> assertFalse(result.next()));
+        assertAll(() -> assertNextRow(result, 1L, "aaa", null, null), () -> assertNextRow(result, 2L, "bbb", 2L, "bbb"),
+                () -> assertNextRow(result, null, null, 3L, "ccc"), () -> assertFalse(result.next()));
     }
 
     // Identifier Test - CONVERT_TO_UPPER mode --------------------------------

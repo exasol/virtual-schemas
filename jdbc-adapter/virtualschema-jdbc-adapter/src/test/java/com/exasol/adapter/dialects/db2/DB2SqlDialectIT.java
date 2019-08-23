@@ -39,7 +39,7 @@ class DB2SqlDialectIT extends AbstractIntegrationTest {
     void testSelectNumericDataTypes() throws SQLException {
         final String query = "SELECT PRICE,PROMOPRICE FROM " + VIRTUAL_SCHEMA + ".PRODUCT WHERE pid = '100-100-01'";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, new BigDecimal("9.99"), new BigDecimal("7.25"));
+        assertNextRow(result, new BigDecimal("9.99"), new BigDecimal("7.25"));
         matchSingleRowExplain(query, "SELECT \"PRICE\", \"PROMOPRICE\" FROM \"" + DB2_SCHEMA
                 + "\".\"PRODUCT\" WHERE \"PID\" = '100-100-01'");
     }
@@ -48,7 +48,7 @@ class DB2SqlDialectIT extends AbstractIntegrationTest {
     void testLimit() throws SQLException {
         final String query = "SELECT * FROM (SELECT price,PROMOPRICE FROM DB2.PRODUCT) AS A LIMIT 1 ";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, new BigDecimal("9.99"), new BigDecimal("7.25"));
+        assertNextRow(result, new BigDecimal("9.99"), new BigDecimal("7.25"));
         matchSingleRowExplain(query,
                 "SELECT \"PRICE\", \"PROMOPRICE\" FROM \"" + DB2_SCHEMA + "\".\"PRODUCT\" FETCH FIRST 1 ROWS ONLY");
     }
@@ -58,7 +58,7 @@ class DB2SqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT DETAIL_TIMESTAMP,UHRZEIT FROM " + VIRTUAL_SCHEMA
                 + ".\"Additional_Datatypes\"  WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, "2020-01-01-00.00.00.123456789123", "12.05.11");
+        assertNextRow(result, "2020-01-01-00.00.00.123456789123", "12.05.11");
         matchSingleRowExplain(query, "SELECT VARCHAR(\"DETAIL_TIMESTAMP\"), VARCHAR(\"UHRZEIT\") FROM \"" + DB2_SCHEMA
                 + "\".\"Additional_Datatypes\" WHERE \"DETAIL_TIMESTAMP\" = '2020-01-01-00.00.00.123456789123'");
 
@@ -69,7 +69,7 @@ class DB2SqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT BIDATAVARCHAR,BIDATACHAR FROM " + VIRTUAL_SCHEMA
                 + ".\"Additional_Datatypes\"  WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, "30303031",
+        assertNextRow(result, "30303031",
                 "41414242202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020");
         matchSingleRowExplain(query, "SELECT HEX(\"BIDATAVARCHAR\"), HEX(\"BIDATACHAR\") FROM \"" + DB2_SCHEMA
                 + "\".\"Additional_Datatypes\" WHERE \"DETAIL_TIMESTAMP\" = '2020-01-01-00.00.00.123456789123'");
@@ -81,7 +81,7 @@ class DB2SqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT UNICODECOL FROM " + VIRTUAL_SCHEMA
                 + ".\"Additional_Datatypes\"  WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, "CHAR 茶");
+        assertNextRow(result, "CHAR 茶");
         matchSingleRowExplain(query, "SELECT \"UNICODECOL\" FROM \"" + DB2_SCHEMA
                 + "\".\"Additional_Datatypes\" WHERE \"DETAIL_TIMESTAMP\" = '2020-01-01-00.00.00.123456789123'");
 
@@ -93,7 +93,7 @@ class DB2SqlDialectIT extends AbstractIntegrationTest {
                 + VIRTUAL_SCHEMA
                 + ".\"Additional_Datatypes\"  WHERE DETAIL_TIMESTAMP = '2020-01-01-00.00.00.123456789123'";
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, "2020-01-03-00.00.00.123456789123", "2018-01-01-00.00.00.123456789123", "CHAR");
+        assertNextRow(result, "2020-01-03-00.00.00.123456789123", "2018-01-01-00.00.00.123456789123", "CHAR");
         matchSingleRowExplain(query,
                 "SELECT VARCHAR(\"DETAIL_TIMESTAMP\" + 2 DAYS), VARCHAR(\"DETAIL_TIMESTAMP\" + -2 YEARS), SUBSTR(\"UNICODECOL\", 1, 4) FROM \""
                         + DB2_SCHEMA

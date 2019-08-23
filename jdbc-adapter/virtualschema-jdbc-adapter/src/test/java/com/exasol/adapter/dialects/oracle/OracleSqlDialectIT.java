@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.oracle;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -303,7 +304,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA_ORA + ".t1 a INNER JOIN  " + VIRTUAL_SCHEMA_ORA
                 + ".t2 b ON a.x=b.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, "2", "bbb", "2", "bbb"), () -> assertFalse(result.next()));
+        assertAll(() -> assertNextRow(result, "2", "bbb", "2", "bbb"), () -> assertFalse(result.next()));
     }
 
     @Test
@@ -311,7 +312,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT b.y || " + VIRTUAL_SCHEMA_JDBC + ".t1.y FROM  " + VIRTUAL_SCHEMA_JDBC
                 + ".t1 INNER JOIN  " + VIRTUAL_SCHEMA_JDBC + ".t2 b ON " + VIRTUAL_SCHEMA_JDBC + ".t1.x=b.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, "bbbbbb"), () -> assertFalse(result.next()));
+        assertAll(() -> assertNextRow(result, "bbbbbb"), () -> assertFalse(result.next()));
     }
 
     @Test
@@ -319,8 +320,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA_ORA + ".t1 a LEFT OUTER JOIN  " + VIRTUAL_SCHEMA_ORA
                 + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, "1", "aaa", null, null),
-                () -> matchNextRow(result, "2", "bbb", "2", "bbb"), () -> assertFalse(result.next()));
+        assertAll(() -> assertNextRow(result, "1", "aaa", null, null),
+                () -> assertNextRow(result, "2", "bbb", "2", "bbb"), () -> assertFalse(result.next()));
     }
 
     @Test
@@ -328,8 +329,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA_JDBC + ".t1 a RIGHT OUTER JOIN  " + VIRTUAL_SCHEMA_JDBC
                 + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, "2", "bbb", "2", "bbb"),
-                () -> matchNextRow(result, null, null, "3", "ccc"), () -> assertFalse(result.next()));
+        assertAll(() -> assertNextRow(result, "2", "bbb", "2", "bbb"),
+                () -> assertNextRow(result, null, null, "3", "ccc"), () -> assertFalse(result.next()));
     }
 
     @Test
@@ -337,9 +338,9 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA_ORA + ".t1 a FULL OUTER JOIN  " + VIRTUAL_SCHEMA_ORA
                 + ".t2 b ON a.x=b.x ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, "1", "aaa", null, null),
-                () -> matchNextRow(result, "2", "bbb", "2", "bbb"), () -> matchNextRow(result, null, null, "3", "ccc"),
-                () -> assertFalse(result.next()));
+        assertAll(() -> assertNextRow(result, "1", "aaa", null, null),
+                () -> assertNextRow(result, "2", "bbb", "2", "bbb"),
+                () -> assertNextRow(result, null, null, "3", "ccc"), () -> assertFalse(result.next()));
     }
 
     @Test
@@ -347,8 +348,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA_JDBC + ".t1 a RIGHT OUTER JOIN  " + VIRTUAL_SCHEMA_JDBC
                 + ".t2 b ON a.x||a.y=b.x||b.y ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, "2", "bbb", "2", "bbb"),
-                () -> matchNextRow(result, null, null, "3", "ccc"), () -> assertFalse(result.next()));
+        assertAll(() -> assertNextRow(result, "2", "bbb", "2", "bbb"),
+                () -> assertNextRow(result, null, null, "3", "ccc"), () -> assertFalse(result.next()));
     }
 
     @Test
@@ -356,9 +357,9 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         final String query = "SELECT * FROM  " + VIRTUAL_SCHEMA_ORA + ".t1 a FULL OUTER JOIN  " + VIRTUAL_SCHEMA_ORA
                 + ".t2 b ON a.x-b.x=0 ORDER BY a.x";
         final ResultSet result = executeQuery(query);
-        assertAll(() -> matchNextRow(result, "1", "aaa", null, null),
-                () -> matchNextRow(result, "2", "bbb", "2", "bbb"), () -> matchNextRow(result, null, null, "3", "ccc"),
-                () -> assertFalse(result.next()));
+        assertAll(() -> assertNextRow(result, "1", "aaa", null, null),
+                () -> assertNextRow(result, "2", "bbb", "2", "bbb"),
+                () -> assertNextRow(result, null, null, "3", "ccc"), () -> assertFalse(result.next()));
     }
 
     // Type Tests -------------------------------------------------------------
@@ -387,9 +388,9 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
     void testFilterExpression() throws SQLException {
         final String query = "SELECT C7 FROM %s WHERE C7 > 12346";
         final ResultSet resultJDBC = runQueryJDBC(query);
-        matchNextRow(resultJDBC, new BigDecimal("12355.12345"));
+        assertNextRow(resultJDBC, new BigDecimal("12355.12345"));
         final ResultSet resultORA = runQueryORA(query);
-        matchNextRow(resultORA, "01.2355123450E4");
+        assertNextRow(resultORA, "01.2355123450E4");
 
         runMatchSingleRowExplain(query, "SELECT " + TYPE_TEST_T + ".\"C7\" FROM \"" + ORA_TABLE + "\" WHERE 12346 < "
                 + TYPE_TEST_T + ".\"C7\"");
@@ -460,8 +461,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
     void testOrderByColumn() throws SQLException {
         final String query = "SELECT C1 FROM %s ORDER BY C1 DESC NULLS LAST";
         for (final ResultSet result : runQuery(query)) {
-            matchNextRow(result, "aaaaaaaaaaaaaaaaaaaa                              ");
-            matchNextRow(result, (Object) null);
+            assertNextRow(result, "aaaaaaaaaaaaaaaaaaaa                              ");
+            assertNextRow(result, (Object) null);
         }
         runMatchSingleRowExplain(query, "SELECT " + TYPE_TEST_T + ".\"C1\" FROM \"" + ORA_TABLE + "\" ORDER BY "
                 + TYPE_TEST_T + ".\"C1\" DESC NULLS LAST");
@@ -471,11 +472,11 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
     void testOrderByExpression() throws SQLException {
         final String query = "SELECT C7 FROM %s ORDER BY ABS(C7) DESC NULLS FIRST";
         final ResultSet resultJDBC = runQueryJDBC(query);
-        matchNextRow(resultJDBC, new BigDecimal("12355.12345"));
-        matchNextRow(resultJDBC, new BigDecimal("12345.12345"));
+        assertNextRow(resultJDBC, new BigDecimal("12355.12345"));
+        assertNextRow(resultJDBC, new BigDecimal("12345.12345"));
         final ResultSet resultORA = runQueryORA(query);
-        matchNextRow(resultORA, "01.2355123450E4");
-        matchNextRow(resultORA, "01.2345123450E4");
+        assertNextRow(resultORA, "01.2355123450E4");
+        assertNextRow(resultORA, "01.2345123450E4");
 
         runMatchSingleRowExplain(query, "SELECT " + TYPE_TEST_T + ".\"C7\" FROM \"" + ORA_TABLE + "\" ORDER BY ABS("
                 + TYPE_TEST_T + ".\"C7\") DESC");
@@ -485,11 +486,11 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
     void testLimit() throws SQLException {
         final String query = "SELECT C7 FROM %s ORDER BY C7 LIMIT 2";
         final ResultSet resultJDBC = runQueryJDBC(query);
-        matchNextRow(resultJDBC, new BigDecimal("12345.12345"));
-        matchNextRow(resultJDBC, new BigDecimal("12355.12345"));
+        assertNextRow(resultJDBC, new BigDecimal("12345.12345"));
+        assertNextRow(resultJDBC, new BigDecimal("12355.12345"));
         final ResultSet resultORA = runQueryORA(query);
-        matchNextRow(resultORA, "01.2345123450E4");
-        matchNextRow(resultORA, "01.2355123450E4");
+        assertNextRow(resultORA, "01.2345123450E4");
+        assertNextRow(resultORA, "01.2355123450E4");
 
         runMatchSingleRowExplain(query, "SELECT LIMIT_SUBSELECT.* FROM ( SELECT " + TYPE_TEST_T + ".\"C7\" FROM \""
                 + ORA_TABLE + "\" ORDER BY " + TYPE_TEST_T + ".\"C7\"  ) LIMIT_SUBSELECT WHERE ROWNUM <= 2");
@@ -499,9 +500,9 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
     void testLimitOffset() throws SQLException {
         final String query = "SELECT C7 FROM %s ORDER BY C7 LIMIT 1 OFFSET 1";
         final ResultSet resultJDBC = runQueryJDBC(query);
-        matchNextRow(resultJDBC, new BigDecimal("12355.12345"));
+        assertNextRow(resultJDBC, new BigDecimal("12355.12345"));
         final ResultSet resultORA = runQueryORA(query);
-        matchNextRow(resultORA, "01.2355123450E4");
+        assertNextRow(resultORA, "01.2355123450E4");
 
         runMatchSingleRowExplain(query,
                 "SELECT c0 FROM ( SELECT LIMIT_SUBSELECT.*, ROWNUM ROWNUM_SUB FROM ( SELECT " + TYPE_TEST_T
@@ -513,7 +514,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
     void testChar() throws SQLException {
         final String query = "SELECT C1 FROM %s";
         for (final ResultSet result : runQuery(query)) {
-            matchNextRow(result, "aaaaaaaaaaaaaaaaaaaa                              ");
+            assertNextRow(result, "aaaaaaaaaaaaaaaaaaaa                              ");
         }
         assertEquals("CHAR(50) ASCII", getColumnType("C1"));
     }
@@ -522,7 +523,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
     void testNChar() throws SQLException {
         final String query = "SELECT C2 FROM %s";
         for (final ResultSet result : runQuery(query)) {
-            matchNextRow(result, "bbbbbbbbbbbbbbbbbbbb                              ");
+            assertNextRow(result, "bbbbbbbbbbbbbbbbbbbb                              ");
         }
         assertEquals("CHAR(50) UTF8", getColumnType("C2"));
     }
@@ -531,7 +532,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
     void testVarchar() throws SQLException {
         final String query = "SELECT C3 FROM %s";
         for (final ResultSet result : runQuery(query)) {
-            matchNextRow(result, "cccccccccccccccccccc");
+            assertNextRow(result, "cccccccccccccccccccc");
         }
         assertEquals("VARCHAR(50) ASCII", getColumnType("C3"));
     }
@@ -540,7 +541,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
     void testNVarchar() throws SQLException {
         final String query = "SELECT C4 FROM %s";
         for (final ResultSet result : runQuery(query)) {
-            matchNextRow(result, "dddddddddddddddddddd");
+            assertNextRow(result, "dddddddddddddddddddd");
         }
         assertEquals("VARCHAR(50) UTF8", getColumnType("C4"));
     }
@@ -653,7 +654,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
     void testLong() throws SQLException {
         final String query = "SELECT C_LONG FROM " + EXA_TABLE_JDBC;
         final ResultSet result = executeQuery(query);
-        matchNextRow(result, "test long 123");
+        assertNextRow(result, "test long 123");
         assertEquals("VARCHAR(2000000) ASCII", getColumnType("C_LONG"));
     }
 
@@ -661,7 +662,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
     void testDate() throws SQLException {
         final String query = "SELECT C10 FROM %s";
         for (final ResultSet result : runQuery(query)) {
-            matchNextRow(result, java.sql.Date.valueOf("2016-08-19"));
+            assertNextRow(result, java.sql.Date.valueOf("2016-08-19"));
         }
         runMatchSingleRowExplain(query, "SELECT " + TYPE_TEST_T + ".\"C10\" FROM \"" + ORA_TABLE + "\"");
         assertEquals("TIMESTAMP", getColumnType("C10"));
@@ -671,11 +672,12 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
     void testTimestamp3() throws SQLException {
         final String query = "SELECT C11 FROM %s";
         final ResultSet resultJDBC = runQueryJDBC(query);
-        matchNextRow(resultJDBC, "11-MAR-13 05.30.15.123 PM");
+        assertNextRow(resultJDBC, Timestamp.valueOf("2013-03-11 17:30:15.123"));
         final ResultSet resultORA = runQueryORA(query);
-        matchNextRow(resultORA, Timestamp.valueOf("2013-03-11 17:30:15.123"));
+        assertNextRow(resultORA, Timestamp.valueOf("2013-03-11 17:30:15.123"));
 
-        runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(" + TYPE_TEST_T + ".\"C11\") FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplainJDBC(query, "SELECT TO_TIMESTAMP(TO_CHAR(" + TYPE_TEST_T
+                + ".\"C11\", 'YYYY-MM-DD HH24:MI:SS.FF3'), 'YYYY-MM-DD HH24:MI:SS.FF3') FROM \"" + ORA_TABLE + "\"");
         runMatchSingleRowExplainORA(query, "SELECT " + TYPE_TEST_T + ".\"C11\" FROM \"" + ORA_TABLE + "\"");
         assertEquals("TIMESTAMP", getColumnTypeJDBC("C11"));
         assertEquals("TIMESTAMP", getColumnTypeORA("C11"));
@@ -685,42 +687,45 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
     void testTimestamp6() throws SQLException {
         final String query = "SELECT C12 FROM %s";
         final ResultSet resultJDBC = runQueryJDBC(query);
-        matchNextRow(resultJDBC, "11-MAR-13 05.30.15.123456 PM");
+        assertNextRow(resultJDBC, Timestamp.valueOf("2013-03-11 17:30:15.123"));
         final ResultSet resultORA = runQueryORA(query);
-        matchNextRow(resultORA, Timestamp.valueOf("2013-03-11 17:30:15.123"));
+        assertNextRow(resultORA, Timestamp.valueOf("2013-03-11 17:30:15.123"));
 
-        runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(" + TYPE_TEST_T + ".\"C12\") FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplainJDBC(query, "SELECT TO_TIMESTAMP(TO_CHAR(" + TYPE_TEST_T
+                + ".\"C12\", 'YYYY-MM-DD HH24:MI:SS.FF3'), 'YYYY-MM-DD HH24:MI:SS.FF3') FROM \"" + ORA_TABLE + "\"");
         runMatchSingleRowExplainORA(query, "SELECT " + TYPE_TEST_T + ".\"C12\" FROM \"" + ORA_TABLE + "\"");
-        assertEquals("TIMESTAMP", getColumnTypeJDBC("C12"));
-        assertEquals("TIMESTAMP", getColumnTypeORA("C12"));
+        assertAll(() -> assertThat(getColumnTypeJDBC("C12"), equalTo("TIMESTAMP")),
+                () -> assertThat(getColumnTypeORA("C12"), equalTo("TIMESTAMP")));
     }
 
     @Test
     void testTimestamp9() throws SQLException {
         final String query = "SELECT C13 FROM %s";
         final ResultSet resultJDBC = runQueryJDBC(query);
-        matchNextRow(resultJDBC, "11-MAR-13 05.30.15.123456789 PM");
+        assertNextRow(resultJDBC, Timestamp.valueOf("2013-03-11 17:30:15.123"));
         final ResultSet resultORA = runQueryORA(query);
-        matchNextRow(resultORA, Timestamp.valueOf("2013-03-11 17:30:15.123"));
+        assertNextRow(resultORA, Timestamp.valueOf("2013-03-11 17:30:15.123"));
 
-        runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(" + TYPE_TEST_T + ".\"C13\") FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplainJDBC(query, "SELECT TO_TIMESTAMP(TO_CHAR(" + TYPE_TEST_T
+                + ".\"C13\", 'YYYY-MM-DD HH24:MI:SS.FF3'), 'YYYY-MM-DD HH24:MI:SS.FF3') FROM \"" + ORA_TABLE + "\"");
         runMatchSingleRowExplainORA(query, "SELECT " + TYPE_TEST_T + ".\"C13\" FROM \"" + ORA_TABLE + "\"");
-        assertEquals("TIMESTAMP", getColumnTypeJDBC("C13"));
-        assertEquals("TIMESTAMP", getColumnTypeORA("C13"));
+        assertAll(() -> assertThat(getColumnTypeJDBC("C13"), equalTo("TIMESTAMP")),
+              () -> assertThat(getColumnTypeORA("C13"), equalTo("TIMESTAMP")));
     }
 
     @Test
     void testTimestampTZ() throws SQLException {
         final String query = "SELECT C14 FROM %s";
         final ResultSet resultJDBC = runQueryJDBC(query);
-        matchNextRow(resultJDBC, "19-AUG-16 11.28.05.000000 AM -08:00");
+        assertNextRow(resultJDBC, Timestamp.valueOf("2016-08-19 11:28:05.0"));
         final ResultSet resultORA = runQueryORA(query);
-        matchNextRow(resultORA, Timestamp.valueOf("2016-08-19 19:28:05.000"));
+        assertNextRow(resultORA, Timestamp.valueOf("2016-08-19 19:28:05.000"));
 
-        runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(" + TYPE_TEST_T + ".\"C14\") FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplainJDBC(query, "SELECT TO_TIMESTAMP(TO_CHAR(" + TYPE_TEST_T
+                + ".\"C14\", 'YYYY-MM-DD HH24:MI:SS.FF3'), 'YYYY-MM-DD HH24:MI:SS.FF3') FROM \"" + ORA_TABLE + "\"");
         runMatchSingleRowExplainORA(query, "SELECT " + TYPE_TEST_T + ".\"C14\" FROM \"" + ORA_TABLE + "\"");
-        assertEquals("VARCHAR(2000000) UTF8", getColumnTypeJDBC("C14"));
-        assertEquals("VARCHAR(2000000) UTF8", getColumnTypeORA("C14"));
+        assertAll(() -> assertThat(getColumnTypeJDBC("C14"), equalTo("TIMESTAMP")),
+              () -> assertThat(getColumnTypeORA("C14"), equalTo("TIMESTAMP")));
     }
 
     @Test
@@ -728,21 +733,22 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         executeUpdate("ALTER SESSION SET TIME_ZONE = 'UTC'");
         final String query = "SELECT C15 FROM %s";
         final ResultSet resultJDBC = runQueryJDBC(query);
-        matchNextRow(resultJDBC, "30-APR-18 07.00.05.000000 PM");
+        assertNextRow(resultJDBC, Timestamp.valueOf("2018-04-30 19:00:05.0"));
         final ResultSet resultORA = runQueryORA(query);
-        matchNextRow(resultORA, Timestamp.valueOf("2018-04-30 18:00:05.000"));
+        assertNextRow(resultORA, Timestamp.valueOf("2018-04-30 18:00:05.000"));
 
-        runMatchSingleRowExplainJDBC(query, "SELECT TO_CHAR(" + TYPE_TEST_T + ".\"C15\") FROM \"" + ORA_TABLE + "\"");
+        runMatchSingleRowExplainJDBC(query, "SELECT TO_TIMESTAMP(TO_CHAR(" + TYPE_TEST_T
+                + ".\"C15\", 'YYYY-MM-DD HH24:MI:SS.FF3'), 'YYYY-MM-DD HH24:MI:SS.FF3') FROM \"" + ORA_TABLE + "\"");
         runMatchSingleRowExplainORA(query, "SELECT " + TYPE_TEST_T + ".\"C15\" FROM \"" + ORA_TABLE + "\"");
-        assertEquals("VARCHAR(2000000) UTF8", getColumnTypeJDBC("C15"));
-        assertEquals("VARCHAR(2000000) UTF8", getColumnTypeORA("C15"));
+        assertEquals("TIMESTAMP", getColumnTypeJDBC("C15"));
+        assertEquals("TIMESTAMP", getColumnTypeORA("C15"));
     }
 
     @Test
     void testIntervalYear() throws SQLException {
         final String query = "SELECT C16 FROM %s";
         for (final ResultSet result : runQuery(query)) {
-            matchNextRow(result, "+54-02");
+            assertNextRow(result, "+54-02");
         }
         runMatchSingleRowExplain(query, "SELECT TO_CHAR(" + TYPE_TEST_T + ".\"C16\") FROM \"" + ORA_TABLE + "\"");
         assertEquals("VARCHAR(2000000) UTF8", getColumnType("C16"));
@@ -752,8 +758,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
     void testIntervalDay() throws SQLException {
         final String query = "SELECT C17 FROM %s ORDER BY 1";
         for (final ResultSet result : runQuery(query)) {
-            matchNextRow(result, "+01 11:12:10.123000");
-            matchNextRow(result, "+02 02:03:04.123456");
+            assertNextRow(result, "+01 11:12:10.123000");
+            assertNextRow(result, "+02 02:03:04.123456");
         }
         runMatchSingleRowExplain(query, "SELECT TO_CHAR(" + TYPE_TEST_T + ".\"C17\") FROM \"" + ORA_TABLE
                 + "\" ORDER BY " + TYPE_TEST_T + ".\"C17\"");
@@ -765,19 +771,18 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         executeUpdate("ALTER SESSION SET TIME_ZONE = 'UTC'");
         final String query = "SELECT * FROM %s.%s";
         final ResultSet resultJDBC = runQueryJDBC(String.format(query, VIRTUAL_SCHEMA_JDBC, "TS_T"));
-        matchNextRow(resultJDBC, "01-JAN-18 11.00.00.000000 AM", "01-JAN-18 11.00.00.000000 AM",
-                "01-JAN-18 11.00.00.000000 AM +01:00");
+        assertNextRow(resultJDBC, Timestamp.valueOf("2018-01-01 11:00:00.0"),
+                Timestamp.valueOf("2018-01-01 11:00:00.0"), Timestamp.valueOf("2018-01-01 11:00:00.0"));
         final ResultSet resultORA = runQueryORA(String.format(query, VIRTUAL_SCHEMA_ORA, "TS_T"));
-        matchNextRow(resultORA, Timestamp.valueOf("2018-01-01 11:00:00.000"),
+        assertNextRow(resultORA, Timestamp.valueOf("2018-01-01 11:00:00.000"),
                 Timestamp.valueOf("2018-01-01 10:00:00.000"), Timestamp.valueOf("2018-01-01 10:00:00.000"));
         final Map<String, String> columnTypesJDBC = getColumnTypesOfTable(VIRTUAL_SCHEMA_JDBC + ".TS_T");
         final Map<String, String> columnTypesORA = getColumnTypesOfTable(VIRTUAL_SCHEMA_ORA + ".TS_T");
-
-        assertEquals("TIMESTAMP", columnTypesJDBC.get("A"));
-        assertEquals("TIMESTAMP", columnTypesORA.get("A"));
-        assertEquals("VARCHAR(2000000) UTF8", columnTypesJDBC.get("B"));
-        assertEquals("VARCHAR(2000000) UTF8", columnTypesORA.get("B"));
-        assertEquals("VARCHAR(2000000) UTF8", columnTypesJDBC.get("C"));
-        assertEquals("VARCHAR(2000000) UTF8", columnTypesORA.get("C"));
+        assertAll(() -> assertThat(columnTypesJDBC.get("A"), equalTo("TIMESTAMP")),
+                () -> assertThat(columnTypesORA.get("A"), equalTo("TIMESTAMP")),
+                () -> assertThat(columnTypesJDBC.get("B"), equalTo("TIMESTAMP")),
+                () -> assertThat(columnTypesORA.get("B"), equalTo("TIMESTAMP")),
+                () -> assertThat(columnTypesJDBC.get("C"), equalTo("TIMESTAMP")),
+                () -> assertThat(columnTypesORA.get("C"), equalTo(("TIMESTAMP"))));
     }
 }

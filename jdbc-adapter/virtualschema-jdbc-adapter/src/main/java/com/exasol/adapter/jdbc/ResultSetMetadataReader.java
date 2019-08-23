@@ -35,9 +35,8 @@ public class ResultSetMetadataReader {
      *
      * @param query push-down query
      * @return string describing the columns (names and types)
-     * @throws SQLException if the necessary remote metadata cannot be read
      */
-    public String describeColumns(final String query) throws SQLException {
+    public String describeColumns(final String query) {
         LOGGER.fine(() -> "Generating columns description for push-down query using "
                 + this.columnMetadataReader.getClass().getSimpleName() + ":\n" + query);
         try (final PreparedStatement statement = this.connection.prepareStatement(query)) {
@@ -47,11 +46,11 @@ public class ResultSetMetadataReader {
             LOGGER.fine(() -> "Columns description: " + columnsDescription);
             return columnsDescription;
         } catch (final SQLException exception) {
-            throw new SQLException(
-                    "Unable to read remote metadata for push-down query trying to generate result columun description.",
+            throw new RemoteMetadataReaderException(
+                    "Unable to read remote metadata for push-down query trying to generate result column description. Caused by: "
+                            + exception.getMessage(),
                     exception);
         }
-
     }
 
     private String createColumnDescriptionFromDataTypes(final List<DataType> types) {

@@ -175,14 +175,14 @@ public abstract class AbstractIntegrationTest {
         return getPortOfConnectedDatabase(connection);
     }
 
-    public static void matchNextRow(final ResultSet result, final Object... expectedElements) throws SQLException {
+    public static void assertNextRow(final ResultSet result, final Object... expectedElements) throws SQLException {
         result.next();
         assertEquals(getDiffWithTypes(Arrays.asList(expectedElements), rowToObject(result)),
                 Arrays.asList(expectedElements), rowToObject(result));
     }
 
-    public static void matchLastRow(final ResultSet result, final Object... expectedElements) throws SQLException {
-        matchNextRow(result, expectedElements);
+    public static void assertLastRow(final ResultSet result, final Object... expectedElements) throws SQLException {
+        assertNextRow(result, expectedElements);
         assertFalse(result.next());
     }
 
