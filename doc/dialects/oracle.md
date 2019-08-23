@@ -148,7 +148,7 @@ Oracle data types are mapped to their equivalents in Exasol. The following excep
     This will cast NUMBER with precision > 36, NUMBER without precision and LONG to DECIMAL(36,20).
     Keep in mind that this will yield errors if the data in the Oracle database does not fit into the specified DECIMAL type.
 - `DATE` is casted to `TIMESTAMP`. This data type is only supported for positive year values, i.e., years > 0001.
-- `TIMESTAMP WITH [LOCAL] TIME ZONE` is casted to `VARCHAR`. Exasol does not support timestamps with time zone information.
+- `TIMESTAMP WITH [LOCAL] TIME ZONE` is casted to `TIMESTAMP`. 
 - `INTERVAL` is casted to `VARCHAR`.
 - `CLOB`, `NCLOB` and `BLOB` are casted to `VARCHAR`.
 - `RAW` and `LONG RAW` are not supported.

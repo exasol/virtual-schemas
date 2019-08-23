@@ -45,12 +45,13 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
         case Types.DECIMAL:
         case Types.NUMERIC:
             return mapNumericType(jdbcTypeDescription);
+        case ORACLE_TIMESTAMP_WITH_TIME_ZONE:
+        case ORACLE_TIMESTAMP_WITH_LOCAL_TIME_ZONE:
+            return DataType.createTimestamp(false);
         case Types.NCLOB:
         case ORACLE_CLOB:
         case INTERVAL_YEAR_TO_MONTH:
         case INTERVAL_DAY_TO_SECOND:
-        case ORACLE_TIMESTAMP_WITH_TIME_ZONE:
-        case ORACLE_TIMESTAMP_WITH_LOCAL_TIME_ZONE:
         case ORACLE_BINARY_FLOAT:
         case ORACLE_BINARY_DOUBLE:
             return DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
@@ -102,7 +103,7 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
         } else {
             throw new IllegalArgumentException("Unable to parse adapter property "
                     + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " value \"" + oraclePrecisionAndScale
-                    + " into a number precison and scale. The required format is \"<precision>.<scale>\", where both are integer numbers.");
+                    + " into a number precision and scale. The required format is \"<precision>.<scale>\", where both are integer numbers.");
         }
     }
 

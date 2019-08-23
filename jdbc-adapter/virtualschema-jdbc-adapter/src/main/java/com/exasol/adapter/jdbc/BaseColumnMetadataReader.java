@@ -97,7 +97,7 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
                 .adapterNotes(adapterNotes) //
                 .type(exasolType) //
                 .nullable(isRemoteColumnNullable(remoteColumn, columnName)) //
-                .identity(isAutoIncrementColmun(remoteColumn, columnName)) //
+                .identity(isAutoIncrementColumn(remoteColumn, columnName)) //
                 .defaultValue(readDefaultValue(remoteColumn)) //
                 .comment(readComment(remoteColumn)) //
                 .originalTypeName(originalTypeName) //
@@ -144,7 +144,7 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
         }
     }
 
-    private boolean isAutoIncrementColmun(final ResultSet remoteColumn, final String columnName) {
+    private boolean isAutoIncrementColumn(final ResultSet remoteColumn, final String columnName) {
         try {
             final String identity = remoteColumn.getString(AUTOINCREMENT_COLUMN);
             return JDBC_TRUE.equalsIgnoreCase(identity);

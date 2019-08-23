@@ -122,13 +122,22 @@ class OracleSqlGenerationVisitorTest {
         assertSqlNodeConvertedToAsterisk(selectList, this.visitor);
     }
 
-    @CsvSource({ "NUMBER", "TIMESTAMP", "INTERVAL", "BINARY_FLOAT", "BINARY_DOUBLE", "CLOB", "NCLOB" })
+    @CsvSource({ "NUMBER", "INTERVAL", "BINARY_FLOAT", "BINARY_DOUBLE", "CLOB", "NCLOB" })
     @ParameterizedTest
     void testVisitSqlSelectListSelectStarCastToChar(final String dataType) throws AdapterException {
         final SqlSelectList selectList = createSqlSelectStarListWithOneColumn(
                 "{\"jdbcDataType\":2, \"typeName\":\"" + dataType + "\"}",
                 DataType.createVarChar(50, DataType.ExaCharset.UTF8), "test_column");
         assertThat(this.visitor.visit(selectList), equalTo("TO_CHAR(\"test_column\")"));
+    }
+
+    @Test
+    void testVisitSqlSelectListSelectStarWithTimestamp() throws AdapterException {
+        final SqlSelectList selectList = createSqlSelectStarListWithOneColumn(
+                "{\"jdbcDataType\":2, \"typeName\":\"TIMESTAMP\"}",
+                DataType.createVarChar(50, DataType.ExaCharset.UTF8), "test_column");
+        assertThat(this.visitor.visit(selectList), equalTo(
+                "TO_TIMESTAMP(TO_CHAR(\"test_column\", 'YYYY-MM-DD HH24:MI:SS.FF3'), 'YYYY-MM-DD HH24:MI:SS.FF3')"));
     }
 
     @CsvSource({ "ROWID", "UROWID" })
