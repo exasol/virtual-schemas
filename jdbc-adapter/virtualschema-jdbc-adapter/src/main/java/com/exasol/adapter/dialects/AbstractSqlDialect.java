@@ -129,7 +129,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         if (value == null) {
             return "NULL";
         } else {
-            return "'" + value.replaceAll("'", "''") + "'";
+            return "'" + value.replace("'", "''") + "'";
         }
     }
 
@@ -240,8 +240,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         if (this.properties.containsKey(EXCEPTION_HANDLING_PROPERTY)) {
             final String exceptionHandling = this.properties.getExceptionHandling();
             if (!((exceptionHandling == null) || exceptionHandling.isEmpty())) {
-                for (final AbstractSqlDialect.ExceptionHandlingMode mode : AbstractSqlDialect.ExceptionHandlingMode
-                        .values()) {
+                for (final SqlDialect.ExceptionHandlingMode mode : SqlDialect.ExceptionHandlingMode.values()) {
                     if (!mode.name().equals(exceptionHandling)) {
                         throw new PropertyValidationException(
                                 "Invalid value '" + exceptionHandling + "' for property " + EXCEPTION_HANDLING_PROPERTY

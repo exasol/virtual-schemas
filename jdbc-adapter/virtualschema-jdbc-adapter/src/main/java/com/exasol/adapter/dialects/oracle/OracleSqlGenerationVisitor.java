@@ -349,10 +349,10 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                 builder.append(", ");
             }
             builder.append(function.getOrderBy().getExpressions().get(i).accept(this));
-            if (!function.getOrderBy().isAscending().get(i)) {
+            if (function.getOrderBy().isAscending().get(i).equals(false)) {
                 builder.append(" DESC");
             }
-            if (!function.getOrderBy().nullsLast().get(i)) {
+            if (function.getOrderBy().nullsLast().get(i).equals(false)) {
                 builder.append(" NULLS FIRST");
             }
         }
