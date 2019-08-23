@@ -694,8 +694,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         runMatchSingleRowExplainJDBC(query, "SELECT TO_TIMESTAMP(TO_CHAR(" + TYPE_TEST_T
                 + ".\"C12\", 'YYYY-MM-DD HH24:MI:SS.FF3'), 'YYYY-MM-DD HH24:MI:SS.FF3') FROM \"" + ORA_TABLE + "\"");
         runMatchSingleRowExplainORA(query, "SELECT " + TYPE_TEST_T + ".\"C12\" FROM \"" + ORA_TABLE + "\"");
-        assertEquals("TIMESTAMP", getColumnTypeJDBC("C12"));
-        assertEquals("TIMESTAMP", getColumnTypeORA("C12"));
+        assertAll(() -> assertThat(getColumnTypeJDBC("C12"), equalTo("TIMESTAMP")),
+                () -> assertThat(getColumnTypeORA("C12"), equalTo("TIMESTAMP")));
     }
 
     @Test
@@ -709,8 +709,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         runMatchSingleRowExplainJDBC(query, "SELECT TO_TIMESTAMP(TO_CHAR(" + TYPE_TEST_T
                 + ".\"C13\", 'YYYY-MM-DD HH24:MI:SS.FF3'), 'YYYY-MM-DD HH24:MI:SS.FF3') FROM \"" + ORA_TABLE + "\"");
         runMatchSingleRowExplainORA(query, "SELECT " + TYPE_TEST_T + ".\"C13\" FROM \"" + ORA_TABLE + "\"");
-        assertEquals("TIMESTAMP", getColumnTypeJDBC("C13"));
-        assertEquals("TIMESTAMP", getColumnTypeORA("C13"));
+        assertAll(() -> assertThat(getColumnTypeJDBC("C13"), equalTo("TIMESTAMP")),
+              () -> assertThat(getColumnTypeORA("C13"), equalTo("TIMESTAMP")));
     }
 
     @Test
@@ -724,8 +724,8 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         runMatchSingleRowExplainJDBC(query, "SELECT TO_TIMESTAMP(TO_CHAR(" + TYPE_TEST_T
                 + ".\"C14\", 'YYYY-MM-DD HH24:MI:SS.FF3'), 'YYYY-MM-DD HH24:MI:SS.FF3') FROM \"" + ORA_TABLE + "\"");
         runMatchSingleRowExplainORA(query, "SELECT " + TYPE_TEST_T + ".\"C14\" FROM \"" + ORA_TABLE + "\"");
-        assertEquals("TIMESTAMP", getColumnTypeJDBC("C14"));
-        assertEquals("TIMESTAMP", getColumnTypeORA("C14"));
+        assertAll(() -> assertThat(getColumnTypeJDBC("C14"), equalTo("TIMESTAMP")),
+              () -> assertThat(getColumnTypeORA("C14"), equalTo("TIMESTAMP")));
     }
 
     @Test
