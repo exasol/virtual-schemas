@@ -154,7 +154,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
     }
 
     /**
-     * Get the list of user-defined adapter properties which the dialect supports
+     * Get the list of user-defined adapter properties which the dialect supports.
      *
      * @return list of supported properties
      */
