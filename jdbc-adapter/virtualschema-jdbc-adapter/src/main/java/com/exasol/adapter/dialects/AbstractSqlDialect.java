@@ -19,6 +19,9 @@ import com.exasol.adapter.sql.*;
  * Abstract implementation of a dialect. We recommend that every dialect should extend this abstract class.
  */
 public abstract class AbstractSqlDialect implements SqlDialect {
+    protected static final List<String> SHARED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
+            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
+            SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, BINARY_COLUMN_HANDLING_PROPERTY);
     protected Set<ScalarFunction> omitParenthesesMap = EnumSet.noneOf(ScalarFunction.class);
     protected RemoteMetadataReader remoteMetadataReader;
     protected AdapterProperties properties;
@@ -150,12 +153,17 @@ public abstract class AbstractSqlDialect implements SqlDialect {
         }
     }
 
+    /**
+     * Get the list of user-defined adapter properties which the dialect supports
+     *
+     * @return list of supported properties
+     */
+    protected abstract List<String> getSupportedProperties();
+
     protected String createUnsupportedElementMessage(final String unsupportedElement, final String property) {
         return "The dialect " + this.properties.getSqlDialect() + " does not support " + unsupportedElement
                 + " property. Please, do not set the " + property + " property.";
     }
-
-    protected abstract List<String> getSupportedProperties();
 
     private void validateConnectionProperties() throws PropertyValidationException {
         if (this.properties.containsKey(CONNECTION_NAME_PROPERTY)) {

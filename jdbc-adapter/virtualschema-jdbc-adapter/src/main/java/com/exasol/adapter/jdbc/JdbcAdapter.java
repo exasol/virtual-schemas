@@ -29,23 +29,6 @@ public class JdbcAdapter implements VirtualSchemaAdapter {
     private final RemoteConnectionFactory connectionFactory = new RemoteConnectionFactory();
 
     /**
-     * This method gets called by the database during interactions with the virtual schema.
-     *
-     * @param metadata   Metadata object
-     * @param rawRequest JSON request, as defined in the Adapter Script API
-     * @return JSON response, as defined in the Adapter Script API
-     * @throws AdapterException in case the request is not recognized
-     * @deprecated As of Virtual Schema version 1.8.0 you should use
-     *             {@link com.exasol.adapter.RequestDispatcher#adapterCall(ExaMetadata, String)} as entry point instead.
-     */
-    @Deprecated
-    public static String adapterCall(final ExaMetadata metadata, final String rawRequest) throws AdapterException {
-        LOGGER.warning("The adapter entry point \"com.exasol.adapter.jdbc.JdbcAdapter\" is deprecated."
-                + " Please use \"com.exasol.adapter.RequestDispatcher\" instead.");
-        return RequestDispatcher.adapterCall(metadata, rawRequest);
-    }
-
-    /**
      * Create a new instance of type {@link JdbcAdapter}.
      */
     public JdbcAdapter() {

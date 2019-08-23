@@ -70,33 +70,47 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
     protected List<ColumnMetadata> getColumnsFromResultSet(final ResultSet remoteColumns) throws SQLException {
         final List<ColumnMetadata> columns = new ArrayList<>();
         while (remoteColumns.next()) {
-            final ColumnMetadata metadata = mapColumn(remoteColumns);
-            columns.add(metadata);
+            mapOrSkipColumn(remoteColumns, columns);
         }
         return columns;
     }
 
+    public void mapOrSkipColumn(final ResultSet remoteColumns, final List<ColumnMetadata> columns) throws SQLException {
+        final ColumnMetadata metadata = mapColumn(remoteColumns);
+        if (metadata.getType().isSupported()) {
+            columns.add(metadata);
+        } else {
+            LOGGER.fine(() -> "Column \"" + metadata.getName() + "\" of type \"" + metadata.getOriginalTypeName()
+                    + "\" not supported by Virtual Schema. Skipping column in mapping.");
+        }
+    }
+
     private ColumnMetadata mapColumn(final ResultSet remoteColumn) throws SQLException {
+        final JdbcTypeDescription jdbcTypeDescription = readJdbcTypeDescription(remoteColumn);
         final String columnName = readColumnName(remoteColumn);
-        final int jdbcType = readJdbcDataType(remoteColumn);
-        final int decimalScale = readScale(remoteColumn);
-        final int precisionOrSize = readPrecisionOrSize(remoteColumn);
-        final int charOctedLength = readOctetLength(remoteColumn);
-        final String typeName = readTypeName(remoteColumn);
-        final JdbcTypeDescription jdbcTypeDescription = new JdbcTypeDescription(jdbcType, decimalScale, precisionOrSize,
-                charOctedLength, typeName);
         final String originalTypeName = readColumnTypeName(remoteColumn);
-        final String adapterNotes = ColumnAdapterNotes.serialize(new ColumnAdapterNotes(jdbcType, originalTypeName));
+        final String adapterNotes = ColumnAdapterNotes
+                .serialize(new ColumnAdapterNotes(jdbcTypeDescription.getJdbcType(), originalTypeName));
+        final DataType exasolType = mapJdbcType(jdbcTypeDescription);
         return ColumnMetadata.builder() //
                 .name(columnName) //
                 .adapterNotes(adapterNotes) //
-                .type(mapJdbcType(jdbcTypeDescription)) //
+                .type(exasolType) //
                 .nullable(isRemoteColumnNullable(remoteColumn, columnName)) //
                 .identity(isAutoIncrementColmun(remoteColumn, columnName)) //
                 .defaultValue(readDefaultValue(remoteColumn)) //
                 .comment(readComment(remoteColumn)) //
                 .originalTypeName(originalTypeName) //
                 .build();
+    }
+
+    public JdbcTypeDescription readJdbcTypeDescription(final ResultSet remoteColumn) throws SQLException {
+        final int jdbcType = readJdbcDataType(remoteColumn);
+        final int decimalScale = readScale(remoteColumn);
+        final int precisionOrSize = readPrecisionOrSize(remoteColumn);
+        final int charOctetLength = readOctetLength(remoteColumn);
+        final String typeName = readTypeName(remoteColumn);
+        return new JdbcTypeDescription(jdbcType, decimalScale, precisionOrSize, charOctetLength, typeName);
     }
 
     private int readJdbcDataType(final ResultSet remoteColumn) throws SQLException {
@@ -176,15 +190,6 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
         return this.identifierConverter.convert(columns.getString(NAME_COLUMN));
     }
 
-    /**
-     * Map type information from JDBC to the Exasol type information.
-     * <p>
-     * Override this method in a dedicated mapper if you need dialect specific behavior.
-     * </p>
-     *
-     * @param jdbcTypeDescription parameter object describing the type from the JDBC perspective
-     * @return Exasol data type information
-     */
     @Override
     public DataType mapJdbcType(final JdbcTypeDescription jdbcTypeDescription) {
         switch (jdbcTypeDescription.getJdbcType()) {
@@ -236,8 +241,7 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
         case Types.NULL:
         case Types.REF_CURSOR:
         default:
-            throw new RemoteMetadataReaderException("Unsupported JBDC data type \"" + jdbcTypeDescription.getJdbcType()
-                    + "\" found trying to map remote schema metadata to Exasol.");
+            return DataType.createUnsupported();
         }
     }
 
