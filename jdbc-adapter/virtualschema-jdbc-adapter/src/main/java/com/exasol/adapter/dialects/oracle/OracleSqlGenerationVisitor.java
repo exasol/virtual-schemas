@@ -10,7 +10,6 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
-import com.google.common.collect.ImmutableList;
 
 /**
  * This class generates SQL queries for the {@link OracleSqlGenerationVisitor}.
@@ -19,8 +18,8 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     // If set to true, the SELECT list elements will get aliases such as c1, c2, ...
     private boolean requiresSelectListAliasesForLimit = false;
     private static final String TIMESTAMP_FORMAT = "'YYYY-MM-DD HH24:MI:SS.FF3'";
-    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("TIMESTAMP", "INTERVAL",
-            "BINARY_FLOAT", "BINARY_DOUBLE", "CLOB", "NCLOB", "ROWID", "UROWID", "BLOB");
+    private static final List<String> TYPE_NAMES_REQUIRING_CAST = List.of("TIMESTAMP", "INTERVAL", "BINARY_FLOAT",
+            "BINARY_DOUBLE", "CLOB", "NCLOB", "ROWID", "UROWID", "BLOB");
     private final Set<AggregateFunction> aggregateFunctionsCast = EnumSet.noneOf(AggregateFunction.class);
     private final Set<ScalarFunction> scalarFunctionsCast = EnumSet.noneOf(ScalarFunction.class);
 

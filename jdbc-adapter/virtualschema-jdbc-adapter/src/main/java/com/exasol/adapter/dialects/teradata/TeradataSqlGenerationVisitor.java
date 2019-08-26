@@ -9,16 +9,14 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
-import com.google.common.collect.ImmutableList;
 
 /**
  * This class generates SQL queries for the {@link TeradataSqlDialect}.
  */
 public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
-    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("SYSUDTLIB.ST_GEOMETRY", "XML",
-            "JSON", "TIME", "TIME WITH TIME ZONE", "CLOB", "PERIOD", "INTERVAL");
-    private static final List<String> TYPE_NAME_NOT_SUPPORTED = ImmutableList.of("BYTE", "VARBYTE", "BLOB",
-            "SYSUDTLIB");
+    private static final List<String> TYPE_NAMES_REQUIRING_CAST = List.of("SYSUDTLIB.ST_GEOMETRY", "XML", "JSON",
+            "TIME", "TIME WITH TIME ZONE", "CLOB", "PERIOD", "INTERVAL");
+    private static final List<String> TYPE_NAME_NOT_SUPPORTED = List.of("BYTE", "VARBYTE", "BLOB", "SYSUDTLIB");
     private final Predicate<SqlNode> nodeRequiresCast = node -> {
         try {
             if (node.getType() == SqlNodeType.COLUMN) {

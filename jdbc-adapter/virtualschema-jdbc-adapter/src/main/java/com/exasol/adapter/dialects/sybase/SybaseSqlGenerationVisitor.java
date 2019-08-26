@@ -5,8 +5,6 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
 
 import java.util.*;
 
@@ -17,8 +15,8 @@ import static com.exasol.adapter.dialects.sybase.SybaseSqlDialect.MAX_SYBASE_VAR
  * This class generates SQL queries for the {@link SybaseSqlGenerationVisitor}.
  */
 public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
-    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("text", "time", "bigtime", "xml");
-    private static final List<String> TYPE_NAME_NOT_SUPPORTED = ImmutableList.of("varbinary", "binary", "image");
+    private static final List<String> TYPE_NAMES_REQUIRING_CAST = List.of("text", "time", "bigtime", "xml");
+    private static final List<String> TYPE_NAME_NOT_SUPPORTED = List.of("varbinary", "binary", "image");
 
     /**
      * Create a new instance of the {@link SybaseSqlGenerationVisitor}.
@@ -133,7 +131,7 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
 
     @Override
     public String visit(final SqlOrderBy orderBy) throws AdapterException {
-        int size = orderBy.getExpressions().size();
+        final int size = orderBy.getExpressions().size();
         final List<String> sqlOrderElement = new ArrayList<>(size);
         for (int i = 0; i < size; ++i) {
             String elementSql = orderBy.getExpressions().get(i).accept(this);
@@ -150,7 +148,7 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
             }
             sqlOrderElement.add(elementSql);
         }
-        return "ORDER BY " + Joiner.on(", ").join(sqlOrderElement);
+        return "ORDER BY " + String.join(" ,", sqlOrderElement);
     }
 
     @Override

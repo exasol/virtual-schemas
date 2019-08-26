@@ -446,7 +446,7 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
 
     @Test
     void testDatatypeDouble() throws SQLException {
-        testDatatype("mydouble", new Double("192189234.1723854"), "DOUBLE");
+        testDatatype("mydouble", Double.valueOf("192189234.1723854"), "DOUBLE");
     }
 
     @Test
@@ -456,7 +456,7 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
 
     @Test
     void testDatatypeInteger() throws SQLException {
-        testDatatype("myinteger", new Integer("7189234"), "DECIMAL(10,0)");
+        testDatatype("myinteger", Integer.valueOf("7189234"), "DECIMAL(10,0)");
     }
 
     @Test
@@ -516,12 +516,12 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
 
     @Test
     void testDatatypeReal() throws SQLException {
-        testDatatype("myreal", new Float("10.12"), "DOUBLE");
+        testDatatype("myreal", Float.valueOf("10.12"), "DOUBLE");
     }
 
     @Test
     void testDatatypeSmallInt() throws SQLException {
-        testDatatype("mysmallint", new Integer("100"), "DECIMAL(5,0)");
+        testDatatype("mysmallint", Integer.valueOf("100"), "DECIMAL(5,0)");
     }
 
     @Test

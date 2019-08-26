@@ -15,8 +15,6 @@ import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
 import com.exasol.sql.SqlNormalizer;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 
 class SqlDialectTest {
     @Test
@@ -24,12 +22,11 @@ class SqlDialectTest {
         final TableMetadata clicksMeta = getTestTableMetadata();
         final SqlTable fromClause = new SqlTable("TEST", clicksMeta);
         final SqlColumn col1 = new SqlColumn(1, clicksMeta.getColumns().get(0));
-        final SqlSelectList selectList = SqlSelectList.createRegularSelectList(ImmutableList.<SqlNode>of(
-                new SqlFunctionAggregate(AggregateFunction.APPROXIMATE_COUNT_DISTINCT, ImmutableList.<SqlNode>of(col1),
-                        false),
-                new SqlFunctionAggregate(AggregateFunction.AVG, ImmutableList.<SqlNode>of(col1), false),
-                new SqlFunctionAggregate(AggregateFunction.COUNT, new ArrayList<SqlNode>(), true),
-                new SqlFunctionAggregate(AggregateFunction.MAX, ImmutableList.<SqlNode>of(col1), false)));
+        final SqlSelectList selectList = SqlSelectList.createRegularSelectList(
+                List.of(new SqlFunctionAggregate(AggregateFunction.APPROXIMATE_COUNT_DISTINCT, List.of(col1), false),
+                        new SqlFunctionAggregate(AggregateFunction.AVG, List.of(col1), false),
+                        new SqlFunctionAggregate(AggregateFunction.COUNT, new ArrayList<SqlNode>(), true),
+                        new SqlFunctionAggregate(AggregateFunction.MAX, List.of(col1), false)));
         final SqlNode node = new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
 
         final String schemaName = "SCHEMA";
@@ -37,12 +34,12 @@ class SqlDialectTest {
                 + schemaName + "\".\"TEST\"";
 
         final Map<AggregateFunction, String> aggAliases = new EnumMap<>(AggregateFunction.class);
-        final Map<ScalarFunction, String> scalarAliases = ImmutableMap.of();
-        final Map<ScalarFunction, String> infixAliases = ImmutableMap.of();
+        final Map<ScalarFunction, String> scalarAliases = Map.of();
+        final Map<ScalarFunction, String> infixAliases = Map.of();
         aggAliases.put(AggregateFunction.APPROXIMATE_COUNT_DISTINCT, "NDV");
         aggAliases.put(AggregateFunction.AVG, "AVERAGE");
         aggAliases.put(AggregateFunction.COUNT, "COUNT2");
-        final Map<ScalarFunction, String> prefixAliases = ImmutableMap.of();
+        final Map<ScalarFunction, String> prefixAliases = Map.of();
 
         final SqlDialect dialect = new AliasesSqlDialect(aggAliases, scalarAliases, infixAliases, prefixAliases);
 
@@ -57,14 +54,14 @@ class SqlDialectTest {
         final TableMetadata clicksMeta = getTestTableMetadata();
         final SqlTable fromClause = new SqlTable("TEST", clicksMeta);
         final SqlColumn col1 = new SqlColumn(1, clicksMeta.getColumns().get(0));
-        final SqlSelectList selectList = SqlSelectList.createRegularSelectList(ImmutableList.<SqlNode>of(
-                new SqlFunctionScalar(ScalarFunction.ABS, ImmutableList.<SqlNode>of(col1), false, false),
-                new SqlFunctionScalar(ScalarFunction.ADD,
-                        ImmutableList.of(col1, new SqlLiteralExactnumeric(new BigDecimal(100))), true, false),
-                new SqlFunctionScalar(ScalarFunction.SUB,
-                        ImmutableList.of(col1, new SqlLiteralExactnumeric(new BigDecimal(100))), true, false),
-                new SqlFunctionScalar(ScalarFunction.TO_CHAR, ImmutableList.<SqlNode>of(col1), true, false),
-                new SqlFunctionScalar(ScalarFunction.NEG, ImmutableList.<SqlNode>of(col1), false, false)));
+        final SqlSelectList selectList = SqlSelectList
+                .createRegularSelectList(List.of(new SqlFunctionScalar(ScalarFunction.ABS, List.of(col1), false, false),
+                        new SqlFunctionScalar(ScalarFunction.ADD,
+                                List.of(col1, new SqlLiteralExactnumeric(new BigDecimal(100))), true, false),
+                        new SqlFunctionScalar(ScalarFunction.SUB,
+                                List.of(col1, new SqlLiteralExactnumeric(new BigDecimal(100))), true, false),
+                        new SqlFunctionScalar(ScalarFunction.TO_CHAR, List.of(col1), true, false),
+                        new SqlFunctionScalar(ScalarFunction.NEG, List.of(col1), false, false)));
         final SqlNode node = new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
 
         final String schemaName = "SCHEMA";
@@ -76,8 +73,7 @@ class SqlDialectTest {
         scalarAliases.put(ScalarFunction.ABS, "ABSOLUTE");
         scalarAliases.put(ScalarFunction.ADD, "PLUS");
         scalarAliases.put(ScalarFunction.NEG, "NEGATIVE");
-        final SqlDialect dialect = new AliasesSqlDialect(ImmutableMap.<AggregateFunction, String>of(), scalarAliases,
-                ImmutableMap.<ScalarFunction, String>of(), ImmutableMap.<ScalarFunction, String>of());
+        final SqlDialect dialect = new AliasesSqlDialect(Map.of(), scalarAliases, Map.of(), Map.of());
 
         final SqlGenerationContext context = new SqlGenerationContext("", schemaName, false);
         final SqlNodeVisitor<String> generator = new SqlGenerationVisitor(dialect, context);
@@ -90,10 +86,8 @@ class SqlDialectTest {
         final SqlGenerationContext context = new SqlGenerationContext("", "schema", false);
         for (final ScalarFunction function : ScalarFunction.values()) {
             if (!function.isSimple()) {
-                final Map<ScalarFunction, String> scalarAliases = ImmutableMap.of(function, "ALIAS");
-                final SqlDialect dialect = new AliasesSqlDialect(ImmutableMap.<AggregateFunction, String>of(),
-                        scalarAliases, ImmutableMap.<ScalarFunction, String>of(),
-                        ImmutableMap.<ScalarFunction, String>of());
+                final Map<ScalarFunction, String> scalarAliases = Map.of(function, "ALIAS");
+                final SqlDialect dialect = new AliasesSqlDialect(Map.of(), scalarAliases, Map.of(), Map.of());
                 try {
                     new SqlGenerationVisitor(dialect, context);
                     throw new Exception("Should never arrive here");
@@ -106,10 +100,8 @@ class SqlDialectTest {
         // Test non-simple aggregate functions
         for (final AggregateFunction function : AggregateFunction.values()) {
             if (!function.isSimple()) {
-                final Map<AggregateFunction, String> aggregateAliases = ImmutableMap.of(function, "ALIAS");
-                final SqlDialect dialect = new AliasesSqlDialect(aggregateAliases,
-                        ImmutableMap.<ScalarFunction, String>of(), ImmutableMap.<ScalarFunction, String>of(),
-                        ImmutableMap.<ScalarFunction, String>of());
+                final Map<AggregateFunction, String> aggregateAliases = Map.of(function, "ALIAS");
+                final SqlDialect dialect = new AliasesSqlDialect(aggregateAliases, Map.of(), Map.of(), Map.of());
                 try {
                     new SqlGenerationVisitor(dialect, context);
                     throw new Exception("Should never arrive here");
