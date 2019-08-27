@@ -5,7 +5,6 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
-import com.google.common.collect.ImmutableList;
 
 import java.util.*;
 
@@ -16,9 +15,9 @@ import static com.exasol.adapter.dialects.sqlserver.SqlServerSqlDialect.MAX_SQLS
  * This class generates SQL queries for the {@link SqlServerSqlDialect}.
  */
 public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
-    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("text", "date", "datetime2",
-            "hierarchyid", "geometry", "geography", "timestamp", "xml");
-    private static final List<String> TYPE_NAME_NOT_SUPPORTED = ImmutableList.of("varbinary", "binary");
+    private static final List<String> TYPE_NAMES_REQUIRING_CAST = List.of("text", "date", "datetime2", "hierarchyid",
+            "geometry", "geography", "timestamp", "xml");
+    private static final List<String> TYPE_NAME_NOT_SUPPORTED = List.of("varbinary", "binary");
 
     /**
      * Create a new instance of the {@link SqlServerSqlGenerationVisitor}.

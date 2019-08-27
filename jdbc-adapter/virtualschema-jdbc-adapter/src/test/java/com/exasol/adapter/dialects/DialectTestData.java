@@ -7,7 +7,6 @@ import java.util.List;
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
-import com.google.common.collect.ImmutableList;
 
 public class DialectTestData {
 
@@ -20,19 +19,17 @@ public class DialectTestData {
         // LIMIT 10;
         final TableMetadata clicksMeta = getClicksTableMetadata();
         final SqlTable fromClause = new SqlTable("CLICKS", clicksMeta);
-        final SqlSelectList selectList = SqlSelectList.createRegularSelectList(ImmutableList
-                .of(new SqlColumn(0, clicksMeta.getColumns().get(0)), new SqlFunctionAggregate(AggregateFunction.COUNT,
-                        ImmutableList.<SqlNode>of(new SqlColumn(1, clicksMeta.getColumns().get(1))), false)));
+        final SqlSelectList selectList = SqlSelectList.createRegularSelectList(
+                List.of(new SqlColumn(0, clicksMeta.getColumns().get(0)), new SqlFunctionAggregate(
+                        AggregateFunction.COUNT, List.of(new SqlColumn(1, clicksMeta.getColumns().get(1))), false)));
         final SqlNode whereClause = new SqlPredicateLess(new SqlLiteralExactnumeric(BigDecimal.ONE),
                 new SqlColumn(0, clicksMeta.getColumns().get(0)));
-        final SqlExpressionList groupBy = new SqlGroupBy(
-                ImmutableList.<SqlNode>of(new SqlColumn(0, clicksMeta.getColumns().get(0))));
+        final SqlExpressionList groupBy = new SqlGroupBy(List.of(new SqlColumn(0, clicksMeta.getColumns().get(0))));
         final SqlNode countUrl = new SqlFunctionAggregate(AggregateFunction.COUNT,
-                ImmutableList.<SqlNode>of(new SqlColumn(1, clicksMeta.getColumns().get(1))), false);
+                List.of(new SqlColumn(1, clicksMeta.getColumns().get(1))), false);
         final SqlNode having = new SqlPredicateLess(new SqlLiteralExactnumeric(BigDecimal.ONE), countUrl);
-        final SqlOrderBy orderBy = new SqlOrderBy(
-                ImmutableList.<SqlNode>of(new SqlColumn(0, clicksMeta.getColumns().get(0))), ImmutableList.of(true),
-                ImmutableList.of(true));
+        final SqlOrderBy orderBy = new SqlOrderBy(List.of(new SqlColumn(0, clicksMeta.getColumns().get(0))),
+                List.of(true), List.of(true));
         final SqlLimit limit = new SqlLimit(10);
         return new SqlStatementSelect(fromClause, selectList, whereClause, groupBy, having, orderBy, limit);
     }

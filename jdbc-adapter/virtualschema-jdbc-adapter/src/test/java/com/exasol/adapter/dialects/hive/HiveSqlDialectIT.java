@@ -71,7 +71,7 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     public void testSetup() throws SQLException {
         final String query = "SELECT X FROM " + VIRTUAL_SCHEMA + ".T";
         final ResultSet result = executeQuery(query);
-        assertNextRow(result, new Long("99"));
+        assertNextRow(result, Long.valueOf("99"));
     }
 
     // Join Tests -------------------------------------------------------------
