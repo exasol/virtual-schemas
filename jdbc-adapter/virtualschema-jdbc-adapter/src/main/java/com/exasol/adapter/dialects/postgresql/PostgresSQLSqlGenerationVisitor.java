@@ -7,16 +7,15 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
-import com.google.common.collect.ImmutableList;
 
 /**
  * This class generates SQL queries for the {@link PostgreSQLSqlDialect}.
  */
 public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
-    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("varbit", "point", "line", "lseg",
-            "box", "path", "polygon", "circle", "cidr", "citext", "inet", "macaddr", "interval", "json", "jsonb",
-            "uuid", "tsquery", "tsvector", "xml", "smallserial", "serial", "bigserial");
-    private static final List<String> TYPE_NAMES_NOT_SUPPORTED = ImmutableList.of("bytea");
+    private static final List<String> TYPE_NAMES_REQUIRING_CAST = List.of("varbit", "point", "line", "lseg", "box",
+            "path", "polygon", "circle", "cidr", "citext", "inet", "macaddr", "interval", "json", "jsonb", "uuid",
+            "tsquery", "tsvector", "xml", "smallserial", "serial", "bigserial");
+    private static final List<String> TYPE_NAMES_NOT_SUPPORTED = List.of("bytea");
 
     /**
      * Create a new instance of the {@link PostgresSQLSqlGenerationVisitor}.

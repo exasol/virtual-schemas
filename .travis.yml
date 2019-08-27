@@ -9,7 +9,7 @@ services:
 
 matrix:
   include:
-    - jdk: "openjdk8"
+    - jdk: "openjdk9"
 
 
 addons:

@@ -14,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
 import com.exasol.adapter.dialects.IntegrationTestConfigurationCondition;
-import com.google.common.collect.ImmutableList;
 
 /**
  * Integration tests for the Exasol SQL dialect.
@@ -80,7 +79,7 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
                                                                                               // database
         // The Exasol JDBC driver is included in the Maven dependencies, so no need to
         // add it.
-        final List<String> includes = ImmutableList.of(getConfig().getJdbcAdapterPath());
+        final List<String> includes = List.of(getConfig().getJdbcAdapterPath());
         createJDBCAdapter(includes);
         createTestSchema();
         createVirtualSchema(VIRTUAL_SCHEMA, ExasolSqlDialect.NAME, "", TEST_SCHEMA, "", getConfig().getExasolUser(),
@@ -157,9 +156,10 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
         assertNextRow(result, "C12", "INTERVAL YEAR(2) TO MONTH", (long) 13, null, null, "'3-5'");
         assertNextRow(result, "C13", "INTERVAL DAY(2) TO SECOND(3)", (long) 29, null, null, "'2 12:50:10.123'");
         assertLastRow(result, "C14", "GEOMETRY(3857)", (long) 8000000, null, null, "'POINT(2 5)'"); // srid not yet
-                                                                                                   // supported, so will
-                                                                                                   // always default to
-                                                                                                   // 3857
+                                                                                                    // supported, so
+                                                                                                    // will
+                                                                                                    // always default to
+                                                                                                    // 3857
     }
 
     @Test
@@ -370,7 +370,7 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
                 "VS_JDBC_WITH_CONNNAME_CONNECTION", "", "", "ADAPTER.JDBC_ADAPTER", "", false, "", "", null, "");
         final String query = "SELECT 1 FROM VS_JDBC_WITH_CONNNAME.SIMPLE_VALUES";
         final ResultSet result = executeQuery(query);
-        assertNextRow(result, new Short("1"));
+        assertNextRow(result, Short.valueOf("1"));
         matchSingleRowExplain(query,
                 "IMPORT INTO (c1 DECIMAL(1, 0)) FROM JDBC AT VS_JDBC_WITH_CONNNAME_CONNECTION STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
@@ -388,7 +388,7 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
                 "");
         final String query = "SELECT 1 FROM VS_EXA_WITH_CONNNAME.SIMPLE_VALUES";
         final ResultSet result = executeQuery(query);
-        assertNextRow(result, new Short("1"));
+        assertNextRow(result, Short.valueOf("1"));
         matchSingleRowExplain(query,
                 "IMPORT FROM EXA AT 'localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
@@ -402,7 +402,7 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
                 false, "", "", null, "");
         final String query = "SELECT 1 FROM VS_JDBC_WITH_USER_PW.SIMPLE_VALUES";
         final ResultSet result = executeQuery(query);
-        assertNextRow(result, new Short("1"));
+        assertNextRow(result, Short.valueOf("1"));
         matchSingleRowExplain(query,
                 "IMPORT INTO (c1 DECIMAL(1, 0)) FROM JDBC AT 'jdbc:exa:localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
@@ -418,7 +418,7 @@ class ExasolSqlDialectIT extends AbstractIntegrationTest {
                 "");
         final String query = "SELECT 1 FROM VS_EXA_WITH_USER_PW.SIMPLE_VALUES";
         final ResultSet result = executeQuery(query);
-        assertNextRow(result, new Short("1"));
+        assertNextRow(result, Short.valueOf("1"));
         matchSingleRowExplain(query,
                 "IMPORT FROM EXA AT 'localhost:8888' USER 'sys' IDENTIFIED BY 'exasol' STATEMENT 'SELECT 1 FROM \"NATIVE_EXA_IT\".\"SIMPLE_VALUES\"'",
                 IS_LOCAL);
