@@ -150,5 +150,5 @@ Oracle data types are mapped to their equivalents in Exasol. The following excep
 - `DATE` is casted to `TIMESTAMP`. This data type is only supported for positive year values, i.e., years > 0001.
 - `TIMESTAMP WITH [LOCAL] TIME ZONE` is casted to `TIMESTAMP`. 
 - `INTERVAL` is casted to `VARCHAR`.
-- `CLOB`, `NCLOB` and `BLOB` are casted to `VARCHAR`.
-- `RAW` and `LONG RAW` are not supported.
+- `CLOB` are `NCLOB` are treated as `VARCHAR`.
+- `BLOB`, `RAW` and `LONG RAW` are not supported.
