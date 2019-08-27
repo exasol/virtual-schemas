@@ -5,7 +5,6 @@ import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.dialects.SqlGenerationVisitor;
 import com.exasol.adapter.sql.*;
-import com.google.common.base.Joiner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +28,7 @@ public class ImpalaSqlGenerationVisitor extends SqlGenerationVisitor {
 
     @Override
     public String visit(final SqlPredicateLikeRegexp predicate) throws AdapterException {
-        return predicate.getLeft().accept(this) + " REGEXP "
-                + predicate.getPattern().accept(this);
+        return predicate.getLeft().accept(this) + " REGEXP " + predicate.getPattern().accept(this);
     }
 
     @Override
@@ -77,8 +75,8 @@ public class ImpalaSqlGenerationVisitor extends SqlGenerationVisitor {
             if (dialect.getAggregateFunctionAliases().containsKey(function.getFunction())) {
                 functionNameInSourceSystem = dialect.getAggregateFunctionAliases().get(function.getFunction());
             }
-            return "CAST(" + functionNameInSourceSystem + "(" + distinctSql
-                    + Joiner.on(", ").join(argumentsSql) + ") AS DOUBLE)";
+            return "CAST(" + functionNameInSourceSystem + "(" + distinctSql + String.join(", ", argumentsSql)
+                    + ") AS DOUBLE)";
         }
     }
 }

@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.sql.Connection;
+import java.util.*;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +17,6 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.sql.*;
-import com.google.common.collect.ImmutableList;
 
 @ExtendWith(MockitoExtension.class)
 class BigQuerySqlGenerationVisitorTest {
@@ -29,8 +29,8 @@ class BigQuerySqlGenerationVisitorTest {
         final SqlNodeVisitor<String> visitor = new BigQuerySqlGenerationVisitor(dialect,
                 new SqlGenerationContext("catalog", "schema", false));
         final TableMetadata clicksMeta = getClicksTableMetadata();
-        final SqlOrderBy orderBy = new SqlOrderBy(ImmutableList.of(new SqlColumn(0, clicksMeta.getColumns().get(0))),
-                ImmutableList.of(true), ImmutableList.of(true));
+        final SqlOrderBy orderBy = new SqlOrderBy(List.of(new SqlColumn(0, clicksMeta.getColumns().get(0))),
+                List.of(true), List.of(true));
         assertThat(visitor.visit(orderBy), equalTo("ORDER BY `USER_ID`"));
     }
 }

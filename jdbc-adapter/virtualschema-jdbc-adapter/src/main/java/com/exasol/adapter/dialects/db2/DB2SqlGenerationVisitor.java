@@ -7,15 +7,14 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
-import com.google.common.collect.*;
 
 /**
  * This class generates SQL queries for the {@link DB2SqlDialect}.
  */
 public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
-    private static final List<String> TYPE_NAMES_REQUIRING_CAST = ImmutableList.of("TIMESTAMP", "DECFLOAT", "CLOB",
+    private static final List<String> TYPE_NAMES_REQUIRING_CAST = List.of("TIMESTAMP", "DECFLOAT", "CLOB",
             "XML", "TIME");
-    private static final List<String> TYPE_NAMES_NOT_SUPPORTED = ImmutableList.of("BLOB");
+    private static final List<String> TYPE_NAMES_NOT_SUPPORTED = List.of("BLOB");
 
     /**
      * Create a new instance of the {@link DB2SqlGenerationVisitor}.

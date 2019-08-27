@@ -9,7 +9,7 @@ set -eux
 cd "$(dirname "$0")/.."
 
 readonly config="$(pwd)/integration-test-data/integration-test-travis.yaml"
-readonly exasol_docker_image_version="6.1.2-d1"
+readonly exasol_docker_image_version="6.2.0-d1"
 readonly docker_image="exasol/docker-db:$exasol_docker_image_version"
 readonly docker_name="exasoldb"
 readonly jdbc_driver_dir="$(pwd)/integration-test-data/drivers"
@@ -99,14 +99,14 @@ prepare_docker() {
 init_docker() {
 	pushd "$1/$docker_name"
 	pipenv run ./exadt start-cluster "$docker_name"
-	exa_container_name="$(docker ps --filter ancestor=exasol/docker-db:6.1.2-d1 --format "{{.Names}}")"
+	exa_container_name="$(docker ps --filter ancestor=exasol/docker-db:$exasol_docker_image_version --format "{{.Names}}")"
 	docker logs -f "$exa_container_name" &
 	popd
 }
 
 check_docker_ready() {
 	# Wait until database is ready
-	exa_container_name="$(docker ps --filter ancestor=exasol/docker-db:6.1.2-d1 --format "{{.Names}}")"
+	exa_container_name="$(docker ps --filter ancestor=exasol/docker-db:$exasol_docker_image_version --format "{{.Names}}")"
 	(docker logs -f --tail 0 "$exa_container_name" &) 2>&1 | grep -q -i 'stage4: All stages finished'
 	sleep 30
 }

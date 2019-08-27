@@ -12,7 +12,6 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.exasol.ExasolSqlDialect;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
-import com.google.common.collect.ImmutableList;
 
 import com.exasol.sql.SqlNormalizer;
 
@@ -38,7 +37,7 @@ class CustomSqlGenerationVisitorTest {
     private SqlNode getTestSqlNode() {
         final TableMetadata clicksMeta = getTestTableMetadata();
         final SqlTable fromClause = new SqlTable("TEST", clicksMeta);
-        final SqlSelectList selectList = SqlSelectList.createRegularSelectList(ImmutableList.<SqlNode>of(
+        final SqlSelectList selectList = SqlSelectList.createRegularSelectList(List.of(
                 new SqlPredicateNot(new SqlPredicateNot(new SqlColumn(1, clicksMeta.getColumns().get(0))))));
         return new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
     }

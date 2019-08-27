@@ -9,7 +9,6 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.TableMetadata;
-import com.google.common.base.Strings;
 
 /**
  * This class maps metadata of tables from the remote source to Exasol.
@@ -107,7 +106,7 @@ public class BaseTableMetadataReader extends AbstractMetadataReader implements T
     }
 
     protected TableMetadata mapTable(final ResultSet table, final String tableName) throws SQLException {
-        final String comment = Strings.nullToEmpty(readComment(table));
+        final String comment = Optional.ofNullable(readComment(table)).orElse("");
         final List<ColumnMetadata> columns = this.columnMetadataReader.mapColumns(tableName);
         final String adapterNotes = DEFAULT_TABLE_ADAPTER_NOTES;
         return new TableMetadata(adjustIdentifierCase(tableName), adapterNotes, columns, comment);
