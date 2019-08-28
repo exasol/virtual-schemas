@@ -122,7 +122,7 @@ class OracleSqlGenerationVisitorTest {
         assertSqlNodeConvertedToAsterisk(selectList, this.visitor);
     }
 
-    @CsvSource({ "NUMBER", "INTERVAL", "BINARY_FLOAT", "BINARY_DOUBLE", "CLOB", "NCLOB" })
+    @CsvSource({ "NUMBER", "INTERVAL", "BINARY_FLOAT", "BINARY_DOUBLE" })
     @ParameterizedTest
     void testVisitSqlSelectListSelectStarCastToChar(final String dataType) throws AdapterException {
         final SqlSelectList selectList = createSqlSelectStarListWithOneColumn(

@@ -137,6 +137,8 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
 
 The Oracle dialect does not support all capabilities. A complete list can be found in [OracleSqlDialect.getCapabilities()](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/oracle/OracleSqlDialect.java).
 
+## Type Mappings and Limitations
+
 Oracle data types are mapped to their equivalents in Exasol. The following exceptions apply:
 
 - `NUMBER`, `NUMBER with precision > 36` and `LONG` are casted to `VARCHAR` to prevent a loss of precision. 
@@ -147,8 +149,12 @@ Oracle data types are mapped to their equivalents in Exasol. The following excep
     
     This will cast NUMBER with precision > 36, NUMBER without precision and LONG to DECIMAL(36,20).
     Keep in mind that this will yield errors if the data in the Oracle database does not fit into the specified DECIMAL type.
+
 - `DATE` is casted to `TIMESTAMP`. This data type is only supported for positive year values, i.e., years > 0001.
 - `TIMESTAMP WITH [LOCAL] TIME ZONE` is casted to `TIMESTAMP`. 
 - `INTERVAL` is casted to `VARCHAR`.
-- `CLOB` are `NCLOB` are treated as `VARCHAR`.
+- `CLOB` and `NCLOB` values are supported up to the maximum size of an Exasol [`VARCHAR`](https://docs.exasol.com/sql_references/data_types/datatypedetails.htm#StringDataType).
+
+    By default an error will be thrown if you try to import a value that is larger. If you want to import from tables which contain bigger values, you need to truncate the values.
+    
 - `BLOB`, `RAW` and `LONG RAW` are not supported.

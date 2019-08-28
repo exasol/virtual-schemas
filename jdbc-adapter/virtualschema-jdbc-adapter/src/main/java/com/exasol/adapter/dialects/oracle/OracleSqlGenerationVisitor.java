@@ -19,7 +19,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     private boolean requiresSelectListAliasesForLimit = false;
     private static final String TIMESTAMP_FORMAT = "'YYYY-MM-DD HH24:MI:SS.FF3'";
     private static final List<String> TYPE_NAMES_REQUIRING_CAST = List.of("TIMESTAMP", "INTERVAL", "BINARY_FLOAT",
-            "BINARY_DOUBLE", "CLOB", "NCLOB", "ROWID", "UROWID", "BLOB");
+            "BINARY_DOUBLE", "ROWID", "UROWID", "BLOB");
     private final Set<AggregateFunction> aggregateFunctionsCast = EnumSet.noneOf(AggregateFunction.class);
     private final Set<ScalarFunction> scalarFunctionsCast = EnumSet.noneOf(ScalarFunction.class);
 
@@ -62,7 +62,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
      * SELECT c1, c2, ... FROM ( SELECT LIMIT_SUBSELECT.*, ROWNUM ROWNUM_SUB FROM ( &lt;query-with-aliases&gt; )
      * LIMIT_SUBSELECT WHERE ROWNUM &lt;= 30 ) WHERE ROWNUM_SUB &gt; 20
      *
-     * The rownum filter is evaluated before ORDER BY, which is why we need subselects
+     * The rownum filter is evaluated before ORDER BY, which is why we need sub-selects
      */
     @Override
     public String visit(final SqlStatementSelect select) throws AdapterException {
@@ -261,11 +261,10 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         final AbstractSqlDialect dialect = (AbstractSqlDialect) getDialect();
         final String typeName = ColumnAdapterNotes
                 .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        if (typeName.startsWith("INTERVAL") || typeName.equals("BINARY_FLOAT") || typeName.equals("BINARY_DOUBLE")
-                || typeName.equals("CLOB") || typeName.equals("NCLOB")) {
+        if (typeName.startsWith("INTERVAL") || typeName.equals("BINARY_FLOAT") || typeName.equals("BINARY_DOUBLE")) {
             return "TO_CHAR(" + projectionString + ")";
         } else if (typeName.startsWith("TIMESTAMP")
-                && ((OracleSqlDialect) dialect).getImportType() == ImportType.JDBC) {
+                && (((OracleSqlDialect) dialect).getImportType() == ImportType.JDBC)) {
             return "TO_TIMESTAMP(TO_CHAR(" + projectionString + ", " + TIMESTAMP_FORMAT + "), " + TIMESTAMP_FORMAT
                     + ")";
         } else if (typeName.equals("NUMBER")) {
