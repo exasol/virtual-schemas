@@ -26,15 +26,11 @@ This means an user familiar with SQL will immediately feel at home when accessin
 
 ## Deprecation Warning
 
-The old entry point (Java class) for Virtual Schemas
-
-    com.exasol.adapter.jdbc.JdbcAdapter
-
-is deprecated. Please use the new entry point
+Please use the entry point
 
     com.exasol.adapter.RequestDispatcher
 
-in all your `CREATE JAVA ADAPTER SCRIPT` statements. The old entry point will be removed with the upcoming Version 2.0.0 of Exasol's Virtual Schema.
+in all your `CREATE JAVA ADAPTER SCRIPT` statements. The old entry point was removed with the Version 2.0.0 of Exasol's Virtual Schema.
 
 ## Features
 
