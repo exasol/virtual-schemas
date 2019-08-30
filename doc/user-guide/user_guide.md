@@ -129,7 +129,7 @@ The following properties can be used to control the behavior of the JDBC adapter
 As you see above, these properties can be defined in `CREATE VIRTUAL SCHEMA` or changed afterwards via `ALTER VIRTUAL SCHEMA SET`. 
 Note that properties are always strings, like `TABLE_FILTER='T1,T2'`.
 
-**Mandatory Properties:**
+#### Mandatory Properties
 
 Property                    | Value
 --------------------------- | -----------
@@ -147,7 +147,7 @@ Property                    | Value
 **PASSWORD**                | Password for authentication. Only required if `CONNECTION_NAME` is not set.
 
 
-**Common Optional Properties:**
+#### Common Optional Properties
 
 Property                    | Value
 --------------------------- | -----------
@@ -155,7 +155,7 @@ Property                    | Value
 **SCHEMA_NAME**             | The name of the remote JDBC schema. This is usually case-sensitive, depending on the dialect. It depends on the dialect whether you have to specify this or not. Usually you have to specify it if the data source JDBC driver supports the concepts of schemas.
 **TABLE_FILTER**            | A comma-separated list of table names (case sensitive). Only these tables will be available as virtual tables, other tables are ignored. Use this if you don't want to have all remote tables in your virtual schema.
 
-**Advanced Optional Properties:**
+#### Advanced Optional Properties
 
 Property                    | Value
 --------------------------- | -----------
@@ -167,6 +167,18 @@ Property                    | Value
 **EXCEPTION_HANDLING**      | Activates or deactivates different exception handling modes. Supported values: `IGNORE_INVALID_VIEWS` and `NONE` (default). Currently this property only affects the Teradata dialect.
 **EXCLUDED_CAPABILITIES**   | A comma-separated list of capabilities that you want to deactivate (although the adapter might support them).
 **IGNORE_ERRORS**           | Is used to ignore errors thrown by the adapter. Supported values: 'POSTGRESQL_UPPERCASE_TABLES' (see PostgreSQL dialect documentation).
+
+## Limitations
+
+## Unrecognized and Unsupported Data Types
+
+Not all data types present in a source database have a matching equivalent in Exasol. Also software updates on the source database can introduce new data type that the Virtual schema does not recognize.
+
+There are a few important things you need to know about those data types.
+
+1. Columns of an unrecognized / unsupported data type are not mapped in a Virtual Schema. From Exasol's perspective those columns do not exist on a table. This is done so that tables containing those columns can still be mapped and do not have to be rejected as a whole.
+2. You can't query columns of an unrecognized / unsupported data type. If the source table contains them, you have to *explicitly* exclude them from the query. You can for example not use the asterisk (`*`) on a table that contains one ore more of those columns. This will result in an error issued by the Virtual schema.
+3. You can't use functions that result in an unsupported / unknown data type. 
 
 ## See Also
 
