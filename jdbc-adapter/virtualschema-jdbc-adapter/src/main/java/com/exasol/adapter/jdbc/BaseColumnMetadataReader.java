@@ -6,6 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.regex.*;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.IdentifierConverter;
@@ -334,6 +335,21 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
             return DataType.createDecimal(decimalPrec, decimalScale);
         } else {
             return DataType.createDouble();
+        }
+    }
+
+    protected DataType getNumberTypeFromProperty(final String property) {
+        final Pattern pattern = Pattern.compile("\\s*(\\d+)\\s*,\\s*(\\d+)\\s*");
+        final String precisionAndScale = this.properties.get(property);
+        final Matcher matcher = pattern.matcher(precisionAndScale);
+        if (matcher.matches()) {
+            final int precision = Integer.parseInt(matcher.group(1));
+            final int scale = Integer.parseInt(matcher.group(2));
+            return DataType.createDecimal(precision, scale);
+        } else {
+            throw new IllegalArgumentException("Unable to parse adapter property " + property + " value \""
+                    + precisionAndScale
+                    + " into a number precision and scale. The required format is \"<precision>.<scale>\", where both are integer numbers.");
         }
     }
 }
