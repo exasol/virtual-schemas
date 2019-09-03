@@ -4,6 +4,7 @@ import static com.exasol.adapter.sql.AggregateFunction.*;
 import static com.exasol.adapter.sql.ScalarFunction.*;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.*;
@@ -15,7 +16,7 @@ import com.exasol.adapter.sql.*;
  * This class generates SQL queries for the {@link OracleSqlGenerationVisitor}.
  */
 public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
-    // If set to true, the SELECT list elements will get aliases such as c1, c2, ...
+    public static final Logger LOGGER = Logger.getLogger(OracleSqlGenerationVisitor.class.getName());
     private boolean requiresSelectListAliasesForLimit = false;
     private static final String TIMESTAMP_FORMAT = "'YYYY-MM-DD HH24:MI:SS.FF3'";
     private static final List<String> TYPE_NAMES_REQUIRING_CAST = List.of("TIMESTAMP", "INTERVAL", "BINARY_FLOAT",
@@ -62,7 +63,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
      * SELECT c1, c2, ... FROM ( SELECT LIMIT_SUBSELECT.*, ROWNUM ROWNUM_SUB FROM ( &lt;query-with-aliases&gt; )
      * LIMIT_SUBSELECT WHERE ROWNUM &lt;= 30 ) WHERE ROWNUM_SUB &gt; 20
      *
-     * The rownum filter is evaluated before ORDER BY, which is why we need sub-selects
+     * The ROWNUM filter is evaluated before ORDER BY, which is why we need sub-selects
      */
     @Override
     public String visit(final SqlStatementSelect select) throws AdapterException {
@@ -145,25 +146,27 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     private String getSqlSelectList(final SqlSelectList selectList) throws AdapterException {
         final List<String> selectListElements = new ArrayList<>();
         if (selectList.isSelectStar()) {
-            // Do as if the user has all columns in select list
-            final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
-            final boolean selectListRequiresCasts = isSelectListRequiresCasts(selectList, selectListElements, select);
-            if (!this.requiresSelectListAliasesForLimit && !selectListRequiresCasts) {
-                selectListElements.clear();
-                selectListElements.add("*");
-            }
+            getSelectStarList(selectList, selectListElements);
         } else {
             for (final SqlNode node : selectList.getExpressions()) {
                 selectListElements.add(node.accept(this));
             }
         }
         if (this.requiresSelectListAliasesForLimit) {
-            // Add aliases to select list elements
-            for (int i = 0; i < selectListElements.size(); i++) {
-                selectListElements.set(i, selectListElements.get(i) + " AS c" + i);
-            }
+            addColumnAliases(selectListElements);
         }
         return String.join(", ", selectListElements);
+    }
+
+    public void getSelectStarList(final SqlSelectList selectList, final List<String> selectListElements)
+            throws AdapterException {
+        final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
+        final boolean selectListRequiresCasts = isSelectListRequiresCasts(selectList, selectListElements, select);
+        if (!this.requiresSelectListAliasesForLimit && !selectListRequiresCasts) {
+            LOGGER.fine("Converting select list to SELECT *");
+            selectListElements.clear();
+            selectListElements.add("*");
+        }
     }
 
     private boolean isSelectListRequiresCasts(final SqlSelectList selectList, final List<String> selectListElements,
@@ -228,11 +231,17 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                 && (columnType.getScale() == castNumberToDecimalType.getScale());
     }
 
+    public void addColumnAliases(final List<String> selectListElements) {
+        for (int i = 0; i < selectListElements.size(); i++) {
+            selectListElements.set(i, selectListElements.get(i) + " AS c" + i);
+        }
+    }
+
+    // Limit is realized via a {@code ROWNUM} filter in Oracle (< 12c) Oracle 12c introduced nice syntax for limit and
+    // offset
+    // functionality: "OFFSET 4 ROWS FETCH NEXT 4 ROWS ONLY"
     @Override
     public String visit(final SqlLimit limit) {
-        // Limit is realized via a rownum filter in Oracle (< 12c)
-        // Oracle 12c introduced nice syntax for limit and offset functionality: "OFFSET 4 ROWS FETCH NEXT 4 ROWS ONLY".
-        // Nice to have to add this.
         return "";
     }
 
@@ -262,7 +271,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         final String typeName = ColumnAdapterNotes
                 .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
         if (typeName.startsWith("INTERVAL") || typeName.equals("BINARY_FLOAT") || typeName.equals("BINARY_DOUBLE")) {
-            return "TO_CHAR(" + projectionString + ")";
+            return createToChar(projectionString);
         } else if (typeName.startsWith("TIMESTAMP")
                 && (((OracleSqlDialect) dialect).getImportType() == ImportType.JDBC)) {
             return "TO_TIMESTAMP(TO_CHAR(" + projectionString + ", " + TIMESTAMP_FORMAT + "), " + TIMESTAMP_FORMAT
@@ -278,19 +287,27 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         }
     }
 
+    public String createToChar(final String operand) {
+        return "TO_CHAR(" + operand + ")";
+    }
+
     private String getNumberProjectionString(final SqlColumn column, final String projectionString,
             final OracleSqlDialect dialect) {
         if (column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.VARCHAR) {
-            return "TO_CHAR(" + projectionString + ")";
+            return createToChar(projectionString);
         } else {
             if (checkIfNeedToCastNumberToDecimal(column)) {
                 final DataType castNumberToDecimalType = dialect.getOracleNumberTargetType();
-                return "CAST(" + projectionString + " AS DECIMAL(" + castNumberToDecimalType.getPrecision() + ","
-                        + castNumberToDecimalType.getScale() + "))";
+                return cast(projectionString, "DECIMAL(" + castNumberToDecimalType.getPrecision() + ","
+                        + castNumberToDecimalType.getScale() + ")");
             } else {
                 return projectionString;
             }
         }
+    }
+
+    private String cast(final String value, final String as) {
+        return "CAST(" + value + " AS " + as + ")";
     }
 
     @Override
@@ -302,7 +319,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     private String getLiteralString(final String literalString, final boolean b, final SqlNode parent) {
         final boolean isDirectlyInSelectList = (b && (parent.getType() == SqlNodeType.SELECT_LIST));
         if (isDirectlyInSelectList) {
-            return "TO_CHAR(" + literalString + ")";
+            return createToChar(literalString);
         }
         return literalString;
     }
@@ -363,14 +380,13 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
 
     @Override
     public String visit(final SqlFunctionAggregate function) throws AdapterException {
-        String sql = super.visit(function);
         final boolean isDirectlyInSelectList = (function.hasParent()
                 && (function.getParent().getType() == SqlNodeType.SELECT_LIST));
         if (isDirectlyInSelectList && this.aggregateFunctionsCast.contains(function.getFunction())) {
             // Cast to FLOAT because result set metadata has precision = 0, scale = 0
-            sql = "CAST(" + sql + " AS FLOAT)";
+            return cast(super.visit(function), "FLOAT");
         }
-        return sql;
+        return super.visit(function);
     }
 
     @Override
@@ -449,7 +465,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                 && (function.getParent().getType() == SqlNodeType.SELECT_LIST));
         if (isDirectlyInSelectList && this.scalarFunctionsCast.contains(function.getFunction())) {
             // Cast to FLOAT because result set metadata has precision = 0, scale = 0
-            sql = "CAST(" + sql + " AS FLOAT)";
+            sql = cast(sql, "FLOAT");
         }
         return sql;
     }

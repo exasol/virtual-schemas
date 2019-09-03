@@ -130,7 +130,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
      * <p>
      * Override this method in case conversions are necessary.
      * </p>
-     * 
+     *
      * @param selectList list of columns (or expressions) in the <code>SELECT</code> part
      * @return always <code>"true"</code>
      */
@@ -198,7 +198,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
     @Override
     public String visit(final SqlGroupBy groupBy) throws AdapterException {
         if ((groupBy.getExpressions() == null) || groupBy.getExpressions().isEmpty()) {
-            throw new RuntimeException("Unexpected internal state (empty group by)");
+            throw new IllegalStateException("Unexpected internal state (empty group by)");
         }
         final List<String> selectElement = new ArrayList<>();
         for (final SqlNode node : groupBy.getExpressions()) {
@@ -229,13 +229,13 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
 
     @Override
     public String visit(final SqlFunctionAggregateGroupConcat function) throws AdapterException {
+        validateSingleAgrumentFunctionParameter(function);
         final StringBuilder builder = new StringBuilder();
         builder.append(function.getFunctionName());
         builder.append("(");
         if (function.hasDistinct()) {
             builder.append("DISTINCT ");
         }
-        assert ((function.getArguments().size() == 1) && (function.getArguments().get(0) != null));
         builder.append(function.getArguments().get(0).accept(this));
         if (function.hasOrderBy()) {
             builder.append(" ");
@@ -250,6 +250,13 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         }
         builder.append(")");
         return builder.toString();
+    }
+
+    public void validateSingleAgrumentFunctionParameter(final SqlFunctionAggregateGroupConcat function) {
+        if ((function.getArguments().size() != 1) || (function.getArguments().get(0) == null)) {
+            throw new IllegalArgumentException(
+                    "Function AGGREGATE GROUP CONCAT must have exactly one non-NULL parameter.");
+        }
     }
 
     @Override
@@ -312,11 +319,10 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
 
     @Override
     public String visit(final SqlFunctionScalarCast function) throws AdapterException {
-
+        validateSingleAgrumentFunctionParameter(function);
         final StringBuilder builder = new StringBuilder();
         builder.append("CAST");
         builder.append("(");
-        assert ((function.getArguments().size() == 1) && (function.getArguments().get(0) != null));
         builder.append(function.getArguments().get(0).accept(this));
         builder.append(" AS ");
         builder.append(function.getDataType());
@@ -324,11 +330,23 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         return builder.toString();
     }
 
+    public void validateSingleAgrumentFunctionParameter(final SqlFunctionScalarCast function) {
+        if ((function.getArguments().size() != 1) || (function.getArguments().get(0) == null)) {
+            throw new IllegalArgumentException("Function CAST must have exactly one non-NULL parameter.");
+        }
+    }
+
     @Override
     public String visit(final SqlFunctionScalarExtract function) throws AdapterException {
-        assert ((function.getArguments().size() == 1) && (function.getArguments().get(0) != null));
+        validateSingleAgrumentFunctionParameter(function);
         final String expression = function.getArguments().get(0).accept(this);
         return function.getFunctionName() + "(" + function.getToExtract() + " FROM " + expression + ")";
+    }
+
+    public void validateSingleAgrumentFunctionParameter(final SqlFunctionScalarExtract function) {
+        if ((function.getArguments().size() != 1) || (function.getArguments().get(0) == null)) {
+            throw new IllegalArgumentException("Function EXTRACT must have exactly one non-NULL parameter.");
+        }
     }
 
     @Override
