@@ -167,7 +167,7 @@ We tested with the JDBC 4.1.
 
 ## Type Mappings
 
-- `DECIMAL`, `DECIMAL with precision > 36` are casted to `VARCHAR` to prevent a loss of precision. 
+-`DECIMAL with precision > 36` is casted to `VARCHAR` to prevent a loss of precision. 
 
     If you want to return a DECIMAL type you can set the property HIVE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE: 
     
