@@ -158,12 +158,11 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         return String.join(", ", selectListElements);
     }
 
-    public void getSelectStarList(final SqlSelectList selectList, final List<String> selectListElements)
+    private void getSelectStarList(final SqlSelectList selectList, final List<String> selectListElements)
             throws AdapterException {
         final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
         final boolean selectListRequiresCasts = isSelectListRequiresCasts(selectList, selectListElements, select);
         if (!this.requiresSelectListAliasesForLimit && !selectListRequiresCasts) {
-            LOGGER.fine("Converting select list to SELECT *");
             selectListElements.clear();
             selectListElements.add("*");
         }
@@ -231,7 +230,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                 && (columnType.getScale() == castNumberToDecimalType.getScale());
     }
 
-    public void addColumnAliases(final List<String> selectListElements) {
+    private void addColumnAliases(final List<String> selectListElements) {
         for (int i = 0; i < selectListElements.size(); i++) {
             selectListElements.set(i, selectListElements.get(i) + " AS c" + i);
         }
