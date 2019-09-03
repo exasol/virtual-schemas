@@ -252,7 +252,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         return builder.toString();
     }
 
-    public void validateSingleAgrumentFunctionParameter(final SqlFunctionAggregateGroupConcat function) {
+    private void validateSingleAgrumentFunctionParameter(final SqlFunctionAggregateGroupConcat function) {
         if ((function.getArguments().size() != 1) || (function.getArguments().get(0) == null)) {
             throw new IllegalArgumentException(
                     "Function AGGREGATE GROUP CONCAT must have exactly one non-NULL parameter.");
@@ -330,7 +330,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         return builder.toString();
     }
 
-    public void validateSingleAgrumentFunctionParameter(final SqlFunctionScalarCast function) {
+    private void validateSingleAgrumentFunctionParameter(final SqlFunctionScalarCast function) {
         if ((function.getArguments().size() != 1) || (function.getArguments().get(0) == null)) {
             throw new IllegalArgumentException("Function CAST must have exactly one non-NULL parameter.");
         }
@@ -343,7 +343,7 @@ public class SqlGenerationVisitor implements SqlNodeVisitor<String> {
         return function.getFunctionName() + "(" + function.getToExtract() + " FROM " + expression + ")";
     }
 
-    public void validateSingleAgrumentFunctionParameter(final SqlFunctionScalarExtract function) {
+    private void validateSingleAgrumentFunctionParameter(final SqlFunctionScalarExtract function) {
         if ((function.getArguments().size() != 1) || (function.getArguments().get(0) == null)) {
             throw new IllegalArgumentException("Function EXTRACT must have exactly one non-NULL parameter.");
         }
