@@ -6,7 +6,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
@@ -263,6 +263,21 @@ public abstract class AbstractSqlDialect implements SqlDialect {
             if (!connectionIsEmpty) {
                 throw new PropertyValidationException("You defined the property " + connectionProperty
                         + " without setting " + importFromProperty + " to 'TRUE'. This is not allowed");
+            }
+        }
+    }
+
+    protected void validateCastNumberToDecimalProperty(final String castNumberToDecimalProperty)
+            throws PropertyValidationException {
+        if (this.properties.containsKey(castNumberToDecimalProperty)) {
+            final Pattern pattern = Pattern.compile("\\s*(\\d+)\\s*,\\s*(\\d+)\\s*");
+            final String precisionAndScale = this.properties.get(castNumberToDecimalProperty);
+            final Matcher matcher = pattern.matcher(precisionAndScale);
+            if (!matcher.matches()) {
+                throw new PropertyValidationException("Unable to parse adapter property " + castNumberToDecimalProperty
+                        + " value \"" + precisionAndScale
+                        + " into a number's precision and scale. The required format is \"<precision>.<scale>\", where "
+                        + "both are integer numbers.");
             }
         }
     }

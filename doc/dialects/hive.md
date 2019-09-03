@@ -164,3 +164,14 @@ See also:
 
 The dialect was tested with the Cloudera Hive JDBC driver available on the [Cloudera downloads page](http://www.cloudera.com/downloads). The driver is also available directly from [Simba technologies](http://www.simba.com/), who developed the driver.
 We tested with the JDBC 4.1.
+
+## Type Mappings
+
+-`DECIMAL with precision > 36` is casted to `VARCHAR` to prevent a loss of precision. 
+
+    If you want to return a DECIMAL type you can set the property HIVE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE: 
+    
+    `HIVE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE='36,20'` 
+    
+    This will cast DECIMAL with precision > 36, DECIMAL without precision to DECIMAL(36,20).
+    Keep in mind that this will yield errors if the data in the Hive database does not fit into the specified DECIMAL type.

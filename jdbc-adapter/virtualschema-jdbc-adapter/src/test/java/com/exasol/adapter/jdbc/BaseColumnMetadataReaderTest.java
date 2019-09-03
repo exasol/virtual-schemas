@@ -1,5 +1,6 @@
 package com.exasol.adapter.jdbc;
 
+import static com.exasol.adapter.dialects.hive.HiveProperties.HIVE_CAST_NUMBER_TO_DECIMAL_PROPERTY;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
@@ -7,9 +8,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.sql.*;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.exasol.adapter.dialects.hive.*;
+import com.exasol.adapter.metadata.*;
+import org.junit.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,10 +22,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType.ExaDataType;
 
-public class BaseColumnMetadataReaderTest {
+class BaseColumnMetadataReaderTest {
     private BaseColumnMetadataReader reader;
 
     @BeforeEach
@@ -54,5 +57,17 @@ public class BaseColumnMetadataReaderTest {
                 .map(column -> column.getType().getExaDataType()) //
                 .collect(Collectors.toList());
         assertThat(columnTypes, containsInAnyOrder(ExaDataType.DATE, ExaDataType.DOUBLE));
+    }
+
+    @Test
+    void testMapColumnTypeBeyondMaxExasolDecimalPrecisionWithCastProperty() {
+        final Map<String, String> rawProperties = new HashMap<>();
+        rawProperties.put(HIVE_CAST_NUMBER_TO_DECIMAL_PROPERTY, "10,2");
+        final AdapterProperties properties = new AdapterProperties(rawProperties);
+        final ColumnMetadataReader columnMetadataReader = new HiveColumnMetadataReader(null, properties,
+                BaseIdentifierConverter.createDefault());
+        final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.DECIMAL, 0,
+                DataType.MAX_EXASOL_DECIMAL_PRECISION + 1, 10, "DECIMAL");
+        Assert.assertThat(columnMetadataReader.mapJdbcType(typeDescription), equalTo(DataType.createDecimal(10, 2)));
     }
 }

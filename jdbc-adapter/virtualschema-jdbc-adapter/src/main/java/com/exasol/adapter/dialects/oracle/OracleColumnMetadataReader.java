@@ -4,8 +4,6 @@ import static com.exasol.adapter.dialects.oracle.OracleProperties.ORACLE_CAST_NU
 
 import java.sql.Connection;
 import java.sql.Types;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.BinaryColumnHandling;
@@ -86,28 +84,13 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
 
     private DataType getOracleNumberTargetType() {
         if (this.properties.containsKey(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY)) {
-            return getOracleNumberTypeFromProperty();
+            return getNumberTypeFromProperty(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY);
         } else {
             return DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
         }
     }
 
-    private DataType getOracleNumberTypeFromProperty() {
-        final Pattern pattern = Pattern.compile("\\s*(\\d+)\\s*,\\s*(\\d+)\\s*");
-        final String oraclePrecisionAndScale = this.properties.get(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY);
-        final Matcher matcher = pattern.matcher(oraclePrecisionAndScale);
-        if (matcher.matches()) {
-            final int precision = Integer.parseInt(matcher.group(1));
-            final int scale = Integer.parseInt(matcher.group(2));
-            return DataType.createDecimal(precision, scale);
-        } else {
-            throw new IllegalArgumentException("Unable to parse adapter property "
-                    + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " value \"" + oraclePrecisionAndScale
-                    + " into a number precision and scale. The required format is \"<precision>.<scale>\", where both are integer numbers.");
-        }
-    }
-
-    public DataType mapBlobType() {
+    private DataType mapBlobType() {
         if (this.properties.getBinaryColumnHandling() == BinaryColumnHandling.IGNORE) {
             return DataType.createUnsupported();
         } else {
