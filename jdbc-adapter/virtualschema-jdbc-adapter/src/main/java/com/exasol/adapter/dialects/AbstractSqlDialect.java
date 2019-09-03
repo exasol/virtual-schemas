@@ -276,7 +276,7 @@ public abstract class AbstractSqlDialect implements SqlDialect {
             if (!matcher.matches()) {
                 throw new PropertyValidationException("Unable to parse adapter property " + castNumberToDecimalProperty
                         + " value \"" + precisionAndScale
-                        + " into a number precison and scale. The required format is \"<precsion>.<scale>\", where "
+                        + " into a number's precision and scale. The required format is \"<precision>.<scale>\", where "
                         + "both are integer numbers.");
             }
         }

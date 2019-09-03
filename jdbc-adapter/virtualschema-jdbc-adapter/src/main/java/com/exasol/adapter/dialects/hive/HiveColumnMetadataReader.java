@@ -16,7 +16,7 @@ import static com.exasol.adapter.dialects.hive.HiveProperties.HIVE_CAST_NUMBER_T
 public class HiveColumnMetadataReader extends BaseColumnMetadataReader {
 
     /**
-     * Create a new instance of the {@link HiveColumnMetadataReader}
+     * Create a new instance of the {@link HiveColumnMetadataReader}.
      *
      * @param connection          connection to the remote data source
      * @param properties          user-defined adapter properties
