@@ -10,8 +10,6 @@ import static com.exasol.adapter.dialects.oracle.OracleProperties.*;
 
 import java.sql.Connection;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.exasol.adapter.AdapterProperties;
@@ -168,25 +166,11 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         super.validateProperties();
         checkImportPropertyConsistency(ORACLE_IMPORT_PROPERTY, ORACLE_CONNECTION_NAME_PROPERTY);
         validateBooleanProperty(ORACLE_IMPORT_PROPERTY);
-        validateCastNumberToDecimalProperty();
+        validateCastNumberToDecimalProperty(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY);
     }
 
     @Override
     public List<String> getSupportedProperties() {
         return SUPPORTED_PROPERTIES;
-    }
-
-    private void validateCastNumberToDecimalProperty() throws PropertyValidationException {
-        if (this.properties.containsKey(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY)) {
-            final Pattern pattern = Pattern.compile("\\s*(\\d+)\\s*,\\s*(\\d+)\\s*");
-            final String oraclePrecisionAndScale = this.properties.get(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY);
-            final Matcher matcher = pattern.matcher(oraclePrecisionAndScale);
-            if (!matcher.matches()) {
-                throw new PropertyValidationException("Unable to parse adapter property "
-                        + ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY + " value \"" + oraclePrecisionAndScale
-                        + " into a number precison and scale. The required format is \"<precsion>.<scale>\", where "
-                        + "both are integer numbers.");
-            }
-        }
     }
 }

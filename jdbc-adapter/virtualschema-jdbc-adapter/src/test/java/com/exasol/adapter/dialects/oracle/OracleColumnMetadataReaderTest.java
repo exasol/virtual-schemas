@@ -31,9 +31,8 @@ class OracleColumnMetadataReaderTest {
                 BaseIdentifierConverter.createDefault());
     }
 
-    @ValueSource(strings = { "10,2", " 10,2", " 10 , 2 " })
-    @ParameterizedTest
-    void testMapColumnTypeBeyondMaximumDecimalPrecision(final String input) {
+    @Test
+    void testMapColumnTypeBeyondMaximumDecimalPrecision() {
         final int precision = DataType.MAX_EXASOL_DECIMAL_PRECISION + 1;
         final int scale = 0;
         final int castPrecision = 10;

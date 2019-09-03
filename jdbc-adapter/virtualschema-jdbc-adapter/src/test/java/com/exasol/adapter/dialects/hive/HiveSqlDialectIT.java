@@ -5,12 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.FileNotFoundException;
-import java.math.BigDecimal;
+import java.math.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assume;
+import com.exasol.adapter.dialects.oracle.*;
+import org.junit.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,7 @@ import com.exasol.adapter.dialects.IntegrationTestConfigurationCondition;
 @ExtendWith(IntegrationTestConfigurationCondition.class)
 public class HiveSqlDialectIT extends AbstractIntegrationTest {
     private static final String VIRTUAL_SCHEMA = "VS_HIVE";
+    private static final String VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL = "VS_HIVE_JDBC_NUMBER_TO_DECIMAL";
     private static final String HIVE_SCHEMA = "default";
     private static final boolean IS_LOCAL = false;
     private static final String HIVE_CONNECTION = "HIVE_CONNECTION";
@@ -34,13 +36,17 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
     static void beforeAll() throws FileNotFoundException, SQLException, ClassNotFoundException {
         Assume.assumeTrue(getConfig().hiveTestsRequested());
         setConnection(connectToExa());
-
         createTestSchema();
-
         createHiveJDBCAdapter();
         createHiveConnection();
         createVirtualSchema(VIRTUAL_SCHEMA, HiveSqlDialect.NAME, "", HIVE_SCHEMA, HIVE_CONNECTION, "", "",
                 "ADAPTER.JDBC_ADAPTER", "", IS_LOCAL, getConfig().debugAddress(), "", null, "");
+        // create JDBC virtual schema with special DECIMAL handling
+        createVirtualSchema(VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL, HiveSqlDialect.NAME, "", HIVE_SCHEMA,
+                HIVE_CONNECTION, "", "",
+                // "ADAPTER.JDBC_ORACLE_DEBUG",
+                "ADAPTER.JDBC_ADAPTER", "", IS_LOCAL, getConfig().debugAddress(), "",
+                "hive_cast_number_to_decimal_with_precision_and_scale='36,2'", "");
     }
 
     private static void createTestSchema() throws SQLException, ClassNotFoundException, FileNotFoundException {
@@ -58,6 +64,12 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
             stmt.execute("create table t2(x int, y varchar(100))");
             stmt.execute("truncate table t2");
             stmt.execute("insert into t2 values (2,'bbb'), (3,'ccc')");
+
+            stmt.execute(
+                    "create table decimal_cast(decimal_col1 decimal(12, 6), decimal_col2 decimal(36, 16), decimal_col3 decimal(38, 17))");
+            stmt.execute("truncate table decimal_cast");
+            stmt.execute(
+                    "insert into decimal_cast values (123456.12345671, 123456789.011111111111111, 1234444444444444444.5555555555555555555555550)");
 
             stmt.execute(
                     "CREATE TABLE ALL_HIVE_DATA_TYPES(ARRAYCOL ARRAY<string>, BIGINTEGER BIGINT, BOOLCOLUMN BOOLEAN, CHARCOLUMN CHAR(1), DECIMALCOL DECIMAL(10,0), DOUBLECOL DOUBLE, FLOATCOL FLOAT, INTCOL INT, MAPCOL MAP<string,int>, SMALLINTEGER SMALLINT, STRINGCOL STRING, STRUCTCOL struct<a : int, b : int>, TIMESTAMPCOL TIMESTAMP, TINYINTEGER TINYINT, VARCHARCOL VARCHAR(10), BINARYCOL BINARY, DATECOL DATE)");
@@ -351,5 +363,24 @@ public class HiveSqlDialectIT extends AbstractIntegrationTest {
 
     private static void createHiveConnection() throws SQLException, FileNotFoundException {
         createConnection(HIVE_CONNECTION, getConfig().getHiveDockerJdbcConnectionString(), "", "");
+    }
+
+    @Test
+    void testNumberBeyondExasolPrecisionMaxValueToDecimalColumnTypes() throws SQLException {
+        final ResultSet resultSet = executeQuery(
+                "SELECT COLUMN_NAME, COLUMN_TYPE FROM EXA_DBA_COLUMNS WHERE COLUMN_SCHEMA = '"
+                        + VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL
+                        + "' AND COLUMN_TABLE='DECIMAL_CAST' ORDER BY COLUMN_ORDINAL_POSITION");
+        assertNextRow(resultSet, "DECIMAL_COL1", "DECIMAL(12,6)");
+        assertNextRow(resultSet, "DECIMAL_COL2", "DECIMAL(36,16)");
+        assertNextRow(resultSet, "DECIMAL_COL3", "DECIMAL(36,2)");
+    }
+
+    @Test
+    void testNumberBeyondExasolPrecisionMaxValueToDecimal() throws SQLException {
+        final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL + ".decimal_cast";
+        final ResultSet resultSet = executeQuery(query);
+        assertNextRow(resultSet, new BigDecimal("123456.123457"), new BigDecimal("123456789.0111111111111110"),
+                new BigDecimal("1234444444444444444.55"));
     }
 }

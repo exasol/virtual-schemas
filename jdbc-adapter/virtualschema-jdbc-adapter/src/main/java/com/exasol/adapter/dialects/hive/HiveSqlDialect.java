@@ -6,6 +6,8 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static com.exasol.adapter.dialects.hive.HiveProperties.HIVE_CAST_NUMBER_TO_DECIMAL_PROPERTY;
+import static com.exasol.adapter.dialects.oracle.OracleProperties.*;
 
 import java.sql.Connection;
 import java.util.*;
@@ -27,7 +29,7 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
-            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
+            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY, HIVE_CAST_NUMBER_TO_DECIMAL_PROPERTY);
 
     private static Capabilities createCapabilityList() {
         return Capabilities.builder()
@@ -128,6 +130,12 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
         return new HiveMetadataReader(this.connection, this.properties);
+    }
+
+    @Override
+    public void validateProperties() throws PropertyValidationException {
+        super.validateProperties();
+        validateCastNumberToDecimalProperty(HIVE_CAST_NUMBER_TO_DECIMAL_PROPERTY);
     }
 
     @Override

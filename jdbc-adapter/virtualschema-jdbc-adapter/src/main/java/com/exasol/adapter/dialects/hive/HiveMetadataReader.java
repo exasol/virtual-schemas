@@ -29,7 +29,7 @@ public class HiveMetadataReader extends AbstractRemoteMetadataReader {
 
     @Override
     protected ColumnMetadataReader createColumnMetadataReader() {
-        return new BaseColumnMetadataReader(this.connection, this.properties, this.identifierConverter);
+        return new HiveColumnMetadataReader(this.connection, this.properties, this.identifierConverter);
     }
 
     @Override
