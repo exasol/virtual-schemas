@@ -55,6 +55,15 @@ class OracleColumnMetadataReaderTest {
                 equalTo(DataType.createMaximumSizeVarChar(ExaCharset.UTF8)));
     }
 
+    @Test
+    void testMapColumnTypeWithMaximumDecimalPrecision() {
+        final int precision = DataType.MAX_EXASOL_DECIMAL_PRECISION;
+        final int scale = 0;
+        final JdbcTypeDescription typeDescription = createTypeDescriptionForNumeric(precision, scale);
+        assertThat(this.columnMetadataReader.mapJdbcType(typeDescription),
+                equalTo(DataType.createDecimal(precision, scale)));
+    }
+
     private OracleColumnMetadataReader createParameterizedColumnMetadataReader(
             final Map<String, String> rawProperties) {
         return new OracleColumnMetadataReader(null, new AdapterProperties(rawProperties),

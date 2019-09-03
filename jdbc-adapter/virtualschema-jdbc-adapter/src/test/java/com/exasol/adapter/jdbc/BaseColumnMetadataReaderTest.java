@@ -24,7 +24,7 @@ import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.metadata.DataType.ExaDataType;
 
-public class BaseColumnMetadataReaderTest {
+class BaseColumnMetadataReaderTest {
     private BaseColumnMetadataReader reader;
 
     @BeforeEach
@@ -57,23 +57,6 @@ public class BaseColumnMetadataReaderTest {
                 .map(column -> column.getType().getExaDataType()) //
                 .collect(Collectors.toList());
         assertThat(columnTypes, containsInAnyOrder(ExaDataType.DATE, ExaDataType.DOUBLE));
-    }
-
-    @Test
-    void testMapColumnTypeWithMaxExasolDecimalPrecision() {
-        final int precision = DataType.MAX_EXASOL_DECIMAL_PRECISION;
-        final int scale = 0;
-        final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.DECIMAL, scale, precision, 10,
-                "DECIMAL");
-        Assert.assertThat(this.reader.mapJdbcType(typeDescription), equalTo(DataType.createDecimal(precision, scale)));
-    }
-
-    @Test
-    void testMapColumnTypeBeyondMaxExasolDecimalPrecision() {
-        final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.DECIMAL, 0,
-                DataType.MAX_EXASOL_DECIMAL_PRECISION + 1, 10, "DECIMAL");
-        Assert.assertThat(this.reader.mapJdbcType(typeDescription),
-                equalTo(DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8)));
     }
 
     @Test
