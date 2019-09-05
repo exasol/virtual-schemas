@@ -1,12 +1,12 @@
 package com.exasol.adapter.dialects;
 
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.TableMetadata;
-import com.exasol.adapter.sql.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+
+import com.exasol.adapter.metadata.ColumnMetadata;
+import com.exasol.adapter.metadata.TableMetadata;
+import com.exasol.adapter.sql.*;
 
 /**
  * Contains functions that are helpful during SQL generation.

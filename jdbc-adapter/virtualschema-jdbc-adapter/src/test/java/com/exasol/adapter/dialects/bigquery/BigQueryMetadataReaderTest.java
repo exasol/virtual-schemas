@@ -1,18 +1,21 @@
 package com.exasol.adapter.dialects.bigquery;
 
-import com.exasol.adapter.*;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.*;
-import org.junit.jupiter.api.*;
-import org.mockito.*;
-
-import java.sql.*;
-
 import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.ANY_TABLE_TYPE;
-import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
+import java.sql.Connection;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
+import com.exasol.adapter.dialects.IdentifierConverter;
+import com.exasol.adapter.jdbc.*;
 
 class BigQueryMetadataReaderTest {
     private BigQueryMetadataReader reader;

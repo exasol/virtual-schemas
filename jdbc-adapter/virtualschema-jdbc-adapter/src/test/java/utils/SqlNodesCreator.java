@@ -1,13 +1,14 @@
 package utils;
 
+import static com.exasol.adapter.sql.AggregateFunction.AVG;
+
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
-
-import java.math.*;
-import java.util.*;
-import java.util.stream.*;
-
-import static com.exasol.adapter.sql.AggregateFunction.AVG;
 
 /**
  * This class contains static methods for fast creation of SQL nodes which are used in tests for SQL generation

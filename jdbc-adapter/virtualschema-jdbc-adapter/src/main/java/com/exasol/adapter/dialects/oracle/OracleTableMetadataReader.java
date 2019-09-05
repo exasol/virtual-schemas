@@ -1,10 +1,11 @@
 package com.exasol.adapter.dialects.oracle;
 
+import java.sql.Connection;
+
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.BaseTableMetadataReader;
 import com.exasol.adapter.jdbc.ColumnMetadataReader;
-import java.sql.Connection;
 
 /**
  * This class implements a reader for Oracle database metadata.

@@ -1,18 +1,17 @@
 package com.exasol.adapter.dialects;
 
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.metadata.TableMetadata;
-import com.exasol.adapter.sql.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import static com.exasol.adapter.dialects.SqlGenerationHelper.addMetadata;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.exasol.adapter.dialects.SqlGenerationHelper.addMetadata;
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import com.exasol.adapter.metadata.*;
+import com.exasol.adapter.sql.*;
 
 class SqlGenerationHelperTest {
     private static final String TABLE_NAME_1 = "TABLE_NAME_1";

@@ -1,13 +1,14 @@
 package com.exasol.adapter.dialects.saphana;
 
-import com.exasol.adapter.*;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.*;
-
-import java.sql.*;
-import java.util.*;
-
 import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.ANY_TABLE_TYPE;
+
+import java.sql.Connection;
+import java.util.Set;
+
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
+import com.exasol.adapter.dialects.IdentifierConverter;
+import com.exasol.adapter.jdbc.*;
 
 /**
  * Metadata reader that reads SAP HANA-specific database metadata.

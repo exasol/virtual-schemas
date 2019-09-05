@@ -1,25 +1,28 @@
 package com.exasol.adapter.dialects.postgresql;
 
-import com.exasol.adapter.*;
-import com.exasol.adapter.dialects.*;
-
-import com.exasol.adapter.metadata.*;
-import com.exasol.adapter.sql.*;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.*;
-import org.junit.jupiter.params.provider.*;
-import org.mockito.*;
-
-import java.sql.*;
-import java.util.*;
-
 import static com.exasol.adapter.dialects.VisitorAssertions.assertSqlNodeConvertedToAsterisk;
 import static com.exasol.adapter.dialects.VisitorAssertions.assertSqlNodeConvertedToOne;
-import static com.exasol.adapter.sql.ScalarFunction.*;
+import static com.exasol.adapter.sql.ScalarFunction.POSIX_TIME;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static utils.SqlNodesCreator.*;
+
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mock;
+
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.sql.*;
 
 class PostgresSQLSqlGenerationVisitorTest {
     private SqlNodeVisitor<String> visitor;

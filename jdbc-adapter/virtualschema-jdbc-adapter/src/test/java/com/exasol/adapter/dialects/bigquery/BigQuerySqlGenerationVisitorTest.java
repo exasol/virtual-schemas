@@ -5,7 +5,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.sql.Connection;
-import java.util.*;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.dialects.SqlGenerationContext;
 import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.sql.*;
 

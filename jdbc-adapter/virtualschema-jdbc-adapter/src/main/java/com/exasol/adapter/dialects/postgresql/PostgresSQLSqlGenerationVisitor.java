@@ -4,8 +4,9 @@ import java.util.*;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.*;
-import com.exasol.adapter.metadata.*;
+import com.exasol.adapter.jdbc.ColumnAdapterNotes;
+import com.exasol.adapter.metadata.ColumnMetadata;
+import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.sql.*;
 
 /**

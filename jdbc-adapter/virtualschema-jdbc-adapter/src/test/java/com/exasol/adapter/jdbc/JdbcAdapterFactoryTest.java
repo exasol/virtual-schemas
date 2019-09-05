@@ -1,11 +1,11 @@
 package com.exasol.adapter.jdbc;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
 
-import com.exasol.adapter.*;
+import com.exasol.adapter.AdapterFactory;
 
 class JdbcAdapterFactoryTest {
     @Test

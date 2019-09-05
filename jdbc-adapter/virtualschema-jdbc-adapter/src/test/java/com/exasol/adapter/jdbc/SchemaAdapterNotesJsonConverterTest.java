@@ -1,14 +1,15 @@
 package com.exasol.adapter.jdbc;
 
-import com.exasol.adapter.AdapterException;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.exasol.adapter.AdapterException;
 
 class SchemaAdapterNotesJsonConverterTest {
     private SchemaAdapterNotesJsonConverter schemaAdapterNotesJsonConverter;

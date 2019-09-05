@@ -6,7 +6,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.regex.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;

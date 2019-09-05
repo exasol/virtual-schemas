@@ -1,13 +1,15 @@
 package com.exasol.adapter.dialects.hive;
 
-import com.exasol.adapter.*;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.*;
-import com.exasol.adapter.metadata.*;
-
-import java.sql.*;
-
 import static com.exasol.adapter.dialects.hive.HiveProperties.HIVE_CAST_NUMBER_TO_DECIMAL_PROPERTY;
+
+import java.sql.Connection;
+import java.sql.Types;
+
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.IdentifierConverter;
+import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
+import com.exasol.adapter.metadata.DataType;
 
 /**
  * This class implements Hive-specific reading of column metadata.
