@@ -1,15 +1,17 @@
 package com.exasol.adapter.dialects.hive;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.sql.*;
+import java.sql.Types;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import com.exasol.adapter.*;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.*;
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
+import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.metadata.DataType;
 
 class HiveColumnMetadataReaderTest {
     private HiveColumnMetadataReader columnMetadataReader;

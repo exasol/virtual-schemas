@@ -1,10 +1,11 @@
 package com.exasol.adapter.dialects;
 
-import com.exasol.adapter.*;
-import com.exasol.adapter.sql.*;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.sql.SqlNodeVisitor;
+import com.exasol.adapter.sql.SqlSelectList;
 
 public class VisitorAssertions {
     public static void assertSqlNodeConvertedToOne(final SqlSelectList sqlSelectList, final SqlNodeVisitor visitor)

@@ -1,17 +1,20 @@
 package com.exasol.adapter.dialects.oracle;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Types;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import com.exasol.adapter.*;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.*;
-import com.exasol.adapter.metadata.DataType.*;
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
+import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.DataType.ExaCharset;
 
 class OracleColumnMetadataReaderTest {
     private OracleColumnMetadataReader columnMetadataReader;

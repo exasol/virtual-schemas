@@ -1,15 +1,16 @@
 package com.exasol.adapter.dialects.sybase;
 
-import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.*;
-import com.exasol.adapter.metadata.*;
-import com.exasol.adapter.sql.*;
+import static com.exasol.adapter.dialects.sybase.SybaseSqlDialect.MAX_SYBASE_N_VARCHAR_SIZE;
+import static com.exasol.adapter.dialects.sybase.SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE;
 
 import java.util.*;
 
-import static com.exasol.adapter.dialects.sybase.SybaseSqlDialect.MAX_SYBASE_N_VARCHAR_SIZE;
-import static com.exasol.adapter.dialects.sybase.SybaseSqlDialect.MAX_SYBASE_VARCHAR_SIZE;
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.ColumnAdapterNotes;
+import com.exasol.adapter.metadata.ColumnMetadata;
+import com.exasol.adapter.metadata.TableMetadata;
+import com.exasol.adapter.sql.*;
 
 /**
  * This class generates SQL queries for the {@link SybaseSqlGenerationVisitor}.

@@ -1,9 +1,7 @@
 package com.exasol.adapter.dialects.redshift;
 
 import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlGenerationContext;
-import com.exasol.adapter.dialects.SqlGenerationVisitor;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.sql.SqlFunctionAggregateGroupConcat;
 
 /**

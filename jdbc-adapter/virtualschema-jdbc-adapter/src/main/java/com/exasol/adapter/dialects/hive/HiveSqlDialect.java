@@ -7,7 +7,6 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.adapter.dialects.hive.HiveProperties.HIVE_CAST_NUMBER_TO_DECIMAL_PROPERTY;
-import static com.exasol.adapter.dialects.oracle.OracleProperties.*;
 
 import java.sql.Connection;
 import java.util.*;

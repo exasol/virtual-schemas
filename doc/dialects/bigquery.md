@@ -28,7 +28,7 @@ Please remember to check the versions of your JAR files after downloading driver
 ```sql
 CREATE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-2.0.0.jar;
+    %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-2.0.1.jar;
     %jar /buckets/<BFS service>/<bucket>/avro-1.8.2.jar;
     %jar /buckets/<BFS service>/<bucket>/gax-1.40.0.jar;
     %jar /buckets/<BFS service>/<bucket>/google-api-client-1.28.0.jar;

@@ -1,11 +1,11 @@
 package com.exasol.adapter.jdbc;
 
-import org.junit.jupiter.api.Test;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertAll;
+
+import org.junit.jupiter.api.Test;
 
 class SchemaAdapterNotesTest {
     private static final String CATALOG_SEPARATOR = ".";

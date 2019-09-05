@@ -24,15 +24,10 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.capabilities.AggregateFunctionCapability;
-import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.capabilities.LiteralCapability;
-import com.exasol.adapter.capabilities.PredicateCapability;
-import com.exasol.adapter.capabilities.ScalarFunctionCapability;
+import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.sql.SqlNode;
 import com.exasol.adapter.sql.SqlNodeVisitor;
-
 import com.exasol.sql.SqlNormalizer;
 
 class ExasolSqlDialectTest {

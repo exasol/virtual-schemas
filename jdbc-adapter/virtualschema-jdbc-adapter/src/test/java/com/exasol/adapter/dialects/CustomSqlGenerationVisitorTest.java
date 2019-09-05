@@ -12,7 +12,6 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.exasol.ExasolSqlDialect;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
-
 import com.exasol.sql.SqlNormalizer;
 
 class CustomSqlGenerationVisitorTest {

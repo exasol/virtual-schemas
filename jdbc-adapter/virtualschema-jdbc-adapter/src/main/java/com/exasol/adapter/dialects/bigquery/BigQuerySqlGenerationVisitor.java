@@ -1,10 +1,11 @@
 package com.exasol.adapter.dialects.bigquery;
 
-import com.exasol.adapter.*;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.*;
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.sql.SqlOrderBy;
 
 /**
  * This class implements a Google-Big-Query-specific variant of an SQL generation visitor.

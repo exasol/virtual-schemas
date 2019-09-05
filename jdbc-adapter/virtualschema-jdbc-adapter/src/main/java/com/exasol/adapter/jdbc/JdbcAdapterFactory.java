@@ -2,8 +2,9 @@ package com.exasol.adapter.jdbc;
 
 import java.util.*;
 
-import com.exasol.adapter.*;
-import com.exasol.logging.*;
+import com.exasol.adapter.AdapterFactory;
+import com.exasol.adapter.VirtualSchemaAdapter;
+import com.exasol.logging.VersionCollector;
 
 /**
  * This class implements a factory for the {@link JdbcAdapter}.

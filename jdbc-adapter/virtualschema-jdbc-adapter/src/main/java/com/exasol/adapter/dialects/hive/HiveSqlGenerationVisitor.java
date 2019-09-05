@@ -1,14 +1,14 @@
 package com.exasol.adapter.dialects.hive;
 
+import java.util.*;
+import java.util.function.Predicate;
+
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.sql.*;
-
-import java.util.*;
-import java.util.function.Predicate;
 
 /**
  * This class generates SQL queries for the {@link HiveSqlDialect}.

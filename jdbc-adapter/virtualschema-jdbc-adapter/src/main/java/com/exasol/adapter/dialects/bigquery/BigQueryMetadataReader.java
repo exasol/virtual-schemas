@@ -1,13 +1,14 @@
 package com.exasol.adapter.dialects.bigquery;
 
-import java.sql.*;
-import java.util.*;
-
-import com.exasol.adapter.*;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.*;
-
 import static com.exasol.adapter.jdbc.RemoteMetadataReaderConstants.ANY_TABLE_TYPE;
+
+import java.sql.Connection;
+import java.util.Set;
+
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
+import com.exasol.adapter.dialects.IdentifierConverter;
+import com.exasol.adapter.jdbc.*;
 
 /**
  * Metadata reader that reads BigQuery-specific database metadata.
