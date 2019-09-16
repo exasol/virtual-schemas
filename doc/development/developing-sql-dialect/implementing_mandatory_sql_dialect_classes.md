@@ -118,7 +118,7 @@ And we also need two corresponding test classes:
     The list of capabilities that Exasol's Virtual Schemas know can be found in `com.exasol.adapter.capabilities` package from the project [`virtual-schema-common-java`](https://github.com/exasol/virtual-schema-common-java). 
     If you look at the JavaDoc of that class, you find helpful examples of what that capability means.
     
-    You only need to **pick up the capabilities from the existing lists** in the common part of the project. 
+    You only need to pick up **the capabilities from the existing lists** in the common part of the project. 
     If the source supports something that is not in our lists, you can ignore it.
     
 9. **Write a unit test** that checks whether the SQL dialect adapter **reports the capabilities** that you find in the documentation of the data source.
@@ -165,7 +165,7 @@ And we also need two corresponding test classes:
     _Reading through the Athena and Presto documentation you will realize that while `LIMIT` in general is supported `LIMIT_WITH_OFFSET` is not. 
     The unit test reflects that._
 
-    **Run the test and it must fail**, since you did not implement the the capability reporting method yet.
+    Run the test and it must fail, since you did not implement the the capability reporting method yet.
 
 10. Now **implement the main capabilities part of the `createCapabilityList()` method** in the `<Your_dialect_name>SqlDialect.java` class so that it returns the main capabilities you added to the test.
     We use a builder and an `addMain()` method to add capabilities. 
@@ -183,7 +183,7 @@ And we also need two corresponding test classes:
     }
     ```
 
-11. Now **repeat** the previous two steps for all **other kinds of capabilities**.
+11. Now repeat the previous two steps for all **other kinds of capabilities**.
 
     ### Defining Catalog and Schema Support
 
@@ -255,7 +255,7 @@ And we also need two corresponding test classes:
         assertThat(this.dialect.getDefaultNullSorting(), equalTo(NullSorting.NULLS_SORTED_AT_END));
     }
     ```
-    Again **run the test, let it fail, implement, let the test succeed**.
+    Again run the test, let it fail, implement, let the test succeed.
 
     ### Implement String Literal Conversion
 
@@ -291,7 +291,7 @@ And we also need two corresponding test classes:
 
     ### Implement the Applying of Quotes
     
-17. The next method to **implement - `applyQuote()`**. It applies quotes to table and schema names.
+17. The next method to **implement: `applyQuote()`**. It applies quotes to table and schema names.
     In case of Aurora it's a little bit complicated, so let's see a more generic example:
     ```java
     @Test
@@ -358,7 +358,7 @@ It looks up the fully qualified class name of the dialect factories in the file 
        //methods here
    } 
    ```
-   Also **create a corresponding test class**.
+   Also create a corresponding test class.
    
 2. **Implement method `getSqlDialectName()`** and write test for it.
     ```java
@@ -367,10 +367,10 @@ It looks up the fully qualified class name of the dialect factories in the file 
         return AthenaSqlDialect.NAME;
     }
     ```
-    The factory needs to be able to provide the dialect name since the JDBC adapter identifies dialect by name.
-    Note that at this point we don't have an instance of the dialect yet and thus are using the constant directly.
+    _The factory needs to be able to provide the dialect name since the JDBC adapter identifies dialect by name._
+    _Note that at this point we don't have an instance of the dialect yet and thus are using the constant directly._
 
-3. The **other method** in the factory creates the instance: **`createSqlDialect()`**. **Don't forget to write a test**. 
+3. The **other method** in the factory creates the instance: **`createSqlDialect()`**. Don't forget to write a test. 
     Check the test coverage for the class.
     ```java
     @Override
@@ -378,7 +378,7 @@ It looks up the fully qualified class name of the dialect factories in the file 
         return new AthenaSqlDialect(connection, properties);
     }
     ```
-    The main reason for having a factory is that dialects are loaded lazily. 
-    It is more resource-efficient and secure to load only the one single dialect that we actually need. 
-    The factories are very lightweight, dialects not so much.
+    _The main reason for having a factory is that dialects are loaded lazily._ 
+    _It is more resource-efficient and secure to load only the one single dialect that we actually need._ 
+    _The factories are very lightweight, dialects not so much._
 

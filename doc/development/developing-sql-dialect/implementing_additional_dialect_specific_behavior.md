@@ -1,95 +1,114 @@
-## Implementing additional dialect-specific behavior
+# Implementing additional dialect-specific behavior
 
-**When you finish the main implementation part** above you should check **whether your new dialect has some specific behavior**. 
-If it does, you should implement additional class. If not, your dialect is ready to be used.
+In this part we should check whether your new dialect has some **specific behavior**. If it does, you should implement additional classes.    
 
-At this point you can **run the first manual integration test**. If the test fails, it means that your implementation is not fully finished or you made some mistakes in the mandatory classes.
-Read carefully through the error messages and try to figure out what caused the errors.     
-
-### Implementing Identifier Case Handling
+## Implementing Identifier Case Handling
 
 Different products have different case-sensitivity and quoting rules for identifiers like table names. 
-Exasol for example silently converts all unquoted identifiers to upper case. PostgreSQL converts them to lower case instead. 
-MySQL table names are case-sensitive (at least on Unix-style operating systems) since they directly map to the names of the files containing the table data. 
-In order to translate identifiers correctly between Exasol and the remote source, **we must define the behavior of the remote data source**.
+In order to translate identifiers correctly between Exasol and the remote source, we must define the behavior of the remote data source.
 
-In our Athena example the situation is tricky. The documentation states that Athena itself is uses case-insensitive table names. 
-On the other hand combining Athena with Apache Spark forces case-sensitive table handling. 
-For now we implement the default behavior and let Exasol handle all unquoted identifiers as if they were upper case.
+_Exasol for example silently converts all unquoted identifiers to upper case. PostgreSQL converts them to lower case instead._ 
+_MySQL table names are case-sensitive (at least on Unix-style operating systems) since they directly map to the names of the files containing the table data._
 
-1. First, check if **the default identifiers case handling** is true for your source database:
+_In our Athena example the situation is tricky. The documentation states that Athena itself is uses case-insensitive table names._ 
+_On the other hand combining Athena with Apache Spark forces case-sensitive table handling._ 
+_For now we implement the default behavior and let Exasol handle all unquoted identifiers as if they were upper case._
+
+1. First, check if **the default identifiers case handling** is true for your source:
 
     - **Unquoted** identifiers are treated as **UPPERCASE** text. 
     It means that if you write `SELECT * FROM Schema_Name.Table_Name`, it will be read as `SELECT * FROM SCHEMA_NAME.TABLE_NAME`. 
-    All schema/table/column names are converted to uppercase automatically by the database.
+    All schema/table/column names are converted to uppercase.
     - **Quoted** identifiers are treated as  **CASE SENSITIVE**.
     It means that if you write `SELECT * FROM "Schema_Name"."Table_Name"`, it will be read as `SELECT * FROM Schema_Name.Table_Name`. 
-    All schema/table/column names are saved as you wrote them.
+    All schema/table/column names are saved as they are written.
 
-    If **the both point are true** for the source database, you can **skip** `Implementing Identifier Case Handling` part and go to the next one. 
-    
-2. Check that you can apply the description from the list below to the unquoted/quoted identifiers:
+    If the both points are true for the source, you can **skip** `Implementing Identifier Case Handling` part and go to the next one. 
+
+2. If you need to change the default behavior, **create a class for the Metadata Reader**. For example `com.exasol.adapter.dialects.hive.HiveMetadataReader` that **extends** `AbstractRemoteMetadataReader`. 
+    Let your IDE to generate necessary **overriding methods and constructor** for you. 
+    ```java
+    public class HiveMetadataReader extends AbstractRemoteMetadataReader {
+       //methods here
+   } 
+   ```
+   Also **create a corresponding test class**.
+   
+3. Go back to the main dialect class (`HiveSqlDialect.java` for example) and **fix the `createRemoteMetadataReader()`** method instantiating your new Metadata Reader:
+
+   ```java
+   @Override
+   protected RemoteMetadataReader createRemoteMetadataReader() {
+       return new HiveMetadataReader(this.connection, this.properties);
+   }
+   ```
+   Also fix the test.
+   
+4. Check that you can apply the description from the list below to the unquoted/quoted identifiers:
 
     - All identifiers are converted to uppercase;
     - All identifiers are converted to lowercase;
     - All identifiers are treated as case-sensitive;
     
-    If you can apply one of the description above to the unquoted identifiers and also quoted identifiers (not necessary the same one to the both),
-    follow go to the step 3. If not, go to the step 4. 
+    If you **can apply** one of the description above to the unquoted identifiers and also quoted identifiers (not necessary the same one to the both),
+    go to the **[Standard Identifier Case Handling](#standard-identifier-case-handling)**. 
+    
+    **If not**, go to the **[Exotic Identifier Case Handling](#exotic-identifier-case-handling)**. 
 
-Identifier handling is implemented in a separate class that needs to implement the interface `IdentifierConverter`.
+    ### Standard Identifier Case Handling
+    
+   Add the **overriding method `createIdentifierConverter`** to **`<Your dialect name>MetadataReader`** which you created in step 2. 
+   The first value from the `BaseIdentifierConverter`'s constructor is for unquoted identifiers. The second one is for quoted.
+   
+   Here is an example from the HIVE:
+    
+   ```java
+   @Override
+   protected IdentifierConverter createIdentifierConverter() {
+       return new BaseIdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_LOWER,
+              IdentifierCaseHandling.INTERPRET_AS_LOWER);
+   }
+   ```
+   Don't forget to add the test to the `<Your dialect name>MetadataReaderTest`.
 
-```
-public interface IdentifierConverter {
-    public String convert(String identifier);
-    public IdentifierCaseHandling getUnquotedIdentifierHandling();
-    public IdentifierCaseHandling getQuotedIdentifierHandling();
-}
-```
-
-### Standard Identifier Case Handling
-
-You can find a configurable standard implementation in class `BaseIdentifierConverter`. This should be sufficient for all but exotic cases. 
-PostgreSQL is an example, where identifier handling needs special attention.
-
-The standard implementation can be configured in the constructor `BaseIdentifierConverter(final IdentifierCaseHandling unquotedIdentifierHandling, final IdentifierCaseHandling quotedIdentifierHandling)`.
-
-The default configuration is `IdentifierHandling.CONVERT_TO_UPPER` for unquoted identifiers and `INTERPRET_AS_CASE_SENSITIVE` for quoted one. 
-If that is what you need for your source, you are all set.
-
-In case your database behaves differently but still works with the `BaseIdentifierConverter`, you can instantiate a matching version by overriding the method `createIdentifierConverter` in your dialect's top-level metadata reader. Here is an example from the HIVE dialect:
-
-```java
-// ...
-public class HiveMetadataReader extends BaseRemoteMetadataReader {
-    // ...
-
+    ### Exotic Identifier Case Handling
+    
+    If you are unlucky, your data source has non-standard identifier case handling. You have to implement your own `IdentifierConverter` in this case.
+    Create a new class which implements IdentifierConverter and implement the methods:
+    
+    ```java
+    public class YourDialectIdentifierConverter implements IdentifierConverter {   
+        @Override
+        public String convert(final String identifier) {
+            //implement it
+        }
+    
+        @Override
+        public IdentifierCaseHandling getUnquotedIdentifierHandling() {
+            //implement it
+        }
+    
+        @Override
+        public IdentifierCaseHandling getQuotedIdentifierHandling() {
+            //implement it
+        }
+    }
+    ```
+    After you finished the implementation, add the **overriding method `createIdentifierConverter`** to **`<Your dialect name>MetadataReader`** which you created in step 2. 
+    Instantiate `YourDialectIdentifierConverter` there:
+    
+    ```java
     @Override
     protected IdentifierConverter createIdentifierConverter() {
-        return new BaseIdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_LOWER,
-                IdentifierCaseHandling.INTERPRET_AS_LOWER);
+        return new YourDialectIdentifierConverter(//constructor parameters);
     }
-}
-```
-
-All `IdentifierConverter`s have getters that let you check the conversion configuration:
-
-### Exotic Identifier Case Handling
-
-If you are unlucky, your data source has non-standard identifier case handling. As mentioned before you can still implement your own `IdentifierConverter`.
-
-Check the following classes for an example:
-
-* `PostgresMetadataReader` &mdash; where the converter is instantiated
-* `PostgresIdentifierConverterTest`
-* `PostgresIdentifierConverter`
-
-
-
-
-
-
-
+    ```    
+   
+    PostgreSQL is an example, where identifier handling needs special attention. Check the following classes for an example:
+    * `PostgresMetadataReader` &mdash; where the converter is instantiated
+    * `PostgresIdentifierConverter` &mdash; which implements `IdentifierConverter` interface.
+    * `PostgresIdentifierConverterTest`
+    
 ## Implementing Access to Remote Metadata
 
 Database metadata describes the structure and configuration parameters of a database. You need it for example to find out which tables exist and what columns they have.

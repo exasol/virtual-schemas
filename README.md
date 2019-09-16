@@ -79,8 +79,8 @@ Supported dialects:
 ## Information for Developers 
 
 * [Virtual Schema API Documentation](doc/development/virtual_schema_api.md)
-* [Developing and Testing an SQL Dialect](doc/development/developing_a_dialect.md)
-* [Step-by-step guide to writing your own SQL dialect](doc/development/step_by_step_guide_to_writing_your_own_dialect.md)
+* [Developing and Testing an SQL Dialect](doc/development/developing-sql-dialect/developing_a_dialect.md)
+* [Step-by-step guide to writing your own SQL dialect](doc/development/developing-sql-dialect/step_by_step_guide_to_writing_your_own_dialect.md)
 * [Remote Logging](doc/development/remote_logging.md)
 * [Remote Debugging](doc/development/remote_debugging.md)
 * [Troubleshooting](doc/development/troubleshooting.md)
@@ -90,7 +90,7 @@ Supported dialects:
 
 ### Run Time Dependencies
 
-Running the Virtual Schema requires a Java Runtime version 8 or later.
+Running the Virtual Schema requires a Java Runtime version 9 or later.
 
 | Dependency                                                                          | Purpose                                                | License                       |
 |-------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------|
