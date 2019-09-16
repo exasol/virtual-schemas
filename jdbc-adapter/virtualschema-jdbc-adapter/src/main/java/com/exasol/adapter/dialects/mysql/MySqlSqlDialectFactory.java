@@ -4,8 +4,11 @@ import java.sql.Connection;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.dialects.SqlDialectFactory;
 
-public class MySqlSqlDialectFactory {
+
+
+public class MySqlSqlDialectFactory implements SqlDialectFactory {
 
     public String getSqlDialectName() {
         return MySqlSqlDialect.NAME;

@@ -80,7 +80,6 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
 
     @Override
     public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
-        // TODO Auto-generated method stub
         return true;
     }
 
@@ -92,13 +91,15 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
     @Override
     public String applyQuote(final String identifier) {
         // http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_ansi_quotes
-        final CharSequence quoteChar = "`";
-        return quoteChar + identifier.replace(quoteChar, quoteChar + "" + quoteChar) + quoteChar;
-        }
+        return "\"" + identifier + "\"";
+    }
 
     @Override
     public String getStringLiteral(final String value) {
-        return "'" + value.replace("'", "''") + "'";
+        final StringBuilder builder = new StringBuilder("'");
+        builder.append(value.replaceAll("'", "''"));
+        builder.append("'");
+        return builder.toString();
     }
 
 

@@ -1,28 +1,31 @@
 package com.exasol.adapter.dialects.mysql;
 
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.SqlDialect;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+
 import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 
-import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 
-import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.SqlDialect.NullSorting;
-import com.exasol.adapter.dialects.SqlDialect.StructureElementSupport;
-
-public class MySqlSqlDialectTest {
+class MySqlSqlDialectTest {
     private MySqlSqlDialect dialect;
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         this.dialect = new MySqlSqlDialect(null, AdapterProperties.emptyProperties());
     }
 
@@ -33,7 +36,7 @@ public class MySqlSqlDialectTest {
     }
 
     @Test
-    public void testGetMainCapabilities() {
+    void testGetMainCapabilities() {
         assertThat(this.dialect.getCapabilities().getMainCapabilities(),
                 containsInAnyOrder(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS,
                         AGGREGATE_SINGLE_GROUP, AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_GROUP_BY_EXPRESSION,
@@ -42,13 +45,13 @@ public class MySqlSqlDialectTest {
     }
 
     @Test
-    public void testGetLiteralCapabilitiesLiteral() {
+    void testGetLiteralCapabilitiesLiteral() {
         assertThat(this.dialect.getCapabilities().getLiteralCapabilities(),
                 containsInAnyOrder(NULL, BOOL, DATE, TIMESTAMP, TIMESTAMP_UTC, DOUBLE, EXACTNUMERIC, STRING, INTERVAL));
     }
 
     @Test
-    public void testGetScalarFunctionCapabilities() {
+    void testGetScalarFunctionCapabilities() {
         assertThat(this.dialect.getCapabilities().getScalarFunctionCapabilities(), containsInAnyOrder(ABS, ACOS, ASIN,
                 ATAN, ATAN2, CEIL, COS, COT, DEGREES, DIV, EXP, FLOOR, GREATEST, LEAST, LN, LOG, MOD, POWER, RADIANS,
                 RAND, ROUND, SIGN, SIN, SQRT, TAN, ASCII, BIT_LENGTH, CONCAT, INSERT, INSTR, LENGTH, LOCATE, LOWER,
@@ -64,51 +67,65 @@ public class MySqlSqlDialectTest {
     }
 
     @Test
-    public void testGetAggregateFunctionCapabilities() {
+    void testGetAggregateFunctionCapabilities() {
         assertThat(this.dialect.getCapabilities().getAggregateFunctionCapabilities(), containsInAnyOrder(COUNT, SUM,
                 MIN, MAX, AVG, STDDEV, STDDEV_POP, STDDEV_SAMP, VARIANCE, VAR_POP, VAR_SAMP));
     }
 
     @Test
-    public void testSupportsJdbcCatalogs() {
-        assertThat(this.dialect.supportsJdbcCatalogs(), equalTo(StructureElementSupport.NONE));
+    void testSupportsJdbcCatalogs() {
+        assertThat(this.dialect.supportsJdbcCatalogs(), equalTo(SqlDialect.StructureElementSupport.NONE));
     }
 
     @Test
-    public void testSupportsJdbcSchemas() {
-        assertThat(this.dialect.supportsJdbcSchemas(), equalTo(StructureElementSupport.SINGLE));
+    void testSupportsJdbcSchemas() {
+        assertThat(this.dialect.supportsJdbcSchemas(), equalTo(SqlDialect.StructureElementSupport.SINGLE));
     }
 
     @Test
-    public void testRequiresCatalogQualifiedTableNames() {
-        assertThat(this.dialect.requiresCatalogQualifiedTableNames(null), equalTo(false));
+    void testRequiresCatalogQualifiedTableNames() {
+        assertThat(this.dialect.requiresCatalogQualifiedTableNames(null), equalTo(true));
     }
 
     @Test
-    public void testRequiresSchemaQualifiedTableNames() {
+    void testRequiresSchemaQualifiedTableNames() {
         assertThat(this.dialect.requiresSchemaQualifiedTableNames(null), equalTo(false));
     }
 
     @Test
-    public void testGetDefaultNullSorting() {
-        assertThat(this.dialect.getDefaultNullSorting(), equalTo(NullSorting.NULLS_SORTED_AT_END));
+    void testGetDefaultNullSorting() {
+        assertThat(this.dialect.getDefaultNullSorting(), equalTo(SqlDialect.NullSorting.NULLS_SORTED_AT_END));
     }
 
-    @CsvSource({ "tableName, \"tableName\"", "table123, \"table123\"", "_table, `_table`",
-            "table_name, \"table_name\"" })
+    @ValueSource(strings = { "ab:\'ab\'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
     @ParameterizedTest
-    public void testApplyQuote(final String unquoted, final String quoted) {
-        assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
+    void testGetLiteralString(final String definition){
+        final int colonPosition = definition.indexOf(':');
+        final String original = definition.substring(0, colonPosition);
+        final String literal = definition.substring(colonPosition + 1);
+        assertThat(this.dialect.getStringLiteral(original), equalTo(literal));
     }
 
     @Test
-    public void testMetadataReaderClass() {
+    void testApplyQuote(){
+        assertThat(this.dialect.applyQuote("tableName"), Matchers.equalTo("\"tableName\""));
+    }
+
+    /*@CsvSource({"tableName, \"tableName\"", "table123, \"table123\"", "_table, `_table`",
+            "table_name, \"table_name\""})
+    @ParameterizedTest
+    void testApplyQuote(final String unquoted, final String quoted) {
+        assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
+    }*/
+
+    @Test
+    void testMetadataReaderClass() {
         assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
                 instanceOf(MySqlMetadataReader.class));
     }
 
     @Test
-    public void testGetSupportedProperties() {
+    void testGetSupportedProperties() {
         assertThat(this.dialect.getSupportedProperties(),
                 containsInAnyOrder(SQL_DIALECT_PROPERTY, CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY,
                         USERNAME_PROPERTY, PASSWORD_PROPERTY, CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY,
