@@ -13,7 +13,7 @@ public class MySqlSqlDialectFactory implements SqlDialectFactory {
     public String getSqlDialectName() {
         return MySqlSqlDialect.NAME;
     }
-
+@Override
     public SqlDialect createSqlDialect(final Connection connection, final AdapterProperties properties) {
         return new MySqlSqlDialect(connection, properties);
     }
