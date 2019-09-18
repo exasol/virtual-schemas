@@ -9,7 +9,7 @@ import com.exasol.adapter.dialects.SqlDialectFactory;
 
 
 public class MySqlSqlDialectFactory implements SqlDialectFactory {
-
+@Override 
     public String getSqlDialectName() {
         return MySqlSqlDialect.NAME;
     }
