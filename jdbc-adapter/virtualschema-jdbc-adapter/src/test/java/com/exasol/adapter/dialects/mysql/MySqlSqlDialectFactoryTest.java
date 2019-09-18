@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import com.exasol.adapter.AdapterProperties;
 
 class MySqlSqlDialectFactoryTest {
-
     private MySqlSqlDialectFactory factory;
 
     @BeforeEach
@@ -28,5 +27,4 @@ class MySqlSqlDialectFactoryTest {
         assertThat(this.factory.createSqlDialect(null, AdapterProperties.emptyProperties()),
                 instanceOf(MySqlSqlDialect.class));
     }
-
 }

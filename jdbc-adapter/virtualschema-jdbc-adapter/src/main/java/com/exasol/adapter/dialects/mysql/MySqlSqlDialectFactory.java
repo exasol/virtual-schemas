@@ -6,7 +6,9 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectFactory;
 
-
+/**
+ * Factory for the MySql SQL dialect.
+ */
 
 public class MySqlSqlDialectFactory implements SqlDialectFactory {
 @Override 

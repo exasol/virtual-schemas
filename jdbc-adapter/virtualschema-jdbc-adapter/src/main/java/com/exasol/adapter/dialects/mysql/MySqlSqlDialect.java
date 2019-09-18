@@ -16,6 +16,11 @@ import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 
+/**
+ * This class implements the SQL dialect of MySQL.
+ *
+ * @see <a href="https://dev.mysql.com/doc/">MySQL</a>
+ */
 public class MySqlSqlDialect extends AbstractSqlDialect {
     static final String NAME = "MYSQL";
     private static final Capabilities CAPABILITIES = createCapabilityList();
@@ -23,8 +28,6 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
-
-
 
     private static Capabilities createCapabilityList() {
         return Capabilities //
@@ -53,6 +56,12 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
                 .build();
     }
 
+    /**
+     * Create a new instance of the {@link MySqlSqlDialect}.
+     *
+     * @param connection JDBC connection to the Athena service
+     * @param properties user-defined adapter properties
+     */
     public MySqlSqlDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
@@ -69,7 +78,6 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
 
     @Override
     public StructureElementSupport supportsJdbcCatalogs() {
-        //Ensure it is supported
         return StructureElementSupport.NONE;
     }
 
@@ -90,7 +98,11 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuote(final String identifier) {
-        // http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_ansi_quotes
+        /**
+         * Create a new instance of the {@link MySqlSqlDialect}.
+         * http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_ansi_quotes
+         */
+        //
         return "\"" + identifier + "\"";
     }
 
@@ -101,8 +113,6 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
         builder.append("'");
         return builder.toString();
     }
-
-
 
     @Override
     public NullSorting getDefaultNullSorting() {

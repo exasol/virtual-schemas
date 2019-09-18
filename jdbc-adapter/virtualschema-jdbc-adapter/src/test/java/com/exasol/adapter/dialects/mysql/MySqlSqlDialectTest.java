@@ -20,7 +20,6 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
-
 class MySqlSqlDialectTest {
     private MySqlSqlDialect dialect;
 
@@ -28,7 +27,6 @@ class MySqlSqlDialectTest {
     void beforeEach() {
         this.dialect = new MySqlSqlDialect(null, AdapterProperties.emptyProperties());
     }
-
 
     @Test
     void testGetName() {
@@ -110,13 +108,6 @@ class MySqlSqlDialectTest {
     void testApplyQuote(){
         assertThat(this.dialect.applyQuote("tableName"), Matchers.equalTo("\"tableName\""));
     }
-
-    /*@CsvSource({"tableName, \"tableName\"", "table123, \"table123\"", "_table, `_table`",
-            "table_name, \"table_name\""})
-    @ParameterizedTest
-    void testApplyQuote(final String unquoted, final String quoted) {
-        assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
-    }*/
 
     @Test
     void testMetadataReaderClass() {

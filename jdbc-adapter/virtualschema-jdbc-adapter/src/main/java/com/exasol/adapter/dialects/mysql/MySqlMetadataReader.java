@@ -8,9 +8,14 @@ import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.*;
 
-
 public class MySqlMetadataReader extends AbstractRemoteMetadataReader {
 
+    /**
+     * Create a new instance of the {@link MySqlMetadataReader}.
+     *
+     * @param connection JDBC connection to the remote data source
+     * @param properties user-defined adapter properties
+     */
     public MySqlMetadataReader(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
@@ -22,7 +27,6 @@ public class MySqlMetadataReader extends AbstractRemoteMetadataReader {
 
     @Override
     protected IdentifierConverter createIdentifierConverter() {
-        //TODO check cases
         return new BaseIdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_UPPER,
                 IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE);
     }
