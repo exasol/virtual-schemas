@@ -14,7 +14,3 @@ In short it's a cluster of machines digging through large amounts of data stored
 - [Part 1. Implementing the SQL Dialect Adapter's Mandatory Classes](implementing_mandatory_sql_dialect_classes.md) 
 - [Part 2. Implementing Additional Dialect-Specific Behavior](implementing_additional_dialect_specific_behavior.md)
 - [Part 3. Integration Testing](integration_testing.md)
-
-
-
-
