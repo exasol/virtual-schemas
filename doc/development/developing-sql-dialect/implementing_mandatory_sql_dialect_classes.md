@@ -87,11 +87,9 @@ And we also need two corresponding test classes:
    }
    ```
   
-6. **Add the fully qualified class name** `com.exasol.adapter.dialects.athena.AthenaSqlDialect` to the **file `src/main/resources/sql_dialects.properties`**  so that the class loader can find your new dialect adapter.
+6. **Add the dialect name** (here `ATHENA`) **to the list of dialects**  for which the `JbdcAdapterFactory` is responsible in the method `getSupportedAdapterNames()`.
 
-7. **Add the dialect name** (here `ATHENA`) **to the list of dialects**  for which the `JbdcAdapterFactory` is responsible in the method `getSupportedAdapterNames()`.
-
-8. Create a **new unit test class** for the dialect in the test package you created before: `com.exasol.adapter.dialects.athena.AthenaSqlDialectTest` that tests class `AthenaSqlDialect`.
+7. Create a **new unit test class** for the dialect in the test package you created before: `com.exasol.adapter.dialects.athena.AthenaSqlDialectTest` that tests class `AthenaSqlDialect`.
 
     ### Acquiring Information About the Specifics of the Dialect
     
@@ -121,7 +119,7 @@ And we also need two corresponding test classes:
     You only need to pick up **the capabilities from the existing lists** in the common part of the project. 
     If the source supports something that is not in our lists, you can ignore it.
     
-9. **Write a unit test** that checks whether the SQL dialect adapter **reports the capabilities** that you find in the documentation of the data source.
+8. **Write a unit test** that checks whether the SQL dialect adapter **reports the capabilities** that you find in the documentation of the data source.
     We have 5 types of capabilities: 
     
      1. Main Capabilities
@@ -167,7 +165,7 @@ And we also need two corresponding test classes:
 
     Run the test and it must fail, since you did not implement the the capability reporting method yet.
 
-10. Now **implement the main capabilities part of the `createCapabilityList()` method** in the `<Your_dialect_name>SqlDialect.java` class so that it returns the main capabilities you added to the test.
+9. Now **implement the main capabilities part of the `createCapabilityList()` method** in the `<Your_dialect_name>SqlDialect.java` class so that it returns the main capabilities you added to the test.
     We use a builder and an `addMain()` method to add capabilities. 
 
     _There are also `addLiteral()`, `addPredicate()`, `addScalarFunction()`, and `addAggregateFunction()` methods for other kinds of capabilities._
@@ -183,7 +181,7 @@ And we also need two corresponding test classes:
     }
     ```
 
-11. Now repeat the previous two steps for all **other kinds of capabilities**.
+10. Now repeat the previous two steps for all **other kinds of capabilities**.
 
     ### Defining Catalog and Schema Support
 
@@ -203,7 +201,7 @@ And we also need two corresponding test classes:
     _And the [documentation of the `SHOW DATABASES` command](https://docs.aws.amazon.com/athena/latest/ug/show-databases.html) states that there is a synonym called `SHOW SCHEMAS`._
     _That means that Athena internally creates a 1:1 mapping of databases to schemas with the same name._
 
-12. After we find out about schemas and catalogs, we **implement two unit tests**:
+11. After we find out about schemas and catalogs, we **implement two unit tests**:
 
     ```java
     @Test
@@ -219,11 +217,11 @@ And we also need two corresponding test classes:
 
     Both tests must fail. 
     
-13. After that **implement the functions `supportsJdbcCatalogs()` and `supportsJdbcSchemas()`**. 
+12. After that **implement the functions `supportsJdbcCatalogs()` and `supportsJdbcSchemas()`**. 
     Don't forget that you have already created the templates for the methods. So you only need to add the returning values.
     Re-run the test to check that your implementation works fine.
 
-14. The methods `requiresCatalogQualifiedTableNames(SqlGenerationContext)` and `requiresSchemaQualifiedTableNames(SqlGenerationContext)` are closely related. 
+13. The methods `requiresCatalogQualifiedTableNames(SqlGenerationContext)` and `requiresSchemaQualifiedTableNames(SqlGenerationContext)` are closely related. 
     They define under which circumstances table names need to be qualified with catalog and / or schema name.
     **Write tests for these two methods and implement them**.
 
@@ -247,7 +245,7 @@ And we also need two corresponding test classes:
     
     _The Athena documentation states that by default `NULL` values appear last in a search result regardless of search direction._
 
-15. So **the unit test** looks like this:
+14. So **the unit test** looks like this:
 
     ```java
     @Test
@@ -263,7 +261,7 @@ And we also need two corresponding test classes:
     
     _Athena expects string literals to be wrapped in single quotes and single qoutes inside the literal to be escaped by duplicating each._
 
-16. **Create the `testGetLiteralString()` test** method: 
+15. **Create the `testGetLiteralString()` test** method: 
     ```java
     @ValueSource(strings = { "ab:\'ab\'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
     @ParameterizedTest
@@ -291,7 +289,7 @@ And we also need two corresponding test classes:
 
     ### Implement the Applying of Quotes
     
-17. The next method to **implement: `applyQuote()`**. It applies quotes to table and schema names.
+16. The next method to **implement: `applyQuote()`**. It applies quotes to table and schema names.
     In case of Aurora it's a little bit complicated, so let's see a more generic example:
     ```java
     @Test
@@ -306,7 +304,7 @@ And we also need two corresponding test classes:
             return "\"" + identifier + "\"";
         }   
     ```
-18. **Create `SUPPORTED_PROPERTIES` constant**  with a list of properties which are supported by a new dialect. 
+17. **Create `SUPPORTED_PROPERTIES` constant**  with a list of properties which are supported by a new dialect. 
 
     The list of the most common supported properties: `SQL_DIALECT_PROPERTY, CONNECTION_NAME_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
     SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY`.
@@ -324,7 +322,7 @@ And we also need two corresponding test classes:
         return SUPPORTED_PROPERTIES;
     }
     ```
-19. You have **two unimplemented methods** left: `createQueryRewriter()` and `createRemoteMetadataReader()`.
+18. You have **two unimplemented methods** left: `createQueryRewriter()` and `createRemoteMetadataReader()`.
     Let's use a default implementation for now:
     
     ```java
@@ -382,3 +380,4 @@ It looks up the fully qualified class name of the dialect factories in the file 
     _It is more resource-efficient and secure to load only the one single dialect that we actually need._ 
     _The factories are very lightweight, dialects not so much._
 
+4. **Add the fully qualified factory name** `com.exasol.adapter.dialects.athena.AthenaSqlDialectFactory` to the **file `/src/main/resources/META-INF/services/com.exasol.adapter.dialects.SqlDialectFactory`**  so that the class loader can find your new dialect factory.
