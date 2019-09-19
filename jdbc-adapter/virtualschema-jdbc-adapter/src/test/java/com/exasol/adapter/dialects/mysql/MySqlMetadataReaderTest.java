@@ -35,7 +35,7 @@ class MySqlMetadataReaderTest {
 
     @Test
     void testGetColumnMetadataReader() {
-        assertThat(this.reader.getColumnMetadataReader(), instanceOf(BaseColumnMetadataReader.class));
+        assertThat(this.reader.getColumnMetadataReader(), instanceOf(MySqlColumnMetadataReader.class));
     }
 
     @Test
@@ -50,6 +50,6 @@ class MySqlMetadataReaderTest {
                 () -> assertThat(converter.getQuotedIdentifierHandling(),
                         equalTo(IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE)),
                 () -> assertThat(converter.getUnquotedIdentifierHandling(),
-                        equalTo(IdentifierCaseHandling.INTERPRET_AS_UPPER)));
+                        equalTo(IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE)));
     }
 }

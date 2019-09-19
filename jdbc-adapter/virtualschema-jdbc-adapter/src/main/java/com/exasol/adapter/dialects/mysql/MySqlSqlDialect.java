@@ -26,8 +26,8 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
     private static final Capabilities CAPABILITIES = createCapabilityList();
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
-            CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
-            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
+            SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY,
+            LOG_LEVEL_PROPERTY);
 
     private static Capabilities createCapabilityList() {
         return Capabilities //
@@ -83,17 +83,17 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
 
     @Override
     public StructureElementSupport supportsJdbcSchemas() {
-        return StructureElementSupport.SINGLE;
+        return StructureElementSupport.MULTIPLE;
     }
 
     @Override
     public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
-        return true;
+        return false;
     }
 
     @Override
     public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
-        return false;
+        return true;
     }
 
     /**
@@ -102,15 +102,7 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
      */
     @Override
     public String applyQuote(final String identifier) {
-        return "\"" + identifier + "\"";
-    }
-
-    @Override
-    public String getStringLiteral(final String value) {
-        final StringBuilder builder = new StringBuilder("'");
-        builder.append(value.replaceAll("'", "''"));
-        builder.append("'");
-        return builder.toString();
+        return "`" + identifier + "`";
     }
 
     @Override

@@ -30,13 +30,13 @@ public class MySqlMetadataReader extends AbstractRemoteMetadataReader {
 
     @Override
     protected IdentifierConverter createIdentifierConverter() {
-        return new BaseIdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_UPPER,
+        return new BaseIdentifierConverter(IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE,
                 IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE);
     }
 
     @Override
     protected ColumnMetadataReader createColumnMetadataReader() {
-        return new BaseColumnMetadataReader(this.connection, this.properties, this.identifierConverter);
+        return new MySqlColumnMetadataReader(this.connection, this.properties, this.identifierConverter);
     }
 
     @Override
