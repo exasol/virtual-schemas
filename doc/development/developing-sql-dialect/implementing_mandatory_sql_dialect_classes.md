@@ -312,7 +312,7 @@ And we also need two corresponding test classes:
     Then **implement `getSupportedProperties()`** method. Write a test. 
 
     ```java
-    private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
+    private static final List<String> SUPPORTED_PROPERTIES = List.of(SQL_DIALECT_PROPERTY,
                 CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
                 CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
                 DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
