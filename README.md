@@ -24,6 +24,10 @@ Regardless of whether that source is a relational database like ours, or it's li
 
 This means an user familiar with SQL will immediately feel at home when accessing remote data through Virtual Schemas.
 
+## Version Requirements
+
+From Virtual Schema 2.0.0 on you need Exasol 6.2 or later since it requires Java 9 to run. For Exasol 6.1 choose Virtual Schema 1.x or upgrade to 6.2.
+
 ## Deprecation Warning
 
 Please use the entry point
