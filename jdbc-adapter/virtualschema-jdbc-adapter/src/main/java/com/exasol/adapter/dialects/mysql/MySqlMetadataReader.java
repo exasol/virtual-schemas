@@ -12,7 +12,6 @@ import com.exasol.adapter.jdbc.*;
  * Metadata reader that reads MySQL-specific database metadata.
  */
 public class MySqlMetadataReader extends AbstractRemoteMetadataReader {
-
     /**
      * Create a new instance of the {@link MySqlMetadataReader}.
      *

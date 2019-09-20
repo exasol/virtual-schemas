@@ -26,6 +26,8 @@ You need to specify the following settings when adding the JDBC driver via EXAOp
 | Prefix    | `jdbc:mysql:`                                       |
 | Files     | `mysql-connector-java-<version>.jar`                |
 
+IMPORTANT: Currently you have to **Disable Security Manager** for the driver if you want to connect to MySQL using Virtual Schemas.
+It is necessary because JDBC driver requires a JAVA permission which we do not grant by default.  
 
 ## Uploading the JDBC Driver to EXAOperation
 
@@ -57,7 +59,7 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
 
 ## Defining a Named Connection
 
-Define the connection to MySQL as shown below. We recommend using TLS to secure the connection.
+Define the connection to MySQL as shown below.
 
 ```sql
 CREATE OR REPLACE CONNECTION MYSQL_CONNECTION
@@ -82,5 +84,4 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
 ## Data Types Mapping and Limitations
 
 - `TIME` is casted to `TIMESTAMP` with a format `1970-01-01 hh:mm:ss`.   
-
 - Unsupported data types: `BINARY`, `VARBINARY`, `BLOB`, `TINYBLOB`, `MEDIUMBLOB`, `LONGBLOB`.

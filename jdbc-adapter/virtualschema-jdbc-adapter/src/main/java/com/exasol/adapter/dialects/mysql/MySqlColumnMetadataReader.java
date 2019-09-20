@@ -13,7 +13,6 @@ import com.exasol.adapter.metadata.DataType;
  * This class implements MySQL-specific reading of column metadata.
  */
 public class MySqlColumnMetadataReader extends BaseColumnMetadataReader {
-
     /**
      * Create a new instance of the {@link MySqlColumnMetadataReader}.
      *

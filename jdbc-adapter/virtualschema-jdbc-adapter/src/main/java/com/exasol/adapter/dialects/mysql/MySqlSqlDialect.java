@@ -8,7 +8,6 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.Connection;
-import java.util.Arrays;
 import java.util.List;
 
 import com.exasol.adapter.AdapterProperties;
@@ -19,12 +18,12 @@ import com.exasol.adapter.jdbc.RemoteMetadataReader;
 /**
  * This class implements the SQL dialect of MySQL.
  *
- * @see <a href="https://dev.mysql.com/doc/">MySQL</a>
+ * @see <a href="https://dev.mysql.com/doc/">MySQL developer documentation</a>
  */
 public class MySqlSqlDialect extends AbstractSqlDialect {
     static final String NAME = "MYSQL";
     private static final Capabilities CAPABILITIES = createCapabilityList();
-    private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
+    private static final List<String> SUPPORTED_PROPERTIES = List.of(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY,
             LOG_LEVEL_PROPERTY);
@@ -87,8 +86,7 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
     }
 
     /**
-     * Create a new instance of the {@link MySqlSqlDialect}.
-     * http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_ansi_quotes
+     * @see <a href=http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_ansi_quotes><a/>
      */
     @Override
     public String applyQuote(final String identifier) {
