@@ -24,8 +24,14 @@ public class MySqlMetadataReader extends AbstractRemoteMetadataReader {
     }
 
     @Override
-    public Set<String> getSupportedTableTypes() {
-        return RemoteMetadataReaderConstants.ANY_TABLE_TYPE;
+    protected ColumnMetadataReader createColumnMetadataReader() {
+        return new MySqlColumnMetadataReader(this.connection, this.properties, this.identifierConverter);
+    }
+
+    @Override
+    protected TableMetadataReader createTableMetadataReader() {
+        return new BaseTableMetadataReader(this.connection, this.columnMetadataReader, this.properties,
+                this.identifierConverter);
     }
 
     @Override
@@ -35,13 +41,7 @@ public class MySqlMetadataReader extends AbstractRemoteMetadataReader {
     }
 
     @Override
-    protected ColumnMetadataReader createColumnMetadataReader() {
-        return new MySqlColumnMetadataReader(this.connection, this.properties, this.identifierConverter);
-    }
-
-    @Override
-    protected TableMetadataReader createTableMetadataReader() {
-        return new BaseTableMetadataReader(this.connection, this.columnMetadataReader, this.properties,
-                this.identifierConverter);
+    public Set<String> getSupportedTableTypes() {
+        return RemoteMetadataReaderConstants.ANY_TABLE_TYPE;
     }
 }

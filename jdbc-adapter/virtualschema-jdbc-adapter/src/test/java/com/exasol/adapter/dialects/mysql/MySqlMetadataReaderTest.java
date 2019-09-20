@@ -15,7 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.dialects.IdentifierConverter;
-import com.exasol.adapter.jdbc.*;
+import com.exasol.adapter.jdbc.BaseTableMetadataReader;
+import com.exasol.adapter.jdbc.IdentifierCaseHandling;
 
 @ExtendWith(MockitoExtension.class)
 class MySqlMetadataReaderTest {

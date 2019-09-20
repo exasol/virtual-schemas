@@ -29,6 +29,16 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
             SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY,
             LOG_LEVEL_PROPERTY);
 
+    /**
+     * Create a new instance of the {@link MySqlSqlDialect}.
+     *
+     * @param connection JDBC connection to the Athena service
+     * @param properties user-defined adapter properties
+     */
+    public MySqlSqlDialect(final Connection connection, final AdapterProperties properties) {
+        super(connection, properties);
+    }
+
     private static Capabilities createCapabilityList() {
         return Capabilities //
                 .builder() //
@@ -56,16 +66,6 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
                 .build();
     }
 
-    /**
-     * Create a new instance of the {@link MySqlSqlDialect}.
-     *
-     * @param connection JDBC connection to the Athena service
-     * @param properties user-defined adapter properties
-     */
-    public MySqlSqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
-    }
-
     @Override
     public String getName() {
         return NAME;
@@ -86,6 +86,15 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
         return StructureElementSupport.MULTIPLE;
     }
 
+    /**
+     * Create a new instance of the {@link MySqlSqlDialect}.
+     * http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_ansi_quotes
+     */
+    @Override
+    public String applyQuote(final String identifier) {
+        return "`" + identifier + "`";
+    }
+
     @Override
     public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
         return false;
@@ -94,15 +103,6 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
     @Override
     public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
         return true;
-    }
-
-    /**
-     * Create a new instance of the {@link MySqlSqlDialect}.
-     * http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_ansi_quotes
-     */
-    @Override
-    public String applyQuote(final String identifier) {
-        return "`" + identifier + "`";
     }
 
     @Override

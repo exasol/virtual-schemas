@@ -1,13 +1,13 @@
 package com.exasol.adapter.dialects.mysql;
 
+import java.sql.Connection;
+import java.sql.Types;
+
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
-
-import java.sql.Connection;
-import java.sql.Types;
 
 /**
  * This class implements MySQL-specific reading of column metadata.

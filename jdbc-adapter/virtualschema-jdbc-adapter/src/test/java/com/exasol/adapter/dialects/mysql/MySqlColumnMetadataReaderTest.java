@@ -1,18 +1,17 @@
 package com.exasol.adapter.dialects.mysql;
 
-import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.BaseIdentifierConverter;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.dialects.hive.HiveColumnMetadataReader;
-import com.exasol.adapter.metadata.DataType;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.sql.Types;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
+import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.metadata.DataType;
 
 class MySqlColumnMetadataReaderTest {
     private MySqlColumnMetadataReader columnMetadataReader;
