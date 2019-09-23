@@ -6,7 +6,7 @@ The minimum implementation requires that you create two mandatory classes:
 1. [`<Your_dialect_name>SqlDialect.java`](#creating-the-main-dialect-class)
 2. [`<Your_dialect_name>SqlDialectFactory.java`](#creating-the-sql-dialect-factory)
 
-_For example, for Athena dialect we have: `AthenaSqlDialect.java` and `AthenaSqlDialectFactory.java`._
+For example, for Athena dialect we have: `AthenaSqlDialect.java` and `AthenaSqlDialectFactory.java`.
 
 And we also need two corresponding test classes:
  
@@ -65,12 +65,12 @@ And we also need two corresponding test classes:
     }
     ```
 
-    _The constant `NAME` is package-scoped because we also need it in a method of the [factory](#creating-the-sql-dialect-factory) that instantiates the dialect _before_ an instance is available._
+    The constant `NAME` is package-scoped because we also need it in a method of the [factory](#creating-the-sql-dialect-factory) that instantiates the dialect _before_ an instance is available.
 
 5. **Add a `CAPABILITIES` constant  and `createCapabilityList()` method** that returns NULL.
 
-    _Since the capabilities of the adapter do not change at runtime, we assigned them to a constant. 
-    This way the `Capabilities` object is instantiated only once which makes querying the capabilities cheaper._
+    Since the capabilities of the adapter do not change at runtime, we assigned them to a constant. 
+    This way the `Capabilities` object is instantiated only once which makes querying the capabilities cheaper.
 
     Also **implement `getCapabilities()` method** returning the `CAPABILITIES` constant you've just created.
 

@@ -2,7 +2,7 @@
 
 In this part we find out whether your new dialect has some **dialect-specific behavior**. If it does, you have to implement additional classes.
 
-Here is a checklist with the most common behavior issues that might need implementation:
+Here is a checklist with the most common behavior differences that might need implementation:
 
 1. [Identifier Case Handling](#implementing-identifier-case-handling)   
 2. [Supported tables types](#implementing-supported-tables-types)
@@ -22,34 +22,34 @@ _In our Athena example the situation is tricky. The documentation states that At
 _On the other hand combining Athena with Apache Spark forces case-sensitive table handling._ 
 _For now we implement the default behavior and let Exasol handle all unquoted identifiers as if they were upper case._
 
-1. First, check if the **default identifiers case handling** is suited to your source:
+1. First, check if the **default identifiers case handling** is suitable for your source:
 
     - **Unquoted** identifiers are treated as **UPPERCASE** text. 
     It means that if you write a query `SELECT * FROM Schema_Name.Table_Name`, the source reads it as `SELECT * FROM SCHEMA_NAME.TABLE_NAME`. 
     All schema/table/column names are converted to uppercase.
     - **Quoted** identifiers are treated as  **CASE SENSITIVE**.
     It means that if you write a query `SELECT * FROM "Schema_Name"."Table_Name"`, the source reads it as `SELECT * FROM Schema_Name.Table_Name`. 
-    All schema/table/column names are saved as they were written.
+    All schema/table/column names are used literally without case changes.
 
 2. If the **both statements above are true** for your source, **skip** this part and go to [Supported tables types](implementing-supported-tables-types).
     
-3. If you want to rewrite the default identifiers case handling, create a new **class for the Metadata Reader**. 
+3. If you want to override the default identifiers case handling, create a new **class for the Metadata Reader**. 
     Follow steps in [Implementing Access to Remote Metadata](#implementing-access-to-remote-metadata) and then come back here. 
    
-4. Check if you can apply a description from the list below to the unquoted/quoted identifiers (not necessary the same description to the both) of the source:
+4. Check if one of the descriptions from the list below to the unquoted and / or quoted identifiers of the source:
 
     - All identifiers are converted to uppercase;
     - All identifiers are converted to lowercase;
     - All identifiers are treated as case-sensitive;
     
-5. If you found suitable descriptions for your identifiers in the list, go to the **[Standard Identifier Case Handling](#standard-identifier-case-handling)**. 
+5. If any descriptions fit your identifiers, refer to the **[Standard Identifier Case Handling](#standard-identifier-case-handling)**. 
     If not, go to the **[Exotic Identifier Case Handling](#exotic-identifier-case-handling)**. 
 
     ### Standard Identifier Case Handling
     
-   Add an **overriding method `createIdentifierConverter()`** to `<Your dialect name>MetadataReader.java` which you created at step 3. 
+   **Override the method `createIdentifierConverter()`** in `<Your dialect name>MetadataReader.java`. 
 
-   Here is an example from the HIVE dialect. The first value of the `BaseIdentifierConverter`'s constructor is for unquoted identifiers, the second one is for quoted.    
+   Here is an example from the Apache Hive dialect. The first value of the `BaseIdentifierConverter`'s constructor is for unquoted identifiers, the second one is for quoted ones.    
    ```java
    @Override
    protected IdentifierConverter createIdentifierConverter() {
@@ -62,7 +62,7 @@ _For now we implement the default behavior and let Exasol handle all unquoted id
     ### Exotic Identifier Case Handling
     
     If you are unlucky, your data source has non-standard identifier case handling. You have to implement your own `IdentifierConverter` in this case.
-    Create a new class which **implements the IdentifierConverter** interface and implement methods:
+    Create a new class which **implements the `IdentifierConverter`** interface and implement methods:
     ```java
     public class YourDialectIdentifierConverter implements IdentifierConverter {   
         @Override
@@ -81,7 +81,7 @@ _For now we implement the default behavior and let Exasol handle all unquoted id
         }
     }
     ```
-    After you finish the implementation, add an **overriding method `createIdentifierConverter()`** to **`<Your dialect name>MetadataReader.java`** which you created at step 3. 
+    After you finish the implementation, **override the method `createIdentifierConverter()`** in **`<Your dialect name>MetadataReader.java`**. 
     Instantiate `YourDialectIdentifierConverter` there:
     ```java
     @Override
@@ -224,15 +224,15 @@ Let's look at a HIVE dialect example. We only want to change mapping for one dat
 
 At its very core the Virtual Schema JDBC adapter rewrites queries. 
 When a user issues a query at the Virtual Schema frontend, it is first parsed and interpreted by the database core, then pushed down in parts or as a whole to the Virtual Schema backend. 
-In the case of the JDBC adapter we have remote data source that speak SQL &mdash; or a driver that makes it like as if they did. 
+In the case of the JDBC adapter we have a remote data source that speaks SQL &mdash; or a driver that makes it look as if they did. 
 But before the Virtual Schema backend pushes a query further down to the remote data source, it rewrites it to accommodate dialect differences.
 
-If possible the backend does not even execute that query itself, but aims to construct an [IMPORT](https://docs.exasol.com/sql/import.htm) statement and gives that back to the Virtual Schema frontend. 
-That way the Exasol database can directly run `IMPORT` on the remote data source, effectively remove the need for marshalling, transferring and unmarshalling data payload for the communication between Virtual Schema backend and frontend.
+If possible the backend does not even execute that query itself, but aims to construct an [IMPORT](https://docs.exasol.com/sql/import.htm) statement and returns it to the Virtual Schema frontend. 
+That way the Exasol database can directly run `IMPORT` on the remote data source. Effectively this removes the need for marshalling, transferring and unmarshalling data payload for the communication between Virtual Schema backend and frontend.
 
 ###  Pre-Requisites for Using IMPORT
 
-If you plan to use IMPORT, bare in mind that remote data source must **offer a JDBC driver** (always the case if you write a dialect for the JDBC adapter instead of an adapter from scratch).
+If you plan to use `IMPORT`, bare in mind that remote data source must **offer a JDBC driver** (always the case if you write a dialect for the JDBC adapter instead of an adapter from scratch).
 
 ### Overloading Rewriting
 
