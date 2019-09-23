@@ -72,7 +72,7 @@ class MySqlSqlDialectTest {
 
     @Test
     void testSupportsJdbcCatalogs() {
-        assertThat(this.dialect.supportsJdbcCatalogs(), equalTo(SqlDialect.StructureElementSupport.NONE));
+        assertThat(this.dialect.supportsJdbcCatalogs(), equalTo(SqlDialect.StructureElementSupport.MULTIPLE));
     }
 
     @Test
@@ -82,7 +82,7 @@ class MySqlSqlDialectTest {
 
     @Test
     void testRequiresCatalogQualifiedTableNames() {
-        assertThat(this.dialect.requiresCatalogQualifiedTableNames(null), equalTo(false));
+        assertThat(this.dialect.requiresCatalogQualifiedTableNames(null), equalTo(true));
     }
 
     @Test
@@ -120,6 +120,7 @@ class MySqlSqlDialectTest {
         assertThat(this.dialect.getSupportedProperties(),
                 containsInAnyOrder(SQL_DIALECT_PROPERTY, CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY,
                         USERNAME_PROPERTY, PASSWORD_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY,
-                        EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY));
+                        CATALOG_NAME_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY,
+                        LOG_LEVEL_PROPERTY));
     }
 }

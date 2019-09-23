@@ -51,7 +51,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-2.1.0.jar;
+    %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-2.1.1.jar;
     %jar /buckets/<BFS service>/<bucket>/mysql-connector-java-<version>.jar;
 /
 ;
@@ -70,7 +70,7 @@ IDENTIFIED BY '<password>';
 
 ## Creating a Virtual Schema
 
-Below you see how a MySQL Virtual Schema is created.
+Below you see how a MySQL Virtual Schema is created. We recommend filtering by database (CATALOG_NAME).
 
 ```sql
 CREATE VIRTUAL SCHEMA <virtual schema name>
@@ -78,7 +78,7 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
     WITH
     SQL_DIALECT = 'MYSQL'
     CONNECTION_NAME = 'MYSQL_CONNECTION'
-    SCHEMA_NAME = '<schema name>';
+    CATALOG_NAME = '<database name>';
 ```
 
 ## Data Types Mapping and Limitations
