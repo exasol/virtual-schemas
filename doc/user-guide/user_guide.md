@@ -17,17 +17,18 @@ Please note that the syntax for creating adapter scripts is not recognized by al
 1. [Athena](../dialects/athena.md)
 1. [Aurora](../dialects/aurora.md)
 1. [Big Query](../dialects/bigquery.md)
+1. [DB2](../dialects/db2.md)
 1. [EXASOL](../dialects/exasol.md)
 1. [Hive](../dialects/hive.md)
 1. [Impala](../dialects/impala.md)
-1. [DB2](../dialects/db2.md)
+1. [MySQL](doc/dialects/mysql.md))
 1. [Oracle](../dialects/oracle.md)
-1. [Teradata](../dialects/teradata.md)
+1. [PostgresSQL](../dialects/postgresql.md)
 1. [Redshift](../dialects/redshift.md)
 1. [SAP HANA](.../dialects/saphana.md)
 1. [SQL Server](../dialects/sql_server.md)
 1. [Sybase ASE](../dialects/sybase.md)
-1. [PostgresSQL](../dialects/postgresql.md)
+1. [Teradata](../dialects/teradata.md)
 1. Generic
 
 
