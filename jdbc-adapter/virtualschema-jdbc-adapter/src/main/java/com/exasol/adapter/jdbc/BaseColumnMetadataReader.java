@@ -243,6 +243,7 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
         case Types.NULL:
         case Types.REF_CURSOR:
         default:
+            LOGGER.finer("Found unsupported type: " + jdbcTypeDescription.getJdbcType());
             return DataType.createUnsupported();
         }
     }

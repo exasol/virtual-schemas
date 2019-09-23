@@ -17,17 +17,18 @@ Please note that the syntax for creating adapter scripts is not recognized by al
 1. [Athena](../dialects/athena.md)
 1. [Aurora](../dialects/aurora.md)
 1. [Big Query](../dialects/bigquery.md)
+1. [DB2](../dialects/db2.md)
 1. [EXASOL](../dialects/exasol.md)
 1. [Hive](../dialects/hive.md)
 1. [Impala](../dialects/impala.md)
-1. [DB2](../dialects/db2.md)
+1. [MySQL](doc/dialects/mysql.md))
 1. [Oracle](../dialects/oracle.md)
-1. [Teradata](../dialects/teradata.md)
+1. [PostgresSQL](../dialects/postgresql.md)
 1. [Redshift](../dialects/redshift.md)
 1. [SAP HANA](.../dialects/saphana.md)
 1. [SQL Server](../dialects/sql_server.md)
 1. [Sybase ASE](../dialects/sybase.md)
-1. [PostgresSQL](../dialects/postgresql.md)
+1. [Teradata](../dialects/teradata.md)
 1. Generic
 
 
@@ -178,7 +179,9 @@ There are a few important things you need to know about those data types.
 
 1. Columns of an unrecognized / unsupported data type are not mapped in a Virtual Schema. From Exasol's perspective those columns do not exist on a table. This is done so that tables containing those columns can still be mapped and do not have to be rejected as a whole.
 2. You can't query columns of an unrecognized / unsupported data type. If the source table contains them, you have to *explicitly* exclude them from the query. You can for example not use the asterisk (`*`) on a table that contains one ore more of those columns. This will result in an error issued by the Virtual schema.
-3. You can't use functions that result in an unsupported / unknown data type. 
+3. If you want to query all columns except unsupported, add `1` to the columns list. Otherwise you will see the same error as if you query with the asterisk (`*`).
+    For example, a table contains 3 columns: `bool_column` BOOLEAN, `timestamp_column` TIMESTAMP, `blob_column` BLOB. The column BLOB is not supported. If you want to query two other columns, use: `SELECT "bool_column", "timestamp_column", 1 FROM table_name;` .
+4. You can't use functions that result in an unsupported / unknown data type. 
 
 ## See Also
 
