@@ -1,10 +1,11 @@
-# Teradata SQL Dialect
+# MySQL SQL Dialect
 
-Teradata is one of the Relational Database Management System based on a Massively Parallel Processing (MPP) Architecture.
+[MySQL](https://www.mysql.com/) is an open-source relational database management system.
 
 ## Registering the JDBC Driver in EXAOperation
 
-First download the [Teradata JDBC driver](https://downloads.teradata.com/download/connectivity/jdbc-driver).
+First download the [MySQL JDBC driver](https://dev.mysql.com/downloads/connector/j/).
+Select Operating System -> Platform Independent -> Download.
 
 Now register the driver in EXAOperation:
 
@@ -20,10 +21,13 @@ You need to specify the following settings when adding the JDBC driver via EXAOp
 
 | Parameter | Value                                               |
 |-----------|-----------------------------------------------------|
-| Name      | `TERADATA`                                          |
-| Main      | `com.teradata.jdbc.TeraDriver`                      |
-| Prefix    | `jdbc:teradata:`                                    |
-| Files     | `terajdbc4.jar`, `tdgssconfig.jar`                  |
+| Name      | `MYSQL`                                             |
+| Main      | `com.mysql.jdbc.Driver`                             |
+| Prefix    | `jdbc:mysql:`                                       |
+| Files     | `mysql-connector-java-<version>.jar`                |
+
+IMPORTANT: Currently you have to **Disable Security Manager** for the driver if you want to connect to MySQL using Virtual Schemas.
+It is necessary because JDBC driver requires a JAVA permission which we do not grant by default.  
 
 ## Uploading the JDBC Driver to EXAOperation
 
@@ -46,34 +50,38 @@ The SQL statement below creates the adapter script, defines the Java class that 
 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
-  %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-2.1.0.jar;
-  %jar /buckets/<BFS service>/<bucket>/terajdbc4.jar;
-  %jar /buckets/<BFS service>/<bucket>/tdgssconfig.jar;
+    %scriptclass com.exasol.adapter.RequestDispatcher;
+    %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-2.1.0.jar;
+    %jar /buckets/<BFS service>/<bucket>/mysql-connector-java-<version>.jar;
 /
 ;
 ```
 
 ## Defining a Named Connection
 
-Define the connection to Teradata as shown below. 
+Define the connection to MySQL as shown below.
 
 ```sql
-CREATE OR REPLACE CONNECTION TERADATA_CONNECTION
-TO 'jdbc:teradata://<database server>/database=<database name>'
+CREATE OR REPLACE CONNECTION MYSQL_CONNECTION
+TO 'jdbc:mysql://<host>:<port>/'
 USER '<user>'
 IDENTIFIED BY '<password>';
 ```
 
 ## Creating a Virtual Schema
 
-Below you see how a Teradata Virtual Schema is created. 
+Below you see how a MySQL Virtual Schema is created.
 
 ```sql
 CREATE VIRTUAL SCHEMA <virtual schema name>
     USING ADAPTER.JDBC_ADAPTER
     WITH
-    SQL_DIALECT = 'TERADATA'
-    CONNECTION_NAME = 'TERADATA_CONNECTION'
+    SQL_DIALECT = 'MYSQL'
+    CONNECTION_NAME = 'MYSQL_CONNECTION'
     SCHEMA_NAME = '<schema name>';
 ```
+
+## Data Types Mapping and Limitations
+
+- `TIME` is casted to `TIMESTAMP` with a format `1970-01-01 hh:mm:ss`.   
+- Unsupported data types: `BINARY`, `VARBINARY`, `BLOB`, `TINYBLOB`, `MEDIUMBLOB`, `LONGBLOB`.
