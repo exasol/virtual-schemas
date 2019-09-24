@@ -70,7 +70,7 @@ IDENTIFIED BY '<password>';
 
 ## Creating a Virtual Schema
 
-Below you see how a MySQL Virtual Schema is created. We recommend filtering by database (CATALOG_NAME).
+Below you see how a MySQL Virtual Schema is created. Use CATALOG_NAME property to select a database.
 
 ```sql
 CREATE VIRTUAL SCHEMA <virtual schema name>
