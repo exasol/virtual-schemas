@@ -71,7 +71,7 @@ Supported dialects:
 1. [Exasol](doc/dialects/exasol.md)
 1. [Hive](doc/dialects/hive.md)
 1. [Impala](doc/dialects/impala.md)
-1. [MySQL](doc/dialects/mysql.md))
+1. [MySQL](doc/dialects/mysql.md)
 1. [Oracle](doc/dialects/oracle.md)
 1. [PostgreSQL](doc/dialects/postgresql.md)
 1. [Redshift](doc/dialects/redshift.md)

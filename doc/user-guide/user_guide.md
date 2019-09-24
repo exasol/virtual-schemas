@@ -21,7 +21,7 @@ Please note that the syntax for creating adapter scripts is not recognized by al
 1. [EXASOL](../dialects/exasol.md)
 1. [Hive](../dialects/hive.md)
 1. [Impala](../dialects/impala.md)
-1. [MySQL](doc/dialects/mysql.md))
+1. [MySQL](../doc/dialects/mysql.md)
 1. [Oracle](../dialects/oracle.md)
 1. [PostgresSQL](../dialects/postgresql.md)
 1. [Redshift](../dialects/redshift.md)

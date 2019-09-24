@@ -23,10 +23,9 @@ import com.exasol.adapter.jdbc.RemoteMetadataReader;
 public class MySqlSqlDialect extends AbstractSqlDialect {
     static final String NAME = "MYSQL";
     private static final Capabilities CAPABILITIES = createCapabilityList();
-    private static final List<String> SUPPORTED_PROPERTIES = List.of(SQL_DIALECT_PROPERTY,
-            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
-            SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY,
-            LOG_LEVEL_PROPERTY);
+    private static final List<String> SUPPORTED_PROPERTIES = List.of(SQL_DIALECT_PROPERTY, CONNECTION_NAME_PROPERTY,
+            CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY, CATALOG_NAME_PROPERTY,
+            TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
     /**
      * Create a new instance of the {@link MySqlSqlDialect}.
@@ -77,12 +76,12 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
 
     @Override
     public StructureElementSupport supportsJdbcCatalogs() {
-        return StructureElementSupport.NONE;
+        return StructureElementSupport.MULTIPLE;
     }
 
     @Override
     public StructureElementSupport supportsJdbcSchemas() {
-        return StructureElementSupport.MULTIPLE;
+        return StructureElementSupport.NONE;
     }
 
     /**
@@ -95,12 +94,12 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
 
     @Override
     public boolean requiresCatalogQualifiedTableNames(final SqlGenerationContext context) {
-        return false;
+        return true;
     }
 
     @Override
     public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
-        return true;
+        return false;
     }
 
     @Override
