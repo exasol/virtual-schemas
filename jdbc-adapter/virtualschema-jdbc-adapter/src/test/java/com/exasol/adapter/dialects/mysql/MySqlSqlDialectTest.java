@@ -72,22 +72,22 @@ class MySqlSqlDialectTest {
 
     @Test
     void testSupportsJdbcCatalogs() {
-        assertThat(this.dialect.supportsJdbcCatalogs(), equalTo(SqlDialect.StructureElementSupport.NONE));
+        assertThat(this.dialect.supportsJdbcCatalogs(), equalTo(SqlDialect.StructureElementSupport.MULTIPLE));
     }
 
     @Test
     void testSupportsJdbcSchemas() {
-        assertThat(this.dialect.supportsJdbcSchemas(), equalTo(SqlDialect.StructureElementSupport.MULTIPLE));
+        assertThat(this.dialect.supportsJdbcSchemas(), equalTo(SqlDialect.StructureElementSupport.NONE));
     }
 
     @Test
     void testRequiresCatalogQualifiedTableNames() {
-        assertThat(this.dialect.requiresCatalogQualifiedTableNames(null), equalTo(false));
+        assertThat(this.dialect.requiresCatalogQualifiedTableNames(null), equalTo(true));
     }
 
     @Test
     void testRequiresSchemaQualifiedTableNames() {
-        assertThat(this.dialect.requiresSchemaQualifiedTableNames(null), equalTo(true));
+        assertThat(this.dialect.requiresSchemaQualifiedTableNames(null), equalTo(false));
     }
 
     @Test
@@ -119,7 +119,7 @@ class MySqlSqlDialectTest {
     void testGetSupportedProperties() {
         assertThat(this.dialect.getSupportedProperties(),
                 containsInAnyOrder(SQL_DIALECT_PROPERTY, CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY,
-                        USERNAME_PROPERTY, PASSWORD_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY,
+                        USERNAME_PROPERTY, PASSWORD_PROPERTY, TABLE_FILTER_PROPERTY, CATALOG_NAME_PROPERTY,
                         EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY));
     }
 }
