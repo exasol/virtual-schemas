@@ -15,12 +15,12 @@ Here is a checklist with the most common behavior differences that might need im
 Different products have different case-sensitivity and quoting rules for identifiers like table names. 
 In order to translate identifiers correctly between Exasol and the remote source, we must define the behavior of the remote data source.
 
-_Exasol for example silently converts all unquoted identifiers to upper case. PostgreSQL converts them to lower case instead._ 
-_MySQL table names are case-sensitive (at least on Unix-style operating systems) since they directly map to the names of the files containing the table data._
+Exasol for example silently converts all unquoted identifiers to upper case. PostgreSQL converts them to lower case instead. 
+MySQL table names are case-sensitive (at least on Unix-style operating systems) since they directly map to the names of the files containing the table data.
 
-_In our Athena example the situation is tricky. The documentation states that Athena itself is uses case-insensitive table names._ 
-_On the other hand combining Athena with Apache Spark forces case-sensitive table handling._ 
-_For now we implement the default behavior and let Exasol handle all unquoted identifiers as if they were upper case._
+In our Athena example the situation is tricky. The documentation states that Athena itself is uses case-insensitive table names.
+On the other hand combining Athena with Apache Spark forces case-sensitive table handling.
+For now we implement the default behavior and let Exasol handle all unquoted identifiers as if they were upper case.
 
 1. First, check if the **default identifiers case handling** is suitable for your source:
 
@@ -47,6 +47,8 @@ _For now we implement the default behavior and let Exasol handle all unquoted id
 
     ### Standard Identifier Case Handling
     
+    Add a test for `createIdentifierConverter()` method to the `<Your dialect name>MetadataReaderTest.java`.
+    
    **Override the method `createIdentifierConverter()`** in `<Your dialect name>MetadataReader.java`. 
 
    Here is an example from the Apache Hive dialect. The first value of the `BaseIdentifierConverter`'s constructor is for unquoted identifiers, the second one is for quoted ones.    
@@ -57,7 +59,6 @@ _For now we implement the default behavior and let Exasol handle all unquoted id
               IdentifierCaseHandling.INTERPRET_AS_LOWER);
    }
    ```
-   Don't forget to add a test to the `<Your dialect name>MetadataReaderTest.java`.
 
     ### Exotic Identifier Case Handling
     
@@ -81,8 +82,10 @@ _For now we implement the default behavior and let Exasol handle all unquoted id
         }
     }
     ```
+   
     After you finish the implementation, **override the method `createIdentifierConverter()`** in **`<Your dialect name>MetadataReader.java`**. 
     Instantiate `YourDialectIdentifierConverter` there:
+    
     ```java
     @Override
     protected IdentifierConverter createIdentifierConverter() {
@@ -128,9 +131,9 @@ If the source supports something else, "EXTERNAL TABLE" for example, you need to
 If you are accessing a remote data source for which a JDBC-compliant driver exists, you will in most cases be able to retrieve the information about the tables via built-in functions of the dirver. 
 We use the function [`getTables(String, String, String, String[])`](https://docs.oracle.com/javase/8/docs/api/java/sql/DatabaseMetaData.html#getTables-java.lang.String-java.lang.String-java.lang.String-java.lang.String:A-) for that purpose in the `BaseTableMetadataReader` and most of the dialect variants.
 
-_Athena (at least with driver version 2.0.7) is one of the rare examples, where that approach fails. Issuing `getTables(...)` returns an empty result set._ 
-_Looking at the documentation, we can see that the recommended way to list tables is issuing a [`SHOW TABLES`](https://docs.aws.amazon.com/athena/latest/ug/show-tables.html) command._ 
-_If you ever worked with [MySQL](https://www.mysql.com/) this might [look familiar](https://dev.mysql.com/doc/refman/8.0/en/show-tables.html)._
+Athena (at least with driver version 2.0.7) is one of the rare examples, where that approach fails. Issuing `getTables(...)` returns an empty result set. 
+Looking at the documentation, we can see that the recommended way to list tables is issuing a [`SHOW TABLES`](https://docs.aws.amazon.com/athena/latest/ug/show-tables.html) command.
+If you ever worked with [MySQL](https://www.mysql.com/) this might [look familiar](https://dev.mysql.com/doc/refman/8.0/en/show-tables.html).
 
 The best way to check if your source can find metadata with the default settings &mdash; run the first manual [integration test](integration_testing.md) with [remote logging](../remote_logging.md).
 If you can **access metadata** using the default implementation, go to the next checkpoint: [Data Type Conversion](#implementing-data-type-conversion).
@@ -168,9 +171,9 @@ In that case you don't need to write any code since this is the column metadata 
 
 If the database supports type that are not covered in the `BaseColumnMetadataReader.java` you will still often be able to map the handful of special data types and delegate the rest of the work back to the base reader.
 
-_Be prepared that even if the remote data source implements an SQL standard type, there are often subtle differences in the implementation. The most obvious one are size restrictions that differ widely between the products._
-_On for `VARCHAR` you also need to be aware of character set encoding. Exasol supports `UTF8` which should be able to receive data from any other character set and `ASCII` which is very limited but only uses a single byte per character._
-_There are differences in how precise the remote data source can encode integer, fixed point and floating values and so on._
+Be prepared that even if the remote data source implements an SQL standard type, there are often subtle differences in the implementation. The most obvious one are size restrictions that differ widely between the products.
+On for `VARCHAR` you also need to be aware of character set encoding. Exasol supports `UTF8` which should be able to receive data from any other character set and `ASCII` which is very limited but only uses a single byte per character.
+There are differences in how precise the remote data source can encode integer, fixed point and floating values and so on.
 
 The best way to find out how good the default mapping works for your source &mdash; run a manual [integration test](integration_testing.md) with [remote logging](../remote_logging.md) accessing a table with all data types available in the source.
 If you assume that you don't need to change data type conversion &mdash; go to the next checkpoint: [Implementing Query Rewriting](#implementing-query-rewriting)
@@ -289,6 +292,7 @@ For each of them a base implementation exists which works fine with a number of 
       //methods here
     }
     ```
+   
 2. Now go back to **the main dialect test class** (`AthenaSqlDialectTest.java`) and write a **unit test** that ensures that the `AthenaSqlDialect` instantiates the specific metadata reader instead of the base implementation.
     ```java
     package com.exasol.adapter.dialects.athena;

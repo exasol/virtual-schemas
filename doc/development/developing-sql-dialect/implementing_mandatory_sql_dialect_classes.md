@@ -21,7 +21,7 @@ And we also need two corresponding test classes:
     And one more **package for tests**:  
     `/virtual-schemas/jdbc-adapter/virtualschema-jdbc-adapter/src/test/java/com/exasol/adapter/dialects/<your new dialect package>` 
 
-    _For example, the package for Athena is named `com.exasol.adapter.dialects.athena`._
+    For example, the package for Athena is named `com.exasol.adapter.dialects.athena`.
 
 2. Now **create a stub class for the dialect**: `com.exasol.adapter.dialects.athena.AthenaSqlDialect` that **extends** `AbstractDialect`. 
     Let your IDE generate necessary **overriding methods** to remove all compilation exceptions. You will implement them later:
@@ -160,15 +160,15 @@ And we also need two corresponding test classes:
     }
     ```
 
-    _Reading through the Athena and Presto documentation you will realize that while `LIMIT` in general is supported `LIMIT_WITH_OFFSET` is not. 
-    The unit test reflects that._
+    Reading through the Athena and Presto documentation you will realize that while `LIMIT` in general is supported `LIMIT_WITH_OFFSET` is not. 
+    The unit test reflects that.
 
     Run the test and it must fail, since you did not implement the the capability reporting method yet.
 
 9. Now **implement the main capabilities part of the `createCapabilityList()` method** in the `<Your_dialect_name>SqlDialect.java` class so that it returns the main capabilities you added to the test.
     We use a builder and an `addMain()` method to add capabilities. 
 
-    _There are also `addLiteral()`, `addPredicate()`, `addScalarFunction()`, and `addAggregateFunction()` methods for other kinds of capabilities._
+    There are also `addLiteral()`, `addPredicate()`, `addScalarFunction()`, and `addAggregateFunction()` methods for other kinds of capabilities.
     ```java
     private static Capabilities createCapabilityList() {
         return Capabilities //
@@ -189,17 +189,17 @@ And we also need two corresponding test classes:
     The same is true for schemas. In case of a relational database you can try to find out whether or not catalogs and / or schemas are supported by simply looking at the Data Definition Language (DDL) statements that the SQL dialect provides. 
     If `CREATE SCHEMA` exists, the database supports schemas.
 
-    _If on the other hand those DDL commands are missing, that does not rule out that pseudo-catalogs and schemas are used. You will see why shortly._
+    If on the other hand those DDL commands are missing, that does not rule out that pseudo-catalogs and schemas are used. You will see why shortly.
 
-    _A Virtual Schema needs to know how the data source handles catalogs and schemas, so that it can:_
-    _1. Validate user-defined catalog and schema properties._
-    _2. Apply catalog and schema filters only where those concepts are supported._
+    A Virtual Schema needs to know how the data source handles catalogs and schemas, so that it can:
+    1. Validate user-defined catalog and schema properties.
+    2. Apply catalog and schema filters only where those concepts are supported.
 
-    _A quick look at the [Athena DDL](https://docs.aws.amazon.com/athena/latest/ug/language-reference.html) tells us that you can't create or drop catalogs and schemas._ 
-    _On the other hand the [JDBC driver simulates catalog support with a single pseudo-catalog](https://s3.amazonaws.com/athena-downloads/drivers/JDBC/SimbaAthenaJDBC_2.0.7/docs/Simba+Athena+JDBC+Driver+Install+and+Configuration+Guide.pdf#%5B%7B%22num%22%3A40%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C76.5%2C556.31%2C0%5D) called `AwsDataCatalog`._
+    A quick look at the [Athena DDL](https://docs.aws.amazon.com/athena/latest/ug/language-reference.html) tells us that you can't create or drop catalogs and schemas._ 
+    On the other hand the [JDBC driver simulates catalog support with a single pseudo-catalog](https://s3.amazonaws.com/athena-downloads/drivers/JDBC/SimbaAthenaJDBC_2.0.7/docs/Simba+Athena+JDBC+Driver+Install+and+Configuration+Guide.pdf#%5B%7B%22num%22%3A40%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C76.5%2C556.31%2C0%5D) called `AwsDataCatalog`.
 
-    _And the [documentation of the `SHOW DATABASES` command](https://docs.aws.amazon.com/athena/latest/ug/show-databases.html) states that there is a synonym called `SHOW SCHEMAS`._
-    _That means that Athena internally creates a 1:1 mapping of databases to schemas with the same name._
+    And the [documentation of the `SHOW DATABASES` command](https://docs.aws.amazon.com/athena/latest/ug/show-databases.html) states that there is a synonym called `SHOW SCHEMAS`.
+    That means that Athena internally creates a 1:1 mapping of databases to schemas with the same name.
 
 11. After we find out about schemas and catalogs, we **implement two unit tests**:
 
@@ -225,7 +225,7 @@ And we also need two corresponding test classes:
     They define under which circumstances table names need to be qualified with catalog and / or schema name.
     **Write tests for these two methods and implement them**.
 
-    _Below you find two unit test examples where the first checks that the Athena adapter does not require catalog-qualified IDs when generating SQL code and the second states that schema-qualification is required._
+    Below you find two unit test examples where the first checks that the Athena adapter does not require catalog-qualified IDs when generating SQL code and the second states that schema-qualification is required.
 
     ```java
     @Test
@@ -243,7 +243,7 @@ And we also need two corresponding test classes:
     
     Next we tell the virtual schema how the SQL dialect sorts `NULL` values by default. 
     
-    _The Athena documentation states that by default `NULL` values appear last in a search result regardless of search direction._
+    The Athena documentation states that by default `NULL` values appear last in a search result regardless of search direction.
 
 14. So **the unit test** looks like this:
 
@@ -259,7 +259,7 @@ And we also need two corresponding test classes:
 
     Another thing we need to implement in the dialect class is quoting of string literals.
     
-    _Athena expects string literals to be wrapped in single quotes and single qoutes inside the literal to be escaped by duplicating each._
+    Athena expects string literals to be wrapped in single quotes and single qoutes inside the literal to be escaped by duplicating each.
 
 15. **Create the `testGetLiteralString()` test** method: 
     ```java
@@ -272,8 +272,8 @@ And we also need two corresponding test classes:
         assertThat(this.dialect.getStringLiteral(original), equalTo(literal));
     }
     ```
-    _You might be wondering why I did not use the `CsvSource` parameterization here._
-    _This is owed to the fact that the `CsvSource` syntax interprets single quotes as string quotes which makes this particular scenario untestable._
+    You might be wondering why I did not use the `CsvSource` parameterization here.
+    This is owed to the fact that the `CsvSource` syntax interprets single quotes as string quotes which makes this particular scenario untestable.
 
     After we let the test fail, we add the following implementation in the dialect:
 
@@ -365,8 +365,8 @@ It looks up the fully qualified class name of the dialect factories in the file 
         return AthenaSqlDialect.NAME;
     }
     ```
-    _The factory needs to be able to provide the dialect name since the JDBC adapter identifies dialect by name._
-    _Note that at this point we don't have an instance of the dialect yet and thus are using the constant directly._
+    The factory needs to be able to provide the dialect name since the JDBC adapter identifies dialect by name.
+    Note that at this point we don't have an instance of the dialect yet and thus are using the constant directly.
 
 3. The **other method** in the factory creates the instance: **`createSqlDialect()`**. Don't forget to write a test. 
     Check the test coverage for the class.
@@ -376,8 +376,8 @@ It looks up the fully qualified class name of the dialect factories in the file 
         return new AthenaSqlDialect(connection, properties);
     }
     ```
-    _The main reason for having a factory is that dialects are loaded lazily._ 
-    _It is more resource-efficient and secure to load only the one single dialect that we actually need._ 
-    _The factories are very lightweight, dialects not so much._
+    The main reason for having a factory is that dialects are loaded lazily.
+    It is more resource-efficient and secure to load only the one single dialect that we actually need. 
+    The factories are very lightweight, dialects not so much.
 
 4. **Add the fully qualified factory name** `com.exasol.adapter.dialects.athena.AthenaSqlDialectFactory` to the **file `/src/main/resources/META-INF/services/com.exasol.adapter.dialects.SqlDialectFactory`**  so that the class loader can find your new dialect factory.
