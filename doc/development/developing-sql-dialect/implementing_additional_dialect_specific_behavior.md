@@ -89,7 +89,7 @@ For now we implement the default behavior and let Exasol handle all unquoted ide
     ```java
     @Override
     protected IdentifierConverter createIdentifierConverter() {
-        return new YourDialectIdentifierConverter(//constructor parameters);
+        return new YourDialectIdentifierConverter(/*constructor parameters*/);
     }
     ```    
     PostgreSQL is an example, where identifier handling needs special attention. Check the following classes:
@@ -276,6 +276,7 @@ For each of them a base implementation exists which works fine with a number of 
 
 1. First of all create a class for the Metadata Reader. For example, `AthenaMetadataReader` in package `com.exasol.adapter.dialects.athena` that **extends** `AbstractRemoteMetadataReader`. 
     Let your IDE to generate necessary **overriding methods and constructor**. Also create a corresponding **test class**.
+   
     ```java
     package com.exasol.adapter.dialects.athena;
     
@@ -294,6 +295,7 @@ For each of them a base implementation exists which works fine with a number of 
     ```
    
 2. Now go back to **the main dialect test class** (`AthenaSqlDialectTest.java`) and write a **unit test** that ensures that the `AthenaSqlDialect` instantiates the specific metadata reader instead of the base implementation.
+   
     ```java
     package com.exasol.adapter.dialects.athena;
     
@@ -313,17 +315,21 @@ For each of them a base implementation exists which works fine with a number of 
         }
     }
     ```
+   
     When you run this test, it must fail and tell you that instead of the expected `AthenaMetadataReader` a `BaseRemoteMetadataReader` is instantiated. This is the default behavior of any SQL dialect.
 
 3. Now **change the method `createRemoteMetadataReader`** in the main dialect class instantiating your new Metadata Reader:
+  
     ```java
         @Override
         protected RemoteMetadataReader createRemoteMetadataReader() {
             return new AthenaMetadataReader(this.connection, this.properties);
         }
     ```
+   
 4. **Implement methods** in the Metadata Reader. For start, you can use the next default implementations:
-    ```java
+    
+   ```java
        @Override
        protected IdentifierConverter createIdentifierConverter() {
            return new BaseIdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_UPPER,

@@ -25,6 +25,7 @@ And we also need two corresponding test classes:
 
 2. Now **create a stub class for the dialect**: `com.exasol.adapter.dialects.athena.AthenaSqlDialect` that **extends** `AbstractDialect`. 
     Let your IDE generate necessary **overriding methods** to remove all compilation exceptions. You will implement them later:
+   
     ```java
    public class AthenaSqlDialect extends AbstractSqlDialect {
         @Override
@@ -43,6 +44,7 @@ And we also need two corresponding test classes:
 
 3. **Add a constructor** that takes a [JDBC database connection](https://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html) and user properties as parameters. 
     Your IDE could also generate it for you.
+  
     ```java
     /**
     * Create a new instance of the {@link AthenaSqlDialect}.
@@ -169,6 +171,7 @@ And we also need two corresponding test classes:
     We use a builder and an `addMain()` method to add capabilities. 
 
     There are also `addLiteral()`, `addPredicate()`, `addScalarFunction()`, and `addAggregateFunction()` methods for other kinds of capabilities.
+   
     ```java
     private static Capabilities createCapabilityList() {
         return Capabilities //
@@ -253,6 +256,7 @@ And we also need two corresponding test classes:
         assertThat(this.dialect.getDefaultNullSorting(), equalTo(NullSorting.NULLS_SORTED_AT_END));
     }
     ```
+    
     Again run the test, let it fail, implement, let the test succeed.
 
     ### Implement String Literal Conversion
@@ -262,6 +266,7 @@ And we also need two corresponding test classes:
     Athena expects string literals to be wrapped in single quotes and single qoutes inside the literal to be escaped by duplicating each.
 
 15. **Create the `testGetLiteralString()` test** method: 
+   
     ```java
     @ValueSource(strings = { "ab:\'ab\'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
     @ParameterizedTest
@@ -272,6 +277,7 @@ And we also need two corresponding test classes:
         assertThat(this.dialect.getStringLiteral(original), equalTo(literal));
     }
     ```
+    
     You might be wondering why I did not use the `CsvSource` parameterization here.
     This is owed to the fact that the `CsvSource` syntax interprets single quotes as string quotes which makes this particular scenario untestable.
 
@@ -291,6 +297,7 @@ And we also need two corresponding test classes:
     
 16. The next method to **implement: `applyQuote()`**. It applies quotes to table and schema names.
     In case of Aurora it's a little bit complicated, so let's see a more generic example:
+   
     ```java
     @Test
     void testApplyQuote() {
@@ -298,12 +305,14 @@ And we also need two corresponding test classes:
     }
     ```
     And implementation:
+
     ```java
     @Override
     public String applyQuote(final String identifier) {
             return "\"" + identifier + "\"";
         }   
     ```
+    
 17. **Create `SUPPORTED_PROPERTIES` constant**  with a list of properties which are supported by a new dialect. 
 
     The list of the most common supported properties: `SQL_DIALECT_PROPERTY, CONNECTION_NAME_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
@@ -322,6 +331,7 @@ And we also need two corresponding test classes:
         return SUPPORTED_PROPERTIES;
     }
     ```
+    
 18. You have **two unimplemented methods** left: `createQueryRewriter()` and `createRemoteMetadataReader()`.
     Let's use a default implementation for now:
     
@@ -336,6 +346,7 @@ And we also need two corresponding test classes:
         return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
     }
     ```
+    
     Write the tests fot the methods.
 
     ### Checking the Code Coverage of the Dialect Adapter
@@ -351,31 +362,38 @@ It looks up the fully qualified class name of the dialect factories in the file 
 
 1. Now **create a class for the factory**: `com.exasol.adapter.dialects.athena.AthenaSqlDialectFactory` that **implements** `SqlDialectFactory`. 
     Let your IDE to generate necessary **overriding methods** for you. 
+  
     ```java
     public class AthenaSqlDialectFactory implements SqlDialectFactory {
        //methods here
    } 
+  
    ```
+   
    Also create a corresponding test class.
    
 2. **Implement method `getSqlDialectName()`** and write test for it.
+  
     ```java
     @Override
     public String getSqlDialectName() {
         return AthenaSqlDialect.NAME;
     }
     ```
+   
     The factory needs to be able to provide the dialect name since the JDBC adapter identifies dialect by name.
     Note that at this point we don't have an instance of the dialect yet and thus are using the constant directly.
 
 3. The **other method** in the factory creates the instance: **`createSqlDialect()`**. Don't forget to write a test. 
     Check the test coverage for the class.
+    
     ```java
     @Override
     public SqlDialect createSqlDialect(final Connection connection, final AdapterProperties properties) {
         return new AthenaSqlDialect(connection, properties);
     }
     ```
+   
     The main reason for having a factory is that dialects are loaded lazily.
     It is more resource-efficient and secure to load only the one single dialect that we actually need. 
     The factories are very lightweight, dialects not so much.
