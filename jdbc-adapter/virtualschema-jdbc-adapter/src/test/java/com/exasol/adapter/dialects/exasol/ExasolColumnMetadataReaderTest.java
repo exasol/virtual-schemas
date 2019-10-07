@@ -55,6 +55,14 @@ class ExasolColumnMetadataReaderTest {
     }
 
     @Test
+    void testMapJdbcTypeHashtype() {
+        final JdbcTypeDescription jdbcTypeDescription = new JdbcTypeDescription(
+              ExasolColumnMetadataReader.EXASOL_HASHTYPE, 0, 0, 16, "HASHTYPE");
+        assertThat(this.exasolColumnMetadataReader.mapJdbcType(jdbcTypeDescription),
+              equalTo(DataType.createHashtype(16)));
+    }
+
+    @Test
     void testMapJdbcTypeDefault() {
         final JdbcTypeDescription jdbcTypeDescription = new JdbcTypeDescription(Types.BOOLEAN, 0, 0, 0, "BOOLEAN");
         assertThat(this.exasolColumnMetadataReader.mapJdbcType(jdbcTypeDescription), equalTo(DataType.createBool()));

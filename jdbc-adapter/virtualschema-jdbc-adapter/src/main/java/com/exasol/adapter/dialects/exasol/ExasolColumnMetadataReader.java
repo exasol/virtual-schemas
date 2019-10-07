@@ -16,6 +16,8 @@ public class ExasolColumnMetadataReader extends BaseColumnMetadataReader {
     static final int EXASOL_INTERVAL_YEAR_TO_MONTHS = -103;
     static final int EXASOL_GEOMETRY = 123;
     static final int EXASOL_TIMESTAMP = 124;
+    static final int EXASOL_HASHTYPE = 125;
+    private static final int DEFAULT_HASHTYPE_BYTESIZE = 16;
     private static final int DEFAULT_INTERVAL_DAY_TO_SECOND_FRACTION = 3;
     private static final int DEFAULT_INTERVAL_DAY_TO_SECOND_PRECISION = 2;
     private static final int DEFAULT_INTERVAL_YEAR_TO_MONTH_PRECISION = 2;
@@ -45,6 +47,8 @@ public class ExasolColumnMetadataReader extends BaseColumnMetadataReader {
             return DataType.createGeometry(DEFAULT_SPACIAL_REFERENCE_SYSTEM_IDENTIFIER);
         case EXASOL_TIMESTAMP:
             return DataType.createTimestamp(true);
+        case EXASOL_HASHTYPE:
+            return DataType.createHashtype(DEFAULT_HASHTYPE_BYTESIZE);
         default:
             return super.mapJdbcType(jdbcTypeDescription);
         }

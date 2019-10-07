@@ -212,10 +212,10 @@ public class BaseColumnMetadataReader extends AbstractMetadataReader implements 
         case Types.NVARCHAR:
         case Types.LONGVARCHAR:
         case Types.LONGNVARCHAR:
-            return convertVarChar(jdbcTypeDescription.getPrecisionOrSize(), jdbcTypeDescription.getCharOctetLength());
+            return convertVarChar(jdbcTypeDescription.getPrecisionOrSize(), jdbcTypeDescription.getByteSize());
         case Types.CHAR:
         case Types.NCHAR:
-            return convertChar(jdbcTypeDescription.getPrecisionOrSize(), jdbcTypeDescription.getCharOctetLength());
+            return convertChar(jdbcTypeDescription.getPrecisionOrSize(), jdbcTypeDescription.getByteSize());
         case Types.DATE:
             return DataType.createDate();
         case Types.TIMESTAMP:
