@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.oracle;
 
+import static com.exasol.adapter.metadata.DataType.createMaximumSizeVarChar;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
@@ -40,7 +41,7 @@ class OracleColumnMetadataReaderTest {
         final int scale = OracleColumnMetadataReader.ORACLE_MAGIC_NUMBER_SCALE;
         final JdbcTypeDescription typeDescription = createTypeDescriptionForNumeric(precision, scale);
         assertThat(this.columnMetadataReader.mapJdbcType(typeDescription),
-                equalTo(DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8)));
+                equalTo(createMaximumSizeVarChar(DataType.ExaCharset.UTF8)));
     }
 
     @Test
@@ -55,16 +56,23 @@ class OracleColumnMetadataReaderTest {
         rawProperties.put("BINARY_COLUMN_HANDLING", "ENCODE_BASE64");
         final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.BLOB, 0, 0, 0, null);
         assertThat(createParameterizedColumnMetadataReader(rawProperties).mapJdbcType(typeDescription),
-                equalTo(DataType.createMaximumSizeVarChar(ExaCharset.UTF8)));
+                equalTo(createMaximumSizeVarChar(ExaCharset.UTF8)));
     }
 
     @Test
-    void testMapColumnTypeWithMaximumDecimalPrecision() {
+    void testMapNumericColumnTypeWithMaximumDecimalPrecision() {
         final int precision = DataType.MAX_EXASOL_DECIMAL_PRECISION;
         final int scale = 0;
         final JdbcTypeDescription typeDescription = createTypeDescriptionForNumeric(precision, scale);
         assertThat(this.columnMetadataReader.mapJdbcType(typeDescription),
                 equalTo(DataType.createDecimal(precision, scale)));
+    }
+
+    @Test
+    void testMapRowid() {
+        final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.ROWID, 0, 0, 0, null);
+        assertThat(this.columnMetadataReader.mapJdbcType(typeDescription),
+                equalTo(createMaximumSizeVarChar(DataType.ExaCharset.UTF8)));
     }
 
     private OracleColumnMetadataReader createParameterizedColumnMetadataReader(

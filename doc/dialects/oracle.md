@@ -48,7 +48,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-2.1.1.jar;
+  %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-2.1.2.jar;
   %jar /buckets/<BFS service>/<bucket>/ojdbc<JDBC driver version>.jar;
 /
 ;
@@ -153,8 +153,8 @@ Oracle data types are mapped to their equivalents in Exasol. The following excep
 - `DATE` is casted to `TIMESTAMP`. This data type is only supported for positive year values, i.e., years > 0001.
 - `TIMESTAMP WITH [LOCAL] TIME ZONE` is casted to `TIMESTAMP`. 
 - `INTERVAL` is casted to `VARCHAR`.
-- `CLOB` and `NCLOB` values are supported up to the maximum size of an Exasol [`VARCHAR`](https://docs.exasol.com/sql_references/data_types/datatypedetails.htm#StringDataType).
+- `CLOB`, `BLOB`, and `NCLOB` values are supported up to the maximum size of an Exasol [`VARCHAR`](https://docs.exasol.com/sql_references/data_types/datatypedetails.htm#StringDataType).
 
     By default an error will be thrown if you try to import a value that is larger. If you want to import from tables which contain bigger values, you need to truncate the values.
     
-- `BLOB`, `RAW` and `LONG RAW` are not supported.
+- `RAW` and `LONG RAW` are not supported.
