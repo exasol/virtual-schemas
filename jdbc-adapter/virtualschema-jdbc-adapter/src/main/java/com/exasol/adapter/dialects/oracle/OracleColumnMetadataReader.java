@@ -52,6 +52,7 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
         case INTERVAL_DAY_TO_SECOND:
         case ORACLE_BINARY_FLOAT:
         case ORACLE_BINARY_DOUBLE:
+        case Types.ROWID:
             return DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
         case Types.BLOB:
             return mapBlobType();
