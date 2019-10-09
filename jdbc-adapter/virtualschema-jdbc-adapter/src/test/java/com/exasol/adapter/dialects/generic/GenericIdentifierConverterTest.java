@@ -1,13 +1,13 @@
 package com.exasol.adapter.dialects.generic;
 
-import static com.exasol.adapter.jdbc.IdentifierCaseHandling.*;
+import static com.exasol.adapter.dialects.IdentifierCaseHandling.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-import com.exasol.adapter.jdbc.IdentifierCaseHandling;
-import com.exasol.adapter.jdbc.SchemaAdapterNotes;
+import com.exasol.adapter.adapternotes.SchemaAdapterNotes;
+import com.exasol.adapter.dialects.IdentifierCaseHandling;
 
 class GenericIdentifierConverterTest {
     @Test

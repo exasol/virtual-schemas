@@ -12,9 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import com.exasol.ExaConnectionInformation;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.AbstractConnectionDefinitionBuilderTest;
-import com.exasol.adapter.jdbc.BaseConnectionDefinitionBuilder;
-import com.exasol.adapter.jdbc.ConnectionDefinitionBuilder;
+import com.exasol.adapter.jdbc.*;
 
 class ExasolConnectionDefinitionBuilderTest extends AbstractConnectionDefinitionBuilderTest {
     private static final String EXASOL_CONNECTION_STRING = "thehost:2345";

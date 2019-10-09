@@ -7,10 +7,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.adapternotes.SchemaAdapterNotes;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
-import com.exasol.adapter.jdbc.SchemaAdapterNotes;
 
 /**
  * This dialect can be used for data sources where a custom dialect implementation does not yet exists. It will obtain

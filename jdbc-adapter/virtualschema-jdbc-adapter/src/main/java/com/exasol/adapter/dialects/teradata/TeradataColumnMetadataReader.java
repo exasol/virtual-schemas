@@ -8,9 +8,7 @@ import java.util.List;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.IdentifierConverter;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
-import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
-import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
+import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 

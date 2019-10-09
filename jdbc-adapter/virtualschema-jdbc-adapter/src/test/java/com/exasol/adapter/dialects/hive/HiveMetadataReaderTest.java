@@ -8,8 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.IdentifierCaseHandling;
 import com.exasol.adapter.dialects.IdentifierConverter;
-import com.exasol.adapter.jdbc.IdentifierCaseHandling;
 
 public class HiveMetadataReaderTest {
     private HiveMetadataReader hiveMetadataReader;

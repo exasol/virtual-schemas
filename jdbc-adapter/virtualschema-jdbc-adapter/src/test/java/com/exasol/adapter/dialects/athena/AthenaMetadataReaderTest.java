@@ -13,9 +13,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.BaseIdentifierConverter;
-import com.exasol.adapter.dialects.IdentifierConverter;
-import com.exasol.adapter.jdbc.*;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
+import com.exasol.adapter.jdbc.BaseTableMetadataReader;
 
 @ExtendWith(MockitoExtension.class)
 class AthenaMetadataReaderTest {

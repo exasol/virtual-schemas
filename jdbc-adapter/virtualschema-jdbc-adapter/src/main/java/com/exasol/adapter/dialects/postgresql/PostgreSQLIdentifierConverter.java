@@ -5,8 +5,8 @@ import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGR
 import java.util.regex.Pattern;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.IdentifierCaseHandling;
 import com.exasol.adapter.dialects.IdentifierConverter;
-import com.exasol.adapter.jdbc.IdentifierCaseHandling;
 
 /**
  * This class implements database identifier converter for {@link PostgreSQLSqlDialect}.

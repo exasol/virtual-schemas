@@ -1,4 +1,4 @@
-package com.exasol.adapter.jdbc;
+package com.exasol.adapter.adapternotes;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

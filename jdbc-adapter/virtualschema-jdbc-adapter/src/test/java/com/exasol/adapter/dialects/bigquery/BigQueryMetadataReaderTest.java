@@ -13,9 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.BaseIdentifierConverter;
-import com.exasol.adapter.dialects.IdentifierConverter;
-import com.exasol.adapter.jdbc.*;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
+import com.exasol.adapter.jdbc.BaseTableMetadataReader;
 
 class BigQueryMetadataReaderTest {
     private BigQueryMetadataReader reader;

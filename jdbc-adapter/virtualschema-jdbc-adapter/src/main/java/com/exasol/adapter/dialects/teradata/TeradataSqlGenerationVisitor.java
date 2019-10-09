@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.adapternotes.ColumnAdapterNotes;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
 

@@ -1,4 +1,4 @@
-package com.exasol.adapter.dialects;
+package com.exasol.adapter.jdbc;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -11,8 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.exasol.ExaConnectionInformation;
-import com.exasol.adapter.jdbc.BaseConnectionDefinitionBuilder;
-import com.exasol.adapter.jdbc.ConnectionDefinitionBuilder;
 
 class BaseConnectionDefinitionBuilderTest extends AbstractConnectionDefinitionBuilderTest {
     @BeforeEach

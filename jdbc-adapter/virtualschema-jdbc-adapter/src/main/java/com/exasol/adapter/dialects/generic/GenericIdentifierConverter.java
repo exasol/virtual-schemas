@@ -1,10 +1,10 @@
 package com.exasol.adapter.dialects.generic;
 
-import static com.exasol.adapter.jdbc.IdentifierCaseHandling.*;
+import static com.exasol.adapter.dialects.IdentifierCaseHandling.*;
 
+import com.exasol.adapter.adapternotes.SchemaAdapterNotes;
 import com.exasol.adapter.dialects.BaseIdentifierConverter;
-import com.exasol.adapter.jdbc.IdentifierCaseHandling;
-import com.exasol.adapter.jdbc.SchemaAdapterNotes;
+import com.exasol.adapter.dialects.IdentifierCaseHandling;
 
 /**
  * The {@link GenericIdentifierConverter} tries to determine identifier handling semi-automatically.
