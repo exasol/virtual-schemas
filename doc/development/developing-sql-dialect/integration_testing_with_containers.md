@@ -43,7 +43,7 @@ Set the following properties for your database:
 
 ### Provide JDBC drivers for the Source Database
 
-The JDBC drivers are automatically deployed during the test. You have to create a directory for the jdbc driver under integration-test-data/drivers. The folder contains the driver jar file(s) and a config file. See the [PostgreSQL config](../../jdbc-adapter/integration-test-data/drivers/POSTGRESQL/settings.cfg) for an example.
+The JDBC drivers are automatically deployed during the test. You have to create a directory for the jdbc driver under integration-test-data/drivers. The folder contains the driver jar file(s) and a config file. See the [PostgreSQL config](../../../jdbc-adapter/integration-test-data/drivers/POSTGRESQL/settings.cfg) for an example.
 
 In order to connect to the source database from your integration test you also have to add the jdbc driver dependency to the [POM](../../../jdbc-adapter/virtualschema-jdbc-adapter/pom.xml) scope verify.
 
