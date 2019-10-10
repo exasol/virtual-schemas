@@ -1,4 +1,4 @@
-package com.exasol.adapter.jdbc;
+package com.exasol.adapter.adapternotes;
 
 import javax.json.*;
 

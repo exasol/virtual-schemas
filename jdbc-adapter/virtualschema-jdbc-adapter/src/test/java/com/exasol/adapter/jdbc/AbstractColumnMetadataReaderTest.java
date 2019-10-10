@@ -1,11 +1,10 @@
-package com.exasol.adapter.dialects;
+package com.exasol.adapter.jdbc;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import java.sql.Types;
 
-import com.exasol.adapter.jdbc.ColumnMetadataReader;
 import com.exasol.adapter.metadata.DataType;
 
 public abstract class AbstractColumnMetadataReaderTest {

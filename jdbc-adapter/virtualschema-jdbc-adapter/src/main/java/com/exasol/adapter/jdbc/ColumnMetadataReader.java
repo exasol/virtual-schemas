@@ -2,7 +2,6 @@ package com.exasol.adapter.jdbc;
 
 import java.util.List;
 
-import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 

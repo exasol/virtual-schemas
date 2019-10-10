@@ -125,7 +125,7 @@ Please follow our [step-by-step guide](step_by_step_guide_to_writing_your_own_di
 
 ### Adding Documentation
 
-Please also remember to [document the SQL dialect](../../../dialects).
+Please also remember to [document the SQL dialect](../../dialects).
 
 ## See Also
 

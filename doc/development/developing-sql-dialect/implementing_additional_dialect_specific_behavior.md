@@ -31,7 +31,7 @@ For now we implement the default behavior and let Exasol handle all unquoted ide
     It means that if you write a query `SELECT * FROM "Schema_Name"."Table_Name"`, the source reads it as `SELECT * FROM Schema_Name.Table_Name`. 
     All schema/table/column names are used literally without case changes.
 
-2. If the **both statements above are true** for your source, **skip** this part and go to [Supported tables types](implementing-supported-tables-types).
+2. If the **both statements above are true** for your source, **skip** this part and go to [Supported tables types](#implementing-supported-tables-types).
     
 3. If you want to override the default identifiers case handling, create a new **class for the Metadata Reader**. 
     Follow steps in [Implementing Access to Remote Metadata](#implementing-access-to-remote-metadata) and then come back here. 

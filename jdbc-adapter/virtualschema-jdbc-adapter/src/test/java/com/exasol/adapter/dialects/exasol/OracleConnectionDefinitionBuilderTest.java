@@ -12,11 +12,9 @@ import org.junit.jupiter.api.Test;
 
 import com.exasol.ExaConnectionInformation;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.AbstractConnectionDefinitionBuilderTest;
 import com.exasol.adapter.dialects.oracle.OracleConnectionDefinitionBuilder;
 import com.exasol.adapter.dialects.oracle.OracleProperties;
-import com.exasol.adapter.jdbc.BaseConnectionDefinitionBuilder;
-import com.exasol.adapter.jdbc.ConnectionDefinitionBuilder;
+import com.exasol.adapter.jdbc.*;
 
 class OracleConnectionDefinitionBuilderTest extends AbstractConnectionDefinitionBuilderTest {
     private static final String ORACLE_CONNECTION_NAME = "ora_connection";

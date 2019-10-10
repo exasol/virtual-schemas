@@ -7,6 +7,8 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.adapternotes.SchemaAdapterNotes;
+import com.exasol.adapter.adapternotes.SchemaAdapterNotesJsonConverter;
 import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.metadata.SchemaMetadata;
 import com.exasol.adapter.metadata.TableMetadata;
