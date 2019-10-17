@@ -57,3 +57,9 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
 ## Testing inforamtion
 
 The SQL Server Dialect was tested with the jTDS 1.3.1 JDBC driver and SQL Server 2014.
+
+## Troubleshooting 
+
+- SQL SERVER jTDS JDBC driver contains a [bug](https://sourceforge.net/p/jtds/bugs/679/) in DATE type. 
+The returned datatype for a SQLServer DATE type is a VARCHAR with a length of 10. If you want to avoid it you can use a newer driver, for example:[mssql-jdbc-7.2.2.jre8.jar](https://www.microsoft.com/en-us/download/details.aspx?id=57782).
+Please, be aware that the new driver is not completely testing with Virtual Schemas. The driver's information for this dialect will be updated after we test the driver. 
