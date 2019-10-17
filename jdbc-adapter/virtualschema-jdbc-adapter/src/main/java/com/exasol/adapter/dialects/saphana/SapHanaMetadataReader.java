@@ -6,8 +6,7 @@ import java.sql.Connection;
 import java.util.Set;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.BaseIdentifierConverter;
-import com.exasol.adapter.dialects.IdentifierConverter;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.*;
 
 /**

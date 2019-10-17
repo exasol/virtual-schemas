@@ -1,4 +1,4 @@
-package com.exasol.adapter.dialects;
+package com.exasol.adapter.jdbc;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -8,8 +8,6 @@ import java.util.Map;
 
 import com.exasol.ExaConnectionInformation;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.jdbc.BaseConnectionDefinitionBuilder;
-import com.exasol.adapter.jdbc.ConnectionDefinitionBuilder;
 
 public abstract class AbstractConnectionDefinitionBuilderTest {
     protected static final String USER = "property_user";

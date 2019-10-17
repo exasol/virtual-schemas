@@ -4,8 +4,8 @@ import java.sql.Connection;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.IdentifierConverter;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
+import com.exasol.adapter.jdbc.JdbcTypeDescription;
 import com.exasol.adapter.metadata.DataType;
 
 /**

@@ -1,7 +1,5 @@
 package com.exasol.adapter.dialects;
 
-import com.exasol.adapter.jdbc.IdentifierCaseHandling;
-
 /**
  * Abstract base class for all identifier converters.
  */

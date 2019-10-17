@@ -1,7 +1,5 @@
 package com.exasol.adapter.dialects;
 
-import com.exasol.adapter.jdbc.IdentifierCaseHandling;
-
 /**
  * This class represents SQL table and column names converter.
  */

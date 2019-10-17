@@ -40,11 +40,11 @@ in all your `CREATE JAVA ADAPTER SCRIPT` statements. The old entry point was rem
 
 * Read access to data on remote data sources
 * Data in those sources appears as tables inside Exasol and can be queried using regular SQL statements.
-* Supports the following relational databases as sources: [IBM DB2](https://www.ibm.com/db2/), [Exasol](https://www.exasol.com), Generic [JDBC](https://www.oracle.com/technetwork/java/overview-141217.html)-capable RDBMS, [Oracle](https://www.oracle.com), [PostgreSQL](https://postgresql.org/), [Amazon AWS Redshift](https://aws.amazon.com/redshift/), [Microsoft SQLServer](https://www.microsoft.com/en-us/sql-server/), [Sybase](http://www.sybase.com/), [Teradata](https://www.teradata.com/)
+* Supports the following relational databases as sources: [IBM DB2](https://www.ibm.com/db2/), [Exasol](https://www.exasol.com), Generic JDBC-capable RDBMS, [MySQL](https://www.mysql.com/), [Oracle](https://www.oracle.com), [PostgreSQL](https://postgresql.org/), [Amazon AWS Redshift](https://aws.amazon.com/redshift/), [SAP HANA](https://www.sap.com/) [Microsoft SQLServer](https://www.microsoft.com/en-us/sql-server/), [Sybase](http://www.sybase.com/), [Teradata](https://www.teradata.com/)
 * Supports [Apache Impala](http://impala.apache.org/) (Hadoop-based analytical database) as a source
 * Supports [Apache Hive](https://hive.apache.org/) (Hadoop-based data warehouse) as source
 * Supports access to file-based columnar storage (e.g. [Tableau files](https://onlinehelp.tableau.com/current/pro/desktop/en-us/environ_filesandfolders.html))
-  via [Amazon AWS Redshift Spectrum](https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html) and [Amazon AWS Athena](https://aws.amazon.com/athena/)
+  via [Amazon AWS Redshift Spectrum](https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html), [Amazon AWS Athena](https://aws.amazon.com/athena/), [AWS Aurora](https://aws.amazon.com/rds/aurora/) and [Google Big Query](https://cloud.google.com/bigquery/).
 * Pushes down queries to the remote source (some sources)
 * Supports sources with no / one / multiple catalogs or schemas
 * Allows limiting metadata mapping to selected catalogs and / or schemas
@@ -75,7 +75,7 @@ Supported dialects:
 1. [Oracle](doc/dialects/oracle.md)
 1. [PostgreSQL](doc/dialects/postgresql.md)
 1. [Redshift](doc/dialects/redshift.md)
-1. [SAP HANA](.../dialects/saphana.md)
+1. [SAP HANA](doc/dialects/saphana.md)
 1. [SQL Server](doc/dialects/sql_server.md)
 1. [Sybase ASE](doc/dialects/sybase.md)
 1. [Teradata](doc/dialects/teradata.md)

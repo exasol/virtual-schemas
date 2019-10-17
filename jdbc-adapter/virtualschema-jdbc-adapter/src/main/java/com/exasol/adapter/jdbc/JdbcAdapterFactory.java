@@ -1,6 +1,7 @@
 package com.exasol.adapter.jdbc;
 
-import java.util.*;
+import java.util.ServiceLoader;
+import java.util.Set;
 
 import com.exasol.adapter.AdapterFactory;
 import com.exasol.adapter.VirtualSchemaAdapter;

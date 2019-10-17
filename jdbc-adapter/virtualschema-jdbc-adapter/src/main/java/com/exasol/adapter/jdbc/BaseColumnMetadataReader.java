@@ -10,8 +10,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.adapternotes.ColumnAdapterNotes;
 import com.exasol.adapter.dialects.IdentifierConverter;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 

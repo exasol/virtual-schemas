@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.exasol.adapter.jdbc.ColumnAdapterNotes;
+import com.exasol.adapter.adapternotes.ColumnAdapterNotes;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
 

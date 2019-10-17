@@ -19,7 +19,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.BaseIdentifierConverter;
-import com.exasol.adapter.dialects.JdbcTypeDescription;
+import com.exasol.adapter.dialects.IdentifierCaseHandling;
 import com.exasol.adapter.dialects.hive.HiveColumnMetadataReader;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;

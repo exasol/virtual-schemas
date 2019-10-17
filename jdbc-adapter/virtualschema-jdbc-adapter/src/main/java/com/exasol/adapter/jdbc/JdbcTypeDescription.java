@@ -1,4 +1,4 @@
-package com.exasol.adapter.dialects;
+package com.exasol.adapter.jdbc;
 
 /**
  * This class implements a parameter object describing attributes of a JDBC data type.

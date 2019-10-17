@@ -3,20 +3,23 @@ package com.exasol.adapter.jdbc;
 import static com.exasol.adapter.AdapterProperties.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.sql.SQLException;
 import java.util.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.MainCapability;
-import com.exasol.adapter.metadata.SchemaMetadataInfo;
-import com.exasol.adapter.metadata.TableMetadata;
+import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.request.*;
 import com.exasol.adapter.response.*;
 import com.exasol.adapter.sql.SqlStatement;
@@ -49,9 +52,8 @@ class JdbcAdapterTest {
         final List<TableMetadata> involvedTablesMetadata = null;
         final PushDownRequest request = new PushDownRequest(GENERIC_ADAPTER_NAME, createSchemaMetadataInfo(), statement,
                 involvedTablesMetadata);
-        final ExaMetadata exaMetadataMock = Mockito.mock(ExaMetadata.class);
-        final PushDownResponse response = this.adapter.pushdown(exaMetadataMock, request);
-        return response;
+        final ExaMetadata exaMetadataMock = mock(ExaMetadata.class);
+        return this.adapter.pushdown(exaMetadataMock, request);
     }
 
     private void setGenericSqlDialectProperty() {
@@ -81,7 +83,7 @@ class JdbcAdapterTest {
         this.rawProperties.put(SCHEMA_NAME_PROPERTY, "SYSIBM");
         final GetCapabilitiesRequest request = new GetCapabilitiesRequest(GENERIC_ADAPTER_NAME,
                 createSchemaMetadataInfo());
-        final ExaMetadata exaMetadataMock = Mockito.mock(ExaMetadata.class);
+        final ExaMetadata exaMetadataMock = mock(ExaMetadata.class);
         final GetCapabilitiesResponse response = this.adapter.getCapabilities(exaMetadataMock, request);
         assertThat(response.getCapabilities().getMainCapabilities(), emptyCollectionOf(MainCapability.class));
     }
@@ -90,11 +92,45 @@ class JdbcAdapterTest {
     void testDropVirtualSchemaMustSucceedEvenIfDebugAddressIsInvalid() throws AdapterException {
         setGenericSqlDialectProperty();
         setDerbyConnectionProperties();
-        final ExaMetadata exaMetadataMock = Mockito.mock(ExaMetadata.class);
+        final ExaMetadata exaMetadataMock = mock(ExaMetadata.class);
         this.rawProperties.put(AdapterProperties.DEBUG_ADDRESS_PROPERTY, "this_is_an:invalid_debug_address");
         final DropVirtualSchemaRequest dropRequest = new DropVirtualSchemaRequest(GENERIC_ADAPTER_NAME,
                 createSchemaMetadataInfo());
         final DropVirtualSchemaResponse response = this.adapter.dropVirtualSchema(exaMetadataMock, dropRequest);
         assertThat(response, notNullValue());
+    }
+
+    @Test
+    void testSetPropertiesWithoutTablesFilter() throws AdapterException {
+        setGenericSqlDialectProperty();
+        setDerbyConnectionProperties();
+        final Map<String, String> newRawProperties = new HashMap<>();
+        newRawProperties.put(SCHEMA_NAME_PROPERTY, "NEW SCHEMA");
+        final SetPropertiesRequest request = new SetPropertiesRequest(GENERIC_ADAPTER_NAME, createSchemaMetadataInfo(),
+                newRawProperties);
+        final ExaMetadata exaMetadataMock = mock(ExaMetadata.class);
+        final SetPropertiesResponse response = this.adapter.setProperties(exaMetadataMock, request);
+        assertThat(response.getSchemaMetadata().getTables(), emptyCollectionOf(TableMetadata.class));
+    }
+
+    @Test
+    void testSetPropertiesWithTablesFilter() throws AdapterException, SQLException {
+        final JdbcAdapter adapter = mock(JdbcAdapter.class);
+        when(adapter.setProperties(any(), any())).thenCallRealMethod();
+        when(adapter.readMetadata(any(), any(), any())).thenReturn(new SchemaMetadata("",
+                Arrays.asList(new TableMetadata("T1", "", null, ""), new TableMetadata("T2", "", null, ""))));
+        setGenericSqlDialectProperty();
+        setDerbyConnectionProperties();
+        final Map<String, String> newRawProperties = new HashMap<>();
+        newRawProperties.put(SCHEMA_NAME_PROPERTY, "NEW SCHEMA");
+        newRawProperties.put(TABLE_FILTER_PROPERTY, "T1, T2");
+        final SetPropertiesRequest request = new SetPropertiesRequest(GENERIC_ADAPTER_NAME, createSchemaMetadataInfo(),
+                newRawProperties);
+        final ExaMetadata exaMetadataMock = mock(ExaMetadata.class);
+        final SetPropertiesResponse response = adapter.setProperties(exaMetadataMock, request);
+        final List<TableMetadata> tables = response.getSchemaMetadata().getTables();
+        assertAll(() -> assertThat(tables, hasSize(2)), //
+                () -> assertThat(tables.get(0).getName(), equalTo("T1")),
+                () -> assertThat(tables.get(1).getName(), equalTo("T2")));
     }
 }

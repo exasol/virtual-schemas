@@ -3,6 +3,7 @@ package com.exasol.adapter.jdbc;
 import java.util.List;
 import java.util.Set;
 
+import com.exasol.adapter.adapternotes.SchemaAdapterNotes;
 import com.exasol.adapter.metadata.SchemaMetadata;
 
 /**
