@@ -12,7 +12,7 @@ public class JdbcTypeDescription {
     private final int jdbcType;
     private final int decimalScale;
     private final int precisionOrSize;
-    private final int charOctetLength;
+    private final int byteSize;
     private final String typeName;
 
     /**
@@ -21,15 +21,15 @@ public class JdbcTypeDescription {
      * @param jdbcType        type identifier as presented by the JDBC driver of the database
      * @param decimalScale    number of digits behind the point
      * @param precisionOrSize precision for numbers or size for size types (like <code>VARCHAR</code>)
-     * @param charOctetLength storage size the data type needs in bytes
+     * @param byteSize        storage size the data type needs in bytes
      * @param typeName        original name the type has in the database
      */
     public JdbcTypeDescription(final int jdbcType, final int decimalScale, final int precisionOrSize,
-            final int charOctetLength, final String typeName) {
+            final int byteSize, final String typeName) {
         this.jdbcType = jdbcType;
         this.decimalScale = decimalScale;
         this.precisionOrSize = precisionOrSize;
-        this.charOctetLength = charOctetLength;
+        this.byteSize = byteSize;
         this.typeName = typeName;
     }
 
@@ -65,8 +65,8 @@ public class JdbcTypeDescription {
      *
      * @return size in bytes
      */
-    public int getCharOctetLength() {
-        return this.charOctetLength;
+    public int getByteSize() {
+        return this.byteSize;
     }
 
     /**
