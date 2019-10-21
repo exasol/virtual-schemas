@@ -13,8 +13,8 @@ import com.exasol.adapter.sql.*;
  * This class generates SQL queries for the {@link DB2SqlDialect}.
  */
 public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
-    private static final List<String> TYPE_NAMES_REQUIRING_CAST = List.of("TIMESTAMP", "DECFLOAT", "CLOB",
-            "XML", "TIME");
+    private static final List<String> TYPE_NAMES_REQUIRING_CAST = List.of("TIMESTAMP", "DECFLOAT", "CLOB", "XML",
+            "TIME");
     private static final List<String> TYPE_NAMES_NOT_SUPPORTED = List.of("BLOB");
 
     /**
@@ -90,7 +90,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
                         || getListOfTypeNamesNotSupported().contains(typeName);
             }
             return false;
-        } catch (AdapterException exception) {
+        } catch (final AdapterException exception) {
             throw new SqlGenerationVisitorException("Exception during deserialization of ColumnAdapterNotes. ",
                     exception);
         }
@@ -325,8 +325,8 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         final StringBuilder builder = new StringBuilder();
         builder.append("LISTAGG");
         builder.append("(");
-        if (function.getArguments() != null && function.getArguments().size() == 1
-                && function.getArguments().get(0) != null) {
+        if ((function.getArguments() != null) && (function.getArguments().size() == 1)
+                && (function.getArguments().get(0) != null)) {
             return getGroupConcat(function, builder);
         } else {
             throw new SqlGenerationVisitorException(

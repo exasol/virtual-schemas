@@ -85,7 +85,8 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
     }
 
     /**
-     * @see <a href=http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_ansi_quotes><a/>
+     * @see <a href="http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_ansi_quotes">ANSI quotes (MySQL
+     *      reference manual)</a>
      */
     @Override
     public String applyQuote(final String identifier) {

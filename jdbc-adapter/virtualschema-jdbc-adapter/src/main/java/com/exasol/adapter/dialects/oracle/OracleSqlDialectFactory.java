@@ -3,13 +3,13 @@ package com.exasol.adapter.dialects.oracle;
 import java.sql.Connection;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.AbstractSqlDialectFactory;
 import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlDialectFactory;
 
 /**
  * Factory for the Oracle SQL dialect.
  */
-public class OracleSqlDialectFactory implements SqlDialectFactory {
+public class OracleSqlDialectFactory extends AbstractSqlDialectFactory {
     @Override
     public String getSqlDialectName() {
         return OracleSqlDialect.NAME;

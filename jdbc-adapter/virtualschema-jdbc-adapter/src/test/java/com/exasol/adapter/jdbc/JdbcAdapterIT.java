@@ -1,6 +1,9 @@
 package com.exasol.adapter.jdbc;
 
-import static com.exasol.adapter.AdapterProperties.*;
+import static com.exasol.adapter.AdapterProperties.CONNECTION_STRING_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.PASSWORD_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.SQL_DIALECT_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.USERNAME_PROPERTY;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
@@ -13,7 +16,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.exasol.ExaMetadata;
-import com.exasol.adapter.*;
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.AdapterFactory;
+import com.exasol.adapter.AdapterRegistry;
+import com.exasol.adapter.RequestDispatcher;
+import com.exasol.adapter.VirtualSchemaAdapter;
 import com.exasol.adapter.response.GetCapabilitiesResponse;
 
 class JdbcAdapterIT {
@@ -26,7 +33,7 @@ class JdbcAdapterIT {
                 + "        \"name\" : \"foo\",\n" //
                 + "        \"properties\" :\n" //
                 + "        {\n" //
-                + "            \"" + SQL_DIALECT_PROPERTY + "\" : \"GENERIC\"\n," //
+                + "            \"" + SQL_DIALECT_PROPERTY + "\" : \"DERBY\"\n," //
                 + "            \"" + CONNECTION_STRING_PROPERTY + "\" : \"jdbc:derby:memory:test;create=true;\"\n," //
                 + "            \"" + USERNAME_PROPERTY + "\" : \"\"\n," //
                 + "            \"" + PASSWORD_PROPERTY + "\" : \"\"\n" //
