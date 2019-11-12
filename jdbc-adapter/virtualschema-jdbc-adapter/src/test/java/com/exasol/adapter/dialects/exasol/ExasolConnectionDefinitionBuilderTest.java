@@ -14,7 +14,7 @@ import com.exasol.ExaConnectionInformation;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.jdbc.*;
 
-class ExasolConnectionDefinitionBuilderTest extends AbstractConnectionDefinitionBuilderTest {
+class ExasolConnectionDefinitionBuilderTest extends AbstractConnectionDefinitionBuilderTestBase {
     private static final String EXASOL_CONNECTION_STRING = "thehost:2345";
 
     @BeforeEach
