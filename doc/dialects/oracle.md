@@ -68,7 +68,7 @@ CREATE OR REPLACE CONNECTION ORACLE_JDBC_CONNECTION
 A quick option to test the `ORACLE_JDBC_CONNECTION` connection is to run an `IMPORT FROM JDBC` query. The connection works, if `42` is returned.
 
 ```sql
-IMPORT FROM JDBC AT jdbc_oracle
+IMPORT FROM JDBC AT ORACLE_JDBC_CONNECTION
   STATEMENT 'SELECT 42 FROM DUAL';
 ```
 
