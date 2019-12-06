@@ -45,7 +45,7 @@ in all your `CREATE JAVA ADAPTER SCRIPT` statements. The old entry point was rem
 * Supports the following relational databases as sources: [IBM DB2](https://www.ibm.com/db2/), [Exasol](https://www.exasol.com), Generic JDBC-capable RDBMS, [MySQL](https://www.mysql.com/), [Oracle](https://www.oracle.com), [PostgreSQL](https://postgresql.org/), [Amazon AWS Redshift](https://aws.amazon.com/redshift/), [SAP HANA](https://www.sap.com/) [Microsoft SQLServer](https://www.microsoft.com/en-us/sql-server/), [Sybase](http://www.sybase.com/), [Teradata](https://www.teradata.com/)
 * Supports [Apache Impala](http://impala.apache.org/) (Hadoop-based analytical database) as a source
 * Supports [Apache Hive](https://hive.apache.org/) (Hadoop-based data warehouse) as source
-* Supports access to file-based columnar storage (e.g. [Tableau files](https://onlinehelp.tableau.com/current/pro/desktop/en-us/environ_filesandfolders.html))
+* Supports access to file-based columnar storage (e.g. [Apache Parquet files](https://parquet.apache.org/documentation/latest/))
   via [Amazon AWS Redshift Spectrum](https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html), [Amazon AWS Athena](https://aws.amazon.com/athena/), [AWS Aurora](https://aws.amazon.com/rds/aurora/) and [Google Big Query](https://cloud.google.com/bigquery/).
 * Pushes down queries to the remote source (some sources)
 * Supports sources with no / one / multiple catalogs or schemas
