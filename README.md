@@ -103,9 +103,11 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 |-------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------|
 | [JSON-P](https://javaee.github.io/jsonp/)                                           | JSON Processing                                        | CDDL-1.0                      |
 | [Exasol Script API](https://docs.exasol.com/database_concepts/udf_scripts.htm)      | Accessing Exasol features                              | MIT License                   |
+| [Exasol Virtual Schema Common](https://github.com/exasol/virtual-schema-common-java)| Common module of Exasol Virtual Schemas adapters       | MIT License                   |
+| [Exasol Virtual Schema JDBC](https://github.com/exasol/virtual-schema-common-jdbc)  | Common JDBC functions for Virtual Schemas adapters     | MIT License                   |
 | JDBC driver(s), depending on data source                                            | Connecting to the data source                          | Check driver documentation    |
 
-### Build Time Dependencies
+### Test Dependencies
 
 | Dependency                                                                          | Purpose                                                | License                       |
 |-------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------|
@@ -113,7 +115,6 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 | [Apache HTTP Components](http://hc.apache.org/)                                     | HTTP communication                                     | Apache License 2.0            |
 | [Apache Maven](https://maven.apache.org/)                                           | Build tool                                             | Apache License 2.0            |
 | [Equals Verifier](https://jqno.nl/equalsverifier/)                                  | Testing `equals(...)` and `hashCode()` contracts       | Apache License 2.0            |
-| [Exasol Virtual Schema Common](https://github.com/exasol/virtual-schema-common-java)| Common module of Exasol Virtual Schemas adapters       | MIT License                   |
 | [Exec Maven Plugin](https://www.mojohaus.org/exec-maven-plugin/)                    | Helps execute system and Java programs.                | Apache License 2.0            |
 | [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)                                  | Checking for conditions in code via matchers           | BSD License                   |
 | [JSONassert](http://jsonassert.skyscreamer.org/)                                    | Compare JSON documents for semantic equality           | Apache License 2.0            |
@@ -121,3 +122,16 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 | [J5SE](https://github.com/itsallcode/junit5-system-extensions)                      | JUnit5 extensions to test Java System.x functions      | Eclipse Public License 2.0    |
 | [Mockito](http://site.mockito.org/)                                                 | Mocking framework                                      | MIT License                   |
 | [SnakeYaml](https://bitbucket.org/asomov/snakeyaml/src/default/)                    | YAML parsing                                           | Apache License 2.0            |
+
+### Maven Plug-ins
+
+| Plug-in                                                                             | Purpose                                                | License                       |
+|-------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------|
+| [Maven Compiler Plugin](https://maven.apache.org/plugins/maven-compiler-plugin/)    | Setting required Java version                          | Apache License 2.0            |
+| [Maven Exec Plugin](https://www.mojohaus.org/exec-maven-plugin/)                    | Executing external applications                        | Apache License 2.0            |
+| [Maven GPG Plugin](https://maven.apache.org/plugins/maven-gpg-plugin/)              | Code signing                                           | Apache License 2.0            |
+| [Maven Failsafe Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Integration testing                                    | Apache License 2.0            |
+| [Maven Javadoc Plugin](https://maven.apache.org/plugins/maven-javadoc-plugin/)      | Creating a Javadoc JAR                                 | Apache License 2.0            |
+| [Maven Jacoco Plugin](https://www.eclemma.org/jacoco/trunk/doc/maven.html)          | Code coverage metering                                 | Eclipse Public License 2.0    |
+| [Maven Source Plugin](https://maven.apache.org/plugins/maven-source-plugin/)        | Creating a source code JAR                             | Apache License 2.0            |
+| [Maven Surefire Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Unit testing                                           | Apache License 2.0            |

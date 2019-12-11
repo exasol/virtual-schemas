@@ -3,13 +3,13 @@ package com.exasol.adapter.dialects.redshift;
 import java.sql.Connection;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.AbstractSqlDialectFactory;
 import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlDialectFactory;
 
 /**
  * Factory for the Redshift SQL dialect.
  */
-public class RedshiftSqlDialectFactory implements SqlDialectFactory {
+public class RedshiftSqlDialectFactory extends AbstractSqlDialectFactory {
     @Override
     public String getSqlDialectName() {
         return RedshiftSqlDialect.NAME;

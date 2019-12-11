@@ -52,7 +52,7 @@ public class SqlNodesCreator {
     public static SqlStatementSelect createSqlStatementSelect(final SqlSelectList sqlSelectList,
             final List<ColumnMetadata> columns, final String tableName) {
         final SqlTable fromClause = createFromClause(columns, tableName);
-        return new SqlStatementSelect(fromClause, sqlSelectList, null, null, null, null, null);
+        return SqlStatementSelect.builder().selectList(sqlSelectList).fromClause(fromClause).build();
     }
 
     public static SqlFunctionScalar createSqlFunctionScalarWithTwoStringArguments(final ScalarFunction scalarFunction,

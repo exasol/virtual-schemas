@@ -117,8 +117,9 @@ class OracleSqlDialectTest {
     void testSqlGeneratorWithSelectStarAndOffset() throws AdapterException {
         SqlStatementSelect node = (SqlStatementSelect) DialectTestData.getTestSqlNode();
         node.getLimit().setOffset(5);
-        node = new SqlStatementSelect(node.getFromClause(), SqlSelectList.createSelectStarSelectList(),
-                node.getWhereClause(), node.getGroupBy(), node.getHaving(), node.getOrderBy(), node.getLimit());
+        node = SqlStatementSelect.builder().selectList(SqlSelectList.createSelectStarSelectList())
+                .fromClause(node.getFromClause()).whereClause(node.getWhereClause()).groupBy(node.getGroupBy())
+                .having(node.getHaving()).orderBy(node.getOrderBy()).limit(node.getLimit()).build();
         final String expectedSql = "SELECT c0, c1 FROM (" + //
                 "  SELECT LIMIT_SUBSELECT.*, ROWNUM ROWNUM_SUB FROM ( " + //
                 "    SELECT \"USER_ID\" AS c0, \"URL\" AS c1 " + //

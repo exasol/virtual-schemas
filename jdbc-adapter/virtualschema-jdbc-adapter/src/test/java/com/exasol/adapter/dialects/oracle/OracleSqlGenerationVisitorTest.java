@@ -66,8 +66,9 @@ class OracleSqlGenerationVisitorTest {
         final SqlSelectList selectList = SqlSelectList.createAnyValueSelectList();
         final SqlTable fromClause = createFromClause(Collections.emptyList(), "");
         final SqlLimit limit = new SqlLimit(10, 3);
-        final SqlStatementSelect sqlStatementSelect = new SqlStatementSelect(fromClause, selectList, null, null, null,
-                null, limit);
+        final SqlStatementSelect sqlStatementSelect = SqlStatementSelect.builder().selectList(selectList)
+                .fromClause(fromClause).limit(limit).build();
+
         assertThat(this.visitor.visit(sqlStatementSelect), equalTo("1"));
     }
 
@@ -76,8 +77,8 @@ class OracleSqlGenerationVisitorTest {
         final SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
         final SqlTable fromClause = createFromClause(Collections.emptyList(), "test_table_name");
         final SqlLimit limit = new SqlLimit(10, 3);
-        final SqlStatementSelect sqlStatementSelect = new SqlStatementSelect(fromClause, selectList, null, null, null,
-                null, limit);
+        final SqlStatementSelect sqlStatementSelect = SqlStatementSelect.builder().selectList(selectList)
+                .fromClause(fromClause).limit(limit).build();
         assertThat(this.visitor.visit(sqlStatementSelect),
                 equalTo("SELECT  FROM ( SELECT LIMIT_SUBSELECT.*, ROWNUM "
                         + "ROWNUM_SUB FROM ( SELECT  FROM \"test_schema\".\"test_table_name\"  ) LIMIT_SUBSELECT WHERE "
@@ -89,8 +90,8 @@ class OracleSqlGenerationVisitorTest {
         final SqlSelectList selectList = createRegularSqlSelectListWithTwoColumns();
         final SqlTable fromClause = createFromClause(Collections.emptyList(), "test_table_name");
         final SqlLimit limit = new SqlLimit(10, 3);
-        final SqlStatementSelect sqlStatementSelect = new SqlStatementSelect(fromClause, selectList, null, null, null,
-                null, limit);
+        final SqlStatementSelect sqlStatementSelect = SqlStatementSelect.builder().selectList(selectList)
+                .fromClause(fromClause).limit(limit).build();
         assertThat(this.visitor.visit(sqlStatementSelect),
                 equalTo("SELECT c0, c1 FROM ( SELECT LIMIT_SUBSELECT.*, ROWNUM "
                         + "ROWNUM_SUB FROM ( SELECT true AS c0, 'string' AS c1 FROM \"test_schema\".\"test_table_name\""
@@ -102,8 +103,8 @@ class OracleSqlGenerationVisitorTest {
         final SqlSelectList selectList = createRegularSqlSelectListWithTwoColumns();
         final SqlTable fromClause = createFromClause(Collections.emptyList(), "test_table_name");
         final SqlLimit limit = new SqlLimit(10);
-        final SqlStatementSelect sqlStatementSelect = new SqlStatementSelect(fromClause, selectList, null, null, null,
-                null, limit);
+        final SqlStatementSelect sqlStatementSelect = SqlStatementSelect.builder().selectList(selectList)
+                .fromClause(fromClause).limit(limit).build();
         assertThat(this.visitor.visit(sqlStatementSelect),
                 equalTo("SELECT LIMIT_SUBSELECT.* FROM ( SELECT true, 'string' FROM \"test_schema\""
                         + ".\"test_table_name\"  ) LIMIT_SUBSELECT WHERE ROWNUM <= 10"));
@@ -165,7 +166,7 @@ class OracleSqlGenerationVisitorTest {
         columns.add(ColumnMetadata.builder().name("test_column")
                 .adapterNotes("{\"jdbcDataType\":2, \"typeName\":\"NUMBER\"}").type(DataType.createDouble()).build());
         final SqlTable fromClause = createFromClause(columns, "");
-        final SqlNode select = new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
+        final SqlNode select = SqlStatementSelect.builder().selectList(selectList).fromClause(fromClause).build();
         selectList.setParent(select);
         assertThat(this.visitor.visit(selectList), equalTo("CAST(\"test_column\" AS DECIMAL(0,0))"));
     }
@@ -174,7 +175,7 @@ class OracleSqlGenerationVisitorTest {
     void testVisitSqlSelectListRegularSelectList() throws AdapterException {
         final SqlSelectList selectList = createRegularSqlSelectListWithTwoColumns();
         final SqlTable fromClause = createFromClause(Collections.emptyList(), "");
-        final SqlNode select = new SqlStatementSelect(fromClause, selectList, null, null, null, null, null);
+        final SqlNode select = SqlStatementSelect.builder().selectList(selectList).fromClause(fromClause).build();
         selectList.setParent(select);
         assertThat(this.visitor.visit(selectList), equalTo("true, 'string'"));
     }

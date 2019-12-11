@@ -10,12 +10,12 @@ import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.BaseIdentifierConverter;
-import com.exasol.adapter.jdbc.AbstractColumnMetadataReaderTest;
+import com.exasol.adapter.jdbc.AbstractColumnMetadataReaderTestBase;
 import com.exasol.adapter.jdbc.JdbcTypeDescription;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.metadata.DataType.ExaCharset;
 
-class RedshiftColumnMetadataReaderTest extends AbstractColumnMetadataReaderTest {
+class RedshiftColumnMetadataReaderTest extends AbstractColumnMetadataReaderTestBase {
     @BeforeEach
     void beforeEach() {
         this.columnMetadataReader = new RedshiftColumnMetadataReader(null, AdapterProperties.emptyProperties(),

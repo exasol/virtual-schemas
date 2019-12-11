@@ -31,7 +31,8 @@ public class DialectTestData {
         final SqlOrderBy orderBy = new SqlOrderBy(List.of(new SqlColumn(0, clicksMeta.getColumns().get(0))),
                 List.of(true), List.of(true));
         final SqlLimit limit = new SqlLimit(10);
-        return new SqlStatementSelect(fromClause, selectList, whereClause, groupBy, having, orderBy, limit);
+        return SqlStatementSelect.builder().selectList(selectList).fromClause(fromClause).whereClause(whereClause)
+                .groupBy(groupBy).having(having).orderBy(orderBy).limit(limit).build();
     }
 
     public static TableMetadata getClicksTableMetadata() {

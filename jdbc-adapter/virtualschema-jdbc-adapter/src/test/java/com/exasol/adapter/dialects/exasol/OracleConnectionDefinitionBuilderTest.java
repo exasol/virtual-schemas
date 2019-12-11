@@ -16,7 +16,7 @@ import com.exasol.adapter.dialects.oracle.OracleConnectionDefinitionBuilder;
 import com.exasol.adapter.dialects.oracle.OracleProperties;
 import com.exasol.adapter.jdbc.*;
 
-class OracleConnectionDefinitionBuilderTest extends AbstractConnectionDefinitionBuilderTest {
+class OracleConnectionDefinitionBuilderTest extends AbstractConnectionDefinitionBuilderTestBase {
     private static final String ORACLE_CONNECTION_NAME = "ora_connection";
 
     @BeforeEach

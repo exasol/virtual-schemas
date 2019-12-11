@@ -28,7 +28,7 @@ import com.exasol.adapter.sql.SqlStatement;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class BigQueryQueryRewriterTest extends AbstractQueryRewriterTest {
+class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
     private QueryRewriter queryRewriter;
     @Mock
     private ResultSet mockResultSet;
