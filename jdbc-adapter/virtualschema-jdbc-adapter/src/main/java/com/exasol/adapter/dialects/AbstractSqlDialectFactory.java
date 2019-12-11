@@ -3,7 +3,7 @@ package com.exasol.adapter.dialects;
 import com.exasol.logging.VersionCollector;
 
 /**
- * Common base class for all factories of JDBC-based SQL dialect
+ * Common base class for all factories of JDBC-based SQL dialect.
  */
 public abstract class AbstractSqlDialectFactory implements SqlDialectFactory {
     @Override
