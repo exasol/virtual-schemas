@@ -14,7 +14,7 @@
     <product.version>2.2.1</product.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.version>9</java.version>
+    <java.version>11</java.version>
     <junit.version>5.4.2</junit.version>
     <junit.platform.version>1.4.2</junit.platform.version>
     <maven.surefire.version>2.22.1</maven.surefire.version>
