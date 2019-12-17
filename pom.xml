@@ -309,6 +309,8 @@
                     <descriptors>
                         <descriptor>src/main/assembly/all-dependencies.xml</descriptor>
                     </descriptors>
+                    <finalName>virtualschema-jdbc-adapter-dist-${product.version}</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>
                     <execution>
