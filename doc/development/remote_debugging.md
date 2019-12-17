@@ -77,7 +77,7 @@ You can see the filled out configuration dialog below.
 
 ![Eclipse remote debugging settings](../images/Screenshot_Eclipse_remote_debugging.png)
 
-You can find the example configuration above in the collection of launch configurations under [`jdbc-adapter/launch`](../../jdbc-adapter/launch/virtual-schema%20debug%20listen%20on%20port%208000.launch). 
+You can find the example configuration above in the collection of launch configurations under [`jdbc-adapter/launch`](../../launch/virtual-schema%20debug%20listen%20on%20port%208000.launch). 
 
 ## Configuring the Virtual Schema for Remote Debugging
 
