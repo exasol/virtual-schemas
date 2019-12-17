@@ -30,9 +30,9 @@ This means an user familiar with SQL will immediately feel at home when accessin
 
 Virtual Schema | Required Java Version | Provided by Exasol | Lifecycle
 ---------------|-----------------------|--------------------|--------------------------------
-3.x.x          |                    11 | >= 6.2             | supported, active development
-2.x.x          |                     9 | >= 6.2             | supported
-1.x.x          |                     8 | >= 6.0             | discontinued
+3.x.x          |                    11 | &ge; 6.2           | supported, active development
+2.x.x          |                     9 | &ge; 6.2           | supported
+1.x.x          |                     8 | &ge; 6.0           | discontinued
 
 Note that you can update Exasol 6.0.x and 6.1.x with script language containers version 2019-11-26 or newer in order to get Java 11 support. We recommend the updating Exasol installation to at least 6.2.3 or newer for best results.
 
