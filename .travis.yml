@@ -16,12 +16,11 @@ addons:
     organization: exasol
 
 before_script:
-  - sudo pip install pipenv
   - ./tools/version.sh verify
+  - sudo pip install pipenv
 
 script:
   - ./integration-test-data/run_integration_tests.sh
-  - cd  jdbc-adapter
   - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar
 
 cache:
