@@ -65,7 +65,7 @@ deploy_jdbc_drivers() {
 	fi
 	#deploy adapter jar
 	adapter_jar="$(awk '/jdbcAdapterPath/{ n=split($0,a,"/"); print a[n];}' $config)"
-	adapter_path="./virtualschema-jdbc-adapter-dist/target/$adapter_jar"
+	adapter_path="./virtualschema-jdbc-adapter/target/$adapter_jar"
 	curl -X PUT -T "$adapter_path" "$bucket_fs_upload_url"
 }
 
