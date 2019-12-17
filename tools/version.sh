@@ -1,5 +1,5 @@
 #!/bin/bash
-readonly vs_jar_prefix='virtual-schema-jdbc-adapter-dist'
+readonly vs_jar_prefix='virtualschema-jdbc-adapter-dist'
 readonly jar_suffix='jar'
 readonly vs_jar_pattern="$vs_jar_prefix-.*\.$jar_suffix"
 readonly root_dir='virtual-schema-jdbc-adapter'
