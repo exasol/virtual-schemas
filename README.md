@@ -28,7 +28,13 @@ This means an user familiar with SQL will immediately feel at home when accessin
 
 ## Version Requirements
 
-From Virtual Schema 2.0.0 on you need Exasol 6.2 or later since it requires Java 9 to run. For Exasol 6.1 choose Virtual Schema 1.x or upgrade to 6.2.
+Virtual Schema | Required Java Version | Provided by Exasol | Lifecycle
+---------------|-----------------------|--------------------|--------------------------------
+3.x.x          |                    11 | &ge; 6.2           | supported, active development
+2.x.x          |                     9 | &ge; 6.2           | supported
+1.x.x          |                     8 | &ge; 6.0           | discontinued
+
+Note that you can update Exasol 6.0.x and 6.1.x with script language containers version 2019-11-26 or newer in order to get Java 11 support. We recommend the updating Exasol installation to at least 6.2.3 or newer for best results.
 
 ## Deprecation Warning
 
