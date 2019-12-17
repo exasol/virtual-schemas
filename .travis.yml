@@ -16,8 +16,11 @@ addons:
     organization: exasol
 
 before_script:
-  - ./tools/version.sh verify
   - sudo pip install pipenv
+  - ./virtual-schema-jdbc-adapter/tools/version.sh verify
+
+install:
+    - travis_retry mvn dependency:resolve
 
 script:
   - ./integration-test-data/run_integration_tests.sh
@@ -25,4 +28,4 @@ script:
 
 cache:
   directories:
-  - "$HOME/.m2"
+  - $HOME/.m2
