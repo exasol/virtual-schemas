@@ -53,28 +53,25 @@ If you want to write an SQL dialect, you need to start by implementing the diale
 
 ### Project Structure
 
-This repository contains Maven sub-projects that are structured as follows. 
+This repository is structured as follows. 
 
-    jdbc-adapter                               Parent project and integration test framework
+    virtual-schemas
       |
-      |-- virtualschema-jdbc-adapter           The actual implementation files
+      |
+      |-- src
       |     |
-      |     |-- src
+      |     |-- main
       |     |     |
-      |     |     |-- main
-      |     |     |     |
-      |     |     |     |-- java               Productive code
-      |     |     |     |
-      |     |     |     '-- resources          Productive resources (e.g. service loader configuration)
+      |     |     |-- java               Productive code
       |     |     |
-      |     |     '-- test
-      |     |           |
-      |     |           |-- java               Unit and integration tests
-      |     |           |
-      |     |           '-- resources          Test resources
+      |     |     '-- resources          Productive resources (e.g. service loader configuration)
+      |     |
+      |     '-- test
+      |           |
+      |           |-- java               Unit and integration tests
+      |           |
+      |           '-- resources          Test resources
       |    ...     
-      |
-      '-- virtualschema-jdbc-adapter-dist      Environment for creating the all-in-one adapter JAR
 
 ### Package Structure
 
@@ -98,18 +95,18 @@ The Java package structure of the `virtualschema-jdbc-adapter` reflects the sepa
 
 | Interface                                                                                                                                                         | Implementation                | Purpose                                                                                |
 |-------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|----------------------------------------------------------------------------------------|
-| [`com.exasol.adapter.dialects.SqlDialect`](../../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/SqlDialect.java)               | mandatory                     | Define capabilities and which kind of support the dialect has for catalogs and schemas |
-| [`com.exasol.adapter.dialects.SqlDialectFactory`](../../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/SqlDialectFactory.java) | mandatory                     | Provide a way to instantiate the SQL dialect                                           |
-| [`com.exasol.adapter.jdbc.RemoteMetadataReader`](../../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/RemoteMetadataReader.java)   | optional depending on dialect | Read top-level metadata and find remote tables                                         |
-| [`com.exasol.adapter.jdbc.TableMetadataReader`](../../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/TableMetadataReader.java)     | optional depending on dialect | Decide which tables should be mapped and map data on table level                       |
-| [`com.exasol.adapter.jdbc.ColumnMetadataReader`](../../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/jdbc/ColumnMetadataReader.java)   | optional depending on dialect | Map data on column level                                                               |
-| [`com.exasol.adapter.dialects.QueryRewriter`](../../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/QueryRewriter.java)         | optional depending on dialect | Rewrite the original query into a dialect-specific one                                 |
+| [`com.exasol.adapter.dialects.SqlDialect`](https://github.com/exasol/virtual-schema-common-jdbc/blob/master/src/main/java/com/exasol/adapter/dialects/SqlDialect.java)               | mandatory                     | Define capabilities and which kind of support the dialect has for catalogs and schemas |
+| [`com.exasol.adapter.dialects.SqlDialectFactory`](https://github.com/exasol/virtual-schema-common-jdbc/blob/master/src/main/java/com/exasol/adapter/dialects/SqlDialectFactory.java) | mandatory                     | Provide a way to instantiate the SQL dialect                                           |
+| [`com.exasol.adapter.jdbc.RemoteMetadataReader`](https://github.com/exasol/virtual-schema-common-jdbc/blob/master/src/main/java/com/exasol/adapter/jdbc/RemoteMetadataReader.java)   | optional depending on dialect | Read top-level metadata and find remote tables                                         |
+| [`com.exasol.adapter.jdbc.TableMetadataReader`](https://github.com/exasol/virtual-schema-common-jdbc/blob/master/src/main/java/com/exasol/adapter/jdbc/TableMetadataReader.java)     | optional depending on dialect | Decide which tables should be mapped and map data on table level                       |
+| [`com.exasol.adapter.jdbc.ColumnMetadataReader`](https://github.com/exasol/virtual-schema-common-jdbc/blob/master/src/main/java/com/exasol/adapter/jdbc/ColumnMetadataReader.java)   | optional depending on dialect | Map data on column level                                                               |
+| [`com.exasol.adapter.dialects.QueryRewriter`](https://github.com/exasol/virtual-schema-common-jdbc/blob/master/src/main/java/com/exasol/adapter/dialects/QueryRewriter.java)         | optional depending on dialect | Rewrite the original query into a dialect-specific one                                 |
 
 ### Registering the Dialect
 
 The Virtual Schema adapter creates an instance of an SQL dialect on demand. You can pick any dialect that is listed in the `SqlDialects` registry. Each dialect needs a factory that can create an instance of that dialect. That factory must implement the interface 'SqlDialectFactory'.
 
-We use Java's [Service Loader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) in order to load the dialect implementation. That means you need to register the factory of your new dialect as a service on the list in [`com.exasol.adapter.dialects.SqlDialectFactory`](../../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/resources/META-INF/services/com.exasol.adapter.dialects.SqlDialectFactory).
+We use Java's [Service Loader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) in order to load the dialect implementation. That means you need to register the factory of your new dialect as a service on the list in [`com.exasol.adapter.dialects.SqlDialectFactory`](https://github.com/exasol/virtual-schema-common-jdbc/blob/master/src/main/java/com/exasol/adapter/dialects/SqlDialectFactory.java).
 
 ```properties
 com.exasol.adapter.dialects.athena.AthenaSqlDialectFactory

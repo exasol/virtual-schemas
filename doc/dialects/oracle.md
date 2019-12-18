@@ -135,7 +135,7 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
 
 ## Supported capabilities
 
-The Oracle dialect does not support all capabilities. A complete list can be found in [OracleSqlDialect.getCapabilities()](../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/oracle/OracleSqlDialect.java).
+The Oracle dialect does not support all capabilities. A complete list can be found in [OracleSqlDialect.getCapabilities()](../../src/main/java/com/exasol/adapter/dialects/oracle/OracleSqlDialect.java).
 
 ## Type Mappings and Limitations
 
