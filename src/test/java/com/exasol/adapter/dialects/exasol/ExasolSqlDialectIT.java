@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
+import com.exasol.jdbc.DataException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
@@ -32,10 +33,13 @@ import com.exasol.containers.ExasolContainerConstants;
 @Testcontainers
 class ExasolSqlDialectIT {
     private static final String VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION = "virtualschema-jdbc-adapter-dist-3.0.1.jar";
+    private static final String JDBC_EXASOL_CONNECTION = "JDBC_EXASOL_CONNECTION";
     private static final String SCHEMA_TEST = "SCHEMA_TEST";
     private static final String TABLE_ALL_EXASOL_DATA_TYPES = "TABLE_ALL_EXASOL_TYPES";
     private static final String TABLE_WITH_NULLS = "TABLE_WITH_NULLS";
     private static final String TABLE_SIMPLE_VALUES = "TABLE_SIMPLE_VALUES";
+    private static final String TABLE_JOIN_1 = "TABLE_JOIN_1";
+    private static final String TABLE_JOIN_2 = "TABLE_JOIN_2";
     private static final String VIRTUAL_SCHEMA_JDBC = "VIRTUAL_SCHEMA_JDBC";
     private static final String VIRTUAL_SCHEMA_JDBC_LOCAL = "VIRTUAL_SCHEMA_JDBC_LOCAL";
     private static final String VIRTUAL_SCHEMA_EXA = "VIRTUAL_SCHEMA_EXA";
@@ -65,6 +69,7 @@ class ExasolSqlDialectIT {
         createTestTableWithNulls();
         createTestTableWithSimpleValues();
         createTestTableMixedCase();
+        createTestTablesForJoinTests();
         createConnection();
         createAdapterScript();
         createVirtualSchema(VIRTUAL_SCHEMA_JDBC, SCHEMA_TEST, Optional.empty());
@@ -139,8 +144,15 @@ class ExasolSqlDialectIT {
                 + "(1, 2, 3)");
     }
 
+    private static void createTestTablesForJoinTests() throws SQLException {
+        statement.execute("CREATE TABLE " + SCHEMA_TEST + "." + TABLE_JOIN_1 + "(x INT, y VARCHAR(100))");
+        statement.execute("INSERT INTO " + SCHEMA_TEST + "." + TABLE_JOIN_1 + " VALUES (1,'aaa'), (2,'bbb')");
+        statement.execute("CREATE TABLE " + SCHEMA_TEST + "." + TABLE_JOIN_2 + "(x INT, y VARCHAR(100))");
+        statement.execute("INSERT INTO " + SCHEMA_TEST + "." + TABLE_JOIN_2 + " VALUES (2,'bbb'), (3,'ccc')");
+    }
+
     private static void createConnection() throws SQLException {
-        statement.execute("CREATE CONNECTION JDBC_EXASOL_CONNECTION " //
+        statement.execute("CREATE CONNECTION " + JDBC_EXASOL_CONNECTION + " " //
                 + "TO 'jdbc:exa:localhost:8888' " //
                 + "USER '" + container.getUsername() + "' " //
                 + "IDENTIFIED BY '" + container.getPassword() + "'");
@@ -162,7 +174,7 @@ class ExasolSqlDialectIT {
         builder.append(virtualSchemaName);
         builder.append(" USING " + SCHEMA_TEST + ".ADAPTER_SCRIPT_EXASOL WITH ");
         builder.append("SQL_DIALECT     = 'EXASOL' ");
-        builder.append("CONNECTION_NAME = 'JDBC_EXASOL_CONNECTION' ");
+        builder.append("CONNECTION_NAME = '" + JDBC_EXASOL_CONNECTION + "' ");
         builder.append("SCHEMA_NAME     = '" + schemaName + "' ");
         builder.append("DEBUG_ADDRESS = '10.0.2.15:3000'");
         builder.append("LOG_LEVEL = 'ALL'");
@@ -613,5 +625,132 @@ class ExasolSqlDialectIT {
                 () -> assertExplainVirtual(query, //
                         "SELECT CAST(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" AS VARCHAR(15) UTF8) FROM \"" //
                                 + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getParameterForTestCaseEqual")
+    void testCaseEqual(final String virtualSchemaName, final String then) {
+        final String query = "SELECT CASE A WHEN 1 THEN 'YES' WHEN 2 THEN 'PERHAPS' ELSE 'NO' END FROM "
+                + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "YES"), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT CASE \"" + TABLE_SIMPLE_VALUES + "\".\"A\" WHEN 1 " + then + " FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+    }
+
+    private static Stream<Arguments> getParameterForTestCaseEqual() {
+        return Stream.of(Arguments.of(VIRTUAL_SCHEMA_EXA, "THEN ''YES'' WHEN 2 THEN ''PERHAPS'' ELSE ''NO'' END"), //
+                Arguments.of(VIRTUAL_SCHEMA_EXA_LOCAL, "THEN 'YES' WHEN 2 THEN 'PERHAPS' ELSE 'NO' END"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getParameterForTestCaseMoreThan")
+    void testCaseMoreThan(final String virtualSchemaName, final String then) {
+        final String query = "SELECT CASE WHEN A > 1 THEN 'YES' ELSE 'NO' END FROM " //
+                + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "NO"), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT CASE WHEN 1 < \"" + TABLE_SIMPLE_VALUES + "\".\"A\" " + then + " FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+    }
+
+    private static Stream<Arguments> getParameterForTestCaseMoreThan() {
+        return Stream.of(Arguments.of(VIRTUAL_SCHEMA_EXA, "THEN ''YES'' ELSE ''NO'' END"), //
+                Arguments.of(VIRTUAL_SCHEMA_EXA_LOCAL, "THEN 'YES' ELSE 'NO' END"));
+    }
+
+    @Test
+    void testCreateVirtualSchemaWithNonexistentConnectionThrowsException() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("CREATE VIRTUAL SCHEMA VIRTUAL_SCHEMA_WRONG_CONNECTION");
+        builder.append(" USING " + SCHEMA_TEST + ".ADAPTER_SCRIPT_EXASOL WITH ");
+        builder.append("SQL_DIALECT     = 'EXASOL' ");
+        builder.append("CONNECTION_NAME = 'NONEXISTENT_CONNECTION' ");
+        builder.append("SCHEMA_NAME     = '" + SCHEMA_TEST + "' ");
+        final DataException exception = assertThrows(DataException.class, () -> statement.execute(builder.toString()));
+        assertThat(exception.getMessage(),
+                containsString("Could not access the connection information of connection \"NONEXISTENT_CONNECTION\""));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getParameterForTestVirtualSchemaExplainImport")
+    void testVirtualSchemaExplainImport(final String virtualSchemaName, final String expectedImportStatement) {
+        final String query = "SELECT 1 FROM " + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "1"), //
+                () -> assertExplainVirtual(query, expectedImportStatement));
+    }
+
+    private static Stream<Arguments> getParameterForTestVirtualSchemaExplainImport() {
+        final String select = "SELECT 1 FROM \"" + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\"";
+        return Stream.of(
+                Arguments.of(VIRTUAL_SCHEMA_EXA,
+                        "IMPORT FROM EXA AT 'localhost:8888' USER 'SYS' IDENTIFIED BY 'exasol' STATEMENT " //
+                                + "'" + select + "'"),
+                Arguments.of(VIRTUAL_SCHEMA_EXA_LOCAL, select),
+                Arguments.of(VIRTUAL_SCHEMA_JDBC,
+                        "IMPORT INTO (c1 DECIMAL(1, 0)) FROM JDBC AT " + JDBC_EXASOL_CONNECTION + " STATEMENT " //
+                                + "'" + select + "'"),
+                Arguments.of(VIRTUAL_SCHEMA_JDBC_LOCAL, select));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsAll")
+    void testInnerJoin(final String virtualSchemaName) throws SQLException {
+        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
+                "VALUES(2,'bbb', 2,'bbb')");
+        final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
+                + " a INNER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x");
+        assertThat(actual, matchesResultSet(expected));
+    }
+
+    private ResultSet createJoinExpectedTable(final String expectedColumns, final String expectedValues)
+            throws SQLException {
+        statement.execute("CREATE OR REPLACE TABLE " + SCHEMA_TEST + ".TABLE_JOIN_EXPECTED " + expectedColumns);
+        statement.execute("INSERT INTO " + SCHEMA_TEST + ".TABLE_JOIN_EXPECTED " + expectedValues);
+        return statement.executeQuery("SELECT * FROM " + SCHEMA_TEST + ".TABLE_JOIN_EXPECTED");
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsAll")
+    void testInnerJoinWithProjection(final String virtualSchemaName) throws SQLException {
+        final ResultSet expected = createJoinExpectedTable("(y VARCHAR(100))", " VALUES('bbbbbb')");
+        final ResultSet actual = statement.executeQuery("SELECT b.y || " + virtualSchemaName + "." + TABLE_JOIN_1
+                + ".y FROM " + virtualSchemaName + "." + TABLE_JOIN_1 + " INNER JOIN  " + virtualSchemaName + "."
+                + TABLE_JOIN_2 + " b ON " + virtualSchemaName + "." + TABLE_JOIN_1 + ".x=b.x");
+        assertThat(actual, matchesResultSet(expected));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsAll")
+    void testLeftJoin(final String virtualSchemaName) throws SQLException {
+        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
+                "VALUES(1, 'aaa', null, null), " //
+                        + "(2, 'bbb', 2, 'bbb')");
+        final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
+                + " a LEFT OUTER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
+        assertThat(actual, matchesResultSet(expected));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsAll")
+    void testRightJoin(final String virtualSchemaName) throws SQLException {
+        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
+                "VALUES(2, 'bbb', 2, 'bbb'), " //
+                        + "(null, null, 3, 'ccc')");
+        final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
+                + " a RIGHT OUTER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
+        assertThat(actual, matchesResultSet(expected));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsAll")
+    void testFullOuterJoin(final String virtualSchemaName) throws SQLException {
+        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
+                "VALUES(1, 'aaa', null, null), " //
+                        + "(2, 'bbb', 2, 'bbb'), " //
+                        + "(null, null, 3, 'ccc')");
+        final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
+                + " a FULL OUTER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
+        assertThat(actual, matchesResultSet(expected));
     }
 }

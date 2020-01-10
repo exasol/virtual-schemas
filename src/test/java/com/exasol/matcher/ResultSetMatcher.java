@@ -193,6 +193,9 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
     }
 
     private <T> boolean doesObjectMatches(final String dataTypeName, final T expectedValue, final T actualValue) {
+        if (expectedValue == null || actualValue == null) {
+            return doesPrimitiveTypeMatches(dataTypeName, expectedValue, actualValue);
+        }
         if (expectedValue.equals(actualValue)) {
             return true;
         } else {
