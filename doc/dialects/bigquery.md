@@ -28,7 +28,7 @@ Please remember to check the versions of your JAR files after downloading driver
 ```sql
 CREATE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-3.0.0.jar;
+    %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-3.0.1.jar;
     %jar /buckets/<BFS service>/<bucket>/avro-1.8.2.jar;
     %jar /buckets/<BFS service>/<bucket>/gax-1.40.0.jar;
     %jar /buckets/<BFS service>/<bucket>/google-api-client-1.28.0.jar;
@@ -50,7 +50,7 @@ CREATE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
 
 ## Defining a Named Connection
 
-Please follow the [Authenticating to a Cloud API Service article](https://cloud.google.com/video-intelligence/docs/common/auth]) to get Google service account credentials.
+Please follow the [Authenticating to a Cloud API Service article](https://cloud.google.com/docs/authentication/) to get Google service account credentials.
 
 Upload the key to BucketFS, then create a named connection:
 
@@ -58,7 +58,7 @@ Upload the key to BucketFS, then create a named connection:
 CREATE OR REPLACE CONNECTION BIGQUERY_CONNECTION
 TO 'jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;ProjectId=<your project id>;OAuthType=0;OAuthServiceAcctEmail=<service account email>;OAuthPvtKeyPath=/<path to the bucket>/<name of the key file>';
 ```    
-You can find additional information about the [JDBC connection string in the Big Query JDBC installation guide](https://www.simba.com/products/BigQuery/doc/JDBC_InstallGuide/content/jdbc/bq/authenticating/serviceaccount.htm]);
+You can find additional information about the [JDBC connection string in the Big Query JDBC installation guide](https://www.simba.com/products/BigQuery/doc/JDBC_InstallGuide/content/jdbc/using/intro.htm);
 
 ## Creating a Virtual Schema
 
