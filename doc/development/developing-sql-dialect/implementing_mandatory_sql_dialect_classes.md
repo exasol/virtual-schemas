@@ -358,7 +358,7 @@ And we also need two corresponding test classes:
 
 Each dialect is accompanied by a factory that is responsible for instantiating that dialect. 
 The [Java Service](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) loader takes care of finding and loading the factory. 
-It looks up the fully qualified class name of the dialect factories in the file [`com.exasol.adapter.dialects.SqlDialectFactory`](../../../jdbc-adapter/virtualschema-jdbc-adapter/src/main/resources/META-INF/services/com.exasol.adapter.dialects.SqlDialectFactory).
+It looks up the fully qualified class name of the dialect factories in the file [`com.exasol.adapter.dialects.SqlDialectFactory`](https://github.com/exasol/virtual-schema-common-jdbc/blob/master/src/main/java/com/exasol/adapter/dialects/SqlDialectFactory.java).
 
 1. Now **create a class for the factory**: `com.exasol.adapter.dialects.athena.AthenaSqlDialectFactory` that **implements** `SqlDialectFactory`. 
     Let your IDE to generate necessary **overriding methods** for you. 

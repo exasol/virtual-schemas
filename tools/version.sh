@@ -3,8 +3,8 @@ readonly vs_jar_prefix='virtualschema-jdbc-adapter-dist'
 readonly jar_suffix='jar'
 readonly vs_jar_pattern="$vs_jar_prefix-.*\.$jar_suffix"
 readonly root_dir='virtual-schemas'
-readonly master_pom='jdbc-adapter/pom.xml'
-readonly file_find_regex='.*\.(md|yaml)'
+readonly master_pom='pom.xml'
+readonly file_find_regex='.*\.(md|yaml|java)'
 readonly script=$(basename $0)
 
 main() {

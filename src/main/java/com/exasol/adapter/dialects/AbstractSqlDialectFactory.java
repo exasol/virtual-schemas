@@ -9,7 +9,7 @@ public abstract class AbstractSqlDialectFactory implements SqlDialectFactory {
     @Override
     public String getSqlDialectVersion() {
         final VersionCollector versionCollector = new VersionCollector(
-                "META-INF/maven/com.exasol/virtualschema-jdbc-adapter/pom.properties");
+                "META-INF/maven/com.exasol/virtual-schema-jdbc-adapter/pom.properties");
         return versionCollector.getVersionNumber();
     }
 }
