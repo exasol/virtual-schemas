@@ -4,6 +4,7 @@ import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
+import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -43,9 +44,15 @@ class MySqlSqlDialectTest {
     }
 
     @Test
-    void testGetLiteralCapabilitiesLiteral() {
+    void testGetLiteralCapabilities() {
         assertThat(this.dialect.getCapabilities().getLiteralCapabilities(),
                 containsInAnyOrder(NULL, BOOL, DATE, TIMESTAMP, TIMESTAMP_UTC, DOUBLE, EXACTNUMERIC, STRING, INTERVAL));
+    }
+
+    @Test
+    void testGetPredicateCapabilities() {
+        assertThat(this.dialect.getCapabilities().getPredicateCapabilities(), containsInAnyOrder(AND, OR, NOT, EQUAL,
+                NOTEQUAL, LESS, LESSEQUAL, LIKE, BETWEEN, IS_NULL, IS_NOT_NULL));
     }
 
     @Test
