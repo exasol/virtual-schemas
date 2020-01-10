@@ -167,6 +167,16 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>jdbc</artifactId>
+            <version>1.12.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.7.28</version>
+        </dependency>
+        <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>virtual-schema-common-jdbc</artifactId>
             <version>${vscjdbc.version}</version>
