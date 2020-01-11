@@ -56,8 +56,7 @@ class ExasolSqlDialectIT {
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
-                    .withLogConsumer(new Slf4jLogConsumer(LOGGER)) //
-                    .withClusterLogsPath(Path.of("target/mylogs"));
+                    .withLogConsumer(new Slf4jLogConsumer(LOGGER));
     private static Statement statement;
 
     @BeforeAll
