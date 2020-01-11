@@ -21,6 +21,9 @@ import com.exasol.jdbc.DataException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -32,6 +35,7 @@ import com.exasol.containers.ExasolContainerConstants;
 @Tag("integration")
 @Testcontainers
 class ExasolSqlDialectIT {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExasolSqlDialectIT.class);
     private static final String VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION = "virtualschema-jdbc-adapter-dist-3.0.1.jar";
     private static final String JDBC_EXASOL_CONNECTION = "JDBC_EXASOL_CONNECTION";
     private static final String SCHEMA_TEST = "SCHEMA_TEST";
@@ -51,7 +55,9 @@ class ExasolSqlDialectIT {
 
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
-            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE).withClusterLogsPath(Path.of("target/mylogs"));
+            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
+                    .withLogConsumer(new Slf4jLogConsumer(LOGGER)) //
+                    .withClusterLogsPath(Path.of("target/mylogs"));
     private static Statement statement;
 
     @BeforeAll
@@ -276,481 +282,481 @@ class ExasolSqlDialectIT {
         assertSelectColumnsResult(virtualSchemaName, "C10, C11");
     }
 
-//    // TODO: This test excludes VIRTUAL_SCHEMA_JDBC and VIRTUAL_SCHEMA_EXA virtual schema because of the bug on the
-//    // loader side.
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsOnlyLocal")
-//    void testIntervalYearToMonth(final String virtualSchemaName) throws SQLException {
-//        assertSelectColumnsResult(virtualSchemaName, "C12");
-//    }
-//
-//    private static Stream<String> getVirtualSchemaVariantsOnlyLocal() {
-//        return Stream.of(VIRTUAL_SCHEMA_JDBC_LOCAL, VIRTUAL_SCHEMA_EXA_LOCAL);
-//    }
-//
-//    // TODO: This test excludes VIRTUAL_SCHEMA_JDBC and VIRTUAL_SCHEMA_EXA virtual schema because of the bug on the
-//    // loader side.
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsOnlyLocal")
-//    void testIntervalDayToSecond(final String virtualSchemaName) throws SQLException {
-//        assertSelectColumnsResult(virtualSchemaName, "C13");
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsAll")
-//    void testGeometry(final String virtualSchemaName) throws SQLException {
-//        assertSelectColumnsResult(virtualSchemaName, "C14");
-//    }
-//
-//    @Test
-//    void testIdentifierCaseSensitivityOnTable() throws SQLException {
-//        final ResultSet expected = statement.executeQuery("SELECT \"Column1\", \"column2\", COLUMN3 FROM \""
-//                + SCHEMA_TEST_MIXED_CASE + "\".\"" + TABLE_MIXED_CASE + "\"");
-//        final ResultSet actual = statement.executeQuery("SELECT \"Column1\", \"column2\", COLUMN3 FROM \""
-//                + VIRTUAL_SCHEMA_EXA_MIXED_CASE + "\".\"" + TABLE_MIXED_CASE + "\"");
-//        assertThat(actual, matchesResultSet(expected));
-//    }
-//
-//    @Test
-//    void assertUnquotedMixedCaseTableIsNotFound() {
-//        final SQLException exception = assertThrows(SQLException.class,
-//                () -> statement.executeQuery("SELECT * FROM \"" + SCHEMA_TEST_MIXED_CASE + "\"." + TABLE_MIXED_CASE));
-//        assertThat(exception.getMessage(),
-//                containsString("object \"SCHEMA_TEST_Mixed_Case\".\"TABLE_MIXED_CASE\" not found "));
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(strings = { "Column1", "column2" })
-//    void assertUnquotedMixedCaseColumnIsNotFound(final String columnName) {
-//        final SQLException exception = assertThrows(SQLException.class, () -> statement.executeQuery("SELECT "
-//                + columnName + " FROM \"" + VIRTUAL_SCHEMA_EXA_MIXED_CASE + "\".\"" + TABLE_MIXED_CASE + "\""));
-//        assertThat(exception.getMessage(), containsString("object " + columnName.toUpperCase() + " not found "));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testGroupConcat(final String virtualSchemaName) {
-//        final String query = "SELECT GROUP_CONCAT(A) FROM " + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
-//        assertAll(() -> assertExpressionExecutionStringResult(query, "1,1,2,2,3,3"), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\") FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
-//    }
-//
-//    private static Stream<String> getVirtualSchemaVariantsExa() {
-//        return Stream.of(VIRTUAL_SCHEMA_EXA, VIRTUAL_SCHEMA_EXA_LOCAL);
-//    }
-//
-//    private void assertExpressionExecutionStringResult(final String query, final String expected) throws SQLException {
-//        final ResultSet result = statement.executeQuery(query);
-//        result.next();
-//        final String actual = result.getString(1);
-//        assertThat(actual, containsString(expected));
-//    }
-//
-//    private void assertExplainVirtual(final String query, final String expected) throws SQLException {
-//        final ResultSet explainVirtual = statement.executeQuery("EXPLAIN VIRTUAL " + query);
-//        explainVirtual.next();
-//        final String explainVirtualStringActual = explainVirtual.getString("PUSHDOWN_SQL");
-//        assertThat(explainVirtualStringActual, containsString(expected));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testGroupConcatDistinct(final String virtualSchemaName) {
-//        final String query = "SELECT GROUP_CONCAT(DISTINCT A) FROM " + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
-//        assertAll(() -> assertExpressionExecutionStringResult(query, "1,2,3"), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT GROUP_CONCAT(DISTINCT \"" + TABLE_SIMPLE_VALUES + "\".\"A\") FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testGroupConcatOrderBy(final String virtualSchemaName) {
-//        final String query = "SELECT GROUP_CONCAT(A ORDER BY C) FROM " + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
-//        assertAll(() -> assertExpressionExecutionStringResult(query, "1,2,3,1,2,3"), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" ORDER BY \"" //
-//                                + TABLE_SIMPLE_VALUES + "\".\"C\") FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testGroupConcatOrderByDesc(final String virtualSchemaName) {
-//        final String query = "SELECT GROUP_CONCAT(A ORDER BY C DESC) FROM " + virtualSchemaName + "."
-//                + TABLE_SIMPLE_VALUES;
-//        assertAll(() -> assertExpressionExecutionStringResult(query, "3,2,1,3,2,1"), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" ORDER BY \"" //
-//                                + TABLE_SIMPLE_VALUES + "\".\"C\" DESC) FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testGroupConcatOrderByDescNullsLast(final String virtualSchemaName) {
-//        final String query = "SELECT GROUP_CONCAT(A ORDER BY C DESC NULLS LAST) FROM " + virtualSchemaName + "."
-//                + TABLE_SIMPLE_VALUES;
-//        assertAll(() -> assertExpressionExecutionStringResult(query, "3,2,1,3,2,1"), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" ORDER BY \"" //
-//                                + TABLE_SIMPLE_VALUES + "\".\"C\" DESC NULLS LAST) FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getParameterForTestGroupConcatSeparator")
-//    void testGroupConcatSeparator(final String virtualSchemaName, final String separator) {
-//        final String query = "SELECT GROUP_CONCAT(A SEPARATOR ';'||' ') FROM " + virtualSchemaName + "."
-//                + TABLE_SIMPLE_VALUES;
-//        assertAll(() -> assertExpressionExecutionStringResult(query, "1; 1; 2; 2; 3; 3"), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" SEPARATOR " + separator + ") FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
-//    }
-//
-//    private static Stream<Arguments> getParameterForTestGroupConcatSeparator() {
-//        return Stream.of(Arguments.of(VIRTUAL_SCHEMA_EXA, "''; ''"), //
-//                Arguments.of(VIRTUAL_SCHEMA_EXA_LOCAL, "'; '"));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsOnlyLocal")
-//    void testGroupConcatSeparatorLocalVirtualSchemas(final String virtualSchemaName) {
-//        final String query = "SELECT GROUP_CONCAT(A SEPARATOR ';'||' ') FROM " + virtualSchemaName + "."
-//                + TABLE_SIMPLE_VALUES;
-//        assertAll(() -> assertExpressionExecutionStringResult(query, "1; 1; 2; 2; 3; 3"), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" SEPARATOR '; ') FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testExtractFromDate(final String virtualSchemaName) {
-//        final String query = "SELECT EXTRACT(MONTH FROM C9) FROM " + virtualSchemaName + "."
-//                + TABLE_ALL_EXASOL_DATA_TYPES;
-//        assertAll(() -> assertExpressionExecutionIntResult(query, 8), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT EXTRACT(MONTH FROM \"" + TABLE_ALL_EXASOL_DATA_TYPES + "\".\"C9\") FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
-//    }
-//
-//    private void assertExpressionExecutionIntResult(final String query, final int expected) throws SQLException {
-//        final ResultSet result = statement.executeQuery(query);
-//        result.next();
-//        final int actual = result.getInt(1);
-//        assertThat(actual, equalTo(expected));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testExtractFromInterval(final String virtualSchemaName) {
-//        final String query = "SELECT EXTRACT(MONTH FROM C12) FROM " + virtualSchemaName + "."
-//                + TABLE_ALL_EXASOL_DATA_TYPES;
-//        assertAll(() -> assertExpressionExecutionIntResult(query, 6), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT EXTRACT(MONTH FROM \"" + TABLE_ALL_EXASOL_DATA_TYPES + "\".\"C12\") FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testCastAsChar(final String virtualSchemaName) {
-//        final String query = "SELECT CAST(A AS CHAR(15)) FROM " + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
-//        assertAll(() -> assertExpressionExecutionStringResult(query, "1              "), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT CAST(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" AS CHAR(15) UTF8) FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testCastBooleanAsVarchar(final String virtualSchemaName) {
-//        final String query = "SELECT CAST(CAST(A > 0 AS VARCHAR(15)) AS BOOLEAN) FROM " + virtualSchemaName + "."
-//                + TABLE_SIMPLE_VALUES;
-//        assertAll(() -> assertExpressionExecutionBooleanResult(query, true), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT CAST(CAST(0 < \"" + TABLE_SIMPLE_VALUES
-//                                + "\".\"A\" AS VARCHAR(15) UTF8) AS BOOLEAN) FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
-//    }
-//
-//    private void assertExpressionExecutionBooleanResult(final String query, final boolean expected)
-//            throws SQLException {
-//        final ResultSet result = statement.executeQuery(query);
-//        result.next();
-//        final boolean actualResult = result.getBoolean(1);
-//        assertThat(actualResult, equalTo(expected));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testCastVarcharAsDate(final String virtualSchemaName) {
-//        final String query = "SELECT CAST(CAST(C9 AS VARCHAR(30)) AS DATE) FROM " + virtualSchemaName + "."
-//                + TABLE_ALL_EXASOL_DATA_TYPES;
-//        assertAll(
-//                () -> assertExpressionExecutionDateResult(query,
-//                        new Date(new GregorianCalendar(2016, AUGUST, 1).getTime().getTime())), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
-//                                + "\".\"C9\" AS VARCHAR(30) UTF8) AS DATE) FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
-//    }
-//
-//    private void assertExpressionExecutionDateResult(final String query, final Date expected) throws SQLException {
-//        final ResultSet result = statement.executeQuery(query);
-//        result.next();
-//        final Date actualResult = result.getDate(1);
-//        assertThat(actualResult, equalTo(expected));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testCastVarcharAsDecimal(final String virtualSchemaName) {
-//        final String query = "SELECT CAST(CAST(A AS VARCHAR(15)) AS DECIMAL(8, 1)) FROM " + virtualSchemaName + "."
-//                + TABLE_SIMPLE_VALUES;
-//        assertAll(() -> assertExpressionExecutionBigDecimalResult(query, new BigDecimal("1.0")), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT CAST(CAST(\"" + TABLE_SIMPLE_VALUES
-//                                + "\".\"A\" AS VARCHAR(15) UTF8) AS DECIMAL(8, 1)) FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
-//    }
-//
-//    private void assertExpressionExecutionBigDecimalResult(final String query, final BigDecimal expected)
-//            throws SQLException {
-//        final ResultSet result = statement.executeQuery(query);
-//        result.next();
-//        final BigDecimal actualResult = result.getBigDecimal(1);
-//        assertThat(actualResult, equalTo(expected));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testCastVarcharAsDouble(final String virtualSchemaName) {
-//        final String query = "SELECT CAST(CAST(C AS VARCHAR(15)) AS DOUBLE) FROM " + virtualSchemaName + "."
-//                + TABLE_SIMPLE_VALUES;
-//        assertAll(() -> assertExpressionExecutionDoubleResult(query, 1.1d), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT CAST(CAST(\"" + TABLE_SIMPLE_VALUES + "\".\"C\" AS VARCHAR(15) UTF8) AS DOUBLE) FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
-//    }
-//
-//    private void assertExpressionExecutionDoubleResult(final String query, final double expected) throws SQLException {
-//        final ResultSet result = statement.executeQuery(query);
-//        result.next();
-//        final double actualResult = result.getDouble(1);
-//        assertThat(actualResult, equalTo(expected));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testCastVarcharAsGeometry(final String virtualSchemaName) {
-//        final String query = "SELECT CAST(CAST(C14 AS VARCHAR(100)) AS GEOMETRY(5)) FROM " + virtualSchemaName + "."
-//                + TABLE_ALL_EXASOL_DATA_TYPES;
-//        assertAll(() -> assertExpressionExecutionStringResult(query, "POINT (2 5)"), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
-//                                + "\".\"C14\" AS VARCHAR(100) UTF8) AS GEOMETRY(5)) FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testCastVarcharAsIntervalDayToSecond(final String virtualSchemaName) {
-//        final String query = "SELECT CAST(CAST(C13 AS VARCHAR(100)) AS INTERVAL DAY (5) TO SECOND (2)) FROM "
-//                + virtualSchemaName + "." + TABLE_ALL_EXASOL_DATA_TYPES;
-//        assertAll(() -> assertExpressionExecutionStringResult(query, "+00003 12:50:10.12"), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
-//                                + "\".\"C13\" AS VARCHAR(100) UTF8) AS INTERVAL DAY (5) TO SECOND (2)) FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testCastVarcharAsIntervalYearToMonth(final String virtualSchemaName) {
-//        final String query = "SELECT CAST(CAST(C12 AS VARCHAR(100)) AS INTERVAL YEAR (5) TO MONTH) FROM "
-//                + virtualSchemaName + "." + TABLE_ALL_EXASOL_DATA_TYPES;
-//        assertAll(() -> assertExpressionExecutionStringResult(query, "+00004-06"), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
-//                                + "\".\"C12\" AS VARCHAR(100) UTF8) AS INTERVAL YEAR (5) TO MONTH) FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testCastVarcharAsTimestamp(final String virtualSchemaName) {
-//        final String query = "SELECT CAST(CAST(C10 AS VARCHAR(100)) AS TIMESTAMP) FROM " + virtualSchemaName + "."
-//                + TABLE_ALL_EXASOL_DATA_TYPES;
-//        assertAll(
-//                () -> assertExpressionExecutionTimestampResult(query,
-//                        new Timestamp(new GregorianCalendar(2016, AUGUST, 1, 0, 0, 1).getTime().getTime())), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
-//                                + "\".\"C10\" AS VARCHAR(100) UTF8) AS TIMESTAMP) FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
-//    }
-//
-//    private void assertExpressionExecutionTimestampResult(final String query, final Timestamp expected)
-//            throws SQLException {
-//        final ResultSet result = statement.executeQuery(query);
-//        result.next();
-//        final Timestamp actual = result.getTimestamp(1);
-//        assertThat(actual, equalTo(expected));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testCastVarcharAsTimestampWithLocalTimeZone(final String virtualSchemaName) {
-//        final String query = "SELECT CAST(CAST(C11 AS VARCHAR(100)) AS TIMESTAMP WITH LOCAL TIME ZONE) FROM "
-//                + virtualSchemaName + "." + TABLE_ALL_EXASOL_DATA_TYPES;
-//        assertAll(
-//                () -> assertExpressionExecutionTimestampResult(query,
-//                        new Timestamp(new GregorianCalendar(2016, AUGUST, 1, 0, 0, 2).getTime().getTime())), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
-//                                + "\".\"C11\" AS VARCHAR(100) UTF8) AS TIMESTAMP WITH LOCAL TIME ZONE) FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsExa")
-//    void testCastIntAsVarchar(final String virtualSchemaName) {
-//        final String query = "SELECT CAST(A AS VARCHAR(15)) FROM " + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
-//        assertAll(() -> assertExpressionExecutionStringResult(query, "1"), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT CAST(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" AS VARCHAR(15) UTF8) FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getParameterForTestCaseEqual")
-//    void testCaseEqual(final String virtualSchemaName, final String then) {
-//        final String query = "SELECT CASE A WHEN 1 THEN 'YES' WHEN 2 THEN 'PERHAPS' ELSE 'NO' END FROM "
-//                + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
-//        assertAll(() -> assertExpressionExecutionStringResult(query, "YES"), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT CASE \"" + TABLE_SIMPLE_VALUES + "\".\"A\" WHEN 1 " + then + " FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
-//    }
-//
-//    private static Stream<Arguments> getParameterForTestCaseEqual() {
-//        return Stream.of(Arguments.of(VIRTUAL_SCHEMA_EXA, "THEN ''YES'' WHEN 2 THEN ''PERHAPS'' ELSE ''NO'' END"), //
-//                Arguments.of(VIRTUAL_SCHEMA_EXA_LOCAL, "THEN 'YES' WHEN 2 THEN 'PERHAPS' ELSE 'NO' END"));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getParameterForTestCaseMoreThan")
-//    void testCaseMoreThan(final String virtualSchemaName, final String then) {
-//        final String query = "SELECT CASE WHEN A > 1 THEN 'YES' ELSE 'NO' END FROM " //
-//                + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
-//        assertAll(() -> assertExpressionExecutionStringResult(query, "NO"), //
-//                () -> assertExplainVirtual(query, //
-//                        "SELECT CASE WHEN 1 < \"" + TABLE_SIMPLE_VALUES + "\".\"A\" " + then + " FROM \"" //
-//                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
-//    }
-//
-//    private static Stream<Arguments> getParameterForTestCaseMoreThan() {
-//        return Stream.of(Arguments.of(VIRTUAL_SCHEMA_EXA, "THEN ''YES'' ELSE ''NO'' END"), //
-//                Arguments.of(VIRTUAL_SCHEMA_EXA_LOCAL, "THEN 'YES' ELSE 'NO' END"));
-//    }
-//
-//    @Test
-//    void testCreateVirtualSchemaWithNonexistentConnectionThrowsException() {
-//        final StringBuilder builder = new StringBuilder();
-//        builder.append("CREATE VIRTUAL SCHEMA VIRTUAL_SCHEMA_WRONG_CONNECTION");
-//        builder.append(" USING " + SCHEMA_TEST + ".ADAPTER_SCRIPT_EXASOL WITH ");
-//        builder.append("SQL_DIALECT     = 'EXASOL' ");
-//        builder.append("CONNECTION_NAME = 'NONEXISTENT_CONNECTION' ");
-//        builder.append("SCHEMA_NAME     = '" + SCHEMA_TEST + "' ");
-//        final DataException exception = assertThrows(DataException.class, () -> statement.execute(builder.toString()));
-//        assertThat(exception.getMessage(),
-//                containsString("Could not access the connection information of connection \"NONEXISTENT_CONNECTION\""));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getParameterForTestVirtualSchemaExplainImport")
-//    void testVirtualSchemaExplainImport(final String virtualSchemaName, final String expectedImportStatement) {
-//        final String query = "SELECT 1 FROM " + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
-//        assertAll(() -> assertExpressionExecutionStringResult(query, "1"), //
-//                () -> assertExplainVirtual(query, expectedImportStatement));
-//    }
-//
-//    private static Stream<Arguments> getParameterForTestVirtualSchemaExplainImport() {
-//        final String select = "SELECT 1 FROM \"" + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\"";
-//        return Stream.of(
-//                Arguments.of(VIRTUAL_SCHEMA_EXA,
-//                        "IMPORT FROM EXA AT 'localhost:8888' USER 'SYS' IDENTIFIED BY 'exasol' STATEMENT " //
-//                                + "'" + select + "'"),
-//                Arguments.of(VIRTUAL_SCHEMA_EXA_LOCAL, select),
-//                Arguments.of(VIRTUAL_SCHEMA_JDBC,
-//                        "IMPORT INTO (c1 DECIMAL(1, 0)) FROM JDBC AT " + JDBC_EXASOL_CONNECTION + " STATEMENT " //
-//                                + "'" + select + "'"),
-//                Arguments.of(VIRTUAL_SCHEMA_JDBC_LOCAL, select));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsAll")
-//    void testInnerJoin(final String virtualSchemaName) throws SQLException {
-//        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
-//                "VALUES(2,'bbb', 2,'bbb')");
-//        final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
-//                + " a INNER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x");
-//        assertThat(actual, matchesResultSet(expected));
-//    }
-//
-//    private ResultSet createJoinExpectedTable(final String expectedColumns, final String expectedValues)
-//            throws SQLException {
-//        statement.execute("CREATE OR REPLACE TABLE " + SCHEMA_TEST + ".TABLE_JOIN_EXPECTED " + expectedColumns);
-//        statement.execute("INSERT INTO " + SCHEMA_TEST + ".TABLE_JOIN_EXPECTED " + expectedValues);
-//        return statement.executeQuery("SELECT * FROM " + SCHEMA_TEST + ".TABLE_JOIN_EXPECTED");
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsAll")
-//    void testInnerJoinWithProjection(final String virtualSchemaName) throws SQLException {
-//        final ResultSet expected = createJoinExpectedTable("(y VARCHAR(100))", " VALUES('bbbbbb')");
-//        final ResultSet actual = statement.executeQuery("SELECT b.y || " + virtualSchemaName + "." + TABLE_JOIN_1
-//                + ".y FROM " + virtualSchemaName + "." + TABLE_JOIN_1 + " INNER JOIN  " + virtualSchemaName + "."
-//                + TABLE_JOIN_2 + " b ON " + virtualSchemaName + "." + TABLE_JOIN_1 + ".x=b.x");
-//        assertThat(actual, matchesResultSet(expected));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsAll")
-//    void testLeftJoin(final String virtualSchemaName) throws SQLException {
-//        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
-//                "VALUES(1, 'aaa', null, null), " //
-//                        + "(2, 'bbb', 2, 'bbb')");
-//        final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
-//                + " a LEFT OUTER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
-//        assertThat(actual, matchesResultSet(expected));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsAll")
-//    void testRightJoin(final String virtualSchemaName) throws SQLException {
-//        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
-//                "VALUES(2, 'bbb', 2, 'bbb'), " //
-//                        + "(null, null, 3, 'ccc')");
-//        final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
-//                + " a RIGHT OUTER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
-//        assertThat(actual, matchesResultSet(expected));
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("getVirtualSchemaVariantsAll")
-//    void testFullOuterJoin(final String virtualSchemaName) throws SQLException {
-//        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
-//                "VALUES(1, 'aaa', null, null), " //
-//                        + "(2, 'bbb', 2, 'bbb'), " //
-//                        + "(null, null, 3, 'ccc')");
-//        final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
-//                + " a FULL OUTER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
-//        assertThat(actual, matchesResultSet(expected));
-//    }
+    // TODO: This test excludes VIRTUAL_SCHEMA_JDBC and VIRTUAL_SCHEMA_EXA virtual schema because of the bug on the
+    // loader side.
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsOnlyLocal")
+    void testIntervalYearToMonth(final String virtualSchemaName) throws SQLException {
+        assertSelectColumnsResult(virtualSchemaName, "C12");
+    }
+
+    private static Stream<String> getVirtualSchemaVariantsOnlyLocal() {
+        return Stream.of(VIRTUAL_SCHEMA_JDBC_LOCAL, VIRTUAL_SCHEMA_EXA_LOCAL);
+    }
+
+    // TODO: This test excludes VIRTUAL_SCHEMA_JDBC and VIRTUAL_SCHEMA_EXA virtual schema because of the bug on the
+    // loader side.
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsOnlyLocal")
+    void testIntervalDayToSecond(final String virtualSchemaName) throws SQLException {
+        assertSelectColumnsResult(virtualSchemaName, "C13");
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsAll")
+    void testGeometry(final String virtualSchemaName) throws SQLException {
+        assertSelectColumnsResult(virtualSchemaName, "C14");
+    }
+
+    @Test
+    void testIdentifierCaseSensitivityOnTable() throws SQLException {
+        final ResultSet expected = statement.executeQuery("SELECT \"Column1\", \"column2\", COLUMN3 FROM \""
+                + SCHEMA_TEST_MIXED_CASE + "\".\"" + TABLE_MIXED_CASE + "\"");
+        final ResultSet actual = statement.executeQuery("SELECT \"Column1\", \"column2\", COLUMN3 FROM \""
+                + VIRTUAL_SCHEMA_EXA_MIXED_CASE + "\".\"" + TABLE_MIXED_CASE + "\"");
+        assertThat(actual, matchesResultSet(expected));
+    }
+
+    @Test
+    void assertUnquotedMixedCaseTableIsNotFound() {
+        final SQLException exception = assertThrows(SQLException.class,
+                () -> statement.executeQuery("SELECT * FROM \"" + SCHEMA_TEST_MIXED_CASE + "\"." + TABLE_MIXED_CASE));
+        assertThat(exception.getMessage(),
+                containsString("object \"SCHEMA_TEST_Mixed_Case\".\"TABLE_MIXED_CASE\" not found "));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "Column1", "column2" })
+    void assertUnquotedMixedCaseColumnIsNotFound(final String columnName) {
+        final SQLException exception = assertThrows(SQLException.class, () -> statement.executeQuery("SELECT "
+                + columnName + " FROM \"" + VIRTUAL_SCHEMA_EXA_MIXED_CASE + "\".\"" + TABLE_MIXED_CASE + "\""));
+        assertThat(exception.getMessage(), containsString("object " + columnName.toUpperCase() + " not found "));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testGroupConcat(final String virtualSchemaName) {
+        final String query = "SELECT GROUP_CONCAT(A) FROM " + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "1,1,2,2,3,3"), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\") FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+    }
+
+    private static Stream<String> getVirtualSchemaVariantsExa() {
+        return Stream.of(VIRTUAL_SCHEMA_EXA, VIRTUAL_SCHEMA_EXA_LOCAL);
+    }
+
+    private void assertExpressionExecutionStringResult(final String query, final String expected) throws SQLException {
+        final ResultSet result = statement.executeQuery(query);
+        result.next();
+        final String actual = result.getString(1);
+        assertThat(actual, containsString(expected));
+    }
+
+    private void assertExplainVirtual(final String query, final String expected) throws SQLException {
+        final ResultSet explainVirtual = statement.executeQuery("EXPLAIN VIRTUAL " + query);
+        explainVirtual.next();
+        final String explainVirtualStringActual = explainVirtual.getString("PUSHDOWN_SQL");
+        assertThat(explainVirtualStringActual, containsString(expected));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testGroupConcatDistinct(final String virtualSchemaName) {
+        final String query = "SELECT GROUP_CONCAT(DISTINCT A) FROM " + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "1,2,3"), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT GROUP_CONCAT(DISTINCT \"" + TABLE_SIMPLE_VALUES + "\".\"A\") FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testGroupConcatOrderBy(final String virtualSchemaName) {
+        final String query = "SELECT GROUP_CONCAT(A ORDER BY C) FROM " + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "1,2,3,1,2,3"), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" ORDER BY \"" //
+                                + TABLE_SIMPLE_VALUES + "\".\"C\") FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testGroupConcatOrderByDesc(final String virtualSchemaName) {
+        final String query = "SELECT GROUP_CONCAT(A ORDER BY C DESC) FROM " + virtualSchemaName + "."
+                + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "3,2,1,3,2,1"), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" ORDER BY \"" //
+                                + TABLE_SIMPLE_VALUES + "\".\"C\" DESC) FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testGroupConcatOrderByDescNullsLast(final String virtualSchemaName) {
+        final String query = "SELECT GROUP_CONCAT(A ORDER BY C DESC NULLS LAST) FROM " + virtualSchemaName + "."
+                + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "3,2,1,3,2,1"), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" ORDER BY \"" //
+                                + TABLE_SIMPLE_VALUES + "\".\"C\" DESC NULLS LAST) FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getParameterForTestGroupConcatSeparator")
+    void testGroupConcatSeparator(final String virtualSchemaName, final String separator) {
+        final String query = "SELECT GROUP_CONCAT(A SEPARATOR ';'||' ') FROM " + virtualSchemaName + "."
+                + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "1; 1; 2; 2; 3; 3"), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" SEPARATOR " + separator + ") FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+    }
+
+    private static Stream<Arguments> getParameterForTestGroupConcatSeparator() {
+        return Stream.of(Arguments.of(VIRTUAL_SCHEMA_EXA, "''; ''"), //
+                Arguments.of(VIRTUAL_SCHEMA_EXA_LOCAL, "'; '"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsOnlyLocal")
+    void testGroupConcatSeparatorLocalVirtualSchemas(final String virtualSchemaName) {
+        final String query = "SELECT GROUP_CONCAT(A SEPARATOR ';'||' ') FROM " + virtualSchemaName + "."
+                + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "1; 1; 2; 2; 3; 3"), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" SEPARATOR '; ') FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testExtractFromDate(final String virtualSchemaName) {
+        final String query = "SELECT EXTRACT(MONTH FROM C9) FROM " + virtualSchemaName + "."
+                + TABLE_ALL_EXASOL_DATA_TYPES;
+        assertAll(() -> assertExpressionExecutionIntResult(query, 8), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT EXTRACT(MONTH FROM \"" + TABLE_ALL_EXASOL_DATA_TYPES + "\".\"C9\") FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
+    }
+
+    private void assertExpressionExecutionIntResult(final String query, final int expected) throws SQLException {
+        final ResultSet result = statement.executeQuery(query);
+        result.next();
+        final int actual = result.getInt(1);
+        assertThat(actual, equalTo(expected));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testExtractFromInterval(final String virtualSchemaName) {
+        final String query = "SELECT EXTRACT(MONTH FROM C12) FROM " + virtualSchemaName + "."
+                + TABLE_ALL_EXASOL_DATA_TYPES;
+        assertAll(() -> assertExpressionExecutionIntResult(query, 6), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT EXTRACT(MONTH FROM \"" + TABLE_ALL_EXASOL_DATA_TYPES + "\".\"C12\") FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testCastAsChar(final String virtualSchemaName) {
+        final String query = "SELECT CAST(A AS CHAR(15)) FROM " + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "1              "), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT CAST(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" AS CHAR(15) UTF8) FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testCastBooleanAsVarchar(final String virtualSchemaName) {
+        final String query = "SELECT CAST(CAST(A > 0 AS VARCHAR(15)) AS BOOLEAN) FROM " + virtualSchemaName + "."
+                + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionBooleanResult(query, true), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT CAST(CAST(0 < \"" + TABLE_SIMPLE_VALUES
+                                + "\".\"A\" AS VARCHAR(15) UTF8) AS BOOLEAN) FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+    }
+
+    private void assertExpressionExecutionBooleanResult(final String query, final boolean expected)
+            throws SQLException {
+        final ResultSet result = statement.executeQuery(query);
+        result.next();
+        final boolean actualResult = result.getBoolean(1);
+        assertThat(actualResult, equalTo(expected));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testCastVarcharAsDate(final String virtualSchemaName) {
+        final String query = "SELECT CAST(CAST(C9 AS VARCHAR(30)) AS DATE) FROM " + virtualSchemaName + "."
+                + TABLE_ALL_EXASOL_DATA_TYPES;
+        assertAll(
+                () -> assertExpressionExecutionDateResult(query,
+                        new Date(new GregorianCalendar(2016, AUGUST, 1).getTime().getTime())), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
+                                + "\".\"C9\" AS VARCHAR(30) UTF8) AS DATE) FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
+    }
+
+    private void assertExpressionExecutionDateResult(final String query, final Date expected) throws SQLException {
+        final ResultSet result = statement.executeQuery(query);
+        result.next();
+        final Date actualResult = result.getDate(1);
+        assertThat(actualResult, equalTo(expected));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testCastVarcharAsDecimal(final String virtualSchemaName) {
+        final String query = "SELECT CAST(CAST(A AS VARCHAR(15)) AS DECIMAL(8, 1)) FROM " + virtualSchemaName + "."
+                + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionBigDecimalResult(query, new BigDecimal("1.0")), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT CAST(CAST(\"" + TABLE_SIMPLE_VALUES
+                                + "\".\"A\" AS VARCHAR(15) UTF8) AS DECIMAL(8, 1)) FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+    }
+
+    private void assertExpressionExecutionBigDecimalResult(final String query, final BigDecimal expected)
+            throws SQLException {
+        final ResultSet result = statement.executeQuery(query);
+        result.next();
+        final BigDecimal actualResult = result.getBigDecimal(1);
+        assertThat(actualResult, equalTo(expected));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testCastVarcharAsDouble(final String virtualSchemaName) {
+        final String query = "SELECT CAST(CAST(C AS VARCHAR(15)) AS DOUBLE) FROM " + virtualSchemaName + "."
+                + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionDoubleResult(query, 1.1d), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT CAST(CAST(\"" + TABLE_SIMPLE_VALUES + "\".\"C\" AS VARCHAR(15) UTF8) AS DOUBLE) FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+    }
+
+    private void assertExpressionExecutionDoubleResult(final String query, final double expected) throws SQLException {
+        final ResultSet result = statement.executeQuery(query);
+        result.next();
+        final double actualResult = result.getDouble(1);
+        assertThat(actualResult, equalTo(expected));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testCastVarcharAsGeometry(final String virtualSchemaName) {
+        final String query = "SELECT CAST(CAST(C14 AS VARCHAR(100)) AS GEOMETRY(5)) FROM " + virtualSchemaName + "."
+                + TABLE_ALL_EXASOL_DATA_TYPES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "POINT (2 5)"), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
+                                + "\".\"C14\" AS VARCHAR(100) UTF8) AS GEOMETRY(5)) FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testCastVarcharAsIntervalDayToSecond(final String virtualSchemaName) {
+        final String query = "SELECT CAST(CAST(C13 AS VARCHAR(100)) AS INTERVAL DAY (5) TO SECOND (2)) FROM "
+                + virtualSchemaName + "." + TABLE_ALL_EXASOL_DATA_TYPES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "+00003 12:50:10.12"), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
+                                + "\".\"C13\" AS VARCHAR(100) UTF8) AS INTERVAL DAY (5) TO SECOND (2)) FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testCastVarcharAsIntervalYearToMonth(final String virtualSchemaName) {
+        final String query = "SELECT CAST(CAST(C12 AS VARCHAR(100)) AS INTERVAL YEAR (5) TO MONTH) FROM "
+                + virtualSchemaName + "." + TABLE_ALL_EXASOL_DATA_TYPES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "+00004-06"), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
+                                + "\".\"C12\" AS VARCHAR(100) UTF8) AS INTERVAL YEAR (5) TO MONTH) FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testCastVarcharAsTimestamp(final String virtualSchemaName) {
+        final String query = "SELECT CAST(CAST(C10 AS VARCHAR(100)) AS TIMESTAMP) FROM " + virtualSchemaName + "."
+                + TABLE_ALL_EXASOL_DATA_TYPES;
+        assertAll(
+                () -> assertExpressionExecutionTimestampResult(query,
+                        new Timestamp(new GregorianCalendar(2016, AUGUST, 1, 0, 0, 1).getTime().getTime())), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
+                                + "\".\"C10\" AS VARCHAR(100) UTF8) AS TIMESTAMP) FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
+    }
+
+    private void assertExpressionExecutionTimestampResult(final String query, final Timestamp expected)
+            throws SQLException {
+        final ResultSet result = statement.executeQuery(query);
+        result.next();
+        final Timestamp actual = result.getTimestamp(1);
+        assertThat(actual, equalTo(expected));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testCastVarcharAsTimestampWithLocalTimeZone(final String virtualSchemaName) {
+        final String query = "SELECT CAST(CAST(C11 AS VARCHAR(100)) AS TIMESTAMP WITH LOCAL TIME ZONE) FROM "
+                + virtualSchemaName + "." + TABLE_ALL_EXASOL_DATA_TYPES;
+        assertAll(
+                () -> assertExpressionExecutionTimestampResult(query,
+                        new Timestamp(new GregorianCalendar(2016, AUGUST, 1, 0, 0, 2).getTime().getTime())), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
+                                + "\".\"C11\" AS VARCHAR(100) UTF8) AS TIMESTAMP WITH LOCAL TIME ZONE) FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsExa")
+    void testCastIntAsVarchar(final String virtualSchemaName) {
+        final String query = "SELECT CAST(A AS VARCHAR(15)) FROM " + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "1"), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT CAST(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" AS VARCHAR(15) UTF8) FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getParameterForTestCaseEqual")
+    void testCaseEqual(final String virtualSchemaName, final String then) {
+        final String query = "SELECT CASE A WHEN 1 THEN 'YES' WHEN 2 THEN 'PERHAPS' ELSE 'NO' END FROM "
+                + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "YES"), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT CASE \"" + TABLE_SIMPLE_VALUES + "\".\"A\" WHEN 1 " + then + " FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+    }
+
+    private static Stream<Arguments> getParameterForTestCaseEqual() {
+        return Stream.of(Arguments.of(VIRTUAL_SCHEMA_EXA, "THEN ''YES'' WHEN 2 THEN ''PERHAPS'' ELSE ''NO'' END"), //
+                Arguments.of(VIRTUAL_SCHEMA_EXA_LOCAL, "THEN 'YES' WHEN 2 THEN 'PERHAPS' ELSE 'NO' END"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getParameterForTestCaseMoreThan")
+    void testCaseMoreThan(final String virtualSchemaName, final String then) {
+        final String query = "SELECT CASE WHEN A > 1 THEN 'YES' ELSE 'NO' END FROM " //
+                + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "NO"), //
+                () -> assertExplainVirtual(query, //
+                        "SELECT CASE WHEN 1 < \"" + TABLE_SIMPLE_VALUES + "\".\"A\" " + then + " FROM \"" //
+                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+    }
+
+    private static Stream<Arguments> getParameterForTestCaseMoreThan() {
+        return Stream.of(Arguments.of(VIRTUAL_SCHEMA_EXA, "THEN ''YES'' ELSE ''NO'' END"), //
+                Arguments.of(VIRTUAL_SCHEMA_EXA_LOCAL, "THEN 'YES' ELSE 'NO' END"));
+    }
+
+    @Test
+    void testCreateVirtualSchemaWithNonexistentConnectionThrowsException() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("CREATE VIRTUAL SCHEMA VIRTUAL_SCHEMA_WRONG_CONNECTION");
+        builder.append(" USING " + SCHEMA_TEST + ".ADAPTER_SCRIPT_EXASOL WITH ");
+        builder.append("SQL_DIALECT     = 'EXASOL' ");
+        builder.append("CONNECTION_NAME = 'NONEXISTENT_CONNECTION' ");
+        builder.append("SCHEMA_NAME     = '" + SCHEMA_TEST + "' ");
+        final DataException exception = assertThrows(DataException.class, () -> statement.execute(builder.toString()));
+        assertThat(exception.getMessage(),
+                containsString("Could not access the connection information of connection \"NONEXISTENT_CONNECTION\""));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getParameterForTestVirtualSchemaExplainImport")
+    void testVirtualSchemaExplainImport(final String virtualSchemaName, final String expectedImportStatement) {
+        final String query = "SELECT 1 FROM " + virtualSchemaName + "." + TABLE_SIMPLE_VALUES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "1"), //
+                () -> assertExplainVirtual(query, expectedImportStatement));
+    }
+
+    private static Stream<Arguments> getParameterForTestVirtualSchemaExplainImport() {
+        final String select = "SELECT 1 FROM \"" + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\"";
+        return Stream.of(
+                Arguments.of(VIRTUAL_SCHEMA_EXA,
+                        "IMPORT FROM EXA AT 'localhost:8888' USER 'SYS' IDENTIFIED BY 'exasol' STATEMENT " //
+                                + "'" + select + "'"),
+                Arguments.of(VIRTUAL_SCHEMA_EXA_LOCAL, select),
+                Arguments.of(VIRTUAL_SCHEMA_JDBC,
+                        "IMPORT INTO (c1 DECIMAL(1, 0)) FROM JDBC AT " + JDBC_EXASOL_CONNECTION + " STATEMENT " //
+                                + "'" + select + "'"),
+                Arguments.of(VIRTUAL_SCHEMA_JDBC_LOCAL, select));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsAll")
+    void testInnerJoin(final String virtualSchemaName) throws SQLException {
+        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
+                "VALUES(2,'bbb', 2,'bbb')");
+        final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
+                + " a INNER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x");
+        assertThat(actual, matchesResultSet(expected));
+    }
+
+    private ResultSet createJoinExpectedTable(final String expectedColumns, final String expectedValues)
+            throws SQLException {
+        statement.execute("CREATE OR REPLACE TABLE " + SCHEMA_TEST + ".TABLE_JOIN_EXPECTED " + expectedColumns);
+        statement.execute("INSERT INTO " + SCHEMA_TEST + ".TABLE_JOIN_EXPECTED " + expectedValues);
+        return statement.executeQuery("SELECT * FROM " + SCHEMA_TEST + ".TABLE_JOIN_EXPECTED");
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsAll")
+    void testInnerJoinWithProjection(final String virtualSchemaName) throws SQLException {
+        final ResultSet expected = createJoinExpectedTable("(y VARCHAR(100))", " VALUES('bbbbbb')");
+        final ResultSet actual = statement.executeQuery("SELECT b.y || " + virtualSchemaName + "." + TABLE_JOIN_1
+                + ".y FROM " + virtualSchemaName + "." + TABLE_JOIN_1 + " INNER JOIN  " + virtualSchemaName + "."
+                + TABLE_JOIN_2 + " b ON " + virtualSchemaName + "." + TABLE_JOIN_1 + ".x=b.x");
+        assertThat(actual, matchesResultSet(expected));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsAll")
+    void testLeftJoin(final String virtualSchemaName) throws SQLException {
+        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
+                "VALUES(1, 'aaa', null, null), " //
+                        + "(2, 'bbb', 2, 'bbb')");
+        final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
+                + " a LEFT OUTER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
+        assertThat(actual, matchesResultSet(expected));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsAll")
+    void testRightJoin(final String virtualSchemaName) throws SQLException {
+        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
+                "VALUES(2, 'bbb', 2, 'bbb'), " //
+                        + "(null, null, 3, 'ccc')");
+        final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
+                + " a RIGHT OUTER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
+        assertThat(actual, matchesResultSet(expected));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariantsAll")
+    void testFullOuterJoin(final String virtualSchemaName) throws SQLException {
+        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
+                "VALUES(1, 'aaa', null, null), " //
+                        + "(2, 'bbb', 2, 'bbb'), " //
+                        + "(null, null, 3, 'ccc')");
+        final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
+                + " a FULL OUTER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
+        assertThat(actual, matchesResultSet(expected));
+    }
 }
