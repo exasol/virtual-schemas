@@ -7,6 +7,12 @@ general:
   jdbcAdapterPath:         /buckets/bfsdefault/default/virtualschema-jdbc-adapter-dist-3.0.1.jar
   additionalJDBCDriverDir: /vagrant/drivers/
 
+exasol:
+  runIntegrationTests: false
+  address:  127.0.0.1:8899
+  user:     sys
+  password: exasol
+
 postgresql:
   runIntegrationTests:    true
   jdbcDriverPath:         /buckets/bfsdefault/default/drivers/jdbc/POSTGRESQL/postgresql-42.2.5.jar;
