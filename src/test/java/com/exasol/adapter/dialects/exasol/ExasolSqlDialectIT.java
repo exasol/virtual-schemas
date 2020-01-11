@@ -13,11 +13,9 @@ import java.nio.file.Path;
 import java.sql.*;
 import java.util.GregorianCalendar;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
-import com.exasol.jdbc.DataException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
@@ -31,6 +29,7 @@ import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
+import com.exasol.jdbc.DataException;
 
 @Tag("integration")
 @Testcontainers
@@ -48,7 +47,6 @@ class ExasolSqlDialectIT {
     private static final String VIRTUAL_SCHEMA_JDBC_LOCAL = "VIRTUAL_SCHEMA_JDBC_LOCAL";
     private static final String VIRTUAL_SCHEMA_EXA = "VIRTUAL_SCHEMA_EXA";
     private static final String VIRTUAL_SCHEMA_EXA_LOCAL = "VIRTUAL_SCHEMA_EXA_LOCAL";
-
     private static final String SCHEMA_TEST_MIXED_CASE = "SCHEMA_TEST_Mixed_Case";
     private static final String TABLE_MIXED_CASE = "Table_Mixed_Case";
     private static final String VIRTUAL_SCHEMA_EXA_MIXED_CASE = "VIRTUAL_SCHEMA_EXA_Mixed_Case";
@@ -61,7 +59,6 @@ class ExasolSqlDialectIT {
 
     @BeforeAll
     static void beforeAll() throws SQLException, BucketAccessException, InterruptedException, TimeoutException {
-        TimeUnit.SECONDS.sleep(20); // TODO need to be fixed in the test-containers
         final Bucket bucket = container.getDefaultBucket();
         final Path pathToRls = Path.of("target/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
         bucket.uploadFile(pathToRls, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
@@ -168,7 +165,6 @@ class ExasolSqlDialectIT {
                 + "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
                 + "%jar /buckets/bfsdefault/default/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION + ";\n" //
                 + "/");
-        TimeUnit.SECONDS.sleep(20); // FIXME: need to be fixed in the container
     }
 
     private static void createVirtualSchema(final String virtualSchemaName, final String schemaName,
@@ -241,6 +237,7 @@ class ExasolSqlDialectIT {
     }
 
     // TODO: This test excludes VIRTUAL_SCHEMA_EXA virtual schema because of the wrong data mapping caused by driver.
+    //https://github.com/exasol/virtual-schemas/issues/299
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsWithoutExa")
     void testChar(final String virtualSchemaName) throws SQLException {
@@ -283,6 +280,7 @@ class ExasolSqlDialectIT {
 
     // TODO: This test excludes VIRTUAL_SCHEMA_JDBC and VIRTUAL_SCHEMA_EXA virtual schema because of the bug on the
     // loader side.
+    //https://github.com/exasol/virtual-schemas/issues/299
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsOnlyLocal")
     void testIntervalYearToMonth(final String virtualSchemaName) throws SQLException {
@@ -295,6 +293,7 @@ class ExasolSqlDialectIT {
 
     // TODO: This test excludes VIRTUAL_SCHEMA_JDBC and VIRTUAL_SCHEMA_EXA virtual schema because of the bug on the
     // loader side.
+    //https://github.com/exasol/virtual-schemas/issues/299
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsOnlyLocal")
     void testIntervalDayToSecond(final String virtualSchemaName) throws SQLException {

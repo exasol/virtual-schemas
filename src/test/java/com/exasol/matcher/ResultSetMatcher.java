@@ -136,29 +136,28 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
     private boolean doesTimestampMatch(final ResultSet actualRow, final int column) throws SQLException {
         final Timestamp expected = this.expectedResultSet.getTimestamp(column);
         final Timestamp actual = actualRow.getTimestamp(column);
-        return doesObjectMatches("Timestamp", expected, actual);
+        return doesObjectMatch("Timestamp", expected, actual);
     }
 
     private boolean doesDateMatch(final ResultSet actualRow, final int column) throws SQLException {
         final Date expected = this.expectedResultSet.getDate(column);
         final Date actual = actualRow.getDate(column);
-        return doesObjectMatches("Date", expected, actual);
+        return doesObjectMatch("Date", expected, actual);
     }
 
     private boolean doesDecimalMatch(final ResultSet actualRow, final int column) throws SQLException {
         final BigDecimal expected = this.expectedResultSet.getBigDecimal(column);
         final BigDecimal actual = actualRow.getBigDecimal(column);
-        return doesObjectMatches("BigDecimal", expected, actual);
+        return doesObjectMatch("BigDecimal", expected, actual);
     }
 
     private boolean doesBooleanMatch(final ResultSet actualRow, final int column) throws SQLException {
         final boolean expected = this.expectedResultSet.getBoolean(column);
         final boolean actual = actualRow.getBoolean(column);
-        return doesPrimitiveTypeMatches("Boolean", expected, actual);
+        return doesPrimitiveTypeMatch("Boolean", expected, actual);
     }
 
-    private <T> boolean doesPrimitiveTypeMatches(final String dataTypeName, final T expectedValue,
-            final T actualValue) {
+    private <T> boolean doesPrimitiveTypeMatch(final String dataTypeName, final T expectedValue, final T actualValue) {
         if (expectedValue == actualValue) {
             return true;
         } else {
@@ -177,24 +176,24 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
     private boolean doesDoubleMatch(final ResultSet actualRow, final int column) throws SQLException {
         final Double expected = this.expectedResultSet.getDouble(column);
         final Double actual = actualRow.getDouble(column);
-        return doesObjectMatches("Double", expected, actual);
+        return doesObjectMatch("Double", expected, actual);
     }
 
     private boolean doesIntegerMatch(final ResultSet actualRow, final int column) throws SQLException {
         final Integer expected = this.expectedResultSet.getInt(column);
         final Integer actual = actualRow.getInt(column);
-        return doesObjectMatches("Integer", expected, actual);
+        return doesObjectMatch("Integer", expected, actual);
     }
 
     private boolean doesStringMatch(final ResultSet actualRow, final int column) throws SQLException {
         final String expected = this.expectedResultSet.getString(column);
         final String actual = actualRow.getString(column);
-        return doesObjectMatches("String", expected, actual);
+        return doesObjectMatch("String", expected, actual);
     }
 
-    private <T> boolean doesObjectMatches(final String dataTypeName, final T expectedValue, final T actualValue) {
+    private <T> boolean doesObjectMatch(final String dataTypeName, final T expectedValue, final T actualValue) {
         if (expectedValue == null || actualValue == null) {
-            return doesPrimitiveTypeMatches(dataTypeName, expectedValue, actualValue);
+            return doesPrimitiveTypeMatch(dataTypeName, expectedValue, actualValue);
         }
         if (expectedValue.equals(actualValue)) {
             return true;
