@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
+import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
@@ -31,8 +32,7 @@ import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
 import com.exasol.jdbc.DataException;
 
-@Tag("integration")
-@Testcontainers
+@Ignore
 class ExasolSqlDialectIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExasolSqlDialectIT.class);
     private static final String VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION = "virtualschema-jdbc-adapter-dist-3.0.1.jar";
