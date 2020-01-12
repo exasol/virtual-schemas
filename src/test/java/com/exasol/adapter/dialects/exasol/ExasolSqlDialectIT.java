@@ -13,10 +13,10 @@ import java.nio.file.Path;
 import java.sql.*;
 import java.util.GregorianCalendar;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
@@ -32,7 +32,8 @@ import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
 import com.exasol.jdbc.DataException;
 
-@Ignore
+@Tag("integration")
+@Testcontainers
 class ExasolSqlDialectIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExasolSqlDialectIT.class);
     private static final String VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION = "virtualschema-jdbc-adapter-dist-3.0.1.jar";
@@ -59,6 +60,7 @@ class ExasolSqlDialectIT {
 
     @BeforeAll
     static void beforeAll() throws SQLException, BucketAccessException, InterruptedException, TimeoutException {
+        TimeUnit.SECONDS.sleep(20);
         final Bucket bucket = container.getDefaultBucket();
         final Path pathToRls = Path.of("target/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
         bucket.uploadFile(pathToRls, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
@@ -237,7 +239,7 @@ class ExasolSqlDialectIT {
     }
 
     // TODO: This test excludes VIRTUAL_SCHEMA_EXA virtual schema because of the wrong data mapping caused by driver.
-    //https://github.com/exasol/virtual-schemas/issues/299
+    // https://github.com/exasol/virtual-schemas/issues/299
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsWithoutExa")
     void testChar(final String virtualSchemaName) throws SQLException {
@@ -280,7 +282,7 @@ class ExasolSqlDialectIT {
 
     // TODO: This test excludes VIRTUAL_SCHEMA_JDBC and VIRTUAL_SCHEMA_EXA virtual schema because of the bug on the
     // loader side.
-    //https://github.com/exasol/virtual-schemas/issues/299
+    // https://github.com/exasol/virtual-schemas/issues/299
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsOnlyLocal")
     void testIntervalYearToMonth(final String virtualSchemaName) throws SQLException {
@@ -293,7 +295,7 @@ class ExasolSqlDialectIT {
 
     // TODO: This test excludes VIRTUAL_SCHEMA_JDBC and VIRTUAL_SCHEMA_EXA virtual schema because of the bug on the
     // loader side.
-    //https://github.com/exasol/virtual-schemas/issues/299
+    // https://github.com/exasol/virtual-schemas/issues/299
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsOnlyLocal")
     void testIntervalDayToSecond(final String virtualSchemaName) throws SQLException {
