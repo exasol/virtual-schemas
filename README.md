@@ -36,6 +36,8 @@ Virtual Schema | Required Java Version | Provided by Exasol | Lifecycle
 
 Note that you can update Exasol 6.0.x and 6.1.x with script language containers version 2019-11-26 or newer in order to get Java 11 support. We recommend the updating Exasol installation to at least 6.2.3 or newer for best results.
 
+Please contact the [Exasol Support Team](https://www.exasol.com/portal/display/EXA/Support+Dashboard) if you need help upgrading the language container.
+
 ## Deprecation Warning
 
 Please use the entry point
