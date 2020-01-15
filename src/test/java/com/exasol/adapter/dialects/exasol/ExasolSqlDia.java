@@ -32,9 +32,9 @@ import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
 import com.exasol.jdbc.DataException;
 
-@Tag("integration")
-@Testcontainers
-class ExasolSqlDialectIT {
+//@Tag("integration")
+//@Testcontainers
+class ExasolSqlDia {
 //    private static final Logger LOGGER = LoggerFactory.getLogger(ExasolSqlDialectIT.class);
     private static final String VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION = "virtualschema-jdbc-adapter-dist-3.0.1.jar";
     private static final String JDBC_EXASOL_CONNECTION = "JDBC_EXASOL_CONNECTION";
@@ -225,7 +225,7 @@ class ExasolSqlDialectIT {
 
 //    @ParameterizedTest
 //    @MethodSource("getVirtualSchemaVariantsAll")
-    @Test
+//    @Test
     void testVarchar() throws SQLException {
         assertSelectColumnsResult(VIRTUAL_SCHEMA_JDBC, "C1, C2");
     }
