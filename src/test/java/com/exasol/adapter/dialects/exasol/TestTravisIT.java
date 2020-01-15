@@ -28,17 +28,10 @@ public class TestTravisIT {
     public static final String RLS_SALES_ROLES = "RLS_SALES_ROLES";
     private static Statement statement;
 
-    @BeforeAll
-    static void beforeAll() throws SQLException, BucketAccessException, InterruptedException {
-        final Bucket bucket = container.getDefaultBucket();
-        final Connection connection = container.createConnectionForUser(container.getUsername(),
-                container.getPassword());
-        statement = connection.createStatement();
-    }
 
     @Test
     void testExaRlsUsersTableIsFilteredOut() throws InterruptedException {
-        TimeUnit.SECONDS.sleep(20);
+        TimeUnit.SECONDS.sleep(180);
         System.out.println("Reaches test.");
     }
 }
