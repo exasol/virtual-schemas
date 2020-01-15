@@ -14,7 +14,7 @@ exasol:
   password: exasol
 
 postgresql:
-  runIntegrationTests:    true
+  runIntegrationTests:    false
   jdbcDriverPath:         /buckets/bfsdefault/default/drivers/jdbc/POSTGRESQL/postgresql-42.2.5.jar;
   connectionString:       jdbc:postgresql://localhost:45432/postgres
   user:                   postgres
