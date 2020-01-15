@@ -80,8 +80,8 @@ class ExasolSqlDialectIT {
                 Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888'"));
         createVirtualSchema(VIRTUAL_SCHEMA_EXA_LOCAL, SCHEMA_TEST,
                 Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888' IS_LOCAL = 'true'"));
-        createVirtualSchema("\"" + VIRTUAL_SCHEMA_EXA_MIXED_CASE + "\"", SCHEMA_TEST_MIXED_CASE,
-                Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888'"));
+//        createVirtualSchema("\"" + VIRTUAL_SCHEMA_EXA_MIXED_CASE + "\"", SCHEMA_TEST_MIXED_CASE,
+//                Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888'"));
     }
 
     private static void createTestSchema(final String schemaName) throws SQLException {
@@ -169,22 +169,15 @@ class ExasolSqlDialectIT {
 
     private static void createVirtualSchema(final String virtualSchemaName, final String schemaName,
             final Optional<String> additionalParameters) throws SQLException {
-        LOGGER.info("Ready to create virtual schema in schema " + schemaName);
-        statement.execute("OPEN SCHEMA " + "\"" + schemaName + "\"");
-        LOGGER.info("Opened schema " + schemaName);
         final StringBuilder builder = new StringBuilder();
         builder.append("CREATE VIRTUAL SCHEMA ");
         builder.append(virtualSchemaName);
-        builder.append(" USING " + SCHEMA_TEST + ".ADAPTER_SCRIPT_EXASOL WITH ");
+        builder.append(" USING " + schemaName + ".ADAPTER_SCRIPT_EXASOL WITH ");
         builder.append("SQL_DIALECT     = 'EXASOL' ");
         builder.append("CONNECTION_NAME = '" + JDBC_EXASOL_CONNECTION + "' ");
         builder.append("SCHEMA_NAME     = '" + schemaName + "' ");
-        builder.append("DEBUG_ADDRESS = '10.0.2.15:3000'");
-        builder.append("LOG_LEVEL = 'ALL'");
         additionalParameters.ifPresent(builder::append);
-        final String sql = builder.toString();
-        LOGGER.info(sql);
-        statement.execute(sql);
+        statement.execute(builder.toString());
         LOGGER.info("Created virtual schema " + virtualSchemaName);
     }
 
