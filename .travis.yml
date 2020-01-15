@@ -1,15 +1,8 @@
 language: java
 
-# Setting sudo to false will cause Travis to use Containers.
-# To use Docker's privileged mode, we need to enable sudo.
-sudo: required
-
-services:
-  - docker
-
 matrix:
   include:
-    - jdk: "openjdk11"
+    - jdk: openjdk11
 
 addons:
   sonarcloud:
@@ -17,7 +10,6 @@ addons:
 
 before_script:
   - tools/version.sh verify
-  - sudo pip install pipenv
 
 install:
     - travis_retry mvn dependency:resolve
