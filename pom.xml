@@ -17,71 +17,6 @@
         <vscjava.version>8.0.1</vscjava.version>
         <vscjdbc.version>2.0.1</vscjdbc.version>
     </properties>
-    <profiles>
-        <profile>
-            <id>it</id>
-            <dependencies>
-                <dependency>
-                    <scope>verify</scope>
-                    <groupId>org.postgresql</groupId>
-                    <artifactId>postgresql</artifactId>
-                    <version>42.2.5</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.hive</groupId>
-                    <artifactId>hive-jdbc</artifactId>
-                    <version>3.1.1</version>
-                </dependency>
-                <!-- Force transient dependency versions (caused by "hive-jdbc") to avoid using snapshot releases -->
-                <dependency>
-                    <groupId>org.apache.hbase</groupId>
-                    <artifactId>hbase-server</artifactId>
-                    <version>2.2.0</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.glassfish</groupId>
-                    <artifactId>javax.el</artifactId>
-                    <version>3.0.1-b11</version>
-                </dependency>
-            </dependencies>
-            <properties>
-                <integrationtest.skipTestSetup>false</integrationtest.skipTestSetup>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>1.5.0</version>
-                        <executions>
-                            <execution>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>exec
-                                    </goal>   <!-- Setting "java" here would make it run in the same JVM as Maven -->
-                                </goals>
-                                <configuration>
-                                    <classpathScope>test
-                                    </classpathScope> <!-- The class we want to load is in the test folder, so we need to set this to have test classes in the classpath -->
-                                    <executable>java</executable>
-                                    <arguments>
-                                        <argument>-classpath</argument>
-                                        <!-- automatically creates the classpath using all project dependencies, also adding
-                                            the project build directory -->
-                                        <classpath/>
-                                        <argument>com.exasol.adapter.dialects.IntegrationTestSetup</argument>
-                                        <argument>${project.version}</argument>
-                                        <argument>${integrationtest.configfile}</argument>
-                                        <argument>${integrationtest.skipTestSetup}</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
     <distributionManagement>
         <repository>
             <id>maven.exasol.com</id>
@@ -123,7 +58,7 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
             <version>1.7.28</version>
-            <scope>compile</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
