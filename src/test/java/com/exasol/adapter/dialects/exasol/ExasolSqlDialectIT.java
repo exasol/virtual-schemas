@@ -74,20 +74,14 @@ class ExasolSqlDialectIT {
         createTestTablesForJoinTests();
         createConnection();
         createAdapterScript();
-        LOGGER.info("Created adapter script");
         createVirtualSchema(VIRTUAL_SCHEMA_JDBC, SCHEMA_TEST, Optional.empty());
-        LOGGER.info("Created " + VIRTUAL_SCHEMA_JDBC);
         createVirtualSchema(VIRTUAL_SCHEMA_JDBC_LOCAL, SCHEMA_TEST, Optional.of("IS_LOCAL = 'true'"));
-        LOGGER.info("Created " + VIRTUAL_SCHEMA_EXA);
         createVirtualSchema(VIRTUAL_SCHEMA_EXA, SCHEMA_TEST,
                 Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888'"));
-        LOGGER.info("Created " + VIRTUAL_SCHEMA_EXA_LOCAL);
         createVirtualSchema(VIRTUAL_SCHEMA_EXA_LOCAL, SCHEMA_TEST,
                 Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888' IS_LOCAL = 'true'"));
-        LOGGER.info("Created " + VIRTUAL_SCHEMA_EXA_MIXED_CASE);
         createVirtualSchema("\"" + VIRTUAL_SCHEMA_EXA_MIXED_CASE + "\"", SCHEMA_TEST_MIXED_CASE,
                 Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888'"));
-        LOGGER.info("Created all virtual schemas");
     }
 
     private static void createTestSchema(final String schemaName) throws SQLException {
@@ -175,7 +169,9 @@ class ExasolSqlDialectIT {
 
     private static void createVirtualSchema(final String virtualSchemaName, final String schemaName,
             final Optional<String> additionalParameters) throws SQLException {
+        LOGGER.info("Ready to create virtual schema in schema " + schemaName);
         statement.execute("OPEN SCHEMA " + "\"" + schemaName + "\"");
+        LOGGER.info("Opened schema " + schemaName);
         final StringBuilder builder = new StringBuilder();
         builder.append("CREATE VIRTUAL SCHEMA ");
         builder.append(virtualSchemaName);
@@ -186,7 +182,10 @@ class ExasolSqlDialectIT {
         builder.append("DEBUG_ADDRESS = '10.0.2.15:3000'");
         builder.append("LOG_LEVEL = 'ALL'");
         additionalParameters.ifPresent(builder::append);
-        statement.execute(builder.toString());
+        final String sql = builder.toString();
+        LOGGER.info(sql);
+        statement.execute(sql);
+        LOGGER.info("Created virtual schema " + virtualSchemaName);
     }
 
 //    @ParameterizedTest
@@ -233,13 +232,17 @@ class ExasolSqlDialectIT {
     void testVarchar(final String virtualSchemaName) throws SQLException {
         LOGGER.info("Reached test");
         assertSelectColumnsResult(virtualSchemaName, "C1, C2");
+        LOGGER.info("Test finished execution");
     }
 
     private void assertSelectColumnsResult(final String virtualSchemaName, final String columns) throws SQLException {
+        LOGGER.info("Ready to get expected resultSet.");
         final ResultSet expected = statement
                 .executeQuery("SELECT " + columns + " FROM " + SCHEMA_TEST + "." + TABLE_ALL_EXASOL_DATA_TYPES);
+        LOGGER.info("Ready to get actual resultSet.");
         final ResultSet actual = statement
                 .executeQuery("SELECT " + columns + " FROM " + virtualSchemaName + "." + TABLE_ALL_EXASOL_DATA_TYPES);
+        LOGGER.info("Ready to compare resultSets.");
         assertThat(actual, matchesResultSet(expected));
     }
 
