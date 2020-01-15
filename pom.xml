@@ -136,35 +136,6 @@
             <artifactId>javax.el</artifactId>
             <version>3.0.1-b11</version>
         </dependency>
-        <!-- We need this only for the integration test profile, however without adding it here you would have to enable
-                    the profile in the IDE to have the dependency -->
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.17</version>
-            <scope>integration-test</scope>
-        </dependency>
-        <!--Needed to upload jar to BucketFS -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.2</version>
-            <scope>integration-test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>fluent-hc</artifactId>
-            <version>4.5.2</version>
-            <scope>integration-test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpmime</artifactId>
-            <version>4.5.2</version>
-            <scope>integration-test</scope>
-        </dependency>
-        <!-- The EXASOL jdbc driver is only needed for verify scope, however we add it always so that you can always create
-        virtual schemas to an EXASOL -->
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-jdbc</artifactId>

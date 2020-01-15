@@ -35,7 +35,7 @@ import com.exasol.jdbc.DataException;
 @Tag("integration")
 @Testcontainers
 class ExasolSqlDialectIT {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExasolSqlDialectIT.class);
+//    private static final Logger LOGGER = LoggerFactory.getLogger(ExasolSqlDialectIT.class);
     private static final String VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION = "virtualschema-jdbc-adapter-dist-3.0.1.jar";
     private static final String JDBC_EXASOL_CONNECTION = "JDBC_EXASOL_CONNECTION";
     private static final String SCHEMA_TEST = "SCHEMA_TEST";
@@ -54,13 +54,12 @@ class ExasolSqlDialectIT {
 
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
-            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
-                    .withLogConsumer(new Slf4jLogConsumer(LOGGER));
+            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE); //
+//                    .withLogConsumer(new Slf4jLogConsumer(LOGGER));
     private static Statement statement;
 
     @BeforeAll
     static void beforeAll() throws SQLException, BucketAccessException, InterruptedException, TimeoutException {
-//        TimeUnit.SECONDS.sleep(40);
         final Bucket bucket = container.getDefaultBucket();
         final Path pathToRls = Path.of("target/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
         bucket.uploadFile(pathToRls, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
