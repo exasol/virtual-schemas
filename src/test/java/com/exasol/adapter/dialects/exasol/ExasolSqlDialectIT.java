@@ -60,33 +60,34 @@ class ExasolSqlDialectIT {
     @BeforeAll
     static void beforeAll() throws SQLException, BucketAccessException, InterruptedException, TimeoutException {
         final Bucket bucket = container.getDefaultBucket();
-        LOGGER.info("Created bucket");
         final Path pathToRls = Path.of("target/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
         bucket.uploadFile(pathToRls, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
         final Connection connection = container.createConnectionForUser(container.getUsername(),
                 container.getPassword());
-        LOGGER.info("Created connection");
         statement = connection.createStatement();
-        LOGGER.info("Created statement");
         createTestSchema(SCHEMA_TEST);
-        LOGGER.info("Created test schema");
         createTestSchema("\"" + SCHEMA_TEST_MIXED_CASE + "\"");
         createTestTableAllExasolDataTypes();
-//        createTestTableWithNulls();
-//        createTestTableWithSimpleValues();
-//        createTestTableMixedCase();
-//        createTestTablesForJoinTests();
+        createTestTableWithNulls();
+        createTestTableWithSimpleValues();
+        createTestTableMixedCase();
+        createTestTablesForJoinTests();
         createConnection();
         createAdapterScript();
         LOGGER.info("Created adapter script");
         createVirtualSchema(VIRTUAL_SCHEMA_JDBC, SCHEMA_TEST, Optional.empty());
+        LOGGER.info("Created " + VIRTUAL_SCHEMA_JDBC);
         createVirtualSchema(VIRTUAL_SCHEMA_JDBC_LOCAL, SCHEMA_TEST, Optional.of("IS_LOCAL = 'true'"));
+        LOGGER.info("Created " + VIRTUAL_SCHEMA_EXA);
         createVirtualSchema(VIRTUAL_SCHEMA_EXA, SCHEMA_TEST,
                 Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888'"));
+        LOGGER.info("Created " + VIRTUAL_SCHEMA_EXA_LOCAL);
         createVirtualSchema(VIRTUAL_SCHEMA_EXA_LOCAL, SCHEMA_TEST,
                 Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888' IS_LOCAL = 'true'"));
+        LOGGER.info("Created " + VIRTUAL_SCHEMA_EXA_MIXED_CASE);
         createVirtualSchema("\"" + VIRTUAL_SCHEMA_EXA_MIXED_CASE + "\"", SCHEMA_TEST_MIXED_CASE,
                 Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888'"));
+        LOGGER.info("Created all virtual schemas");
     }
 
     private static void createTestSchema(final String schemaName) throws SQLException {
@@ -230,11 +231,11 @@ class ExasolSqlDialectIT {
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testVarchar(final String virtualSchemaName) throws SQLException {
+        LOGGER.info("Reached test");
         assertSelectColumnsResult(virtualSchemaName, "C1, C2");
     }
 
     private void assertSelectColumnsResult(final String virtualSchemaName, final String columns) throws SQLException {
-        LOGGER.info("Reached test");
         final ResultSet expected = statement
                 .executeQuery("SELECT " + columns + " FROM " + SCHEMA_TEST + "." + TABLE_ALL_EXASOL_DATA_TYPES);
         final ResultSet actual = statement
