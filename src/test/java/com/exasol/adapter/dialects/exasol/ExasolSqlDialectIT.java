@@ -40,17 +40,17 @@ class ExasolSqlDialectIT {
     private static final String JDBC_EXASOL_CONNECTION = "JDBC_EXASOL_CONNECTION";
     private static final String SCHEMA_TEST = "SCHEMA_TEST";
     private static final String TABLE_ALL_EXASOL_DATA_TYPES = "TABLE_ALL_EXASOL_TYPES";
-    private static final String TABLE_WITH_NULLS = "TABLE_WITH_NULLS";
-    private static final String TABLE_SIMPLE_VALUES = "TABLE_SIMPLE_VALUES";
-    private static final String TABLE_JOIN_1 = "TABLE_JOIN_1";
-    private static final String TABLE_JOIN_2 = "TABLE_JOIN_2";
+//    private static final String TABLE_WITH_NULLS = "TABLE_WITH_NULLS";
+//    private static final String TABLE_SIMPLE_VALUES = "TABLE_SIMPLE_VALUES";
+//    private static final String TABLE_JOIN_1 = "TABLE_JOIN_1";
+//    private static final String TABLE_JOIN_2 = "TABLE_JOIN_2";
     private static final String VIRTUAL_SCHEMA_JDBC = "VIRTUAL_SCHEMA_JDBC";
-    private static final String VIRTUAL_SCHEMA_JDBC_LOCAL = "VIRTUAL_SCHEMA_JDBC_LOCAL";
-    private static final String VIRTUAL_SCHEMA_EXA = "VIRTUAL_SCHEMA_EXA";
-    private static final String VIRTUAL_SCHEMA_EXA_LOCAL = "VIRTUAL_SCHEMA_EXA_LOCAL";
-    private static final String SCHEMA_TEST_MIXED_CASE = "SCHEMA_TEST_Mixed_Case";
-    private static final String TABLE_MIXED_CASE = "Table_Mixed_Case";
-    private static final String VIRTUAL_SCHEMA_EXA_MIXED_CASE = "VIRTUAL_SCHEMA_EXA_Mixed_Case";
+//    private static final String VIRTUAL_SCHEMA_JDBC_LOCAL = "VIRTUAL_SCHEMA_JDBC_LOCAL";
+//    private static final String VIRTUAL_SCHEMA_EXA = "VIRTUAL_SCHEMA_EXA";
+//    private static final String VIRTUAL_SCHEMA_EXA_LOCAL = "VIRTUAL_SCHEMA_EXA_LOCAL";
+//    private static final String SCHEMA_TEST_MIXED_CASE = "SCHEMA_TEST_Mixed_Case";
+//    private static final String TABLE_MIXED_CASE = "Table_Mixed_Case";
+//    private static final String VIRTUAL_SCHEMA_EXA_MIXED_CASE = "VIRTUAL_SCHEMA_EXA_Mixed_Case";
 
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
@@ -60,7 +60,7 @@ class ExasolSqlDialectIT {
 
     @BeforeAll
     static void beforeAll() throws SQLException, BucketAccessException, InterruptedException, TimeoutException {
-        TimeUnit.SECONDS.sleep(40);
+//        TimeUnit.SECONDS.sleep(40);
         final Bucket bucket = container.getDefaultBucket();
         final Path pathToRls = Path.of("target/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
         bucket.uploadFile(pathToRls, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
@@ -68,7 +68,7 @@ class ExasolSqlDialectIT {
                 container.getPassword());
         statement = connection.createStatement();
         createTestSchema(SCHEMA_TEST);
-        createTestSchema("\"" + SCHEMA_TEST_MIXED_CASE + "\"");
+//        createTestSchema("\"" + SCHEMA_TEST_MIXED_CASE + "\"");
         createTestTableAllExasolDataTypes();
 //        createTestTableWithNulls();
 //        createTestTableWithSimpleValues();
@@ -77,13 +77,13 @@ class ExasolSqlDialectIT {
         createConnection();
         createAdapterScript();
         createVirtualSchema(VIRTUAL_SCHEMA_JDBC, SCHEMA_TEST, Optional.empty());
-        createVirtualSchema(VIRTUAL_SCHEMA_JDBC_LOCAL, SCHEMA_TEST, Optional.of("IS_LOCAL = 'true'"));
-        createVirtualSchema(VIRTUAL_SCHEMA_EXA, SCHEMA_TEST,
-                Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888'"));
-        createVirtualSchema(VIRTUAL_SCHEMA_EXA_LOCAL, SCHEMA_TEST,
-                Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888' IS_LOCAL = 'true'"));
-        createVirtualSchema("\"" + VIRTUAL_SCHEMA_EXA_MIXED_CASE + "\"", SCHEMA_TEST_MIXED_CASE,
-                Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888'"));
+//        createVirtualSchema(VIRTUAL_SCHEMA_JDBC_LOCAL, SCHEMA_TEST, Optional.of("IS_LOCAL = 'true'"));
+//        createVirtualSchema(VIRTUAL_SCHEMA_EXA, SCHEMA_TEST,
+//                Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888'"));
+//        createVirtualSchema(VIRTUAL_SCHEMA_EXA_LOCAL, SCHEMA_TEST,
+//                Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888' IS_LOCAL = 'true'"));
+//        createVirtualSchema("\"" + VIRTUAL_SCHEMA_EXA_MIXED_CASE + "\"", SCHEMA_TEST_MIXED_CASE,
+//                Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888'"));
     }
 
     private static void createTestSchema(final String schemaName) throws SQLException {
@@ -112,48 +112,48 @@ class ExasolSqlDialectIT {
                 + "'2016-08-01 00:00:02.000', '4-6', '3 12:50:10.123', 'POINT(2 5)')");
     }
 
-    private static void createTestTableWithNulls() throws SQLException {
-        statement.execute("CREATE OR REPLACE TABLE " + SCHEMA_TEST + "." + TABLE_WITH_NULLS //
-                + "(c1 INT, " //
-                + "c2 VARCHAR(100))");
-        statement.execute("INSERT INTO " + SCHEMA_TEST + "." + TABLE_WITH_NULLS + " VALUES " //
-                + "(1, 'a'), " //
-                + "(2, null), " //
-                + "(3, 'b'), " //
-                + "(1, null), " //
-                + "(null, 'c')");
-    }
-
-    private static void createTestTableWithSimpleValues() throws SQLException {
-        statement.execute("CREATE OR REPLACE TABLE " + SCHEMA_TEST + "." + TABLE_SIMPLE_VALUES //
-                + "(a INT, " //
-                + "b VARCHAR(100), " //
-                + "c DOUBLE)");
-        statement.execute("INSERT INTO " + SCHEMA_TEST + "." + TABLE_SIMPLE_VALUES + " VALUES " //
-                + "(1, 'a', 1.1), " //
-                + "(2, 'b', 2.2), " //
-                + "(3, 'c', 3.3), " //
-                + "(1, 'd', 4.4), " //
-                + "(2, 'e', 5.5), " //
-                + "(3, 'f', 6.6), " //
-                + "(null, null, null)");
-    }
-
-    private static void createTestTableMixedCase() throws SQLException {
-        statement.execute("CREATE OR REPLACE TABLE \"" + SCHEMA_TEST_MIXED_CASE + "\".\"" + TABLE_MIXED_CASE + "\""//
-                + "(\"Column1\" INT, " //
-                + "\"column2\" INT, " //
-                + "COLUMN3 INT)");
-        statement.execute("INSERT INTO \"" + SCHEMA_TEST_MIXED_CASE + "\".\"" + TABLE_MIXED_CASE + "\" VALUES " //
-                + "(1, 2, 3)");
-    }
-
-    private static void createTestTablesForJoinTests() throws SQLException {
-        statement.execute("CREATE TABLE " + SCHEMA_TEST + "." + TABLE_JOIN_1 + "(x INT, y VARCHAR(100))");
-        statement.execute("INSERT INTO " + SCHEMA_TEST + "." + TABLE_JOIN_1 + " VALUES (1,'aaa'), (2,'bbb')");
-        statement.execute("CREATE TABLE " + SCHEMA_TEST + "." + TABLE_JOIN_2 + "(x INT, y VARCHAR(100))");
-        statement.execute("INSERT INTO " + SCHEMA_TEST + "." + TABLE_JOIN_2 + " VALUES (2,'bbb'), (3,'ccc')");
-    }
+//    private static void createTestTableWithNulls() throws SQLException {
+//        statement.execute("CREATE OR REPLACE TABLE " + SCHEMA_TEST + "." + TABLE_WITH_NULLS //
+//                + "(c1 INT, " //
+//                + "c2 VARCHAR(100))");
+//        statement.execute("INSERT INTO " + SCHEMA_TEST + "." + TABLE_WITH_NULLS + " VALUES " //
+//                + "(1, 'a'), " //
+//                + "(2, null), " //
+//                + "(3, 'b'), " //
+//                + "(1, null), " //
+//                + "(null, 'c')");
+//    }
+//
+//    private static void createTestTableWithSimpleValues() throws SQLException {
+//        statement.execute("CREATE OR REPLACE TABLE " + SCHEMA_TEST + "." + TABLE_SIMPLE_VALUES //
+//                + "(a INT, " //
+//                + "b VARCHAR(100), " //
+//                + "c DOUBLE)");
+//        statement.execute("INSERT INTO " + SCHEMA_TEST + "." + TABLE_SIMPLE_VALUES + " VALUES " //
+//                + "(1, 'a', 1.1), " //
+//                + "(2, 'b', 2.2), " //
+//                + "(3, 'c', 3.3), " //
+//                + "(1, 'd', 4.4), " //
+//                + "(2, 'e', 5.5), " //
+//                + "(3, 'f', 6.6), " //
+//                + "(null, null, null)");
+//    }
+//
+//    private static void createTestTableMixedCase() throws SQLException {
+//        statement.execute("CREATE OR REPLACE TABLE \"" + SCHEMA_TEST_MIXED_CASE + "\".\"" + TABLE_MIXED_CASE + "\""//
+//                + "(\"Column1\" INT, " //
+//                + "\"column2\" INT, " //
+//                + "COLUMN3 INT)");
+//        statement.execute("INSERT INTO \"" + SCHEMA_TEST_MIXED_CASE + "\".\"" + TABLE_MIXED_CASE + "\" VALUES " //
+//                + "(1, 2, 3)");
+//    }
+//
+//    private static void createTestTablesForJoinTests() throws SQLException {
+//        statement.execute("CREATE TABLE " + SCHEMA_TEST + "." + TABLE_JOIN_1 + "(x INT, y VARCHAR(100))");
+//        statement.execute("INSERT INTO " + SCHEMA_TEST + "." + TABLE_JOIN_1 + " VALUES (1,'aaa'), (2,'bbb')");
+//        statement.execute("CREATE TABLE " + SCHEMA_TEST + "." + TABLE_JOIN_2 + "(x INT, y VARCHAR(100))");
+//        statement.execute("INSERT INTO " + SCHEMA_TEST + "." + TABLE_JOIN_2 + " VALUES (2,'bbb'), (3,'ccc')");
+//    }
 
     private static void createConnection() throws SQLException {
         statement.execute("CREATE CONNECTION " + JDBC_EXASOL_CONNECTION + " " //
@@ -220,14 +220,15 @@ class ExasolSqlDialectIT {
 //        assertThat(actual, matchesResultSet(expected));
 //    }
 
-    private static Stream<String> getVirtualSchemaVariantsAll() {
-        return Stream.of(VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_JDBC_LOCAL, VIRTUAL_SCHEMA_EXA, VIRTUAL_SCHEMA_EXA_LOCAL);
-    }
+//    private static Stream<String> getVirtualSchemaVariantsAll() {
+//        return Stream.of(VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_JDBC_LOCAL, VIRTUAL_SCHEMA_EXA, VIRTUAL_SCHEMA_EXA_LOCAL);
+//    }
 
-    @ParameterizedTest
-    @MethodSource("getVirtualSchemaVariantsAll")
-    void testVarchar(final String virtualSchemaName) throws SQLException {
-        assertSelectColumnsResult(virtualSchemaName, "C1, C2");
+//    @ParameterizedTest
+//    @MethodSource("getVirtualSchemaVariantsAll")
+    @Test
+    void testVarchar() throws SQLException {
+        assertSelectColumnsResult(VIRTUAL_SCHEMA_JDBC, "C1, C2");
     }
 
     private void assertSelectColumnsResult(final String virtualSchemaName, final String columns) throws SQLException {
