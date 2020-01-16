@@ -160,7 +160,7 @@ class ExasolSqlDialectIT {
                 + "IDENTIFIED BY '" + container.getPassword() + "'");
     }
 
-    private static void createAdapterScript() throws SQLException, InterruptedException {
+    private static void createAdapterScript() throws SQLException {
         statement.execute("CREATE OR REPLACE JAVA ADAPTER SCRIPT " + SCHEMA_TEST + ".ADAPTER_SCRIPT_EXASOL AS " //
                 + "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
                 + "%jar /buckets/bfsdefault/default/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION + ";\n" //
@@ -173,13 +173,12 @@ class ExasolSqlDialectIT {
         final StringBuilder builder = new StringBuilder();
         builder.append("CREATE VIRTUAL SCHEMA ");
         builder.append(virtualSchemaName);
-        builder.append(" USING " + schemaName + ".ADAPTER_SCRIPT_EXASOL WITH ");
+        builder.append(" USING " + SCHEMA_TEST + ".ADAPTER_SCRIPT_EXASOL WITH ");
         builder.append("SQL_DIALECT     = 'EXASOL' ");
         builder.append("CONNECTION_NAME = '" + JDBC_EXASOL_CONNECTION + "' ");
         builder.append("SCHEMA_NAME     = '" + schemaName + "' ");
         additionalParameters.ifPresent(builder::append);
         statement.execute(builder.toString());
-        LOGGER.info("Created virtual schema " + virtualSchemaName);
     }
 
     @ParameterizedTest
@@ -224,19 +223,14 @@ class ExasolSqlDialectIT {
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testVarchar(final String virtualSchemaName) throws SQLException {
-        LOGGER.info("Reached test");
         assertSelectColumnsResult(virtualSchemaName, "C1, C2");
-        LOGGER.info("Test finished execution");
     }
 
     private void assertSelectColumnsResult(final String virtualSchemaName, final String columns) throws SQLException {
-        LOGGER.info("Ready to get expected resultSet.");
         final ResultSet expected = statement
                 .executeQuery("SELECT " + columns + " FROM " + SCHEMA_TEST + "." + TABLE_ALL_EXASOL_DATA_TYPES);
-        LOGGER.info("Ready to get actual resultSet.");
         final ResultSet actual = statement
                 .executeQuery("SELECT " + columns + " FROM " + virtualSchemaName + "." + TABLE_ALL_EXASOL_DATA_TYPES);
-        LOGGER.info("Ready to compare resultSets.");
         assertThat(actual, matchesResultSet(expected));
     }
 
