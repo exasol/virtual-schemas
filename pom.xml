@@ -13,9 +13,11 @@
         <java.version>11</java.version>
         <junit.version>5.5.2</junit.version>
         <junit.platform.version>1.5.2</junit.platform.version>
-        <maven.surefire.and.failsafe.plugin.version>2.22.1</maven.surefire.and.failsafe.plugin.version>
+        <surefire.and.failsafe.plugin.version>3.0.0-M4</surefire.and.failsafe.plugin.version>
         <vscjava.version>8.0.1</vscjava.version>
         <vscjdbc.version>2.0.1</vscjdbc.version>
+        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
     <profiles>
         <profile>
@@ -49,41 +51,6 @@
             </properties>
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>${maven.surefire.and.failsafe.plugin.version}</version>
-                        <configuration>
-                            <systemProperties>
-                                <property>
-                                    <name>java.util.logging.config.file</name>
-                                    <value>src/test/resources/logging.properties</value>
-                                </property>
-                            </systemProperties>
-                            <includes>
-                                <include>**/*IT.java</include>
-                            </includes>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>failsafe-integration-tests</id>
-                                <phase>integration-test</phase>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                            <!-- verify phase verifies the results. Must be added so that failing integration tests are not
-                                ignored. -->
-                            <execution>
-                                <id>verify</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
@@ -153,6 +120,24 @@
             <groupId>com.exasol</groupId>
             <artifactId>virtual-schema-common-jdbc</artifactId>
             <version>${vscjdbc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.exasol</groupId>
+            <artifactId>exasol-testcontainers</artifactId>
+            <version>1.4.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.exasol</groupId>
+            <artifactId>hamcrest-resultset-matcher</artifactId>
+            <version>0.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>1.12.3</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
@@ -264,7 +249,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven.surefire.and.failsafe.plugin.version}</version>
+                <version>${surefire.and.failsafe.plugin.version}</version>
                 <configuration>
                     <!-- Set the highest log level for coverage testing, so that we have a chance to reach branches
                       in the logging lambdas too.
@@ -278,8 +263,15 @@
                 <version>0.8.5</version>
                 <executions>
                     <execution>
+                        <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>prepare-agent-integration</id>
+                        <goals>
+                            <goal>prepare-agent-integration</goal>
                         </goals>
                     </execution>
                     <execution>
@@ -287,6 +279,13 @@
                         <phase>test</phase>
                         <goals>
                             <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report-integration</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report-integration</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -316,6 +315,24 @@
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${surefire.and.failsafe.plugin.version}</version>
+                <configuration>
+                    <!-- Set the highest log level for coverage testing, so that we have a chance to reach branches
+                      <property>	                      in the logging lambdas too. -->
+                    <argLine>-Djava.util.logging.config.file=src/test/resources/logging.properties ${argLine}</argLine>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
                         </goals>
                     </execution>
                 </executions>

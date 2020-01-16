@@ -4,6 +4,7 @@ import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_IMPORT_
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 import com.exasol.ExaConnectionInformation;
 import com.exasol.ExaMetadata;
@@ -23,6 +24,8 @@ import com.exasol.adapter.sql.SqlStatement;
  * </p>
  */
 public class ExasolQueryRewriter extends BaseQueryRewriter {
+    private static final Logger LOGGER = Logger.getLogger(ExasolQueryRewriter.class.getName());
+
     /**
      * Create a new instance of the {@link ExasolQueryRewriter}.
      *
@@ -72,7 +75,9 @@ public class ExasolQueryRewriter extends BaseQueryRewriter {
         final ExaConnectionInformation exaConnectionInformation = getConnectionInformation(exaMetadata, properties);
         final String connectionDefinition = this.connectionDefinitionBuilder.buildConnectionDefinition(properties,
                 exaConnectionInformation);
-        return "IMPORT FROM EXA " + connectionDefinition + " STATEMENT '"
+        final String importQuery = "IMPORT FROM EXA " + connectionDefinition + " STATEMENT '"
                 + statement.accept(sqlGeneratorVisitor).replace("'", "''") + "'";
+        LOGGER.finer(() -> "Import from push-down query:\n" + importQuery);
+        return importQuery;
     }
 }
