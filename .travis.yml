@@ -1,5 +1,9 @@
 language: java
 
+# Setting sudo to false will cause Travis to use Containers.
+# To use Docker's privileged mode, we need to enable sudo.
+sudo: required
+
 matrix:
   include:
     - jdk: openjdk11

@@ -16,7 +16,7 @@
         <surefire.and.failsafe.plugin.version>3.0.0-M4</surefire.and.failsafe.plugin.version>
         <vscjava.version>8.0.1</vscjava.version>
         <vscjdbc.version>2.0.1</vscjdbc.version>
-        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco.xml,target/site/jacoco-it/jacoco.xml
+        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
     <profiles>
@@ -326,7 +326,6 @@
                 <configuration>
                     <!-- Set the highest log level for coverage testing, so that we have a chance to reach branches
                       <property>	                      in the logging lambdas too. -->
-                    <name>java.util.logging.config.file</name>
                     <argLine>-Djava.util.logging.config.file=src/test/resources/logging.properties ${argLine}</argLine>
                 </configuration>
                 <executions>
