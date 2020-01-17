@@ -3,6 +3,7 @@ package com.exasol.adapter.dialects.postgresql;
 import static com.exasol.adapter.dialects.IntegrationTestsConstants.*;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.file.Path;
 import java.sql.*;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
@@ -12,7 +13,8 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.*;
+import org.testcontainers.containers.JdbcDatabaseContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -30,12 +32,20 @@ import utils.IntegrationTestSetupManager;
 @Testcontainers
 class PostgreSQLSqlDialectIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLSqlDialectIT.class);
+    private static final String POSTGRES_DRIVER_NAME_AND_VERSION = "postgresql-42.2.5.jar";
+    public static final Path PATH_TO_POSTGRES_DRIVER = Path
+            .of("src/test/resources/integration/driver/" + POSTGRES_DRIVER_NAME_AND_VERSION);
     private static final String POSTGRES_DOCKER_VERSION = "postgres:9.6.2";
     private static final String SCHEMA_POSTGRES_TEST = "SCHEMA_POSTGRES_TEST";
+    private static final String SCHEMA_POSTGRES_MIXED_CASE_TEST = "SCHEMA_POSTGRES_MIXED_CASE_TEST";
     private static final String TABLE_POSTGRES_MIXED_CASE = "Table_Postgres_Mixed_Case";
     private static final String TABLE_POSTGRES_SIMPLE = "TABLE_POSTGRES_SIMPLE";
     private static final String TABLE_POSTGRES_ALL_DATA_TYPES = "TABLE_POSTGRES_ALL_DATA_TYPES";
-    private static final Network network = Network.newNetwork();
+    private static final String CONNECTION_POSTGRES_JDBC = "CONNECTION_POSTGRES_JDBC";
+    private static final String VIRTUAL_SCHEMA_POSTGRES_JDBC = "VIRTUAL_SCHEMA_POSTGRES_JDBC";
+    private static final String VIRTUAL_SCHEMA_POSTGRES_JDBC_UPPERCASE_TABLE = "VIRTUAL_SCHEMA_POSTGRES_JDBC_UPPERCASE_TABLE";
+    private static final String VIRTUAL_SCHEMA_POSTGRES_JDBC_PRESERVE_ORIGINAL_CASE = "VIRTUAL_SCHEMA_POSTGRES_JDBC_PRESERVE_ORIGINAL_CASE";
+
     @Container
     private static final PostgreSQLContainer postgresqlContainer = new PostgreSQLContainer(POSTGRES_DOCKER_VERSION);
     @Container
@@ -49,20 +59,26 @@ class PostgreSQLSqlDialectIT {
     static void beforeAll() throws InterruptedException, BucketAccessException, TimeoutException, SQLException {
         final Bucket bucket = exasolContainer.getDefaultBucket();
         bucket.uploadFile(PATH_TO_VIRTUAL_SCHEMAS_JAR, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
+        bucket.uploadFile(PATH_TO_POSTGRES_DRIVER, POSTGRES_DRIVER_NAME_AND_VERSION);
         final Connection exasolConnection = exasolContainer.createConnectionForUser(exasolContainer.getUsername(),
                 exasolContainer.getPassword());
         statementExasol = exasolConnection.createStatement();
         final Statement statementPostgres = getStatement(postgresqlContainer);
         integrationTestSetupManager.createTestSchema(statementExasol, SCHEMA_EXASOL_TEST);
         integrationTestSetupManager.createTestSchema(statementPostgres, SCHEMA_POSTGRES_TEST);
+        integrationTestSetupManager.createTestSchema(statementPostgres, SCHEMA_POSTGRES_MIXED_CASE_TEST);
         createPostgresTestTableSimple(statementPostgres);
         createPostgresTestTableAllDataTypes(statementPostgres);
         createPostgresTestTableMixedCase(statementPostgres);
 
-//        createConnection();
-//        createAdapterScript();
-//        createVirtualSchema(VIRTUAL_SCHEMA_JDBC, SCHEMA_TEST, Optional.empty());
-//        createVirtualSchema(VIRTUAL_SCHEMA_JDBC_LOCAL, SCHEMA_TEST, Optional.of("IS_LOCAL = 'true'"));
+        final String connectionString = "jdbc:postgresql://172.17.0.1:" + postgresqlContainer.getMappedPort(5432) + "/"
+                + postgresqlContainer.getDatabaseName();
+        integrationTestSetupManager.createConnection(statementExasol, CONNECTION_POSTGRES_JDBC, connectionString,
+                postgresqlContainer.getUsername(), postgresqlContainer.getPassword());
+        integrationTestSetupManager.createAdapterScript(statementExasol,
+                SCHEMA_EXASOL_TEST + "." + ADAPTER_SCRIPT_EXASOL, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION,
+                Optional.of("%jar /buckets/bfsdefault/default/" + POSTGRES_DRIVER_NAME_AND_VERSION + ";\n"));
+        createVirtualSchema(VIRTUAL_SCHEMA_POSTGRES_JDBC, SCHEMA_EXASOL_TEST, Optional.empty());
     }
 
     private static Statement getStatement(final JdbcDatabaseContainer container) throws SQLException {
@@ -169,36 +185,23 @@ class PostgreSQLSqlDialectIT {
     }
 
     private static void createPostgresTestTableMixedCase(final Statement statementPostgres) throws SQLException {
-        final String qualifiedTableName = SCHEMA_POSTGRES_TEST + ".\"" + TABLE_POSTGRES_MIXED_CASE + "\"";
+        final String qualifiedTableName = SCHEMA_POSTGRES_MIXED_CASE_TEST + ".\"" + TABLE_POSTGRES_MIXED_CASE + "\"";
         statementPostgres.execute("CREATE TABLE " + qualifiedTableName + " (x INT, \"Y\" INT)");
-    }
-
-    private static void createConnection() throws SQLException {
-//        statement.execute("CREATE CONNECTION " + JDBC_EXASOL_CONNECTION + " " //
-//                + "TO 'jdbc:exa:localhost:8888' " //
-//                + "USER '" + container.getUsername() + "' " //
-//                + "IDENTIFIED BY '" + container.getPassword() + "'");
-    }
-
-    private static void createAdapterScript() throws SQLException {
-//        statement.execute("CREATE OR REPLACE JAVA ADAPTER SCRIPT " + SCHEMA_TEST + ".ADAPTER_SCRIPT_EXASOL AS " //
-//                + "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
-//                + "%jar /buckets/bfsdefault/default/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION + ";\n" //
-//                + "/");
     }
 
     private static void createVirtualSchema(final String virtualSchemaName, final String schemaName,
             final Optional<String> additionalParameters) throws SQLException {
-//        statement.execute("OPEN SCHEMA " + "\"" + schemaName + "\"");
-//        final StringBuilder builder = new StringBuilder();
-//        builder.append("CREATE VIRTUAL SCHEMA ");
-//        builder.append(virtualSchemaName);
-//        builder.append(" USING " + SCHEMA_TEST + ".ADAPTER_SCRIPT_EXASOL WITH ");
-//        builder.append("SQL_DIALECT     = 'EXASOL' ");
-//        builder.append("CONNECTION_NAME = '" + JDBC_EXASOL_CONNECTION + "' ");
-//        builder.append("SCHEMA_NAME     = '" + schemaName + "' ");
-//        additionalParameters.ifPresent(builder::append);
-//        statement.execute(builder.toString());
+        statementExasol.execute("OPEN SCHEMA " + "\"" + schemaName + "\"");
+        final StringBuilder builder = new StringBuilder();
+        builder.append("CREATE VIRTUAL SCHEMA ");
+        builder.append(virtualSchemaName);
+        builder.append(" USING " + SCHEMA_EXASOL_TEST + "." + ADAPTER_SCRIPT_EXASOL + " WITH ");
+        builder.append("SQL_DIALECT     = 'POSTGRESQL' ");
+        builder.append("CATALOG_NAME     = '" + postgresqlContainer.getDatabaseName() + "' ");
+        builder.append("CONNECTION_NAME = '" + CONNECTION_POSTGRES_JDBC + "' ");
+        builder.append("SCHEMA_NAME     = '" + schemaName + "' ");
+        additionalParameters.ifPresent(builder::append);
+        statementExasol.execute(builder.toString());
     }
 
     @Test

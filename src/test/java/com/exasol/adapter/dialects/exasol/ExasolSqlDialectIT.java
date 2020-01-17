@@ -54,7 +54,7 @@ class ExasolSqlDialectIT {
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
                     .withLogConsumer(new Slf4jLogConsumer(LOGGER));
     private static Statement statement;
-    private static IntegrationTestSetupManager integrationTestSetupManager = new IntegrationTestSetupManager();
+    private static final IntegrationTestSetupManager integrationTestSetupManager = new IntegrationTestSetupManager();
 
     @BeforeAll
     static void beforeAll() throws SQLException, BucketAccessException, InterruptedException, TimeoutException {
