@@ -30,6 +30,7 @@ import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
 import com.exasol.jdbc.DataException;
+
 import utils.IntegrationTestSetupManager;
 
 @Tag("integration")
@@ -39,8 +40,6 @@ class ExasolSqlDialectIT {
     private static final String JDBC_EXASOL_CONNECTION = "JDBC_EXASOL_CONNECTION";
     private static final String TABLE_ALL_EXASOL_DATA_TYPES = "TABLE_ALL_EXASOL_TYPES";
     private static final String TABLE_SIMPLE_VALUES = "TABLE_SIMPLE_VALUES";
-    private static final String TABLE_JOIN_1 = "TABLE_JOIN_1";
-    private static final String TABLE_JOIN_2 = "TABLE_JOIN_2";
     private static final String VIRTUAL_SCHEMA_JDBC = "VIRTUAL_SCHEMA_JDBC";
     private static final String VIRTUAL_SCHEMA_JDBC_LOCAL = "VIRTUAL_SCHEMA_JDBC_LOCAL";
     private static final String VIRTUAL_SCHEMA_EXA = "VIRTUAL_SCHEMA_EXA";
@@ -68,7 +67,8 @@ class ExasolSqlDialectIT {
         createTestTableAllExasolDataTypes();
         createTestTableWithSimpleValues();
         createTestTableMixedCase();
-        createTestTablesForJoinTests();
+        integrationTestSetupManager.createTestTablesForJoinTests(statement, SCHEMA_EXASOL_TEST, TABLE_JOIN_1,
+                TABLE_JOIN_2);
         createConnection();
         createAdapterScript();
         createVirtualSchema(VIRTUAL_SCHEMA_JDBC, SCHEMA_EXASOL_TEST, Optional.empty());
@@ -127,13 +127,6 @@ class ExasolSqlDialectIT {
                 + "(1, 2, 3)");
     }
 
-    private static void createTestTablesForJoinTests() throws SQLException {
-        statement.execute("CREATE TABLE " + SCHEMA_EXASOL_TEST + "." + TABLE_JOIN_1 + "(x INT, y VARCHAR(100))");
-        statement.execute("INSERT INTO " + SCHEMA_EXASOL_TEST + "." + TABLE_JOIN_1 + " VALUES (1,'aaa'), (2,'bbb')");
-        statement.execute("CREATE TABLE " + SCHEMA_EXASOL_TEST + "." + TABLE_JOIN_2 + "(x INT, y VARCHAR(100))");
-        statement.execute("INSERT INTO " + SCHEMA_EXASOL_TEST + "." + TABLE_JOIN_2 + " VALUES (2,'bbb'), (3,'ccc')");
-    }
-
     private static void createConnection() throws SQLException {
         statement.execute("CREATE CONNECTION " + JDBC_EXASOL_CONNECTION + " " //
                 + "TO 'jdbc:exa:localhost:8888' " //
@@ -150,7 +143,6 @@ class ExasolSqlDialectIT {
 
     private static void createVirtualSchema(final String virtualSchemaName, final String schemaName,
             final Optional<String> additionalParameters) throws SQLException {
-        statement.execute("OPEN SCHEMA " + "\"" + schemaName + "\"");
         final StringBuilder builder = new StringBuilder();
         builder.append("CREATE VIRTUAL SCHEMA ");
         builder.append(virtualSchemaName);
@@ -679,24 +671,18 @@ class ExasolSqlDialectIT {
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testInnerJoin(final String virtualSchemaName) throws SQLException {
-        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
-                "VALUES(2,'bbb', 2,'bbb')");
+        final ResultSet expected = integrationTestSetupManager.GetSelectAllFromJoinExpectedTable(statement,
+                SCHEMA_EXASOL_TEST, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(2,'bbb', 2,'bbb')");
         final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
                 + " a INNER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x");
         assertThat(actual, matchesResultSet(expected));
     }
 
-    private ResultSet createJoinExpectedTable(final String expectedColumns, final String expectedValues)
-            throws SQLException {
-        statement.execute("CREATE OR REPLACE TABLE " + SCHEMA_EXASOL_TEST + ".TABLE_JOIN_EXPECTED " + expectedColumns);
-        statement.execute("INSERT INTO " + SCHEMA_EXASOL_TEST + ".TABLE_JOIN_EXPECTED " + expectedValues);
-        return statement.executeQuery("SELECT * FROM " + SCHEMA_EXASOL_TEST + ".TABLE_JOIN_EXPECTED");
-    }
-
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testInnerJoinWithProjection(final String virtualSchemaName) throws SQLException {
-        final ResultSet expected = createJoinExpectedTable("(y VARCHAR(100))", " VALUES('bbbbbb')");
+        final ResultSet expected = integrationTestSetupManager.GetSelectAllFromJoinExpectedTable(statement,
+                SCHEMA_EXASOL_TEST, "(y VARCHAR(100))", " VALUES('bbbbbb')");
         final ResultSet actual = statement.executeQuery("SELECT b.y || " + virtualSchemaName + "." + TABLE_JOIN_1
                 + ".y FROM " + virtualSchemaName + "." + TABLE_JOIN_1 + " INNER JOIN  " + virtualSchemaName + "."
                 + TABLE_JOIN_2 + " b ON " + virtualSchemaName + "." + TABLE_JOIN_1 + ".x=b.x");
@@ -706,8 +692,8 @@ class ExasolSqlDialectIT {
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testLeftJoin(final String virtualSchemaName) throws SQLException {
-        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
-                "VALUES(1, 'aaa', null, null), " //
+        final ResultSet expected = integrationTestSetupManager.GetSelectAllFromJoinExpectedTable(statement,
+                SCHEMA_EXASOL_TEST, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(1, 'aaa', null, null), " //
                         + "(2, 'bbb', 2, 'bbb')");
         final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
                 + " a LEFT OUTER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
@@ -717,8 +703,8 @@ class ExasolSqlDialectIT {
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testRightJoin(final String virtualSchemaName) throws SQLException {
-        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
-                "VALUES(2, 'bbb', 2, 'bbb'), " //
+        final ResultSet expected = integrationTestSetupManager.GetSelectAllFromJoinExpectedTable(statement,
+                SCHEMA_EXASOL_TEST, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(2, 'bbb', 2, 'bbb'), " //
                         + "(null, null, 3, 'ccc')");
         final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
                 + " a RIGHT OUTER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
@@ -728,8 +714,8 @@ class ExasolSqlDialectIT {
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testFullOuterJoin(final String virtualSchemaName) throws SQLException {
-        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
-                "VALUES(1, 'aaa', null, null), " //
+        final ResultSet expected = integrationTestSetupManager.GetSelectAllFromJoinExpectedTable(statement,
+                SCHEMA_EXASOL_TEST, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(1, 'aaa', null, null), " //
                         + "(2, 'bbb', 2, 'bbb'), " //
                         + "(null, null, 3, 'ccc')");
         final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
