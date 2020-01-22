@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.exasol;
 
+import static com.exasol.adapter.dialects.IntegrationTestsConstants.*;
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
 import static java.util.Calendar.AUGUST;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -9,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
-import java.nio.file.Path;
 import java.sql.*;
 import java.util.GregorianCalendar;
 import java.util.Optional;
@@ -31,18 +31,15 @@ import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
 import com.exasol.jdbc.DataException;
 
+import utils.IntegrationTestSetupManager;
+
 @Tag("integration")
 @Testcontainers
 class ExasolSqlDialectIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExasolSqlDialectIT.class);
-    private static final String VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION = "virtualschema-jdbc-adapter-dist-3.0.1.jar";
     private static final String JDBC_EXASOL_CONNECTION = "JDBC_EXASOL_CONNECTION";
-    private static final String SCHEMA_TEST = "SCHEMA_TEST";
     private static final String TABLE_ALL_EXASOL_DATA_TYPES = "TABLE_ALL_EXASOL_TYPES";
-    private static final String TABLE_WITH_NULLS = "TABLE_WITH_NULLS";
     private static final String TABLE_SIMPLE_VALUES = "TABLE_SIMPLE_VALUES";
-    private static final String TABLE_JOIN_1 = "TABLE_JOIN_1";
-    private static final String TABLE_JOIN_2 = "TABLE_JOIN_2";
     private static final String VIRTUAL_SCHEMA_JDBC = "VIRTUAL_SCHEMA_JDBC";
     private static final String VIRTUAL_SCHEMA_JDBC_LOCAL = "VIRTUAL_SCHEMA_JDBC_LOCAL";
     private static final String VIRTUAL_SCHEMA_EXA = "VIRTUAL_SCHEMA_EXA";
@@ -56,40 +53,36 @@ class ExasolSqlDialectIT {
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
                     .withLogConsumer(new Slf4jLogConsumer(LOGGER));
     private static Statement statement;
+    private static final IntegrationTestSetupManager integrationTestSetupManager = new IntegrationTestSetupManager();
 
     @BeforeAll
     static void beforeAll() throws SQLException, BucketAccessException, InterruptedException, TimeoutException {
         final Bucket bucket = container.getDefaultBucket();
-        final Path pathToRls = Path.of("target/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
-        bucket.uploadFile(pathToRls, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
+        bucket.uploadFile(PATH_TO_VIRTUAL_SCHEMAS_JAR, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
         final Connection connection = container.createConnectionForUser(container.getUsername(),
                 container.getPassword());
         statement = connection.createStatement();
-        createTestSchema(SCHEMA_TEST);
-        createTestSchema("\"" + SCHEMA_TEST_MIXED_CASE + "\"");
+        integrationTestSetupManager.createTestSchema(statement, SCHEMA_EXASOL_TEST);
+        integrationTestSetupManager.createTestSchema(statement, "\"" + SCHEMA_TEST_MIXED_CASE + "\"");
         createTestTableAllExasolDataTypes();
-        createTestTableWithNulls();
         createTestTableWithSimpleValues();
         createTestTableMixedCase();
-        createTestTablesForJoinTests();
+        integrationTestSetupManager.createTestTablesForJoinTests(statement, SCHEMA_EXASOL_TEST, TABLE_JOIN_1,
+                TABLE_JOIN_2);
         createConnection();
         createAdapterScript();
-        createVirtualSchema(VIRTUAL_SCHEMA_JDBC, SCHEMA_TEST, Optional.empty());
-        createVirtualSchema(VIRTUAL_SCHEMA_JDBC_LOCAL, SCHEMA_TEST, Optional.of("IS_LOCAL = 'true'"));
-        createVirtualSchema(VIRTUAL_SCHEMA_EXA, SCHEMA_TEST,
+        createVirtualSchema(VIRTUAL_SCHEMA_JDBC, SCHEMA_EXASOL_TEST, Optional.empty());
+        createVirtualSchema(VIRTUAL_SCHEMA_JDBC_LOCAL, SCHEMA_EXASOL_TEST, Optional.of("IS_LOCAL = 'true'"));
+        createVirtualSchema(VIRTUAL_SCHEMA_EXA, SCHEMA_EXASOL_TEST,
                 Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888'"));
-        createVirtualSchema(VIRTUAL_SCHEMA_EXA_LOCAL, SCHEMA_TEST,
+        createVirtualSchema(VIRTUAL_SCHEMA_EXA_LOCAL, SCHEMA_EXASOL_TEST,
                 Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888' IS_LOCAL = 'true'"));
         createVirtualSchema("\"" + VIRTUAL_SCHEMA_EXA_MIXED_CASE + "\"", SCHEMA_TEST_MIXED_CASE,
                 Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888'"));
     }
 
-    private static void createTestSchema(final String schemaName) throws SQLException {
-        statement.execute("CREATE SCHEMA " + schemaName);
-    }
-
     private static void createTestTableAllExasolDataTypes() throws SQLException {
-        statement.execute("CREATE OR REPLACE TABLE " + SCHEMA_TEST + "." + TABLE_ALL_EXASOL_DATA_TYPES //
+        statement.execute("CREATE OR REPLACE TABLE " + SCHEMA_EXASOL_TEST + "." + TABLE_ALL_EXASOL_DATA_TYPES //
                 + "(c1 VARCHAR(100) DEFAULT 'bar', " //
                 + "c2 VARCHAR(100) CHARACTER SET ASCII DEFAULT 'bar', " //
                 + "c3 CHAR(10) DEFAULT 'foo'," //
@@ -105,29 +98,17 @@ class ExasolSqlDialectIT {
                 + "c13 INTERVAL DAY TO SECOND DEFAULT '2 12:50:10.123', " //
                 + "c14 GEOMETRY(3857) DEFAULT 'POINT(2 5)' " //
                 + ")");
-        statement.execute("INSERT INTO " + SCHEMA_TEST + "." + TABLE_ALL_EXASOL_DATA_TYPES + " VALUES " //
+        statement.execute("INSERT INTO " + SCHEMA_EXASOL_TEST + "." + TABLE_ALL_EXASOL_DATA_TYPES + " VALUES " //
                 + "('a茶', 'b', 'c茶', 'd', 123, 123.456, 2.2, FALSE, '2016-08-01', '2016-08-01 00:00:01.000', " //
                 + "'2016-08-01 00:00:02.000', '4-6', '3 12:50:10.123', 'POINT(2 5)')");
     }
 
-    private static void createTestTableWithNulls() throws SQLException {
-        statement.execute("CREATE OR REPLACE TABLE " + SCHEMA_TEST + "." + TABLE_WITH_NULLS //
-                + "(c1 INT, " //
-                + "c2 VARCHAR(100))");
-        statement.execute("INSERT INTO " + SCHEMA_TEST + "." + TABLE_WITH_NULLS + " VALUES " //
-                + "(1, 'a'), " //
-                + "(2, null), " //
-                + "(3, 'b'), " //
-                + "(1, null), " //
-                + "(null, 'c')");
-    }
-
     private static void createTestTableWithSimpleValues() throws SQLException {
-        statement.execute("CREATE OR REPLACE TABLE " + SCHEMA_TEST + "." + TABLE_SIMPLE_VALUES //
+        statement.execute("CREATE OR REPLACE TABLE " + SCHEMA_EXASOL_TEST + "." + TABLE_SIMPLE_VALUES //
                 + "(a INT, " //
                 + "b VARCHAR(100), " //
                 + "c DOUBLE)");
-        statement.execute("INSERT INTO " + SCHEMA_TEST + "." + TABLE_SIMPLE_VALUES + " VALUES " //
+        statement.execute("INSERT INTO " + SCHEMA_EXASOL_TEST + "." + TABLE_SIMPLE_VALUES + " VALUES " //
                 + "(1, 'a', 1.1), " //
                 + "(2, 'b', 2.2), " //
                 + "(3, 'c', 3.3), " //
@@ -146,13 +127,6 @@ class ExasolSqlDialectIT {
                 + "(1, 2, 3)");
     }
 
-    private static void createTestTablesForJoinTests() throws SQLException {
-        statement.execute("CREATE TABLE " + SCHEMA_TEST + "." + TABLE_JOIN_1 + "(x INT, y VARCHAR(100))");
-        statement.execute("INSERT INTO " + SCHEMA_TEST + "." + TABLE_JOIN_1 + " VALUES (1,'aaa'), (2,'bbb')");
-        statement.execute("CREATE TABLE " + SCHEMA_TEST + "." + TABLE_JOIN_2 + "(x INT, y VARCHAR(100))");
-        statement.execute("INSERT INTO " + SCHEMA_TEST + "." + TABLE_JOIN_2 + " VALUES (2,'bbb'), (3,'ccc')");
-    }
-
     private static void createConnection() throws SQLException {
         statement.execute("CREATE CONNECTION " + JDBC_EXASOL_CONNECTION + " " //
                 + "TO 'jdbc:exa:localhost:8888' " //
@@ -161,7 +135,7 @@ class ExasolSqlDialectIT {
     }
 
     private static void createAdapterScript() throws SQLException {
-        statement.execute("CREATE OR REPLACE JAVA ADAPTER SCRIPT " + SCHEMA_TEST + ".ADAPTER_SCRIPT_EXASOL AS " //
+        statement.execute("CREATE OR REPLACE JAVA ADAPTER SCRIPT " + SCHEMA_EXASOL_TEST + ".ADAPTER_SCRIPT_EXASOL AS " //
                 + "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
                 + "%jar /buckets/bfsdefault/default/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION + ";\n" //
                 + "/");
@@ -169,11 +143,10 @@ class ExasolSqlDialectIT {
 
     private static void createVirtualSchema(final String virtualSchemaName, final String schemaName,
             final Optional<String> additionalParameters) throws SQLException {
-        statement.execute("OPEN SCHEMA " + "\"" + schemaName + "\"");
         final StringBuilder builder = new StringBuilder();
         builder.append("CREATE VIRTUAL SCHEMA ");
         builder.append(virtualSchemaName);
-        builder.append(" USING " + SCHEMA_TEST + ".ADAPTER_SCRIPT_EXASOL WITH ");
+        builder.append(" USING " + SCHEMA_EXASOL_TEST + ".ADAPTER_SCRIPT_EXASOL WITH ");
         builder.append("SQL_DIALECT     = 'EXASOL' ");
         builder.append("CONNECTION_NAME = '" + JDBC_EXASOL_CONNECTION + "' ");
         builder.append("SCHEMA_NAME     = '" + schemaName + "' ");
@@ -184,7 +157,7 @@ class ExasolSqlDialectIT {
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testDataTypeMapping(final String virtualSchemaName) throws SQLException {
-        final String expectedSchemaQualifiedTableName = SCHEMA_TEST + ".EXA_DBA_COLUMNS_EXPECTED";
+        final String expectedSchemaQualifiedTableName = SCHEMA_EXASOL_TEST + ".EXA_DBA_COLUMNS_EXPECTED";
         statement.execute("CREATE OR REPLACE TABLE " + expectedSchemaQualifiedTableName //
                 + "(COLUMN_NAME VARCHAR(128), " //
                 + "COLUMN_TYPE VARCHAR(40), " //
@@ -228,7 +201,7 @@ class ExasolSqlDialectIT {
 
     private void assertSelectColumnsResult(final String virtualSchemaName, final String columns) throws SQLException {
         final ResultSet expected = statement
-                .executeQuery("SELECT " + columns + " FROM " + SCHEMA_TEST + "." + TABLE_ALL_EXASOL_DATA_TYPES);
+                .executeQuery("SELECT " + columns + " FROM " + SCHEMA_EXASOL_TEST + "." + TABLE_ALL_EXASOL_DATA_TYPES);
         final ResultSet actual = statement
                 .executeQuery("SELECT " + columns + " FROM " + virtualSchemaName + "." + TABLE_ALL_EXASOL_DATA_TYPES);
         assertThat(actual, matchesResultSet(expected));
@@ -336,7 +309,7 @@ class ExasolSqlDialectIT {
         assertAll(() -> assertExpressionExecutionStringResult(query, "1,1,2,2,3,3"), //
                 () -> assertExplainVirtual(query, //
                         "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\") FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
     }
 
     private static Stream<String> getVirtualSchemaVariantsExa() {
@@ -364,7 +337,7 @@ class ExasolSqlDialectIT {
         assertAll(() -> assertExpressionExecutionStringResult(query, "1,2,3"), //
                 () -> assertExplainVirtual(query, //
                         "SELECT GROUP_CONCAT(DISTINCT \"" + TABLE_SIMPLE_VALUES + "\".\"A\") FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
     }
 
     @ParameterizedTest
@@ -375,7 +348,7 @@ class ExasolSqlDialectIT {
                 () -> assertExplainVirtual(query, //
                         "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" ORDER BY \"" //
                                 + TABLE_SIMPLE_VALUES + "\".\"C\") FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
     }
 
     @ParameterizedTest
@@ -387,7 +360,7 @@ class ExasolSqlDialectIT {
                 () -> assertExplainVirtual(query, //
                         "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" ORDER BY \"" //
                                 + TABLE_SIMPLE_VALUES + "\".\"C\" DESC) FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
     }
 
     @ParameterizedTest
@@ -399,7 +372,7 @@ class ExasolSqlDialectIT {
                 () -> assertExplainVirtual(query, //
                         "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" ORDER BY \"" //
                                 + TABLE_SIMPLE_VALUES + "\".\"C\" DESC NULLS LAST) FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
     }
 
     @ParameterizedTest
@@ -410,7 +383,7 @@ class ExasolSqlDialectIT {
         assertAll(() -> assertExpressionExecutionStringResult(query, "1; 1; 2; 2; 3; 3"), //
                 () -> assertExplainVirtual(query, //
                         "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" SEPARATOR " + separator + ") FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
     }
 
     private static Stream<Arguments> getParameterForTestGroupConcatSeparator() {
@@ -426,7 +399,7 @@ class ExasolSqlDialectIT {
         assertAll(() -> assertExpressionExecutionStringResult(query, "1; 1; 2; 2; 3; 3"), //
                 () -> assertExplainVirtual(query, //
                         "SELECT GROUP_CONCAT(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" SEPARATOR '; ') FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
     }
 
     @ParameterizedTest
@@ -437,7 +410,7 @@ class ExasolSqlDialectIT {
         assertAll(() -> assertExpressionExecutionIntResult(query, 8), //
                 () -> assertExplainVirtual(query, //
                         "SELECT EXTRACT(MONTH FROM \"" + TABLE_ALL_EXASOL_DATA_TYPES + "\".\"C9\") FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
     }
 
     private void assertExpressionExecutionIntResult(final String query, final int expected) throws SQLException {
@@ -455,7 +428,7 @@ class ExasolSqlDialectIT {
         assertAll(() -> assertExpressionExecutionIntResult(query, 6), //
                 () -> assertExplainVirtual(query, //
                         "SELECT EXTRACT(MONTH FROM \"" + TABLE_ALL_EXASOL_DATA_TYPES + "\".\"C12\") FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
     }
 
     @ParameterizedTest
@@ -465,7 +438,7 @@ class ExasolSqlDialectIT {
         assertAll(() -> assertExpressionExecutionStringResult(query, "1              "), //
                 () -> assertExplainVirtual(query, //
                         "SELECT CAST(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" AS CHAR(15) UTF8) FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
     }
 
     @ParameterizedTest
@@ -477,7 +450,7 @@ class ExasolSqlDialectIT {
                 () -> assertExplainVirtual(query, //
                         "SELECT CAST(CAST(0 < \"" + TABLE_SIMPLE_VALUES
                                 + "\".\"A\" AS VARCHAR(15) UTF8) AS BOOLEAN) FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
     }
 
     private void assertExpressionExecutionBooleanResult(final String query, final boolean expected)
@@ -499,7 +472,7 @@ class ExasolSqlDialectIT {
                 () -> assertExplainVirtual(query, //
                         "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
                                 + "\".\"C9\" AS VARCHAR(30) UTF8) AS DATE) FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
     }
 
     private void assertExpressionExecutionDateResult(final String query, final Date expected) throws SQLException {
@@ -518,7 +491,7 @@ class ExasolSqlDialectIT {
                 () -> assertExplainVirtual(query, //
                         "SELECT CAST(CAST(\"" + TABLE_SIMPLE_VALUES
                                 + "\".\"A\" AS VARCHAR(15) UTF8) AS DECIMAL(8, 1)) FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
     }
 
     private void assertExpressionExecutionBigDecimalResult(final String query, final BigDecimal expected)
@@ -537,7 +510,7 @@ class ExasolSqlDialectIT {
         assertAll(() -> assertExpressionExecutionDoubleResult(query, 1.1d), //
                 () -> assertExplainVirtual(query, //
                         "SELECT CAST(CAST(\"" + TABLE_SIMPLE_VALUES + "\".\"C\" AS VARCHAR(15) UTF8) AS DOUBLE) FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
     }
 
     private void assertExpressionExecutionDoubleResult(final String query, final double expected) throws SQLException {
@@ -556,7 +529,7 @@ class ExasolSqlDialectIT {
                 () -> assertExplainVirtual(query, //
                         "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
                                 + "\".\"C14\" AS VARCHAR(100) UTF8) AS GEOMETRY(5)) FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
     }
 
     @ParameterizedTest
@@ -568,7 +541,7 @@ class ExasolSqlDialectIT {
                 () -> assertExplainVirtual(query, //
                         "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
                                 + "\".\"C13\" AS VARCHAR(100) UTF8) AS INTERVAL DAY (5) TO SECOND (2)) FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
     }
 
     @ParameterizedTest
@@ -580,7 +553,7 @@ class ExasolSqlDialectIT {
                 () -> assertExplainVirtual(query, //
                         "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
                                 + "\".\"C12\" AS VARCHAR(100) UTF8) AS INTERVAL YEAR (5) TO MONTH) FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
     }
 
     @ParameterizedTest
@@ -594,7 +567,7 @@ class ExasolSqlDialectIT {
                 () -> assertExplainVirtual(query, //
                         "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
                                 + "\".\"C10\" AS VARCHAR(100) UTF8) AS TIMESTAMP) FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
     }
 
     private void assertExpressionExecutionTimestampResult(final String query, final Timestamp expected)
@@ -616,7 +589,7 @@ class ExasolSqlDialectIT {
                 () -> assertExplainVirtual(query, //
                         "SELECT CAST(CAST(\"" + TABLE_ALL_EXASOL_DATA_TYPES
                                 + "\".\"C11\" AS VARCHAR(100) UTF8) AS TIMESTAMP WITH LOCAL TIME ZONE) FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_ALL_EXASOL_DATA_TYPES + "\""));
     }
 
     @ParameterizedTest
@@ -626,7 +599,7 @@ class ExasolSqlDialectIT {
         assertAll(() -> assertExpressionExecutionStringResult(query, "1"), //
                 () -> assertExplainVirtual(query, //
                         "SELECT CAST(\"" + TABLE_SIMPLE_VALUES + "\".\"A\" AS VARCHAR(15) UTF8) FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
     }
 
     @ParameterizedTest
@@ -637,7 +610,7 @@ class ExasolSqlDialectIT {
         assertAll(() -> assertExpressionExecutionStringResult(query, "YES"), //
                 () -> assertExplainVirtual(query, //
                         "SELECT CASE \"" + TABLE_SIMPLE_VALUES + "\".\"A\" WHEN 1 " + then + " FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
     }
 
     private static Stream<Arguments> getParameterForTestCaseEqual() {
@@ -653,7 +626,7 @@ class ExasolSqlDialectIT {
         assertAll(() -> assertExpressionExecutionStringResult(query, "NO"), //
                 () -> assertExplainVirtual(query, //
                         "SELECT CASE WHEN 1 < \"" + TABLE_SIMPLE_VALUES + "\".\"A\" " + then + " FROM \"" //
-                                + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
+                                + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\""));
     }
 
     private static Stream<Arguments> getParameterForTestCaseMoreThan() {
@@ -665,10 +638,10 @@ class ExasolSqlDialectIT {
     void testCreateVirtualSchemaWithNonexistentConnectionThrowsException() {
         final StringBuilder builder = new StringBuilder();
         builder.append("CREATE VIRTUAL SCHEMA VIRTUAL_SCHEMA_WRONG_CONNECTION");
-        builder.append(" USING " + SCHEMA_TEST + ".ADAPTER_SCRIPT_EXASOL WITH ");
+        builder.append(" USING " + SCHEMA_EXASOL_TEST + ".ADAPTER_SCRIPT_EXASOL WITH ");
         builder.append("SQL_DIALECT     = 'EXASOL' ");
         builder.append("CONNECTION_NAME = 'NONEXISTENT_CONNECTION' ");
-        builder.append("SCHEMA_NAME     = '" + SCHEMA_TEST + "' ");
+        builder.append("SCHEMA_NAME     = '" + SCHEMA_EXASOL_TEST + "' ");
         final DataException exception = assertThrows(DataException.class, () -> statement.execute(builder.toString()));
         assertThat(exception.getMessage(),
                 containsString("Could not access the connection information of connection \"NONEXISTENT_CONNECTION\""));
@@ -683,7 +656,7 @@ class ExasolSqlDialectIT {
     }
 
     private static Stream<Arguments> getParameterForTestVirtualSchemaExplainImport() {
-        final String select = "SELECT 1 FROM \"" + SCHEMA_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\"";
+        final String select = "SELECT 1 FROM \"" + SCHEMA_EXASOL_TEST + "\".\"" + TABLE_SIMPLE_VALUES + "\"";
         return Stream.of(
                 Arguments.of(VIRTUAL_SCHEMA_EXA,
                         "IMPORT FROM EXA AT 'localhost:8888' USER 'SYS' IDENTIFIED BY 'exasol' STATEMENT " //
@@ -698,24 +671,18 @@ class ExasolSqlDialectIT {
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testInnerJoin(final String virtualSchemaName) throws SQLException {
-        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
-                "VALUES(2,'bbb', 2,'bbb')");
+        final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statement,
+                SCHEMA_EXASOL_TEST, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(2,'bbb', 2,'bbb')");
         final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
                 + " a INNER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x");
         assertThat(actual, matchesResultSet(expected));
     }
 
-    private ResultSet createJoinExpectedTable(final String expectedColumns, final String expectedValues)
-            throws SQLException {
-        statement.execute("CREATE OR REPLACE TABLE " + SCHEMA_TEST + ".TABLE_JOIN_EXPECTED " + expectedColumns);
-        statement.execute("INSERT INTO " + SCHEMA_TEST + ".TABLE_JOIN_EXPECTED " + expectedValues);
-        return statement.executeQuery("SELECT * FROM " + SCHEMA_TEST + ".TABLE_JOIN_EXPECTED");
-    }
-
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testInnerJoinWithProjection(final String virtualSchemaName) throws SQLException {
-        final ResultSet expected = createJoinExpectedTable("(y VARCHAR(100))", " VALUES('bbbbbb')");
+        final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statement,
+                SCHEMA_EXASOL_TEST, "(y VARCHAR(100))", " VALUES('bbbbbb')");
         final ResultSet actual = statement.executeQuery("SELECT b.y || " + virtualSchemaName + "." + TABLE_JOIN_1
                 + ".y FROM " + virtualSchemaName + "." + TABLE_JOIN_1 + " INNER JOIN  " + virtualSchemaName + "."
                 + TABLE_JOIN_2 + " b ON " + virtualSchemaName + "." + TABLE_JOIN_1 + ".x=b.x");
@@ -725,8 +692,8 @@ class ExasolSqlDialectIT {
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testLeftJoin(final String virtualSchemaName) throws SQLException {
-        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
-                "VALUES(1, 'aaa', null, null), " //
+        final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statement,
+                SCHEMA_EXASOL_TEST, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(1, 'aaa', null, null), " //
                         + "(2, 'bbb', 2, 'bbb')");
         final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
                 + " a LEFT OUTER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
@@ -736,8 +703,8 @@ class ExasolSqlDialectIT {
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testRightJoin(final String virtualSchemaName) throws SQLException {
-        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
-                "VALUES(2, 'bbb', 2, 'bbb'), " //
+        final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statement,
+                SCHEMA_EXASOL_TEST, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(2, 'bbb', 2, 'bbb'), " //
                         + "(null, null, 3, 'ccc')");
         final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
                 + " a RIGHT OUTER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
@@ -747,8 +714,8 @@ class ExasolSqlDialectIT {
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testFullOuterJoin(final String virtualSchemaName) throws SQLException {
-        final ResultSet expected = createJoinExpectedTable("(x INT, y VARCHAR(100), a INT, b VARCHAR(100))",
-                "VALUES(1, 'aaa', null, null), " //
+        final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statement,
+                SCHEMA_EXASOL_TEST, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(1, 'aaa', null, null), " //
                         + "(2, 'bbb', 2, 'bbb'), " //
                         + "(null, null, 3, 'ccc')");
         final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
