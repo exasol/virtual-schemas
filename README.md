@@ -124,6 +124,7 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 | [Apache Maven](https://maven.apache.org/)                                           | Build tool                                             | Apache License 2.0            |
 | [Equals Verifier](https://jqno.nl/equalsverifier/)                                  | Testing `equals(...)` and `hashCode()` contracts       | Apache License 2.0            |
 | [Exec Maven Plugin](https://www.mojohaus.org/exec-maven-plugin/)                    | Helps execute system and Java programs.                | Apache License 2.0            |
+| [HikariCP](https://github.com/brettwooldridge/HikariCP)                             | JDBC connection pool.                                  | Apache License 2.0            |
 | [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)                                  | Checking for conditions in code via matchers           | BSD License                   |
 | [JSONassert](http://jsonassert.skyscreamer.org/)                                    | Compare JSON documents for semantic equality           | Apache License 2.0            |
 | [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0    |
