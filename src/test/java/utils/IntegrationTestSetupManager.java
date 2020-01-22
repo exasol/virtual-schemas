@@ -1,11 +1,7 @@
 package utils;
 
-import java.math.BigDecimal;
 import java.sql.*;
 import java.util.Optional;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class IntegrationTestSetupManager {
     public void createTestSchema(final Statement statement, final String schemaName) throws SQLException {
@@ -40,7 +36,7 @@ public class IntegrationTestSetupManager {
         statement.execute("INSERT INTO " + schemaName + "." + secondTableName + " VALUES (2,'bbb'), (3,'ccc')");
     }
 
-    public ResultSet GetSelectAllFromJoinExpectedTable(final Statement statement, final String schemaName,
+    public ResultSet getSelectAllFromJoinExpectedTable(final Statement statement, final String schemaName,
             final String expectedColumns, final String expectedValues) throws SQLException {
         statement.execute("CREATE OR REPLACE TABLE " + schemaName + ".TABLE_JOIN_EXPECTED " + expectedColumns);
         statement.execute("INSERT INTO " + schemaName + ".TABLE_JOIN_EXPECTED " + expectedValues);

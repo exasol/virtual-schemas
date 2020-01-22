@@ -671,7 +671,7 @@ class ExasolSqlDialectIT {
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testInnerJoin(final String virtualSchemaName) throws SQLException {
-        final ResultSet expected = integrationTestSetupManager.GetSelectAllFromJoinExpectedTable(statement,
+        final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statement,
                 SCHEMA_EXASOL_TEST, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(2,'bbb', 2,'bbb')");
         final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
                 + " a INNER JOIN  " + virtualSchemaName + "." + TABLE_JOIN_2 + " b ON a.x=b.x");
@@ -681,7 +681,7 @@ class ExasolSqlDialectIT {
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testInnerJoinWithProjection(final String virtualSchemaName) throws SQLException {
-        final ResultSet expected = integrationTestSetupManager.GetSelectAllFromJoinExpectedTable(statement,
+        final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statement,
                 SCHEMA_EXASOL_TEST, "(y VARCHAR(100))", " VALUES('bbbbbb')");
         final ResultSet actual = statement.executeQuery("SELECT b.y || " + virtualSchemaName + "." + TABLE_JOIN_1
                 + ".y FROM " + virtualSchemaName + "." + TABLE_JOIN_1 + " INNER JOIN  " + virtualSchemaName + "."
@@ -692,7 +692,7 @@ class ExasolSqlDialectIT {
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testLeftJoin(final String virtualSchemaName) throws SQLException {
-        final ResultSet expected = integrationTestSetupManager.GetSelectAllFromJoinExpectedTable(statement,
+        final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statement,
                 SCHEMA_EXASOL_TEST, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(1, 'aaa', null, null), " //
                         + "(2, 'bbb', 2, 'bbb')");
         final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
@@ -703,7 +703,7 @@ class ExasolSqlDialectIT {
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testRightJoin(final String virtualSchemaName) throws SQLException {
-        final ResultSet expected = integrationTestSetupManager.GetSelectAllFromJoinExpectedTable(statement,
+        final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statement,
                 SCHEMA_EXASOL_TEST, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(2, 'bbb', 2, 'bbb'), " //
                         + "(null, null, 3, 'ccc')");
         final ResultSet actual = statement.executeQuery("SELECT * FROM " + virtualSchemaName + "." + TABLE_JOIN_1
@@ -714,7 +714,7 @@ class ExasolSqlDialectIT {
     @ParameterizedTest
     @MethodSource("getVirtualSchemaVariantsAll")
     void testFullOuterJoin(final String virtualSchemaName) throws SQLException {
-        final ResultSet expected = integrationTestSetupManager.GetSelectAllFromJoinExpectedTable(statement,
+        final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statement,
                 SCHEMA_EXASOL_TEST, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(1, 'aaa', null, null), " //
                         + "(2, 'bbb', 2, 'bbb'), " //
                         + "(null, null, 3, 'ccc')");
