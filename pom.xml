@@ -215,6 +215,7 @@
             <scope>test</scope>
         </dependency>
         <!--From here: legacy dependencies that should be checked later (most of them were used in old integration tests)-->
+        <!--https://github.com/exasol/virtual-schemas/issues/302-->
         <dependency>
             <groupId>org.skyscreamer</groupId>
             <artifactId>jsonassert</artifactId>
