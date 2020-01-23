@@ -1,5 +1,10 @@
 package utils;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import org.testcontainers.containers.JdbcDatabaseContainer;
+
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.Optional;
 
@@ -41,5 +46,19 @@ public class IntegrationTestSetupManager {
         statement.execute("CREATE OR REPLACE TABLE " + schemaName + ".TABLE_JOIN_EXPECTED " + expectedColumns);
         statement.execute("INSERT INTO " + schemaName + ".TABLE_JOIN_EXPECTED " + expectedValues);
         return statement.executeQuery("SELECT * FROM " + schemaName + ".TABLE_JOIN_EXPECTED");
+    }
+
+    public Statement getStatement(final JdbcDatabaseContainer container) throws SQLException {
+        final DataSource dataSource = getDataSource(container);
+        return dataSource.getConnection().createStatement();
+    }
+
+    private DataSource getDataSource(final JdbcDatabaseContainer container) {
+        final HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setJdbcUrl(container.getJdbcUrl());
+        hikariConfig.setUsername(container.getUsername());
+        hikariConfig.setPassword(container.getPassword());
+        hikariConfig.setDriverClassName(container.getDriverClassName());
+        return new HikariDataSource(hikariConfig);
     }
 }
