@@ -1,6 +1,6 @@
 package com.exasol.adapter.dialects.exasol;
 
-import static com.exasol.adapter.dialects.IntegrationTestsConstants.*;
+import static com.exasol.adapter.dialects.IntegrationTestConstants.*;
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
 import static java.util.Calendar.AUGUST;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -67,10 +67,10 @@ class ExasolSqlDialectIT {
         createTestTableAllExasolDataTypes();
         createTestTableWithSimpleValues();
         createTestTableMixedCase();
-        integrationTestSetupManager.createTestTablesForJoinTests(statement, SCHEMA_EXASOL, TABLE_JOIN_1,
-                TABLE_JOIN_2);
+        integrationTestSetupManager.createTestTablesForJoinTests(statement, SCHEMA_EXASOL, TABLE_JOIN_1, TABLE_JOIN_2);
         createConnection();
-        createAdapterScript();
+        integrationTestSetupManager.createAdapterScript(statement, SCHEMA_EXASOL + "." + ADAPTER_SCRIPT_EXASOL,
+                VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION, Optional.empty());
         createVirtualSchema(VIRTUAL_SCHEMA_JDBC, SCHEMA_EXASOL, Optional.empty());
         createVirtualSchema(VIRTUAL_SCHEMA_JDBC_LOCAL, SCHEMA_EXASOL, Optional.of("IS_LOCAL = 'true'"));
         createVirtualSchema(VIRTUAL_SCHEMA_EXA, SCHEMA_EXASOL,
@@ -132,13 +132,6 @@ class ExasolSqlDialectIT {
                 + "TO 'jdbc:exa:localhost:8888' " //
                 + "USER '" + container.getUsername() + "' " //
                 + "IDENTIFIED BY '" + container.getPassword() + "'");
-    }
-
-    private static void createAdapterScript() throws SQLException {
-        statement.execute("CREATE OR REPLACE JAVA ADAPTER SCRIPT " + SCHEMA_EXASOL + ".ADAPTER_SCRIPT_EXASOL AS " //
-                + "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
-                + "%jar /buckets/bfsdefault/default/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION + ";\n" //
-                + "/");
     }
 
     private static void createVirtualSchema(final String virtualSchemaName, final String schemaName,

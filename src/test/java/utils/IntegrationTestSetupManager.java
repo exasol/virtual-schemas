@@ -36,9 +36,11 @@ public class IntegrationTestSetupManager {
     public void createTestTablesForJoinTests(final Statement statement, final String schemaName,
             final String firstTableName, final String secondTableName) throws SQLException {
         statement.execute("CREATE TABLE " + schemaName + "." + firstTableName + "(x INT, y VARCHAR(100))");
-        statement.execute("INSERT INTO " + schemaName + "." + firstTableName + " VALUES (1,'aaa'), (2,'bbb')");
+        statement.execute("INSERT INTO " + schemaName + "." + firstTableName + " VALUES (1,'aaa')");
+        statement.execute("INSERT INTO " + schemaName + "." + firstTableName + " VALUES (2,'bbb')");
         statement.execute("CREATE TABLE " + schemaName + "." + secondTableName + "(x INT, y VARCHAR(100))");
-        statement.execute("INSERT INTO " + schemaName + "." + secondTableName + " VALUES (2,'bbb'), (3,'ccc')");
+        statement.execute("INSERT INTO " + schemaName + "." + secondTableName + " VALUES (2,'bbb')");
+        statement.execute("INSERT INTO " + schemaName + "." + secondTableName + " VALUES (3,'ccc')");
     }
 
     public ResultSet getSelectAllFromJoinExpectedTable(final Statement statement, final String schemaName,

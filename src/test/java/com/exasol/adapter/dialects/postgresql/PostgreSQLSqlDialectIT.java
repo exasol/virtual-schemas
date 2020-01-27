@@ -1,6 +1,6 @@
 package com.exasol.adapter.dialects.postgresql;
 
-import static com.exasol.adapter.dialects.IntegrationTestsConstants.*;
+import static com.exasol.adapter.dialects.IntegrationTestConstants.*;
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
