@@ -1,6 +1,6 @@
 # Integration Testing with Containers
 
-Virtual Schema integration tests uses `exasol-testcontainers` framework, which requires docker privileged mode to be available to run tests.
+Virtual Schema integration tests use `exasol-testcontainers` framework, which requires docker privileged mode to be available to run the tests.
 
 ## Overview
 
@@ -58,7 +58,7 @@ You can start the integration tests as follows:
 mvn clean package && mvn verify
 ```
 
-This will run all included into `maven-failsafe-plugin` integration tests, i.e. all JUnit tests with the suffix `IT` in the filename.
+This will run all included into the `maven-failsafe-plugin` integration tests.
 
 Another way to run integration tests:
 
@@ -70,7 +70,7 @@ Some integration tests are not running automatically, but it is possible to exec
 
 In order to start `OracleSqlDialectIT`:
 * Download Oracle JDBC driver `ojdbc8.jar` and oracle instant client `instantclient-basic-linux.x64-12.1.0.2.0.zip` and temporary put them into `src/test/resources/integration/driver/oracle` directory.
-* Run the tests from IDE or temporary add `OracleSqlDialectIT.java` into the `maven-failsafe-plugin` includes section and execute  `mvn verify` command.
+* Run the tests from an IDE or temporary add `OracleSqlDialectIT.java` into the `maven-failsafe-plugin` includes section and execute  `mvn verify` command.
 * Remove the driver and the instant client after the test. Do not upload them to the GitHub repository.
 
 ## See also
