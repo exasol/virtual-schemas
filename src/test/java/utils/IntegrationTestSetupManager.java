@@ -1,5 +1,10 @@
 package utils;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import org.testcontainers.containers.JdbcDatabaseContainer;
+
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.Optional;
 
@@ -31,9 +36,11 @@ public class IntegrationTestSetupManager {
     public void createTestTablesForJoinTests(final Statement statement, final String schemaName,
             final String firstTableName, final String secondTableName) throws SQLException {
         statement.execute("CREATE TABLE " + schemaName + "." + firstTableName + "(x INT, y VARCHAR(100))");
-        statement.execute("INSERT INTO " + schemaName + "." + firstTableName + " VALUES (1,'aaa'), (2,'bbb')");
+        statement.execute("INSERT INTO " + schemaName + "." + firstTableName + " VALUES (1,'aaa')");
+        statement.execute("INSERT INTO " + schemaName + "." + firstTableName + " VALUES (2,'bbb')");
         statement.execute("CREATE TABLE " + schemaName + "." + secondTableName + "(x INT, y VARCHAR(100))");
-        statement.execute("INSERT INTO " + schemaName + "." + secondTableName + " VALUES (2,'bbb'), (3,'ccc')");
+        statement.execute("INSERT INTO " + schemaName + "." + secondTableName + " VALUES (2,'bbb')");
+        statement.execute("INSERT INTO " + schemaName + "." + secondTableName + " VALUES (3,'ccc')");
     }
 
     public ResultSet getSelectAllFromJoinExpectedTable(final Statement statement, final String schemaName,
@@ -41,5 +48,19 @@ public class IntegrationTestSetupManager {
         statement.execute("CREATE OR REPLACE TABLE " + schemaName + ".TABLE_JOIN_EXPECTED " + expectedColumns);
         statement.execute("INSERT INTO " + schemaName + ".TABLE_JOIN_EXPECTED " + expectedValues);
         return statement.executeQuery("SELECT * FROM " + schemaName + ".TABLE_JOIN_EXPECTED");
+    }
+
+    public Statement getStatement(final JdbcDatabaseContainer container) throws SQLException {
+        final DataSource dataSource = getDataSource(container);
+        return dataSource.getConnection().createStatement();
+    }
+
+    private DataSource getDataSource(final JdbcDatabaseContainer container) {
+        final HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setJdbcUrl(container.getJdbcUrl());
+        hikariConfig.setUsername(container.getUsername());
+        hikariConfig.setPassword(container.getPassword());
+        hikariConfig.setDriverClassName(container.getDriverClassName());
+        return new HikariDataSource(hikariConfig);
     }
 }
