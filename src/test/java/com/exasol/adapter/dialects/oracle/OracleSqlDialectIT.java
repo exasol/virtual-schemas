@@ -393,7 +393,7 @@ class OracleSqlDialectIT {
     class JoinTest {
         @ParameterizedTest
         @ValueSource(strings = { VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_ORA })
-        void testInnerJoinJdbc(final String virtualSchema) throws SQLException {
+        void testInnerJoin(final String virtualSchema) throws SQLException {
             final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
                     SCHEMA_EXASOL, "(x VARCHAR(100), y VARCHAR(100), a VARCHAR(100), b VARCHAR(100))",
                     "VALUES('2','bbb', '2','bbb')");

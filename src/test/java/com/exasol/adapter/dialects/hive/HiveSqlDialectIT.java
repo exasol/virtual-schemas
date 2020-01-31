@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects.hive;
 
 import static com.exasol.adapter.dialects.IntegrationTestConstants.*;
+import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
@@ -11,6 +12,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +32,8 @@ import utils.IntegrationTestSetupManager;
  * How to run `HiveSqlDialectIT`:
  * Download Hive JDBC driver `HiveJDBC41.jar`.
  * Temporarily put it into `src/test/resources/integration/driver/hive` directory.
- * If the file's name is different from the one mentioned above, edit `src/test/resources/integration/driver/hive/hive.properties` file.
- * Run the tests from an IDE or temporarily add `OracleSqlDialectIT.java` into the `maven-failsafe-plugin`'s includes section and execute `mvn verify` command.
+ * If the file's name is different from the one mentioned above, edit `src/test/resources/integration/driver/hive/hive.properties` and settings.cfg files.
+ * Run the tests from an IDE or temporarily add `HiveSqlDialectIT.java` into the `maven-failsafe-plugin`'s includes section and execute `mvn verify` command.
  */
 @Tag("integration")
 @Testcontainers
@@ -58,8 +60,8 @@ class HiveSqlDialectIT {
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
-                    .withLogConsumer(new Slf4jLogConsumer(LOGGER)) //
-                    .withClusterLogsPath(Path.of("target/mylogs"));
+                    .withLogConsumer(new Slf4jLogConsumer(LOGGER)); //
+//                    .withClusterLogsPath(Path.of("target/mylogs"));
     private static Statement statementExasol;
     private static final IntegrationTestSetupManager integrationTestSetupManager = new IntegrationTestSetupManager();
 
@@ -204,5 +206,131 @@ class HiveSqlDialectIT {
         result.next();
         final long actualResult = result.getLong(1);
         assertThat(actualResult, equalTo(expected));
+    }
+
+    @Nested
+    @DisplayName("Join test")
+    class JoinTest {
+        @Test
+        void testInnerJoin() throws SQLException {
+            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
+                    SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", //
+                    "VALUES(2,'bbb', 2,'bbb')");
+            final ResultSet actual = statementExasol
+                    .executeQuery("SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a INNER JOIN  "
+                            + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x=b.x");
+            MatcherAssert.assertThat(actual, matchesResultSet(expected));
+        }
+
+        @Test
+        void testInnerJoinWithProjection() throws SQLException {
+            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
+                    SCHEMA_EXASOL, "(y VARCHAR(100))", //
+                    " VALUES('bbbbbb')");
+            final ResultSet actual = statementExasol
+                    .executeQuery("SELECT b.y || " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + ".y FROM "
+                            + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " INNER JOIN  " + VIRTUAL_SCHEMA_HIVE_JDBC
+                            + "." + TABLE_JOIN_2 + " b ON " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + ".x=b.x");
+            MatcherAssert.assertThat(actual, matchesResultSet(expected));
+        }
+
+        @Test
+        void testLeftJoin() throws SQLException {
+            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
+                    SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", //
+                    "VALUES(1, 'aaa', null, null), " //
+                            + "(2, 'bbb', 2, 'bbb')");
+            final ResultSet actual = statementExasol.executeQuery(
+                    "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a LEFT OUTER JOIN  "
+                            + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
+            MatcherAssert.assertThat(actual, matchesResultSet(expected));
+        }
+
+        @Test
+        void testRightJoin() throws SQLException {
+            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
+                    SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", //
+                    "VALUES(2, 'bbb', 2, 'bbb'), " //
+                            + "(null, null, 3, 'ccc')");
+            final ResultSet actual = statementExasol.executeQuery(
+                    "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a RIGHT OUTER JOIN  "
+                            + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
+            MatcherAssert.assertThat(actual, matchesResultSet(expected));
+        }
+
+        @Test
+        void testFullOuterJoin() throws SQLException {
+            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
+                    SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", //
+                    "VALUES(1, 'aaa', null, null), " //
+                            + "(2, 'bbb', 2, 'bbb'), " //
+                            + "(null, null, 3, 'ccc')");
+            final ResultSet actual = statementExasol.executeQuery(
+                    "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a FULL OUTER JOIN  "
+                            + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
+            MatcherAssert.assertThat(actual, matchesResultSet(expected));
+        }
+
+        @Test
+        void testRightJoinWithComplexCondition() throws SQLException {
+            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
+                    SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", //
+                    "VALUES(2, 'bbb', 2, 'bbb'), " //
+                            + "(null, null, 3, 'ccc')");
+            final ResultSet actual = statementExasol.executeQuery(
+                    "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a RIGHT OUTER JOIN  "
+                            + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x||a.y=b.x||b.y ORDER BY a.x");
+            MatcherAssert.assertThat(actual, matchesResultSet(expected));
+        }
+
+        @Test
+        void testFullOuterJoinWithComplexCondition() throws SQLException {
+            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
+                    SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", //
+                    "VALUES(1, 'aaa', null, null), " //
+                            + "(2, 'bbb', 2, 'bbb'), " //
+                            + "(null, null, 3, 'ccc')");
+            final ResultSet actual = statementExasol.executeQuery(
+                    "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a FULL OUTER JOIN  "
+                            + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x-b.x=0 ORDER BY a.x");
+            MatcherAssert.assertThat(actual, matchesResultSet(expected));
+        }
+    }
+
+    @Test
+    void testDataTypeMapping() throws SQLException {
+        final String expectedSchemaQualifiedTableName = SCHEMA_EXASOL + ".EXA_DBA_COLUMNS_EXPECTED";
+        statementExasol.execute("CREATE OR REPLACE TABLE " + expectedSchemaQualifiedTableName //
+                + "(COLUMN_NAME VARCHAR(128), " //
+                + "COLUMN_TYPE VARCHAR(40), " //
+                + "COLUMN_MAXSIZE DECIMAL(18,0), " //
+                + "COLUMN_NUM_PREC DECIMAL(18, 0), " //
+                + "COLUMN_NUM_SCALE DECIMAL(18, 0), " //
+                + "COLUMN_DEFAULT VARCHAR(2000))");
+        statementExasol.execute("INSERT INTO " + expectedSchemaQualifiedTableName + " VALUES " //
+                + "('ARRAYCOL', 'VARCHAR(255) ASCII', 255, NULL, NULL, NULL), " //
+                + "('BIGINTEGER', 'DECIMAL(19,0)', 19, 19, 0, NULL), " //
+                + "('BOOLCOLUMN', 'BOOLEAN', 1, NULL, NULL, NULL), " //
+                + "('CHARCOLUMN', 'CHAR(1) ASCII', 1, NULL, NULL, NULL), " //
+                + "('DECIMALCOL', 'DECIMAL(10,0)', 10, 10, 0, NULL), " //
+                + "('DOUBLECOL', 'DOUBLE', 64, NULL, NULL, NULL), " //
+                + "('FLOATCOL', 'DOUBLE', 64, NULL, NULL, NULL), " //
+                + "('INTCOL', 'DECIMAL(10,0)', 10, 10, 0, NULL), " //
+                + "('MAPCOL', 'VARCHAR(255) ASCII', 255, NULL, NULL, NULL), " //
+                + "('SMALLINTEGER', 'DECIMAL(5,0)', 5, 5, 0, NULL), " //
+                + "('STRINGCOL', 'VARCHAR(255) ASCII', 255, NULL, NULL, NULL), " //
+                + "('STRUCTCOL', 'VARCHAR(255) ASCII', 255, NULL, NULL, NULL), " //
+                + "('TIMESTAMPCOL', 'TIMESTAMP', 29, NULL, NULL, NULL), " //
+                + "('TINYINTEGER', 'DECIMAL(3,0)', 3, 3, 0, NULL), " //
+                + "('VARCHARCOL', 'VARCHAR(10) ASCII', 10, NULL, NULL, NULL), " //
+                + "('BINARYCOL', 'VARCHAR(2000000) UTF8', 2000000, NULL, NULL, NULL), " //
+                + "('DATECOL', 'DATE', 10, NULL, NULL, NULL) " //
+        );
+        final ResultSet expected = statementExasol.executeQuery("SELECT * FROM " + expectedSchemaQualifiedTableName);
+        final ResultSet actual = statementExasol
+                .executeQuery("SELECT COLUMN_NAME, COLUMN_TYPE, COLUMN_MAXSIZE, COLUMN_NUM_PREC, COLUMN_NUM_SCALE, "
+                        + "COLUMN_DEFAULT FROM EXA_DBA_COLUMNS WHERE COLUMN_SCHEMA = '" + VIRTUAL_SCHEMA_HIVE_JDBC
+                        + "' AND COLUMN_TABLE='" + TABLE_HIVE_ALL_DATA_TYPES + "' ORDER BY COLUMN_ORDINAL_POSITION");
+        assertThat(actual, matchesResultSet(expected));
     }
 }
