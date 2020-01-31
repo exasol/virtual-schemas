@@ -1,6 +1,6 @@
 # Integration Testing with Containers
 
-Virtual Schema integration tests use `exasol-testcontainers` framework, which requires docker privileged mode to be available to run the tests.
+Virtual Schema integration tests use the `exasol-testcontainers` framework, which requires docker privileged mode to be available to run the tests.
 
 ## Overview
 
@@ -21,13 +21,13 @@ What you need is, for each source database:
 
 ## Preparing Integration Test
 
-1. In order to run the integration test automated, add the test to the includes list of the `maven-failsafe-plugin` in the [pom file](../../../pom.xml).
+1. In order to run the automated integration test, add the test to the includes list of the `maven-failsafe-plugin` in the [pom file](../../../pom.xml).
 2. Provide a JDBC driver JAR for the source database.
 3. Add a new Integration Test class for you database
 
 ### Provide JDBC drivers for the Source Database
 
-The JDBC drivers are automatically deployed during the test. You have to create a directory for the jdbc driver under `src/test/resources/integration/driver`. 
+The JDBC drivers are automatically deployed during the test. You have to create a directory for the JDBC driver under `src/test/resources/integration/driver`. 
 The folder contains the driver jar file(s) and a `settings.cfg` file (for any integration test except Exasol and Postgres).
 In order to connect to the source database from your integration test you also have to add the jdbc driver dependency to the [POM](../../../pom.xml) scope verify.
 
@@ -58,7 +58,7 @@ You can start the integration tests as follows:
 mvn clean package && mvn verify
 ```
 
-This will run all included into the `maven-failsafe-plugin` integration tests.
+This will run all tests included in the `maven-failsafe-plugin` integration test configuration.
 
 Another way to run integration tests:
 
