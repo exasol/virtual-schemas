@@ -65,7 +65,7 @@ class OracleSqlDialectIT {
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
                     .withLogConsumer(new Slf4jLogConsumer(LOGGER));
     @Container
-    private static final OracleContainer oracleContainer = new OracleContainer(ORACLE_DOCKER_VERSION);
+    private static final OracleContainer oracleContainer = new OracleContainer(ORACLE_CONTAINER_NAME);
     private static final String PATH_TO_ORACLE_PROPERTY_FILE = "src/test/resources/integration/driver/oracle/oracle.properties";
     private static Statement statementExasol;
     private static final IntegrationTestSetupManager integrationTestSetupManager = new IntegrationTestSetupManager();

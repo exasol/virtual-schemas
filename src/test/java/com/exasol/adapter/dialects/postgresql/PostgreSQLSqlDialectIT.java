@@ -49,7 +49,7 @@ class PostgreSQLSqlDialectIT {
     private static final int POSTGRES_PORT = 5432;
 
     @Container
-    private static final PostgreSQLContainer postgresqlContainer = new PostgreSQLContainer(POSTGRES_DOCKER_VERSION);
+    private static final PostgreSQLContainer postgresqlContainer = new PostgreSQLContainer(POSTGRES_CONTAINER_NAME);
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
