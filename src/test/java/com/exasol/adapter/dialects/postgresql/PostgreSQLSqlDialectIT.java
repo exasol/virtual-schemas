@@ -8,6 +8,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.nio.file.Path;
 import java.sql.*;
 import java.util.Collections;
 import java.util.Optional;
@@ -34,6 +35,10 @@ import utils.IntegrationTestSetupManager;
 @Testcontainers
 class PostgreSQLSqlDialectIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLSqlDialectIT.class);
+    public static final String POSTGRES_DRIVER_NAME_AND_VERSION = "postgresql-42.2.5.jar";
+    public static final Path PATH_TO_POSTGRES_DRIVER = Path.of("src", "test", "resources", "integration", "driver",
+            "postgres", POSTGRES_DRIVER_NAME_AND_VERSION);
+    public static final String POSTGRES_CONTAINER_NAME = "postgres:9.6.2";
     private static final String CONNECTION_POSTGRES_JDBC = "CONNECTION_POSTGRES_JDBC";
     private static final String SCHEMA_POSTGRES = "schema_postgres";
     private static final String SCHEMA_POSTGRES_UPPERCASE_TABLE = "schema_postgres_upper";

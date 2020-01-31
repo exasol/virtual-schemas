@@ -40,13 +40,17 @@ import utils.IntegrationTestSetupManager;
 * How to run `OracleSqlDialectIT`:
 * Download Oracle JDBC driver `ojdbc8.jar` and oracle instant client `instantclient-basic-linux.x64-12.1.0.2.0.zip`.
 * Temporary put them into `src/test/resources/integration/driver/oracle` directory.
-* If the file's names are different from mentioned above, edit `src/test/resources/integration/driver/oracle/oracle.properties` file.
-* Run the tests from IDE or temporary add `OracleSqlDialectIT.java` into the maven-failsafe-plugin's includes section and execute `mvn verify` command.
+* If the files' names are different from the ones mentioned above, edit `src/test/resources/integration/driver/oracle/oracle.properties` file.
+* Run the tests from an IDE or temporarily add `OracleSqlDialectIT.java` into the `maven-failsafe-plugin`'s includes section and execute `mvn verify` command.
 */
 @Tag("integration")
 @Testcontainers
 class OracleSqlDialectIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(OracleSqlDialectIT.class);
+    public static final String ORACLE_CONTAINER_NAME = "oracleinanutshell/oracle-xe-11g";
+    public static final String JDBC_DRIVER_CONFIGURATION_FILE_NAME = "settings.cfg";
+    public static final Path ORACLE_DRIVER_SETTINGS_PATH = Path.of("src", "test", "resources", "integration", "driver",
+            "oracle", JDBC_DRIVER_CONFIGURATION_FILE_NAME);
     private static final String SCHEMA_ORACLE = "SCHEMA_ORACLE";
     private static final int ORACLE_PORT = 1521;
     private static final String CONNECTION_ORACLE_JDBC = "CONNECTION_ORACLE_JDBC";

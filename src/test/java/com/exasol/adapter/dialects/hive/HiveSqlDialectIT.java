@@ -27,6 +27,9 @@ import utils.IntegrationTestSetupManager;
 @Testcontainers
 class HiveSqlDialectIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(HiveSqlDialectIT.class);
+    public static final String HIVE_DOCKER_COMPOSE_YAML = "src/test/resources/integration/driver/hive/docker-compose.yaml";
+    public static final Path HIVE_DRIVER_SETTINGS_PATH = Path.of("src", "test", "resources", "integration", "driver",
+            "hive", JDBC_DRIVER_CONFIGURATION_FILE_NAME);
     private static final String PATH_TO_HIVE_PROPERTY_FILE = "src/test/resources/integration/driver/hive/hive.properties";
     private static final String HIVE_SERVICE_NAME = "hive-server_1";
     private static final int HIVE_EXPOSED_PORT = 10000;
