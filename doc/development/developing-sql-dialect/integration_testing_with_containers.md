@@ -83,7 +83,7 @@ List of disabled integration tests:
 How to start `OracleSqlDialectIT`:
 
 1. Download Oracle JDBC driver `ojdbc8.jar` and oracle instant client `instantclient-basic-linux.x64-12.1.0.2.0.zip` and temporary put them into `src/test/resources/integration/driver/oracle` directory.
-2. Run the tests from an IDE or temporary add `OracleSqlDialectIT.java` into the `maven-failsafe-plugin` includes section and execute  `mvn verify` command.
+2. Run the tests from an IDE or temporarily add `OracleSqlDialectIT.java` into the `maven-failsafe-plugin` includes section and execute  `mvn verify` command.
 3. Remove the driver and the instant client after the test. Do not upload them to the GitHub repository.
 
 ## See also
