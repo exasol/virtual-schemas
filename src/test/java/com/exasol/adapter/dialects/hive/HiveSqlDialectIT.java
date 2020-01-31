@@ -87,7 +87,6 @@ class HiveSqlDialectIT {
     }
 
     private static Connection getHiveConnection() throws ClassNotFoundException, SQLException, InterruptedException {
-//        Thread.sleep(1000000000);
         Class.forName("org.apache.hive.jdbc.HiveDriver");
         return DriverManager.getConnection("jdbc:hive2://localhost:10000/default", "hive", "hive");
     }
