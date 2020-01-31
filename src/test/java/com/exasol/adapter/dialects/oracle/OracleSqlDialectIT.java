@@ -47,6 +47,10 @@ import utils.IntegrationTestSetupManager;
 @Testcontainers
 class OracleSqlDialectIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(OracleSqlDialectIT.class);
+    public static final String ORACLE_CONTAINER_NAME = "oracleinanutshell/oracle-xe-11g";
+    public static final String JDBC_DRIVER_CONFIGURATION_FILE_NAME = "settings.cfg";
+    public static final Path ORACLE_DRIVER_SETTINGS_PATH = Path.of("src", "test", "resources", "integration", "driver",
+            "oracle", JDBC_DRIVER_CONFIGURATION_FILE_NAME);
     private static final String SCHEMA_ORACLE = "SCHEMA_ORACLE";
     private static final int ORACLE_PORT = 1521;
     private static final String CONNECTION_ORACLE_JDBC = "CONNECTION_ORACLE_JDBC";
@@ -65,7 +69,7 @@ class OracleSqlDialectIT {
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
                     .withLogConsumer(new Slf4jLogConsumer(LOGGER));
     @Container
-    private static final OracleContainer oracleContainer = new OracleContainer(ORACLE_DOCKER_VERSION);
+    private static final OracleContainer oracleContainer = new OracleContainer(ORACLE_CONTAINER_NAME);
     private static final String PATH_TO_ORACLE_PROPERTY_FILE = "src/test/resources/integration/driver/oracle/oracle.properties";
     private static Statement statementExasol;
     private static final IntegrationTestSetupManager integrationTestSetupManager = new IntegrationTestSetupManager();

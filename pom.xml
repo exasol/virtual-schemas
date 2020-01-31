@@ -242,12 +242,10 @@
                             <execution>
                                 <phase>pre-integration-test</phase>
                                 <goals>
-                                    <goal>exec
-                                    </goal>   <!-- Setting "java" here would make it run in the same JVM as Maven -->
+                                    <goal>exec</goal>   <!-- Setting "java" here would make it run in the same JVM as Maven -->
                                 </goals>
                                 <configuration>
-                                    <classpathScope>test
-                                    </classpathScope> <!-- The class we want to load is in the test folder, so we need to set this to have test classes in the classpath -->
+                                    <classpathScope>test</classpathScope> <!-- The class we want to load is in the test folder, so we need to set this to have test classes in the classpath -->
                                     <executable>java</executable>
                                     <arguments>
                                         <argument>-classpath</argument>
