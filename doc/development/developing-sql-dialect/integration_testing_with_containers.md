@@ -81,7 +81,7 @@ List of disabled integration tests:
 * HiveSqlDialectIT
 * OracleSqlDialectIT
 
-How to start `HiveSqlDialectIT`:
+### Starting the Hive Integration Test
 
 1. Download Hive JDBC driver `HiveJDBC41.jar`.
 2. Temporarily put it into `src/test/resources/integration/driver/hive` directory.
