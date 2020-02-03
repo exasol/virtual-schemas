@@ -38,10 +38,7 @@ import utils.IntegrationTestSetupManager;
 
 /*
 * How to run `OracleSqlDialectIT`:
-* Download Oracle JDBC driver `ojdbc8.jar` and oracle instant client `instantclient-basic-linux.x64-12.1.0.2.0.zip`.
-* Temporarily put them into `src/test/resources/integration/driver/oracle` directory.
-* If the files' names are different from the ones mentioned above, edit `src/test/resources/integration/driver/oracle/oracle.properties` file.
-* Run the tests from an IDE or temporarily add `OracleSqlDialectIT.java` into the `maven-failsafe-plugin`'s includes section and execute `mvn verify` command.
+* See the documentation: doc/development/developing-sql-dialect/integration_testing_with_containers.md
 */
 @Tag("integration")
 @Testcontainers

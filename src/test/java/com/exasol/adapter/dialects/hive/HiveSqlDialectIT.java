@@ -35,10 +35,7 @@ import utils.IntegrationTestSetupManager;
 
 /*
  * How to run `HiveSqlDialectIT`:
- * Download Hive JDBC driver `HiveJDBC41.jar`.
- * Temporarily put it into `src/test/resources/integration/driver/hive` directory.
- * If the file's name is different from the one mentioned above, edit `src/test/resources/integration/driver/hive/hive.properties` and settings.cfg files.
- * Run the tests from an IDE or temporarily add `HiveSqlDialectIT.java` into the `maven-failsafe-plugin`'s includes section and execute `mvn verify` command.
+ * See the documentation: doc/development/developing-sql-dialect/integration_testing_with_containers.md
  */
 @Tag("integration")
 @Testcontainers
@@ -71,8 +68,8 @@ class HiveSqlDialectIT {
     private static final IntegrationTestSetupManager integrationTestSetupManager = new IntegrationTestSetupManager();
 
     @BeforeAll
-    static void beforeAll()
-            throws InterruptedException, BucketAccessException, TimeoutException, SQLException, ClassNotFoundException {
+    static void beforeAll() throws InterruptedException, BucketAccessException, TimeoutException, SQLException,
+            ClassNotFoundException, IOException {
         final String driverName = getPropertyFromFile(PATH_TO_HIVE_PROPERTY_FILE, "driver.name");
         final String driverPath = getPropertyFromFile(PATH_TO_HIVE_PROPERTY_FILE, "driver.path");
         uploadFilesToBucket(driverName, driverPath);
@@ -103,13 +100,11 @@ class HiveSqlDialectIT {
                 HIVE_USERNAME, HIVE_PASSWORD);
     }
 
-    private static String getPropertyFromFile(final String filePath, final String propertyName) {
+    private static String getPropertyFromFile(final String filePath, final String propertyName) throws IOException {
         try (final InputStream inputStream = new FileInputStream(filePath)) {
             final Properties properties = new Properties();
             properties.load(inputStream);
             return properties.getProperty(propertyName);
-        } catch (final IOException exception) {
-            throw new IllegalArgumentException("Cannot access the oracle.properties file or read from it.");
         }
     }
 
