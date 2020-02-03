@@ -36,20 +36,16 @@ import com.exasol.containers.ExasolContainerConstants;
 
 import utils.IntegrationTestSetupManager;
 
-/*
-* How to run `OracleSqlDialectIT`:
-* Download Oracle JDBC driver `ojdbc8.jar` and oracle instant client `instantclient-basic-linux.x64-12.1.0.2.0.zip`.
-* Temporary put them into `src/test/resources/integration/driver/oracle` directory.
-* If the files' names are different from the ones mentioned above, edit `src/test/resources/integration/driver/oracle/oracle.properties` file.
-* Run the tests from an IDE or temporarily add `OracleSqlDialectIT.java` into the `maven-failsafe-plugin`'s includes section and execute `mvn verify` command.
-*/
+/**
+ * How to run `OracleSqlDialectIT`: See the documentation <a
+ * href="doc/development/developing-sql-dialect/integration_testing_with_containers.md>integration_testing_with_containers.md</a>.
+ */
 @Tag("integration")
 @Testcontainers
 class OracleSqlDialectIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(OracleSqlDialectIT.class);
-    public static final String ORACLE_CONTAINER_NAME = "oracleinanutshell/oracle-xe-11g";
-    public static final String JDBC_DRIVER_CONFIGURATION_FILE_NAME = "settings.cfg";
-    public static final Path ORACLE_DRIVER_SETTINGS_PATH = Path.of("src", "test", "resources", "integration", "driver",
+    private static final String ORACLE_CONTAINER_NAME = "oracleinanutshell/oracle-xe-11g";
+    private static final Path ORACLE_DRIVER_SETTINGS_PATH = Path.of("src", "test", "resources", "integration", "driver",
             "oracle", JDBC_DRIVER_CONFIGURATION_FILE_NAME);
     private static final String SCHEMA_ORACLE = "SCHEMA_ORACLE";
     private static final int ORACLE_PORT = 1521;
@@ -282,8 +278,11 @@ class OracleSqlDialectIT {
         void testNumber36ToDecimal(final String virtualSchemaName) throws SQLException {
             final String qualifiedTableName = virtualSchemaName + "." + TABLE_ORACLE_ALL_DATA_TYPES;
             final String query = "SELECT c_number36 FROM " + qualifiedTableName;
-            assertExpressionExecutionBigDecimalResult(query, new BigDecimal("123456789012345678901234567890123456"));
-            assertThat(getColumnTypesOfTable(qualifiedTableName, "C_NUMBER36"), equalTo("DECIMAL(36,0)"));
+            assertAll(
+                    () -> assertExpressionExecutionBigDecimalResult(query,
+                            new BigDecimal("123456789012345678901234567890123456")),
+                    () -> assertThat(getColumnTypesOfTable(qualifiedTableName, "C_NUMBER36"),
+                            equalTo("DECIMAL(36,0)")));
         }
 
         @ParameterizedTest
@@ -394,7 +393,7 @@ class OracleSqlDialectIT {
     class JoinTest {
         @ParameterizedTest
         @ValueSource(strings = { VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_ORA })
-        void testInnerJoinJdbc(final String virtualSchema) throws SQLException {
+        void testInnerJoin(final String virtualSchema) throws SQLException {
             final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
                     SCHEMA_EXASOL, "(x VARCHAR(100), y VARCHAR(100), a VARCHAR(100), b VARCHAR(100))",
                     "VALUES('2','bbb', '2','bbb')");
