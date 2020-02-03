@@ -36,10 +36,10 @@ import com.exasol.containers.ExasolContainerConstants;
 
 import utils.IntegrationTestSetupManager;
 
-/*
-* How to run `OracleSqlDialectIT`:
-* See the documentation: doc/development/developing-sql-dialect/integration_testing_with_containers.md
-*/
+/**
+ * How to run `OracleSqlDialectIT`: See the documentation <a
+ * href="doc/development/developing-sql-dialect/integration_testing_with_containers.md>integration_testing_with_containers.md</a>.
+ */
 @Tag("integration")
 @Testcontainers
 class OracleSqlDialectIT {
