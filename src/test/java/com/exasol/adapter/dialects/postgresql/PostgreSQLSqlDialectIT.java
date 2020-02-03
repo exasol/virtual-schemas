@@ -220,6 +220,7 @@ class PostgreSQLSqlDialectIT {
     }
 
     @Nested
+    @Tag("integration")
     @DisplayName("Join test")
     class JoinTest {
         @Test
@@ -295,6 +296,7 @@ class PostgreSQLSqlDialectIT {
     }
 
     @Nested
+    @Tag("integration")
     @DisplayName("Identifier Test - CONVERT_TO_UPPER mode")
     class IdentifierTestConvertToUpper {
         @Test
@@ -351,6 +353,7 @@ class PostgreSQLSqlDialectIT {
     }
 
     @Nested
+    @Tag("integration")
     @DisplayName("Identifier Test - PRESERVE_ORIGINAL_CASE mode")
     class IdentifierPreserveOriginalCaseTest {
         @Test
