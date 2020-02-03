@@ -78,13 +78,24 @@ Therefore we cannot include some jdbc drivers to the projects and you need to do
 
 List of disabled integration tests:
 
+* HiveSqlDialectIT
 * OracleSqlDialectIT
+
+How to start `HiveSqlDialectIT`:
+
+1. Download Hive JDBC driver `HiveJDBC41.jar`.
+2. Temporarily put it into `src/test/resources/integration/driver/hive` directory.
+3. If the file's name is different from the one mentioned above, edit `src/test/resources/integration/driver/hive/hive.properties` and `settings.cfg` files.
+4. Run the tests from an IDE or temporarily add `HiveSqlDialectIT.java` into the `maven-failsafe-plugin`'s includes section and execute `mvn verify` command.
+5. Remove the driver after the test. Do not upload it to the GitHub repository.
 
 How to start `OracleSqlDialectIT`:
 
-1. Download Oracle JDBC driver `ojdbc8.jar` and oracle instant client `instantclient-basic-linux.x64-12.1.0.2.0.zip` and temporary put them into `src/test/resources/integration/driver/oracle` directory.
-2. Run the tests from an IDE or temporarily add `OracleSqlDialectIT.java` into the `maven-failsafe-plugin` includes section and execute  `mvn verify` command.
-3. Remove the driver and the instant client after the test. Do not upload them to the GitHub repository.
+1. Download Oracle JDBC driver `ojdbc8.jar` and oracle instant client `instantclient-basic-linux.x64-12.1.0.2.0.zip`. 
+2. Temporary put them into `src/test/resources/integration/driver/oracle` directory.
+3. If the file's name is different from the one mentioned above, edit `src/test/resources/integration/driver/oracle/oracle.properties` and `settings.cfg` files.
+4. Run the tests from an IDE or temporarily add `OracleSqlDialectIT.java` into the `maven-failsafe-plugin` includes section and execute  `mvn verify` command.
+5. Remove the driver and the instant client after the test. Do not upload them to the GitHub repository.
 
 ## See also
 

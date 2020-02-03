@@ -281,8 +281,11 @@ class OracleSqlDialectIT {
         void testNumber36ToDecimal(final String virtualSchemaName) throws SQLException {
             final String qualifiedTableName = virtualSchemaName + "." + TABLE_ORACLE_ALL_DATA_TYPES;
             final String query = "SELECT c_number36 FROM " + qualifiedTableName;
-            assertExpressionExecutionBigDecimalResult(query, new BigDecimal("123456789012345678901234567890123456"));
-            assertThat(getColumnTypesOfTable(qualifiedTableName, "C_NUMBER36"), equalTo("DECIMAL(36,0)"));
+            assertAll(
+                    () -> assertExpressionExecutionBigDecimalResult(query,
+                            new BigDecimal("123456789012345678901234567890123456")),
+                    () -> assertThat(getColumnTypesOfTable(qualifiedTableName, "C_NUMBER36"),
+                            equalTo("DECIMAL(36,0)")));
         }
 
         @ParameterizedTest

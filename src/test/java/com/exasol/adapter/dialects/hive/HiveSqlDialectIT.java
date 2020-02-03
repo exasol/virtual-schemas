@@ -2,12 +2,16 @@ package com.exasol.adapter.dialects.hive;
 
 import static com.exasol.adapter.dialects.IntegrationTestConstants.*;
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.sql.*;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
@@ -18,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -56,12 +61,12 @@ class HiveSqlDialectIT {
     private static final String VIRTUAL_SCHEMA_HIVE_JDBC_NUMBER_TO_DECIMAL = "VIRTUAL_SCHEMA_HIVE_JDBC_NUMBER_TO_DECIMAL";
     @Container
     public static DockerComposeContainer hiveContainer = new DockerComposeContainer(new File(HIVE_DOCKER_COMPOSE_YAML)) //
-            .withExposedService(HIVE_SERVICE_NAME, HIVE_EXPOSED_PORT);
+            .withExposedService(HIVE_SERVICE_NAME, HIVE_EXPOSED_PORT,
+                    Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(50)));
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
                     .withLogConsumer(new Slf4jLogConsumer(LOGGER)); //
-//                    .withClusterLogsPath(Path.of("target/mylogs"));
     private static Statement statementExasol;
     private static final IntegrationTestSetupManager integrationTestSetupManager = new IntegrationTestSetupManager();
 
@@ -299,7 +304,7 @@ class HiveSqlDialectIT {
 
     @Test
     void testDataTypeMapping() throws SQLException {
-        final String expectedSchemaQualifiedTableName = SCHEMA_EXASOL + ".EXA_DBA_COLUMNS_EXPECTED";
+        final String expectedSchemaQualifiedTableName = SCHEMA_EXASOL + ".EXPECTED";
         statementExasol.execute("CREATE OR REPLACE TABLE " + expectedSchemaQualifiedTableName //
                 + "(COLUMN_NAME VARCHAR(128), " //
                 + "COLUMN_TYPE VARCHAR(40), " //
@@ -332,5 +337,316 @@ class HiveSqlDialectIT {
                         + "COLUMN_DEFAULT FROM EXA_DBA_COLUMNS WHERE COLUMN_SCHEMA = '" + VIRTUAL_SCHEMA_HIVE_JDBC
                         + "' AND COLUMN_TABLE='" + TABLE_HIVE_ALL_DATA_TYPES + "' ORDER BY COLUMN_ORDINAL_POSITION");
         assertThat(actual, matchesResultSet(expected));
+    }
+
+    @Test
+    void testSelectWithAllTypes() throws SQLException {
+        final String expectedSchemaQualifiedTableName = SCHEMA_EXASOL + ".EXPECTED";
+        statementExasol.execute("CREATE OR REPLACE TABLE " + expectedSchemaQualifiedTableName + //
+                "(arraycol VARCHAR(255) ASCII, " //
+                + "biginteger DECIMAL(19,0), " //
+                + "boolcolumn BOOLEAN, " //
+                + "charcolumn CHAR(1) ASCII, " //
+                + "decimalcol DECIMAL(10,0), " //
+                + "doublecol DOUBLE, " //
+                + "floatcol DOUBLE, " //
+                + "intcol DECIMAL(10,0), " //
+                + "mapcol VARCHAR(255) ASCII, " //
+                + "smallinteger DECIMAL(5,0), " //
+                + "stringcol VARCHAR(255) ASCII, " //
+                + "structcol VARCHAR(255) ASCII, " //
+                + "timestampcol TIMESTAMP, " //
+                + "tinyinteger DECIMAL(3,0), " //
+                + "varcharcol VARCHAR(10) ASCII, " //
+                + "binarycol VARCHAR(2000000) UTF8, " //
+                + "datecol DATE)");
+        statementExasol.execute("INSERT INTO " + expectedSchemaQualifiedTableName + " VALUES " //
+                + "('[\"etet\",\"ettee\"]', " //
+                + "56, " //
+                + "true, " //
+                + "2, " //
+                + "53, " //
+                + "56.3, " //
+                + "5.199999809265137, " //
+                + "85, " //
+                + "'{\"jkljj\":5}', " //
+                + "2, " //
+                + "'tshg', " //
+                + "'{\"a\":2,\"b\":4}', " //
+                + "'2017-01-02 13:32:50.744', " //
+                + "1, " //
+                + "'tytu', " //
+                + "'TVRBeE1BPT0=', " //
+                + "'1970-01-01' " //
+                + ")");
+        final ResultSet expected = statementExasol.executeQuery("SELECT * FROM " + expectedSchemaQualifiedTableName);
+        final ResultSet actual = statementExasol
+                .executeQuery("SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES);
+        assertThat(actual, matchesResultSet(expected));
+    }
+
+    @Test
+    void testProjection() {
+        final String qualifiedTableName = VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES;
+        final String query = "SELECT BIGINTEGER FROM " + qualifiedTableName;
+        assertAll(() -> assertExpressionExecutionBigDecimalResult(query, new BigDecimal("56")),
+                () -> assertExplainVirtual(query, "SELECT `" + TABLE_HIVE_ALL_DATA_TYPES + "`.`BIGINTEGER` FROM `"
+                        + SCHEMA_HIVE + "`.`" + TABLE_HIVE_ALL_DATA_TYPES + "`"));
+    }
+
+    private void assertExpressionExecutionBigDecimalResult(final String query, final BigDecimal expectedValue)
+            throws SQLException {
+        final ResultSet result = statementExasol.executeQuery(query);
+        result.next();
+        final BigDecimal actualResult = result.getBigDecimal(1);
+        assertThat(actualResult.stripTrailingZeros(), equalTo(expectedValue));
+    }
+
+    private void assertExplainVirtual(final String query, final String expected) throws SQLException {
+        final ResultSet explainVirtual = statementExasol.executeQuery("EXPLAIN VIRTUAL " + query);
+        explainVirtual.next();
+        final String explainVirtualStringActual = explainVirtual.getString("PUSHDOWN_SQL");
+        assertThat(explainVirtualStringActual, containsString(expected));
+    }
+
+    @Test
+    void testRewrittenProjection() {
+        final String qualifiedTableName = VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES;
+        final String query = "SELECT BINARYCOL FROM " + qualifiedTableName;
+        final String expectedExplainVirtual = "SELECT base64(`" + TABLE_HIVE_ALL_DATA_TYPES + "`.`BINARYCOL`) FROM `"
+                + SCHEMA_HIVE + "`.`" + TABLE_HIVE_ALL_DATA_TYPES;
+        assertAll(() -> assertExpressionExecutionStringResult(query, "TVRBeE1BPT0="),
+                () -> assertExplainVirtual(query, expectedExplainVirtual));
+    }
+
+    private void assertExpressionExecutionStringResult(final String query, final String expected) throws SQLException {
+        final ResultSet result = statementExasol.executeQuery(query);
+        result.next();
+        final String actual = result.getString(1);
+        MatcherAssert.assertThat(actual, containsString(expected));
+    }
+
+    @Test
+    void testAggregateGroupByColumn() throws SQLException {
+        final ResultSet expected = getExpectedResultSet("(boolcolumn BOOLEAN, biginteger DECIMAL(19,0))", "(true, 56)");
+        final String query = "SELECT boolcolumn, min(biginteger) FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "."
+                + TABLE_HIVE_ALL_DATA_TYPES + " GROUP BY boolcolumn";
+        final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BOOLCOLUMN`, " //
+                + "MIN(`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`) FROM `default`.`TABLE_HIVE_ALL_DATA_TYPES` " //
+                + "GROUP BY `TABLE_HIVE_ALL_DATA_TYPES`.`BOOLCOLUMN`";
+        assertAll(() -> assertThat(statementExasol.executeQuery(query), matchesResultSet(expected)),
+                () -> assertExplainVirtual(query, expectedExplainVirtual));
+
+    }
+
+    private ResultSet getExpectedResultSet(final String expectedColumnTypes, final String expectedValues)
+            throws SQLException {
+        final String qualifiedExpectedTableName = SCHEMA_EXASOL + "." + "EXPECTED";
+        statementExasol.execute("CREATE OR REPLACE TABLE " + qualifiedExpectedTableName + expectedColumnTypes);
+        statementExasol.execute("INSERT INTO " + qualifiedExpectedTableName + " VALUES" + expectedValues);
+        return statementExasol.executeQuery("SELECT * FROM " + qualifiedExpectedTableName);
+    }
+
+    @Test
+    void testAggregateHaving() throws SQLException {
+        final ResultSet expected = getExpectedResultSet("(boolcolumn BOOLEAN, biginteger DECIMAL(19,0))", "(true, 56)");
+        final String query = "SELECT boolcolumn, min(biginteger) FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "."
+                + TABLE_HIVE_ALL_DATA_TYPES + " GROUP BY boolcolumn HAVING MIN(biginteger)<57";
+        final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BOOLCOLUMN`, " //
+                + "MIN(`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`) FROM `default`.`TABLE_HIVE_ALL_DATA_TYPES` " //
+                + "GROUP BY `TABLE_HIVE_ALL_DATA_TYPES`.`BOOLCOLUMN` " //
+                + "HAVING MIN(`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`) < 57";
+        assertAll(() -> assertThat(statementExasol.executeQuery(query), matchesResultSet(expected)),
+                () -> assertExplainVirtual(query, expectedExplainVirtual));
+    }
+
+    @Test
+    // =, !=, <, <=, >, >=
+    void testComparisonPredicates() throws SQLException {
+        final ResultSet expected = getExpectedResultSet(
+                "(biginteger DECIMAL(19,0), b1 BOOLEAN, b2 BOOLEAN, b3 BOOLEAN, b4 BOOLEAN, b5 BOOLEAN, b6 BOOLEAN)",
+                "(56, false, true, true, true, false, false)");
+        final String query = "SELECT biginteger, biginteger=60, biginteger!=60, biginteger<60, biginteger<=60, biginteger>60, biginteger>=60 FROM "
+                + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES + " WHERE intcol = 85";
+        final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`, " //
+                + "`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` = 60, " //
+                + "`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` <> 60, " //
+                + "`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` < 60, " //
+                + "`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` <= 60, " //
+                + "60 < `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`, "
+                + "60 <= `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` FROM `default`.`TABLE_HIVE_ALL_DATA_TYPES` WHERE `TABLE_HIVE_ALL_DATA_TYPES`.`INTCOL` = 85";
+        assertAll(() -> assertThat(statementExasol.executeQuery(query), matchesResultSet(expected)),
+                () -> assertExplainVirtual(query, expectedExplainVirtual));
+
+    }
+
+    @Test
+    // NOT, AND, OR
+    void testLogicalPredicates() {
+        final String query = "SELECT biginteger FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES
+                + " WHERE (biginteger < 56 or biginteger > 56) AND NOT (biginteger is null)";
+        final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` " //
+                + "FROM `default`.`TABLE_HIVE_ALL_DATA_TYPES` "
+                + "WHERE ((`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` < 56 OR 56 < `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`) " //
+                + "AND NOT (`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` IS NULL))";
+        assertAll(() -> assertThat(statementExasol.executeQuery(query).next(), equalTo(false)),
+                () -> assertExplainVirtual(query, expectedExplainVirtual));
+    }
+
+    @Test
+    // LIKE, LIKE ESCAPE (not pushed down)
+    void testLikePredicates() throws SQLException {
+        final ResultSet expected = getExpectedResultSet("(varcharcol VARCHAR(10) ASCII, boolcolumn BOOLEAN)",
+                "('tytu', false)");
+        final String query = "SELECT varcharcol, varcharcol LIKE 't%' ESCAPE 't' FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "."
+                + TABLE_HIVE_ALL_DATA_TYPES + " WHERE (varcharcol LIKE 't%')";
+        final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`VARCHARCOL` " //
+                + "FROM `default`.`TABLE_HIVE_ALL_DATA_TYPES` WHERE `TABLE_HIVE_ALL_DATA_TYPES`.`VARCHARCOL` LIKE ''t%''";
+        assertAll(() -> assertThat(statementExasol.executeQuery(query), matchesResultSet(expected)),
+                () -> assertExplainVirtual(query, expectedExplainVirtual));
+    }
+
+    @Test
+    // REGEXP_LIKE rewritten to REGEXP
+    void testLikePredicatesRewritten() {
+        final String query = "SELECT varcharcol FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES
+                + " WHERE varcharcol REGEXP_LIKE 'a+'";
+        final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`VARCHARCOL` " //
+                + "FROM `default`.`TABLE_HIVE_ALL_DATA_TYPES` WHERE `TABLE_HIVE_ALL_DATA_TYPES`.`VARCHARCOL`REGEXP''a+''";
+        assertAll(() -> assertThat(statementExasol.executeQuery(query).next(), equalTo(false)),
+                () -> assertExplainVirtual(query, expectedExplainVirtual));
+    }
+
+    @Test
+    // BETWEEN, IN, IS NULL, !=NULL(rewritten to "IS NOT NULL")
+    void testMiscPredicates() throws SQLException {
+        final ResultSet expected = getExpectedResultSet(
+                "(biginteger DECIMAL(19,0), b1 BOOLEAN, b2 BOOLEAN, b3 BOOLEAN)", "(56, true, false, true)");
+        final String query = "SELECT biginteger,  biginteger in (56, 61), biginteger is null, biginteger != null FROM "
+                + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES + " WHERE biginteger between 51 and 60";
+        final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`, " //
+                + "`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` IN (56, 61), " //
+                + "`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` IS NULL, " //
+                + "`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` IS NOT NULL " //
+                + "FROM `default`.`TABLE_HIVE_ALL_DATA_TYPES` " //
+                + "WHERE `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` BETWEEN 51 AND 60";
+        assertAll(() -> assertThat(statementExasol.executeQuery(query), matchesResultSet(expected)),
+                () -> assertExplainVirtual(query, expectedExplainVirtual));
+    }
+
+    // This does not work with the current Hive version, since datatypes for the SUM
+    // columns dffer in the prepare and execute phases
+    void testCountSumAggregateFunction() throws SQLException {
+        final ResultSet expected = getExpectedResultSet(
+                "(a DECIMAL(19,0), b DECIMAL(19,0), c DECIMAL(19,0), d DECIMAL(19,0), e DECIMAL(19,0))",
+                "(1, 1, 1, 56, 56)");
+        final String query = "SELECT COUNT(biginteger), COUNT(*), COUNT(DISTINCT biginteger), SUM(biginteger), SUM(DISTINCT biginteger) FROM "
+                + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES;
+        final String expectedExplainVirtual = "SELECT COUNT(`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`), " //
+                + "COUNT(*), COUNT(DISTINCT `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`), " //
+                + "SUM(`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`), " //
+                + "SUM(DISTINCT `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`) FROM `default`.`TABLE_HIVE_ALL_DATA_TYPES`";
+        assertAll(() -> assertThat(statementExasol.executeQuery(query), matchesResultSet(expected)),
+                () -> assertExplainVirtual(query, expectedExplainVirtual));
+    }
+
+    @Test
+    void testAvgMinMaxAggregateFunction() throws SQLException {
+        final ResultSet expected = getExpectedResultSet("(a DOUBLE, b DECIMAL(19,0), c DECIMAL(19,0))",
+                "(56.0, 56, 56)");
+        final String query = "SELECT AVG(biginteger), MIN(biginteger), MAX(biginteger) FROM " + VIRTUAL_SCHEMA_HIVE_JDBC
+                + "." + TABLE_HIVE_ALL_DATA_TYPES;
+        final String expectedExplainVirtual = "SELECT AVG(`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`), " //
+                + "MIN(`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`), " //
+                + "MAX(`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`) FROM `default`.`TABLE_HIVE_ALL_DATA_TYPES`";
+        assertAll(() -> assertThat(statementExasol.executeQuery(query), matchesResultSet(expected)),
+                () -> assertExplainVirtual(query, expectedExplainVirtual));
+    }
+
+    @Test
+    void testCastedStringFunctions() {
+        final String qualifiedTableName = VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES;
+        final String query = "SELECT concat(upper(varcharcol),lower(repeat(varcharcol,2))) FROM " + qualifiedTableName;
+        final String expectedExplainVirtual = "SELECT CAST(CONCAT(CAST(UPPER(`TABLE_HIVE_ALL_DATA_TYPES`.`VARCHARCOL`) " //
+                + "as string),CAST(LOWER(CAST(REPEAT(`TABLE_HIVE_ALL_DATA_TYPES`.`VARCHARCOL`,2) "
+                + "as string)) as string)) as string) FROM `default`.`TABLE_HIVE_ALL_DATA_TYPES`";
+        assertAll(() -> assertExpressionExecutionStringResult(query, "TYTUtytutytu"),
+                () -> assertExplainVirtual(query, expectedExplainVirtual));
+    }
+
+    @Test
+    void testRewrittenDivAndModFunctions() throws SQLException {
+        final ResultSet expected = getExpectedResultSet("(a DECIMAL(19,0), b DECIMAL(19,0))", "(1, 0)");
+        final String query = "SELECT DIV(biginteger,biginteger), mod(biginteger,biginteger) FROM "
+                + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES;
+        final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` DIV `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`, " //
+                + "`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` % `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` " //
+                + "FROM `default`.`TABLE_HIVE_ALL_DATA_TYPES`";
+        assertAll(() -> assertThat(statementExasol.executeQuery(query), matchesResultSet(expected)),
+                () -> assertExplainVirtual(query, expectedExplainVirtual));
+    }
+
+    @Test
+    void testRewrittenSubStringFunction() {
+        final String qualifiedTableName = VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES;
+        final String query = "SELECT substring(stringcol FROM 1 FOR 2) FROM " + qualifiedTableName;
+        final String expectedExplainVirtual = "SELECT SUBSTR(`TABLE_HIVE_ALL_DATA_TYPES`.`STRINGCOL`, 1, 2) " //
+                + "FROM `default`.`TABLE_HIVE_ALL_DATA_TYPES";
+        assertAll(() -> assertExpressionExecutionStringResult(query, "ts"),
+                () -> assertExplainVirtual(query, expectedExplainVirtual));
+    }
+
+    @Test
+    public void testOrderByLimit() throws SQLException {
+        final ResultSet expected = getExpectedResultSet("(boolcolumn BOOLEAN, biginteger DECIMAL(19,0))", "(true, 56)");
+        final String query = "SELECT  boolcolumn, biginteger FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "."
+                + TABLE_HIVE_ALL_DATA_TYPES + " ORDER BY biginteger LIMIT 3";
+        final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`, " //
+                + "`TABLE_HIVE_ALL_DATA_TYPES`.`BOOLCOLUMN` " //
+                + "FROM `default`.`TABLE_HIVE_ALL_DATA_TYPES` " //
+                + "ORDER BY `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` NULLS LAST LIMIT 3";
+        assertAll(() -> assertThat(statementExasol.executeQuery(query), matchesResultSet(expected)),
+                () -> assertExplainVirtual(query, expectedExplainVirtual));
+    }
+
+    @Test
+    public void testOrderByLimitOffset() throws SQLException {
+        final ResultSet expected = getExpectedResultSet("(boolcolumn BOOLEAN, biginteger DECIMAL(19,0))", "(true, 56)");
+        final String query = "SELECT  boolcolumn, biginteger FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "."
+                + TABLE_HIVE_ALL_DATA_TYPES + " ORDER BY biginteger LIMIT 2 OFFSET 1";
+        final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`, " //
+                + "`TABLE_HIVE_ALL_DATA_TYPES`.`BOOLCOLUMN` " //
+                + "FROM `default`.`TABLE_HIVE_ALL_DATA_TYPES` " //
+                + "ORDER BY `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` NULLS LAST";
+        assertAll(() -> assertThat(statementExasol.executeQuery(query), matchesResultSet(expected)),
+                () -> assertExplainVirtual(query, expectedExplainVirtual));
+    }
+
+    @Test
+    void testNumberBeyondExasolPrecisionMaxValueToDecimalColumnTypes() throws SQLException {
+        final String expectedSchemaQualifiedTableName = SCHEMA_EXASOL + ".EXPECTED";
+        statementExasol.execute("CREATE OR REPLACE TABLE " + expectedSchemaQualifiedTableName //
+                + "(COLUMN_NAME VARCHAR(128), " //
+                + "COLUMN_TYPE VARCHAR(40))");
+        statementExasol.execute("INSERT INTO " + expectedSchemaQualifiedTableName + " VALUES " //
+                + "('DECIMAL_COL1', 'DECIMAL(12,6)'), " //
+                + "('DECIMAL_COL2', 'DECIMAL(36,16)'), " //
+                + "('DECIMAL_COL3', 'DECIMAL(36,2)') " //
+        );
+        final ResultSet expected = statementExasol.executeQuery("SELECT * FROM " + expectedSchemaQualifiedTableName);
+        final ResultSet actual = statementExasol
+                .executeQuery("SELECT COLUMN_NAME, COLUMN_TYPE FROM EXA_DBA_COLUMNS WHERE COLUMN_SCHEMA = '" //
+                        + VIRTUAL_SCHEMA_HIVE_JDBC_NUMBER_TO_DECIMAL + "' AND COLUMN_TABLE='" //
+                        + TABLE_HIVE_DECIMAL_CAST + "' ORDER BY COLUMN_ORDINAL_POSITION");
+        assertThat(actual, matchesResultSet(expected));
+    }
+
+    @Test
+    void testNumberBeyondExasolPrecisionMaxValueToDecimal() throws SQLException {
+        final ResultSet expected = getExpectedResultSet("(a DECIMAL(12,6), b DECIMAL(36,16), c DECIMAL(36,2))", //
+                "(123456.123457, 123456789.0111111111111110, 1234444444444444444.55)");
+        final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC_NUMBER_TO_DECIMAL + "."
+                + TABLE_HIVE_DECIMAL_CAST;
+        assertThat(statementExasol.executeQuery(query), matchesResultSet(expected));
     }
 }
