@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.bigquery;
 
+import java.math.BigInteger;
 import java.sql.*;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -55,7 +56,6 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
             }
             if (rowNumber == 0) {
                 builder.append(" (1) WHERE false");
-                return builder.toString();
             }
         }
         return builder.toString();
@@ -114,8 +114,8 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
 
     private void appendBigInt(final StringBuilder builder, final ResultSet resultSet, final String columnName)
             throws SQLException {
-        final int value = resultSet.getInt(columnName);
-        builder.append(resultSet.wasNull() ? LITERAL_NULL : value);
+        final String string = resultSet.getString(columnName);
+        builder.append(resultSet.wasNull() ? LITERAL_NULL : new BigInteger(string));
     }
 
     private void appendNumeric(final StringBuilder builder, final ResultSet resultSet, final String columnName)

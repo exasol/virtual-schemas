@@ -64,7 +64,7 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
     @Test
     void testRewriteWithBigInt() throws AdapterException, SQLException {
         when(this.mockResultSetMetaData.getColumnName(1)).thenReturn("bigInt");
-        when(this.mockResultSet.getInt("bigInt")).thenReturn(1);
+        when(this.mockResultSet.getString("bigInt")).thenReturn("1");
         when(this.mockResultSetMetaData.getColumnType(1)).thenReturn(Types.BIGINT);
         when(this.mockResultSetMetaData.getColumnCount()).thenReturn(1);
         when(this.mockResultSet.next()).thenReturn(true, false);
@@ -116,8 +116,8 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
     @CsvSource({ "string, 12, hello, hello", //
           "string, 12, i'm, i''m"})
     @ParameterizedTest
-    void testRewriteWithStringValues(final String columnName, final int type, final String columnValue, final String resultValue)
-          throws AdapterException, SQLException {
+    void testRewriteWithStringValues(final String columnName, final int type, final String columnValue,
+            final String resultValue) throws AdapterException, SQLException {
         when(this.mockResultSetMetaData.getColumnName(1)).thenReturn(columnName);
         when(this.mockResultSet.getString(columnName)).thenReturn(columnValue);
         when(this.mockResultSetMetaData.getColumnType(1)).thenReturn(type);
@@ -170,9 +170,12 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
     @Test
     void testRewriteWithJdbcConnectionWithThreeRows() throws AdapterException, SQLException {
         when(this.mockResultSet.next()).thenReturn(true, true, true, false);
-        when(this.mockResultSet.getInt(any())).thenReturn(1, 2, 3);
-        when(this.mockResultSet.getString(any())).thenReturn("foo", "bar", "cat");
-        when(this.mockResultSet.getBoolean(any())).thenReturn(true, false, true);
+        when(this.mockResultSetMetaData.getColumnName(1)).thenReturn("bigInt");
+        when(this.mockResultSetMetaData.getColumnName(2)).thenReturn("varchar");
+        when(this.mockResultSetMetaData.getColumnName(3)).thenReturn("boolean");
+        when(this.mockResultSet.getString("bigInt")).thenReturn("1", "2", "3");
+        when(this.mockResultSet.getString("varchar")).thenReturn("foo", "bar", "cat");
+        when(this.mockResultSet.getBoolean("boolean")).thenReturn(true, false, true);
         when(this.mockResultSetMetaData.getColumnType(1)).thenReturn(Types.BIGINT);
         when(this.mockResultSetMetaData.getColumnType(2)).thenReturn(Types.VARCHAR);
         when(this.mockResultSetMetaData.getColumnType(3)).thenReturn(Types.BOOLEAN);
@@ -203,7 +206,7 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
 
     @Test
     void testRewriteBigIntWithValueNull() throws AdapterException, SQLException {
-        when(this.mockResultSet.getInt(any())).thenReturn(0);
+        when(this.mockResultSet.getString(any())).thenReturn("0");
         mockOneRowWithOneColumnOfType(Types.BIGINT);
         assertNullValueUsedInSelect();
     }
