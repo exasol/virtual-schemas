@@ -14,7 +14,6 @@ import org.mockito.Mock;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
 import com.exasol.adapter.jdbc.BaseTableMetadataReader;
 
 class BigQueryMetadataReaderTest {
@@ -34,7 +33,7 @@ class BigQueryMetadataReaderTest {
 
     @Test
     void testGetColumnMetadataReader() {
-        assertThat(this.reader.getColumnMetadataReader(), instanceOf(BaseColumnMetadataReader.class));
+        assertThat(this.reader.getColumnMetadataReader(), instanceOf(BigQueryColumnMetadataReader.class));
     }
 
     @Test
