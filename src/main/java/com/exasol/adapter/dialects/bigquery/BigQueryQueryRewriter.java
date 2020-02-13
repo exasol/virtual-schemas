@@ -2,6 +2,7 @@ package com.exasol.adapter.dialects.bigquery;
 
 import java.math.BigInteger;
 import java.sql.*;
+import java.util.StringJoiner;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,22 +40,22 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
     @Override
     public String rewrite(final SqlStatement statement, final ExaMetadata exaMetadata,
             final AdapterProperties properties) throws AdapterException, SQLException {
-        final StringBuilder builder = new StringBuilder();
         final String query = getQueryFromStatement(statement, properties);
         LOGGER.fine(() -> "Query to rewrite: " + query);
+        final StringBuilder builder = new StringBuilder();
         try (final ResultSet resultSet = this.connection.createStatement().executeQuery(query)) {
             builder.append("SELECT * FROM VALUES");
             int rowNumber = 0;
+            final ResultSetMetaData metaData = resultSet.getMetaData();
             while (resultSet.next()) {
                 if (rowNumber > 0) {
                     builder.append(",");
                 }
-                final ResultSetMetaData metaData = resultSet.getMetaData();
                 appendRow(builder, resultSet, metaData);
                 ++rowNumber;
             }
             if (rowNumber == 0) {
-                builder.append(" (1) WHERE false");
+                appendQueryForEmptyTable(builder, metaData);
             }
         }
         return builder.toString();
@@ -65,6 +66,18 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
         final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
                 properties.getSchemaName(), false);
         return statement.accept(this.dialect.getSqlGenerationVisitor(context));
+    }
+
+    private void appendQueryForEmptyTable(final StringBuilder builder, final ResultSetMetaData metaData)
+            throws SQLException {
+        final int columnCounter = metaData.getColumnCount();
+        builder.append("(");
+        final StringJoiner joiner = new StringJoiner(", ");
+        for (int i = 0; i < columnCounter; i++) {
+            joiner.add("1");
+        }
+        builder.append(joiner.toString());
+        builder.append(") WHERE false");
     }
 
     private void appendRow(final StringBuilder builder, final ResultSet resultSet,
@@ -156,7 +169,7 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
             return String.format("%02d.%02d.%04d", day, month, year);
         } else {
             throw new IllegalArgumentException(
-                    "Date does not match required format: YYYY-[M]M-[D]D. Actual " + dateToCast);
+                    "Date does not match required format: YYYY-[M]M-[D]D. Actual value was:" + dateToCast);
         }
     }
 

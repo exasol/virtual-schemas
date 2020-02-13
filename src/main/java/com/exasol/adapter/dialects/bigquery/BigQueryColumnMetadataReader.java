@@ -27,11 +27,9 @@ public class BigQueryColumnMetadataReader extends BaseColumnMetadataReader {
 
     @Override
     public DataType mapJdbcType(final JdbcTypeDescription jdbcTypeDescription) {
-        switch (jdbcTypeDescription.getJdbcType()) {
-        case Types.TIME:
+        if (jdbcTypeDescription.getJdbcType() == Types.TIME) {
             return DataType.createVarChar(16, DataType.ExaCharset.UTF8);
-        default:
-            return super.mapJdbcType(jdbcTypeDescription);
         }
+        return super.mapJdbcType(jdbcTypeDescription);
     }
 }
