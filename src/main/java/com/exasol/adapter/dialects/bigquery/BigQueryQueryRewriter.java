@@ -1,6 +1,8 @@
 package com.exasol.adapter.dialects.bigquery;
 
+import java.math.BigInteger;
 import java.sql.*;
+import java.util.StringJoiner;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,7 +18,6 @@ import com.exasol.adapter.sql.SqlStatement;
  * This class implements a BigQuery-specific query rewriter.
  */
 public class BigQueryQueryRewriter extends BaseQueryRewriter {
-    private static final String LITERAL_NULL = "NULL";
     private static final Logger LOGGER = Logger.getLogger(BigQueryQueryRewriter.class.getName());
     private static final double[] TEN_POWERS = { 10d, 100d, 1000d, 10000d, 100000d, 1000000d };
     @SuppressWarnings("squid:S4784") // this pattern is secure
@@ -39,23 +40,22 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
     @Override
     public String rewrite(final SqlStatement statement, final ExaMetadata exaMetadata,
             final AdapterProperties properties) throws AdapterException, SQLException {
-        final StringBuilder builder = new StringBuilder();
         final String query = getQueryFromStatement(statement, properties);
         LOGGER.fine(() -> "Query to rewrite: " + query);
+        final StringBuilder builder = new StringBuilder();
         try (final ResultSet resultSet = this.connection.createStatement().executeQuery(query)) {
             builder.append("SELECT * FROM VALUES");
             int rowNumber = 0;
+            final ResultSetMetaData metaData = resultSet.getMetaData();
             while (resultSet.next()) {
                 if (rowNumber > 0) {
                     builder.append(",");
                 }
-                final ResultSetMetaData metaData = resultSet.getMetaData();
                 appendRow(builder, resultSet, metaData);
                 ++rowNumber;
             }
             if (rowNumber == 0) {
-                builder.append(" (1) WHERE false");
-                return builder.toString();
+                appendQueryForEmptyTable(builder, metaData);
             }
         }
         return builder.toString();
@@ -66,6 +66,18 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
         final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
                 properties.getSchemaName(), false);
         return statement.accept(this.dialect.getSqlGenerationVisitor(context));
+    }
+
+    private void appendQueryForEmptyTable(final StringBuilder builder, final ResultSetMetaData metaData)
+            throws SQLException {
+        final int columnCounter = metaData.getColumnCount();
+        builder.append("(");
+        final StringJoiner joiner = new StringJoiner(", ");
+        for (int i = 0; i < columnCounter; i++) {
+            joiner.add("1");
+        }
+        builder.append(joiner.toString());
+        builder.append(") WHERE false");
     }
 
     private void appendRow(final StringBuilder builder, final ResultSet resultSet,
@@ -88,9 +100,8 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
         case Types.BIGINT:
             appendBigInt(builder, resultSet, columnName);
             break;
-        case Types.NUMERIC:
         case Types.DOUBLE:
-            appendNumeric(builder, resultSet, columnName);
+            appendDouble(builder, resultSet, columnName);
             break;
         case Types.BOOLEAN:
             appendBoolean(builder, resultSet, columnName);
@@ -102,39 +113,46 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
             appendTimestamp(builder, resultSet, columnName);
             break;
         case Types.VARCHAR:
-            builder.append(this.dialect.getStringLiteral(resultSet.getString(columnName)));
+            appendVarchar(builder, resultSet, columnName);
             break;
         case Types.TIME:
         case Types.VARBINARY:
+        case Types.NUMERIC:
         default:
             appendString(builder, resultSet, columnName);
             break;
         }
     }
 
-    private void appendBigInt(final StringBuilder builder, final ResultSet resultSet, final String columnName)
+    private void appendVarchar(final StringBuilder builder, final ResultSet resultSet, final String columnName)
             throws SQLException {
-        final int value = resultSet.getInt(columnName);
-        builder.append(resultSet.wasNull() ? LITERAL_NULL : value);
+        final String stringLiteral = this.dialect.getStringLiteral(resultSet.getString(columnName));
+        builder.append(resultSet.wasNull() ? "CAST (NULL AS VARCHAR(4))" : stringLiteral);
     }
 
-    private void appendNumeric(final StringBuilder builder, final ResultSet resultSet, final String columnName)
+    private void appendBigInt(final StringBuilder builder, final ResultSet resultSet, final String columnName)
+            throws SQLException {
+        final String string = resultSet.getString(columnName);
+        builder.append(resultSet.wasNull() ? "CAST (NULL AS DECIMAL(19,0))" : new BigInteger(string));
+    }
+
+    private void appendDouble(final StringBuilder builder, final ResultSet resultSet, final String columnName)
             throws SQLException {
         final double value = resultSet.getDouble(columnName);
-        builder.append(resultSet.wasNull() ? LITERAL_NULL : value);
+        builder.append(resultSet.wasNull() ? "CAST (NULL AS DOUBLE)" : value);
     }
 
     private void appendBoolean(final StringBuilder builder, final ResultSet resultSet, final String columnName)
             throws SQLException {
         final boolean value = resultSet.getBoolean(columnName);
-        builder.append(resultSet.wasNull() ? LITERAL_NULL : value);
+        builder.append(resultSet.wasNull() ? "CAST (NULL AS BOOLEAN)" : value);
     }
 
     private void appendDate(final StringBuilder builder, final ResultSet resultSet, final String columnName)
             throws SQLException {
         final String value = resultSet.getString(columnName);
         if (value == null) {
-            builder.append(LITERAL_NULL);
+            builder.append("CAST (NULL AS VARCHAR(4))");
         } else {
             builder.append("'");
             builder.append(castDate(value));
@@ -143,18 +161,15 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
     }
 
     private String castDate(final String dateToCast) {
-        if (dateToCast != null) {
-            final Matcher matcher = DATE_PATTERN.matcher(dateToCast);
-            if (matcher.matches()) {
-                final int year = Integer.parseInt(matcher.group(1));
-                final int month = Integer.parseInt(matcher.group(2));
-                final int day = Integer.parseInt(matcher.group(3));
-                return String.format("%02d.%02d.%04d", day, month, year);
-            } else {
-                throw new IllegalArgumentException("Date does not match required format: YYYY-[M]M-[D]D");
-            }
+        final Matcher matcher = DATE_PATTERN.matcher(dateToCast);
+        if (matcher.matches()) {
+            final int year = Integer.parseInt(matcher.group(1));
+            final int month = Integer.parseInt(matcher.group(2));
+            final int day = Integer.parseInt(matcher.group(3));
+            return String.format("%02d.%02d.%04d", day, month, year);
         } else {
-            return null;
+            throw new IllegalArgumentException(
+                    "Date does not match required format: YYYY-[M]M-[D]D. Actual value was:" + dateToCast);
         }
     }
 
@@ -162,7 +177,7 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
             throws SQLException {
         final String value = resultSet.getString(columnName);
         if (value == null) {
-            builder.append(LITERAL_NULL);
+            builder.append("CAST (NULL AS VARCHAR(4))");
         } else {
             builder.append("'");
             builder.append(castTimestamp(value));
@@ -171,15 +186,12 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
     }
 
     private String castTimestamp(final String timestampToCast) {
-        if (timestampToCast != null) {
-            final StringBuilder builder = new StringBuilder();
-            final String[] splitTimestamp = getSplitTimestamp(timestampToCast);
-            builder.append(castDate(splitTimestamp[0]));
-            builder.append(" ");
-            builder.append(castTime(splitTimestamp[1]));
-            return builder.toString();
-        }
-        return null;
+        final StringBuilder builder = new StringBuilder();
+        final String[] splitTimestamp = getSplitTimestamp(timestampToCast);
+        builder.append(castDate(splitTimestamp[0]));
+        builder.append(" ");
+        builder.append(castTime(splitTimestamp[1]));
+        return builder.toString();
     }
 
     private String[] getSplitTimestamp(final String timestampToCast) {
@@ -214,7 +226,7 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
             throws SQLException {
         final String value = resultSet.getString(columnName);
         if (value == null) {
-            builder.append(LITERAL_NULL);
+            builder.append("CAST (NULL AS VARCHAR(4))");
         } else {
             builder.append("'");
             builder.append(value);
