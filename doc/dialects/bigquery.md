@@ -31,7 +31,7 @@ Please remember to check the versions of your JAR files after downloading driver
 ```sql
 CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_BIGQUERY AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-3.0.2.jar;
+    %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-3.1.0.jar;
     %jar /buckets/<BFS service>/<bucket>/avro-1.8.2.jar;
     %jar /buckets/<BFS service>/<bucket>/gax-1.42.0.jar;
     %jar /buckets/<BFS service>/<bucket>/google-api-client-1.28.0.jar;
@@ -101,6 +101,12 @@ If you need to use currently unsupported data types or find a way around known l
 ## Performance
 
 Please be aware that the current implementation of the dialect can only handle result sets with limited size (a few thousand rows).
+If you need to proceed a large amount of data, please, contact our support team. Another implementation of the dialect with a speed improvement(using IMPORT INTO) is available, but not documented and announced officially on our GitHub due to: 
+
+1. the complex installation process
+2. security risks (a user has to disable the drivers' security manager to use it)
+
+Please, try to avoid using IMPORT implementation if it is possible. Be aware of the security risks. 
 
 ## Testing information
 

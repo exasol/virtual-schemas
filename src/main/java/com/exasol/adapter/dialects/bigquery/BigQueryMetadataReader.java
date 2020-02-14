@@ -41,7 +41,7 @@ public class BigQueryMetadataReader extends AbstractRemoteMetadataReader {
 
     @Override
     protected IdentifierConverter createIdentifierConverter() {
-        return new BaseIdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_UPPER,
+        return new BaseIdentifierConverter(IdentifierCaseHandling.INTERPRET_AS_LOWER,
                 IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE);
     }
 }

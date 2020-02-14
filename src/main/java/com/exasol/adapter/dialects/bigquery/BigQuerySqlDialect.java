@@ -6,9 +6,11 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static com.exasol.adapter.dialects.bigquery.BigQueryProperties.BIGQUERY_ENABLE_IMPORT_PROPERTY;
 
 import java.sql.Connection;
 import java.util.*;
+import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
@@ -23,12 +25,13 @@ import com.exasol.adapter.sql.ScalarFunction;
  * @see <a href="https://cloud.google.com/bigquery/">BigQuery</a>
  */
 public class BigQuerySqlDialect extends AbstractSqlDialect {
+    private static final Logger LOGGER = Logger.getLogger(BigQuerySqlDialect.class.getName());
     static final String NAME = "BIGQUERY";
     private static final Capabilities CAPABILITIES = createCapabilityList();
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
-            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
+            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY, BIGQUERY_ENABLE_IMPORT_PROPERTY);
 
     /**
      * Create a new instance of the {@link BigQuerySqlDialect}.
@@ -48,7 +51,14 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
 
     @Override
     protected QueryRewriter createQueryRewriter() {
-        return new BigQueryQueryRewriter(this, this.remoteMetadataReader, this.connection);
+        if (this.properties.containsKey(BIGQUERY_ENABLE_IMPORT_PROPERTY)
+                && "true".equalsIgnoreCase(this.properties.get(BIGQUERY_ENABLE_IMPORT_PROPERTY))) {
+            LOGGER.info("Attention, IMPORT was activated for BIGQUERY dialect. "
+                    + "Please, be aware that it is not secured to use IMPORT with this dialect.");
+            return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
+        } else {
+            return new BigQueryQueryRewriter(this, this.remoteMetadataReader, this.connection);
+        }
     }
 
     @Override
@@ -135,7 +145,8 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    public SqlGenerationVisitor getSqlGenerationVisitor(final SqlGenerationContext context) {
-        return new BigQuerySqlGenerationVisitor(this, context);
+    public void validateProperties() throws PropertyValidationException {
+        super.validateProperties();
+        validateBooleanProperty(BIGQUERY_ENABLE_IMPORT_PROPERTY);
     }
 }
