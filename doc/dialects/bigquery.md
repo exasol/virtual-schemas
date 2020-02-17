@@ -28,7 +28,7 @@ CREATE SCHEMA SCHEMA_FOR_VS_SCRIPT;
 
 The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
 
-List all the jars from Magnitude Simba JDBC driver.
+List all the JAR files from Magnitude Simba JDBC driver.
 
 ```sql
 CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_BIGQUERY AS
@@ -98,7 +98,7 @@ If you need to use currently unsupported data types or find a way around known l
 ## Performance
 
 Please be aware that the current implementation of the dialect can only handle result sets with limited size (a few thousand rows).
-If you need to proceed a large amount of data, please, contact our support team. Another implementation of the dialect with a speed improvement(using IMPORT INTO) is available, but not documented and announced officially on our GitHub due to: 
+If you need to process a large amount of data, please contact our support team. Another implementation of the dialect with a performance improvement (using `IMPORT INTO`) is available, but not documented for self-service because of 
 
 1. the complex installation process
 2. security risks (a user has to disable the drivers' security manager to use it)
