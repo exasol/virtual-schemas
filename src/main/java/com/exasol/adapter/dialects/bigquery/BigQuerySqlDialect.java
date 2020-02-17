@@ -54,7 +54,7 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
         if (this.properties.containsKey(BIGQUERY_ENABLE_IMPORT_PROPERTY)
                 && "true".equalsIgnoreCase(this.properties.get(BIGQUERY_ENABLE_IMPORT_PROPERTY))) {
             LOGGER.warning("Attention: IMPORT is activated for the BIGQUERY dialect. "
-                    + "Please be aware that it using IMPORT with this dialect requires disabling important security features and is therefore not recommended!");
+                    + "Please be aware that using IMPORT with this dialect requires disabling important security features and is therefore not recommended!");
             return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
         } else {
             return new BigQueryQueryRewriter(this, this.remoteMetadataReader, this.connection);

@@ -70,7 +70,6 @@ This is an open source project which is officially supported by Exasol. For any 
 ## Information for Users
 
 * [User Guide](doc/user-guide/user_guide.md)
-* [Deployment Guide](doc/user-guide/deploying_the_virtual_schema_adapter.md) 
 
 Supported dialects:
 

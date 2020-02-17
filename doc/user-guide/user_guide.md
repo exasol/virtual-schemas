@@ -5,8 +5,6 @@ The purpose of this page is to provide detailed instructions for each of the sup
 * How does the **CREATE VIRTUAL SCHEMA** statement look like, i.e. which properties are required.
 * **Data source specific notes**, like authentication with Kerberos, supported capabilities or things to consider regarding the data type mapping.
 
-As an entry point we recommend you follow the [step-by-step deployment guide](deploying_the_virtual_schema_adapter.md) which will link to this page whenever needed.
-
 ## Before you Start
 
 Please note that the syntax for creating adapter scripts is not recognized by all SQL clients. 
@@ -55,10 +53,44 @@ Please note that the syntax for creating adapter scripts is not recognized by al
 
 ## Getting Started
 
+This page contains common information applicable to all the dialects. You can also check more [detailed guides for each dialect](#list-of-supported-dialects) in the dialects' documentation.
+
 Before you can start using the JDBC adapter for virtual schemas you have to deploy the adapter and the JDBC driver of your data source in your Exasol database.
-Please follow the [step-by-step deployment guide](deploying_the_virtual_schema_adapter.md).
+
+## Deploying JDBC Driver Files
+
+You have to upload the JDBC driver files of your remote database **twice** (except the BigQuery dialect):
+
+* Upload all files of the JDBC driver into a bucket of your choice, so that they can be accessed from the adapter script.
+  
+* Upload all files of the JDBC driver as a JDBC driver in EXAOperation
+  - In EXAOperation go to Software -> JDBC Drivers
+  - Add the JDBC driver by specifying the JDBC main class and the prefix of the JDBC connection string
+  - Upload all files (one by one) to the specific JDBC to the newly added JDBC driver.
+
+Note that some JDBC drivers consist of several files and that you have to upload all of them. 
+To find out which JAR you need, check the individual dialects' documentation pages.
+
+## Deploying the Adapter Script
+
+Create a schema to hold the adapter script.
+
+```sql
+CREATE SCHEMA SCHEMA_FOR_VS_SCRIPT;
+```
+
+The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
+
+```sql
+CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.JDBC_ADAPTER_SCRIPT AS
+  %scriptclass com.exasol.adapter.RequestDispatcher;
+  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-3.1.0.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/<JDBC driver>.jar;
+/
+```
 
 ## Using the Adapter
+
 The following statements demonstrate how you can use virtual schemas with the JDBC adapter to connect to a Hive system. 
 Please scroll down to see a list of all properties supported by the JDBC adapter.
 
@@ -66,18 +98,18 @@ First we create a virtual schema using the JDBC adapter. The adapter will retrie
 The metadata (virtual tables, columns and data types) are then cached in Exasol.
 
 ```sql
-CREATE CONNECTION hive_conn TO 'jdbc:hive2://localhost:10000/default' USER 'hive-usr' IDENTIFIED BY 'hive-pwd';
+CREATE CONNECTION JDBC_CONNECTION_HIVE TO 'jdbc:hive2://localhost:10000/default' USER 'hive-usr' IDENTIFIED BY 'hive-pwd';
 
-CREATE VIRTUAL SCHEMA hive USING adapter.jdbc_adapter WITH
+CREATE VIRTUAL SCHEMA VIRTUAL_SCHEMA_HIVE USING SCHEMA_FOR_VS_SCRIPT.JDBC_ADAPTER_SCRIPT WITH
   SQL_DIALECT     = 'HIVE'
-  CONNECTION_NAME = 'HIVE_CONN'
+  CONNECTION_NAME = 'JDBC_CONNECTION_HIVE'
   SCHEMA_NAME     = 'default';
 ```
 
 We can now explore the tables in the virtual schema, just like for a regular schema:
 
 ```sql
-OPEN SCHEMA hive;
+OPEN SCHEMA VIRTUAL_SCHEMA_HIVE;
 SELECT * FROM cat;
 DESCRIBE clicks;
 ```
@@ -102,30 +134,31 @@ SELECT * from clicks JOIN native_schema.users on clicks.userid = users.id;
 You can refresh the schemas metadata, e.g. if tables were added in the remote system:
 
 ```sql
-ALTER VIRTUAL SCHEMA hive REFRESH;
-ALTER VIRTUAL SCHEMA hive REFRESH TABLES t1 t2; -- refresh only these tables
+ALTER VIRTUAL SCHEMA VIRTUAL_SCHEMA_HIVE REFRESH;
+ALTER VIRTUAL SCHEMA VIRTUAL_SCHEMA_HIVE REFRESH TABLES t1 t2; -- refresh only these tables
 ```
 
 Or set properties. Depending on the adapter and the property you set this might update the metadata or not. 
 In our example the metadata are affected, because afterwards the virtual schema will only expose two virtual tables.
 
 ```sql
-ALTER VIRTUAL SCHEMA hive SET TABLE_FILTER='CUSTOMERS, CLICKS';
+ALTER VIRTUAL SCHEMA VIRTUAL_SCHEMA_HIVE SET TABLE_FILTER='CUSTOMERS, CLICKS';
 ```
 
 Finally you can unset properties:
 
 ```sql
-ALTER VIRTUAL SCHEMA hive SET TABLE_FILTER=null;
+ALTER VIRTUAL SCHEMA VIRTUAL_SCHEMA_HIVE SET TABLE_FILTER=null;
 ```
 
 Or drop the virtual schema:
 
 ```sql
-DROP VIRTUAL SCHEMA hive CASCADE;
+DROP VIRTUAL SCHEMA VIRTUAL_SCHEMA_HIVE CASCADE;
 ```
 
 ### Adapter Properties
+
 The following properties can be used to control the behavior of the JDBC adapter. 
 As you see above, these properties can be defined in `CREATE VIRTUAL SCHEMA` or changed afterwards via `ALTER VIRTUAL SCHEMA SET`. 
 Note that properties are always strings, like `TABLE_FILTER='T1,T2'`.
