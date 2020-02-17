@@ -103,8 +103,6 @@ If you need to proceed a large amount of data, please, contact our support team.
 1. the complex installation process
 2. security risks (a user has to disable the drivers' security manager to use it)
 
-Please, try to avoid using IMPORT implementation if it is possible. Be aware of the security risks. 
-
 ## Testing information
 
 In the following matrix you find combinations of JDBC driver and dialect version that we tested.
