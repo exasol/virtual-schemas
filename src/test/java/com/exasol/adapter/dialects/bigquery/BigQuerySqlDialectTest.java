@@ -7,10 +7,12 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.adapter.dialects.bigquery.BigQueryProperties.BIGQUERY_ENABLE_IMPORT_PROPERTY;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,8 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.BaseQueryRewriter;
-import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
@@ -136,10 +137,24 @@ class BigQuerySqlDialectTest {
 
     @Test
     void testCreateQueryRewriterBaseQueryRewriter() {
-        Map<String, String> properties = new HashMap<>();
+        final Map<String, String> properties = new HashMap<>();
         properties.put(BIGQUERY_ENABLE_IMPORT_PROPERTY, "TRUE");
-        AdapterProperties adapterProperties = new AdapterProperties(properties);
+        final AdapterProperties adapterProperties = new AdapterProperties(properties);
         final BigQuerySqlDialect dialect = new BigQuerySqlDialect(null, adapterProperties);
         assertThat(dialect.createQueryRewriter(), instanceOf(BaseQueryRewriter.class));
+    }
+
+    @Test
+    void testValidateProperties() {
+        final Map<String, String> properties = new HashMap<>();
+        properties.put(BIGQUERY_ENABLE_IMPORT_PROPERTY, "WRONG VALUE");
+        properties.put(CONNECTION_STRING_PROPERTY, "CONNECTION_STRING_PROPERTY");
+        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        final BigQuerySqlDialect dialect = new BigQuerySqlDialect(null, adapterProperties);
+        final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
+                dialect::validateProperties);
+        assertThat(exception.getMessage(),
+                containsString("The value 'WRONG VALUE' for the property BIGQUERY_ENABLE_IMPORT is invalid. "
+                        + "It has to be either 'true' or 'false' (case insensitive)"));
     }
 }
