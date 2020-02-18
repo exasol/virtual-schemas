@@ -16,10 +16,10 @@ And we also need two corresponding test classes:
 ## Creating the Main Dialect Class
 
 1. Start by **creating a new package** called with the new dialect name in the existing `dialects` folder. Place your package here:  
-    `/virtual-schemas/jdbc-adapter/virtualschema-jdbc-adapter/src/main/java/com/exasol/adapter/dialects/<your new dialect package>` 
+    `/virtual-schemas/src/main/java/com/exasol/adapter/dialects/<your new dialect package>` 
 
     And one more **package for tests**:  
-    `/virtual-schemas/jdbc-adapter/virtualschema-jdbc-adapter/src/test/java/com/exasol/adapter/dialects/<your new dialect package>` 
+    `/virtual-schemas/src/test/java/com/exasol/adapter/dialects/<your new dialect package>` 
 
     For example, the package for Athena is named `com.exasol.adapter.dialects.athena`.
 
@@ -89,9 +89,7 @@ And we also need two corresponding test classes:
    }
    ```
   
-6. **Add the dialect name** (here `ATHENA`) **to the list of dialects**  for which the `JbdcAdapterFactory` is responsible in the method `getSupportedAdapterNames()`.
-
-7. Create a **new unit test class** for the dialect in the test package you created before: `com.exasol.adapter.dialects.athena.AthenaSqlDialectTest` that tests class `AthenaSqlDialect`.
+6. Create a **new unit test class** for the dialect in the test package you created before: `com.exasol.adapter.dialects.athena.AthenaSqlDialectTest` that tests class `AthenaSqlDialect`.
 
     ### Acquiring Information About the Specifics of the Dialect
     
@@ -121,7 +119,7 @@ And we also need two corresponding test classes:
     You only need to pick up **the capabilities from the existing lists** in the common part of the project. 
     If the source supports something that is not in our lists, you can ignore it.
     
-8. **Write a unit test** that checks whether the SQL dialect adapter **reports the capabilities** that you find in the documentation of the data source.
+7. **Write a unit test** that checks whether the SQL dialect adapter **reports the capabilities** that you find in the documentation of the data source.
     We have 5 types of capabilities: 
     
      1. Main Capabilities
@@ -167,7 +165,7 @@ And we also need two corresponding test classes:
 
     Run the test and it must fail, since you did not implement the the capability reporting method yet.
 
-9. Now **implement the main capabilities part of the `createCapabilityList()` method** in the `<Your_dialect_name>SqlDialect.java` class so that it returns the main capabilities you added to the test.
+8. Now **implement the main capabilities part of the `createCapabilityList()` method** in the `<Your_dialect_name>SqlDialect.java` class so that it returns the main capabilities you added to the test.
     We use a builder and an `addMain()` method to add capabilities. 
 
     There are also `addLiteral()`, `addPredicate()`, `addScalarFunction()`, and `addAggregateFunction()` methods for other kinds of capabilities.
@@ -184,7 +182,7 @@ And we also need two corresponding test classes:
     }
     ```
 
-10. Now repeat the previous two steps for all **other kinds of capabilities**.
+9. Now repeat the previous two steps for all **other kinds of capabilities**.
 
     ### Defining Catalog and Schema Support
 
@@ -204,7 +202,7 @@ And we also need two corresponding test classes:
     And the [documentation of the `SHOW DATABASES` command](https://docs.aws.amazon.com/athena/latest/ug/show-databases.html) states that there is a synonym called `SHOW SCHEMAS`.
     That means that Athena internally creates a 1:1 mapping of databases to schemas with the same name.
 
-11. After we find out about schemas and catalogs, we **implement two unit tests**:
+10. After we find out about schemas and catalogs, we **implement two unit tests**:
 
     ```java
     @Test
@@ -220,11 +218,11 @@ And we also need two corresponding test classes:
 
     Both tests must fail. 
     
-12. After that **implement the functions `supportsJdbcCatalogs()` and `supportsJdbcSchemas()`**. 
+11. After that **implement the functions `supportsJdbcCatalogs()` and `supportsJdbcSchemas()`**. 
     Don't forget that you have already created the templates for the methods. So you only need to add the returning values.
     Re-run the test to check that your implementation works fine.
 
-13. The methods `requiresCatalogQualifiedTableNames(SqlGenerationContext)` and `requiresSchemaQualifiedTableNames(SqlGenerationContext)` are closely related. 
+12. The methods `requiresCatalogQualifiedTableNames(SqlGenerationContext)` and `requiresSchemaQualifiedTableNames(SqlGenerationContext)` are closely related. 
     They define under which circumstances table names need to be qualified with catalog and / or schema name.
     **Write tests for these two methods and implement them**.
 
@@ -248,7 +246,7 @@ And we also need two corresponding test classes:
     
     The Athena documentation states that by default `NULL` values appear last in a search result regardless of search direction.
 
-14. So **the unit test** looks like this:
+13. So **the unit test** looks like this:
 
     ```java
     @Test
@@ -265,7 +263,7 @@ And we also need two corresponding test classes:
     
     Athena expects string literals to be wrapped in single quotes and single qoutes inside the literal to be escaped by duplicating each.
 
-15. **Create the `testGetLiteralString()` test** method: 
+14. **Create the `testGetLiteralString()` test** method: 
    
     ```java
     @ValueSource(strings = { "ab:\'ab\'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
@@ -295,7 +293,7 @@ And we also need two corresponding test classes:
 
     ### Implement the Applying of Quotes
     
-16. The next method to **implement: `applyQuote()`**. It applies quotes to table and schema names.
+15. The next method to **implement: `applyQuote()`**. It applies quotes to table and schema names.
     In case of Aurora it's a little bit complicated, so let's see a more generic example:
    
     ```java
@@ -313,7 +311,7 @@ And we also need two corresponding test classes:
         }   
     ```
     
-17. **Create `SUPPORTED_PROPERTIES` constant**  with a list of properties which are supported by a new dialect. 
+16. **Create `SUPPORTED_PROPERTIES` constant**  with a list of properties which are supported by a new dialect. 
 
     The list of the most common supported properties: `SQL_DIALECT_PROPERTY, CONNECTION_NAME_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
     SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY`.
@@ -332,7 +330,7 @@ And we also need two corresponding test classes:
     }
     ```
     
-18. You have **two unimplemented methods** left: `createQueryRewriter()` and `createRemoteMetadataReader()`.
+17. You have **two unimplemented methods** left: `createQueryRewriter()` and `createRemoteMetadataReader()`.
     Let's use a default implementation for now:
     
     ```java

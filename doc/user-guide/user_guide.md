@@ -5,10 +5,12 @@ The purpose of this page is to provide detailed instructions for each of the sup
 * How does the **CREATE VIRTUAL SCHEMA** statement look like, i.e. which properties are required.
 * **Data source specific notes**, like authentication with Kerberos, supported capabilities or things to consider regarding the data type mapping.
 
-## Before you Start
+## Prerequisites
 
-Please note that the syntax for creating adapter scripts is not recognized by all SQL clients. 
-[DBeaver](https://dbeaver.io/) for example. If you encounter such a problem, try a different client.
+To start using Virtual Schemas you should know:
+
+* How to [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm) 
+* How to [Upload the driver to BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/accessfiles.htm) 
 
 ## List of Supported Dialects
 
@@ -43,8 +45,7 @@ You can find the list of supported dialects in [the list of supported dilects](#
 The so called `GENERIC` dialect is designed to work with any JDBC driver. It derives the SQL dialect from the JDBC driver metadata. 
 However, it does not support any capabilities and might fail if the data source has special syntax or data types, so it should only be used for evaluation purposes.
 
-If you are interested in a introduction to virtual schemas please refer to the Exasol user manual. 
-You can find it in the [download area of the Exasol user portal](https://www.exasol.com/portal/display/DOC/Database+User+Manual).
+If you are interested in an introduction to virtual schemas please refer to the [Exasol Documentation Portal](https://docs.exasol.com/home.htm). 
 
 ## Before you Start
 
@@ -84,7 +85,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.JDBC_ADAPTER_SCRIPT AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-3.1.0.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-3.1.1.jar;
   %jar /buckets/your-bucket-fs/your-bucket/<JDBC driver>.jar;
 /
 ```
