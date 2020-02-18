@@ -26,6 +26,6 @@ class BigQueryColumnMetadataReaderTest {
     void mapDecimalReturnDecimal() {
         final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.TIME, 0, 0, 10, "TIME");
         assertThat(this.columnMetadataReader.mapJdbcType(typeDescription),
-                equalTo(DataType.createVarChar(16, DataType.ExaCharset.UTF8)));
+                equalTo(DataType.createVarChar(30, DataType.ExaCharset.UTF8)));
     }
 }

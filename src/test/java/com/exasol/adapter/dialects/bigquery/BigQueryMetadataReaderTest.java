@@ -48,6 +48,6 @@ class BigQueryMetadataReaderTest {
                 () -> assertThat(converter.getQuotedIdentifierHandling(),
                         equalTo(IdentifierCaseHandling.INTERPRET_CASE_SENSITIVE)),
                 () -> assertThat(converter.getUnquotedIdentifierHandling(),
-                        equalTo(IdentifierCaseHandling.INTERPRET_AS_UPPER)));
+                        equalTo(IdentifierCaseHandling.INTERPRET_AS_LOWER)));
     }
 }

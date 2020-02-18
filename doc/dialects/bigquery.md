@@ -9,10 +9,12 @@ Download the [Simba JDBC Driver for Google BigQuery](https://cloud.google.com/bi
 ## Uploading the JDBC Driver to EXAOperation
 
 1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm) 
-1. Upload the driver to BucketFS
+1. [Upload the driver to BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/accessfiles.htm)
 
-Hint: Magnitude Simba driver contains a lot of jar files, but you can upload all of them together as an archive (`.tar.gz`, for example).
+**Hint**: Magnitude Simba driver contains a lot of jar files, but you can upload all of them together as an archive (`.tar.gz`, for example).
 The archive will be unpacked automatically in the bucket and you can access the files using the following path pattern '<your bucket>/<archive's name without extension>/<name of a file form the archive>.jar'
+
+Leave only `.jar` files in the archive. It will help you to generate a list for adapter script later. 
 
 ## Installing the Adapter Script
 
@@ -26,30 +28,25 @@ CREATE SCHEMA SCHEMA_FOR_VS_SCRIPT;
 
 The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
 
-Please remember to check the versions of your JAR files after downloading driver. They can differ from the list below.
+List all the JAR files from Magnitude Simba JDBC driver.
 
 ```sql
 CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_BIGQUERY AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-3.0.2.jar;
-    %jar /buckets/<BFS service>/<bucket>/avro-1.8.2.jar;
-    %jar /buckets/<BFS service>/<bucket>/gax-1.42.0.jar;
-    %jar /buckets/<BFS service>/<bucket>/google-api-client-1.28.0.jar;
-    %jar /buckets/<BFS service>/<bucket>/google-api-services-bigquery-v2-rev426-1.25.0.jar;
-    %jar /buckets/<BFS service>/<bucket>/google-auth-library-credentials-0.15.0.jar;
-    %jar /buckets/<BFS service>/<bucket>/google-auth-library-oauth2-http-0.13.0.jar;
+    %jar /buckets/<BFS service>/<bucket>/virtualschema-jdbc-adapter-dist-3.1.0.jar;
     %jar /buckets/<BFS service>/<bucket>/GoogleBigQueryJDBC42.jar;
-    %jar /buckets/<BFS service>/<bucket>/google-http-client-1.29.0.jar;
-    %jar /buckets/<BFS service>/<bucket>/google-http-client-jackson2-1.28.0.jar;
-    %jar /buckets/<BFS service>/<bucket>/google-oauth-client-1.28.0.jar;
-    %jar /buckets/<BFS service>/<bucket>/grpc-context-1.18.0.jar;
-    %jar /buckets/<BFS service>/<bucket>/guava-26.0-android.jar
-    %jar /buckets/<BFS service>/<bucket>/jackson-core-2.9.6.jar;
-    %jar /buckets/<BFS service>/<bucket>/joda-time-2.10.1.jar;
-    %jar /buckets/<BFS service>/<bucket>/opencensus-api-0.18.0.jar;
-    %jar /buckets/<BFS service>/<bucket>/opencensus-contrib-http-util-0.18.0.jar;
+    ...
+    ...
+    ...
 /
 ;
+```
+
+**Hint**: to avoid filling the list by hands, use a convenience UDF script [bucketfs_ls](https://github.com/exasol/exa-toolbox/blob/master/utilities/bucketfs_ls.sql).
+Create a script and run it as in the following example:
+
+```sql
+SELECT '%jar /buckets/<BFS service>/<bucket>/<archive's name without extension if used>/'|| files || ';' FROM (SELECT EXA_toolbox.bucketfs_ls('/buckets/<BFS service>/<bucket>/<archive's name without extension if used>/') files ); 
 ```
 
 ## Defining a Named Connection
@@ -101,6 +98,10 @@ If you need to use currently unsupported data types or find a way around known l
 ## Performance
 
 Please be aware that the current implementation of the dialect can only handle result sets with limited size (a few thousand rows).
+If you need to process a large amount of data, please contact our support team. Another implementation of the dialect with a performance improvement (using `IMPORT INTO`) is available, but not documented for self-service because of 
+
+1. the complex installation process
+2. security risks (a user has to disable the drivers' security manager to use it)
 
 ## Testing information
 

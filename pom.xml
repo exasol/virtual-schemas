@@ -7,7 +7,7 @@
     <version>${product.version}</version>
     <name>Virtual Schema JDBC Adapter</name>
     <properties>
-        <product.version>3.0.2</product.version>
+        <product.version>3.1.0</product.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>11</java.version>
