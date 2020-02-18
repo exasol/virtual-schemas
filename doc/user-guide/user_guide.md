@@ -7,7 +7,7 @@ The purpose of this page is to provide detailed instructions for each of the sup
 
 ## Prerequisites
 
-To start using Virtual Schemas you should know:
+Before you can start using Virtual Schemas you should know:
 
 * How to [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm) 
 * How to [Upload the driver to BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/accessfiles.htm) 

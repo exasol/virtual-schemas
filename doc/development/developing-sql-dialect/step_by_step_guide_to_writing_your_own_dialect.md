@@ -15,7 +15,7 @@ To start developing Virtual Schemas you should know:
 
 * How to use [git](https://git-scm.com/)
 * How to use [Maven](https://maven.apache.org/). Check the list of dependencies and plugins that we use in the project at the end of [README](../../../README.md) file.
-* How to setup Maven project in an IDE of your preference. 
+* How to setup a Maven project in the IDE of choice. 
   - [Tips for Eclipse](https://www.eclipse.org/m2e/)
   - [Tips for Intellij IDEA](https://www.jetbrains.com/help/idea/maven-support.html)
 * How to use [Docker](https://www.docker.com/) (for integration testing)

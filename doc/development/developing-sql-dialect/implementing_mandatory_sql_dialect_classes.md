@@ -182,7 +182,7 @@ And we also need two corresponding test classes:
     }
     ```
 
-9. Now repeat the previous two steps for all **other kinds of capabilities**.
+9. Repeat the previous two steps for all **other kinds of capabilities**.
 
     ### Defining Catalog and Schema Support
 
