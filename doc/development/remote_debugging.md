@@ -89,12 +89,12 @@ Debug options need to be set when creating a virtual schema. Below you see an ex
 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.ATHENA_ADAPTER AS
-  %env JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,server=n,address=192.168.1.2:8000,suspend=y";
+  %jvmoption -agentlib:jdwp=transport=dt_socket,server=n,address=<host>:<port>,suspend=y;
   -- ...
 /
 ```
 
-The parameter `JAVA_TOOL_OPTIONS` is passed down by Exasol to the Java VM that runs the Virtual Schema.
+The parameter `jvmoption` is passed down to the Java VM that runs the Virtual Schema.
 
 Here's what the parts of those VM options mean:
 
@@ -104,3 +104,27 @@ Here's what the parts of those VM options mean:
 | `server=n`                           | Switches the VM side of the debugging chain to client mode      |
 | `address=<host>:<port>`              | Host name or IP address and port of the debugger in listen mode |
 | `suspend=y`                          | Establish the debug connection before running the program       |
+
+## The Debugging Session
+
+Once your debugger is listening and the adapter script configuration is properly set, you can start the actual debugging.
+
+### Setting a Breakpoint
+
+One of the most common mistakes when trying this out the first time is to forget setting a breakpoint. If you do this, then the Java VM inside the language container will connect to you debugger, but the adapter script will simply run through.
+
+If you want to do real debugging, you need at least on breakpoint before you start.
+
+Please refer to the documentation of your IDE or the Java debugger to learn how to set a breakpoint.
+
+## Troubleshooting
+
+### `JAVA_TOOL_OPTIONS` is Deprecated
+
+Earlier versions of Virtual Schema were based on Java 8. At that time you could set the environment variable [`JAVA_TOOL_OPTIONS`](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/envvars002.html) to define the debugger options.
+
+Recent releases use Java 11 and that variant does not work anymore. Use `%jvmoptions` instead.
+
+### "VM crashed" After First Successful Debug Session
+
+If you want to work in a implement-debug cycle, make sure your debugger settings keep the debugger listening after the remote VM finished. Otherwise you will get a "VM crashed" error that is caused by the VM not being able to attach to the remote debugger because it is not listening. 
