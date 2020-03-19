@@ -113,7 +113,7 @@ Once your debugger is listening and the adapter script configuration is properly
 
 One of the most common mistakes when trying this out the first time is to forget setting a breakpoint. If you do this, then the Java VM inside the language container will connect to you debugger, but the adapter script will simply run through.
 
-If you want to do real debugging, you need at least on breakpoint before you start.
+If you want to do real debugging, you need at least one breakpoint before you start.
 
 Please refer to the documentation of your IDE or the Java debugger to learn how to set a breakpoint.
 
