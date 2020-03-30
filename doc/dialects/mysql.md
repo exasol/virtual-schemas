@@ -34,8 +34,7 @@ It is necessary because JDBC driver requires a JAVA permission which we do not g
 1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm)
 1. Upload the driver to BucketFS
 
-This step is necessary since the UDF container the adapter runs in has no access 
-to the JDBC drivers installed via EXAOperation but it can access BucketFS.
+This step is necessary since the UDF container the adapter runs in has no access to the JDBC drivers installed via EXAOperation but it can access BucketFS.
 
 ## Installing the Adapter Script
 
