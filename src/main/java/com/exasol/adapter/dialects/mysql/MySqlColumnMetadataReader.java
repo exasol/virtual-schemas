@@ -43,21 +43,27 @@ public class MySqlColumnMetadataReader extends BaseColumnMetadataReader {
     }
 
     private DataType convertVarChar(final JdbcTypeDescription jdbcTypeDescription) {
-        final int size = getSize(jdbcTypeDescription);
+        final int size = getVarcharSize(jdbcTypeDescription);
         final int octetLength = jdbcTypeDescription.getByteSize();
-        final DataType colType;
         final DataType.ExaCharset charset = (octetLength == size) ? DataType.ExaCharset.ASCII
                 : DataType.ExaCharset.UTF8;
         if (size <= DataType.MAX_EXASOL_VARCHAR_SIZE) {
-            final int precision = size == 0 ? DataType.MAX_EXASOL_VARCHAR_SIZE : size;
-            colType = DataType.createVarChar(precision, charset);
+            final int precision = getVarcharPrecision(size);
+            return DataType.createVarChar(precision, charset);
         } else {
-            colType = DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, charset);
+            return DataType.createVarChar(DataType.MAX_EXASOL_VARCHAR_SIZE, charset);
         }
-        return colType;
     }
 
-    private int getSize(final JdbcTypeDescription jdbcTypeDescription) {
+    private int getVarcharPrecision(int size) {
+        if (size == 0) {
+            return DataType.MAX_EXASOL_VARCHAR_SIZE;
+        } else {
+            return size;
+        }
+    }
+
+    private int getVarcharSize(final JdbcTypeDescription jdbcTypeDescription) {
         final String typeName = jdbcTypeDescription.getTypeName();
         if (typeName.equals(TEXT_DATA_TYPE_NAME)) {
             return TEXT_DATA_TYPE_SIZE;
