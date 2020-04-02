@@ -1,10 +1,9 @@
 package com.exasol.adapter.dialects.sqlserver;
 
-import java.sql.Connection;
-
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.AbstractSqlDialectFactory;
 import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 
 /**
  * Factory for the SQL Server dialect.
@@ -16,7 +15,7 @@ public class SqlServerSqlDialectFactory extends AbstractSqlDialectFactory {
     }
 
     @Override
-    public SqlDialect createSqlDialect(final Connection connection, final AdapterProperties properties) {
-        return new SqlServerSqlDialect(connection, properties);
+    public SqlDialect createSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
+        return new SqlServerSqlDialect(connectionFactory, properties);
     }
 }

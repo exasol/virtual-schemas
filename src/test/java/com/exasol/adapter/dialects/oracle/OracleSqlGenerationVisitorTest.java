@@ -11,30 +11,37 @@ import static utils.SqlNodesCreator.*;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlGenerationContext;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.*;
 
+@ExtendWith(MockitoExtension.class)
 class OracleSqlGenerationVisitorTest {
     private OracleSqlGenerationVisitor visitor;
     @Mock
     private Connection connectionMock;
 
     @BeforeEach
-    void beforeEach() {
-        final SqlDialect dialect = new OracleSqlDialect(this.connectionMock, AdapterProperties.emptyProperties());
+    void beforeEach(@Mock final ConnectionFactory connectionFactoryMock) throws SQLException {
+        // when(connectionFactoryMock.getConnection()).thenReturn(this.connectionMock);
+        final SqlDialect dialect = new OracleSqlDialectFactory().createSqlDialect(null,
+                AdapterProperties.emptyProperties());
         final SqlGenerationContext context = new SqlGenerationContext("test_catalog", "test_schema", false);
         this.visitor = new OracleSqlGenerationVisitor(dialect, context);
     }

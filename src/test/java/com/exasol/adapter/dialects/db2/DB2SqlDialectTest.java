@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 
 @ExtendWith(MockitoExtension.class)
 class DB2SqlDialectTest {
@@ -41,9 +43,9 @@ class DB2SqlDialectTest {
     private Map<String, String> rawProperties;
 
     @BeforeEach
-    void beforeEach() {
+    void beforeEach(@Mock final ConnectionFactory connectionFactoryMock) throws SQLException {
         this.rawProperties = new HashMap<>();
-        this.dialect = new DB2SqlDialect(this.connectionMock, AdapterProperties.emptyProperties());
+        this.dialect = new DB2SqlDialect(connectionFactoryMock, AdapterProperties.emptyProperties());
     }
 
     @Test

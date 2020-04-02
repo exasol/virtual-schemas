@@ -1,7 +1,6 @@
 package com.exasol.adapter.dialects.postgresql;
 
-import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -15,24 +14,28 @@ import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 
+@ExtendWith(MockitoExtension.class)
 class PostgreSQLSqlDialectTest {
     private PostgreSQLSqlDialect dialect;
-    private Map<String, String> rawProperties;
+    @Mock
+    private ConnectionFactory connectionFactoryMock;
 
     @BeforeEach
     void beforeEach() {
-        this.rawProperties = new HashMap<>();
-        this.dialect = new PostgreSQLSqlDialect(null, AdapterProperties.emptyProperties());
+        this.dialect = new PostgreSQLSqlDialect(this.connectionFactoryMock, AdapterProperties.emptyProperties());
     }
 
     @Test
@@ -97,51 +100,46 @@ class PostgreSQLSqlDialectTest {
 
     @Test
     void testPostgreSQLIdentifierMappingConsistency() throws PropertyValidationException {
-        setMandatoryProperties("POSTGRESQL");
-        this.rawProperties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT_TO_UPPER");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new PostgreSQLSqlDialect(null, adapterProperties);
+        final SqlDialect sqlDialect = new PostgreSQLSqlDialect(null, new AdapterProperties(Map.of( //
+                SQL_DIALECT_PROPERTY, "postgresql", //
+                CONNECTION_NAME_PROPERTY, "MY_CONN", //
+                "POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT_TO_UPPER")));
         sqlDialect.validateProperties();
     }
 
     @Test
     void testPostgreSQLIdentifierMappingInvalidPropertyValueThrowsException() {
-        setMandatoryProperties("POSTGRESQL");
-        this.rawProperties.put("POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new PostgreSQLSqlDialect(null, adapterProperties);
+        final SqlDialect sqlDialect = new PostgreSQLSqlDialect(null, new AdapterProperties(Map.of( //
+                SQL_DIALECT_PROPERTY, "POSTGRESQL", //
+                CONNECTION_NAME_PROPERTY, "MY_CONN", //
+                "POSTGRESQL_IDENTIFIER_MAPPING", "CONVERT")));
         assertThrows(PropertyValidationException.class, sqlDialect::validateProperties);
     }
 
     @Test
     void testIgnoreErrorsConsistency() {
-        this.rawProperties.put("IGNORE_ERRORS", "ORACLE_ERROR");
-        this.rawProperties.put("SQL_DIALECT", "postgresql");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new PostgreSQLSqlDialect(null, adapterProperties);
+        final SqlDialect sqlDialect = new PostgreSQLSqlDialect(null, new AdapterProperties(Map.of( //
+                SQL_DIALECT_PROPERTY, "postgresql", //
+                CONNECTION_NAME_PROPERTY, "MY_CONN", //
+                "IGNORE_ERRORS", "ORACLE_ERROR")));
         assertThrows(PropertyValidationException.class, sqlDialect::validateProperties);
     }
 
     @Test
     void testValidateCatalogProperty() throws PropertyValidationException {
-        setMandatoryProperties("POSTGRESQL");
-        this.rawProperties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new PostgreSQLSqlDialect(null, adapterProperties);
+        final SqlDialect sqlDialect = new PostgreSQLSqlDialect(null, new AdapterProperties(Map.of( //
+                SQL_DIALECT_PROPERTY, "POSTGRESQL", //
+                CONNECTION_NAME_PROPERTY, "MY_CONN", //
+                CATALOG_NAME_PROPERTY, "MY_CATALOG")));
         sqlDialect.validateProperties();
     }
 
     @Test
     void testValidateSchemaProperty() throws PropertyValidationException {
-        setMandatoryProperties("POSTGRESQL");
-        this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new PostgreSQLSqlDialect(null, adapterProperties);
+        final SqlDialect sqlDialect = new PostgreSQLSqlDialect(null, new AdapterProperties(Map.of( //
+                SQL_DIALECT_PROPERTY, "POSTGRESQL", //
+                CONNECTION_NAME_PROPERTY, "MY_CONN", //
+                SCHEMA_NAME_PROPERTY, "MY_SCHEMA")));
         sqlDialect.validateProperties();
-    }
-
-    private void setMandatoryProperties(final String sqlDialectProperty) {
-        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
-        this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN");
     }
 }

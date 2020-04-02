@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.exasol.adapter.adapternotes.ColumnAdapterNotes;
+import com.exasol.adapter.adapternotes.ColumnAdapterNotesJsonConverter;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
 
@@ -36,15 +37,33 @@ public class DialectTestData {
     }
 
     public static TableMetadata getClicksTableMetadata() {
+        final ColumnAdapterNotesJsonConverter converter = ColumnAdapterNotesJsonConverter.getInstance();
         final List<ColumnMetadata> columns = new ArrayList<>();
-        columns.add(ColumnMetadata.builder().name("USER_ID")
-                .adapterNotes(ColumnAdapterNotes.serialize(new ColumnAdapterNotes(3, "DECIMAL")))
-                .type(DataType.createDecimal(18, 0)).nullable(true).identity(false).defaultValue("").comment("")
+        final ColumnAdapterNotes decimalAdapterNotes = ColumnAdapterNotes.builder() //
+                .jdbcDataType(3) //
+                .typeName("DECIMAL") //
+                .build();
+        final ColumnAdapterNotes varcharAdapterNotes = ColumnAdapterNotes.builder() //
+                .jdbcDataType(12) //
+                .typeName("VARCHAR") //
+                .build();
+        columns.add(ColumnMetadata.builder() //
+                .name("USER_ID") //
+                .adapterNotes(converter.convertToJson(decimalAdapterNotes)).type(DataType.createDecimal(18, 0)) //
+                .nullable(true) //
+                .identity(false) //
+                .defaultValue("") //
+                .comment("") //
                 .build());
-        columns.add(ColumnMetadata.builder().name("URL")
-                .adapterNotes(ColumnAdapterNotes.serialize(new ColumnAdapterNotes(12, "VARCHAR")))
-                .type(DataType.createVarChar(10000, DataType.ExaCharset.UTF8)).nullable(true).identity(false)
-                .defaultValue("").comment("").build());
+        columns.add(ColumnMetadata.builder() //
+                .name("URL") //
+                .adapterNotes(converter.convertToJson(varcharAdapterNotes)) //
+                .type(DataType.createVarChar(10000, DataType.ExaCharset.UTF8)) //
+                .nullable(true) //
+                .identity(false) //
+                .defaultValue("") //
+                .comment("") //
+                .build());
         return new TableMetadata("CLICKS", "", columns, "");
     }
 }

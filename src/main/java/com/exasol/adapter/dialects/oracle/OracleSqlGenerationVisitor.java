@@ -7,7 +7,6 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.adapternotes.ColumnAdapterNotes;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
@@ -195,8 +194,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private boolean checkIfColumnRequiresCast(final SqlColumn node) throws AdapterException {
-        final String typeName = ColumnAdapterNotes
-                .deserialize(node.getMetadata().getAdapterNotes(), node.getMetadata().getName()).getTypeName();
+        final String typeName = getTypeNameFromColumn(node);
         if (typeName.equals("NUMBER")) {
             if (node.getMetadata().getType().getExaDataType() == DataType.ExaDataType.VARCHAR) {
                 return true;
@@ -267,8 +265,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
 
     private String getProjectionString(final SqlColumn column, final String projectionString) throws AdapterException {
         final AbstractSqlDialect dialect = (AbstractSqlDialect) getDialect();
-        final String typeName = ColumnAdapterNotes
-                .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+        final String typeName = getTypeNameFromColumn(column);
         if (typeName.startsWith("INTERVAL") || typeName.equals("BINARY_FLOAT") || typeName.equals("BINARY_DOUBLE")) {
             return createToChar(projectionString);
         } else if (typeName.startsWith("TIMESTAMP")

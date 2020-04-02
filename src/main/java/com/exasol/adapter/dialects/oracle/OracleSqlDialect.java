@@ -8,14 +8,14 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.adapter.dialects.oracle.OracleProperties.*;
 
-import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.*;
 
@@ -61,11 +61,11 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     /**
      * Create a new instance of the {@link OracleSqlDialect}.
      *
-     * @param connection JDBC connection
-     * @param properties user-defined adapter properties
+     * @param connectionFactory factory for the JDBC connection to the remote data source
+     * @param properties        user-defined adapter properties
      */
-    public OracleSqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
+    public OracleSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
+        super(connectionFactory, properties);
         this.omitParenthesesMap.add(ScalarFunction.SYSDATE);
         this.omitParenthesesMap.add(ScalarFunction.SYSTIMESTAMP);
     }
@@ -153,12 +153,16 @@ public class OracleSqlDialect extends AbstractSqlDialect {
 
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new OracleMetadataReader(this.connection, this.properties);
+        try {
+            return new OracleMetadataReader(this.connectionFactory.getConnection(), this.properties);
+        } catch (final SQLException exception) {
+            throw new RemoteMetadataReaderException("Unable to create Oracle remote metadata reader.", exception);
+        }
     }
 
     @Override
     protected QueryRewriter createQueryRewriter() {
-        return new OracleQueryRewriter(this, this.remoteMetadataReader, this.connection);
+        return new OracleQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
     }
 
     @Override

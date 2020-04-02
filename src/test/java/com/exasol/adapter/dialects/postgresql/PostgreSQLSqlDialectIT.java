@@ -27,7 +27,6 @@ import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
-import com.exasol.jdbc.DataException;
 
 import utils.IntegrationTestSetupManager;
 
@@ -54,7 +53,8 @@ class PostgreSQLSqlDialectIT {
     private static final int POSTGRES_PORT = 5432;
 
     @Container
-    private static final PostgreSQLContainer postgresqlContainer = new PostgreSQLContainer(POSTGRES_CONTAINER_NAME);
+    private static final PostgreSQLContainer<? extends PostgreSQLContainer<?>> postgresqlContainer = new PostgreSQLContainer<>(
+            POSTGRES_CONTAINER_NAME);
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
@@ -89,7 +89,7 @@ class PostgreSQLSqlDialectIT {
                 Optional.of("%jar /buckets/bfsdefault/default/" + POSTGRES_DRIVER_NAME_AND_VERSION + ";\n"));
         createVirtualSchema(VIRTUAL_SCHEMA_POSTGRES, SCHEMA_POSTGRES, Optional.empty());
         createVirtualSchema(VIRTUAL_SCHEMA_POSTGRES_UPPERCASE_TABLE, SCHEMA_POSTGRES_UPPERCASE_TABLE,
-                Optional.of("ignore_errors='POSTGRESQL_UPPERCASE_TABLES'"));
+                Optional.of("IGNORE_ERRORS='POSTGRESQL_UPPERCASE_TABLES'"));
         createVirtualSchema(VIRTUAL_SCHEMA_POSTGRES_PRESERVE_ORIGINAL_CASE, SCHEMA_POSTGRES_UPPERCASE_TABLE,
                 Optional.of("POSTGRESQL_IDENTIFIER_MAPPING = 'PRESERVE_ORIGINAL_CASE'"));
     }
@@ -292,7 +292,7 @@ class PostgreSQLSqlDialectIT {
 
     @Test
     void testCreateSchemaWithUpperCaseTablesThrowsException() {
-        final Exception exception = assertThrows(DataException.class, () -> //
+        final Exception exception = assertThrows(SQLException.class, () -> //
         createVirtualSchema("WRONG_VIRTUAL_SCHEMA", SCHEMA_POSTGRES_UPPERCASE_TABLE, Optional.empty()));
         assertThat(exception.getMessage(), containsString("Table " + TABLE_POSTGRES_MIXED_CASE
                 + " cannot be used in virtual schema. Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation."));
@@ -327,7 +327,7 @@ class PostgreSQLSqlDialectIT {
                 .execute("ALTER VIRTUAL SCHEMA " + VIRTUAL_SCHEMA_POSTGRES_UPPERCASE_TABLE + " set ignore_errors=''");
         statementExasol.execute("ALTER VIRTUAL SCHEMA " + VIRTUAL_SCHEMA_POSTGRES_UPPERCASE_TABLE
                 + " set POSTGRESQL_IDENTIFIER_MAPPING = 'CONVERT_TO_UPPER'");
-        final DataException exception = assertThrows(DataException.class, () -> statementExasol
+        final Exception exception = assertThrows(SQLException.class, () -> statementExasol
                 .execute("ALTER VIRTUAL SCHEMA " + VIRTUAL_SCHEMA_POSTGRES_UPPERCASE_TABLE + " REFRESH"));
         assertThat(exception.getMessage(), containsString("Table " + TABLE_POSTGRES_MIXED_CASE
                 + " cannot be used in virtual schema. Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation."));

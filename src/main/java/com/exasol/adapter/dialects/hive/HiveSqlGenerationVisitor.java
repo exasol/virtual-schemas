@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.function.Predicate;
 
 import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.adapternotes.ColumnAdapterNotes;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.TableMetadata;
@@ -42,7 +41,7 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private List<String> getSelectStarList(final SqlSelectList selectList) throws AdapterException {
-        if (SqlGenerationHelper.selectListRequiresCasts(selectList, nodeRequiresCast)) {
+        if (SqlGenerationHelper.selectListRequiresCasts(selectList, this.nodeRequiresCast)) {
             final List<TableMetadata> tableMetadata = new ArrayList<>();
             final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
             SqlGenerationHelper.addMetadata(select.getFromClause(), tableMetadata);
@@ -57,12 +56,11 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
         int columnId = 0;
         for (final TableMetadata tableMeta : tableMetadata) {
             for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
-                final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-                final String typeName = getTypeName(sqlColumn);
-                if (typeName.equals(BINARY_TYPE_NAME)) {
-                    selectListElements.add("base64(" + super.visit(sqlColumn) + ")");
+                final SqlColumn column = new SqlColumn(columnId, columnMeta);
+                if (getTypeNameFromColumn(column).equals(BINARY_TYPE_NAME)) {
+                    selectListElements.add("base64(" + super.visit(column) + ")");
                 } else {
-                    selectListElements.add(super.visit(sqlColumn));
+                    selectListElements.add(super.visit(column));
                 }
                 ++columnId;
             }
@@ -70,20 +68,13 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
         return selectListElements;
     }
 
-    private String getTypeName(final SqlColumn sqlColumn) throws AdapterException {
-        return ColumnAdapterNotes
-                .deserialize(sqlColumn.getMetadata().getAdapterNotes(), sqlColumn.getMetadata().getName())
-                .getTypeName();
-    }
-
     private List<String> getSelectList(final SqlSelectList selectList) throws AdapterException {
         final List<SqlNode> expressions = selectList.getExpressions();
         final List<String> selectListElements = new ArrayList<>(expressions.size());
         for (final SqlNode node : expressions) {
             if (node.getType().equals(SqlNodeType.COLUMN)) {
-                final SqlColumn sqlColumn = (SqlColumn) node;
-                final String typeName = getTypeName(sqlColumn);
-                if (typeName.equals(BINARY_TYPE_NAME)) {
+                final SqlColumn column = (SqlColumn) node;
+                if (getTypeNameFromColumn(column).equals(BINARY_TYPE_NAME)) {
                     selectListElements.add("base64(" + node.accept(this) + ")");
                 } else {
                     selectListElements.add(node.accept(this));
@@ -233,11 +224,10 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
         try {
             if (node.getType() == SqlNodeType.COLUMN) {
                 final SqlColumn column = (SqlColumn) node;
-                final String typeName = getTypeName(column);
-                return typeName.equals(BINARY_TYPE_NAME);
+                return getTypeNameFromColumn(column).equals(BINARY_TYPE_NAME);
             }
             return false;
-        } catch (Exception exception) {
+        } catch (final Exception exception) {
             throw new SqlGenerationVisitorException("Exception during deserialization of ColumnAdapterNotes. ",
                     exception);
         }

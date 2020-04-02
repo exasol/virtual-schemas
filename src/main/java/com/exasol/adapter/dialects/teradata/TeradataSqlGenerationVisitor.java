@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.adapternotes.ColumnAdapterNotes;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
@@ -21,9 +20,7 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
         try {
             if (node.getType() == SqlNodeType.COLUMN) {
                 final SqlColumn column = (SqlColumn) node;
-                final String typeName = ColumnAdapterNotes
-                        .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName())
-                        .getTypeName();
+                final String typeName = getTypeNameFromColumn(column);
                 return TYPE_NAMES_REQUIRING_CAST.contains(typeName) || TYPE_NAME_NOT_SUPPORTED.contains(typeName)
                         || (typeName.startsWith("NUMBER")
                                 && (column.getMetadata().getType().getExaDataType() == DataType.ExaDataType.DOUBLE));
@@ -110,23 +107,17 @@ public class TeradataSqlGenerationVisitor extends SqlGenerationVisitor {
         return getColumnProjectionString(column, super.visit(column));
     }
 
-    private String getColumnProjectionString(final SqlColumn column, final String projString) throws AdapterException {
-        final boolean isDirectlyInSelectList = (column.hasParent()
-                && (column.getParent().getType() == SqlNodeType.SELECT_LIST));
-        if (!isDirectlyInSelectList) {
-            return projString;
-        }
-        final String typeName = ColumnAdapterNotes
-                .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
+    private String getColumnProjectionString(final SqlColumn column, final String projectionString)
+            throws AdapterException {
+        return super.isDirectlyInSelectList(column) //
+                ? getColumnProjectionStringNoCheckImpl(getTypeNameFromColumn(column), column, projectionString)
+                : projectionString;
 
     }
 
     private String getColumnProjectionStringNoCheck(final SqlColumn column, final String projString)
             throws AdapterException {
-        final String typeName = ColumnAdapterNotes
-                .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        return getColumnProjectionStringNoCheckImpl(typeName, column, projString);
+        return getColumnProjectionStringNoCheckImpl(getTypeNameFromColumn(column), column, projString);
 
     }
 

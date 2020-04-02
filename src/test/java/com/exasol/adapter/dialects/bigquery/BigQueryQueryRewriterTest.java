@@ -3,7 +3,6 @@ package com.exasol.adapter.dialects.bigquery;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.sql.*;
@@ -15,6 +14,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -24,6 +24,7 @@ import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.sql.SqlStatement;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,13 +41,15 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
     private ExaMetadata exaMetadata;
 
     @BeforeEach
-    void beforeEach() throws SQLException {
+    void beforeEach(@Mock final ConnectionFactory connectionFactoryMock) throws SQLException {
         final Connection connectionMock = this.mockConnection();
-        this.statement = mock(SqlStatement.class);
-        final SqlDialect dialect = new BigQuerySqlDialect(connectionMock, AdapterProperties.emptyProperties());
+        this.statement = Mockito.mock(SqlStatement.class);
+        when(connectionFactoryMock.getConnection()).thenReturn(connectionMock);
+        final SqlDialectFactory factory = new BigQuerySqlDialectFactory();
+        final SqlDialect dialect = factory.createSqlDialect(connectionFactoryMock, AdapterProperties.emptyProperties());
         final BaseRemoteMetadataReader metadataReader = new BaseRemoteMetadataReader(connectionMock,
                 AdapterProperties.emptyProperties());
-        this.queryRewriter = new BigQueryQueryRewriter(dialect, metadataReader, connectionMock);
+        this.queryRewriter = new BigQueryQueryRewriter(dialect, metadataReader, connectionFactoryMock);
         when(connectionMock.createStatement()).thenReturn(this.mockStatement);
         when(this.mockResultSet.getMetaData()).thenReturn(this.mockResultSetMetaData);
         when(this.mockStatement.executeQuery(any())).thenReturn(this.mockResultSet);

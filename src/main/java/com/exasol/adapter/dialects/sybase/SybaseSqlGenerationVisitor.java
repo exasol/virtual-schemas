@@ -6,7 +6,6 @@ import static com.exasol.adapter.dialects.sybase.SybaseSqlDialect.MAX_SYBASE_VAR
 import java.util.*;
 
 import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.adapternotes.ColumnAdapterNotes;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.TableMetadata;
@@ -91,23 +90,19 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
 
     private String buildColumnProjectionString(final SqlColumn column, final String projectionString)
             throws AdapterException {
-        final String typeName = ColumnAdapterNotes
-                .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-        return buildColumnProjectionString(typeName, projectionString);
+        return buildColumnProjectionString(getTypeNameFromColumn(column), projectionString);
     }
 
     private final java.util.function.Predicate<SqlNode> nodeRequiresCast = node -> {
         try {
             if (node.getType() == SqlNodeType.COLUMN) {
                 final SqlColumn column = (SqlColumn) node;
-                final String typeName = ColumnAdapterNotes
-                        .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName())
-                        .getTypeName();
+                final String typeName = getTypeNameFromColumn(column);
                 return getListOfTypeNamesRequiringCast().contains(typeName)
                         || getListOfTypeNamesNotSupported().contains(typeName);
             }
             return false;
-        } catch (AdapterException exception) {
+        } catch (final AdapterException exception) {
             throw new SqlGenerationVisitorException("Exception during deserialization of ColumnAdapterNotes. ",
                     exception);
         }
@@ -121,13 +116,9 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
 
     private String getColumnProjectionString(final SqlColumn column, final String projectionString)
             throws AdapterException {
-        if (!super.isDirectlyInSelectList(column)) {
-            return projectionString;
-        } else {
-            final String typeName = ColumnAdapterNotes
-                    .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
-            return buildColumnProjectionString(typeName, projectionString);
-        }
+        return super.isDirectlyInSelectList(column) //
+                ? buildColumnProjectionString(getTypeNameFromColumn(column), projectionString) //
+                : projectionString;
     }
 
     @Override

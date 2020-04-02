@@ -9,22 +9,33 @@ import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialect.NullSorting;
 import com.exasol.adapter.dialects.SqlDialect.StructureElementSupport;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 
+@ExtendWith(MockitoExtension.class)
 class AthenaSqlDialectTest {
     private AthenaSqlDialect dialect;
+    @Mock
+    private ConnectionFactory connectionFactoryMock;
 
     @BeforeEach
     void beforeEach() {
-        this.dialect = new AthenaSqlDialect(null, AdapterProperties.emptyProperties());
+        this.dialect = new AthenaSqlDialect(this.connectionFactoryMock, AdapterProperties.emptyProperties());
     }
 
     @Test
@@ -102,7 +113,8 @@ class AthenaSqlDialectTest {
     }
 
     @Test
-    void testMetadataReaderClass() {
+    void testMetadataReaderClass(@Mock final Connection connectionMock) throws SQLException {
+        when(this.connectionFactoryMock.getConnection()).thenReturn(connectionMock);
         assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
                 instanceOf(AthenaMetadataReader.class));
     }

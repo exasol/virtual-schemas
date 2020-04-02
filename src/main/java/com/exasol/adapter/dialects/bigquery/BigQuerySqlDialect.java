@@ -8,14 +8,14 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.adapter.dialects.bigquery.BigQueryProperties.BIGQUERY_ENABLE_IMPORT_PROPERTY;
 
-import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
@@ -36,16 +36,20 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
     /**
      * Create a new instance of the {@link BigQuerySqlDialect}.
      *
-     * @param connection JDBC connection to the Big Query service
-     * @param properties user-defined adapter properties
+     * @param connectionFactory factory for the JDBC connection to the Big Query service
+     * @param properties        user-defined adapter properties
      */
-    public BigQuerySqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
+    public BigQuerySqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
+        super(connectionFactory, properties);
     }
 
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new BigQueryMetadataReader(this.connection, this.properties);
+        try {
+            return new BigQueryMetadataReader(this.connectionFactory.getConnection(), this.properties);
+        } catch (final SQLException exception) {
+            throw new RemoteMetadataReaderException("Unable to create BigQuery remote metadata reader.", exception);
+        }
 
     }
 
@@ -55,9 +59,9 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
                 && "true".equalsIgnoreCase(this.properties.get(BIGQUERY_ENABLE_IMPORT_PROPERTY))) {
             LOGGER.warning("Attention: IMPORT is activated for the BIGQUERY dialect. "
                     + "Please be aware that using IMPORT with this dialect requires disabling important security features and is therefore not recommended!");
-            return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
+            return new BaseQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
         } else {
-            return new BigQueryQueryRewriter(this, this.remoteMetadataReader, this.connection);
+            return new BigQueryQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
         }
     }
 

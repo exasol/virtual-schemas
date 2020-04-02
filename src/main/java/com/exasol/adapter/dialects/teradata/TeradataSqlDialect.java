@@ -7,14 +7,14 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
-import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.sql.SqlNodeVisitor;
 
 /**
@@ -50,11 +50,11 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
     /**
      * Create a new instance of the {@link TeradataSqlDialect}.
      *
-     * @param connection JDBC connection
-     * @param properties user-defined adapter properties
+     * @param connectionFactory factory for the JDBC connection to the remote data source
+     * @param properties        user-defined adapter properties
      */
-    public TeradataSqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
+    public TeradataSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
+        super(connectionFactory, properties);
     }
 
     @Override
@@ -69,12 +69,16 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
 
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new TeradataMetadataReader(this.connection, this.properties);
+        try {
+            return new TeradataMetadataReader(this.connectionFactory.getConnection(), this.properties);
+        } catch (final SQLException exception) {
+            throw new RemoteMetadataReaderException("Unable to create Teradata remote metadata reader.", exception);
+        }
     }
 
     @Override
     protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
+        return new BaseQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
     }
 
     @Override

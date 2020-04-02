@@ -11,6 +11,7 @@ import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.SqlStatement;
 
@@ -30,11 +31,11 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
      *
      * @param dialect              Big Query dialect
      * @param remoteMetadataReader remote metadata reader
-     * @param connection           JDBC connection to remote data source
+     * @param connectionFactory    factory for the JDBC connection to remote data source
      */
     public BigQueryQueryRewriter(final SqlDialect dialect, final RemoteMetadataReader remoteMetadataReader,
-            final Connection connection) {
-        super(dialect, remoteMetadataReader, connection);
+            final ConnectionFactory connectionFactory) {
+        super(dialect, remoteMetadataReader, connectionFactory);
     }
 
     @Override
@@ -43,7 +44,7 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
         final String query = getQueryFromStatement(statement, properties);
         LOGGER.fine(() -> "Query to rewrite: " + query);
         final StringBuilder builder = new StringBuilder();
-        try (final ResultSet resultSet = this.connection.createStatement().executeQuery(query)) {
+        try (final ResultSet resultSet = this.connectionFactory.getConnection().createStatement().executeQuery(query)) {
             builder.append("SELECT * FROM VALUES");
             int rowNumber = 0;
             final ResultSetMetaData metaData = resultSet.getMetaData();

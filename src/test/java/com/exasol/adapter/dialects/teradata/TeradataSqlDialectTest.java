@@ -1,7 +1,6 @@
 package com.exasol.adapter.dialects.teradata;
 
-import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -15,28 +14,35 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 
+@ExtendWith(MockitoExtension.class)
 class TeradataSqlDialectTest {
     private SqlDialect dialect;
-    private Map<String, String> rawProperties;
+    @Mock
+    private ConnectionFactory connnectionFactoryMock;
 
     @BeforeEach
     void beforeEach() {
-        this.dialect = new TeradataSqlDialect(null, AdapterProperties.emptyProperties());
-        this.rawProperties = new HashMap<>();
+        this.dialect = new TeradataSqlDialect(this.connnectionFactoryMock, AdapterProperties.emptyProperties());
     }
 
     @Test
@@ -68,16 +74,18 @@ class TeradataSqlDialectTest {
     }
 
     @Test
-    void testMetadataReaderClass() {
+    void testMetadataReaderClass(@Mock final Connection connectionMock) throws SQLException {
+        when(this.connnectionFactoryMock.getConnection()).thenReturn(connectionMock);
         assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
                 instanceOf(TeradataMetadataReader.class));
     }
 
     @Test
     void testValidateCatalogProperty() {
-        setMandatoryProperties("TERADATA");
-        this.rawProperties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
+        final AdapterProperties adapterProperties = new AdapterProperties(Map.of( //
+                SQL_DIALECT_PROPERTY, "TERADATA", //
+                CONNECTION_NAME_PROPERTY, "MY_CONN", //
+                CATALOG_NAME_PROPERTY, "MY_CATALOG"));
         final SqlDialect sqlDialect = new TeradataSqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
@@ -87,16 +95,12 @@ class TeradataSqlDialectTest {
 
     @Test
     void testValidateSchemaProperty() throws PropertyValidationException {
-        setMandatoryProperties("TERADATA");
-        this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
+        final AdapterProperties adapterProperties = new AdapterProperties(Map.of( //
+                SQL_DIALECT_PROPERTY, "TERADATA", //
+                CONNECTION_NAME_PROPERTY, "MY_CONN", //
+                SCHEMA_NAME_PROPERTY, "MY_SCHEMA"));
         final SqlDialect sqlDialect = new TeradataSqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
-    }
-
-    private void setMandatoryProperties(final String sqlDialectProperty) {
-        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
-        this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN");
     }
 
     @Test

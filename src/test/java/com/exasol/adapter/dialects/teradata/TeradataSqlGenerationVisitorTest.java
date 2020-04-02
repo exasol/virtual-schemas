@@ -8,29 +8,29 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static utils.SqlNodesCreator.createSqlSelectStarListWithOneColumn;
 import static utils.SqlNodesCreator.createSqlSelectStarListWithoutColumns;
 
-import java.sql.Connection;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.SqlSelectList;
 import com.exasol.adapter.sql.SqlStatementSelect;
 
+@ExtendWith(MockitoExtension.class)
 class TeradataSqlGenerationVisitorTest {
     private TeradataSqlGenerationVisitor visitor;
-    @Mock
-    private Connection connectionMock;
 
     @BeforeEach
-    void beforeEach() {
-        final SqlDialect dialect = new TeradataSqlDialect(this.connectionMock, AdapterProperties.emptyProperties());
+    void beforeEach(@Mock final ConnectionFactory connectionFactoryMock) {
+        final SqlDialect dialect = new TeradataSqlDialect(connectionFactoryMock, AdapterProperties.emptyProperties());
         final SqlGenerationContext context = new SqlGenerationContext("test_catalog", "test_schema", false);
         this.visitor = new TeradataSqlGenerationVisitor(dialect, context);
     }

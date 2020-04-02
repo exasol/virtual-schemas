@@ -7,13 +7,13 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
-import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.sql.ScalarFunction;
 import com.exasol.adapter.sql.SqlNodeVisitor;
 
@@ -23,6 +23,7 @@ import com.exasol.adapter.sql.SqlNodeVisitor;
 public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     static final String NAME = "POSTGRESQL";
     public static final String POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY = "POSTGRESQL_IDENTIFIER_MAPPING";
+    public static final String POSTGRESQL_UPPERCASE_TABLES_SWITCH = "POSTGRESQL_UPPERCASE_TABLES";
     private static final String POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE_VALUE = "PRESERVE_ORIGINAL_CASE";
     private static final String POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE = "CONVERT_TO_UPPER";
     private static final PostgreSQLIdentifierMapping DEFAULT_POSTGRESS_IDENTIFIER_MAPPING = PostgreSQLIdentifierMapping.CONVERT_TO_UPPER;
@@ -60,11 +61,11 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     /**
      * Create a new instance of the {@link PostgreSQLSqlDialect}.
      *
-     * @param connection JDBC connection
-     * @param properties user-defined adapter properties
+     * @param connectionFactory factory for the JDBC connection to the remote data source
+     * @param properties        user-defined adapter properties
      */
-    public PostgreSQLSqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
+    public PostgreSQLSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
+        super(connectionFactory, properties);
     }
 
     @Override
@@ -74,12 +75,16 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
 
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new PostgreSQLMetadataReader(this.connection, this.properties);
+        try {
+            return new PostgreSQLMetadataReader(this.connectionFactory.getConnection(), this.properties);
+        } catch (final SQLException exception) {
+            throw new RemoteMetadataReaderException("Unable to create PostgreSQL remote metadata reader.", exception);
+        }
     }
 
     @Override
     protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
+        return new BaseQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
     }
 
     @Override
@@ -166,6 +171,11 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
                         + " must be " + POSTGRESQL_IDENTIFER_MAPPING_PRESERVE_ORIGINAL_CASE_VALUE + " or "
                         + POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE);
             }
+        }
+        if (this.properties.hasIgnoreErrors()
+                && !List.of(POSTGRESQL_UPPERCASE_TABLES_SWITCH).containsAll(this.properties.getIgnoredErrors())) {
+            throw new PropertyValidationException("Unknown error identifier in list of ignored errors ("
+                    + IGNORE_ERRORS_PROPERTY + "). Pick one of: " + POSTGRESQL_UPPERCASE_TABLES_SWITCH);
         }
     }
 }
