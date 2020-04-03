@@ -1,7 +1,6 @@
 package com.exasol.adapter.dialects.generic;
 
-import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.*;
 import static org.mockito.Mockito.when;
 
 import java.sql.*;
@@ -35,8 +34,8 @@ class GenericSqlDialectTest {
     void testValidateCatalogProperty() throws PropertyValidationException {
         final Map<String, String> rawProperties = Map.of( //
                 CATALOG_NAME_PROPERTY, "MY_CATALOG", //
-                AdapterProperties.SQL_DIALECT_PROPERTY, "GENERIC", //
-                AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN" //
+                SQL_DIALECT_PROPERTY, "GENERIC", //
+                CONNECTION_NAME_PROPERTY, "MY_CONN" //
         );
         assertDialectCreatedWithValidProperties(this.connectionFactoryMock, rawProperties);
     }
@@ -53,8 +52,8 @@ class GenericSqlDialectTest {
     void testValidateSchemaProperty() throws PropertyValidationException {
         final Map<String, String> rawProperties = Map.of( //
                 SCHEMA_NAME_PROPERTY, "MY_SCHEMA", //
-                AdapterProperties.SQL_DIALECT_PROPERTY, "GENERIC", //
-                AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN" //
+                SQL_DIALECT_PROPERTY, "GENERIC", //
+                CONNECTION_NAME_PROPERTY, "MY_CONN" //
         );
         assertDialectCreatedWithValidProperties(this.connectionFactoryMock, rawProperties);
     }

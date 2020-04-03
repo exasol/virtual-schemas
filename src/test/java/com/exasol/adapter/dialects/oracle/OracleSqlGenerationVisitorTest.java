@@ -39,7 +39,6 @@ class OracleSqlGenerationVisitorTest {
 
     @BeforeEach
     void beforeEach(@Mock final ConnectionFactory connectionFactoryMock) throws SQLException {
-        // when(connectionFactoryMock.getConnection()).thenReturn(this.connectionMock);
         final SqlDialect dialect = new OracleSqlDialectFactory().createSqlDialect(null,
                 AdapterProperties.emptyProperties());
         final SqlGenerationContext context = new SqlGenerationContext("test_catalog", "test_schema", false);
