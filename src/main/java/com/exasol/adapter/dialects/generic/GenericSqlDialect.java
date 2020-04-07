@@ -2,7 +2,7 @@ package com.exasol.adapter.dialects.generic;
 
 import static com.exasol.adapter.AdapterProperties.*;
 
-import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -10,7 +10,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.adapternotes.SchemaAdapterNotes;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.jdbc.*;
 
 /**
  * This dialect can be used for data sources where a custom dialect implementation does not yet exists. It will obtain
@@ -22,15 +22,17 @@ public class GenericSqlDialect extends AbstractSqlDialect {
             CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
             CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
             DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
+    private final RemoteMetadataReader remoteMetadataReader;
 
     /**
      * Create a new instance of the {@link GenericSqlDialect}.
      *
-     * @param connection SQL connection
-     * @param properties user-defined adapter properties
+     * @param connectionFactory factory for the JDBC connection to the remote data source
+     * @param properties        user-defined adapter properties
      */
-    public GenericSqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
+    public GenericSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
+        super(connectionFactory, properties);
+        this.remoteMetadataReader = createRemoteMetadataReader();
     }
 
     @Override
@@ -91,11 +93,16 @@ public class GenericSqlDialect extends AbstractSqlDialect {
 
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new GenericMetadataReader(this.connection, this.properties);
+        try {
+            return new GenericMetadataReader(this.connectionFactory.getConnection(), this.properties);
+        } catch (final SQLException exception) {
+            throw new RemoteMetadataReaderException(
+                    "Unable to create remote metadata reader for the generic SQL dialect.", exception);
+        }
     }
 
     @Override
     protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
+        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connectionFactory);
     }
 }

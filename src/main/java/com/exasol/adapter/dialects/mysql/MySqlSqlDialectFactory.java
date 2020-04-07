@@ -1,18 +1,17 @@
 package com.exasol.adapter.dialects.mysql;
 
-import java.sql.Connection;
-
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.AbstractSqlDialectFactory;
 import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 
 /**
  * Factory for the MySql SQL dialect.
  */
 public class MySqlSqlDialectFactory extends AbstractSqlDialectFactory {
     @Override
-    public SqlDialect createSqlDialect(final Connection connection, final AdapterProperties properties) {
-        return new MySqlSqlDialect(connection, properties);
+    public SqlDialect createSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
+        return new MySqlSqlDialect(connectionFactory, properties);
     }
 
     @Override

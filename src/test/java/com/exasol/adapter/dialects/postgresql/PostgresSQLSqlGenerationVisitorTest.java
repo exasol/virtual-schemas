@@ -8,30 +8,31 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static utils.SqlNodesCreator.*;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.*;
 
+@ExtendWith(MockitoExtension.class)
 class PostgresSQLSqlGenerationVisitorTest {
     private SqlNodeVisitor<String> visitor;
-    @Mock
-    private Connection connectionMock;
 
     @BeforeEach
-    void beforeEach() {
-        final SqlDialect dialect = new PostgreSQLSqlDialect(this.connectionMock, AdapterProperties.emptyProperties());
+    void beforeEach(@Mock final ConnectionFactory connectionFactoryMock) {
+        final SqlDialect dialect = new PostgreSQLSqlDialect(connectionFactoryMock, AdapterProperties.emptyProperties());
         final SqlGenerationContext context = new SqlGenerationContext("test_catalog", "test_schema", false);
         this.visitor = new PostgresSQLSqlGenerationVisitor(dialect, context);
     }
@@ -46,7 +47,7 @@ class PostgresSQLSqlGenerationVisitorTest {
     void testVisitSqlFunctionScalarAddDate(final ScalarFunction scalarFunction, final String expected)
             throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarForDateTest(scalarFunction, 10);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("\"test_column\" +  interval '10 " + expected + "'"));
+        assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("\"test_column\" +  interval '10 " + expected + "'"));
     }
 
     @CsvSource({ "SECONDS_BETWEEN, SECOND", //
@@ -59,7 +60,8 @@ class PostgresSQLSqlGenerationVisitorTest {
     void testVisitSqlFunctionScalarTimeBetween(final ScalarFunction scalarFunction, final String expected)
             throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarForDateTest(scalarFunction, 10);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("DATE_PART('" + expected + "', AGE(10,\"test_column\"))"));
+        assertThat(this.visitor.visit(sqlFunctionScalar),
+                equalTo("DATE_PART('" + expected + "', AGE(10,\"test_column\"))"));
     }
 
     @CsvSource({ "SECOND, SECOND", //
@@ -72,25 +74,25 @@ class PostgresSQLSqlGenerationVisitorTest {
     void testVisitSqlFunctionScalarDatetime(final ScalarFunction scalarFunction, final String expected)
             throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarForDateTest(scalarFunction, 0);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("DATE_PART('" + expected + "',\"test_column\")"));
+        assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("DATE_PART('" + expected + "',\"test_column\")"));
     }
 
     @Test
     void testVisitSqlFunctionScalarPosixTime() throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarForDateTest(POSIX_TIME, 0);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("EXTRACT(EPOCH FROM \"test_column\")"));
+        assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("EXTRACT(EPOCH FROM \"test_column\")"));
     }
 
     @Test
     void testVisitSqlSelectListAnyValue() throws AdapterException {
         final SqlSelectList sqlSelectList = SqlSelectList.createAnyValueSelectList();
-        assertSqlNodeConvertedToOne(sqlSelectList, visitor);
+        assertSqlNodeConvertedToOne(sqlSelectList, this.visitor);
     }
 
     @Test
     void testVisitSqlSelectListSelectStar() throws AdapterException {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithoutColumns();
-        assertSqlNodeConvertedToAsterisk(sqlSelectList, visitor);
+        assertSqlNodeConvertedToAsterisk(sqlSelectList, this.visitor);
     }
 
     @CsvSource({ "varbit, VARCHAR", //
@@ -122,7 +124,7 @@ class PostgresSQLSqlGenerationVisitorTest {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn(
                 "{\"jdbcDataType\":2009, \"typeName\":\"" + typeName + "\"}",
                 DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
-        assertThat(visitor.visit(sqlSelectList), equalTo("CAST(\"test_column\"  as " + expectedCastType + " )"));
+        assertThat(this.visitor.visit(sqlSelectList), equalTo("CAST(\"test_column\"  as " + expectedCastType + " )"));
     }
 
     @Test
@@ -130,13 +132,14 @@ class PostgresSQLSqlGenerationVisitorTest {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn(
                 "{\"jdbcDataType\":2009, \"typeName\":\"bytea\"}", DataType.createVarChar(10, DataType.ExaCharset.UTF8),
                 "test_column");
-        assertThat(visitor.visit(sqlSelectList), equalTo("cast('bytea NOT SUPPORTED' as varchar) as not_supported"));
+        assertThat(this.visitor.visit(sqlSelectList),
+                equalTo("cast('bytea NOT SUPPORTED' as varchar) as not_supported"));
     }
 
     @Test
     void testVisitSqlStatementSelect() throws AdapterException {
         final SqlStatementSelect select = (SqlStatementSelect) DialectTestData.getTestSqlNode();
-        assertThat(visitor.visit(select), //
+        assertThat(this.visitor.visit(select), //
                 equalTo("SELECT \"user_id\", " //
                         + "COUNT(\"url\") FROM \"test_schema\".\"clicks\" " //
                         + "WHERE 1 < \"user_id\" " //
@@ -149,7 +152,7 @@ class PostgresSQLSqlGenerationVisitorTest {
     void testVisitSqlSelectListSelectStarThrowsException() {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn("",
                 DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
-        assertThrows(SqlGenerationVisitorException.class, () -> visitor.visit(sqlSelectList));
+        assertThrows(SqlGenerationVisitorException.class, () -> this.visitor.visit(sqlSelectList));
     }
 
     @Test
@@ -159,6 +162,6 @@ class PostgresSQLSqlGenerationVisitorTest {
         final SqlOrderBy orderBy = createSqlOrderByDescNullsFirst("test_column", "test_column2");
         final SqlFunctionAggregateGroupConcat sqlFunctionAggregateGroupConcat = new SqlFunctionAggregateGroupConcat(
                 AggregateFunction.AVG, arguments, orderBy, false, "'");
-        assertThat(visitor.visit(sqlFunctionAggregateGroupConcat), equalTo("STRING_AGG('test', ''') "));
+        assertThat(this.visitor.visit(sqlFunctionAggregateGroupConcat), equalTo("STRING_AGG('test', ''') "));
     }
 }

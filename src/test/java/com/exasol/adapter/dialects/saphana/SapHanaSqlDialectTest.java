@@ -12,22 +12,33 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.Mockito.when;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.sql.ScalarFunction;
 
+@ExtendWith(MockitoExtension.class)
 class SapHanaSqlDialectTest {
     private SapHanaSqlDialect dialect;
+    @Mock
+    private ConnectionFactory connectionFactoryMock;
 
     @BeforeEach
     void beforeEach() {
-        this.dialect = new SapHanaSqlDialect(null, AdapterProperties.emptyProperties());
+        this.dialect = new SapHanaSqlDialect(this.connectionFactoryMock, AdapterProperties.emptyProperties());
     }
 
     @Test
@@ -116,7 +127,8 @@ class SapHanaSqlDialectTest {
     }
 
     @Test
-    void testMetadataReaderClass() {
+    void testMetadataReaderClass(@Mock final Connection connectionMock) throws SQLException {
+        when(this.connectionFactoryMock.getConnection()).thenReturn(connectionMock);
         Assert.assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
                 instanceOf(SapHanaMetadataReader.class));
     }

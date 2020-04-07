@@ -1,10 +1,9 @@
 package com.exasol.adapter.dialects.teradata;
 
-import java.sql.Connection;
-
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.AbstractSqlDialectFactory;
 import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 
 /**
  * Factory for the Teradata dialect.
@@ -16,7 +15,7 @@ public class TeradataSqlDialectFactory extends AbstractSqlDialectFactory {
     }
 
     @Override
-    public SqlDialect createSqlDialect(final Connection connection, final AdapterProperties properties) {
-        return new TeradataSqlDialect(connection, properties);
+    public SqlDialect createSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
+        return new TeradataSqlDialect(connectionFactory, properties);
     }
 }

@@ -1,12 +1,14 @@
 package utils;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-import org.testcontainers.containers.JdbcDatabaseContainer;
-
-import javax.sql.DataSource;
 import java.sql.*;
 import java.util.Optional;
+
+import javax.sql.DataSource;
+
+import org.testcontainers.containers.JdbcDatabaseContainer;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 public class IntegrationTestSetupManager {
     public void createTestSchema(final Statement statement, final String schemaName) throws SQLException {
@@ -50,12 +52,13 @@ public class IntegrationTestSetupManager {
         return statement.executeQuery("SELECT * FROM " + schemaName + ".TABLE_JOIN_EXPECTED");
     }
 
-    public Statement getStatement(final JdbcDatabaseContainer container) throws SQLException {
+    public Statement getStatement(final JdbcDatabaseContainer<? extends JdbcDatabaseContainer<?>> container)
+            throws SQLException {
         final DataSource dataSource = getDataSource(container);
         return dataSource.getConnection().createStatement();
     }
 
-    private DataSource getDataSource(final JdbcDatabaseContainer container) {
+    private DataSource getDataSource(final JdbcDatabaseContainer<? extends JdbcDatabaseContainer<?>> container) {
         final HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setJdbcUrl(container.getJdbcUrl());
         hikariConfig.setUsername(container.getUsername());

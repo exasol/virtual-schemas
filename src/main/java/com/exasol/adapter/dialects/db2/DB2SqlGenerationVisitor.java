@@ -3,7 +3,6 @@ package com.exasol.adapter.dialects.db2;
 import java.util.*;
 
 import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.adapternotes.ColumnAdapterNotes;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.TableMetadata;
@@ -74,8 +73,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
 
     private String buildColumnProjectionString(final SqlColumn column, final String projectionString)
             throws AdapterException {
-        final String typeName = ColumnAdapterNotes
-                .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+        final String typeName = getTypeNameFromColumn(column);
         return buildColumnProjectionString(typeName, projectionString);
     }
 
@@ -83,9 +81,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         try {
             if (node.getType() == SqlNodeType.COLUMN) {
                 final SqlColumn column = (SqlColumn) node;
-                final String typeName = ColumnAdapterNotes
-                        .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName())
-                        .getTypeName();
+                final String typeName = getTypeNameFromColumn(column);
                 return getListOfTypeNamesRequiringCast().contains(typeName)
                         || getListOfTypeNamesNotSupported().contains(typeName);
             }
@@ -107,8 +103,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         if (!super.isDirectlyInSelectList(column)) {
             return projectionString;
         } else {
-            final String typeName = ColumnAdapterNotes
-                    .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+            final String typeName = getTypeNameFromColumn(column);
             return buildColumnProjectionString(typeName, projectionString);
         }
     }
@@ -251,8 +246,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         }
         final StringBuilder builder = new StringBuilder();
         final SqlColumn column = (SqlColumn) function.getArguments().get(0);
-        final String typeName = ColumnAdapterNotes
-                .deserialize(column.getMetadata().getAdapterNotes(), column.getMetadata().getName()).getTypeName();
+        final String typeName = getTypeNameFromColumn(column);
         boolean isTimestamp = false; // special cast required
         if (typeName.contains("TIMESTAMP")) {
             isTimestamp = true;

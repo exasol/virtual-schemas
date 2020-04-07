@@ -14,23 +14,32 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.HashMap;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
+@ExtendWith(MockitoExtension.class)
 class BigQuerySqlDialectTest {
     private BigQuerySqlDialect dialect;
+    @Mock
+    private ConnectionFactory connectionFactoryMock;
 
     @BeforeEach
     void beforeEach() {
-        this.dialect = new BigQuerySqlDialect(null, AdapterProperties.emptyProperties());
+        this.dialect = new BigQuerySqlDialect(this.connectionFactoryMock, AdapterProperties.emptyProperties());
     }
 
     @Test
@@ -131,25 +140,24 @@ class BigQuerySqlDialectTest {
     }
 
     @Test
-    void testCreateQueryRewriterBigQueryRewriter() {
+    void testCreateQueryRewriterBigQueryRewriter(@Mock final Connection connectionMock) throws SQLException {
+        Mockito.when(this.connectionFactoryMock.getConnection()).thenReturn(connectionMock);
         assertThat(this.dialect.createQueryRewriter(), instanceOf(BigQueryQueryRewriter.class));
     }
 
     @Test
-    void testCreateQueryRewriterBaseQueryRewriter() {
-        final Map<String, String> properties = new HashMap<>();
-        properties.put(BIGQUERY_ENABLE_IMPORT_PROPERTY, "TRUE");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
-        final BigQuerySqlDialect dialect = new BigQuerySqlDialect(null, adapterProperties);
+    void testCreateQueryRewriterBaseQueryRewriter(@Mock final ConnectionFactory connectionFactory) {
+        final AdapterProperties adapterProperties = new AdapterProperties(
+                Map.of(BIGQUERY_ENABLE_IMPORT_PROPERTY, "TRUE"));
+        final BigQuerySqlDialect dialect = new BigQuerySqlDialect(connectionFactory, adapterProperties);
         assertThat(dialect.createQueryRewriter(), instanceOf(BaseQueryRewriter.class));
     }
 
     @Test
     void testValidateProperties() {
-        final Map<String, String> properties = new HashMap<>();
-        properties.put(BIGQUERY_ENABLE_IMPORT_PROPERTY, "WRONG VALUE");
-        properties.put(CONNECTION_STRING_PROPERTY, "CONNECTION_STRING_PROPERTY");
-        final AdapterProperties adapterProperties = new AdapterProperties(properties);
+        final AdapterProperties adapterProperties = new AdapterProperties(Map.of( //
+                BIGQUERY_ENABLE_IMPORT_PROPERTY, "WRONG VALUE", //
+                CONNECTION_STRING_PROPERTY, "CONNECTION_STRING_PROPERTY"));
         final BigQuerySqlDialect dialect = new BigQuerySqlDialect(null, adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 dialect::validateProperties);

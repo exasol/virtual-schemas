@@ -2,6 +2,7 @@ package com.exasol.adapter.dialects.postgresql;
 
 import static com.exasol.adapter.AdapterProperties.IGNORE_ERRORS_PROPERTY;
 import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY;
+import static com.exasol.adapter.dialects.postgresql.PostgreSQLSqlDialect.POSTGRESQL_UPPERCASE_TABLES_SWITCH;
 
 import java.sql.Connection;
 import java.util.logging.Logger;
@@ -15,7 +16,6 @@ import com.exasol.adapter.jdbc.*;
  */
 public class PostgreSQLTableMetadataReader extends BaseTableMetadataReader {
     static final Logger LOGGER = Logger.getLogger(PostgreSQLTableMetadataReader.class.getName());
-    private static final String POSTGRESQL_UPPERCASE_TABLES_SWITCH = "POSTGRESQL_UPPERCASE_TABLES";
 
     /**
      * Create a new {@link PostgreSQLTableMetadataReader} instance.

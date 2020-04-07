@@ -13,7 +13,6 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,18 +28,17 @@ import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialect.NullSorting;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.sql.ScalarFunction;
 
 @ExtendWith(MockitoExtension.class)
 class RedshiftSqlDialectTest {
     private SqlDialect dialect;
-    @Mock
-    private Connection connectionMock;
     private Map<String, String> rawProperties;
 
     @BeforeEach
-    void beforeEach() {
-        this.dialect = new RedshiftSqlDialect(this.connectionMock, AdapterProperties.emptyProperties());
+    void beforeEach(@Mock final ConnectionFactory connectionFactoryMock) {
+        this.dialect = new RedshiftSqlDialect(connectionFactoryMock, AdapterProperties.emptyProperties());
         this.rawProperties = new HashMap<>();
     }
 

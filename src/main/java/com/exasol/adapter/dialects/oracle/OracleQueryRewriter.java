@@ -1,6 +1,5 @@
 package com.exasol.adapter.dialects.oracle;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 
 import com.exasol.ExaConnectionInformation;
@@ -8,8 +7,7 @@ import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.ConnectionDefinitionBuilder;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.sql.SqlNodeVisitor;
 import com.exasol.adapter.sql.SqlStatement;
 
@@ -22,11 +20,11 @@ public class OracleQueryRewriter extends BaseQueryRewriter {
      *
      * @param dialect              Oracle SQl dialect
      * @param remoteMetadataReader reader for metadata from the remote data source
-     * @param connection           JDBC connection to the remote data source
+     * @param connectionFactory    factory for the JDBC connection to the remote data source
      */
     public OracleQueryRewriter(final SqlDialect dialect, final RemoteMetadataReader remoteMetadataReader,
-            final Connection connection) {
-        super(dialect, remoteMetadataReader, connection);
+            final ConnectionFactory connectionFactory) {
+        super(dialect, remoteMetadataReader, connectionFactory);
     }
 
     @Override

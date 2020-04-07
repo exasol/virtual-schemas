@@ -2,25 +2,24 @@ package com.exasol.adapter.dialects.dummy;
 
 import static com.exasol.adapter.AdapterProperties.*;
 
-import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.jdbc.*;
 
-public class DummySqlDialect extends AbstractSqlDialect {
+public final class DummySqlDialect extends AbstractSqlDialect {
     static final String NAME = "DUMMYDIALECT";
     private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
             CONNECTION_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY,
             PASSWORD_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY,
             LOG_LEVEL_PROPERTY, EXCEPTION_HANDLING_PROPERTY);
 
-    public DummySqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
+    public DummySqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
+        super(connectionFactory, properties);
     }
 
     @Override
@@ -30,10 +29,6 @@ public class DummySqlDialect extends AbstractSqlDialect {
 
     public AdapterProperties getProperties() {
         return this.properties;
-    }
-
-    public RemoteMetadataReader getRemoteMetadataReader() {
-        return this.remoteMetadataReader;
     }
 
     @Override
@@ -78,11 +73,16 @@ public class DummySqlDialect extends AbstractSqlDialect {
 
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new BaseRemoteMetadataReader(this.connection, this.properties);
+        try {
+            return new BaseRemoteMetadataReader(this.connectionFactory.getConnection(), this.properties);
+        } catch (final SQLException exception) {
+            throw new RemoteMetadataReaderException("Unable to create remote metadata reader for the Dummy dialect.",
+                    exception);
+        }
     }
 
     @Override
     protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
+        return new BaseQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
     }
 }

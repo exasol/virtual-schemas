@@ -29,7 +29,8 @@ class SqlServerSqlGenerationVisitorTest {
 
     @BeforeEach
     void beforeEach() {
-        final SqlDialect dialect = new SqlServerSqlDialect(this.connectionMock, AdapterProperties.emptyProperties());
+        final SqlDialectFactory factory = new SqlServerSqlDialectFactory();
+        final SqlDialect dialect = factory.createSqlDialect(null, AdapterProperties.emptyProperties());
         final SqlGenerationContext context = new SqlGenerationContext("test_catalog", "test_schema", false);
         this.visitor = new SqlServerSqlGenerationVisitor(dialect, context);
     }
@@ -37,13 +38,13 @@ class SqlServerSqlGenerationVisitorTest {
     @Test
     void testVisitSqlSelectListAnyValue() throws AdapterException {
         final SqlSelectList sqlSelectList = SqlSelectList.createAnyValueSelectList();
-        assertThat(visitor.visit(sqlSelectList), equalTo("true"));
+        assertThat(this.visitor.visit(sqlSelectList), equalTo("true"));
     }
 
     @Test
     void testVisitSqlSelectListSelectStar() throws AdapterException {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithoutColumns();
-        assertSqlNodeConvertedToAsterisk(sqlSelectList, visitor);
+        assertSqlNodeConvertedToAsterisk(sqlSelectList, this.visitor);
     }
 
     @CsvSource({ "text, NVARCHAR(4000)", //
@@ -61,7 +62,7 @@ class SqlServerSqlGenerationVisitorTest {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn(
                 "{\"jdbcDataType\":2009, \"typeName\":\"" + typeName + "\"}",
                 DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
-        assertThat(visitor.visit(sqlSelectList), equalTo("CAST([test_column]  as " + expectedCastType + " )"));
+        assertThat(this.visitor.visit(sqlSelectList), equalTo("CAST([test_column]  as " + expectedCastType + " )"));
     }
 
     @CsvSource({ "varbinary", //
@@ -72,13 +73,13 @@ class SqlServerSqlGenerationVisitorTest {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn(
                 "{\"jdbcDataType\":2009, \"typeName\":\"" + typeName + "\"}",
                 DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
-        assertThat(visitor.visit(sqlSelectList), equalTo("'" + typeName + " NOT SUPPORTED'"));
+        assertThat(this.visitor.visit(sqlSelectList), equalTo("'" + typeName + " NOT SUPPORTED'"));
     }
 
     @Test
     void testVisitSqlStatementSelect() throws AdapterException {
         final SqlStatementSelect select = (SqlStatementSelect) DialectTestData.getTestSqlNode();
-        assertThat(visitor.visit(select), //
+        assertThat(this.visitor.visit(select), //
                 equalTo("SELECT TOP 10 [USER_ID], COUNT([URL])" //
                         + " FROM [test_catalog].[test_schema].[CLICKS]" //
                         + " WHERE 1 < [USER_ID]" //
@@ -90,7 +91,7 @@ class SqlServerSqlGenerationVisitorTest {
     void testVisitSqlSelectListSelectStarThrowsException() {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn("",
                 DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
-        assertThrows(SqlGenerationVisitorException.class, () -> visitor.visit(sqlSelectList));
+        assertThrows(SqlGenerationVisitorException.class, () -> this.visitor.visit(sqlSelectList));
     }
 
     @CsvSource({ "ADD_DAYS, DAY", //
@@ -103,7 +104,7 @@ class SqlServerSqlGenerationVisitorTest {
     void testVisitSqlFunctionScalarAddDate(final ScalarFunction scalarFunction, final String expected)
             throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarForDateTest(scalarFunction, 10);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("DATEADD(" + expected + ",10,[test_column])"));
+        assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("DATEADD(" + expected + ",10,[test_column])"));
     }
 
     @CsvSource({ "SECONDS_BETWEEN, SECOND", //
@@ -116,7 +117,7 @@ class SqlServerSqlGenerationVisitorTest {
     void testVisitSqlFunctionScalarTimeBetween(final ScalarFunction scalarFunction, final String expected)
             throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarForDateTest(scalarFunction, 10);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo("DATEDIFF(" + expected + ",10,[test_column])"));
+        assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("DATEDIFF(" + expected + ",10,[test_column])"));
     }
 
     @CsvSource({ "CURRENT_DATE, CAST( GETDATE() AS DATE)", //
@@ -127,7 +128,7 @@ class SqlServerSqlGenerationVisitorTest {
     void testVisitSqlFunctionScalarWithoutArguments(final ScalarFunction scalarFunction, final String expected)
             throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, null, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo(expected));
+        assertThat(this.visitor.visit(sqlFunctionScalar), equalTo(expected));
     }
 
     @CsvSource(value = { "INSTR : CHARINDEX('test2', 'test', 'test3')", //
@@ -142,7 +143,7 @@ class SqlServerSqlGenerationVisitorTest {
         arguments.add(new SqlLiteralString("test2"));
         arguments.add(new SqlLiteralString("test3"));
         final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, arguments, true, false);
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo(expected));
+        assertThat(this.visitor.visit(sqlFunctionScalar), equalTo(expected));
     }
 
     @CsvSource(value = { "ST_X : 'left'.STX", //
@@ -196,6 +197,6 @@ class SqlServerSqlGenerationVisitorTest {
             throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarWithTwoStringArguments(scalarFunction,
                 "left", "right");
-        assertThat(visitor.visit(sqlFunctionScalar), equalTo(expected));
+        assertThat(this.visitor.visit(sqlFunctionScalar), equalTo(expected));
     }
 }

@@ -15,18 +15,25 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 
+@ExtendWith(MockitoExtension.class)
 class MySqlSqlDialectTest {
     private MySqlSqlDialect dialect;
+    @Mock
+    private ConnectionFactory connectionFactoryMock;
 
     @BeforeEach
     void beforeEach() {
-        this.dialect = new MySqlSqlDialect(null, AdapterProperties.emptyProperties());
+        this.dialect = new MySqlSqlDialect(this.connectionFactoryMock, AdapterProperties.emptyProperties());
     }
 
     @Test

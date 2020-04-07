@@ -7,13 +7,13 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
-import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.sql.ScalarFunction;
 
 /**
@@ -77,11 +77,11 @@ public class SapHanaSqlDialect extends AbstractSqlDialect {
     /**
      * Create a new instance of the {@link SapHanaSqlDialect}
      *
-     * @param connection JDBC connection to the SAP HANA
-     * @param properties user-defined adapter properties
+     * @param connectionFactory factory for the JDBC connection to the remote data source
+     * @param properties        user-defined adapter properties
      */
-    public SapHanaSqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
+    public SapHanaSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
+        super(connectionFactory, properties);
     }
 
     @Override
@@ -121,12 +121,16 @@ public class SapHanaSqlDialect extends AbstractSqlDialect {
 
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new SapHanaMetadataReader(this.connection, this.properties);
+        try {
+            return new SapHanaMetadataReader(this.connectionFactory.getConnection(), this.properties);
+        } catch (final SQLException exception) {
+            throw new RemoteMetadataReaderException("Unable to create HANA remote metadata reader.", exception);
+        }
     }
 
     @Override
     protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
+        return new BaseQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
     }
 
     @Override

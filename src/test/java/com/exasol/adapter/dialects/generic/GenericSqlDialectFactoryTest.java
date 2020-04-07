@@ -3,21 +3,25 @@ package com.exasol.adapter.dialects.generic;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.sql.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 
+@ExtendWith(MockitoExtension.class)
 public class GenericSqlDialectFactoryTest {
     private GenericSqlDialectFactory factory;
 
     @BeforeEach
-    void beforeEach() {
+    void beforeEach() throws SQLException {
         this.factory = new GenericSqlDialectFactory();
     }
 
@@ -27,13 +31,13 @@ public class GenericSqlDialectFactoryTest {
     }
 
     @Test
-    void testCreateDialect() throws SQLException {
-        final Connection connectionMock = mock(Connection.class);
-        final DatabaseMetaData metadataMock = mock(DatabaseMetaData.class);
-        when(connectionMock.getMetaData()).thenReturn(metadataMock);
+    void testCreateDialect(@Mock final DatabaseMetaData metadataMock, @Mock final Connection connectionMock,
+            @Mock final ConnectionFactory connectionFactoryMock) throws SQLException {
         when(metadataMock.supportsMixedCaseIdentifiers()).thenReturn(true);
         when(metadataMock.supportsMixedCaseQuotedIdentifiers()).thenReturn(true);
-        assertThat(this.factory.createSqlDialect(connectionMock, AdapterProperties.emptyProperties()),
+        when(connectionMock.getMetaData()).thenReturn(metadataMock);
+        when(connectionFactoryMock.getConnection()).thenReturn(connectionMock);
+        assertThat(this.factory.createSqlDialect(connectionFactoryMock, AdapterProperties.emptyProperties()),
                 instanceOf(GenericSqlDialect.class));
     }
 }

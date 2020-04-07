@@ -7,31 +7,34 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static utils.SqlNodesCreator.*;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.*;
 
+@ExtendWith(MockitoExtension.class)
 class DB2SqlGenerationVisitorTest {
     private SqlNodeVisitor<String> visitor;
-    @Mock
-    private Connection connectionMock;
 
     @BeforeEach
-    void beforeEach() {
-        final SqlDialect dialect = new DB2SqlDialect(this.connectionMock, AdapterProperties.emptyProperties());
+    void beforeEach(@Mock final ConnectionFactory connectionFactoryMock) {
+        final SqlDialectFactory dialectFactory = new DB2SqlDialectFactory();
+        final SqlDialect dialect = dialectFactory.createSqlDialect(connectionFactoryMock,
+                AdapterProperties.emptyProperties());
         final SqlGenerationContext context = new SqlGenerationContext("test_catalog", "test_schema", false);
         this.visitor = new DB2SqlGenerationVisitor(dialect, context);
     }

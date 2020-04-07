@@ -1,7 +1,6 @@
 package com.exasol.adapter.dialects.sqlserver;
 
-import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -14,29 +13,33 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
+@ExtendWith(MockitoExtension.class)
 class SqlServerSqlDialectTest {
     private SqlDialect dialect;
-    private Map<String, String> rawProperties;
+    @Mock
+    private ConnectionFactory connectionFactoryMock;
 
     @BeforeEach
     void beforeEach() {
-        this.dialect = new SqlServerSqlDialect(null, AdapterProperties.emptyProperties());
-        this.rawProperties = new HashMap<>();
+        this.dialect = new SqlServerSqlDialect(this.connectionFactoryMock, AdapterProperties.emptyProperties());
     }
 
     @Test
@@ -81,25 +84,20 @@ class SqlServerSqlDialectTest {
 
     @Test
     void testValidateCatalogProperty() throws PropertyValidationException {
-        setMandatoryProperties("SQLSERVER");
-        this.rawProperties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new SqlServerSqlDialect(null, adapterProperties);
+        final SqlDialect sqlDialect = new SqlServerSqlDialect(null, new AdapterProperties(Map.of( //
+                SQL_DIALECT_PROPERTY, "SQLSERVER", //
+                CONNECTION_NAME_PROPERTY, "MY_CONN", //
+                CATALOG_NAME_PROPERTY, "MY_CATALOG")));
         sqlDialect.validateProperties();
     }
 
     @Test
     void testValidateSchemaProperty() throws PropertyValidationException {
-        setMandatoryProperties("SQLSERVER");
-        this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
-        final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-        final SqlDialect sqlDialect = new SqlServerSqlDialect(null, adapterProperties);
+        final SqlDialect sqlDialect = new SqlServerSqlDialect(null, new AdapterProperties(Map.of( //
+                SQL_DIALECT_PROPERTY, "SQLSERVER", //
+                CONNECTION_NAME_PROPERTY, "MY_CONN", //
+                SCHEMA_NAME_PROPERTY, "MY_SCHEMA")));
         sqlDialect.validateProperties();
-    }
-
-    private void setMandatoryProperties(final String sqlDialectProperty) {
-        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
-        this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN");
     }
 
     @Test
