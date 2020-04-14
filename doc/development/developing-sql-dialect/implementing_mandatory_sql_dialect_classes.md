@@ -21,7 +21,7 @@ And we also need two corresponding test classes:
     And one more **package for tests**:  
     `/virtual-schemas/src/test/java/com/exasol/adapter/dialects/<your new dialect package>` 
 
-    For example, the package for Athena is named `com.exasol.adapter.dialects.athena`.
+    For example, the package for Athena has a name `com.exasol.adapter.dialects.athena`.
 
 1. Now **create a stub class for the dialect**: `com.exasol.adapter.dialects.athena.AthenaSqlDialect` that **extends** `AbstractDialect`. 
     Let your IDE generate necessary **overriding methods** to remove all compilation exceptions. You will implement them later:
@@ -42,18 +42,18 @@ And we also need two corresponding test classes:
    } 
    ```
 
-1. **Add a constructor** that takes a [JDBC database connection](https://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html) and user properties as parameters. 
+1. **Add a constructor** that takes a [JDBC connection](https://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html) Factory and user properties as parameters. 
     Your IDE could also generate it for you.
   
     ```java
     /**
-    * Create a new instance of the {@link AthenaSqlDialect}.
-    *
-    * @param connection JDBC connection to the Athena service
-    * @param properties user-defined adapter properties
-    */
-    public AthenaSqlDialect(final Connection connection, final AdapterProperties properties) {
-       super(connection, properties);
+     * Create a new instance of the {@link AthenaSqlDialect}.
+     *
+     * @param connectionFactory factory for the JDBC connection to the remote data source
+     * @param properties        user-defined adapter properties
+     */
+    public AthenaSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
+        super(connectionFactory, properties);
     }
     ```
    
@@ -144,10 +144,12 @@ And we also need two corresponding test classes:
     
     public class AthenaSqlDialectTest {
         private AthenaSqlDialect dialect;
+        @Mock
+        private ConnectionFactory connectionFactoryMock;
     
         @BeforeEach
         void beforeEach() {
-            this.dialect = new AthenaSqlDialect(null, AdapterProperties.emptyProperties());
+            this.dialect = new AthenaSqlDialect(this.connectionFactoryMock, AdapterProperties.emptyProperties());
         }
     
         @Test
@@ -163,7 +165,7 @@ And we also need two corresponding test classes:
     Reading through the Athena and Presto documentation you will realize that while `LIMIT` in general is supported `LIMIT_WITH_OFFSET` is not. 
     The unit test reflects that.
 
-    Run the test and it must fail, since you did not implement the the capability reporting method yet.
+    Run the test, and it must fail, since you did not implement the capability reporting method yet.
 
 1. Now **implement the main capabilities part of the `createCapabilityList()` method** in the `<Your_dialect_name>SqlDialect.java` class so that it returns the main capabilities you added to the test.
     We use a builder and an `addMain()` method to add capabilities. 
@@ -187,7 +189,7 @@ And we also need two corresponding test classes:
     ### Defining Catalog and Schema Support
 
     Some databases know the concept of catalogs, others don't. Sometimes databases simulate a single catalog. 
-    The same is true for schemas. In case of a relational database you can try to find out whether or not catalogs and / or schemas are supported by simply looking at the Data Definition Language (DDL) statements that the SQL dialect provides. 
+    The same is true for schemas. In case of a relational database you can try to find out whether catalogs and / or schemas are supported by simply looking at the Data Definition Language (DDL) statements that the SQL dialect provides. 
     If `CREATE SCHEMA` exists, the database supports schemas.
 
     If on the other hand those DDL commands are missing, that does not rule out that pseudo-catalogs and schemas are used. You will see why shortly.
@@ -336,12 +338,12 @@ And we also need two corresponding test classes:
     ```java
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new BaseRemoteMetadataReader(this.connection, this.properties);
+        return new BaseRemoteMetadataReader(this.connectionFactory.getConnection(), this.properties);
     }
 
     @Override
     protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
+        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connectionFactory);
     }
     ```
     
@@ -358,11 +360,11 @@ Each dialect is accompanied by a factory that is responsible for instantiating t
 The [Java Service](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) loader takes care of finding and loading the factory. 
 It looks up the fully qualified class name of the dialect factories in the file [`com.exasol.adapter.dialects.SqlDialectFactory`](https://github.com/exasol/virtual-schema-common-jdbc/blob/master/src/main/java/com/exasol/adapter/dialects/SqlDialectFactory.java).
 
-1. Now **create a class for the factory**: `com.exasol.adapter.dialects.athena.AthenaSqlDialectFactory` that **implements** `SqlDialectFactory`. 
+1. Now **create a class for the factory**: `com.exasol.adapter.dialects.athena.AthenaSqlDialectFactory` that **extends** `AbstractSqlDialectFactory`. 
     Let your IDE to generate necessary **overriding methods** for you. 
   
     ```java
-    public class AthenaSqlDialectFactory implements SqlDialectFactory {
+    public class AthenaSqlDialectFactory extends AbstractSqlDialectFactory {
        //methods here
    } 
   
@@ -387,8 +389,8 @@ It looks up the fully qualified class name of the dialect factories in the file 
     
     ```java
     @Override
-    public SqlDialect createSqlDialect(final Connection connection, final AdapterProperties properties) {
-        return new AthenaSqlDialect(connection, properties);
+    public SqlDialect createSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
+        return new AthenaSqlDialect(connectionFactory, properties);
     }
     ```
    

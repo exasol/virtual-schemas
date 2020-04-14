@@ -18,7 +18,8 @@ Before you can start using Virtual Schemas you should know:
 1. [Aurora](../dialects/aurora.md)
 1. [Big Query](../dialects/bigquery.md)
 1. [DB2](../dialects/db2.md)
-1. [EXASOL](../dialects/exasol.md)
+1. [Exasol](https://github.com/exasol/exasol-virtual-schema/blob/master/doc/dialects/exasol.md)
+**Attention!** The Exasol dialect was moved to a separate repository. If you need to use the Exasol dialect, find the latest release [here](https://github.com/exasol/exasol-virtual-schema/releases).
 1. [Hive](../dialects/hive.md)
 1. [Impala](../dialects/impala.md)
 1. [MySQL](../dialects/mysql.md)
@@ -60,7 +61,7 @@ Before you can start using the JDBC adapter for virtual schemas you have to depl
 
 ## Deploying JDBC Driver Files
 
-You have to upload the JDBC driver files of your remote database **twice** (except the BigQuery dialect):
+You have to upload the JDBC driver files of your remote database **twice** (except the Exasol and BigQuery dialects):
 
 * Upload all files of the JDBC driver into a bucket of your choice, so that they can be accessed from the adapter script.
   
@@ -146,7 +147,7 @@ In our example the metadata are affected, because afterwards the virtual schema 
 ALTER VIRTUAL SCHEMA VIRTUAL_SCHEMA_HIVE SET TABLE_FILTER='CUSTOMERS, CLICKS';
 ```
 
-Finally you can unset properties:
+Finally, you can unset properties:
 
 ```sql
 ALTER VIRTUAL SCHEMA VIRTUAL_SCHEMA_HIVE SET TABLE_FILTER=null;

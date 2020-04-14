@@ -20,7 +20,7 @@ MySQL table names are case-sensitive (at least on Unix-style operating systems) 
 
 In our Athena example the situation is tricky. The documentation states that Athena itself is uses case-insensitive table names.
 On the other hand combining Athena with Apache Spark forces case-sensitive table handling.
-For now we implement the default behavior and let Exasol handle all unquoted identifiers as if they were upper case.
+For now, we implement the default behavior and let Exasol handle all unquoted identifiers as if they were upper case.
 
 1. First, check if the **default identifiers case handling** is suitable for your source:
 
@@ -235,11 +235,11 @@ That way the Exasol database can directly run `IMPORT` on the remote data source
 
 ###  Pre-Requisites for Using IMPORT
 
-If you plan to use `IMPORT`, bare in mind that remote data source must **offer a JDBC driver** (always the case if you write a dialect for the JDBC adapter instead of an adapter from scratch).
+If you plan to use `IMPORT`, bear in mind that remote data source must **offer a JDBC driver** (always the case if you write a dialect for the JDBC adapter instead of an adapter from scratch).
 
 ### Overloading Rewriting
 
-The `AbstractSqlDialect` has a base implementation for query rewriting that should work with most databases that support JDBC. 
+The `AbstractSqlDialect` has a base implementation for the query rewriting that should work with most databases that support JDBC. 
 Sometimes you need more though and in that case you have different mechanisms for doing that.
 
 #### Variant a) Implementing Your own QueryRewriter
