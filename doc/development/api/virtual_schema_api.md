@@ -226,13 +226,22 @@ ORDER  BY user_id
 LIMIT  10;
 ```
 
-The whole set of capabilities is a lot longer. The current list of supported Capabilities can be found in the sources of the Virtual Schema Common Java:
+##### Capability Prefixes
+
+- Main Capabilities: No prefix
+- Literal Capabilities: LITERAL_
+- Predicate Capabilities: FN_PRED_
+- Scalar Function Capabilities: FN_
+- Aggregate Function Capabilities: FN_AGG_
+
+See also [a list of supported Capabilities](capabilities_list.md).
+
+Capabilities can be also found in the sources of the Virtual Schema Common Java:
 * [Main Capabilities](https://github.com/exasol/virtual-schema-common-java/blob/master/src/main/java/com/exasol/adapter/capabilities/MainCapability.java)
 * [Literal Capabilities](https://github.com/exasol/virtual-schema-common-java/blob/master/src/main/java/com/exasol/adapter/capabilities/LiteralCapability.java)
 * [Predicate Capabilities](https://github.com/exasol/virtual-schema-common-java/blob/master/src/main/java/com/exasol/adapter/capabilities/PredicateCapability.java)
 * [Scalar Function Capabilities](https://github.com/exasol/virtual-schema-common-java/blob/master/src/main/java/com/exasol/adapter/capabilities/ScalarFunctionCapability.java)
 * [Aggregate Function Capabilities](https://github.com/exasol/virtual-schema-common-java/blob/master/src/main/java/com/exasol/adapter/capabilities/AggregateFunctionCapability.java)
-
 
 ### Pushdown
 
@@ -531,7 +540,7 @@ Notes
 
 The following EXASOL data types are supported:
 
-**Decimal:**
+#### Decimal
 
 ```json
 {
@@ -544,7 +553,7 @@ The following EXASOL data types are supported:
 }
 ```
 
-**Double:**
+#### Double
 
 ```json
 {
@@ -555,7 +564,7 @@ The following EXASOL data types are supported:
 }
 ```
 
-**Varchar:**
+#### Varchar
 
 ```json
 {
@@ -589,7 +598,7 @@ The following EXASOL data types are supported:
 }
 ```
 
-**Char:**
+#### Char
 
 ```json
 {
@@ -623,7 +632,7 @@ The following EXASOL data types are supported:
 }
 ```
 
-**Date:**
+#### Date
 
 ```json
 {
@@ -634,7 +643,7 @@ The following EXASOL data types are supported:
 }
 ```
 
-**Timestamp:**
+#### Timestamp
 
 ```json
 {
@@ -663,7 +672,7 @@ The following EXASOL data types are supported:
 }
 ```
 
-**Boolean:**
+#### Boolean
 
 ```json
 {
@@ -674,7 +683,7 @@ The following EXASOL data types are supported:
 }
 ```
 
-**Geometry:**
+#### Geometry
 
 ```json
 {
@@ -685,7 +694,9 @@ The following EXASOL data types are supported:
     }
 }
 ```
-**Interval:**
+
+#### Interval
+
 ```json
 {
     "name": "C_INTERVAL_DS_1",
@@ -729,6 +740,18 @@ The following EXASOL data types are supported:
 }
 ```
 
+#### Hashtype
+
+```json
+{
+    "name": "C_HASHTYPE",
+    "dataType": {
+        "type" : "HASHTYPE",
+        "bytesize" : "16"
+        
+    }
+}
+```
 
 ## Expressions
 
@@ -859,9 +882,32 @@ Notes
 }
 ```
 
+```json
+{
+    "type": "literal_interval",
+    "value": "+2-01"
+}
+```
+
+```json
+{
+    "type": "literal_interval",
+    "value": "+0 00:00:02.000"
+}
+```
+
+```json
+{
+    "type" : "literal_hashtype",
+    "value" : "a7b38db6d98542caa3bacc78c3d5bc2f"
+}
+```
+
 ### Predicates
 
 Whenever there is `...` this is a shortcut for an arbitrary expression.
+
+##### AND / OR
 
 ```json
 {
@@ -874,6 +920,8 @@ Whenever there is `...` this is a shortcut for an arbitrary expression.
 
 The same can be used for `predicate_or`.
 
+##### NOT / IS NULL / IS NOT NULL
+
 ```json
 {
     "type": "predicate_not",
@@ -883,9 +931,13 @@ The same can be used for `predicate_or`.
 }
 ```
 
+The same can be used for `predicate_is_null`, `predicate_is_not_null`.
+
+##### = / != / < / <=
+
 ```json
 {
-    "type": "predicate_equals",
+    "type": "predicate_equal",
     "left": {
         ...
     },
@@ -895,7 +947,9 @@ The same can be used for `predicate_or`.
 }
 ```
 
-The same can be used for `predicate_notequals`, `predicate_less` and `predicate_lessequals`.
+The same can be used for `predicate_notequal`, `predicate_less` and `predicate_lessequal`.
+
+##### LIKE / REGEXP_LIKE
 
 ```json
 {
@@ -915,6 +969,8 @@ The same can be used for `predicate_like_regexp`.
 Notes
 * **escapeChar** is optional
 
+##### BETWEEN
+
 ```json
 {
     "type": "predicate_between",
@@ -930,6 +986,8 @@ Notes
 }
 ```
 
+##### IN
+
 `<exp> IN (<const1>, <const2>)`
 
 ```json
@@ -944,9 +1002,32 @@ Notes
 }
 ```
 
+##### IS JSON / IS NOT JSON
+
+`exp1 IS JSON {VALUE | ARRAY | OBJECT | SCALAR} {WITH | WITHOUT} UNIQUE KEYS`
+ (requires predicate capability IS_JSON)
+
+```json
+{
+    "type": "predicate_is_json",
+    "expression": {
+        ...
+    },
+    "typeConstraint": "VALUE",
+    "keyUniquenessConstraint": "WITHOUT UNIQUE KEYS"
+}
+```
+
+Notes:
+
+- typeConstraint is `"VALUE"`, `"ARRAY"`, `"OBJECT"`, or `"SCALAR"`.
+- keyUniquenessConstraint is `"WITH UNIQUE KEYS"` or `"WITHOUT UNIQUE KEYS"`.
+
+The same can be used for a predicate type `predicate_is_not_json`(requires predicate capability IS_NOT_JSON).
+
 ### Scalar Functions
 
-Single argument (consistent with multiple argument version)
+A scalar function with a single argument (consistent with multiple argument version):
 
 ```json
 {
@@ -961,7 +1042,7 @@ Single argument (consistent with multiple argument version)
 }
 ```
 
-Multiple arguments
+A scalar function with multiple arguments:
 
 ```json
 {
@@ -1001,6 +1082,8 @@ Multiple arguments
 Notes
 * **variableInputArgs**: default value is false. If true, `numArgs` is not defined.
 
+##### ADD / SUB / MULT / FLOAT_DIV
+
 Arithmetic operators have following names: `ADD`, `SUB`, `MULT`, `FLOAT_DIV`. They are defined as infix (just a hint, not necessary).
 
 ```json
@@ -1020,7 +1103,9 @@ Arithmetic operators have following names: `ADD`, `SUB`, `MULT`, `FLOAT_DIV`. Th
 }
 ```
 
-**Special cases**
+#### Special Cases of Scalar Functions
+
+##### EXTRACT
 
 `EXTRACT(toExtract FROM exp1)` (requires scalar-function capability `EXTRACT`) 
 
@@ -1036,6 +1121,9 @@ Arithmetic operators have following names: `ADD`, `SUB`, `MULT`, `FLOAT_DIV`. Th
     ],
 }
 ```
+
+##### CAST
+
 `CAST(exp1 AS dataType)` (requires scalar-function capability `CAST`)
 
 ```json
@@ -1054,6 +1142,8 @@ Arithmetic operators have following names: `ADD`, `SUB`, `MULT`, `FLOAT_DIV`. Th
     ],
 }
 ```
+
+##### CASE
 
 `CASE` (requires scalar-function capability `CAST`)
 
@@ -1105,9 +1195,46 @@ Notes:
 * `arguments`: The different cases.
 * `results`: The different results in the same order as the arguments. If present, the ELSE result is the last entry in the `results` array.
 
+##### JSON_VALUE
+
+`JSON_VALUE(arg1, arg2 RETURNING dataType {ERROR | NULL | DEFAULT exp1} ON EMPTY {ERROR | NULL | DEFAULT exp2} ON ERROR)`
+ (requires scalar-function capability JSON_VALUE)
+```json
+{
+    "type": "function_scalar_json_value",
+    "name": "JSON_VALUE",
+    "arguments":
+    [
+        {
+            ...
+        },
+        {
+            ...
+        }
+    ],
+    "returningDataType": dataType,
+    "emptyBehavior":
+    {
+        "type": "ERROR"
+    },
+    "errorBehavior":
+    {
+        "type": "DEFAULT",
+        "expression": exp2
+    }
+}
+```
+
+Notes:
+
+- arguments: Contains two entries: The JSON item and the path specification.
+- emptyBehavior and errorBehavior: type is `"ERROR"`, `"NULL"`, or `"DEFAULT"`. Only for `"DEFAULT"` the member expression containing the default value exists.
+
 ### Aggregate Functions
 
 Consistent with scalar functions. To be detailed: `star-operator`, `distinct`, ...
+
+An aggregate function with a single argument (consistent with multiple argument version):
 
 ```json
 {
@@ -1120,6 +1247,8 @@ Consistent with scalar functions. To be detailed: `star-operator`, `distinct`, .
     ]
 }
 ```
+
+An aggregate function with multiple arguments:
 
 ```json
 {
@@ -1136,9 +1265,12 @@ Consistent with scalar functions. To be detailed: `star-operator`, `distinct`, .
 }
 ```
 
-**Special cases**
+#### Special Cases of Aggregate Functions
 
-`COUNT(exp)`     (requires set-function capability `COUNT`)
+##### COUNT(exp)
+
+`COUNT(exp)`
+ (requires set-function capability `COUNT`)
 
 ```json
 {
@@ -1151,8 +1283,10 @@ Consistent with scalar functions. To be detailed: `star-operator`, `distinct`, .
     ]
 }
 ```
+##### COUNT(*)
 
-`COUNT(*)` (requires set-function capability `COUNT` and `COUNT_STAR`)
+`COUNT(*)`
+ (requires set-function capability `COUNT` and `COUNT_STAR`)
 
 ```json
 {
@@ -1161,7 +1295,10 @@ Consistent with scalar functions. To be detailed: `star-operator`, `distinct`, .
 }
 ```
 
-`COUNT(DISTINCT exp)`    (requires set-function capability `COUNT` and `COUNT_DISTINCT`)
+##### COUNT(DISTINCT exp)
+
+`COUNT(DISTINCT exp)`
+ (requires set-function capability `COUNT` and `COUNT_DISTINCT`)
 
 ```json
 {
@@ -1176,7 +1313,10 @@ Consistent with scalar functions. To be detailed: `star-operator`, `distinct`, .
 }
 ```
 
-`COUNT((exp1, exp2))`   (requires set-function capability `COUNT` and `COUNT_TUPLE`)
+##### COUNT((exp1, exp2))
+
+`COUNT((exp1, exp2))`
+(requires set-function capability `COUNT` and `COUNT_TUPLE`)
 
 ```json
 {
@@ -1193,7 +1333,11 @@ Consistent with scalar functions. To be detailed: `star-operator`, `distinct`, .
     ]
 }
 ```
-`AVG(exp)`     (requires set-function capability `AVG`)
+
+##### AVG(exp)
+
+`AVG(exp)`
+ (requires set-function capability `AVG`)
 
 ```json
 {
@@ -1207,7 +1351,10 @@ Consistent with scalar functions. To be detailed: `star-operator`, `distinct`, .
 }
 ```
 
-`AVG(DISTINCT exp)`    (requires set-function capability `AVG` and `AVG_DISTINCT`)
+##### AVG(DISTINCT exp)
+
+`AVG(DISTINCT exp)`
+ (requires set-function capability `AVG` and `AVG_DISTINCT`)
 
 ```json
 {
@@ -1222,7 +1369,10 @@ Consistent with scalar functions. To be detailed: `star-operator`, `distinct`, .
 }
 ```
 
-`GROUP_CONCAT(DISTINCT exp1 orderBy SEPARATOR ', ')` (requires set-function capability `GROUP_CONCAT`)
+##### GROUP_CONCAT
+
+`GROUP_CONCAT(DISTINCT exp1 orderBy SEPARATOR ', ')`
+ (requires set-function capability `GROUP_CONCAT`)
 
 ```json
 {

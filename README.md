@@ -93,7 +93,7 @@ Supported dialects:
 
 ## Information for Developers 
 
-* [Virtual Schema API Documentation](doc/development/virtual_schema_api.md)
+* [Virtual Schema API Documentation](doc/development/api/virtual_schema_api.md)
 * [Developing and Testing an SQL Dialect](doc/development/developing-sql-dialect/developing_a_dialect.md)
 * [Step-by-step guide to writing your own SQL dialect](doc/development/developing-sql-dialect/step_by_step_guide_to_writing_your_own_dialect.md)
 * [Remote Logging](doc/development/remote_logging.md)
