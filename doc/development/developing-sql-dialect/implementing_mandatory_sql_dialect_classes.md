@@ -21,7 +21,7 @@ And we also need two corresponding test classes:
     And one more **package for tests**:  
     `/virtual-schemas/src/test/java/com/exasol/adapter/dialects/<your new dialect package>` 
 
-    For example, the package for Athena has a name `com.exasol.adapter.dialects.athena`.
+    For example, the package for Athena is named `com.exasol.adapter.dialects.athena`.
 
 1. Now **create a stub class for the dialect**: `com.exasol.adapter.dialects.athena.AthenaSqlDialect` that **extends** `AbstractDialect`. 
     Let your IDE generate necessary **overriding methods** to remove all compilation exceptions. You will implement them later:
@@ -131,27 +131,32 @@ And we also need two corresponding test classes:
     Let's start from the **Main Capabilities** test. Here is an example from the Athena adapter.
 
     ```java
-    package com.exasol.adapter.dialects.athena;
-    
-    import static com.exasol.adapter.capabilities.MainCapability.*;
-    import static org.hamcrest.Matchers.containsInAnyOrder;
-    import static org.junit.Assert.assertThat;
-    
-    import org.junit.Test;
-    import org.junit.jupiter.api.BeforeEach;
-    
-    import com.exasol.adapter.AdapterProperties;
-    
-    @ExtendWith(MockitoExtension.class)
-    public class AthenaSqlDialectTest {
-        private AthenaSqlDialect dialect;
-        @Mock
-        private ConnectionFactory connectionFactoryMock;
-    
-        @BeforeEach
-        void beforeEach() {
-            this.dialect = new AthenaSqlDialect(this.connectionFactoryMock, AdapterProperties.emptyProperties());
-        }
+   package com.exasol.adapter.dialects.athena;
+   
+   import static com.exasol.adapter.AdapterProperties.*;
+   import static com.exasol.adapter.capabilities.MainCapability.*;
+   import static org.hamcrest.Matchers.*;
+   import static org.junit.Assert.assertThat;
+      
+   import org.junit.jupiter.api.BeforeEach;
+   import org.junit.jupiter.api.Test;
+   import org.junit.jupiter.api.extension.ExtendWith;
+   import org.mockito.Mock;
+   import org.mockito.junit.jupiter.MockitoExtension;
+   
+   import com.exasol.adapter.AdapterProperties;
+   import com.exasol.adapter.jdbc.ConnectionFactory;
+   
+   @ExtendWith(MockitoExtension.class)
+   class AthenaSqlDialectTest {
+       private AthenaSqlDialect dialect;
+       @Mock
+       private ConnectionFactory connectionFactoryMock;
+   
+       @BeforeEach
+       void beforeEach() {
+           this.dialect = new AthenaSqlDialect(this.connectionFactoryMock, AdapterProperties.emptyProperties());
+       }
     
         @Test
         void testGetMainCapabilities() {
@@ -338,8 +343,12 @@ And we also need two corresponding test classes:
     
     ```java
     @Override
-    protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new BaseRemoteMetadataReader(this.connectionFactory.getConnection(), this.properties);
+    protected RemoteMetadataReader createRemoteMetadataReader() {  
+        try {
+            return new AthenaMetadataReader(this.connectionFactory.getConnection(), this.properties);
+        } catch (final SQLException exception) {
+            throw new RemoteMetadataReaderException("Unable to create Athena remote metadata reader.", exception);
+        }
     }
 
     @Override

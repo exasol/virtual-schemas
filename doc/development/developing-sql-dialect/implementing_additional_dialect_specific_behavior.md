@@ -239,7 +239,7 @@ If you plan to use `IMPORT`, bear in mind that remote data source must **offer a
 
 ### Overloading Rewriting
 
-The `AbstractSqlDialect` has a base implementation for the query rewriting that should work with most databases that support JDBC. 
+The `AbstractSqlDialect` has a base implementation for query rewriting that should work with most databases that support JDBC. 
 Sometimes you need more though and in that case you have different mechanisms for doing that.
 
 #### Variant a) Implementing Your own QueryRewriter
