@@ -933,7 +933,7 @@ The same can be used for `predicate_or`.
 
 The same can be used for `predicate_is_null`, `predicate_is_not_null`.
 
-##### = / != / < / <=
+##### Comparison operators
 
 ```json
 {

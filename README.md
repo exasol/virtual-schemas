@@ -77,8 +77,7 @@ Supported dialects:
 1. [Aurora](doc/dialects/aurora.md)
 1. [Big Query](doc/dialects/bigquery.md)
 1. [DB2](doc/dialects/db2.md)
-1. [Exasol](https://github.com/exasol/exasol-virtual-schema/blob/master/doc/dialects/exasol.md)
-**Attention!** The Exasol dialect was moved to a separate repository. If you need to use Exasol dialect, find the latest release [here](https://github.com/exasol/exasol-virtual-schema/releases).
+1. [Exasol](https://github.com/exasol/exasol-virtual-schema/blob/master/doc/dialects/exasol.md) ([repository](https://github.com/exasol/exasol-virtual-schema), [releases](https://github.com/exasol/exasol-virtual-schema/releases))
 1. [Hive](doc/dialects/hive.md)
 1. [Impala](doc/dialects/impala.md)
 1. [MySQL](doc/dialects/mysql.md)

@@ -61,7 +61,7 @@ Before you can start using the JDBC adapter for virtual schemas you have to depl
 
 ## Deploying JDBC Driver Files
 
-You have to upload the JDBC driver files of your remote database **twice** (except the Exasol and BigQuery dialects):
+You have to upload the JDBC driver files of your remote database **twice** (except for the Exasol and BigQuery dialects):
 
 * Upload all files of the JDBC driver into a bucket of your choice, so that they can be accessed from the adapter script.
   

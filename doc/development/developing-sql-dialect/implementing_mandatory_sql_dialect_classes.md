@@ -42,8 +42,8 @@ And we also need two corresponding test classes:
    } 
    ```
 
-1. **Add a constructor** that takes a [JDBC connection](https://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html) Factory and user properties as parameters. 
-    Your IDE could also generate it for you.
+1. **Add a constructor** that takes a [JDBC connection](https://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html) factory and user properties as parameters. 
+    Or let your IDE generate it for you. You might wonder, why you get a factory for a connection instead of a connection. This allows your dialect to decide if and when you really need a connection to the remote data source. Depending on that source, establishing a connection can be costly, so having full control over connection creation can safe resources and execution time.
   
     ```java
     /**
@@ -142,6 +142,7 @@ And we also need two corresponding test classes:
     
     import com.exasol.adapter.AdapterProperties;
     
+    @ExtendWith(MockitoExtension.class)
     public class AthenaSqlDialectTest {
         private AthenaSqlDialect dialect;
         @Mock
