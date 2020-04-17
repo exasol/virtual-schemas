@@ -747,7 +747,7 @@ The following EXASOL data types are supported:
     "name": "C_HASHTYPE",
     "dataType": {
         "type" : "HASHTYPE",
-        "bytesize" : "16"
+        "bytesize" : 16
         
     }
 }
@@ -885,21 +885,25 @@ Notes
 ```json
 {
     "type": "literal_interval",
-    "value": "+2-01"
+    "value": "+2-01",
+    "dataType": {
+            "type": "INTERVAL",
+            "fromTo": "YEAR TO MONTH",
+            "precision": 2
+        }
 }
 ```
 
 ```json
 {
     "type": "literal_interval",
-    "value": "+0 00:00:02.000"
-}
-```
-
-```json
-{
-    "type" : "literal_hashtype",
-    "value" : "a7b38db6d98542caa3bacc78c3d5bc2f"
+    "value": "+0 00:00:02.000",
+    "dataType": {
+            "type": "INTERVAL",
+            "fromTo": "DAY TO SECONDS",
+            "precision": 2,
+            "fraction": 2
+        }
 }
 ```
 
@@ -1005,7 +1009,7 @@ Notes
 ##### IS JSON / IS NOT JSON
 
 `exp1 IS JSON {VALUE | ARRAY | OBJECT | SCALAR} {WITH | WITHOUT} UNIQUE KEYS`
- (requires predicate capability IS_JSON)
+ (requires predicate capability `IS_JSON`)
 
 ```json
 {
@@ -1023,7 +1027,7 @@ Notes:
 - typeConstraint is `"VALUE"`, `"ARRAY"`, `"OBJECT"`, or `"SCALAR"`.
 - keyUniquenessConstraint is `"WITH UNIQUE KEYS"` or `"WITHOUT UNIQUE KEYS"`.
 
-The same can be used for a predicate type `predicate_is_not_json`(requires predicate capability IS_NOT_JSON).
+The same can be used for a predicate type `predicate_is_not_json` (requires predicate capability `IS_NOT_JSON`).
 
 ### Scalar Functions
 
@@ -1198,7 +1202,7 @@ Notes:
 ##### JSON_VALUE
 
 `JSON_VALUE(arg1, arg2 RETURNING dataType {ERROR | NULL | DEFAULT exp1} ON EMPTY {ERROR | NULL | DEFAULT exp2} ON ERROR)`
- (requires scalar-function capability JSON_VALUE)
+ (requires scalar-function capability `JSON_VALUE`)
 ```json
 {
     "type": "function_scalar_json_value",
@@ -1228,7 +1232,7 @@ Notes:
 Notes:
 
 - arguments: Contains two entries: The JSON item and the path specification.
-- emptyBehavior and errorBehavior: type is `"ERROR"`, `"NULL"`, or `"DEFAULT"`. Only for `"DEFAULT"` the member expression containing the default value exists.
+- emptyBehavior and errorBehavior: `type` is `"ERROR"`, `"NULL"`, or `"DEFAULT"`. Only for `"DEFAULT"` the member `expression` containing the default value exists.
 
 ### Aggregate Functions
 
