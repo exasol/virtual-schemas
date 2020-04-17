@@ -258,7 +258,6 @@
                       <property>	                      in the logging lambdas too. -->
                     <argLine>-Djava.util.logging.config.file=src/test/resources/logging.properties ${argLine}</argLine>
                     <includes>
-                        <include>ExasolSqlDialectIT.java</include>
                         <include>PostgreSQLSqlDialectIT.java</include>
                     </includes>
                 </configuration>
