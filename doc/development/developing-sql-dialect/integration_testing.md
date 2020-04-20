@@ -63,5 +63,5 @@
 
 ## See Also
 
-* [Virtual Schema API Documentation](../virtual_schema_api.md)
+* [Virtual Schema API Documentation](../api/virtual_schema_api.md)
 * [Integration testing with containers](integration_testing_with_containers.md)

@@ -42,18 +42,18 @@ And we also need two corresponding test classes:
    } 
    ```
 
-1. **Add a constructor** that takes a [JDBC database connection](https://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html) and user properties as parameters. 
-    Your IDE could also generate it for you.
+1. **Add a constructor** that takes a [JDBC connection](https://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html) factory and user properties as parameters. 
+    Or let your IDE generate it for you. You might wonder, why you get a factory for a connection instead of a connection. This allows your dialect to decide if and when you really need a connection to the remote data source. Depending on that source, establishing a connection can be costly, so having full control over connection creation can safe resources and execution time.
   
     ```java
     /**
-    * Create a new instance of the {@link AthenaSqlDialect}.
-    *
-    * @param connection JDBC connection to the Athena service
-    * @param properties user-defined adapter properties
-    */
-    public AthenaSqlDialect(final Connection connection, final AdapterProperties properties) {
-       super(connection, properties);
+     * Create a new instance of the {@link AthenaSqlDialect}.
+     *
+     * @param connectionFactory factory for the JDBC connection to the remote data source
+     * @param properties        user-defined adapter properties
+     */
+    public AthenaSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
+        super(connectionFactory, properties);
     }
     ```
    
@@ -131,24 +131,32 @@ And we also need two corresponding test classes:
     Let's start from the **Main Capabilities** test. Here is an example from the Athena adapter.
 
     ```java
-    package com.exasol.adapter.dialects.athena;
-    
-    import static com.exasol.adapter.capabilities.MainCapability.*;
-    import static org.hamcrest.Matchers.containsInAnyOrder;
-    import static org.junit.Assert.assertThat;
-    
-    import org.junit.Test;
-    import org.junit.jupiter.api.BeforeEach;
-    
-    import com.exasol.adapter.AdapterProperties;
-    
-    public class AthenaSqlDialectTest {
-        private AthenaSqlDialect dialect;
-    
-        @BeforeEach
-        void beforeEach() {
-            this.dialect = new AthenaSqlDialect(null, AdapterProperties.emptyProperties());
-        }
+   package com.exasol.adapter.dialects.athena;
+   
+   import static com.exasol.adapter.AdapterProperties.*;
+   import static com.exasol.adapter.capabilities.MainCapability.*;
+   import static org.hamcrest.Matchers.*;
+   import static org.junit.Assert.assertThat;
+      
+   import org.junit.jupiter.api.BeforeEach;
+   import org.junit.jupiter.api.Test;
+   import org.junit.jupiter.api.extension.ExtendWith;
+   import org.mockito.Mock;
+   import org.mockito.junit.jupiter.MockitoExtension;
+   
+   import com.exasol.adapter.AdapterProperties;
+   import com.exasol.adapter.jdbc.ConnectionFactory;
+   
+   @ExtendWith(MockitoExtension.class)
+   class AthenaSqlDialectTest {
+       private AthenaSqlDialect dialect;
+       @Mock
+       private ConnectionFactory connectionFactoryMock;
+   
+       @BeforeEach
+       void beforeEach() {
+           this.dialect = new AthenaSqlDialect(this.connectionFactoryMock, AdapterProperties.emptyProperties());
+       }
     
         @Test
         void testGetMainCapabilities() {
@@ -163,7 +171,7 @@ And we also need two corresponding test classes:
     Reading through the Athena and Presto documentation you will realize that while `LIMIT` in general is supported `LIMIT_WITH_OFFSET` is not. 
     The unit test reflects that.
 
-    Run the test and it must fail, since you did not implement the the capability reporting method yet.
+    Run the test, and it must fail, since you did not implement the capability reporting method yet.
 
 1. Now **implement the main capabilities part of the `createCapabilityList()` method** in the `<Your_dialect_name>SqlDialect.java` class so that it returns the main capabilities you added to the test.
     We use a builder and an `addMain()` method to add capabilities. 
@@ -187,7 +195,7 @@ And we also need two corresponding test classes:
     ### Defining Catalog and Schema Support
 
     Some databases know the concept of catalogs, others don't. Sometimes databases simulate a single catalog. 
-    The same is true for schemas. In case of a relational database you can try to find out whether or not catalogs and / or schemas are supported by simply looking at the Data Definition Language (DDL) statements that the SQL dialect provides. 
+    The same is true for schemas. In case of a relational database you can try to find out whether catalogs and / or schemas are supported by simply looking at the Data Definition Language (DDL) statements that the SQL dialect provides. 
     If `CREATE SCHEMA` exists, the database supports schemas.
 
     If on the other hand those DDL commands are missing, that does not rule out that pseudo-catalogs and schemas are used. You will see why shortly.
@@ -335,13 +343,17 @@ And we also need two corresponding test classes:
     
     ```java
     @Override
-    protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new BaseRemoteMetadataReader(this.connection, this.properties);
+    protected RemoteMetadataReader createRemoteMetadataReader() {  
+        try {
+            return new AthenaMetadataReader(this.connectionFactory.getConnection(), this.properties);
+        } catch (final SQLException exception) {
+            throw new RemoteMetadataReaderException("Unable to create Athena remote metadata reader.", exception);
+        }
     }
 
     @Override
     protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connection);
+        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connectionFactory);
     }
     ```
     
@@ -358,11 +370,11 @@ Each dialect is accompanied by a factory that is responsible for instantiating t
 The [Java Service](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) loader takes care of finding and loading the factory. 
 It looks up the fully qualified class name of the dialect factories in the file [`com.exasol.adapter.dialects.SqlDialectFactory`](https://github.com/exasol/virtual-schema-common-jdbc/blob/master/src/main/java/com/exasol/adapter/dialects/SqlDialectFactory.java).
 
-1. Now **create a class for the factory**: `com.exasol.adapter.dialects.athena.AthenaSqlDialectFactory` that **implements** `SqlDialectFactory`. 
+1. Now **create a class for the factory**: `com.exasol.adapter.dialects.athena.AthenaSqlDialectFactory` that **extends** `AbstractSqlDialectFactory`. 
     Let your IDE to generate necessary **overriding methods** for you. 
   
     ```java
-    public class AthenaSqlDialectFactory implements SqlDialectFactory {
+    public class AthenaSqlDialectFactory extends AbstractSqlDialectFactory {
        //methods here
    } 
   
@@ -387,8 +399,8 @@ It looks up the fully qualified class name of the dialect factories in the file 
     
     ```java
     @Override
-    public SqlDialect createSqlDialect(final Connection connection, final AdapterProperties properties) {
-        return new AthenaSqlDialect(connection, properties);
+    public SqlDialect createSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
+        return new AthenaSqlDialect(connectionFactory, properties);
     }
     ```
    

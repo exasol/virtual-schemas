@@ -69,30 +69,14 @@ This is an open source project which is officially supported by Exasol. For any 
 
 ## Information for Users
 
+Virtual Schemas support 16 different SQL dialects, from OpenSource databases like PostgreSQL to commercial products like Oracle. 
+Please refer to the user-guide for a [full list of supported SQL dialects](doc/user-guide/user_guide.md#list-of-supported-dialects)
+
 * [User Guide](doc/user-guide/user_guide.md)
-
-Supported dialects:
-
-1. [Athena](doc/dialects/athena.md)
-1. [Aurora](doc/dialects/aurora.md)
-1. [Big Query](doc/dialects/bigquery.md)
-1. [DB2](doc/dialects/db2.md)
-1. [Exasol](doc/dialects/exasol.md)
-1. [Hive](doc/dialects/hive.md)
-1. [Impala](doc/dialects/impala.md)
-1. [MySQL](doc/dialects/mysql.md)
-1. [Oracle](doc/dialects/oracle.md)
-1. [PostgreSQL](doc/dialects/postgresql.md)
-1. [Redshift](doc/dialects/redshift.md)
-1. [SAP HANA](doc/dialects/saphana.md)
-1. [SQL Server](doc/dialects/sql_server.md)
-1. [Sybase ASE](doc/dialects/sybase.md)
-1. [Teradata](doc/dialects/teradata.md)
-1. Generic
 
 ## Information for Developers 
 
-* [Virtual Schema API Documentation](doc/development/virtual_schema_api.md)
+* [Virtual Schema API Documentation](doc/development/api/virtual_schema_api.md)
 * [Developing and Testing an SQL Dialect](doc/development/developing-sql-dialect/developing_a_dialect.md)
 * [Step-by-step guide to writing your own SQL dialect](doc/development/developing-sql-dialect/step_by_step_guide_to_writing_your_own_dialect.md)
 * [Remote Logging](doc/development/remote_logging.md)
@@ -106,40 +90,50 @@ Supported dialects:
 
 Running the Virtual Schema requires a Java Runtime version 9 or later.
 
-| Dependency                                                                          | Purpose                                                | License                       |
-|-------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------|
-| [JSON-P](https://javaee.github.io/jsonp/)                                           | JSON Processing                                        | CDDL-1.0                      |
-| [Exasol Script API](https://docs.exasol.com/database_concepts/udf_scripts.htm)      | Accessing Exasol features                              | MIT License                   |
-| [Exasol Virtual Schema Common](https://github.com/exasol/virtual-schema-common-java)| Common module of Exasol Virtual Schemas adapters       | MIT License                   |
-| [Exasol Virtual Schema JDBC](https://github.com/exasol/virtual-schema-common-jdbc)  | Common JDBC functions for Virtual Schemas adapters     | MIT License                   |
-| JDBC driver(s), depending on data source                                            | Connecting to the data source                          | Check driver documentation    |
+| Dependency                                                                          | Purpose                                                | License                          |
+|-------------------------------------------------------------------------------------|--------------------------------------------------------|----------------------------------|
+| [JSON-P](https://javaee.github.io/jsonp/)                                           | JSON Processing                                        | CDDL-1.0                         |
+| [Exasol Script API](https://docs.exasol.com/database_concepts/udf_scripts.htm)      | Accessing Exasol features                              | MIT License                      |
+| [Exasol Virtual Schema Common](https://github.com/exasol/virtual-schema-common-java)| Common module of Exasol Virtual Schemas adapters       | MIT License                      |
+| [Exasol Virtual Schema JDBC](https://github.com/exasol/virtual-schema-common-jdbc)  | Common JDBC functions for Virtual Schemas adapters     | MIT License                      |
+| JDBC driver(s), depending on data source                                            | Connecting to the data source                          | Check driver documentation       |
 
 ### Test Dependencies
 
-| Dependency                                                                          | Purpose                                                | License                       |
-|-------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------|
-| [Apache Derby](https://db.apache.org/derby/)                                        | Pure-Java embedded database                            | Apache License 2.0            |
-| [Apache HTTP Components](http://hc.apache.org/)                                     | HTTP communication                                     | Apache License 2.0            |
-| [Apache Maven](https://maven.apache.org/)                                           | Build tool                                             | Apache License 2.0            |
-| [Equals Verifier](https://jqno.nl/equalsverifier/)                                  | Testing `equals(...)` and `hashCode()` contracts       | Apache License 2.0            |
-| [Exec Maven Plugin](https://www.mojohaus.org/exec-maven-plugin/)                    | Helps execute system and Java programs.                | Apache License 2.0            |
-| [HikariCP](https://github.com/brettwooldridge/HikariCP)                             | JDBC connection pool.                                  | Apache License 2.0            |
-| [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)                                  | Checking for conditions in code via matchers           | BSD License                   |
-| [JSONassert](http://jsonassert.skyscreamer.org/)                                    | Compare JSON documents for semantic equality           | Apache License 2.0            |
-| [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0    |
-| [J5SE](https://github.com/itsallcode/junit5-system-extensions)                      | JUnit5 extensions to test Java System.x functions      | Eclipse Public License 2.0    |
-| [Mockito](http://site.mockito.org/)                                                 | Mocking framework                                      | MIT License                   |
-| [SnakeYaml](https://bitbucket.org/asomov/snakeyaml/src/default/)                    | YAML parsing                                           | Apache License 2.0            |
+| Dependency                                                                          | Purpose                                                | License                          |
+|-------------------------------------------------------------------------------------|--------------------------------------------------------|----------------------------------|
+| [Apache Maven](https://maven.apache.org/)                                           | Build tool                                             | Apache License 2.0               |
+| [Exasol JDBC Driver][exasol-jdbc-driver]                                            | JDBC driver for Exasol database                        | MIT License                      |
+| [Exasol Testcontainers][exasol-testcontainers]                                      | Exasol extension for the Testcontainers framework      | MIT License                      |
+| [HBase server][hbase-server]                                                        | The Hadoop database                                    | Apache License 2.0               |
+| [Hive JDBC Driver][hive-jdbc-driver]                                                | JDBC driver for Hive database                          | Apache License 2.0               |
+| [HikariCP](https://github.com/brettwooldridge/HikariCP)                             | JDBC connection pool                                   | Apache License 2.0               |
+| [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)                                  | Checking for conditions in code via matchers           | BSD License                      |
+| [JSONassert](http://jsonassert.skyscreamer.org/)                                    | Compare JSON documents for semantic equality           | Apache License 2.0               |
+| [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0       |
+| [J5SE](https://github.com/itsallcode/junit5-system-extensions)                      | JUnit5 extensions to test Java System.x functions      | Eclipse Public License 2.0       |
+| [Mockito](http://site.mockito.org/)                                                 | Mocking framework                                      | MIT License                      |
+| [Oracle JDBC Driver][oracle-jdbc-driver]                                            | JDBC driver for Oracle database                        | Oracle Technology Network License|
+| [PostgreSQL JDBC Driver][postgresql-jdbc-driver]                                    | JDBC driver for PostgreSQL database                    | BSD-2-Clause License             |
+| [Testcontainers](https://www.testcontainers.org/)                                   | Container-based integration tests                      | MIT License                      |
 
 ### Maven Plug-ins
 
-| Plug-in                                                                             | Purpose                                                | License                       |
-|-------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------|
-| [Maven Compiler Plugin](https://maven.apache.org/plugins/maven-compiler-plugin/)    | Setting required Java version                          | Apache License 2.0            |
-| [Maven Exec Plugin](https://www.mojohaus.org/exec-maven-plugin/)                    | Executing external applications                        | Apache License 2.0            |
-| [Maven GPG Plugin](https://maven.apache.org/plugins/maven-gpg-plugin/)              | Code signing                                           | Apache License 2.0            |
-| [Maven Failsafe Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Integration testing                                    | Apache License 2.0            |
-| [Maven Javadoc Plugin](https://maven.apache.org/plugins/maven-javadoc-plugin/)      | Creating a Javadoc JAR                                 | Apache License 2.0            |
-| [Maven Jacoco Plugin](https://www.eclemma.org/jacoco/trunk/doc/maven.html)          | Code coverage metering                                 | Eclipse Public License 2.0    |
-| [Maven Source Plugin](https://maven.apache.org/plugins/maven-source-plugin/)        | Creating a source code JAR                             | Apache License 2.0            |
-| [Maven Surefire Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Unit testing                                           | Apache License 2.0            |
+| Plug-in                                                                             | Purpose                                                | License                          |
+|-------------------------------------------------------------------------------------|--------------------------------------------------------|----------------------------------|
+| [Maven Compiler Plugin](https://maven.apache.org/plugins/maven-compiler-plugin/)    | Setting required Java version                          | Apache License 2.0               |
+| [Maven Exec Plugin](https://www.mojohaus.org/exec-maven-plugin/)                    | Executing external applications                        | Apache License 2.0               |
+| [Maven GPG Plugin](https://maven.apache.org/plugins/maven-gpg-plugin/)              | Code signing                                           | Apache License 2.0               |
+| [Maven Failsafe Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Integration testing                                    | Apache License 2.0               |
+| [Maven Javadoc Plugin](https://maven.apache.org/plugins/maven-javadoc-plugin/)      | Creating a Javadoc JAR                                 | Apache License 2.0               |
+| [Maven Jacoco Plugin](https://www.eclemma.org/jacoco/trunk/doc/maven.html)          | Code coverage metering                                 | Eclipse Public License 2.0       |
+| [Maven Source Plugin](https://maven.apache.org/plugins/maven-source-plugin/)        | Creating a source code JAR                             | Apache License 2.0               |
+| [Maven Surefire Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Unit testing                                           | Apache License 2.0               |
+
+
+[exasol-jdbc-driver]: https://www.exasol.com/portal/display/DOWNLOAD/Exasol+Download+Section
+[hbase-server]: http://hbase.apache.org/
+[hive-jdbc-driver]: https://github.com/apache/hive/tree/master/jdbc/src/java/org/apache/hive/jdbc
+[exasol-testcontainers]: https://github.com/exasol/exasol-testcontainers
+[oracle-jdbc-driver]: https://www.oracle.com/database/technologies/appdev/jdbc.html
+[postgresql-jdbc-driver]: https://jdbc.postgresql.org/

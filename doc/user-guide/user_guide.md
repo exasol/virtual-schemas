@@ -14,22 +14,24 @@ Before you can start using Virtual Schemas you should know:
 
 ## List of Supported Dialects
 
-1. [Athena](../dialects/athena.md)
-1. [Aurora](../dialects/aurora.md)
-1. [Big Query](../dialects/bigquery.md)
-1. [DB2](../dialects/db2.md)
-1. [EXASOL](../dialects/exasol.md)
-1. [Hive](../dialects/hive.md)
-1. [Impala](../dialects/impala.md)
-1. [MySQL](../dialects/mysql.md)
-1. [Oracle](../dialects/oracle.md)
-1. [PostgresSQL](../dialects/postgresql.md)
-1. [Redshift](../dialects/redshift.md)
-1. [SAP HANA](../dialects/saphana.md)
-1. [SQL Server](../dialects/sql_server.md)
-1. [Sybase ASE](../dialects/sybase.md)
-1. [Teradata](../dialects/teradata.md)
-1. Generic
+Dialect name                        | Repository                                                 | Latest release
+------------------------------------|------------------------------------------------------------|--------------------------------------------------|
+[Athena][athena-dialect-doc]        |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+[Aurora][aurora-dialect-doc]        |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+[Big Query][big-query-dialect-doc]  |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+[DB2][db2-dialect-doc]              |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+[Exasol][exasol-dialect-doc]        |  [Exasol Virtual Schema][exasol-virtual-schema-repository] | [Latest release][exasol-virtual-schema-releases] |                
+[Hive][hive-dialect-doc]            |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+[Impala][impala-dialect-doc]        |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+[MySQL][mysql-dialect-doc]          |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+[Oracle][oracle-dialect-doc]        |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+[PostgreSQL][postgresql-dialect-doc]|  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+[Redshift][redshift-dialect-doc]    |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+[SAP HANA][sap-hana-dialect-doc]    |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+[SQL Server][sql-server-dialect-doc]|  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+[Sybase ASE][sybase-dialect-doc]    |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+[Teradata][teradata-dialect-doc]    |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+Generic                             |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |
 
 
 # JDBC Adapter for Virtual Schemas
@@ -60,7 +62,7 @@ Before you can start using the JDBC adapter for virtual schemas you have to depl
 
 ## Deploying JDBC Driver Files
 
-You have to upload the JDBC driver files of your remote database **twice** (except the BigQuery dialect):
+You have to upload the JDBC driver files of your remote database **twice** (except for the Exasol and BigQuery dialects):
 
 * Upload all files of the JDBC driver into a bucket of your choice, so that they can be accessed from the adapter script.
   
@@ -85,7 +87,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.JDBC_ADAPTER_SCRIPT AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-3.1.3.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-4.0.0.jar;
   %jar /buckets/your-bucket-fs/your-bucket/<JDBC driver>.jar;
 /
 ```
@@ -146,7 +148,7 @@ In our example the metadata are affected, because afterwards the virtual schema 
 ALTER VIRTUAL SCHEMA VIRTUAL_SCHEMA_HIVE SET TABLE_FILTER='CUSTOMERS, CLICKS';
 ```
 
-Finally you can unset properties:
+Finally, you can unset properties:
 
 ```sql
 ALTER VIRTUAL SCHEMA VIRTUAL_SCHEMA_HIVE SET TABLE_FILTER=null;
@@ -220,3 +222,26 @@ There are a few important things you need to know about those data types.
 ## See Also
 
 * [SQL Client Specifics](sql_clients.md)
+
+
+
+[athena-dialect-doc]: doc/dialects/athena.md
+[aurora-dialect-doc]: doc/dialects/aurora.md
+[big-query-dialect-doc]: doc/dialects/bigquery.md
+[db2-dialect-doc]: doc/dialects/db2.md
+[exasol-dialect-doc]: https://github.com/exasol/exasol-virtual-schema/blob/master/doc/dialects/exasol.md
+[hive-dialect-doc]: doc/dialects/hive.md
+[impala-dialect-doc]: doc/dialects/impala.md
+[mysql-dialect-doc]: doc/dialects/mysql.md
+[oracle-dialect-doc]: doc/dialects/oracle.md
+[postgresql-dialect-doc]: doc/dialects/postgresql.md
+[redshift-dialect-doc]: doc/dialects/redshift.md
+[sap-hana-dialect-doc]: doc/dialects/saphana.md
+[sql-server-dialect-doc]:doc/dialects/sql_server.md
+[sybase-dialect-doc]: doc/dialects/sybase.md
+[teradata-dialect-doc]: doc/dialects/teradata.md
+
+[virtual-schemas-repository]: https://github.com/exasol/virtual-schemas
+[virtual-schemas-releases]: https://github.com/exasol/virtual-schemas/releases
+[exasol-virtual-schema-repository]: https://github.com/exasol/exasol-virtual-schema
+[exasol-virtual-schema-releases]: https://github.com/exasol/exasol-virtual-schema/releases
