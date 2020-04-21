@@ -4,7 +4,7 @@ import static com.exasol.adapter.dialects.IntegrationTestConstants.*;
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.*;
@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,12 +58,12 @@ class HiveSqlDialectIT {
     @Container
     public static DockerComposeContainer<? extends DockerComposeContainer<?>> hiveContainer = new DockerComposeContainer<>(
             new File(HIVE_DOCKER_COMPOSE_YAML)) //
-                    .withExposedService(HIVE_SERVICE_NAME, HIVE_EXPOSED_PORT,
-                            Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(50)));
+            .withExposedService(HIVE_SERVICE_NAME, HIVE_EXPOSED_PORT,
+                    Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(50)));
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
-                    .withLogConsumer(new Slf4jLogConsumer(LOGGER)); //
+            .withLogConsumer(new Slf4jLogConsumer(LOGGER)); //
     private static Statement statementExasol;
     private static final IntegrationTestSetupManager integrationTestSetupManager = new IntegrationTestSetupManager();
 
@@ -220,7 +219,7 @@ class HiveSqlDialectIT {
             final ResultSet actual = statementExasol
                     .executeQuery("SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a INNER JOIN  "
                             + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x=b.x");
-            MatcherAssert.assertThat(actual, matchesResultSet(expected));
+            assertThat(actual, matchesResultSet(expected));
         }
 
         @Test
@@ -232,7 +231,7 @@ class HiveSqlDialectIT {
                     .executeQuery("SELECT b.y || " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + ".y FROM "
                             + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " INNER JOIN  " + VIRTUAL_SCHEMA_HIVE_JDBC
                             + "." + TABLE_JOIN_2 + " b ON " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + ".x=b.x");
-            MatcherAssert.assertThat(actual, matchesResultSet(expected));
+            assertThat(actual, matchesResultSet(expected));
         }
 
         @Test
@@ -244,7 +243,7 @@ class HiveSqlDialectIT {
             final ResultSet actual = statementExasol.executeQuery(
                     "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a LEFT OUTER JOIN  "
                             + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
-            MatcherAssert.assertThat(actual, matchesResultSet(expected));
+            assertThat(actual, matchesResultSet(expected));
         }
 
         @Test
@@ -256,7 +255,7 @@ class HiveSqlDialectIT {
             final ResultSet actual = statementExasol.executeQuery(
                     "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a RIGHT OUTER JOIN  "
                             + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
-            MatcherAssert.assertThat(actual, matchesResultSet(expected));
+            assertThat(actual, matchesResultSet(expected));
         }
 
         @Test
@@ -269,7 +268,7 @@ class HiveSqlDialectIT {
             final ResultSet actual = statementExasol.executeQuery(
                     "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a FULL OUTER JOIN  "
                             + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
-            MatcherAssert.assertThat(actual, matchesResultSet(expected));
+            assertThat(actual, matchesResultSet(expected));
         }
 
         @Test
@@ -281,7 +280,7 @@ class HiveSqlDialectIT {
             final ResultSet actual = statementExasol.executeQuery(
                     "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a RIGHT OUTER JOIN  "
                             + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x||a.y=b.x||b.y ORDER BY a.x");
-            MatcherAssert.assertThat(actual, matchesResultSet(expected));
+            assertThat(actual, matchesResultSet(expected));
         }
 
         @Test
@@ -294,7 +293,7 @@ class HiveSqlDialectIT {
             final ResultSet actual = statementExasol.executeQuery(
                     "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a FULL OUTER JOIN  "
                             + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x-b.x=0 ORDER BY a.x");
-            MatcherAssert.assertThat(actual, matchesResultSet(expected));
+            assertThat(actual, matchesResultSet(expected));
         }
     }
 
@@ -419,7 +418,7 @@ class HiveSqlDialectIT {
         final ResultSet result = statementExasol.executeQuery(query);
         result.next();
         final String actual = result.getString(1);
-        MatcherAssert.assertThat(actual, containsString(expected));
+        assertThat(actual, containsString(expected));
     }
 
     @Test
@@ -457,7 +456,7 @@ class HiveSqlDialectIT {
     }
 
     @Test
-    // =, !=, <, <=, >, >=
+        // =, !=, <, <=, >, >=
     void testComparisonPredicates() throws SQLException {
         final ResultSet expected = getExpectedResultSet(
                 "(biginteger DECIMAL(19,0), b1 BOOLEAN, b2 BOOLEAN, b3 BOOLEAN, b4 BOOLEAN, b5 BOOLEAN, b6 BOOLEAN)",
@@ -477,20 +476,20 @@ class HiveSqlDialectIT {
     }
 
     @Test
-    // NOT, AND, OR
+        // NOT, AND, OR
     void testLogicalPredicates() {
         final String query = "SELECT biginteger FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES
                 + " WHERE (biginteger < 56 or biginteger > 56) AND NOT (biginteger is null)";
         final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` " //
                 + "FROM `default`.`TABLE_HIVE_ALL_DATA_TYPES` "
                 + "WHERE ((`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` < 56 OR 56 < `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`) " //
-                + "AND NOT (`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` IS NULL))";
+                + "AND NOT ((`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`) IS NULL))";
         assertAll(() -> assertThat(statementExasol.executeQuery(query).next(), equalTo(false)),
                 () -> assertExplainVirtual(query, expectedExplainVirtual));
     }
 
     @Test
-    // LIKE, LIKE ESCAPE (not pushed down)
+        // LIKE, LIKE ESCAPE (not pushed down)
     void testLikePredicates() throws SQLException {
         final ResultSet expected = getExpectedResultSet("(varcharcol VARCHAR(10) ASCII, boolcolumn BOOLEAN)",
                 "('tytu', false)");
@@ -503,7 +502,7 @@ class HiveSqlDialectIT {
     }
 
     @Test
-    // REGEXP_LIKE rewritten to REGEXP
+        // REGEXP_LIKE rewritten to REGEXP
     void testLikePredicatesRewritten() {
         final String query = "SELECT varcharcol FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES
                 + " WHERE varcharcol REGEXP_LIKE 'a+'";
@@ -514,7 +513,7 @@ class HiveSqlDialectIT {
     }
 
     @Test
-    // BETWEEN, IN, IS NULL, !=NULL(rewritten to "IS NOT NULL")
+        // BETWEEN, IN, IS NULL, !=NULL(rewritten to "IS NOT NULL")
     void testMiscPredicates() throws SQLException {
         final ResultSet expected = getExpectedResultSet(
                 "(biginteger DECIMAL(19,0), b1 BOOLEAN, b2 BOOLEAN, b3 BOOLEAN)", "(56, true, false, true)");
@@ -522,7 +521,7 @@ class HiveSqlDialectIT {
                 + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES + " WHERE biginteger between 51 and 60";
         final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`, " //
                 + "`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` IN (56, 61), " //
-                + "`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` IS NULL, " //
+                + "(`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`) IS NULL, " //
                 + "`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` IS NOT NULL " //
                 + "FROM `default`.`TABLE_HIVE_ALL_DATA_TYPES` " //
                 + "WHERE `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` BETWEEN 51 AND 60";
