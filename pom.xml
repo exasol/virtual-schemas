@@ -14,8 +14,8 @@
         <junit.version>5.6.1</junit.version>
         <junit.platform.version>1.6.1</junit.platform.version>
         <surefire.and.failsafe.plugin.version>3.0.0-M4</surefire.and.failsafe.plugin.version>
-        <vscjava.version>8.0.2</vscjava.version>
-        <vscjdbc.version>3.0.3</vscjdbc.version>
+        <vscjava.version>9.0.0</vscjava.version>
+        <vscjdbc.version>4.0.0</vscjdbc.version>
         <org.testcontainers.version>1.13.0</org.testcontainers.version>
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>

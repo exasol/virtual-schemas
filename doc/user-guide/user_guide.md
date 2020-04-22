@@ -42,7 +42,7 @@ The JDBC adapter for virtual schemas allows you to connect to JDBC data sources 
 It uses the well proven ```IMPORT FROM JDBC``` Exasol statement behind the scenes to obtain the requested data, when running a query on a virtual table. 
 The JDBC adapter also serves as the reference adapter for the Exasol virtual schema framework.
 
-You can find the list of supported dialects in [the list of supported dilects](#list-of-supported-dialects).
+You can find supported dialects in [the list of supported dialects](#list-of-supported-dialects).
 
 The so called `GENERIC` dialect is designed to work with any JDBC driver. It derives the SQL dialect from the JDBC driver metadata. 
 However, it does not support any capabilities and might fail if the data source has special syntax or data types, so it should only be used for evaluation purposes.
@@ -203,7 +203,7 @@ Property                    | Value
 **IS_LOCAL**                | Only relevant if your data source is the same Exasol database where you create the virtual schema. Either `TRUE` or `FALSE` (default). If true, you are connecting to the local Exasol database (e.g. for testing purposes). In this case, the adapter can avoid the `IMPORT FROM JDBC` overhead.
 **EXCEPTION_HANDLING**      | Activates or deactivates different exception handling modes. Supported values: `IGNORE_INVALID_VIEWS` and `NONE` (default). Currently this property only affects the Teradata dialect.
 **EXCLUDED_CAPABILITIES**   | A comma-separated list of capabilities that you want to deactivate (although the adapter might support them).
-**IGNORE_ERRORS**           | Is used to ignore errors thrown by the adapter. Supported values: 'POSTGRESQL_UPPERCASE_TABLES' (see PostgreSQL dialect documentation).
+**IGNORE_ERRORS**           | Is used to ignore errors thrown by the adapter. Please, check the documentation of the dialects that support this property for additional information: [Exasol dialect][exasol-dialect-doc], [PostgreSQL dialect][postgresql-dialect-doc];
 
 ## Limitations
 
