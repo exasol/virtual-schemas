@@ -58,12 +58,12 @@ class HiveSqlDialectIT {
     @Container
     public static DockerComposeContainer<? extends DockerComposeContainer<?>> hiveContainer = new DockerComposeContainer<>(
             new File(HIVE_DOCKER_COMPOSE_YAML)) //
-            .withExposedService(HIVE_SERVICE_NAME, HIVE_EXPOSED_PORT,
-                    Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(50)));
+                    .withExposedService(HIVE_SERVICE_NAME, HIVE_EXPOSED_PORT,
+                            Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(50)));
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
-            .withLogConsumer(new Slf4jLogConsumer(LOGGER)); //
+                    .withLogConsumer(new Slf4jLogConsumer(LOGGER)); //
     private static Statement statementExasol;
     private static final IntegrationTestSetupManager integrationTestSetupManager = new IntegrationTestSetupManager();
 
@@ -456,7 +456,7 @@ class HiveSqlDialectIT {
     }
 
     @Test
-        // =, !=, <, <=, >, >=
+    // =, !=, <, <=, >, >=
     void testComparisonPredicates() throws SQLException {
         final ResultSet expected = getExpectedResultSet(
                 "(biginteger DECIMAL(19,0), b1 BOOLEAN, b2 BOOLEAN, b3 BOOLEAN, b4 BOOLEAN, b5 BOOLEAN, b6 BOOLEAN)",
@@ -476,20 +476,21 @@ class HiveSqlDialectIT {
     }
 
     @Test
-        // NOT, AND, OR
+    // NOT, AND, OR
     void testLogicalPredicates() {
         final String query = "SELECT biginteger FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES
                 + " WHERE (biginteger < 56 or biginteger > 56) AND NOT (biginteger is null)";
         final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` " //
                 + "FROM `default`.`TABLE_HIVE_ALL_DATA_TYPES` "
-                + "WHERE ((`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` < 56 OR 56 < `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`) " //
+                + "WHERE ((`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` < 56 OR 56 < `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`) "
+                //
                 + "AND NOT ((`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`) IS NULL))";
         assertAll(() -> assertThat(statementExasol.executeQuery(query).next(), equalTo(false)),
                 () -> assertExplainVirtual(query, expectedExplainVirtual));
     }
 
     @Test
-        // LIKE, LIKE ESCAPE (not pushed down)
+    // LIKE, LIKE ESCAPE (not pushed down)
     void testLikePredicates() throws SQLException {
         final ResultSet expected = getExpectedResultSet("(varcharcol VARCHAR(10) ASCII, boolcolumn BOOLEAN)",
                 "('tytu', false)");
@@ -502,7 +503,7 @@ class HiveSqlDialectIT {
     }
 
     @Test
-        // REGEXP_LIKE rewritten to REGEXP
+    // REGEXP_LIKE rewritten to REGEXP
     void testLikePredicatesRewritten() {
         final String query = "SELECT varcharcol FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES
                 + " WHERE varcharcol REGEXP_LIKE 'a+'";
@@ -513,7 +514,7 @@ class HiveSqlDialectIT {
     }
 
     @Test
-        // BETWEEN, IN, IS NULL, !=NULL(rewritten to "IS NOT NULL")
+    // BETWEEN, IN, IS NULL, !=NULL(rewritten to "IS NOT NULL")
     void testMiscPredicates() throws SQLException {
         final ResultSet expected = getExpectedResultSet(
                 "(biginteger DECIMAL(19,0), b1 BOOLEAN, b2 BOOLEAN, b3 BOOLEAN)", "(56, true, false, true)");
