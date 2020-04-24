@@ -41,6 +41,13 @@ class HiveColumnMetadataReaderTest {
     }
 
     @Test
+    void mapBinaryReturnVarchar() {
+        final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.BINARY, 0, 0, 0, "BINARY");
+        assertThat(this.columnMetadataReader.mapJdbcType(typeDescription),
+                equalTo(DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8)));
+    }
+
+    @Test
     void testMapColumnTypeBeyondMaxExasolDecimalPrecisionWithCastProperty() {
         final Map<String, String> rawProperties = new HashMap<>();
         rawProperties.put(HiveProperties.HIVE_CAST_NUMBER_TO_DECIMAL_PROPERTY, "10,2");
