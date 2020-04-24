@@ -171,17 +171,7 @@ Note that properties are always strings, like `TABLE_FILTER='T1,T2'`.
 Property                    | Value
 --------------------------- | -----------
 **SQL_DIALECT**             | Name of the SQL dialect: EXASOL, HIVE, IMPALA, ORACLE, TERADATA, REDSHIFT or GENERIC (case insensitive). If you try generating a virtual schema without specifying this property you will see all available dialects in the error message.
-
-**Mandatory Connection Specification:**
-
-Either specify `CONNECTION_NAME` OR provide `CONNECTION_STRING`, `USERNAME` and `PASSWORD`.
-
-Property                    | Value
---------------------------- | -----------
-**CONNECTION_NAME**         | Name of the connection created with `CREATE CONNECTION` which contains the JDBC connection string, the username and password. If you defined this property then it is not allowed to set `CONNECTION_STRING`, `USERNAME` and `PASSWORD`. We recommend using this property to ensure that the password will not be shown in the logfiles.
-**CONNECTION_STRING**       | The JDBC connection string. Only required if `CONNECTION_NAME` is not set.
-**USERNAME**                | Username for authentication. Only required if `CONNECTION_NAME` is not set.
-**PASSWORD**                | Password for authentication. Only required if `CONNECTION_NAME` is not set.
+**CONNECTION_NAME**         | Name of the connection created with `CREATE CONNECTION` which contains the JDBC connection string, the username and password.
 
 
 #### Common Optional Properties

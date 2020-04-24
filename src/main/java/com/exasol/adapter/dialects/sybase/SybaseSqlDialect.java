@@ -24,10 +24,6 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
     static final int MAX_SYBASE_VARCHAR_SIZE = 8000;
     static final int MAX_SYBASE_N_VARCHAR_SIZE = 4000;
     private static final Capabilities CAPABILITIES = createCapabilityList();
-    private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
-            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
-            CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
-            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
     private static Capabilities createCapabilityList() {
         return Capabilities.builder()
@@ -63,7 +59,7 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
      * @param properties        user-defined adapter properties
      */
     public SybaseSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
-        super(connectionFactory, properties);
+        super(connectionFactory, properties, Set.of(CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY));
     }
 
     @Override
@@ -133,11 +129,6 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_LOW;
-    }
-
-    @Override
-    protected List<String> getSupportedProperties() {
-        return SUPPORTED_PROPERTIES;
     }
 
     @Override

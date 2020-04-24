@@ -7,7 +7,6 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -50,6 +49,6 @@ class HiveColumnMetadataReaderTest {
                 BaseIdentifierConverter.createDefault());
         final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.DECIMAL, 0,
                 DataType.MAX_EXASOL_DECIMAL_PRECISION + 1, 10, "DECIMAL");
-        Assert.assertThat(columnMetadataReader.mapJdbcType(typeDescription), equalTo(DataType.createDecimal(10, 2)));
+        assertThat(columnMetadataReader.mapJdbcType(typeDescription), equalTo(DataType.createDecimal(10, 2)));
     }
 }

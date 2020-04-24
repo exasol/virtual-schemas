@@ -43,8 +43,13 @@ And we also need two corresponding test classes:
    ```
 
 1. **Add a constructor** that takes a [JDBC connection](https://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html) factory and user properties as parameters. 
-    Or let your IDE generate it for you. You might wonder, why you get a factory for a connection instead of a connection. This allows your dialect to decide if and when you really need a connection to the remote data source. Depending on that source, establishing a connection can be costly, so having full control over connection creation can safe resources and execution time.
+    Or let your IDE generate it for you. You might wonder, why you get a factory for a connection instead of a connection. 
+    This allows your dialect to decide if and when you really need a connection to the remote data source. 
+    Depending on that source, establishing a connection can be costly, so having full control over connection creation can safe resources and execution time.
   
+    The constructor of an `AbstractSqlDialect` also takes a set of dialect-specific properties. 
+    A set of pre-defined properties which each dialect must support you can find inside the `AbstractSqlDialect`. You don't need to re-define them.
+   
     ```java
     /**
      * Create a new instance of the {@link AthenaSqlDialect}.
@@ -53,7 +58,7 @@ And we also need two corresponding test classes:
      * @param properties        user-defined adapter properties
      */
     public AthenaSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
-        super(connectionFactory, properties);
+        super(connectionFactory, properties, Set.of(CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY));
     }
     ```
    
@@ -136,7 +141,7 @@ And we also need two corresponding test classes:
    import static com.exasol.adapter.AdapterProperties.*;
    import static com.exasol.adapter.capabilities.MainCapability.*;
    import static org.hamcrest.Matchers.*;
-   import static org.junit.Assert.assertThat;
+   import static org.hamcrest.MatcherAssert.assertThat;
       
    import org.junit.jupiter.api.BeforeEach;
    import org.junit.jupiter.api.Test;
@@ -317,25 +322,6 @@ And we also need two corresponding test classes:
     public String applyQuote(final String identifier) {
             return "\"" + identifier + "\"";
         }   
-    ```
-    
-1. **Create `SUPPORTED_PROPERTIES` constant**  with a list of properties which are supported by a new dialect. 
-
-    The list of the most common supported properties: `SQL_DIALECT_PROPERTY, CONNECTION_NAME_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
-    SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY`.
-
-    Then **implement `getSupportedProperties()`** method. Write a test. 
-
-    ```java
-    private static final List<String> SUPPORTED_PROPERTIES = List.of(SQL_DIALECT_PROPERTY,
-                CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
-                CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
-                DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
-    
-    @Override
-    protected List<String> getSupportedProperties() {
-        return SUPPORTED_PROPERTIES;
-    }
     ```
     
 1. You have **two unimplemented methods** left: `createQueryRewriter()` and `createRemoteMetadataReader()`.

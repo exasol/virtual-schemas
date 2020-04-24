@@ -132,8 +132,8 @@ class MySqlSqlDialectTest {
     @Test
     void testGetSupportedProperties() {
         assertThat(this.dialect.getSupportedProperties(),
-                containsInAnyOrder(SQL_DIALECT_PROPERTY, CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY,
-                        USERNAME_PROPERTY, PASSWORD_PROPERTY, TABLE_FILTER_PROPERTY, CATALOG_NAME_PROPERTY,
-                        EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY));
+                containsInAnyOrder(SQL_DIALECT_PROPERTY, CONNECTION_NAME_PROPERTY, TABLE_FILTER_PROPERTY,
+                        CATALOG_NAME_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY,
+                        LOG_LEVEL_PROPERTY));
     }
 }

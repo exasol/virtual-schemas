@@ -25,10 +25,6 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
     static final int MAX_SQLSERVER_NVARCHAR_SIZE = 4000;
     static final int MAX_SQLSERVER_CLOB_SIZE = 2000000;
     private static final Capabilities CAPABILITIES = createCapabilityList();
-    private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
-            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
-            CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
-            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
     private static Capabilities createCapabilityList() {
         return Capabilities.builder()
@@ -64,7 +60,7 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
      * @param properties        user-defined adapter properties
      */
     public SqlServerSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
-        super(connectionFactory, properties);
+        super(connectionFactory, properties, Set.of(CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY));
     }
 
     @Override
@@ -148,10 +144,5 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
     @Override
     protected QueryRewriter createQueryRewriter() {
         return new BaseQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
-    }
-
-    @Override
-    protected List<String> getSupportedProperties() {
-        return SUPPORTED_PROPERTIES;
     }
 }

@@ -1,7 +1,7 @@
 package com.exasol.adapter.dialects.redshift;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.sql.Types;
 

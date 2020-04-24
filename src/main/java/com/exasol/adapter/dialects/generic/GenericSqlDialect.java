@@ -3,8 +3,7 @@ package com.exasol.adapter.dialects.generic;
 import static com.exasol.adapter.AdapterProperties.*;
 
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.adapternotes.SchemaAdapterNotes;
@@ -18,10 +17,6 @@ import com.exasol.adapter.jdbc.*;
  */
 public class GenericSqlDialect extends AbstractSqlDialect {
     static final String NAME = "GENERIC";
-    private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
-            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
-            CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
-            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
     private final RemoteMetadataReader remoteMetadataReader;
 
     /**
@@ -31,7 +26,7 @@ public class GenericSqlDialect extends AbstractSqlDialect {
      * @param properties        user-defined adapter properties
      */
     public GenericSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
-        super(connectionFactory, properties);
+        super(connectionFactory, properties, Set.of(CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY));
         this.remoteMetadataReader = createRemoteMetadataReader();
     }
 
@@ -84,11 +79,6 @@ public class GenericSqlDialect extends AbstractSqlDialect {
             assert (notes.areNullsSortedHigh());
             return NullSorting.NULLS_SORTED_HIGH;
         }
-    }
-
-    @Override
-    protected List<String> getSupportedProperties() {
-        return SUPPORTED_PROPERTIES;
     }
 
     @Override

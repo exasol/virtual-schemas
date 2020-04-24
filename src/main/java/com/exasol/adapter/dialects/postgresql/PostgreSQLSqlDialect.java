@@ -28,10 +28,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     private static final String POSTGRESQL_IDENTIFIER_MAPPING_CONVERT_TO_UPPER_VALUE = "CONVERT_TO_UPPER";
     private static final PostgreSQLIdentifierMapping DEFAULT_POSTGRESS_IDENTIFIER_MAPPING = PostgreSQLIdentifierMapping.CONVERT_TO_UPPER;
     private static final Capabilities CAPABILITIES = createCapabilityList();
-    private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
-            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
-            CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
-            IGNORE_ERRORS_PROPERTY, POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
     private static Capabilities createCapabilityList() {
         return Capabilities.builder()
@@ -65,7 +61,8 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
      * @param properties        user-defined adapter properties
      */
     public PostgreSQLSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
-        super(connectionFactory, properties);
+        super(connectionFactory, properties, Set.of(CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, IGNORE_ERRORS_PROPERTY,
+                POSTGRESQL_IDENTIFIER_MAPPING_PROPERTY));
     }
 
     @Override
@@ -155,11 +152,6 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     public void validateProperties() throws PropertyValidationException {
         super.validateProperties();
         checkPostgreSQLIdentifierPropertyConsistency();
-    }
-
-    @Override
-    protected List<String> getSupportedProperties() {
-        return SUPPORTED_PROPERTIES;
     }
 
     private void checkPostgreSQLIdentifierPropertyConsistency() throws PropertyValidationException {

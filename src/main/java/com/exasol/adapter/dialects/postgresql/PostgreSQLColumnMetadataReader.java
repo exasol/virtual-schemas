@@ -37,6 +37,7 @@ public class PostgreSQLColumnMetadataReader extends BaseColumnMetadataReader {
             return mapJdbcTypeOther(jdbcTypeDescription);
         case Types.SQLXML:
         case Types.DISTINCT:
+        case Types.BINARY:
             return DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
         default:
             return super.mapJdbcType(jdbcTypeDescription);

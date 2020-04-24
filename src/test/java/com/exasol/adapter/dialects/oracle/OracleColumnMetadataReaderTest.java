@@ -2,7 +2,7 @@ package com.exasol.adapter.dialects.oracle;
 
 import static com.exasol.adapter.metadata.DataType.createMaximumSizeVarChar;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.sql.Types;
 import java.util.HashMap;
