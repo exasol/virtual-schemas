@@ -92,7 +92,7 @@ class DB2SqlDialectTest {
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
         MatcherAssert.assertThat(exception.getMessage(), containsString(
-                "The dialect DB2 does not support CATALOG_NAME property. Please, do not set the \"CATALOG_NAME\" property."));
+                "The dialect DB2 does not support \"CATALOG_NAME\" property. Please, do not set it."));
     }
 
     private void setMandatoryProperties(final String sqlDialectProperty) {
