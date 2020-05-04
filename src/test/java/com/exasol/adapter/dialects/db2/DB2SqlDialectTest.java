@@ -12,7 +12,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -92,7 +92,7 @@ class DB2SqlDialectTest {
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 sqlDialect::validateProperties);
         MatcherAssert.assertThat(exception.getMessage(), containsString(
-                "The dialect DB2 does not support CATALOG_NAME property. Please, do not set the CATALOG_NAME property."));
+                "The dialect DB2 does not support CATALOG_NAME property. Please, do not set the \"CATALOG_NAME\" property."));
     }
 
     private void setMandatoryProperties(final String sqlDialectProperty) {

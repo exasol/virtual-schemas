@@ -25,11 +25,6 @@ import com.exasol.adapter.sql.*;
 public class OracleSqlDialect extends AbstractSqlDialect {
     static final String NAME = "ORACLE";
     private static final Capabilities CAPABILITIES = createCapabilityList();
-    private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
-            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
-            SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, ORACLE_IMPORT_PROPERTY, ORACLE_CONNECTION_NAME_PROPERTY,
-            EXCLUDED_CAPABILITIES_PROPERTY, ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY, DEBUG_ADDRESS_PROPERTY,
-            LOG_LEVEL_PROPERTY);
 
     private static Capabilities createCapabilityList() {
         return Capabilities.builder()
@@ -65,7 +60,8 @@ public class OracleSqlDialect extends AbstractSqlDialect {
      * @param properties        user-defined adapter properties
      */
     public OracleSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
-        super(connectionFactory, properties);
+        super(connectionFactory, properties, Set.of(SCHEMA_NAME_PROPERTY, ORACLE_IMPORT_PROPERTY,
+                ORACLE_CONNECTION_NAME_PROPERTY, ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY));
         this.omitParenthesesMap.add(ScalarFunction.SYSDATE);
         this.omitParenthesesMap.add(ScalarFunction.SYSTIMESTAMP);
     }
@@ -107,8 +103,8 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         final String oraclePrecisionAndScale = this.properties.get(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY);
         final List<String> precisionAndScaleList = Arrays.stream(oraclePrecisionAndScale.split(",")).map(String::trim)
                 .collect(Collectors.toList());
-        return DataType.createDecimal(Integer.valueOf(precisionAndScaleList.get(0)),
-                Integer.valueOf(precisionAndScaleList.get(1)));
+        return DataType.createDecimal(Integer.parseInt(precisionAndScaleList.get(0)),
+                Integer.parseInt(precisionAndScaleList.get(1)));
     }
 
     @Override
@@ -171,10 +167,5 @@ public class OracleSqlDialect extends AbstractSqlDialect {
         checkImportPropertyConsistency(ORACLE_IMPORT_PROPERTY, ORACLE_CONNECTION_NAME_PROPERTY);
         validateBooleanProperty(ORACLE_IMPORT_PROPERTY);
         validateCastNumberToDecimalProperty(ORACLE_CAST_NUMBER_TO_DECIMAL_PROPERTY);
-    }
-
-    @Override
-    public List<String> getSupportedProperties() {
-        return SUPPORTED_PROPERTIES;
     }
 }

@@ -25,10 +25,6 @@ import com.exasol.adapter.sql.SqlNodeVisitor;
 public class HiveSqlDialect extends AbstractSqlDialect {
     static final String NAME = "HIVE";
     private static final Capabilities CAPABILITIES = createCapabilityList();
-    private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
-            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
-            CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
-            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY, HIVE_CAST_NUMBER_TO_DECIMAL_PROPERTY);
 
     private static Capabilities createCapabilityList() {
         return Capabilities.builder()
@@ -57,7 +53,8 @@ public class HiveSqlDialect extends AbstractSqlDialect {
      * @param properties        user-defined adapter properties
      */
     public HiveSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
-        super(connectionFactory, properties);
+        super(connectionFactory, properties,
+                Set.of(CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, HIVE_CAST_NUMBER_TO_DECIMAL_PROPERTY));
     }
 
     @Override
@@ -119,11 +116,6 @@ public class HiveSqlDialect extends AbstractSqlDialect {
         scalarAliases.put(ScalarFunction.WEEK, "WEEKOFYEAR");
         scalarAliases.put(ScalarFunction.CURRENT_USER, "CURRENT_USER()");
         return scalarAliases;
-    }
-
-    @Override
-    protected List<String> getSupportedProperties() {
-        return SUPPORTED_PROPERTIES;
     }
 
     @Override

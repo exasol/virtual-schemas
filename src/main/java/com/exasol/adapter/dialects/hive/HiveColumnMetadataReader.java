@@ -30,8 +30,11 @@ public class HiveColumnMetadataReader extends BaseColumnMetadataReader {
 
     @Override
     public DataType mapJdbcType(final JdbcTypeDescription jdbcTypeDescription) {
-        if (jdbcTypeDescription.getJdbcType() == Types.DECIMAL) {
+        final int jdbcType = jdbcTypeDescription.getJdbcType();
+        if (jdbcType == Types.DECIMAL) {
             return mapDecimal(jdbcTypeDescription);
+        } else if (jdbcType == Types.BINARY) {
+            return DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
         } else {
             return super.mapJdbcType(jdbcTypeDescription);
         }

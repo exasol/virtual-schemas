@@ -8,7 +8,7 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.SQLException;
-import java.util.List;
+import java.util.Set;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
@@ -23,9 +23,6 @@ import com.exasol.adapter.jdbc.*;
 public class MySqlSqlDialect extends AbstractSqlDialect {
     static final String NAME = "MYSQL";
     private static final Capabilities CAPABILITIES = createCapabilityList();
-    private static final List<String> SUPPORTED_PROPERTIES = List.of(SQL_DIALECT_PROPERTY, CONNECTION_NAME_PROPERTY,
-            CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY, CATALOG_NAME_PROPERTY,
-            TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY);
 
     /**
      * Create a new instance of the {@link MySqlSqlDialect}.
@@ -34,7 +31,7 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
      * @param properties        user-defined adapter properties
      */
     public MySqlSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
-        super(connectionFactory, properties);
+        super(connectionFactory, properties, Set.of(CATALOG_NAME_PROPERTY));
     }
 
     private static Capabilities createCapabilityList() {
@@ -119,10 +116,5 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
     @Override
     protected QueryRewriter createQueryRewriter() {
         return new BaseQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
-    }
-
-    @Override
-    protected List<String> getSupportedProperties() {
-        return SUPPORTED_PROPERTIES;
     }
 }

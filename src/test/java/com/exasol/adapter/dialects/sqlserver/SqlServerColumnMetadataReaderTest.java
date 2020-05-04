@@ -2,7 +2,7 @@ package com.exasol.adapter.dialects.sqlserver;
 
 import static com.exasol.adapter.dialects.sqlserver.SqlServerColumnMetadataReader.*;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.sql.Types;
 

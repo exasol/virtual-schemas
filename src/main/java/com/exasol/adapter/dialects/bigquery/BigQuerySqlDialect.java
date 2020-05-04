@@ -28,10 +28,6 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
     private static final Logger LOGGER = Logger.getLogger(BigQuerySqlDialect.class.getName());
     static final String NAME = "BIGQUERY";
     private static final Capabilities CAPABILITIES = createCapabilityList();
-    private static final List<String> SUPPORTED_PROPERTIES = Arrays.asList(SQL_DIALECT_PROPERTY,
-            CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY, USERNAME_PROPERTY, PASSWORD_PROPERTY,
-            CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
-            DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY, BIGQUERY_ENABLE_IMPORT_PROPERTY);
 
     /**
      * Create a new instance of the {@link BigQuerySqlDialect}.
@@ -40,7 +36,8 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
      * @param properties        user-defined adapter properties
      */
     public BigQuerySqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
-        super(connectionFactory, properties);
+        super(connectionFactory, properties,
+                Set.of(CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, BIGQUERY_ENABLE_IMPORT_PROPERTY));
     }
 
     @Override
@@ -106,11 +103,6 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
         final Map<ScalarFunction, String> aliases = new EnumMap<>(ScalarFunction.class);
         aliases.put(ScalarFunction.HASH_MD5, "MD5");
         return aliases;
-    }
-
-    @Override
-    protected List<String> getSupportedProperties() {
-        return SUPPORTED_PROPERTIES;
     }
 
     @Override

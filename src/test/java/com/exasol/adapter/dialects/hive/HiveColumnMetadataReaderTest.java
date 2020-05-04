@@ -7,7 +7,6 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -42,6 +41,13 @@ class HiveColumnMetadataReaderTest {
     }
 
     @Test
+    void mapBinaryReturnVarchar() {
+        final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.BINARY, 0, 0, 0, "BINARY");
+        assertThat(this.columnMetadataReader.mapJdbcType(typeDescription),
+                equalTo(DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8)));
+    }
+
+    @Test
     void testMapColumnTypeBeyondMaxExasolDecimalPrecisionWithCastProperty() {
         final Map<String, String> rawProperties = new HashMap<>();
         rawProperties.put(HiveProperties.HIVE_CAST_NUMBER_TO_DECIMAL_PROPERTY, "10,2");
@@ -50,6 +56,6 @@ class HiveColumnMetadataReaderTest {
                 BaseIdentifierConverter.createDefault());
         final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.DECIMAL, 0,
                 DataType.MAX_EXASOL_DECIMAL_PRECISION + 1, 10, "DECIMAL");
-        Assert.assertThat(columnMetadataReader.mapJdbcType(typeDescription), equalTo(DataType.createDecimal(10, 2)));
+        assertThat(columnMetadataReader.mapJdbcType(typeDescription), equalTo(DataType.createDecimal(10, 2)));
     }
 }

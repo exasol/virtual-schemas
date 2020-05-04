@@ -8,9 +8,9 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.when;
 
@@ -18,7 +18,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +47,7 @@ class SapHanaSqlDialectTest {
 
     @Test
     void testGetMainCapabilities() {
-        Assert.assertThat(this.dialect.getCapabilities().getMainCapabilities(),
+        assertThat(this.dialect.getCapabilities().getMainCapabilities(),
                 containsInAnyOrder(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS,
                         AGGREGATE_SINGLE_GROUP, AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_GROUP_BY_EXPRESSION,
                         AGGREGATE_GROUP_BY_TUPLE, AGGREGATE_HAVING, ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT,
@@ -57,66 +56,62 @@ class SapHanaSqlDialectTest {
 
     @Test
     void testGetLiteralCapabilitiesLiteral() {
-        Assert.assertThat(this.dialect.getCapabilities().getLiteralCapabilities(),
+        assertThat(this.dialect.getCapabilities().getLiteralCapabilities(),
                 containsInAnyOrder(NULL, BOOL, DATE, TIMESTAMP, DOUBLE, EXACTNUMERIC, STRING));
     }
 
     @Test
     void testGetPredicateCapabilities() {
-        Assert.assertThat(this.dialect.getCapabilities().getPredicateCapabilities(), containsInAnyOrder(AND, OR, NOT,
-                EQUAL, NOTEQUAL, LESS, LESSEQUAL, LIKE, REGEXP_LIKE, BETWEEN, IS_NULL, IS_NOT_NULL));
+        assertThat(this.dialect.getCapabilities().getPredicateCapabilities(), containsInAnyOrder(AND, OR, NOT, EQUAL,
+                NOTEQUAL, LESS, LESSEQUAL, LIKE, REGEXP_LIKE, BETWEEN, IS_NULL, IS_NOT_NULL));
     }
 
     @Test
     void testGetScalarFunctionCapabilities() {
-        Assert.assertThat(this.dialect.getCapabilities().getScalarFunctionCapabilities(),
-                containsInAnyOrder(ABS, ACOS, ASIN, ATAN, ATAN2, CEIL, COS, COSH, COT, FLOOR, GREATEST, LEAST, LN, LOG,
-                        MOD, POWER, RAND, ROUND, SIGN, SIN, SINH, SQRT, TAN, TANH, ASCII, CONCAT, LENGTH, LOCATE, LOWER,
-                        LPAD, LTRIM, REGEXP_REPLACE, REGEXP_SUBSTR, RIGHT, RPAD, RTRIM, SOUNDEX, SUBSTR, TRIM, UNICODE,
-                        UPPER, ADD_DAYS, ADD_MONTHS, ADD_SECONDS, ADD_YEARS, CURRENT_DATE, CURRENT_TIMESTAMP,
-                        DAYS_BETWEEN, EXTRACT, MINUTE, MONTH, MONTHS_BETWEEN, SECOND, SECONDS_BETWEEN, WEEK, YEAR,
-                        YEARS_BETWEEN, ST_X, ST_Y, ST_ENDPOINT, ST_ISCLOSED, ST_ISRING, ST_LENGTH, ST_NUMPOINTS,
-                        ST_POINTN, ST_STARTPOINT, ST_AREA, ST_EXTERIORRING, ST_INTERIORRINGN, ST_NUMINTERIORRINGS,
-                        ST_GEOMETRYN, ST_NUMGEOMETRIES, ST_BOUNDARY, ST_BUFFER, ST_CENTROID, ST_CONTAINS, ST_CONVEXHULL,
-                        ST_CROSSES, ST_DIFFERENCE, ST_DIMENSION, ST_DISJOINT, ST_DISTANCE, ST_ENVELOPE, ST_EQUALS,
-                        ST_GEOMETRYTYPE, ST_INTERSECTION, ST_INTERSECTS, ST_ISEMPTY, ST_ISSIMPLE, ST_OVERLAPS,
-                        ST_SYMDIFFERENCE, ST_TOUCHES, ST_TRANSFORM, ST_UNION, ST_WITHIN, CAST, TO_DATE, TO_TIMESTAMP,
-                        BIT_AND, BIT_NOT, BIT_OR, BIT_SET, BIT_XOR, CURRENT_SCHEMA, CURRENT_USER, HASH_MD5,
-                        HASH_SHA256));
+        assertThat(this.dialect.getCapabilities().getScalarFunctionCapabilities(), containsInAnyOrder(ABS, ACOS, ASIN,
+                ATAN, ATAN2, CEIL, COS, COSH, COT, FLOOR, GREATEST, LEAST, LN, LOG, MOD, POWER, RAND, ROUND, SIGN, SIN,
+                SINH, SQRT, TAN, TANH, ASCII, CONCAT, LENGTH, LOCATE, LOWER, LPAD, LTRIM, REGEXP_REPLACE, REGEXP_SUBSTR,
+                RIGHT, RPAD, RTRIM, SOUNDEX, SUBSTR, TRIM, UNICODE, UPPER, ADD_DAYS, ADD_MONTHS, ADD_SECONDS, ADD_YEARS,
+                CURRENT_DATE, CURRENT_TIMESTAMP, DAYS_BETWEEN, EXTRACT, MINUTE, MONTH, MONTHS_BETWEEN, SECOND,
+                SECONDS_BETWEEN, WEEK, YEAR, YEARS_BETWEEN, ST_X, ST_Y, ST_ENDPOINT, ST_ISCLOSED, ST_ISRING, ST_LENGTH,
+                ST_NUMPOINTS, ST_POINTN, ST_STARTPOINT, ST_AREA, ST_EXTERIORRING, ST_INTERIORRINGN, ST_NUMINTERIORRINGS,
+                ST_GEOMETRYN, ST_NUMGEOMETRIES, ST_BOUNDARY, ST_BUFFER, ST_CENTROID, ST_CONTAINS, ST_CONVEXHULL,
+                ST_CROSSES, ST_DIFFERENCE, ST_DIMENSION, ST_DISJOINT, ST_DISTANCE, ST_ENVELOPE, ST_EQUALS,
+                ST_GEOMETRYTYPE, ST_INTERSECTION, ST_INTERSECTS, ST_ISEMPTY, ST_ISSIMPLE, ST_OVERLAPS, ST_SYMDIFFERENCE,
+                ST_TOUCHES, ST_TRANSFORM, ST_UNION, ST_WITHIN, CAST, TO_DATE, TO_TIMESTAMP, BIT_AND, BIT_NOT, BIT_OR,
+                BIT_SET, BIT_XOR, CURRENT_SCHEMA, CURRENT_USER, HASH_MD5, HASH_SHA256));
     }
 
     @Test
     void testGetAggregateFunctionCapabilities() {
-        Assert.assertThat(this.dialect.getCapabilities().getAggregateFunctionCapabilities(),
+        assertThat(this.dialect.getCapabilities().getAggregateFunctionCapabilities(),
                 containsInAnyOrder(COUNT, COUNT_STAR, COUNT_DISTINCT, SUM, MIN, MAX, AVG, MEDIAN, FIRST_VALUE,
                         LAST_VALUE, STDDEV_POP, STDDEV_SAMP, VAR_POP, VAR_SAMP));
     }
 
     @Test
     void testSupportsJdbcCatalogs() {
-        Assert.assertThat(this.dialect.supportsJdbcCatalogs(),
-                Matchers.equalTo(SqlDialect.StructureElementSupport.SINGLE));
+        assertThat(this.dialect.supportsJdbcCatalogs(), Matchers.equalTo(SqlDialect.StructureElementSupport.SINGLE));
     }
 
     @Test
     void testSupportsJdbcSchemas() {
-        Assert.assertThat(this.dialect.supportsJdbcSchemas(),
-                Matchers.equalTo(SqlDialect.StructureElementSupport.MULTIPLE));
+        assertThat(this.dialect.supportsJdbcSchemas(), Matchers.equalTo(SqlDialect.StructureElementSupport.MULTIPLE));
     }
 
     @Test
     void testRequiresCatalogQualifiedTableNames() {
-        Assert.assertThat(this.dialect.requiresCatalogQualifiedTableNames(null), Matchers.equalTo(false));
+        assertThat(this.dialect.requiresCatalogQualifiedTableNames(null), Matchers.equalTo(false));
     }
 
     @Test
     void testRequiresSchemaQualifiedTableNames() {
-        Assert.assertThat(this.dialect.requiresSchemaQualifiedTableNames(null), Matchers.equalTo(true));
+        assertThat(this.dialect.requiresSchemaQualifiedTableNames(null), Matchers.equalTo(true));
     }
 
     @Test
     void testGetDefaultNullSorting() {
-        Assert.assertThat(this.dialect.getDefaultNullSorting(),
+        assertThat(this.dialect.getDefaultNullSorting(),
                 Matchers.equalTo(SqlDialect.NullSorting.NULLS_SORTED_AT_START));
     }
 
@@ -129,17 +124,16 @@ class SapHanaSqlDialectTest {
     @Test
     void testMetadataReaderClass(@Mock final Connection connectionMock) throws SQLException {
         when(this.connectionFactoryMock.getConnection()).thenReturn(connectionMock);
-        Assert.assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
+        assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
                 instanceOf(SapHanaMetadataReader.class));
     }
 
     @Test
     void testGetSupportedProperties() {
-        Assert.assertThat(this.dialect.getSupportedProperties(),
-                containsInAnyOrder(SQL_DIALECT_PROPERTY, CONNECTION_NAME_PROPERTY, CONNECTION_STRING_PROPERTY,
-                        USERNAME_PROPERTY, PASSWORD_PROPERTY, CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY,
-                        TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY,
-                        LOG_LEVEL_PROPERTY));
+        assertThat(this.dialect.getSupportedProperties(),
+                containsInAnyOrder(SQL_DIALECT_PROPERTY, CONNECTION_NAME_PROPERTY, CATALOG_NAME_PROPERTY,
+                        SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
+                        DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY));
     }
 
     @Test
