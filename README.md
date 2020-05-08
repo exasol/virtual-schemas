@@ -43,7 +43,7 @@ Exasol Version  | Java Version Installed by Default in Language Container
 
 Note that you can update Exasol 6.0.x and 6.1.x with script language containers version 2019-11-26 or newer in order to get Java 11 support. We recommend the updating Exasol installation to at least 6.2.3 or newer for best results.
 
-Please do not try to install language containers with lover Java versions on newer Exasol installations. This is untested.
+Please do not try to install language containers with lower Java versions on newer Exasol installations. This is untested.
 
 Please contact the [Exasol Support Team](https://www.exasol.com/portal/display/EXA/Support+Dashboard) if you need help upgrading the language container.
 
