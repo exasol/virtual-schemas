@@ -87,7 +87,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.JDBC_ADAPTER_SCRIPT AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-4.0.0.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/virtualschema-jdbc-adapter-dist-4.0.1.jar;
   %jar /buckets/your-bucket-fs/your-bucket/<JDBC driver>.jar;
 /
 ```
@@ -215,21 +215,21 @@ There are a few important things you need to know about those data types.
 
 
 
-[athena-dialect-doc]: doc/dialects/athena.md
-[aurora-dialect-doc]: doc/dialects/aurora.md
-[big-query-dialect-doc]: doc/dialects/bigquery.md
-[db2-dialect-doc]: doc/dialects/db2.md
+[athena-dialect-doc]: ../dialects/athena.md
+[aurora-dialect-doc]: ../dialects/aurora.md
+[big-query-dialect-doc]: ../dialects/bigquery.md
+[db2-dialect-doc]: ../dialects/db2.md
 [exasol-dialect-doc]: https://github.com/exasol/exasol-virtual-schema/blob/master/doc/dialects/exasol.md
-[hive-dialect-doc]: doc/dialects/hive.md
-[impala-dialect-doc]: doc/dialects/impala.md
-[mysql-dialect-doc]: doc/dialects/mysql.md
-[oracle-dialect-doc]: doc/dialects/oracle.md
-[postgresql-dialect-doc]: doc/dialects/postgresql.md
-[redshift-dialect-doc]: doc/dialects/redshift.md
-[sap-hana-dialect-doc]: doc/dialects/saphana.md
-[sql-server-dialect-doc]:doc/dialects/sql_server.md
-[sybase-dialect-doc]: doc/dialects/sybase.md
-[teradata-dialect-doc]: doc/dialects/teradata.md
+[hive-dialect-doc]: ../dialects/hive.md
+[impala-dialect-doc]: ../dialects/impala.md
+[mysql-dialect-doc]: ../dialects/mysql.md
+[oracle-dialect-doc]: ../dialects/oracle.md
+[postgresql-dialect-doc]: ../dialects/postgresql.md
+[redshift-dialect-doc]: ../dialects/redshift.md
+[sap-hana-dialect-doc]: ../dialects/saphana.md
+[sql-server-dialect-doc]:../dialects/sql_server.md
+[sybase-dialect-doc]: ../dialects/sybase.md
+[teradata-dialect-doc]: ../dialects/teradata.md
 
 [virtual-schemas-repository]: https://github.com/exasol/virtual-schemas
 [virtual-schemas-releases]: https://github.com/exasol/virtual-schemas/releases
