@@ -10,13 +10,13 @@ import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.adapter.dialects.SqlDialect.StructureElementSupport.MULTIPLE;
 import static com.exasol.adapter.dialects.SqlDialect.StructureElementSupport.SINGLE;
 
+import java.sql.SQLException;
 import java.util.Set;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.ConnectionFactory;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.jdbc.*;
 
 /**
  * This class implements the SQL dialect of Snowflake.
@@ -112,8 +112,11 @@ public class SnowflakeSqlDialect extends AbstractSqlDialect {
 
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            return new SnowflakeMetadataReader(this.connectionFactory.getConnection(), this.properties);
+        } catch (final SQLException exception) {
+            throw new RemoteMetadataReaderException("Unable to create Snowflake remote metadata reader.", exception);
+        }
     }
 
     @Override

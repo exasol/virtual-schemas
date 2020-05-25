@@ -1,10 +1,15 @@
 package com.exasol.adapter.dialects.snowflake;
 
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
+import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
+import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.when;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +31,6 @@ public class SnowflakeSqlDialectTest {
     @BeforeEach
     void beforeEach() {
         this.dialect = new SnowflakeSqlDialect(this.connectionFactoryMock, AdapterProperties.emptyProperties());
-
     }
 
     @Test
@@ -35,10 +39,29 @@ public class SnowflakeSqlDialectTest {
     }
 
     @Test
+    void testGetOneMainCapability() {
+        assertThat(this.dialect.getCapabilities().getMainCapabilities().contains(SELECTLIST_PROJECTION), equalTo(true));
+    }
+
+    @Test
+    void testGetMainCapabilities() {
+        assertThat(this.dialect.getCapabilities().getMainCapabilities(),
+                containsInAnyOrder(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS,
+                        AGGREGATE_SINGLE_GROUP, AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_GROUP_BY_EXPRESSION,
+                        AGGREGATE_GROUP_BY_TUPLE, AGGREGATE_HAVING, ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT));
+    }
+
+    @Test
     void testGetAggregateFunctionCapabilities() {
         assertThat(this.dialect.getCapabilities().getAggregateFunctionCapabilities(),
                 containsInAnyOrder(COUNT, COUNT_STAR, SUM, MIN, MAX, AVG, STDDEV, STDDEV_POP, STDDEV_SAMP, VARIANCE,
                         VAR_POP, VAR_SAMP, APPROXIMATE_COUNT_DISTINCT));
+    }
+
+    @Test
+    void testGetLiteralCapabilitiesLiteral() {
+        assertThat(this.dialect.getCapabilities().getLiteralCapabilities(),
+                containsInAnyOrder(NULL, BOOL, DATE, TIMESTAMP, TIMESTAMP_UTC, DOUBLE, EXACTNUMERIC, STRING, INTERVAL));
     }
 
     @Test
@@ -56,8 +79,8 @@ public class SnowflakeSqlDialectTest {
         assertThat(this.dialect.requiresCatalogQualifiedTableNames(null), equalTo(false));
     }
 
-    @Test // if use dbname is executed in the current session then it doesnt need it. question: does it keep the
-          // session?
+    @Test // TODO: if 'use dbname' is executed in the current session then it doesnt need it. question: does it store
+          // the session?
     void testRequiresSchemaQualifiedTableNames() {
         assertThat(this.dialect.requiresSchemaQualifiedTableNames(null), equalTo(false));
     }
@@ -68,16 +91,20 @@ public class SnowflakeSqlDialectTest {
     }
 
     @Test
-    void testGetMainCapabilities() {
-        assertThat(this.dialect.getCapabilities().getMainCapabilities(),
-                containsInAnyOrder(SELECTLIST_PROJECTION, SELECTLIST_EXPRESSIONS, FILTER_EXPRESSIONS,
-                        AGGREGATE_SINGLE_GROUP, AGGREGATE_GROUP_BY_COLUMN, AGGREGATE_GROUP_BY_EXPRESSION,
-                        AGGREGATE_GROUP_BY_TUPLE, AGGREGATE_HAVING, ORDER_BY_COLUMN, ORDER_BY_EXPRESSION, LIMIT));
+    void testMetadataReaderClass(@Mock final Connection connectionMock) throws SQLException {
+        when(this.connectionFactoryMock.getConnection()).thenReturn(connectionMock);
+        assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
+                instanceOf(SnowflakeMetadataReader.class));
     }
 
-    @Test
-    void testGetOneMainCapability() {
-        assertThat(this.dialect.getCapabilities().getMainCapabilities().contains(SELECTLIST_PROJECTION), equalTo(true));
-    }
+    /*
+     * TODO: is that applicable to Snowflake? seems that 'backtick' is not amongst the identifiers!
+     * 
+     * @CsvSource({ "tableName, \"tableName\"", "table123, \"table123\"", "_table, `_table`",
+     * "table_name, \"table_name\"" })
+     *
+     * @ParameterizedTest void testApplyQuote(final String unquoted, final String quoted) {
+     * assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted)); }
+     */
 
 }
