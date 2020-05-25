@@ -80,26 +80,4 @@ public class SnowflakeSqlDialectTest {
         assertThat(this.dialect.getCapabilities().getMainCapabilities().contains(SELECTLIST_PROJECTION), equalTo(true));
     }
 
-    /*
-     * @Test public void testValidateCatalogProperty() throws PropertyValidationException {
-     * setMandatoryProperties("SNOWFLAKE"); this.rawProperties.put(AdapterProperties.CATALOG_NAME_PROPERTY,
-     * "SNOWFLAKE_CATALOG"); final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
-     * final SqlDialect sqlDialect = new SnowflakeSqlDialect(this.connectionMock, adapterProperties);
-     * sqlDialect.validateProperties(); }
-     *
-     * @Test public void testValidateSchemaProperty() throws PropertyValidationException {
-     * setMandatoryProperties("SNOWFLAKE"); this.rawProperties.put(AdapterProperties.SCHEMA_NAME_PROPERTY,
-     * "SNOWFLAKE_SCHEMA"); final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties); final
-     * SqlDialect sqlDialect = new SnowflakeSqlDialect(this.connectionMock, adapterProperties);
-     * sqlDialect.validateProperties(); }
-     *
-     * @Test public void testGetSupportedProperties() { setMandatoryProperties("SNOWFLAKE"); this.dialect = new
-     * SnowflakeSqlDialect(this.connectionMock, (AdapterProperties) this.rawProperties);
-     * assertThat(this.dialect.getSupportedProperties(),
-     * containsInAnyOrder(AdapterProperties.CONNECTION_NAME_PROPERTY)); }
-     *
-     * private void setMandatoryProperties(final String sqlDialectProperty) {
-     * this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
-     * this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "SNOWFLAKE_CONN"); }
-     */
 }
