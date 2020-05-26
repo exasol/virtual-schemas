@@ -96,7 +96,7 @@ public class SnowflakeSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuote(final String identifier) {
-        return null;
+        return "\"" + identifier + "\"";
     }
 
     @Override
@@ -121,8 +121,15 @@ public class SnowflakeSqlDialect extends AbstractSqlDialect {
 
     @Override
     protected QueryRewriter createQueryRewriter() {
-        // TODO Auto-generated method stub
-        return null;
+        return new BaseQueryRewriter(this, this.createRemoteMetadataReader(), this.connectionFactory);
+    }
+
+    @Override
+    public String getStringLiteral(final String value) {
+        final StringBuilder builder = new StringBuilder("'");
+        builder.append(value.replace("'", "''"));
+        builder.append("'");
+        return builder.toString();
     }
 
 }

@@ -339,7 +339,7 @@ And we also need two corresponding test classes:
 
     @Override
     protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connectionFactory);
+        return new BaseQueryRewriter(this, this.createRemoteMetadataReader(), this.connectionFactory);
     }
     ```
     

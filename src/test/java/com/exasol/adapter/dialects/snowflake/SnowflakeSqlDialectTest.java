@@ -14,6 +14,8 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -74,7 +76,8 @@ public class SnowflakeSqlDialectTest {
         assertThat(this.dialect.supportsJdbcSchemas(), equalTo(StructureElementSupport.MULTIPLE));
     }
 
-    @Test
+    @Test // TODO: if 'use schemaname' is executed in the current session then it doesnt need it. question: does it
+          // store the session?
     void testRequiresCatalogQualifiedTableNames() {
         assertThat(this.dialect.requiresCatalogQualifiedTableNames(null), equalTo(false));
     }
@@ -85,7 +88,7 @@ public class SnowflakeSqlDialectTest {
         assertThat(this.dialect.requiresSchemaQualifiedTableNames(null), equalTo(false));
     }
 
-    @Test
+    @Test // NULLS_SORTED_AT_START is default for Snowflake unless specified otherwise
     void testGetDefaultNullSorting() {
         assertThat(this.dialect.getDefaultNullSorting(), equalTo(NullSorting.NULLS_SORTED_AT_START));
     }
@@ -97,14 +100,17 @@ public class SnowflakeSqlDialectTest {
                 instanceOf(SnowflakeMetadataReader.class));
     }
 
-    /*
-     * TODO: is that applicable to Snowflake? seems that 'backtick' is not amongst the identifiers!
-     * 
-     * @CsvSource({ "tableName, \"tableName\"", "table123, \"table123\"", "_table, `_table`",
-     * "table_name, \"table_name\"" })
-     *
-     * @ParameterizedTest void testApplyQuote(final String unquoted, final String quoted) {
-     * assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted)); }
-     */
+    @ValueSource(strings = { "ab:\'ab\'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
+    @ParameterizedTest
+    void testGetLiteralString(final String definition) {
+        final int colonPosition = definition.indexOf(':');
+        final String original = definition.substring(0, colonPosition);
+        final String literal = definition.substring(colonPosition + 1);
+        assertThat(this.dialect.getStringLiteral(original), equalTo(literal));
+    }
 
+    @Test
+    void testApplyQuote() {
+        assertThat(this.dialect.applyQuote("tableName"), equalTo("\"tableName\""));
+    }
 }
