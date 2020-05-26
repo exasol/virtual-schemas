@@ -101,7 +101,6 @@ public class SnowflakeSqlDialect extends AbstractSqlDialect {
 
     @Override
     public boolean requiresSchemaQualifiedTableNames(final SqlGenerationContext context) {
-        // TODO Auto-generated method stub
         return false;
     }
 
