@@ -1,19 +1,19 @@
 package com.exasol.adapter.dialects.hive;
 
 import static com.exasol.adapter.dialects.IntegrationTestConstants.*;
+import static com.exasol.dbbuilder.dialects.exasol.AdapterScript.Language.JAVA;
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.io.*;
+import java.io.File;
 import java.math.BigDecimal;
-import java.nio.file.Path;
 import java.sql.*;
 import java.time.Duration;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.*;
@@ -25,12 +25,11 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import com.exasol.bucketfs.Bucket;
+import com.exasol.adapter.dialects.AbstractIntegrationTest;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
-
-import utils.IntegrationTestSetupManager;
+import com.exasol.dbbuilder.dialects.exasol.*;
 
 /**
  * How to run `HiveSqlDialectIT`: See the documentation <a
@@ -38,15 +37,13 @@ import utils.IntegrationTestSetupManager;
  */
 @Tag("integration")
 @Testcontainers
-class HiveSqlDialectIT {
+class HiveSqlDialectIT extends AbstractIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(HiveSqlDialectIT.class);
     public static final String HIVE_DOCKER_COMPOSE_YAML = "src/test/resources/integration/driver/hive/docker-compose.yaml";
-    public static final Path HIVE_DRIVER_SETTINGS_PATH = Path.of("src", "test", "resources", "integration", "driver",
-            "hive", JDBC_DRIVER_CONFIGURATION_FILE_NAME);
-    private static final String PATH_TO_HIVE_PROPERTY_FILE = "src/test/resources/integration/driver/hive/hive.properties";
     private static final String HIVE_SERVICE_NAME = "hive-server_1";
+    private static final String RESOURCES_FOLDER_DIALECT_NAME = "hive";
     private static final int HIVE_EXPOSED_PORT = 10000;
-    private static final String CONNECTION_HIVE_JDBC = "CONNECTION_HIVE_JDBC";
+    private static final String JDBC_CONNECTION_NAME = "JDBC";
     private static final String SCHEMA_HIVE = "default";
     private static final String HIVE_USERNAME = "hive";
     private static final String HIVE_PASSWORD = "hive";
@@ -65,14 +62,13 @@ class HiveSqlDialectIT {
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
                     .withLogConsumer(new Slf4jLogConsumer(LOGGER)); //
     private static Statement statementExasol;
-    private static final IntegrationTestSetupManager integrationTestSetupManager = new IntegrationTestSetupManager();
 
     @BeforeAll
-    static void beforeAll() throws InterruptedException, BucketAccessException, TimeoutException, SQLException,
-            ClassNotFoundException, IOException {
-        final String driverName = getPropertyFromFile(PATH_TO_HIVE_PROPERTY_FILE, "driver.name");
-        final String driverPath = getPropertyFromFile(PATH_TO_HIVE_PROPERTY_FILE, "driver.path");
-        uploadFilesToBucket(driverName, driverPath);
+    static void beforeAll()
+            throws InterruptedException, BucketAccessException, TimeoutException, SQLException, ClassNotFoundException {
+        final String driverName = getPropertyFromFile(RESOURCES_FOLDER_DIALECT_NAME, "driver.name");
+        uploadDriverToBucket(driverName, RESOURCES_FOLDER_DIALECT_NAME, exasolContainer.getDefaultBucket());
+        uploadVsJarToBucket(exasolContainer.getDefaultBucket());
         final Connection exasolConnection = exasolContainer.createConnectionForUser(exasolContainer.getUsername(),
                 exasolContainer.getPassword());
         statementExasol = exasolConnection.createStatement();
@@ -81,39 +77,32 @@ class HiveSqlDialectIT {
             createTableHiveSimple(statementHive);
             createTableDecimalCast(statementHive);
             createTableAllDataTypes(statementHive);
-            integrationTestSetupManager.createTestTablesForJoinTests(statementHive, SCHEMA_HIVE, TABLE_JOIN_1,
-                    TABLE_JOIN_2);
+            createTestTablesForJoinTests(connection, SCHEMA_HIVE);
         }
-        integrationTestSetupManager.createTestSchema(statementExasol, SCHEMA_EXASOL);
-        createJdbcConnection();
-        integrationTestSetupManager.createAdapterScript(statementExasol, SCHEMA_EXASOL + "." + ADAPTER_SCRIPT_EXASOL,
-                VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION,
-                Optional.of("%jar /buckets/bfsdefault/default/drivers/jdbc/" + driverName + ";\n"));
-        createVirtualSchema(VIRTUAL_SCHEMA_HIVE_JDBC, Optional.empty());
-        createVirtualSchema(VIRTUAL_SCHEMA_HIVE_JDBC_NUMBER_TO_DECIMAL,
-                Optional.of("hive_cast_number_to_decimal_with_precision_and_scale='36,2'"));
+        final ExasolObjectFactory exasolFactory = new ExasolObjectFactory(exasolContainer.createConnection(""));
+        final ExasolSchema schema = exasolFactory.createSchema(SCHEMA_EXASOL);
+        final String content = "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
+                + "%jar /buckets/bfsdefault/default/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION + ";\n" //
+                + "%jar /buckets/bfsdefault/default/drivers/jdbc/" + driverName + ";\n";
+        final AdapterScript adapterScript = schema.createAdapterScript(ADAPTER_SCRIPT_EXASOL, JAVA, content);
+        final String connectionString = "jdbc:hive2://" + DOCKER_IP_ADDRESS + ":" + HIVE_EXPOSED_PORT + "/"
+                + SCHEMA_HIVE;
+        final ConnectionDefinition connectionDefinition = exasolFactory.createConnectionDefinition(JDBC_CONNECTION_NAME,
+                connectionString, HIVE_USERNAME, HIVE_PASSWORD);
+        exasolFactory.createVirtualSchemaBuilder(VIRTUAL_SCHEMA_HIVE_JDBC).adapterScript(adapterScript)
+                .connectionDefinition(connectionDefinition).dialectName("HIVE")
+                .properties(Map.of("SCHEMA_NAME", SCHEMA_HIVE)).build();
+        exasolFactory.createVirtualSchemaBuilder(VIRTUAL_SCHEMA_HIVE_JDBC_NUMBER_TO_DECIMAL)
+                .adapterScript(adapterScript).connectionDefinition(connectionDefinition).dialectName("HIVE")
+                .properties(Map.of("SCHEMA_NAME", SCHEMA_HIVE, "hive_cast_number_to_decimal_with_precision_and_scale",
+                        "36,2"))
+                .build();
     }
 
-    private static Connection getHiveConnection() throws ClassNotFoundException, SQLException, InterruptedException {
+    private static Connection getHiveConnection() throws ClassNotFoundException, SQLException {
         Class.forName("org.apache.hive.jdbc.HiveDriver");
         return DriverManager.getConnection("jdbc:hive2://localhost:" + HIVE_EXPOSED_PORT + "/" + SCHEMA_HIVE,
                 HIVE_USERNAME, HIVE_PASSWORD);
-    }
-
-    private static String getPropertyFromFile(final String filePath, final String propertyName) throws IOException {
-        try (final InputStream inputStream = new FileInputStream(filePath)) {
-            final Properties properties = new Properties();
-            properties.load(inputStream);
-            return properties.getProperty(propertyName);
-        }
-    }
-
-    private static void uploadFilesToBucket(final String driverName, final String driverPath)
-            throws InterruptedException, BucketAccessException, TimeoutException {
-        final Bucket bucket = exasolContainer.getDefaultBucket();
-        bucket.uploadFile(PATH_TO_VIRTUAL_SCHEMAS_JAR, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
-        bucket.uploadFile(Path.of(driverPath, driverName), "drivers/jdbc/" + driverName);
-        bucket.uploadFile(HIVE_DRIVER_SETTINGS_PATH, "drivers/jdbc/" + JDBC_DRIVER_CONFIGURATION_FILE_NAME);
     }
 
     private static void createTableHiveSimple(final Statement statementHive) throws SQLException {
@@ -174,27 +163,6 @@ class HiveSqlDialectIT {
                 + "FROM " + TABLE_HIVE_SIMPLE);
     }
 
-    private static void createJdbcConnection() throws SQLException {
-        integrationTestSetupManager.createConnection(statementExasol, CONNECTION_HIVE_JDBC,
-                "jdbc:hive2://" + DOCKER_IP_ADDRESS + ":" + HIVE_EXPOSED_PORT + "/" + SCHEMA_HIVE, //
-                HIVE_USERNAME, HIVE_PASSWORD);
-    }
-
-    private static void createVirtualSchema(final String virtualSchemaName, final Optional<String> additionalParameters)
-            throws SQLException {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("CREATE VIRTUAL SCHEMA ");
-        builder.append(virtualSchemaName);
-        builder.append(" USING " + SCHEMA_EXASOL + "." + ADAPTER_SCRIPT_EXASOL + " WITH ");
-        builder.append("SQL_DIALECT     = 'HIVE' ");
-        builder.append("CONNECTION_NAME = '" + CONNECTION_HIVE_JDBC + "' ");
-        builder.append("SCHEMA_NAME     = '" + SCHEMA_HIVE + "' ");
-        additionalParameters.ifPresent(builder::append);
-        final String sql = builder.toString();
-        LOGGER.info("Creating virtual schema with query: " + sql);
-        statementExasol.execute(sql);
-    }
-
     @Test
     public void testSetup() throws SQLException {
         final String query = "SELECT X FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_SIMPLE;
@@ -208,92 +176,94 @@ class HiveSqlDialectIT {
         assertThat(actualResult, equalTo(expected));
     }
 
+    @Override
+    protected Connection getExasolConnection() throws SQLException {
+        return exasolContainer.createConnection("");
+    }
+
     @Nested
     @DisplayName("Join test")
     class JoinTest {
         @Test
         void testInnerJoin() throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", //
-                    "VALUES(2,'bbb', 2,'bbb')");
-            final ResultSet actual = statementExasol
-                    .executeQuery("SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a INNER JOIN  "
-                            + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x=b.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a INNER JOIN  "
+                    + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x=b.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                    List.of("2,'bbb', 2,'bbb'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @Test
         void testInnerJoinWithProjection() throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(y VARCHAR(100))", //
-                    " VALUES('bbbbbb')");
-            final ResultSet actual = statementExasol
-                    .executeQuery("SELECT b.y || " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + ".y FROM "
-                            + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " INNER JOIN  " + VIRTUAL_SCHEMA_HIVE_JDBC
-                            + "." + TABLE_JOIN_2 + " b ON " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + ".x=b.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT b.y || " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + ".y FROM "
+                    + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " INNER JOIN  " + VIRTUAL_SCHEMA_HIVE_JDBC + "."
+                    + TABLE_JOIN_2 + " b ON " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + ".x=b.x";
+            final ResultSet expected = getExpectedResultSet(List.of("y VARCHAR(100)"), //
+                    List.of("'bbbbbb'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @Test
         void testLeftJoin() throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", //
-                    "VALUES(1, 'aaa', null, null), " //
-                            + "(2, 'bbb', 2, 'bbb')");
-            final ResultSet actual = statementExasol.executeQuery(
-                    "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a LEFT OUTER JOIN  "
-                            + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1
+                    + " a LEFT OUTER JOIN  " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2
+                    + " b ON a.x=b.x ORDER BY a.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                    List.of("1, 'aaa', null, null", //
+                            "2, 'bbb', 2, 'bbb'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @Test
         void testRightJoin() throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", //
-                    "VALUES(2, 'bbb', 2, 'bbb'), " //
-                            + "(null, null, 3, 'ccc')");
-            final ResultSet actual = statementExasol.executeQuery(
-                    "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a RIGHT OUTER JOIN  "
-                            + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1
+                    + " a RIGHT OUTER JOIN  " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2
+                    + " b ON a.x=b.x ORDER BY a.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                    List.of("2, 'bbb', 2, 'bbb'", //
+                            "null, null, 3, 'ccc'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @Test
         void testFullOuterJoin() throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", //
-                    "VALUES(1, 'aaa', null, null), " //
-                            + "(2, 'bbb', 2, 'bbb'), " //
-                            + "(null, null, 3, 'ccc')");
-            final ResultSet actual = statementExasol.executeQuery(
-                    "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a FULL OUTER JOIN  "
-                            + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x=b.x ORDER BY a.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1
+                    + " a FULL OUTER JOIN  " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2
+                    + " b ON a.x=b.x ORDER BY a.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                    List.of("1, 'aaa', null, null", //
+                            "2, 'bbb', 2, 'bbb'", //
+                            "null, null, 3, 'ccc'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @Test
         void testRightJoinWithComplexCondition() throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", //
-                    "VALUES(2, 'bbb', 2, 'bbb'), " //
-                            + "(null, null, 3, 'ccc')");
-            final ResultSet actual = statementExasol.executeQuery(
-                    "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a RIGHT OUTER JOIN  "
-                            + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x||a.y=b.x||b.y ORDER BY a.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1
+                    + " a RIGHT OUTER JOIN  " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2
+                    + " b ON a.x||a.y=b.x||b.y ORDER BY a.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                    List.of("2, 'bbb', 2, 'bbb'", //
+                            "null, null, 3, 'ccc'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @Test
         void testFullOuterJoinWithComplexCondition() throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", //
-                    "VALUES(1, 'aaa', null, null), " //
-                            + "(2, 'bbb', 2, 'bbb'), " //
-                            + "(null, null, 3, 'ccc')");
-            final ResultSet actual = statementExasol.executeQuery(
-                    "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1 + " a FULL OUTER JOIN  "
-                            + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2 + " b ON a.x-b.x=0 ORDER BY a.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_1
+                    + " a FULL OUTER JOIN  " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_JOIN_2
+                    + " b ON a.x-b.x=0 ORDER BY a.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                    List.of("1, 'aaa', null, null", //
+                            "2, 'bbb', 2, 'bbb'", //
+                            "null, null, 3, 'ccc'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
     }
 
@@ -423,7 +393,8 @@ class HiveSqlDialectIT {
 
     @Test
     void testAggregateGroupByColumn() throws SQLException {
-        final ResultSet expected = getExpectedResultSet("(boolcolumn BOOLEAN, biginteger DECIMAL(19,0))", "(true, 56)");
+        final ResultSet expected = getExpectedResultSet(List.of("a BOOLEAN", "b DECIMAL(19,0)"), //
+                List.of("true, 56"));
         final String query = "SELECT boolcolumn, min(biginteger) FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "."
                 + TABLE_HIVE_ALL_DATA_TYPES + " GROUP BY boolcolumn";
         final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BOOLCOLUMN`, " //
@@ -434,17 +405,10 @@ class HiveSqlDialectIT {
 
     }
 
-    private ResultSet getExpectedResultSet(final String expectedColumnTypes, final String expectedValues)
-            throws SQLException {
-        final String qualifiedExpectedTableName = SCHEMA_EXASOL + "." + "EXPECTED";
-        statementExasol.execute("CREATE OR REPLACE TABLE " + qualifiedExpectedTableName + expectedColumnTypes);
-        statementExasol.execute("INSERT INTO " + qualifiedExpectedTableName + " VALUES" + expectedValues);
-        return statementExasol.executeQuery("SELECT * FROM " + qualifiedExpectedTableName);
-    }
-
     @Test
     void testAggregateHaving() throws SQLException {
-        final ResultSet expected = getExpectedResultSet("(boolcolumn BOOLEAN, biginteger DECIMAL(19,0))", "(true, 56)");
+        final ResultSet expected = getExpectedResultSet(List.of("a BOOLEAN", "b DECIMAL(19,0)"), //
+                List.of("true, 56"));
         final String query = "SELECT boolcolumn, min(biginteger) FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "."
                 + TABLE_HIVE_ALL_DATA_TYPES + " GROUP BY boolcolumn HAVING MIN(biginteger)<57";
         final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BOOLCOLUMN`, " //
@@ -459,8 +423,9 @@ class HiveSqlDialectIT {
     // =, !=, <, <=, >, >=
     void testComparisonPredicates() throws SQLException {
         final ResultSet expected = getExpectedResultSet(
-                "(biginteger DECIMAL(19,0), b1 BOOLEAN, b2 BOOLEAN, b3 BOOLEAN, b4 BOOLEAN, b5 BOOLEAN, b6 BOOLEAN)",
-                "(56, false, true, true, true, false, false)");
+                List.of("a DECIMAL(19,0)", "b1 BOOLEAN", "b2 BOOLEAN", "b3 BOOLEAN", "b4 BOOLEAN", "b5 BOOLEAN",
+                        "b6 BOOLEAN"), //
+                List.of("56, false, true, true, true, false, false"));
         final String query = "SELECT biginteger, biginteger=60, biginteger!=60, biginteger<60, biginteger<=60, biginteger>60, biginteger>=60 FROM "
                 + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES + " WHERE intcol = 85";
         final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`, " //
@@ -492,8 +457,8 @@ class HiveSqlDialectIT {
     @Test
     // LIKE, LIKE ESCAPE (not pushed down)
     void testLikePredicates() throws SQLException {
-        final ResultSet expected = getExpectedResultSet("(varcharcol VARCHAR(10) ASCII, boolcolumn BOOLEAN)",
-                "('tytu', false)");
+        final ResultSet expected = getExpectedResultSet(List.of("a VARCHAR(10) ASCII", "b BOOLEAN"), //
+                List.of("'tytu', false"));
         final String query = "SELECT varcharcol, varcharcol LIKE 't%' ESCAPE 't' FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "."
                 + TABLE_HIVE_ALL_DATA_TYPES + " WHERE (varcharcol LIKE 't%')";
         final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`VARCHARCOL` " //
@@ -517,7 +482,8 @@ class HiveSqlDialectIT {
     // BETWEEN, IN, IS NULL, !=NULL(rewritten to "IS NOT NULL")
     void testMiscPredicates() throws SQLException {
         final ResultSet expected = getExpectedResultSet(
-                "(biginteger DECIMAL(19,0), b1 BOOLEAN, b2 BOOLEAN, b3 BOOLEAN)", "(56, true, false, true)");
+                List.of("a DECIMAL(19,0)", "b1 BOOLEAN", "b2 BOOLEAN", "b3 BOOLEAN"), //
+                List.of("56, true, false, true"));
         final String query = "SELECT biginteger,  biginteger in (56, 61), biginteger is null, biginteger != null FROM "
                 + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES + " WHERE biginteger between 51 and 60";
         final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`, " //
@@ -534,8 +500,8 @@ class HiveSqlDialectIT {
     // columns dffer in the prepare and execute phases
     void testCountSumAggregateFunction() throws SQLException {
         final ResultSet expected = getExpectedResultSet(
-                "(a DECIMAL(19,0), b DECIMAL(19,0), c DECIMAL(19,0), d DECIMAL(19,0), e DECIMAL(19,0))",
-                "(1, 1, 1, 56, 56)");
+                List.of("a DECIMAL(19,0)", "b DECIMAL(19,0)", "c DECIMAL(19,0)", "d DECIMAL(19,0)", "e DECIMAL(19,0)"), //
+                List.of("1, 1, 1, 56, 56"));
         final String query = "SELECT COUNT(biginteger), COUNT(*), COUNT(DISTINCT biginteger), SUM(biginteger), SUM(DISTINCT biginteger) FROM "
                 + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES;
         final String expectedExplainVirtual = "SELECT COUNT(`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`), " //
@@ -548,8 +514,8 @@ class HiveSqlDialectIT {
 
     @Test
     void testAvgMinMaxAggregateFunction() throws SQLException {
-        final ResultSet expected = getExpectedResultSet("(a DOUBLE, b DECIMAL(19,0), c DECIMAL(19,0))",
-                "(56.0, 56, 56)");
+        final ResultSet expected = getExpectedResultSet(List.of("a DOUBLE", "b DECIMAL(19,0)", "c DECIMAL(19,0)"), //
+                List.of("56.0, 56, 56"));
         final String query = "SELECT AVG(biginteger), MIN(biginteger), MAX(biginteger) FROM " + VIRTUAL_SCHEMA_HIVE_JDBC
                 + "." + TABLE_HIVE_ALL_DATA_TYPES;
         final String expectedExplainVirtual = "SELECT AVG(`TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`), " //
@@ -572,7 +538,8 @@ class HiveSqlDialectIT {
 
     @Test
     void testRewrittenDivAndModFunctions() throws SQLException {
-        final ResultSet expected = getExpectedResultSet("(a DECIMAL(19,0), b DECIMAL(19,0))", "(1, 0)");
+        final ResultSet expected = getExpectedResultSet(List.of("a DECIMAL(19,0)", "b DECIMAL(19,0)"), //
+                List.of("1, 0"));
         final String query = "SELECT DIV(biginteger,biginteger), mod(biginteger,biginteger) FROM "
                 + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_ALL_DATA_TYPES;
         final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER` DIV `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`, " //
@@ -594,7 +561,8 @@ class HiveSqlDialectIT {
 
     @Test
     public void testOrderByLimit() throws SQLException {
-        final ResultSet expected = getExpectedResultSet("(boolcolumn BOOLEAN, biginteger DECIMAL(19,0))", "(true, 56)");
+        final ResultSet expected = getExpectedResultSet(List.of("a BOOLEAN", "b DECIMAL(19,0)"), //
+                List.of("true, 56"));
         final String query = "SELECT  boolcolumn, biginteger FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "."
                 + TABLE_HIVE_ALL_DATA_TYPES + " ORDER BY biginteger LIMIT 3";
         final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`, " //
@@ -607,7 +575,8 @@ class HiveSqlDialectIT {
 
     @Test
     public void testOrderByLimitOffset() throws SQLException {
-        final ResultSet expected = getExpectedResultSet("(boolcolumn BOOLEAN, biginteger DECIMAL(19,0))", "(true, 56)");
+        final ResultSet expected = getExpectedResultSet(List.of("a BOOLEAN", "b DECIMAL(19,0)"), //
+                List.of("true, 56"));
         final String query = "SELECT  boolcolumn, biginteger FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "."
                 + TABLE_HIVE_ALL_DATA_TYPES + " ORDER BY biginteger LIMIT 2 OFFSET 1";
         final String expectedExplainVirtual = "SELECT `TABLE_HIVE_ALL_DATA_TYPES`.`BIGINTEGER`, " //
@@ -639,8 +608,9 @@ class HiveSqlDialectIT {
 
     @Test
     void testNumberBeyondExasolPrecisionMaxValueToDecimal() throws SQLException {
-        final ResultSet expected = getExpectedResultSet("(a DECIMAL(12,6), b DECIMAL(36,16), c DECIMAL(36,2))", //
-                "(123456.123457, 123456789.0111111111111110, 1234444444444444444.55)");
+        final ResultSet expected = getExpectedResultSet(
+                List.of("a DECIMAL(12,6)", "b DECIMAL(36,16)", "c DECIMAL(36,2)"), //
+                List.of("123456.123457, 123456789.0111111111111110, 1234444444444444444.55"));
         final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_HIVE_JDBC_NUMBER_TO_DECIMAL + "."
                 + TABLE_HIVE_DECIMAL_CAST;
         assertThat(statementExasol.executeQuery(query), matchesResultSet(expected));
