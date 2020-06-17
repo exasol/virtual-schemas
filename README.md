@@ -120,6 +120,7 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 | [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0       |
 | [J5SE](https://github.com/itsallcode/junit5-system-extensions)                      | JUnit5 extensions to test Java System.x functions      | Eclipse Public License 2.0       |
 | [Mockito](http://site.mockito.org/)                                                 | Mocking framework                                      | MIT License                      |
+| [MySQL JDBC Driver][mysql-jdbc-driver]                                              | JDBC driver for MySQL database                         | GNU GPL Version 2.0              |
 | [Oracle JDBC Driver][oracle-jdbc-driver]                                            | JDBC driver for Oracle database                        | Oracle Technology Network License|
 | [PostgreSQL JDBC Driver][postgresql-jdbc-driver]                                    | JDBC driver for PostgreSQL database                    | BSD-2-Clause License             |
 | [Testcontainers](https://www.testcontainers.org/)                                   | Container-based integration tests                      | MIT License                      |
@@ -142,5 +143,6 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [hbase-server]: http://hbase.apache.org/
 [hive-jdbc-driver]: https://github.com/apache/hive/tree/master/jdbc/src/java/org/apache/hive/jdbc
 [exasol-testcontainers]: https://github.com/exasol/exasol-testcontainers
+[mysql-jdbc-driver]: https://dev.mysql.com/downloads/connector/j/
 [oracle-jdbc-driver]: https://www.oracle.com/database/technologies/appdev/jdbc.html
 [postgresql-jdbc-driver]: https://jdbc.postgresql.org/
