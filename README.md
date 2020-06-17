@@ -103,7 +103,6 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 |-------------------------------------------------------------------------------------|--------------------------------------------------------|----------------------------------|
 | [JSON-P](https://javaee.github.io/jsonp/)                                           | JSON Processing                                        | CDDL-1.0                         |
 | [Exasol Script API](https://docs.exasol.com/database_concepts/udf_scripts.htm)      | Accessing Exasol features                              | MIT License                      |
-| [Exasol Virtual Schema Common](https://github.com/exasol/virtual-schema-common-java)| Common module of Exasol Virtual Schemas adapters       | MIT License                      |
 | [Exasol Virtual Schema JDBC](https://github.com/exasol/virtual-schema-common-jdbc)  | Common JDBC functions for Virtual Schemas adapters     | MIT License                      |
 | JDBC driver(s), depending on data source                                            | Connecting to the data source                          | Check driver documentation       |
 
@@ -116,7 +115,6 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 | [Exasol Testcontainers][exasol-testcontainers]                                      | Exasol extension for the Testcontainers framework      | MIT License                      |
 | [HBase server][hbase-server]                                                        | The Hadoop database                                    | Apache License 2.0               |
 | [Hive JDBC Driver][hive-jdbc-driver]                                                | JDBC driver for Hive database                          | Apache License 2.0               |
-| [HikariCP](https://github.com/brettwooldridge/HikariCP)                             | JDBC connection pool                                   | Apache License 2.0               |
 | [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)                                  | Checking for conditions in code via matchers           | BSD License                      |
 | [JSONassert](http://jsonassert.skyscreamer.org/)                                    | Compare JSON documents for semantic equality           | Apache License 2.0               |
 | [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0       |
