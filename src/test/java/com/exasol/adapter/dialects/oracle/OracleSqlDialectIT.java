@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.sql.*;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
@@ -34,8 +35,6 @@ import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
 import com.exasol.dbbuilder.dialects.exasol.*;
-
-import utils.IntegrationTestSetupManager;
 
 /**
  * How to run `OracleSqlDialectIT`: See the documentation <a
@@ -65,7 +64,6 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
     @Container
     private static final OracleContainer oracleContainer = new OracleContainer(ORACLE_CONTAINER_NAME);
     private static Statement statementExasol;
-    private static final IntegrationTestSetupManager integrationTestSetupManager = new IntegrationTestSetupManager();
 
     @BeforeAll
     static void beforeAll() throws InterruptedException, BucketAccessException, TimeoutException, SQLException {
@@ -109,13 +107,6 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
                 .properties(Map.of("SCHEMA_NAME", SCHEMA_ORACLE, "IMPORT_FROM_ORA", "true", "ORA_CONNECTION_NAME",
                         ORA_CONNECTION_NAME, "oracle_cast_number_to_decimal_with_precision_and_scale", "36,1"))
                 .build();
-    }
-
-    private static AdapterScript createAdapterScript(final String driverName, final ExasolSchema schema) {
-        final String content = "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
-                + "%jar /buckets/bfsdefault/default/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION + ";\n" //
-                + "%jar /buckets/bfsdefault/default/drivers/jdbc/" + driverName + ";\n";
-        return schema.createAdapterScript(ADAPTER_SCRIPT_EXASOL, JAVA, content);
     }
 
     private static void uploadInstantClientToBucket()
@@ -224,6 +215,13 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
                 + "timestamp '2018-01-01 11:00:00 +01:00', " //
                 + "timestamp '2018-01-01 11:00:00 +01:00' " //
                 + ")");
+    }
+
+    private static AdapterScript createAdapterScript(final String driverName, final ExasolSchema schema) {
+        final String content = "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
+                + "%jar /buckets/bfsdefault/default/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION + ";\n" //
+                + "%jar /buckets/bfsdefault/default/drivers/jdbc/" + driverName + ";\n";
+        return schema.createAdapterScript(ADAPTER_SCRIPT_EXASOL, JAVA, content);
     }
 
     private static ConnectionDefinition createOraConnection(final ExasolObjectFactory exasolFactory,
@@ -377,97 +375,96 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         @ParameterizedTest
         @ValueSource(strings = { VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_ORA })
         void testInnerJoin(final String virtualSchema) throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x VARCHAR(100), y VARCHAR(100), a VARCHAR(100), b VARCHAR(100))",
-                    "VALUES('2','bbb', '2','bbb')");
-            final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + virtualSchema + "." + TABLE_JOIN_1
-                    + " a INNER JOIN  " + virtualSchema + "." + TABLE_JOIN_2 + " b ON a.x=b.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + virtualSchema + "." + TABLE_JOIN_1 + " a INNER JOIN  "
+                    + virtualSchema + "." + TABLE_JOIN_2 + " b ON a.x=b.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x VARCHAR(100)", "y VARCHAR(100)", "a VARCHAR(100)", "b VARCHAR(100)"), //
+                    List.of("'2','bbb', '2','bbb'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @ParameterizedTest
         @ValueSource(strings = { VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_ORA })
         void testInnerJoinWithProjection(final String virtualSchemaName) throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(y VARCHAR(100))", " VALUES('bbbbbb')");
             final String qualifiedJoinTableName1 = virtualSchemaName + "." + TABLE_JOIN_1;
             final String qualifiedJoinTableName2 = virtualSchemaName + "." + TABLE_JOIN_2;
-            final ResultSet actual = statementExasol.executeQuery(
-                    "SELECT b.y || " + qualifiedJoinTableName1 + ".y FROM " + qualifiedJoinTableName1 + " INNER JOIN  "
-                            + qualifiedJoinTableName2 + " b ON " + qualifiedJoinTableName1 + ".x=b.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT b.y || " + qualifiedJoinTableName1 + ".y FROM " + qualifiedJoinTableName1
+                    + " INNER JOIN  " + qualifiedJoinTableName2 + " b ON " + qualifiedJoinTableName1 + ".x=b.x";
+            final ResultSet expected = getExpectedResultSet(List.of("y VARCHAR(100)"), //
+                    List.of("'bbbbbb'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @ParameterizedTest
         @ValueSource(strings = { VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_ORA })
         void testLeftJoin(final String virtualSchemaName) throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x  VARCHAR(100), y VARCHAR(100), a  VARCHAR(100), b VARCHAR(100))",
-                    "VALUES('1', 'aaa', null, null), " //
-                            + "('2', 'bbb', '2', 'bbb')");
             final String qualifiedJoinTableName1 = virtualSchemaName + "." + TABLE_JOIN_1;
             final String qualifiedJoinTableName2 = virtualSchemaName + "." + TABLE_JOIN_2;
-            final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + qualifiedJoinTableName1
-                    + " a LEFT OUTER JOIN  " + qualifiedJoinTableName2 + " b ON a.x=b.x ORDER BY a.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + qualifiedJoinTableName1 + " a LEFT OUTER JOIN  "
+                    + qualifiedJoinTableName2 + " b ON a.x=b.x ORDER BY a.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x VARCHAR(100)", "y VARCHAR(100)", "a VARCHAR(100)", "b VARCHAR(100)"), //
+                    List.of("'1', 'aaa', null, null", //
+                            "'2', 'bbb', '2', 'bbb'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @ParameterizedTest
         @ValueSource(strings = { VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_ORA })
         void testRightJoin(final String virtualSchemaName) throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x VARCHAR(100), y VARCHAR(100), a VARCHAR(100), b VARCHAR(100))",
-                    "VALUES('2', 'bbb', '2', 'bbb'), " //
-                            + "(null, null, '3', 'ccc')");
             final String qualifiedJoinTableName1 = virtualSchemaName + "." + TABLE_JOIN_1;
             final String qualifiedJoinTableName2 = virtualSchemaName + "." + TABLE_JOIN_2;
-            final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + qualifiedJoinTableName1
-                    + " a RIGHT OUTER JOIN  " + qualifiedJoinTableName2 + " b ON a.x=b.x ORDER BY a.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + qualifiedJoinTableName1 + " a RIGHT OUTER JOIN  "
+                    + qualifiedJoinTableName2 + " b ON a.x=b.x ORDER BY a.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x VARCHAR(100)", "y VARCHAR(100)", "a VARCHAR(100)", "b VARCHAR(100)"), //
+                    List.of("'2', 'bbb', '2', 'bbb'", //
+                            "null, null, '3', 'ccc'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @ParameterizedTest
         @ValueSource(strings = { VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_ORA })
         void testFullOuterJoin(final String virtualSchemaName) throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x VARCHAR(100), y VARCHAR(100), a VARCHAR(100), b VARCHAR(100))",
-                    "VALUES(1, 'aaa', null, null), " //
-                            + "('2', 'bbb', '2', 'bbb'), " //
-                            + "(null, null, '3', 'ccc')");
             final String qualifiedJoinTableName1 = virtualSchemaName + "." + TABLE_JOIN_1;
             final String qualifiedJoinTableName2 = virtualSchemaName + "." + TABLE_JOIN_2;
-            final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + qualifiedJoinTableName1
-                    + " a FULL OUTER JOIN  " + qualifiedJoinTableName2 + " b ON a.x=b.x ORDER BY a.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + qualifiedJoinTableName1 + " a FULL OUTER JOIN  "
+                    + qualifiedJoinTableName2 + " b ON a.x=b.x ORDER BY a.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x VARCHAR(100)", "y VARCHAR(100)", "a VARCHAR(100)", "b VARCHAR(100)"), //
+                    List.of("1, 'aaa', null, null", //
+                            "'2', 'bbb', '2', 'bbb'", //
+                            "null, null, '3', 'ccc'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @ParameterizedTest
         @ValueSource(strings = { VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_ORA })
         void testRightJoinWithComplexCondition(final String virtualSchemaName) throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x VARCHAR(100), y VARCHAR(100), a VARCHAR(100), b VARCHAR(100))", //
-                    "VALUES('2', 'bbb', '2', 'bbb'), " //
-                            + "(null, null, '3', 'ccc')");
             final String qualifiedJoinTableName1 = virtualSchemaName + "." + TABLE_JOIN_1;
             final String qualifiedJoinTableName2 = virtualSchemaName + "." + TABLE_JOIN_2;
-            final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + qualifiedJoinTableName1
-                    + " a RIGHT OUTER JOIN  " + qualifiedJoinTableName2 + " b ON a.x||a.y=b.x||b.y ORDER BY a.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + qualifiedJoinTableName1 + " a RIGHT OUTER JOIN  "
+                    + qualifiedJoinTableName2 + " b ON a.x||a.y=b.x||b.y ORDER BY a.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x VARCHAR(100)", "y VARCHAR(100)", "a VARCHAR(100)", "b VARCHAR(100)"), //
+                    List.of("'2', 'bbb', '2', 'bbb'", //
+                            "null, null, '3', 'ccc'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @ParameterizedTest
         @ValueSource(strings = { VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_ORA })
         void testFullOuterJoinWithComplexCondition(final String virtualSchemaName) throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x VARCHAR(100), y VARCHAR(100), a VARCHAR(100), b VARCHAR(100))", //
-                    "VALUES('1', 'aaa', null, null), " //
-                            + "('2', 'bbb', '2', 'bbb'), " //
-                            + "(null, null, '3', 'ccc')");
             final String qualifiedJoinTableName1 = virtualSchemaName + "." + TABLE_JOIN_1;
             final String qualifiedJoinTableName2 = virtualSchemaName + "." + TABLE_JOIN_2;
-            final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + qualifiedJoinTableName1
-                    + " a FULL OUTER JOIN  " + qualifiedJoinTableName2 + " b ON a.x-b.x=0 ORDER BY a.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + qualifiedJoinTableName1 + " a FULL OUTER JOIN  "
+                    + qualifiedJoinTableName2 + " b ON a.x-b.x=0 ORDER BY a.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x VARCHAR(100)", "y VARCHAR(100)", "a VARCHAR(100)", "b VARCHAR(100)"), //
+                    List.of("1, 'aaa', null, null", //
+                            "'2', 'bbb', '2', 'bbb'", //
+                            "null, null, '3', 'ccc'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
     }
 

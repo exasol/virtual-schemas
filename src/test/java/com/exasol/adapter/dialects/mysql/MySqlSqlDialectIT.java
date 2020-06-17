@@ -62,11 +62,8 @@ class MySqlSqlDialectIT extends AbstractIntegrationTest {
         createMySqlStringTable(mySqlSchema);
         createTestTablesForJoinTests(mySQLContainer.createConnection(""), mySqlSchema.getName());
         final ExasolObjectFactory exasolFactory = new ExasolObjectFactory(exasolContainer.createConnection(""));
-        final ExasolSchema schema = exasolFactory.createSchema(SCHEMA_EXASOL);
-        final String content = "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
-                + "%jar /buckets/bfsdefault/default/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION + ";\n" //
-                + "%jar /buckets/bfsdefault/default/drivers/jdbc/" + driverName + ";\n";
-        final AdapterScript adapterScript = schema.createAdapterScript(ADAPTER_SCRIPT_EXASOL, JAVA, content);
+        final ExasolSchema exasolSchema = exasolFactory.createSchema(SCHEMA_EXASOL);
+        final AdapterScript adapterScript = createAdapterScript(driverName, exasolSchema);
         final String connectionString = "jdbc:mysql://" + DOCKER_IP_ADDRESS + ":"
                 + mySQLContainer.getMappedPort(MYSQL_PORT) + "/";
         final ConnectionDefinition connectionDefinition = exasolFactory.createConnectionDefinition(JDBC_CONNECTION_NAME,
@@ -120,6 +117,13 @@ class MySqlSqlDialectIT extends AbstractIntegrationTest {
         table.insert(null, null, "aaa", "aaaaaaaaaaaaa", "bloooooooooooob", "text3", null, null, null, null, "3", null,
                 "", "");
         table.insert(null, null, "aaaaa", "a", "blob", "text", null, null, null, null, null, null, null, null);
+    }
+
+    private static AdapterScript createAdapterScript(final String driverName, final ExasolSchema schema) {
+        final String content = "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
+                + "%jar /buckets/bfsdefault/default/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION + ";\n" //
+                + "%jar /buckets/bfsdefault/default/drivers/jdbc/" + driverName + ";\n";
+        return schema.createAdapterScript(ADAPTER_SCRIPT_EXASOL, JAVA, content);
     }
 
     @Test

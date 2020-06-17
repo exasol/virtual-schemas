@@ -81,10 +81,7 @@ class HiveSqlDialectIT extends AbstractIntegrationTest {
         }
         final ExasolObjectFactory exasolFactory = new ExasolObjectFactory(exasolContainer.createConnection(""));
         final ExasolSchema schema = exasolFactory.createSchema(SCHEMA_EXASOL);
-        final String content = "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
-                + "%jar /buckets/bfsdefault/default/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION + ";\n" //
-                + "%jar /buckets/bfsdefault/default/drivers/jdbc/" + driverName + ";\n";
-        final AdapterScript adapterScript = schema.createAdapterScript(ADAPTER_SCRIPT_EXASOL, JAVA, content);
+        final AdapterScript adapterScript = createAdapterScript(driverName, schema);
         final String connectionString = "jdbc:hive2://" + DOCKER_IP_ADDRESS + ":" + HIVE_EXPOSED_PORT + "/"
                 + SCHEMA_HIVE;
         final ConnectionDefinition connectionDefinition = exasolFactory.createConnectionDefinition(JDBC_CONNECTION_NAME,
@@ -161,6 +158,13 @@ class HiveSqlDialectIT extends AbstractIntegrationTest {
                 + "'MTAxMA==', " //
                 + "date '1970-01-01' " //
                 + "FROM " + TABLE_HIVE_SIMPLE);
+    }
+
+    private static AdapterScript createAdapterScript(final String driverName, final ExasolSchema schema) {
+        final String content = "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
+                + "%jar /buckets/bfsdefault/default/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION + ";\n" //
+                + "%jar /buckets/bfsdefault/default/drivers/jdbc/" + driverName + ";\n";
+        return schema.createAdapterScript(ADAPTER_SCRIPT_EXASOL, JAVA, content);
     }
 
     @Test
