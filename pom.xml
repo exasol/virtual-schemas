@@ -170,7 +170,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>test-db-builder-java</artifactId>
-            <version>0.3.0</version>
+            <version>1.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
