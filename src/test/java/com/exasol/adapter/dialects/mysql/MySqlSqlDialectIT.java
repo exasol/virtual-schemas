@@ -580,7 +580,7 @@ class MySqlSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testOrderByLimit() throws SQLException {
+    void testOrderByLimit() throws SQLException {
         final String query = "SELECT \"bool_col\", \"int_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "." + MYSQL_SIMPLE_TABLE
                 + " ORDER BY \"int_col\" LIMIT 3";
         final ResultSet expected = getExpectedResultSet(List.of("a BOOLEAN", "b DECIMAL(10,0)"), //
@@ -591,7 +591,7 @@ class MySqlSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testOrderByLimitOffset() throws SQLException {
+    void testOrderByLimitOffset() throws SQLException {
         final String query = "SELECT \"bool_col\", \"int_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "." + MYSQL_SIMPLE_TABLE
                 + " ORDER BY \"int_col\" LIMIT 2 OFFSET 1";
         final ResultSet expected = getExpectedResultSet(List.of("a BOOLEAN", "b DECIMAL(10,0)"), //

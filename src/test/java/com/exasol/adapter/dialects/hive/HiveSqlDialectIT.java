@@ -39,7 +39,7 @@ import com.exasol.dbbuilder.dialects.exasol.*;
 @Testcontainers
 class HiveSqlDialectIT extends AbstractIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(HiveSqlDialectIT.class);
-    public static final String HIVE_DOCKER_COMPOSE_YAML = "src/test/resources/integration/driver/hive/docker-compose.yaml";
+    private static final String HIVE_DOCKER_COMPOSE_YAML = "src/test/resources/integration/driver/hive/docker-compose.yaml";
     private static final String HIVE_SERVICE_NAME = "hive-server_1";
     private static final String RESOURCES_FOLDER_DIALECT_NAME = "hive";
     private static final int HIVE_EXPOSED_PORT = 10000;
@@ -168,7 +168,7 @@ class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testSetup() throws SQLException {
+    void testSetup() throws SQLException {
         final String query = "SELECT X FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "." + TABLE_HIVE_SIMPLE;
         assertExpressionExecutionLongResult(query, 99L);
     }
@@ -564,7 +564,7 @@ class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testOrderByLimit() throws SQLException {
+    void testOrderByLimit() throws SQLException {
         final ResultSet expected = getExpectedResultSet(List.of("a BOOLEAN", "b DECIMAL(19,0)"), //
                 List.of("true, 56"));
         final String query = "SELECT  boolcolumn, biginteger FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "."
@@ -578,7 +578,7 @@ class HiveSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testOrderByLimitOffset() throws SQLException {
+    void testOrderByLimitOffset() throws SQLException {
         final ResultSet expected = getExpectedResultSet(List.of("a BOOLEAN", "b DECIMAL(19,0)"), //
                 List.of("true, 56"));
         final String query = "SELECT  boolcolumn, biginteger FROM " + VIRTUAL_SCHEMA_HIVE_JDBC + "."

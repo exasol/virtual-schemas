@@ -294,12 +294,11 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
 
     @Test
     void testCreateSchemaWithUpperCaseTablesThrowsException() {
-        final Exception exception = assertThrows(DatabaseObjectException.class, () -> //
-        exasolFactory.createVirtualSchemaBuilder("WRONG_VIRTUAL_SCHEMA").adapterScript(adapterScript)
-                .connectionDefinition(connectionDefinition).dialectName("POSTGRESQL")
+        final VirtualSchema.Builder builder = exasolFactory.createVirtualSchemaBuilder("WRONG_VIRTUAL_SCHEMA")
+                .adapterScript(adapterScript).connectionDefinition(connectionDefinition).dialectName("POSTGRESQL")
                 .properties(Map.of("CATALOG_NAME", postgresqlContainer.getDatabaseName(), //
-                        "SCHEMA_NAME", SCHEMA_POSTGRES_UPPERCASE_TABLE))
-                .build());
+                        "SCHEMA_NAME", SCHEMA_POSTGRES_UPPERCASE_TABLE));
+        final Exception exception = assertThrows(DatabaseObjectException.class, builder::build);
         assertThat(exception.getMessage(), containsString("Failed to write to object"));
     }
 
