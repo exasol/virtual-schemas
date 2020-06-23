@@ -136,4 +136,9 @@ class MySqlSqlDialectTest {
                         CATALOG_NAME_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY,
                         LOG_LEVEL_PROPERTY));
     }
+
+    @Test
+    void testGetSqlGenerationVisitor() {
+        assertThat(this.dialect.getSqlGenerationVisitor(null), instanceOf(MySqlSqlGenerationVisitor.class));
+    }
 }

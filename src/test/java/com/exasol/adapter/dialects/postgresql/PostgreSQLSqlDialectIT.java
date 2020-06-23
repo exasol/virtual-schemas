@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects.postgresql;
 
 import static com.exasol.adapter.dialects.IntegrationTestConstants.*;
+import static com.exasol.dbbuilder.dialects.exasol.AdapterScript.Language.JAVA;
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -10,8 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.file.Path;
 import java.sql.*;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeoutException;
 
 import org.hamcrest.MatcherAssert;
@@ -23,22 +23,23 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.exasol.adapter.dialects.AbstractIntegrationTest;
 import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
-
-import utils.IntegrationTestSetupManager;
+import com.exasol.dbbuilder.dialects.DatabaseObjectException;
+import com.exasol.dbbuilder.dialects.exasol.*;
 
 @Tag("integration")
 @Testcontainers
-class PostgreSQLSqlDialectIT {
+class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLSqlDialectIT.class);
     private static final String POSTGRES_DRIVER_NAME_AND_VERSION = "postgresql-42.2.5.jar";
     private static final Path PATH_TO_POSTGRES_DRIVER = Path.of("src", "test", "resources", "integration", "driver",
             "postgres", POSTGRES_DRIVER_NAME_AND_VERSION);
     private static final String POSTGRES_CONTAINER_NAME = "postgres:9.6.2";
-    private static final String CONNECTION_POSTGRES_JDBC = "CONNECTION_POSTGRES_JDBC";
+    private static final String JDBC_CONNECTION_NAME = "JDBC";
     private static final String SCHEMA_POSTGRES = "schema_postgres";
     private static final String SCHEMA_POSTGRES_UPPERCASE_TABLE = "schema_postgres_upper";
     private static final String TABLE_POSTGRES_SIMPLE = "table_postgres_simple";
@@ -60,38 +61,50 @@ class PostgreSQLSqlDialectIT {
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
                     .withLogConsumer(new Slf4jLogConsumer(LOGGER));
     private static Statement statementExasol;
-    private static final IntegrationTestSetupManager integrationTestSetupManager = new IntegrationTestSetupManager();
+    private static ExasolObjectFactory exasolFactory;
+    private static ConnectionDefinition connectionDefinition;
+    private static AdapterScript adapterScript;
 
     @BeforeAll
     static void beforeAll() throws InterruptedException, BucketAccessException, TimeoutException, SQLException {
         final Bucket bucket = exasolContainer.getDefaultBucket();
-        bucket.uploadFile(PATH_TO_VIRTUAL_SCHEMAS_JAR, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
         bucket.uploadFile(PATH_TO_POSTGRES_DRIVER, POSTGRES_DRIVER_NAME_AND_VERSION);
-        final Connection exasolConnection = exasolContainer.createConnectionForUser(exasolContainer.getUsername(),
-                exasolContainer.getPassword());
-        statementExasol = exasolConnection.createStatement();
-        final Statement statementPostgres = integrationTestSetupManager.getStatement(postgresqlContainer);
-        integrationTestSetupManager.createTestSchema(statementExasol, SCHEMA_EXASOL);
-        integrationTestSetupManager.createTestSchema(statementPostgres, SCHEMA_POSTGRES);
-        integrationTestSetupManager.createTestSchema(statementPostgres, SCHEMA_POSTGRES_UPPERCASE_TABLE);
-        createPostgresTestTableSimple(statementPostgres);
-        createPostgresTestTableAllDataTypes(statementPostgres);
-        createPostgresTestTableMixedCase(statementPostgres);
-        createPostgresTestTableLowerCase(statementPostgres);
-        integrationTestSetupManager.createTestTablesForJoinTests(statementPostgres, SCHEMA_POSTGRES, TABLE_JOIN_1,
-                TABLE_JOIN_2);
+        uploadVsJarToBucket(bucket);
+        try (final Connection postgresConnection = postgresqlContainer.createConnection("")) {
+            final Statement statementPostgres = postgresConnection.createStatement();
+            statementPostgres.execute("CREATE SCHEMA " + SCHEMA_POSTGRES);
+            statementPostgres.execute("CREATE SCHEMA " + SCHEMA_POSTGRES_UPPERCASE_TABLE);
+            createPostgresTestTableSimple(statementPostgres);
+            createPostgresTestTableAllDataTypes(statementPostgres);
+            createPostgresTestTableMixedCase(statementPostgres);
+            createPostgresTestTableLowerCase(statementPostgres);
+            createTestTablesForJoinTests(postgresConnection, SCHEMA_POSTGRES);
+        }
+        statementExasol = exasolContainer.createConnection("").createStatement();
+        exasolFactory = new ExasolObjectFactory(exasolContainer.createConnection(""));
+        final ExasolSchema exasolSchema = exasolFactory.createSchema(SCHEMA_EXASOL);
+        adapterScript = createAdapterScript(exasolSchema);
         final String connectionString = "jdbc:postgresql://" + DOCKER_IP_ADDRESS + ":"
                 + postgresqlContainer.getMappedPort(POSTGRES_PORT) + "/" + postgresqlContainer.getDatabaseName();
-        integrationTestSetupManager.createConnection(statementExasol, CONNECTION_POSTGRES_JDBC, connectionString,
+        connectionDefinition = exasolFactory.createConnectionDefinition(JDBC_CONNECTION_NAME, connectionString,
                 postgresqlContainer.getUsername(), postgresqlContainer.getPassword());
-        integrationTestSetupManager.createAdapterScript(statementExasol, SCHEMA_EXASOL + "." + ADAPTER_SCRIPT_EXASOL,
-                VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION,
-                Optional.of("%jar /buckets/bfsdefault/default/" + POSTGRES_DRIVER_NAME_AND_VERSION + ";\n"));
-        createVirtualSchema(VIRTUAL_SCHEMA_POSTGRES, SCHEMA_POSTGRES, Optional.empty());
-        createVirtualSchema(VIRTUAL_SCHEMA_POSTGRES_UPPERCASE_TABLE, SCHEMA_POSTGRES_UPPERCASE_TABLE,
-                Optional.of("IGNORE_ERRORS='POSTGRESQL_UPPERCASE_TABLES'"));
-        createVirtualSchema(VIRTUAL_SCHEMA_POSTGRES_PRESERVE_ORIGINAL_CASE, SCHEMA_POSTGRES_UPPERCASE_TABLE,
-                Optional.of("POSTGRESQL_IDENTIFIER_MAPPING = 'PRESERVE_ORIGINAL_CASE'"));
+        exasolFactory.createVirtualSchemaBuilder(VIRTUAL_SCHEMA_POSTGRES).adapterScript(adapterScript)
+                .connectionDefinition(connectionDefinition).dialectName("POSTGRESQL")
+                .properties(Map.of("CATALOG_NAME", postgresqlContainer.getDatabaseName(), //
+                        "SCHEMA_NAME", SCHEMA_POSTGRES))
+                .build();
+        exasolFactory.createVirtualSchemaBuilder(VIRTUAL_SCHEMA_POSTGRES_UPPERCASE_TABLE).adapterScript(adapterScript)
+                .connectionDefinition(connectionDefinition).dialectName("POSTGRESQL")
+                .properties(Map.of("CATALOG_NAME", postgresqlContainer.getDatabaseName(), //
+                        "SCHEMA_NAME", SCHEMA_POSTGRES_UPPERCASE_TABLE, //
+                        "IGNORE_ERRORS", "POSTGRESQL_UPPERCASE_TABLES"))
+                .build();
+        exasolFactory.createVirtualSchemaBuilder(VIRTUAL_SCHEMA_POSTGRES_PRESERVE_ORIGINAL_CASE)
+                .adapterScript(adapterScript).connectionDefinition(connectionDefinition).dialectName("POSTGRESQL")
+                .properties(Map.of("CATALOG_NAME", postgresqlContainer.getDatabaseName(), //
+                        "SCHEMA_NAME", SCHEMA_POSTGRES_UPPERCASE_TABLE, //
+                        "POSTGRESQL_IDENTIFIER_MAPPING", "PRESERVE_ORIGINAL_CASE"))
+                .build();
     }
 
     private static void createPostgresTestTableSimple(final Statement statementPostgres) throws SQLException {
@@ -192,20 +205,10 @@ class PostgreSQLSqlDialectIT {
         statementPostgres.execute("CREATE TABLE " + qualifiedTableName + " (x INT, y INT)");
     }
 
-    private static void createVirtualSchema(final String virtualSchemaName, final String originSchemaName,
-            final Optional<String> additionalParameters) throws SQLException {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("CREATE VIRTUAL SCHEMA ");
-        builder.append(virtualSchemaName);
-        builder.append(" USING " + SCHEMA_EXASOL + "." + ADAPTER_SCRIPT_EXASOL + " WITH ");
-        builder.append("SQL_DIALECT     = 'POSTGRESQL' ");
-        builder.append("CATALOG_NAME     = '" + postgresqlContainer.getDatabaseName() + "' ");
-        builder.append("CONNECTION_NAME = '" + CONNECTION_POSTGRES_JDBC + "' ");
-        builder.append("SCHEMA_NAME     = '" + originSchemaName + "' ");
-        additionalParameters.ifPresent(builder::append);
-        final String sql = builder.toString();
-        LOGGER.info("Creating virtual schema with query: " + sql);
-        statementExasol.execute(sql);
+    private static AdapterScript createAdapterScript(final ExasolSchema schema) {
+        final String content = "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
+                + "%jar /buckets/bfsdefault/default/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION + ";\n";
+        return schema.createAdapterScript(ADAPTER_SCRIPT_EXASOL, JAVA, content);
     }
 
     @Test
@@ -221,81 +224,82 @@ class PostgreSQLSqlDialectIT {
 
     @Test
     void testInnerJoin() throws SQLException {
-        final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(2,'bbb', 2,'bbb')");
-        final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + QUALIFIED_TABLE_JOIN_NAME_1
-                + " a INNER JOIN  " + QUALIFIED_TABLE_JOIN_NAME_2 + " b ON a.x=b.x");
-        MatcherAssert.assertThat(actual, matchesResultSet(expected));
+        final String query = "SELECT * FROM " + QUALIFIED_TABLE_JOIN_NAME_1 + " a INNER JOIN  "
+                + QUALIFIED_TABLE_JOIN_NAME_2 + " b ON a.x=b.x";
+        final ResultSet expected = getExpectedResultSet(List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                List.of("2,'bbb', 2,'bbb'"));
+        assertThat(getActualResultSet(query), matchesResultSet(expected));
     }
 
     @Test
     void testInnerJoinWithProjection() throws SQLException {
-        final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                SCHEMA_EXASOL, "(y VARCHAR(100))", " VALUES('bbbbbb')");
-        final ResultSet actual = statementExasol.executeQuery("SELECT b.y || " + QUALIFIED_TABLE_JOIN_NAME_1
-                + ".y FROM " + QUALIFIED_TABLE_JOIN_NAME_1 + " INNER JOIN  " + QUALIFIED_TABLE_JOIN_NAME_2 + " b ON "
-                + QUALIFIED_TABLE_JOIN_NAME_1 + ".x=b.x");
-        MatcherAssert.assertThat(actual, matchesResultSet(expected));
+        final String query = "SELECT b.y || " + QUALIFIED_TABLE_JOIN_NAME_1 + ".y FROM " + QUALIFIED_TABLE_JOIN_NAME_1
+                + " INNER JOIN  " + QUALIFIED_TABLE_JOIN_NAME_2 + " b ON " + QUALIFIED_TABLE_JOIN_NAME_1 + ".x=b.x";
+        final ResultSet expected = getExpectedResultSet(List.of("y VARCHAR(100)"), //
+                List.of("'bbbbbb'"));
+        assertThat(getActualResultSet(query), matchesResultSet(expected));
     }
 
     @Test
     void testLeftJoin() throws SQLException {
-        final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(1, 'aaa', null, null), " //
-                        + "(2, 'bbb', 2, 'bbb')");
-        final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + QUALIFIED_TABLE_JOIN_NAME_1
-                + " a LEFT OUTER JOIN  " + QUALIFIED_TABLE_JOIN_NAME_2 + " b ON a.x=b.x ORDER BY a.x");
-        MatcherAssert.assertThat(actual, matchesResultSet(expected));
+        final String query = "SELECT * FROM " + QUALIFIED_TABLE_JOIN_NAME_1 + " a LEFT OUTER JOIN  "
+                + QUALIFIED_TABLE_JOIN_NAME_2 + " b ON a.x=b.x ORDER BY a.x";
+        final ResultSet expected = getExpectedResultSet(List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                List.of("1, 'aaa', null, null", //
+                        "2, 'bbb', 2, 'bbb'"));
+        assertThat(getActualResultSet(query), matchesResultSet(expected));
     }
 
     @Test
     void testRightJoin() throws SQLException {
-        final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(2, 'bbb', 2, 'bbb'), " //
-                        + "(null, null, 3, 'ccc')");
-        final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + QUALIFIED_TABLE_JOIN_NAME_1
-                + " a RIGHT OUTER JOIN  " + QUALIFIED_TABLE_JOIN_NAME_2 + " b ON a.x=b.x ORDER BY a.x");
-        MatcherAssert.assertThat(actual, matchesResultSet(expected));
+        final String query = "SELECT * FROM " + QUALIFIED_TABLE_JOIN_NAME_1 + " a RIGHT OUTER JOIN  "
+                + QUALIFIED_TABLE_JOIN_NAME_2 + " b ON a.x=b.x ORDER BY a.x";
+        final ResultSet expected = getExpectedResultSet(List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                List.of("2, 'bbb', 2, 'bbb'", //
+                        "null, null, 3, 'ccc'"));
+        assertThat(getActualResultSet(query), matchesResultSet(expected));
     }
 
     @Test
     void testFullOuterJoin() throws SQLException {
-        final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(1, 'aaa', null, null), " //
-                        + "(2, 'bbb', 2, 'bbb'), " //
-                        + "(null, null, 3, 'ccc')");
-        final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + QUALIFIED_TABLE_JOIN_NAME_1
-                + " a FULL OUTER JOIN  " + QUALIFIED_TABLE_JOIN_NAME_2 + " b ON a.x=b.x ORDER BY a.x");
-        MatcherAssert.assertThat(actual, matchesResultSet(expected));
+        final String query = "SELECT * FROM " + QUALIFIED_TABLE_JOIN_NAME_1 + " a FULL OUTER JOIN  "
+                + QUALIFIED_TABLE_JOIN_NAME_2 + " b ON a.x=b.x ORDER BY a.x";
+        final ResultSet expected = getExpectedResultSet(List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                List.of("1, 'aaa', null, null", //
+                        "2, 'bbb', 2, 'bbb'", //
+                        "null, null, 3, 'ccc'"));
+        assertThat(getActualResultSet(query), matchesResultSet(expected));
     }
 
     @Test
     void testRightJoinWithComplexCondition() throws SQLException {
-        final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(2, 'bbb', 2, 'bbb'), " //
-                        + "(null, null, 3, 'ccc')");
-        final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + QUALIFIED_TABLE_JOIN_NAME_1
-                + " a RIGHT OUTER JOIN  " + QUALIFIED_TABLE_JOIN_NAME_2 + " b ON a.x||a.y=b.x||b.y ORDER BY a.x");
-        MatcherAssert.assertThat(actual, matchesResultSet(expected));
+        final String query = "SELECT * FROM " + QUALIFIED_TABLE_JOIN_NAME_1 + " a RIGHT OUTER JOIN  "
+                + QUALIFIED_TABLE_JOIN_NAME_2 + " b ON a.x||a.y=b.x||b.y ORDER BY a.x";
+        final ResultSet expected = getExpectedResultSet(List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                List.of("2, 'bbb', 2, 'bbb'", //
+                        "null, null, 3, 'ccc'"));
+        assertThat(getActualResultSet(query), matchesResultSet(expected));
     }
 
     @Test
     void testFullOuterJoinWithComplexCondition() throws SQLException {
-        final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                SCHEMA_EXASOL, "(x INT, y VARCHAR(100), a INT, b VARCHAR(100))", "VALUES(1, 'aaa', null, null), " //
-                        + "(2, 'bbb', 2, 'bbb'), " //
-                        + "(null, null, 3, 'ccc')");
-        final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + QUALIFIED_TABLE_JOIN_NAME_1
-                + " a FULL OUTER JOIN  " + QUALIFIED_TABLE_JOIN_NAME_2 + " b ON a.x-b.x=0 ORDER BY a.x");
-        MatcherAssert.assertThat(actual, matchesResultSet(expected));
+        final String query = "SELECT * FROM " + QUALIFIED_TABLE_JOIN_NAME_1 + " a FULL OUTER JOIN  "
+                + QUALIFIED_TABLE_JOIN_NAME_2 + " b ON a.x-b.x=0 ORDER BY a.x";
+        final ResultSet expected = getExpectedResultSet(List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                List.of("1, 'aaa', null, null", //
+                        "2, 'bbb', 2, 'bbb'", //
+                        "null, null, 3, 'ccc'"));
+        assertThat(getActualResultSet(query), matchesResultSet(expected));
     }
 
     @Test
     void testCreateSchemaWithUpperCaseTablesThrowsException() {
-        final Exception exception = assertThrows(SQLException.class, () -> //
-        createVirtualSchema("WRONG_VIRTUAL_SCHEMA", SCHEMA_POSTGRES_UPPERCASE_TABLE, Optional.empty()));
-        assertThat(exception.getMessage(), containsString("Table " + TABLE_POSTGRES_MIXED_CASE
-                + " cannot be used in virtual schema. Set property IGNORE_ERRORS to POSTGRESQL_UPPERCASE_TABLES to enforce schema creation."));
+        final VirtualSchema.Builder builder = exasolFactory.createVirtualSchemaBuilder("WRONG_VIRTUAL_SCHEMA")
+                .adapterScript(adapterScript).connectionDefinition(connectionDefinition).dialectName("POSTGRESQL")
+                .properties(Map.of("CATALOG_NAME", postgresqlContainer.getDatabaseName(), //
+                        "SCHEMA_NAME", SCHEMA_POSTGRES_UPPERCASE_TABLE));
+        final Exception exception = assertThrows(DatabaseObjectException.class, builder::build);
+        assertThat(exception.getMessage(), containsString("Failed to write to object"));
     }
 
     @Test
@@ -571,5 +575,10 @@ class PostgreSQLSqlDialectIT {
     void testDatatypeXML() throws SQLException {
         assertSingleValue("myXml", "VARCHAR(2000000) UTF8",
                 "'<?xml version=\"1.0\"?><book><title>Manual</title><chapter>...</chapter></book>'");
+    }
+
+    @Override
+    protected Connection getExasolConnection() throws SQLException {
+        return exasolContainer.createConnection("");
     }
 }

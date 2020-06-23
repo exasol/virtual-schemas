@@ -1,6 +1,6 @@
 package com.exasol.adapter.dialects.mysql;
 
-import static com.exasol.adapter.AdapterProperties.*;
+import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -14,6 +14,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.*;
+import com.exasol.adapter.sql.SqlNodeVisitor;
 
 /**
  * This class implements the SQL dialect of MySQL.
@@ -116,5 +117,10 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
     @Override
     protected QueryRewriter createQueryRewriter() {
         return new BaseQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
+    }
+
+    @Override
+    public SqlNodeVisitor<String> getSqlGenerationVisitor(final SqlGenerationContext context) {
+        return new MySqlSqlGenerationVisitor(this, context);
     }
 }

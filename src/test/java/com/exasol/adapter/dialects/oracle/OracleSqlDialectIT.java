@@ -1,20 +1,20 @@
 package com.exasol.adapter.dialects.oracle;
 
 import static com.exasol.adapter.dialects.IntegrationTestConstants.*;
+import static com.exasol.dbbuilder.dialects.exasol.AdapterScript.Language.JAVA;
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.*;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.sql.*;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import org.hamcrest.MatcherAssert;
@@ -29,12 +29,12 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.exasol.adapter.dialects.AbstractIntegrationTest;
 import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
-
-import utils.IntegrationTestSetupManager;
+import com.exasol.dbbuilder.dialects.exasol.*;
 
 /**
  * How to run `OracleSqlDialectIT`: See the documentation <a
@@ -42,88 +42,79 @@ import utils.IntegrationTestSetupManager;
  */
 @Tag("integration")
 @Testcontainers
-class OracleSqlDialectIT {
+class OracleSqlDialectIT extends AbstractIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(OracleSqlDialectIT.class);
     private static final String ORACLE_CONTAINER_NAME = "oracleinanutshell/oracle-xe-11g";
-    private static final Path ORACLE_DRIVER_SETTINGS_PATH = Path.of("src", "test", "resources", "integration", "driver",
-            "oracle", JDBC_DRIVER_CONFIGURATION_FILE_NAME);
+    private static final String RESOURCES_FOLDER_DIALECT_NAME = "oracle";
     private static final String SCHEMA_ORACLE = "SCHEMA_ORACLE";
     private static final int ORACLE_PORT = 1521;
-    private static final String CONNECTION_ORACLE_JDBC = "CONNECTION_ORACLE_JDBC";
-    private static final String CONNECTION_ORACLE_ORA = "CONNECTION_ORACLE_ORA";
+    private static final String JDBC_CONNECTION_NAME = "JDBC";
+    private static final String ORA_CONNECTION_NAME = "ORA";
     private static final String TABLE_ORACLE_ALL_DATA_TYPES = "TABLE_ORACLE_ALL_DATA_TYPES";
     private static final String TABLE_ORACLE_NUMBER_HANDLING = "TABLE_ORACLE_NUMBER_HANDLING";
     private static final String TABLE_ORACLE_TIMESTAMPS = "TABLE_ORACLE_TIMESTAMPS";
-
     private static final String VIRTUAL_SCHEMA_JDBC = "VIRTUAL_SCHEMA_JDBC";
     private static final String VIRTUAL_SCHEMA_ORA = "VIRTUAL_SCHEMA_ORA";
     private static final String VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL = "VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL";
     private static final String VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL = "VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL";
-
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
                     .withLogConsumer(new Slf4jLogConsumer(LOGGER));
     @Container
     private static final OracleContainer oracleContainer = new OracleContainer(ORACLE_CONTAINER_NAME);
-    private static final String PATH_TO_ORACLE_PROPERTY_FILE = "src/test/resources/integration/driver/oracle/oracle.properties";
     private static Statement statementExasol;
-    private static final IntegrationTestSetupManager integrationTestSetupManager = new IntegrationTestSetupManager();
 
     @BeforeAll
     static void beforeAll() throws InterruptedException, BucketAccessException, TimeoutException, SQLException {
-        final String driverName = getPropertyFromFile(PATH_TO_ORACLE_PROPERTY_FILE, "driver.name");
-        final String driverPath = getPropertyFromFile(PATH_TO_ORACLE_PROPERTY_FILE, "driver.path");
-        final String instantClientName = getPropertyFromFile(PATH_TO_ORACLE_PROPERTY_FILE, "instant.client.name");
-        final String instantClientPath = getPropertyFromFile(PATH_TO_ORACLE_PROPERTY_FILE, "instant.client.path");
-        uploadFilesToBucket(driverName, driverPath, instantClientName, instantClientPath);
+        final String driverName = getPropertyFromFile(RESOURCES_FOLDER_DIALECT_NAME, "driver.name");
+        uploadDriverToBucket(driverName, RESOURCES_FOLDER_DIALECT_NAME, exasolContainer.getDefaultBucket());
+        uploadVsJarToBucket(exasolContainer.getDefaultBucket());
+        uploadInstantClientToBucket();
         final Connection exasolConnection = exasolContainer.createConnectionForUser(exasolContainer.getUsername(),
                 exasolContainer.getPassword());
         statementExasol = exasolConnection.createStatement();
-        final Statement statementOracle = integrationTestSetupManager.getStatement(oracleContainer);
-        integrationTestSetupManager.createTestSchema(statementExasol, SCHEMA_EXASOL);
+        final Statement statementOracle = oracleContainer.createConnection("").createStatement();
         createOracleUser(statementOracle);
         createOracleTableAllDataTypes(statementOracle);
         createOracleTableNumberHandling(statementOracle);
         createOracleTableTimestamps(statementOracle);
-        integrationTestSetupManager.createTestTablesForJoinTests(statementOracle, SCHEMA_ORACLE, TABLE_JOIN_1,
-                TABLE_JOIN_2);
+        createTestTablesForJoinTests(oracleContainer.createConnection(""), SCHEMA_ORACLE);
         final Integer mappedPort = oracleContainer.getMappedPort(ORACLE_PORT);
-        final String oracleContainerUsername = oracleContainer.getUsername();
-        final String oracleContainerPassword = oracleContainer.getPassword();
-        createJdbcConnection(mappedPort, oracleContainerUsername, oracleContainerPassword);
-        createOraConnection(mappedPort, oracleContainerUsername, oracleContainerPassword);
-        integrationTestSetupManager.createAdapterScript(statementExasol, SCHEMA_EXASOL + "." + ADAPTER_SCRIPT_EXASOL,
-                VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION,
-                Optional.of("%jar /buckets/bfsdefault/default/drivers/jdbc/" + driverName + ";\n"));
-        createVirtualSchema(VIRTUAL_SCHEMA_JDBC, SCHEMA_ORACLE, Optional.empty());
-        createVirtualSchema(VIRTUAL_SCHEMA_ORA, SCHEMA_ORACLE,
-                Optional.of("IMPORT_FROM_ORA='true' ORA_CONNECTION_NAME='" + CONNECTION_ORACLE_ORA + "'"));
-        createVirtualSchema(VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL, SCHEMA_ORACLE,
-                Optional.of("oracle_cast_number_to_decimal_with_precision_and_scale='36,1'"));
-        createVirtualSchema(VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL, SCHEMA_ORACLE, Optional.of(
-                " oracle_cast_number_to_decimal_with_precision_and_scale='36,1' IMPORT_FROM_ORA='true' ORA_CONNECTION_NAME='"
-                        + CONNECTION_ORACLE_ORA + "'"));
+        final String oracleUsername = oracleContainer.getUsername();
+        final String oraclePassword = oracleContainer.getPassword();
+        final ExasolObjectFactory exasolFactory = new ExasolObjectFactory(exasolContainer.createConnection(""));
+        final ExasolSchema schema = exasolFactory.createSchema(SCHEMA_EXASOL);
+        final AdapterScript adapterScript = createAdapterScript(driverName, schema);
+        final String jdbcConnectionString = "jdbc:oracle:thin:@//" + DOCKER_IP_ADDRESS + ":" + mappedPort + "/xe";
+        final ConnectionDefinition jdbcConnectionDefinition = exasolFactory
+                .createConnectionDefinition(JDBC_CONNECTION_NAME, jdbcConnectionString, oracleUsername, oraclePassword);
+        createOraConnection(exasolFactory, mappedPort, oracleUsername, oraclePassword);
+        exasolFactory.createVirtualSchemaBuilder(VIRTUAL_SCHEMA_JDBC).adapterScript(adapterScript)
+                .connectionDefinition(jdbcConnectionDefinition).dialectName("ORACLE")
+                .properties(Map.of("SCHEMA_NAME", SCHEMA_ORACLE)).build();
+        exasolFactory.createVirtualSchemaBuilder(VIRTUAL_SCHEMA_JDBC_NUMBER_TO_DECIMAL).adapterScript(adapterScript)
+                .connectionDefinition(jdbcConnectionDefinition).dialectName("ORACLE")
+                .properties(Map.of("SCHEMA_NAME", SCHEMA_ORACLE)).properties(Map.of("SCHEMA_NAME", SCHEMA_ORACLE,
+                        "oracle_cast_number_to_decimal_with_precision_and_scale", "36,1"))
+                .build();
+        exasolFactory.createVirtualSchemaBuilder(VIRTUAL_SCHEMA_ORA).adapterScript(adapterScript)
+                .connectionDefinition(jdbcConnectionDefinition).dialectName("ORACLE").properties(Map.of("SCHEMA_NAME",
+                        SCHEMA_ORACLE, "IMPORT_FROM_ORA", "true", "ORA_CONNECTION_NAME", ORA_CONNECTION_NAME))
+                .build();
+        exasolFactory.createVirtualSchemaBuilder(VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL).adapterScript(adapterScript)
+                .connectionDefinition(jdbcConnectionDefinition).dialectName("ORACLE")
+                .properties(Map.of("SCHEMA_NAME", SCHEMA_ORACLE, "IMPORT_FROM_ORA", "true", "ORA_CONNECTION_NAME",
+                        ORA_CONNECTION_NAME, "oracle_cast_number_to_decimal_with_precision_and_scale", "36,1"))
+                .build();
     }
 
-    private static String getPropertyFromFile(final String filePath, final String propertyName) {
-        try (final InputStream inputStream = new FileInputStream(filePath)) {
-            final Properties properties = new Properties();
-            properties.load(inputStream);
-            return properties.getProperty(propertyName);
-        } catch (final IOException e) {
-            throw new IllegalArgumentException("Cannot access the oracle.properties file or read from it.");
-        }
-    }
-
-    private static void uploadFilesToBucket(final String driverName, final String driverPath,
-            final String instantClientName, final String instantClientPath)
+    private static void uploadInstantClientToBucket()
             throws InterruptedException, BucketAccessException, TimeoutException {
         final Bucket bucket = exasolContainer.getDefaultBucket();
-        bucket.uploadFile(PATH_TO_VIRTUAL_SCHEMAS_JAR, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
-        bucket.uploadFile(Path.of(driverPath, driverName), "drivers/jdbc/" + driverName);
+        final String instantClientName = getPropertyFromFile(RESOURCES_FOLDER_DIALECT_NAME, "instant.client.name");
+        final String instantClientPath = getPropertyFromFile(RESOURCES_FOLDER_DIALECT_NAME, "instant.client.path");
         bucket.uploadFile(Path.of(instantClientPath, instantClientName), "drivers/oracle/" + instantClientName);
-        bucket.uploadFile(ORACLE_DRIVER_SETTINGS_PATH, "drivers/jdbc/" + JDBC_DRIVER_CONFIGURATION_FILE_NAME);
     }
 
     private static void createOracleUser(final Statement statementOracle) throws SQLException {
@@ -226,38 +217,28 @@ class OracleSqlDialectIT {
                 + ")");
     }
 
-    private static void createJdbcConnection(final Integer mappedPort, final String oracleContainerUsername,
-            final String oracleContainerPassword) throws SQLException {
-        integrationTestSetupManager.createConnection(statementExasol, CONNECTION_ORACLE_JDBC,
-                "jdbc:oracle:thin:@//" + DOCKER_IP_ADDRESS + ":" + mappedPort + "/xe", //
-                oracleContainerUsername, oracleContainerPassword);
+    private static AdapterScript createAdapterScript(final String driverName, final ExasolSchema schema) {
+        final String content = "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
+                + "%jar /buckets/bfsdefault/default/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION + ";\n" //
+                + "%jar /buckets/bfsdefault/default/drivers/jdbc/" + driverName + ";\n";
+        return schema.createAdapterScript(ADAPTER_SCRIPT_EXASOL, JAVA, content);
     }
 
-    private static void createOraConnection(final Integer mappedPort, final String oracleContainerUsername,
-            final String oracleContainerPassword) throws SQLException {
-        integrationTestSetupManager.createConnection(statementExasol, CONNECTION_ORACLE_ORA, //
-                "(DESCRIPTION =" //
-                        + "(ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)" //
-                        + "(HOST = " + DOCKER_IP_ADDRESS + " )" //
-                        + "(PORT = " + mappedPort + ")))" //
-                        + "(CONNECT_DATA = (SERVER = DEDICATED)" //
-                        + "(SERVICE_NAME = xe)))" //
-                , oracleContainerUsername, oracleContainerPassword);
+    private static ConnectionDefinition createOraConnection(final ExasolObjectFactory exasolFactory,
+            final Integer mappedPort, final String oracleUsername, final String oraclePassword) {
+        final String oraConnectionString = "(DESCRIPTION =" //
+                + "(ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)" //
+                + "(HOST = " + DOCKER_IP_ADDRESS + " )" //
+                + "(PORT = " + mappedPort + ")))" //
+                + "(CONNECT_DATA = (SERVER = DEDICATED)" //
+                + "(SERVICE_NAME = xe)))";
+        return exasolFactory.createConnectionDefinition(ORA_CONNECTION_NAME, oraConnectionString, oracleUsername,
+                oraclePassword);
     }
 
-    private static void createVirtualSchema(final String virtualSchemaName, final String originSchemaName,
-            final Optional<String> additionalParameters) throws SQLException {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("CREATE VIRTUAL SCHEMA ");
-        builder.append(virtualSchemaName);
-        builder.append(" USING " + SCHEMA_EXASOL + "." + ADAPTER_SCRIPT_EXASOL + " WITH ");
-        builder.append("SQL_DIALECT     = 'ORACLE' ");
-        builder.append("CONNECTION_NAME = '" + CONNECTION_ORACLE_JDBC + "' ");
-        builder.append("SCHEMA_NAME     = '" + originSchemaName + "' ");
-        additionalParameters.ifPresent(builder::append);
-        final String sql = builder.toString();
-        LOGGER.info("Creating virtual schema with query: " + sql);
-        statementExasol.execute(sql);
+    @Override
+    protected Connection getExasolConnection() throws SQLException {
+        return exasolContainer.createConnection("");
     }
 
     @Nested
@@ -394,97 +375,96 @@ class OracleSqlDialectIT {
         @ParameterizedTest
         @ValueSource(strings = { VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_ORA })
         void testInnerJoin(final String virtualSchema) throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x VARCHAR(100), y VARCHAR(100), a VARCHAR(100), b VARCHAR(100))",
-                    "VALUES('2','bbb', '2','bbb')");
-            final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + virtualSchema + "." + TABLE_JOIN_1
-                    + " a INNER JOIN  " + virtualSchema + "." + TABLE_JOIN_2 + " b ON a.x=b.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + virtualSchema + "." + TABLE_JOIN_1 + " a INNER JOIN  "
+                    + virtualSchema + "." + TABLE_JOIN_2 + " b ON a.x=b.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x VARCHAR(100)", "y VARCHAR(100)", "a VARCHAR(100)", "b VARCHAR(100)"), //
+                    List.of("'2','bbb', '2','bbb'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @ParameterizedTest
         @ValueSource(strings = { VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_ORA })
         void testInnerJoinWithProjection(final String virtualSchemaName) throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(y VARCHAR(100))", " VALUES('bbbbbb')");
             final String qualifiedJoinTableName1 = virtualSchemaName + "." + TABLE_JOIN_1;
             final String qualifiedJoinTableName2 = virtualSchemaName + "." + TABLE_JOIN_2;
-            final ResultSet actual = statementExasol.executeQuery(
-                    "SELECT b.y || " + qualifiedJoinTableName1 + ".y FROM " + qualifiedJoinTableName1 + " INNER JOIN  "
-                            + qualifiedJoinTableName2 + " b ON " + qualifiedJoinTableName1 + ".x=b.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT b.y || " + qualifiedJoinTableName1 + ".y FROM " + qualifiedJoinTableName1
+                    + " INNER JOIN  " + qualifiedJoinTableName2 + " b ON " + qualifiedJoinTableName1 + ".x=b.x";
+            final ResultSet expected = getExpectedResultSet(List.of("y VARCHAR(100)"), //
+                    List.of("'bbbbbb'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @ParameterizedTest
         @ValueSource(strings = { VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_ORA })
         void testLeftJoin(final String virtualSchemaName) throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x  VARCHAR(100), y VARCHAR(100), a  VARCHAR(100), b VARCHAR(100))",
-                    "VALUES('1', 'aaa', null, null), " //
-                            + "('2', 'bbb', '2', 'bbb')");
             final String qualifiedJoinTableName1 = virtualSchemaName + "." + TABLE_JOIN_1;
             final String qualifiedJoinTableName2 = virtualSchemaName + "." + TABLE_JOIN_2;
-            final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + qualifiedJoinTableName1
-                    + " a LEFT OUTER JOIN  " + qualifiedJoinTableName2 + " b ON a.x=b.x ORDER BY a.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + qualifiedJoinTableName1 + " a LEFT OUTER JOIN  "
+                    + qualifiedJoinTableName2 + " b ON a.x=b.x ORDER BY a.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x VARCHAR(100)", "y VARCHAR(100)", "a VARCHAR(100)", "b VARCHAR(100)"), //
+                    List.of("'1', 'aaa', null, null", //
+                            "'2', 'bbb', '2', 'bbb'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @ParameterizedTest
         @ValueSource(strings = { VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_ORA })
         void testRightJoin(final String virtualSchemaName) throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x VARCHAR(100), y VARCHAR(100), a VARCHAR(100), b VARCHAR(100))",
-                    "VALUES('2', 'bbb', '2', 'bbb'), " //
-                            + "(null, null, '3', 'ccc')");
             final String qualifiedJoinTableName1 = virtualSchemaName + "." + TABLE_JOIN_1;
             final String qualifiedJoinTableName2 = virtualSchemaName + "." + TABLE_JOIN_2;
-            final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + qualifiedJoinTableName1
-                    + " a RIGHT OUTER JOIN  " + qualifiedJoinTableName2 + " b ON a.x=b.x ORDER BY a.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + qualifiedJoinTableName1 + " a RIGHT OUTER JOIN  "
+                    + qualifiedJoinTableName2 + " b ON a.x=b.x ORDER BY a.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x VARCHAR(100)", "y VARCHAR(100)", "a VARCHAR(100)", "b VARCHAR(100)"), //
+                    List.of("'2', 'bbb', '2', 'bbb'", //
+                            "null, null, '3', 'ccc'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @ParameterizedTest
         @ValueSource(strings = { VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_ORA })
         void testFullOuterJoin(final String virtualSchemaName) throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x VARCHAR(100), y VARCHAR(100), a VARCHAR(100), b VARCHAR(100))",
-                    "VALUES(1, 'aaa', null, null), " //
-                            + "('2', 'bbb', '2', 'bbb'), " //
-                            + "(null, null, '3', 'ccc')");
             final String qualifiedJoinTableName1 = virtualSchemaName + "." + TABLE_JOIN_1;
             final String qualifiedJoinTableName2 = virtualSchemaName + "." + TABLE_JOIN_2;
-            final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + qualifiedJoinTableName1
-                    + " a FULL OUTER JOIN  " + qualifiedJoinTableName2 + " b ON a.x=b.x ORDER BY a.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + qualifiedJoinTableName1 + " a FULL OUTER JOIN  "
+                    + qualifiedJoinTableName2 + " b ON a.x=b.x ORDER BY a.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x VARCHAR(100)", "y VARCHAR(100)", "a VARCHAR(100)", "b VARCHAR(100)"), //
+                    List.of("1, 'aaa', null, null", //
+                            "'2', 'bbb', '2', 'bbb'", //
+                            "null, null, '3', 'ccc'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @ParameterizedTest
         @ValueSource(strings = { VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_ORA })
         void testRightJoinWithComplexCondition(final String virtualSchemaName) throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x VARCHAR(100), y VARCHAR(100), a VARCHAR(100), b VARCHAR(100))", //
-                    "VALUES('2', 'bbb', '2', 'bbb'), " //
-                            + "(null, null, '3', 'ccc')");
             final String qualifiedJoinTableName1 = virtualSchemaName + "." + TABLE_JOIN_1;
             final String qualifiedJoinTableName2 = virtualSchemaName + "." + TABLE_JOIN_2;
-            final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + qualifiedJoinTableName1
-                    + " a RIGHT OUTER JOIN  " + qualifiedJoinTableName2 + " b ON a.x||a.y=b.x||b.y ORDER BY a.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + qualifiedJoinTableName1 + " a RIGHT OUTER JOIN  "
+                    + qualifiedJoinTableName2 + " b ON a.x||a.y=b.x||b.y ORDER BY a.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x VARCHAR(100)", "y VARCHAR(100)", "a VARCHAR(100)", "b VARCHAR(100)"), //
+                    List.of("'2', 'bbb', '2', 'bbb'", //
+                            "null, null, '3', 'ccc'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @ParameterizedTest
         @ValueSource(strings = { VIRTUAL_SCHEMA_JDBC, VIRTUAL_SCHEMA_ORA })
         void testFullOuterJoinWithComplexCondition(final String virtualSchemaName) throws SQLException {
-            final ResultSet expected = integrationTestSetupManager.getSelectAllFromJoinExpectedTable(statementExasol,
-                    SCHEMA_EXASOL, "(x VARCHAR(100), y VARCHAR(100), a VARCHAR(100), b VARCHAR(100))", //
-                    "VALUES('1', 'aaa', null, null), " //
-                            + "('2', 'bbb', '2', 'bbb'), " //
-                            + "(null, null, '3', 'ccc')");
             final String qualifiedJoinTableName1 = virtualSchemaName + "." + TABLE_JOIN_1;
             final String qualifiedJoinTableName2 = virtualSchemaName + "." + TABLE_JOIN_2;
-            final ResultSet actual = statementExasol.executeQuery("SELECT * FROM " + qualifiedJoinTableName1
-                    + " a FULL OUTER JOIN  " + qualifiedJoinTableName2 + " b ON a.x-b.x=0 ORDER BY a.x");
-            assertThat(actual, matchesResultSet(expected));
+            final String query = "SELECT * FROM " + qualifiedJoinTableName1 + " a FULL OUTER JOIN  "
+                    + qualifiedJoinTableName2 + " b ON a.x-b.x=0 ORDER BY a.x";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x VARCHAR(100)", "y VARCHAR(100)", "a VARCHAR(100)", "b VARCHAR(100)"), //
+                    List.of("1, 'aaa', null, null", //
+                            "'2', 'bbb', '2', 'bbb'", //
+                            "null, null, '3', 'ccc'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
     }
 
