@@ -139,6 +139,6 @@ class MySqlSqlDialectTest {
 
     @Test
     void testGetSqlGenerationVisitor() {
-        assertThat(this.dialect.getSqlGenerationVisitor(null), instanceOf(MySqlGenerationVisitor.class));
+        assertThat(this.dialect.getSqlGenerationVisitor(null), instanceOf(MySqlSqlGenerationVisitor.class));
     }
 }

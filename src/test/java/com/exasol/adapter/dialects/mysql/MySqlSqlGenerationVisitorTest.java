@@ -19,7 +19,7 @@ import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.sql.*;
 
 @ExtendWith(MockitoExtension.class)
-class MySqlGenerationVisitorTest {
+class MySqlSqlGenerationVisitorTest {
     private SqlNodeVisitor<String> visitor;
 
     @BeforeEach
@@ -28,7 +28,7 @@ class MySqlGenerationVisitorTest {
         final SqlDialect dialect = dialectFactory.createSqlDialect(connectionFactoryMock,
                 AdapterProperties.emptyProperties());
         final SqlGenerationContext context = new SqlGenerationContext("test_catalog", "test_schema", false);
-        this.visitor = new MySqlGenerationVisitor(dialect, context);
+        this.visitor = new MySqlSqlGenerationVisitor(dialect, context);
     }
 
     @Test

@@ -7,8 +7,8 @@ import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.sql.*;
 
-public class MySqlGenerationVisitor extends SqlGenerationVisitor {
-    public MySqlGenerationVisitor(SqlDialect dialect, SqlGenerationContext context) {
+public class MySqlSqlGenerationVisitor extends SqlGenerationVisitor {
+    public MySqlSqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         super(dialect, context);
     }
 

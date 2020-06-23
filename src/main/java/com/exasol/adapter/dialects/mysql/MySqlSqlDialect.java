@@ -121,6 +121,6 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
 
     @Override
     public SqlNodeVisitor<String> getSqlGenerationVisitor(final SqlGenerationContext context) {
-        return new MySqlGenerationVisitor(this, context);
+        return new MySqlSqlGenerationVisitor(this, context);
     }
 }
