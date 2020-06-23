@@ -87,7 +87,7 @@ List of disabled integration tests:
 1. Download a JDBC driver and other necessary files: 
  - Hive [`HiveJDBC41.jar`](https://www.cloudera.com/downloads/connectors/hive/jdbc/2-5-4.html)
  - MySQL [`mysql-connector-java-8.0.20.jar`](https://dev.mysql.com/downloads/connector/j/)
- - Oracle [`ojdbc8.jar`](https://www.oracle.com/database/technologies/appdev/jdbc-ucp-19c-downloads.html) and oracle instant client [`instantclient-basic-linux.x64-12.1.0.2.0.zip`](https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html). Please be aware Exasol currently supports only mentioned here version of the Oracle instant client.  
+ - Oracle [`ojdbc8.jar`](https://www.oracle.com/database/technologies/appdev/jdbc-ucp-19c-downloads.html) and oracle instant client [`instantclient-basic-linux.x64-12.1.0.2.0.zip`](https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html). Please be aware that Exasol currently supports only mentioned version of the Oracle instant client.  
 2. Temporarily put the files into `src/test/resources/integration/driver/<dialect lowercase name>` directory. Existing dialect directories: `hive`, `mysql`, `oracle`.
 
 3. If the files' names are different (you renamed the file, or it has a different version number, for example) from the mentioned above, edit `src/test/resources/integration/driver/<dialect lowercase name>/<dialect lowercase name>.properties` and `settings.cfg` files.
