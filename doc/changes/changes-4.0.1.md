@@ -1,4 +1,4 @@
-# Virtual Schemas 4.0.1, released 24.06.2020
+# Exasol Virtual Schemas 4.0.1, released 25.06.2020
 
 ## Summary 
 

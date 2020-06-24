@@ -82,6 +82,7 @@ Virtual Schemas support 16 different SQL dialects, from OpenSource databases lik
 Please refer to the user-guide for a [full list of supported SQL dialects](doc/user-guide/user_guide.md#list-of-supported-dialects)
 
 * [User Guide](doc/user-guide/user_guide.md)
+* [Changelog](doc/changes/changelog.md)
 
 ## Information for Developers 
 
