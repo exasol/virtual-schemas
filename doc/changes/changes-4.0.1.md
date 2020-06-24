@@ -2,11 +2,13 @@
 
 ## Summary 
 
-In this release we introduced the security risks check with `ossindex-maven-plugin`. We removed found security risks in the third-party transient test dependencies.
+In this release we introduced the security risks check with `ossindex-maven-plugin`. We removed the reported security risks by updating or excluding third-party transient test dependencies. Those were used in the integration tests of the Virtual Schema for Hive.
 
 We also adjusted the naming for the attached JAR file:
-Old naming pattern: virtualschema-jdbc-adapter-dist-<dialects version>.jar
-New naming pattern: virtual-schema-dist-<virtual schema common jdbc version>-bundle-<dialects version>.jar
+
+Old naming pattern: `virtualschema-jdbc-adapter-dist-<dialects version>.jar`
+
+New naming pattern: `virtual-schema-dist-<virtual schema common jdbc version>-bundle-<dialects version>.jar`
 
 The new naming pattern helps users to distinguish minor dialect changes from major adapter changes affecting all dialects.
 
@@ -17,7 +19,7 @@ The new naming pattern helps users to distinguish minor dialect changes from maj
 
 ## Features / Enhancements
  
-* #340:  Added MySQL dialect integration test.
+* #340: Added MySQL dialect integration test.
 * #346: Added `changelog.md` file to the documentation for keeping tracking of changes outside of the github.
  
 ## Dependency updates
