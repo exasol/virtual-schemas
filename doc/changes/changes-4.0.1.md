@@ -1,4 +1,4 @@
-# 24 JUNE 2020
+# Virtual Schemas 4.0.1, released 24.06.2020
 
 ## Summary 
 
