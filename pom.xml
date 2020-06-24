@@ -4,10 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>virtual-schema-jdbc-adapter</artifactId>
-    <version>${product.version}</version>
+    <version>4.0.1</version>
     <name>Virtual Schema JDBC Adapter</name>
     <properties>
-        <product.version>4.0.1</product.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>11</java.version>
@@ -329,7 +328,7 @@
                     <descriptors>
                         <descriptor>assembly/all-dependencies.xml</descriptor>
                     </descriptors>
-                    <finalName>virtual-schema-dist-${vscjdbc.version}-bundle-${product.version}</finalName>
+                    <finalName>virtual-schema-dist-${vscjdbc.version}-bundle-${version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>
