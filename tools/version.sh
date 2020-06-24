@@ -85,7 +85,7 @@ log () {
 }
 
 verify_no_other_version_numbers() {
-    find -type f -regextype posix-extended -regex "$file_find_regex" \
+    find -type f -regextype posix-extended -regex "$file_find_regex" ! -name "changelog.md" \
       -exec grep -Hnor $vs_jar_pattern {} \; | grep -v "$1"
     if [[ $? -eq 0 ]]
     then
@@ -107,7 +107,7 @@ unify() {
 
 update_documentation() {
 log "Checking all files matching \"$file_find_regex\""
-    find -type f -regextype posix-extended -regex "$file_find_regex" \
+    find -type f -regextype posix-extended -regex "$file_find_regex" ! -name "changelog.md" \
       -exec echo "Processing \"{}\"" \; \
       -exec sed -i s/"$vs_jar_pattern"/"$vs_jar_prefix-$dialects_version.$jar_suffix"/g {} \; \
       -exec sed -i s/"$vs_jar_pattern"/"$vs_jar_prefix-$vscjdbc_version-bundle-$dialects_version.$jar_suffix"/g {} \;
