@@ -120,7 +120,6 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 | [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)                                  | Checking for conditions in code via matchers           | BSD License                      |
 | [JSONassert](http://jsonassert.skyscreamer.org/)                                    | Compare JSON documents for semantic equality           | Apache License 2.0               |
 | [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0       |
-| [J5SE](https://github.com/itsallcode/junit5-system-extensions)                      | JUnit5 extensions to test Java System.x functions      | Eclipse Public License 2.0       |
 | [Mockito](http://site.mockito.org/)                                                 | Mocking framework                                      | MIT License                      |
 | [MySQL JDBC Driver][mysql-jdbc-driver]                                              | JDBC driver for MySQL database                         | GNU GPL Version 2.0              |
 | [Oracle JDBC Driver][oracle-jdbc-driver]                                            | JDBC driver for Oracle database                        | Oracle Technology Network License|
@@ -133,6 +132,7 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 |-------------------------------------------------------------------------------------|--------------------------------------------------------|----------------------------------|
 | [Maven Compiler Plugin](https://maven.apache.org/plugins/maven-compiler-plugin/)    | Setting required Java version                          | Apache License 2.0               |
 | [Maven Exec Plugin](https://www.mojohaus.org/exec-maven-plugin/)                    | Executing external applications                        | Apache License 2.0               |
+| [Maven Enforcer Plugin][maven-enforcer-plugin]                                      | Controlling environment constants                      | Apache License 2.0               |
 | [Maven GPG Plugin](https://maven.apache.org/plugins/maven-gpg-plugin/)              | Code signing                                           | Apache License 2.0               |
 | [Maven Failsafe Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Integration testing                                    | Apache License 2.0               |
 | [Maven Javadoc Plugin](https://maven.apache.org/plugins/maven-javadoc-plugin/)      | Creating a Javadoc JAR                                 | Apache License 2.0               |
@@ -140,13 +140,16 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 | [Maven Source Plugin](https://maven.apache.org/plugins/maven-source-plugin/)        | Creating a source code JAR                             | Apache License 2.0               |
 | [Maven Surefire Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Unit testing                                           | Apache License 2.0               |
 | [Sonatype OSS Index Maven Plugin][sonatype-oss-index-maven-plugin]                  | Checking Dependencies Vulnerability                    | ASL2                             |
+| [Versions Maven Plugin][versions-maven-plugin]                                      | Checking if dependencies updates are available         | Apache License 2.0               |
 
 [apache-trift]: http://thrift.apache.org/
 [exasol-jdbc-driver]: https://www.exasol.com/portal/display/DOWNLOAD/Exasol+Download+Section
 [exasol-testcontainers]: https://github.com/exasol/exasol-testcontainers
 [hbase-server]: http://hbase.apache.org/
 [hive-jdbc-driver]: https://github.com/apache/hive/tree/master/jdbc/src/java/org/apache/hive/jdbc
+[maven-enforcer-plugin]: http://maven.apache.org/enforcer/maven-enforcer-plugin/
 [mysql-jdbc-driver]: https://dev.mysql.com/downloads/connector/j/
 [oracle-jdbc-driver]: https://www.oracle.com/database/technologies/appdev/jdbc.html
 [postgresql-jdbc-driver]: https://jdbc.postgresql.org/
 [sonatype-oss-index-maven-plugin]: https://sonatype.github.io/ossindex-maven/maven-plugin/
+[versions-maven-plugin]: https://www.mojohaus.org/versions-maven-plugin/
