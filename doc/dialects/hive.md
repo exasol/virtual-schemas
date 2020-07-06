@@ -118,7 +118,7 @@ However, we should update it and add the JDBC connection URL to the `TO` part of
 
 Add the JDBC connection URL for the to the `TO` part of connection string:
 
-```
+```sql
 CREATE OR REPLACE CONNECTION krb_conn
 TO 'jdbc:hive2://<Hive host>:<port>;AuthMech=1;KrbRealm=EXAMPLE.COM;KrbHostFQDN=hive-host.example.com;KrbServiceName=hive'
 USER 'krbuser@EXAMPLE.COM'
@@ -185,13 +185,13 @@ See also:
 
 ### No metadata is returned
 
-If you see this message in the log output:
+If no Virtual Schema is created and see warning message in the log output:
 
 ```
 2020-06-12 06:53:12.309 WARNING [c.e.a.j.BaseTableMetadataReader] Table scan did not find any tables. This can mean that either a) the source does not contain tables (yet), b) the table type is not supported or c) the table scan filter criteria is incorrect. Please check that the source actually contains tables.  Also check the spelling and exact case of any catalog or schema name you provided.
 ```
 
-And if you expect the Virtual Schemas, please unsure that the user specified in the connection string has correct Hive privileges. Otherwise, the Virtual Schema may not return any metadata.
+Please ensure that the user specified in the connection string has correct Hive access privileges in addition to above suggestions. Otherwise, the Virtual Schema may not return any metadata.
 
 ### Kerberos Exception: Invalid status error
 
