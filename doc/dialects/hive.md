@@ -116,7 +116,7 @@ However, we should update it and add the JDBC connection URL to the `TO` part of
 
 #### Using Thrift protocol with Kerberos
 
-Add the JDBC connection URL for the to the `TO` part of connection string:
+Add the JDBC connection URL to the `TO` part of the connection string:
 
 ```sql
 CREATE OR REPLACE CONNECTION krb_conn
@@ -231,7 +231,7 @@ Caused by: org.apache.hive.org.apache.thrift.transport.TTransportException: Inva
 
 It means you have specified the Thrift protocol, and it cannot establish connection using Thrift.
 
-Check if the Hive cluster accepts thrift connection. Or if the HTTP protocol enabled, then change the JDBC connection string as specified for HTTP protocol.
+Check if the Hive cluster accepts a thrift connection. Or if the HTTP protocol enabled, then change the JDBC connection string as specified for HTTP protocol.
 
 ### Kerberos Exception: GSS initiate failed
 
