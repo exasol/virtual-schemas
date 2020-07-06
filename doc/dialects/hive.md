@@ -4,7 +4,7 @@
 
 ## Registering the JDBC Driver in EXAOperation
 
-First download the [Hive JDBC driver](https://www.cloudera.com/downloads/connectors/hive/jdbc/2-6-5.html).
+First download the [Hive JDBC driver](https://www.cloudera.com/downloads/connectors/hive/jdbc/2-6-10.html).
 
 Now register the driver in EXAOperation:
 
@@ -103,14 +103,37 @@ In order to simplify the creation of Kerberos `CONNECTION` objects, the [`create
 Example command:
 
 ```
-python tools/create_kerberos_conn.py krb_conn krbuser@EXAMPLE.COM /etc/krb5.conf ./krbuser.keytab \
-  'jdbc:hive2://<Hive host>:<port>;AuthMech=1;KrbRealm=EXAMPLE.COM;KrbHostFQDN=hive-host.example.com;KrbServiceName=hive'
+python tools/create_kerberos_conn.py krb_conn krbuser@EXAMPLE.COM /etc/krb5.conf ./krbuser.keytab
 ```
 
-Output:
+This outputs a create connection statement:
 
 ```sql
-CREATE CONNECTION krb_conn TO 'jdbc:hive2://<Hive host>:<port>;AuthMech=1;KrbRealm=EXAMPLE.COM;KrbHostFQDN=hive-host.example.com;KrbServiceName=hive' USER 'krbuser@EXAMPLE.COM' IDENTIFIED BY 'ExaAuthType=Kerberos;enp6Cg==;YWFhCg=='
+CREATE CONNECTION krb_conn TO '' USER 'krbuser@EXAMPLE.COM' IDENTIFIED BY 'ExaAuthType=Kerberos;enp6Cg==;YWFhCg=='
+```
+
+However, we should update it and add the JDBC connection URL to the `TO` part of the connection string.
+
+#### Using Thrift protocol with Kerberos
+
+Add the JDBC connection URL to the `TO` part of the connection string:
+
+```sql
+CREATE OR REPLACE CONNECTION krb_conn
+TO 'jdbc:hive2://<Hive host>:<port>;AuthMech=1;KrbRealm=EXAMPLE.COM;KrbHostFQDN=hive-host.example.com;KrbServiceName=hive'
+USER 'krbuser@EXAMPLE.COM'
+IDENTIFIED BY 'ExaAuthType=Kerberos;enp6Cg==;YWFhCg=='
+```
+
+#### Using HTTP protocol with Kerberos
+
+Similar to the Thrift protocol, update the `TO` part of the connection string with HTTP enabled URL:
+
+```sql
+CREATE OR REPLACE CONNECTION krb_conn
+TO 'jdbc:hive2://<Hive host>:<port>;AuthMech=1;KrbRealm=EXAMPLE.COM;KrbHostFQDN=hive-host.example.com;KrbServiceName=hive;transportMode=http;httpPath=cliservice'
+USER 'krbuser@EXAMPLE.COM'
+IDENTIFIED BY 'ExaAuthType=Kerberos;enp6Cg==;YWFhCg=='
 ```
 
 ### Creating the Connection
@@ -158,7 +181,104 @@ Please also note that 32KiB are the maximum string size the driver accepts.
 
 See also:
 
-* [Cloudera JDBC driver for Apache Hive Install Guide](https://www.cloudera.com/documentation/other/connectors/hive-jdbc/2-5-4/Cloudera-JDBC-Driver-for-Apache-Hive-Install-Guide-2-5-4.pdf)
+* [Cloudera JDBC driver for Apache Hive Install Guide](https://docs.cloudera.com/documentation/other/connectors/hive-jdbc/latest/Cloudera-JDBC-Driver-for-Apache-Hive-Install-Guide.pdf)
+
+### No metadata is returned
+
+Sometimes the Virtual Schema is not created, but it also does not fail with any exceptions. In such cases you can enable the remote logging and check the logs.
+
+```
+2020-06-12 06:53:12.309 WARNING [c.e.a.j.BaseTableMetadataReader] Table scan did not find any tables. This can mean that either a) the source does not contain tables (yet), b) the table type is not supported or c) the table scan filter criteria is incorrect. Please check that the source actually contains tables.  Also check the spelling and exact case of any catalog or schema name you provided.
+```
+
+If you see the warning message as above, please ensure that the user specified in the connection string has correct Hive access privileges in addition to above suggestions. Otherwise, the Virtual Schema may not return any metadata.
+
+### Kerberos Exception: Invalid status error
+
+This error means you have specified the Thrift protocol, and it cannot establish connection using Thrift. Check if the Hive cluster accepts a Thrift connection. Or if the HTTP protocol enabled, then change the JDBC connection string as specified for HTTP protocol.
+
+An example error message as below:
+
+```
+2020-05-19 13:56:54.573 FINE    [c.e.a.RequestDispatcher] Stack trace:
+        com.exasol.adapter.jdbc.RemoteMetadataReaderException: Unable to create Hive remote metadata reader.
+        at com.exasol.adapter.dialects.hive.HiveSqlDialect.createRemoteMetadataReader(HiveSqlDialect.java:126)
+        at com.exasol.adapter.dialects.AbstractSqlDialect.readSchemaMetadata(AbstractSqlDialect.java:138)
+        at com.exasol.adapter.jdbc.JdbcAdapter.readMetadata(JdbcAdapter.java:56)
+        at com.exasol.adapter.jdbc.JdbcAdapter.createVirtualSchema(JdbcAdapter.java:33)
+        at com.exasol.adapter.RequestDispatcher.dispatchCreateVirtualSchemaRequestToAdapter(RequestDispatcher.java:110)
+        at com.exasol.adapter.RequestDispatcher.processRequest(RequestDispatcher.java:70)
+        at com.exasol.adapter.RequestDispatcher.executeAdapterCall(RequestDispatcher.java:52)
+        at com.exasol.adapter.RequestDispatcher.adapterCall(RequestDispatcher.java:41)
+        at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+        at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+        at com.exasol.ExaWrapper.runSingleCall(ExaWrapper.java:95)
+Caused by: java.sql.SQLException: Could not open client transport with JDBC Uri: <JDBC_URL>: Invalid status 72
+        at org.apache.hive.jdbc.HiveConnection.<init>(HiveConnection.java:333)
+        at org.apache.hive.jdbc.HiveDriver.connect(HiveDriver.java:107)
+        at java.sql/java.sql.DriverManager.getConnection(DriverManager.java:677)
+        at java.sql/java.sql.DriverManager.getConnection(DriverManager.java:189)
+        ... 12 more
+Caused by: org.apache.hive.org.apache.thrift.transport.TTransportException: Invalid status 72
+        at org.apache.hive.org.apache.thrift.transport.TSaslTransport.sendAndThrowMessage(TSaslTransport.java:232)
+        at org.apache.hive.org.apache.thrift.transport.TSaslTransport.receiveSaslMessage(TSaslTransport.java:184)
+        at org.apache.hive.org.apache.thrift.transport.TSaslTransport.open(TSaslTransport.java:307)
+        at org.apache.hive.org.apache.thrift.transport.TSaslClientTransport.open(TSaslClientTransport.java:37)
+        at org.apache.hive.jdbc.HiveConnection.openTransport(HiveConnection.java:420)
+        at org.apache.hive.jdbc.HiveConnection.<init>(HiveConnection.java:301)
+        ... 19 more
+```
+
+### Kerberos Exception: GSS initiate failed
+
+The GSS initiate issue happens when the internal Hive host is unreachable. Please check and ensure that the Hive host specified using `KrbHostFQDN` parameter is correct.
+
+An example failure exception as below:
+
+```
+2020-05-25 14:44:02.707 FINE [c.e.a.RequestDispatcher] Stack trace:
+com.exasol.adapter.jdbc.RemoteMetadataReaderException: Unable to create Hive remote metadata reader.
+at com.exasol.adapter.dialects.hive.HiveSqlDialect.createRemoteMetadataReader(HiveSqlDialect.java:126)
+at com.exasol.adapter.dialects.AbstractSqlDialect.readSchemaMetadata(AbstractSqlDialect.java:138)
+at com.exasol.adapter.jdbc.JdbcAdapter.readMetadata(JdbcAdapter.java:56)
+at com.exasol.adapter.jdbc.JdbcAdapter.createVirtualSchema(JdbcAdapter.java:33)
+at com.exasol.adapter.RequestDispatcher.dispatchCreateVirtualSchemaRequestToAdapter(RequestDispatcher.java:110)
+at com.exasol.adapter.RequestDispatcher.processRequest(RequestDispatcher.java:70)
+at com.exasol.adapter.RequestDispatcher.executeAdapterCall(RequestDispatcher.java:52)
+at com.exasol.adapter.RequestDispatcher.adapterCall(RequestDispatcher.java:41)
+at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+at com.exasol.ExaWrapper.runSingleCall(ExaWrapper.java:95)
+Caused by: java.sql.SQLException: [Cloudera][HiveJDBCDriver](500164) Error initialized or created transport for authentication: [Cloudera][HiveJDBCDriver](500169) Unable to connect to server: GSS initiate failed.
+at com.cloudera.hiveserver2.hivecommon.api.HiveServer2ClientFactory.createTransport(Unknown Source)
+at com.cloudera.hiveserver2.hivecommon.api.ServiceDiscoveryFactory.createClient(Unknown Source)
+at com.cloudera.hiveserver2.hivecommon.core.HiveJDBCCommonConnection.establishConnection(Unknown Source)
+at com.cloudera.hiveserver2.jdbc.core.LoginTimeoutConnection.connect(Unknown Source)
+at com.cloudera.hiveserver2.jdbc.common.BaseConnectionFactory.doConnect(Unknown Source)
+at com.cloudera.hiveserver2.jdbc.common.AbstractDriver.connect(Unknown Source)
+at java.sql/java.sql.DriverManager.getConnection(DriverManager.java:677)
+at java.sql/java.sql.DriverManager.getConnection(DriverManager.java:189)
+at com.exasol.adapter.jdbc.RemoteConnectionFactory.establishConnectionWithKerberos(RemoteConnectionFactory.java:74)
+at com.exasol.adapter.jdbc.RemoteConnectionFactory.createConnection(RemoteConnectionFactory.java:55)
+at com.exasol.adapter.jdbc.RemoteConnectionFactory.getConnection(RemoteConnectionFactory.java:38)
+at com.exasol.adapter.dialects.hive.HiveSqlDialect.createRemoteMetadataReader(HiveSqlDialect.java:124)
+at com.exasol.adapter.dialects.AbstractSqlDialect.readSchemaMetadata(AbstractSqlDialect.java:138)
+at com.exasol.adapter.jdbc.JdbcAdapter.readMetadata(JdbcAdapter.java:56)
+at com.exasol.adapter.jdbc.JdbcAdapter.createVirtualSchema(JdbcAdapter.java:33)
+at com.exasol.adapter.RequestDispatcher.dispatchCreateVirtualSchemaRequestToAdapter(RequestDispatcher.java:110)
+at com.exasol.adapter.RequestDispatcher.processRequest(RequestDispatcher.java:70)
+at com.exasol.adapter.RequestDispatcher.executeAdapterCall(RequestDispatcher.java:52)
+at com.exasol.adapter.RequestDispatcher.adapterCall(RequestDispatcher.java:41)
+at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+... 23 more
+```
 
 ## Testing information
 
