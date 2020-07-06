@@ -185,17 +185,19 @@ See also:
 
 ### No metadata is returned
 
-If no Virtual Schema is created and see warning message in the log output:
+Sometimes the Virtual Schema is not created, but it also does not fail with any exceptions. In such cases you can enable the remote logging and check the logs.
 
 ```
 2020-06-12 06:53:12.309 WARNING [c.e.a.j.BaseTableMetadataReader] Table scan did not find any tables. This can mean that either a) the source does not contain tables (yet), b) the table type is not supported or c) the table scan filter criteria is incorrect. Please check that the source actually contains tables.  Also check the spelling and exact case of any catalog or schema name you provided.
 ```
 
-Please ensure that the user specified in the connection string has correct Hive access privileges in addition to above suggestions. Otherwise, the Virtual Schema may not return any metadata.
+If you see the warning message as above, please ensure that the user specified in the connection string has correct Hive access privileges in addition to above suggestions. Otherwise, the Virtual Schema may not return any metadata.
 
 ### Kerberos Exception: Invalid status error
 
-If you see the error message similar to below:
+This error means you have specified the Thrift protocol, and it cannot establish connection using Thrift. Check if the Hive cluster accepts a thrift connection. Or if the HTTP protocol enabled, then change the JDBC connection string as specified for HTTP protocol.
+
+An example error message as below:
 
 ```
 2020-05-19 13:56:54.573 FINE    [c.e.a.RequestDispatcher] Stack trace:
@@ -229,13 +231,11 @@ Caused by: org.apache.hive.org.apache.thrift.transport.TTransportException: Inva
         ... 19 more
 ```
 
-It means you have specified the Thrift protocol, and it cannot establish connection using Thrift.
-
-Check if the Hive cluster accepts a thrift connection. Or if the HTTP protocol enabled, then change the JDBC connection string as specified for HTTP protocol.
-
 ### Kerberos Exception: GSS initiate failed
 
-The GSS initiate failure exception as below:
+The GSS initiate issue happens when the internal Hive host is unreachable. Please check and ensure that the Hive host specified using `KrbHostFQDN` parameter is correct.
+
+An example failure exception as below:
 
 ```
 2020-05-25 14:44:02.707 FINE [c.e.a.RequestDispatcher] Stack trace:
@@ -279,8 +279,6 @@ at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(Delegating
 at java.base/java.lang.reflect.Method.invoke(Method.java:566)
 ... 23 more
 ```
-
-This error happens when the internal Hive host is unreachable. Please check and ensure that the Hive host specified using `KrbHostFQDN` parameter is correct.
 
 ## Testing information
 
