@@ -127,7 +127,7 @@ IDENTIFIED BY 'ExaAuthType=Kerberos;enp6Cg==;YWFhCg=='
 
 #### Using HTTP protocol with Kerberos
 
-Similar to the thrift protocol, update the `TO` part of the connection string with HTTP enabled URL:
+Similar to the Thrift protocol, update the `TO` part of the connection string with HTTP enabled URL:
 
 ```sql
 CREATE OR REPLACE CONNECTION krb_conn
