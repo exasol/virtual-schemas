@@ -195,7 +195,7 @@ If you see the warning message as above, please ensure that the user specified i
 
 ### Kerberos Exception: Invalid status error
 
-This error means you have specified the Thrift protocol, and it cannot establish connection using Thrift. Check if the Hive cluster accepts a thrift connection. Or if the HTTP protocol enabled, then change the JDBC connection string as specified for HTTP protocol.
+This error means you have specified the Thrift protocol, and it cannot establish connection using Thrift. Check if the Hive cluster accepts a Thrift connection. Or if the HTTP protocol enabled, then change the JDBC connection string as specified for HTTP protocol.
 
 An example error message as below:
 
