@@ -282,9 +282,9 @@ at java.base/java.lang.reflect.Method.invoke(Method.java:566)
 
 ### Kerberos alias usage instead of principal
 
-In the Java JDK version `1.8.0_242`, we found out that the Kerberos client alias is used instead of the Kerberos principal. This can cause the permission issues since alias does not have access privileges, for example, when connecting to the Hive server.
+In the Java JDK version `1.8.0_242`, we found out that the Kerberos client alias is used instead of the Kerberos principal. This can cause permission issues since alias does not have access privileges, for example, when connecting to the Hive server.
 
-You can read about similar issues in these links:
+You can read about similar issues checking these links:
 
 - https://bugs.launchpad.net/ubuntu/+source/openjdk-8/+bug/1861883
 - https://bugs.openjdk.java.net/browse/JDK-8239385
@@ -314,7 +314,7 @@ More references about the Kerberos principal aliasing:
 
 - The introduction of Kerberos cross-realm support: https://bugs.openjdk.java.net/browse/JDK-8215032
 - Cross realm RFC, in it you can read also how aliasing works, https://datatracker.ietf.org/doc/rfc6806/?include_text=1
-- Introduction of system property to disable the referrals:  https://bugs.openjdk.java.net/browse/JDK-8223172
+- Introduction of the system property to disable the referrals:  https://bugs.openjdk.java.net/browse/JDK-8223172
 - Similar issues and suggestion: https://stackoverflow.com/questions/60041120/impersonation-issue-after-migrating-from-oracle-jdk-8-to-open-jdk-8-in-cloudera
 
 ## Testing information
