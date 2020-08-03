@@ -1,6 +1,6 @@
 # Exasol Virtual Schemas 4.0.3, released 2020-08-??
 
-## Refactoring
+## Documentation
 
 * #354: Added datatypes mapping info to the postgres documentation. 
 * #355: Updated general deployment guide. 
