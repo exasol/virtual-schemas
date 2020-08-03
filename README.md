@@ -59,11 +59,15 @@ in all your `CREATE JAVA ADAPTER SCRIPT` statements. The old entry point was rem
 
 * Read access to data on remote data sources
 * Data in those sources appears as tables inside Exasol and can be queried using regular SQL statements.
-* Supports the following relational databases as sources: [IBM DB2](https://www.ibm.com/db2/), [Exasol](https://www.exasol.com), Generic JDBC-capable RDBMS, [MySQL](https://www.mysql.com/), [Oracle](https://www.oracle.com), [PostgreSQL](https://postgresql.org/), [Amazon AWS Redshift](https://aws.amazon.com/redshift/), [SAP HANA](https://www.sap.com/) [Microsoft SQLServer](https://www.microsoft.com/en-us/sql-server/), [Sybase](http://www.sybase.com/), [Teradata](https://www.teradata.com/)
-* Supports [Apache Impala](http://impala.apache.org/) (Hadoop-based analytical database) as a source
-* Supports [Apache Hive](https://hive.apache.org/) (Hadoop-based data warehouse) as source
+* Supports the following relational databases as sources: [IBM DB2][db2-dialect-doc], [Exasol][exasol-dialect-doc], 
+ Generic JDBC-capable RDBMS, [MySQL][mysql-dialect-doc], [Oracle][oracle-dialect-doc], [PostgreSQL][postgresql-dialect-doc], 
+ [Amazon AWS Redshift][redshift-dialect-doc], [SAP HANA][sap-hana-dialect-doc], [Microsoft SQLServer][sql-server-dialect-doc],
+ [Sybase][sybase-dialect-doc], [Teradata][teradata-dialect-doc].
+* Supports [Apache Impala][impala-dialect-doc] (Hadoop-based analytical database) as a source
+* Supports [Apache Hive][hive-dialect-doc] (Hadoop-based data warehouse) as source
 * Supports access to file-based columnar storage (e.g. [Apache Parquet files](https://parquet.apache.org/documentation/latest/))
-  via [Amazon AWS Redshift Spectrum](https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html), [Amazon AWS Athena](https://aws.amazon.com/athena/), [AWS Aurora](https://aws.amazon.com/rds/aurora/) and [Google Big Query](https://cloud.google.com/bigquery/).
+  via [Amazon AWS Redshift Spectrum](https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html), 
+  [Amazon AWS Athena][athena-dialect-doc], [AWS Aurora][aurora-dialect-doc] and [Google Big Query][big-query-dialect-doc].
 * Pushes down queries to the remote source (some sources)
 * Supports sources with no / one / multiple catalogs or schemas
 * Allows limiting metadata mapping to selected catalogs and / or schemas
@@ -153,3 +157,19 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [postgresql-jdbc-driver]: https://jdbc.postgresql.org/
 [sonatype-oss-index-maven-plugin]: https://sonatype.github.io/ossindex-maven/maven-plugin/
 [versions-maven-plugin]: https://www.mojohaus.org/versions-maven-plugin/
+
+[athena-dialect-doc]: doc/dialects/athena.md
+[aurora-dialect-doc]: doc/dialects/aurora.md
+[big-query-dialect-doc]: doc/dialects/bigquery.md
+[db2-dialect-doc]: doc/dialects/db2.md
+[exasol-dialect-doc]: https://github.com/exasol/exasol-virtual-schema/blob/master/doc/dialects/exasol.md
+[hive-dialect-doc]: doc/dialects/hive.md
+[impala-dialect-doc]: doc/dialects/impala.md
+[mysql-dialect-doc]: doc/dialects/mysql.md
+[oracle-dialect-doc]: doc/dialects/oracle.md
+[postgresql-dialect-doc]: doc/dialects/postgresql.md
+[redshift-dialect-doc]: doc/dialects/redshift.md
+[sap-hana-dialect-doc]: doc/dialects/saphana.md
+[sql-server-dialect-doc]: doc/dialects/sql_server.md
+[sybase-dialect-doc]: doc/dialects/sybase.md
+[teradata-dialect-doc]: doc/dialects/teradata.md

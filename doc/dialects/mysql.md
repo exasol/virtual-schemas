@@ -51,7 +51,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_MYSQL AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-5.0.2-bundle-4.0.2.jar;
+    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-5.0.3-bundle-4.0.3.jar;
     %jar /buckets/<BFS service>/<bucket>/mysql-connector-java-<version>.jar;
 /
 ;
@@ -124,6 +124,6 @@ If you need to use currently unsupported data types or find a way around known l
 
 In the following matrix you find combinations of JDBC driver and dialect version that we tested.
 
-Virtual Schema Version| Big Query Version   | Driver Name              | Driver Version 
-----------------------|---------------------|--------------------------|------------------------
- 3.1.1                | MySQL 8.0.19        | MySQL Connector          |  8.0.17 
+| Virtual Schema Version | MySQL Version | Driver Name     | Driver Version |
+|------------------------|---------------|-----------------|----------------|
+| Latest                 | MySQL 8.0.20  | MySQL Connector | 8.0.20         |
