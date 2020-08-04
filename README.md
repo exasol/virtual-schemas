@@ -59,11 +59,15 @@ in all your `CREATE JAVA ADAPTER SCRIPT` statements. The old entry point was rem
 
 * Read access to data on remote data sources
 * Data in those sources appears as tables inside Exasol and can be queried using regular SQL statements.
-* Supports the following relational databases as sources: [IBM DB2](https://www.ibm.com/db2/), [Exasol](https://www.exasol.com), Generic JDBC-capable RDBMS, [MySQL](https://www.mysql.com/), [Oracle](https://www.oracle.com), [PostgreSQL](https://postgresql.org/), [Amazon AWS Redshift](https://aws.amazon.com/redshift/), [SAP HANA](https://www.sap.com/) [Microsoft SQLServer](https://www.microsoft.com/en-us/sql-server/), [Sybase](http://www.sybase.com/), [Teradata](https://www.teradata.com/)
-* Supports [Apache Impala](http://impala.apache.org/) (Hadoop-based analytical database) as a source
-* Supports [Apache Hive](https://hive.apache.org/) (Hadoop-based data warehouse) as source
+* Supports the following relational databases as sources: [IBM DB2][db2-dialect-doc], [Exasol][exasol-dialect-doc], 
+ Generic JDBC-capable RDBMS, [MySQL][mysql-dialect-doc], [Oracle][oracle-dialect-doc], [PostgreSQL][postgresql-dialect-doc], 
+ [Amazon AWS Redshift][redshift-dialect-doc], [SAP HANA][sap-hana-dialect-doc], [Microsoft SQLServer][sql-server-dialect-doc],
+ [Sybase][sybase-dialect-doc], [Teradata][teradata-dialect-doc].
+* Supports [Apache Impala][impala-dialect-doc] (Hadoop-based analytical database) as a source
+* Supports [Apache Hive][hive-dialect-doc] (Hadoop-based data warehouse) as source
 * Supports access to file-based columnar storage (e.g. [Apache Parquet files](https://parquet.apache.org/documentation/latest/))
-  via [Amazon AWS Redshift Spectrum](https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html), [Amazon AWS Athena](https://aws.amazon.com/athena/), [AWS Aurora](https://aws.amazon.com/rds/aurora/) and [Google Big Query](https://cloud.google.com/bigquery/).
+  via [Amazon AWS Redshift Spectrum](https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html), 
+  [Amazon AWS Athena][athena-dialect-doc], [AWS Aurora][aurora-dialect-doc] and [Google Big Query][big-query-dialect-doc].
 * Pushes down queries to the remote source (some sources)
 * Supports sources with no / one / multiple catalogs or schemas
 * Allows limiting metadata mapping to selected catalogs and / or schemas
@@ -118,30 +122,28 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 | [HBase server][hbase-server]                                                        | The Hadoop database                                    | Apache License 2.0               |
 | [Hive JDBC Driver][hive-jdbc-driver]                                                | JDBC driver for Hive database                          | Apache License 2.0               |
 | [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)                                  | Checking for conditions in code via matchers           | BSD License                      |
-| [JSONassert](http://jsonassert.skyscreamer.org/)                                    | Compare JSON documents for semantic equality           | Apache License 2.0               |
 | [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0       |
 | [Mockito](http://site.mockito.org/)                                                 | Mocking framework                                      | MIT License                      |
 | [MySQL JDBC Driver][mysql-jdbc-driver]                                              | JDBC driver for MySQL database                         | GNU GPL Version 2.0              |
 | [Oracle JDBC Driver][oracle-jdbc-driver]                                            | JDBC driver for Oracle database                        | Oracle Technology Network License|
 | [PostgreSQL JDBC Driver][postgresql-jdbc-driver]                                    | JDBC driver for PostgreSQL database                    | BSD-2-Clause License             |
 | [Testcontainers](https://www.testcontainers.org/)                                   | Container-based integration tests                      | MIT License                      |
+| [Test Database Builder][test-bd-builder]                                            | Fluent database interfaces for testing                 | MIT License                      |
 
 ### Maven Plug-ins
 
 | Plug-in                                                                             | Purpose                                                | License                          |
 |-------------------------------------------------------------------------------------|--------------------------------------------------------|----------------------------------|
+| [Maven Assembly Plugin][maven-assembly-plugin]                                      | Creating JAR                                           | Apache License 2.0               |
 | [Maven Compiler Plugin](https://maven.apache.org/plugins/maven-compiler-plugin/)    | Setting required Java version                          | Apache License 2.0               |
-| [Maven Exec Plugin](https://www.mojohaus.org/exec-maven-plugin/)                    | Executing external applications                        | Apache License 2.0               |
 | [Maven Enforcer Plugin][maven-enforcer-plugin]                                      | Controlling environment constants                      | Apache License 2.0               |
-| [Maven GPG Plugin](https://maven.apache.org/plugins/maven-gpg-plugin/)              | Code signing                                           | Apache License 2.0               |
 | [Maven Failsafe Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Integration testing                                    | Apache License 2.0               |
-| [Maven Javadoc Plugin](https://maven.apache.org/plugins/maven-javadoc-plugin/)      | Creating a Javadoc JAR                                 | Apache License 2.0               |
 | [Maven Jacoco Plugin](https://www.eclemma.org/jacoco/trunk/doc/maven.html)          | Code coverage metering                                 | Eclipse Public License 2.0       |
-| [Maven Source Plugin](https://maven.apache.org/plugins/maven-source-plugin/)        | Creating a source code JAR                             | Apache License 2.0               |
 | [Maven Surefire Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Unit testing                                           | Apache License 2.0               |
 | [Sonatype OSS Index Maven Plugin][sonatype-oss-index-maven-plugin]                  | Checking Dependencies Vulnerability                    | ASL2                             |
 | [Versions Maven Plugin][versions-maven-plugin]                                      | Checking if dependencies updates are available         | Apache License 2.0               |
 
+[maven-assembly-plugin]: https://maven.apache.org/plugins/maven-assembly-plugin/
 [apache-trift]: http://thrift.apache.org/
 [exasol-jdbc-driver]: https://www.exasol.com/portal/display/DOWNLOAD/Exasol+Download+Section
 [exasol-testcontainers]: https://github.com/exasol/exasol-testcontainers
@@ -152,4 +154,21 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [oracle-jdbc-driver]: https://www.oracle.com/database/technologies/appdev/jdbc.html
 [postgresql-jdbc-driver]: https://jdbc.postgresql.org/
 [sonatype-oss-index-maven-plugin]: https://sonatype.github.io/ossindex-maven/maven-plugin/
+[test-bd-builder]: https://github.com/exasol/test-db-builder-java
 [versions-maven-plugin]: https://www.mojohaus.org/versions-maven-plugin/
+
+[athena-dialect-doc]: doc/dialects/athena.md
+[aurora-dialect-doc]: doc/dialects/aurora.md
+[big-query-dialect-doc]: doc/dialects/bigquery.md
+[db2-dialect-doc]: doc/dialects/db2.md
+[exasol-dialect-doc]: https://github.com/exasol/exasol-virtual-schema/blob/master/doc/dialects/exasol.md
+[hive-dialect-doc]: doc/dialects/hive.md
+[impala-dialect-doc]: doc/dialects/impala.md
+[mysql-dialect-doc]: doc/dialects/mysql.md
+[oracle-dialect-doc]: doc/dialects/oracle.md
+[postgresql-dialect-doc]: doc/dialects/postgresql.md
+[redshift-dialect-doc]: doc/dialects/redshift.md
+[sap-hana-dialect-doc]: doc/dialects/saphana.md
+[sql-server-dialect-doc]: doc/dialects/sql_server.md
+[sybase-dialect-doc]: doc/dialects/sybase.md
+[teradata-dialect-doc]: doc/dialects/teradata.md

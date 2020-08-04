@@ -5,6 +5,7 @@
 ## Uploading the JDBC Driver to EXAOperation
 
 First download the [PostgreSQL JDBC driver](https://jdbc.postgresql.org/).
+Driver version 42.2.6 or later is recommended if you want to establish a TLS-secured connection. 
 
 1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm)
 1. Upload the driver to BucketFS
@@ -24,7 +25,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-5.0.2-bundle-4.0.2.jar;
+  %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-5.0.3-bundle-4.0.3.jar;
   %jar /buckets/<BFS service>/<bucket>/postgresql-<version>.jar;
 /
 ```
@@ -86,7 +87,7 @@ You can also set this property to an existing virtual schema:
 ```sql
 ALTER VIRTUAL SCHEMA postgres SET IGNORE_ERRORS = 'POSTGRESQL_UPPERCASE_TABLES';
 ```
-However you **will not be able to query the identifier containing the upper case character**. An error is thrown when querying the virtual table.
+However, you **will not be able to query the identifier containing the upper case character**. An error is thrown when querying the virtual table.
 
 A best practice for this mode is: **never quote identifiers** (in the PostgreSQL Schema as well as in the Exasol Virtual Schema). This way everything works without having to change your queries.
 An alternative is to use the second mode for identifier handling (see below).
@@ -140,7 +141,54 @@ Unquoted identifiers are converted to lowercase on the PostgreSQL side, and sinc
 
 A best practice for this mode is: **always quote identifiers** (in the PostgreSQL Schema as well as in the Exasol Virtual Schema). This way everything works without having to change your queries.
 
+## Data Types Conversion
+
+| PostgreSQL Data Type     | Supported    | Converted Exasol Data Type| Known limitations
+|--------------------------|--------------|---------------------------|-------------------
+| BIGINT                   | ✓            | DECIMAL(19,0)             | 
+| BIGSERIAL                | ✓            | DECIMAL(19,0)             | 
+| BIT                      | ✓            | BOOLEAN                   | 
+| BIT VARYING              | ✓            | VARCHAR(5)                | 
+| BOX                      | ✓            | VARCHAR(2000000)          | 
+| BYTEA                    | ✓            | VARCHAR(2000000)          | 
+| BOOLEAN                  | ✓            | BOOLEAN                   | 
+| CHARACTER                | ✓            | CHAR                      | 
+| CHARACTER VARYING        | ✓            | VARCHAR                   | 
+| CIDR                     | ✓            | VARCHAR(2000000)          | 
+| CIRCLE                   | ✓            | VARCHAR(2000000)          | 
+| DATE                     | ✓            | DATE                      | 
+| DOUBLE PRECISION         | ✓            | DOUBLE                    | 
+| INET                     | ✓            | VARCHAR(2000000)          |  
+| INTEGER                  | ✓            | DECIMAL(10,0)             | 
+| INTERVAL                 | ✓            | VARCHAR(2000000)          | 
+| JSON                     | ✓            | VARCHAR(2000000)          | 
+| JSONB                    | ✓            | VARCHAR(2000000)          | 
+| LINE                     | ✓            | VARCHAR(2000000)          | 
+| LSEG                     | ✓            | VARCHAR(2000000)          | 
+| MACADDR                  | ✓            | VARCHAR(2000000)          | 
+| MONEY                    | ✓            | DOUBLE                    | 
+| NUMERIC                  | ✓            | VARCHAR(2000000)          | Stored in Exasol as VARCHAR, because PostgreSQL NUMERIC values can exceed Exasol Decimal limit which makes it impossible to use Virtual Schemas. 
+| PATH                     | ✓            | VARCHAR(2000000)          | 
+| POINT                    | ✓            | VARCHAR(2000000)          | 
+| POLYGON                  | ✓            | VARCHAR(2000000)          | 
+| REAL                     | ✓            | DOUBLE                    | 
+| SMALLINT                 | ✓            | DECIMAL(5,0)              | 
+| SMALLSERIAL              | ? (untested) |                           | 
+| SERIAL                   | ? (untested) |                           | 
+| TEXT                     | ✓            | VARCHAR(2000000)          | 
+| TIME                     | ✓            | VARCHAR(2000000)          | 
+| TIME WITH TIME ZONE      | ✓            | VARCHAR(2000000)          |   
+| TIMESTAMP                | ✓            | TIMESTAMP                 | 
+| TIMESTAMP WITH TIME ZONE | ✓            | TIMESTAMP                 | 
+| TSQUERY                  | ✓            | VARCHAR(2000000)          | 
+| TSVECTOR                 | ✓            | VARCHAR(2000000)          | 
+| UUID                     | ✓            | VARCHAR(2000000)          | 
+| XML                      | ✓            | VARCHAR(2000000)          | 
+
 ## Testing information
 
-The PostgreSQL dialect was tested with JDBC drivers of version 42.0.0 and later and PostgreSQL 10 and 11.
-Driver version 42.2.6 or later are recommended if you want to establish a TLS-secured connection. 
+In the following matrix you find combinations of JDBC driver and dialect version that we tested.
+
+| Virtual Schema Version | PostgreSQL Version | Driver Name            | Driver Version |
+|------------------------|--------------------|------------------------|----------------|
+| Latest                 | PostgreSQL 9.6.2   | PostgreSQL JDBC Driver |  42.2.5        |

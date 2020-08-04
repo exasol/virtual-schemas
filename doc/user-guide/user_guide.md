@@ -87,77 +87,78 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.JDBC_ADAPTER_SCRIPT AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/your-bucket-fs/your-bucket/virtual-schema-dist-5.0.2-bundle-4.0.2.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/virtual-schema-dist-5.0.3-bundle-4.0.3.jar;
   %jar /buckets/your-bucket-fs/your-bucket/<JDBC driver>.jar;
 /
 ```
 
 ## Using the Adapter
 
-The following statements demonstrate how you can use virtual schemas with the JDBC adapter to connect to a Hive system. 
+The following statements demonstrate the common steps to create a Virtual Schema. 
+You can find the similar tutorial with dialect-specific information for each dialect in the [supported dialects list](#supported-dialects). 
+
 Please scroll down to see a list of all properties supported by the JDBC adapter.
 
-First we create a virtual schema using the JDBC adapter. The adapter will retrieve the metadata via JDBC and map them to virtual tables. 
+First we create a connection and then a virtual schema. The adapter will retrieve the metadata via JDBC and map them to virtual tables. 
 The metadata (virtual tables, columns and data types) are then cached in Exasol.
 
 ```sql
-CREATE CONNECTION JDBC_CONNECTION_HIVE TO 'jdbc:hive2://localhost:10000/default' USER 'hive-usr' IDENTIFIED BY 'hive-pwd';
+CREATE CONNECTION JDBC_CONNECTION TO '<jdbc connection string>' USER 'usr' IDENTIFIED BY 'pwd';
 
-CREATE VIRTUAL SCHEMA VIRTUAL_SCHEMA_HIVE USING SCHEMA_FOR_VS_SCRIPT.JDBC_ADAPTER_SCRIPT WITH
-  SQL_DIALECT     = 'HIVE'
-  CONNECTION_NAME = 'JDBC_CONNECTION_HIVE'
+CREATE VIRTUAL SCHEMA VIRTUAL_SCHEMA_TEST USING SCHEMA_FOR_VS_SCRIPT.JDBC_ADAPTER_SCRIPT WITH
+  SQL_DIALECT     = '<dialect name>'
+  CONNECTION_NAME = 'JDBC_CONNECTION'
   SCHEMA_NAME     = 'default';
 ```
 
 We can now explore the tables in the virtual schema, just like for a regular schema:
 
 ```sql
-OPEN SCHEMA VIRTUAL_SCHEMA_HIVE;
-SELECT * FROM cat;
-DESCRIBE clicks;
+OPEN SCHEMA VIRTUAL_SCHEMA_TEST;
+SELECT * FROM MY_TABLE;
 ```
 
 And we can run arbitrary queries on the virtual tables:
 
 ```sql
-SELECT count(*) FROM clicks;
-SELECT DISTINCT USER_ID FROM clicks;
+SELECT count(*) FROM MY_TABLE;
+SELECT DISTINCT USER_ID FROM MY_TABLE;
 ```
 
 Behind the scenes the Exasol command `IMPORT FROM JDBC` will be executed to obtain the data needed from the data source to fulfil the query. 
 The Exasol database interacts with the adapter to pushdown as much as possible to the data source (e.g. filters, aggregations or `ORDER BY` / `LIMIT`), 
 while considering the capabilities of the data source.
 
-Let's combine a virtual and a native tables in a query:
+Let's combine virtual and native tables in a query:
 
 ```sql
-SELECT * from clicks JOIN native_schema.users on clicks.userid = users.id;
+SELECT * FROM MY_TABLE JOIN NATIVE_SCHEMA.USERS on MY_TABLE.USERID = USERS.ID;
 ```
 
 You can refresh the schemas metadata, e.g. if tables were added in the remote system:
 
 ```sql
-ALTER VIRTUAL SCHEMA VIRTUAL_SCHEMA_HIVE REFRESH;
-ALTER VIRTUAL SCHEMA VIRTUAL_SCHEMA_HIVE REFRESH TABLES t1 t2; -- refresh only these tables
+ALTER VIRTUAL SCHEMA VIRTUAL_SCHEMA_TEST REFRESH;
+ALTER VIRTUAL SCHEMA VIRTUAL_SCHEMA_TEST REFRESH TABLES T1 T2; -- refresh only these tables
 ```
 
 Or set properties. Depending on the adapter and the property you set this might update the metadata or not. 
 In our example the metadata are affected, because afterwards the virtual schema will only expose two virtual tables.
 
 ```sql
-ALTER VIRTUAL SCHEMA VIRTUAL_SCHEMA_HIVE SET TABLE_FILTER='CUSTOMERS, CLICKS';
+ALTER VIRTUAL SCHEMA VIRTUAL_SCHEMA_TEST SET TABLE_FILTER='MY_TABLE, CLICKS';
 ```
 
 Finally, you can unset properties:
 
 ```sql
-ALTER VIRTUAL SCHEMA VIRTUAL_SCHEMA_HIVE SET TABLE_FILTER=null;
+ALTER VIRTUAL SCHEMA VIRTUAL_SCHEMA_TEST SET TABLE_FILTER=null;
 ```
 
 Or drop the virtual schema:
 
 ```sql
-DROP VIRTUAL SCHEMA VIRTUAL_SCHEMA_HIVE CASCADE;
+DROP VIRTUAL SCHEMA VIRTUAL_SCHEMA_TEST CASCADE;
 ```
 
 ### Adapter Properties

@@ -24,7 +24,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-5.0.2-bundle-4.0.2.jar;
+  %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-5.0.3-bundle-4.0.3.jar;
   %jar /buckets/<BFS service>/<bucket>/jtds.jar;
 /
 ```
