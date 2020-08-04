@@ -122,30 +122,28 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 | [HBase server][hbase-server]                                                        | The Hadoop database                                    | Apache License 2.0               |
 | [Hive JDBC Driver][hive-jdbc-driver]                                                | JDBC driver for Hive database                          | Apache License 2.0               |
 | [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)                                  | Checking for conditions in code via matchers           | BSD License                      |
-| [JSONassert](http://jsonassert.skyscreamer.org/)                                    | Compare JSON documents for semantic equality           | Apache License 2.0               |
 | [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0       |
 | [Mockito](http://site.mockito.org/)                                                 | Mocking framework                                      | MIT License                      |
 | [MySQL JDBC Driver][mysql-jdbc-driver]                                              | JDBC driver for MySQL database                         | GNU GPL Version 2.0              |
 | [Oracle JDBC Driver][oracle-jdbc-driver]                                            | JDBC driver for Oracle database                        | Oracle Technology Network License|
 | [PostgreSQL JDBC Driver][postgresql-jdbc-driver]                                    | JDBC driver for PostgreSQL database                    | BSD-2-Clause License             |
 | [Testcontainers](https://www.testcontainers.org/)                                   | Container-based integration tests                      | MIT License                      |
+| [Test Database Builder][test-bd-builder]                                            | Fluent database interfaces for testing                 | MIT License                      |
 
 ### Maven Plug-ins
 
 | Plug-in                                                                             | Purpose                                                | License                          |
 |-------------------------------------------------------------------------------------|--------------------------------------------------------|----------------------------------|
+| [Maven Assembly Plugin][maven-assembly-plugin]                                      | Creating JAR                                           | Apache License 2.0               |
 | [Maven Compiler Plugin](https://maven.apache.org/plugins/maven-compiler-plugin/)    | Setting required Java version                          | Apache License 2.0               |
-| [Maven Exec Plugin](https://www.mojohaus.org/exec-maven-plugin/)                    | Executing external applications                        | Apache License 2.0               |
 | [Maven Enforcer Plugin][maven-enforcer-plugin]                                      | Controlling environment constants                      | Apache License 2.0               |
-| [Maven GPG Plugin](https://maven.apache.org/plugins/maven-gpg-plugin/)              | Code signing                                           | Apache License 2.0               |
 | [Maven Failsafe Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Integration testing                                    | Apache License 2.0               |
-| [Maven Javadoc Plugin](https://maven.apache.org/plugins/maven-javadoc-plugin/)      | Creating a Javadoc JAR                                 | Apache License 2.0               |
 | [Maven Jacoco Plugin](https://www.eclemma.org/jacoco/trunk/doc/maven.html)          | Code coverage metering                                 | Eclipse Public License 2.0       |
-| [Maven Source Plugin](https://maven.apache.org/plugins/maven-source-plugin/)        | Creating a source code JAR                             | Apache License 2.0               |
 | [Maven Surefire Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Unit testing                                           | Apache License 2.0               |
 | [Sonatype OSS Index Maven Plugin][sonatype-oss-index-maven-plugin]                  | Checking Dependencies Vulnerability                    | ASL2                             |
 | [Versions Maven Plugin][versions-maven-plugin]                                      | Checking if dependencies updates are available         | Apache License 2.0               |
 
+[maven-assembly-plugin]: https://maven.apache.org/plugins/maven-assembly-plugin/
 [apache-trift]: http://thrift.apache.org/
 [exasol-jdbc-driver]: https://www.exasol.com/portal/display/DOWNLOAD/Exasol+Download+Section
 [exasol-testcontainers]: https://github.com/exasol/exasol-testcontainers
@@ -156,6 +154,7 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [oracle-jdbc-driver]: https://www.oracle.com/database/technologies/appdev/jdbc.html
 [postgresql-jdbc-driver]: https://jdbc.postgresql.org/
 [sonatype-oss-index-maven-plugin]: https://sonatype.github.io/ossindex-maven/maven-plugin/
+[test-bd-builder]: https://github.com/exasol/test-db-builder-java
 [versions-maven-plugin]: https://www.mojohaus.org/versions-maven-plugin/
 
 [athena-dialect-doc]: doc/dialects/athena.md

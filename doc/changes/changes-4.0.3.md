@@ -24,12 +24,3 @@
 https://ossindex.sonatype.org/component/pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.7.8
 
 </details>
-
-* Updated `com.exasol:hamcrest-resultset-matcher` from 1.1.0 to 1.1.1
-* Updated `com.exasol:test-db-builder-java` from 1.0.0 to 1.0.1
-* Updated `org.testcontainers:junit-jupiter` from 1.14.2 to 1.14.3
-* Updated `org.testcontainers:mysql` from 1.14.2 to 1.14.3
-* Updated `org.testcontainers:oracle-xe` from 1.14.2 to 1.14.3
-* Updated `org.testcontainers:postgresql` from 1.14.2 to 1.14.3
-* Removed `hive-jdbc` transitive dependency `org.apache.logging.log4j:log4j-core`
-* Removed `hbase-server` transitive dependency `com.nimbusds:nimbus-jose-jwt`

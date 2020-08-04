@@ -5,7 +5,7 @@
 ## Uploading the JDBC Driver to EXAOperation
 
 First download the [PostgreSQL JDBC driver](https://jdbc.postgresql.org/).
-Driver version 42.2.6 or later are recommended if you want to establish a TLS-secured connection. 
+Driver version 42.2.6 or later is recommended if you want to establish a TLS-secured connection. 
 
 1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm)
 1. Upload the driver to BucketFS
@@ -87,7 +87,7 @@ You can also set this property to an existing virtual schema:
 ```sql
 ALTER VIRTUAL SCHEMA postgres SET IGNORE_ERRORS = 'POSTGRESQL_UPPERCASE_TABLES';
 ```
-However you **will not be able to query the identifier containing the upper case character**. An error is thrown when querying the virtual table.
+However, you **will not be able to query the identifier containing the upper case character**. An error is thrown when querying the virtual table.
 
 A best practice for this mode is: **never quote identifiers** (in the PostgreSQL Schema as well as in the Exasol Virtual Schema). This way everything works without having to change your queries.
 An alternative is to use the second mode for identifier handling (see below).
