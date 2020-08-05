@@ -65,7 +65,7 @@ CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.JDBC_ADAPTER_SCRIPT AS
 
 ## Define a named connection.
 
-First we create a connection and then a virtual schema.
+First we create a connection.
 
 ```sql
 CREATE CONNECTION JDBC_CONNECTION TO '<jdbc connection string>' USER 'usr' IDENTIFIED BY 'pwd';
@@ -73,6 +73,7 @@ CREATE CONNECTION JDBC_CONNECTION TO '<jdbc connection string>' USER 'usr' IDENT
 
 ## Create Virtual Schema
 
+Now we create the Virtual Schema adapter script.
 The adapter will retrieve the metadata via JDBC and map them to virtual tables. 
 The metadata (virtual tables, columns and data types) are then cached in Exasol.
 
