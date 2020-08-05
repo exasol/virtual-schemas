@@ -38,7 +38,6 @@ You can also [develop a custom dialect](../development/developing-sql-dialect/de
 [sybase-dialect-doc]: ../dialects/sybase.md
 [teradata-dialect-doc]: ../dialects/teradata.md
 
-
 [virtual-schemas-repository]: https://github.com/exasol/virtual-schemas
 [virtual-schemas-releases]: https://github.com/exasol/virtual-schemas/releases
 [exasol-virtual-schema-repository]: https://github.com/exasol/exasol-virtual-schema

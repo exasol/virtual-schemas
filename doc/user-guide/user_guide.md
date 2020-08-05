@@ -1,6 +1,5 @@
 # User Guide
 
-
 The JDBC adapter for virtual schemas allows you to connect to JDBC data sources like Hive, Oracle, Teradata, Exasol or any other data source supporting JDBC.
 It uses the well proven ```IMPORT FROM JDBC``` Exasol statement behind the scenes to obtain the requested data, when running a query on a virtual table. 
 The JDBC adapter also serves as the reference adapter for the Exasol virtual schema framework.
@@ -10,12 +9,12 @@ You can find supported dialects in [the list of supported dialects](dialects.md)
 The so called `GENERIC` dialect is designed to work with any JDBC driver. It derives the SQL dialect from the JDBC driver metadata. 
 However, it does not support any capabilities and might fail if the data source has special syntax or data types, so it should only be used for evaluation purposes.
 
-If you are interested in an introduction to virtual schemas please refer to the [Exasol Documentation Portal](https://docs.exasol.com/home.htm). 
+If you are interested in an introduction to virtual schemas please refer to the [Exasol Documentation Portal](https://docs.exasol.com/database_concepts/virtual_schemas.htm). 
 
 ## Before you Start 
 
 Please note that the syntax for creating adapter scripts is not recognized by all SQL clients. 
-See [SQL Client Specifics](sql_clients.md) for details
+See [SQL Client Specifics](sql_clients.md) for details.
 
 ## Getting Started
 
@@ -27,7 +26,6 @@ The steps for creating virtual schema are:
 * Install the adapter script
 * Define a named connection
 * Create Virtual Schema
-
 
 ## Deploy JDBC Driver Files
 
@@ -44,7 +42,7 @@ See [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-prem
 Note that some JDBC drivers consist of several files and that you have to upload all of them. 
 To find out which JAR you need, check the individual dialects' documentation pages.
 
-## Install the adapter script
+## Install the Adapter Script
 
 Create a schema to hold the adapter script.
 
@@ -62,8 +60,7 @@ CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.JDBC_ADAPTER_SCRIPT AS
 /
 ```
 
-
-## Define a named connection.
+## Define a Named Connection.
 
 First we create a connection.
 
@@ -86,7 +83,7 @@ CREATE VIRTUAL SCHEMA VIRTUAL_SCHEMA_TEST USING SCHEMA_FOR_VS_SCRIPT.JDBC_ADAPTE
   SCHEMA_NAME     = 'default';
 ```
 
-## Using the Adapter 
+## How to Use the Adapter 
 
 We can now explore the tables in the virtual schema, just like for a regular schema:
 
@@ -138,7 +135,6 @@ Or drop the virtual schema:
 DROP VIRTUAL SCHEMA VIRTUAL_SCHEMA_TEST CASCADE;
 ```
 
-
 ## Unrecognized and Unsupported Data Types
 
 Not all data types present in a source database have a matching equivalent in Exasol. Also software updates on the source database can introduce new data type that the Virtual schema does not recognize.
@@ -150,3 +146,9 @@ There are a few important things you need to know about those data types.
 3. If you want to query all columns except unsupported, add `1` to the columns list. Otherwise you will see the same error as if you query with the asterisk (`*`).
     For example, a table contains 3 columns: `bool_column` BOOLEAN, `timestamp_column` TIMESTAMP, `blob_column` BLOB. The column BLOB is not supported. If you want to query two other columns, use: `SELECT "bool_column", "timestamp_column", 1 FROM table_name;` .
 4. You can't use functions that result in an unsupported / unknown data type.  
+
+See also:
+
+* [List of Supported Dialect](doc/user-guide/dialects.md)
+* [Virtual Schema's Properties Reference](doc/user-guide/virtual_schema_properties.md)
+* [SQL Client Specifics](doc/user-guide/sql_clients.md)

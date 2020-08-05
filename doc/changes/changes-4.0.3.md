@@ -2,10 +2,11 @@
 
 ## Documentation
 
+* #317: Work on reducing redundancy between user_guid.md and docs.exasol.com
 * #354: Added datatypes mapping info to the postgres documentation. 
 * #355: Updated general deployment guide. 
 * #359: Replaced links to products with links to dialect in the README's feature list.
-* #317: Work on reducing redundancy between user_guid.md and docs.exasol.com
+* #367: Fixed Oracle dialect bug with invalid Decimal precision (DECIMAL(0,0)).
 
 ## Dependency updates
 
