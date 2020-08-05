@@ -5,6 +5,7 @@
 * #354: Added datatypes mapping info to the postgres documentation. 
 * #355: Updated general deployment guide. 
 * #359: Replaced links to products with links to dialect in the README's feature list.
+* #317: Work on reducing redundancy between user_guid.md and docs.exasol.com
 
 ## Dependency updates
 
