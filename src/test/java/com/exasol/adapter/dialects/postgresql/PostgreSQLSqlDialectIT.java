@@ -223,6 +223,15 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void testCountAll() throws SQLException {
+        final String qualifiedExpectedTableName = VIRTUAL_SCHEMA_POSTGRES + "." + TABLE_POSTGRES_SIMPLE;
+        final String query = "SELECT COUNT(*) FROM " + qualifiedExpectedTableName;
+        final ResultSet expected = getExpectedResultSet(List.of("x DECIMAL(19,0)"), //
+                List.of("1.00000"));
+        assertThat(getActualResultSet(query), matchesResultSet(expected));
+    }
+
+    @Test
     void testInnerJoin() throws SQLException {
         final String query = "SELECT * FROM " + QUALIFIED_TABLE_JOIN_NAME_1 + " a INNER JOIN  "
                 + QUALIFIED_TABLE_JOIN_NAME_2 + " b ON a.x=b.x";

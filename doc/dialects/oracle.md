@@ -158,3 +158,12 @@ Oracle data types are mapped to their equivalents in Exasol. The following excep
     By default an error will be thrown if you try to import a value that is larger. If you want to import from tables which contain bigger values, you need to truncate the values.
     
 - `RAW` and `LONG RAW` are not supported.
+
+## Testing information
+
+In the following matrix you find combinations of JDBC driver and dialect version that we tested.
+
+| Virtual Schema Version | Oracle Version     | Driver Name               | Driver Version |
+|------------------------|--------------------|---------------------------|----------------|
+| 4.0.3                  | Oracle XE 11g      | ojdbc                     | 8              |
+| 4.0.3                  | Oracle XE 11g      | instantclient-basic-linux | x64-12.1.0.2.0 |
