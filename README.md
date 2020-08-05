@@ -95,11 +95,10 @@ This is an open source project which is officially supported by Exasol. For any 
 
 ## Information for Users
 
-* [User Guide](https://docs.exasol.com/database_concepts/virtual_schemas.htm)
+* [Getting started with Virtual Schemas](https://docs.exasol.com/database_concepts/virtual_schemas.htm)
+* [List of Supported Dialect](doc/user-guide/dialects.md)
 
 Additional resources:
-
-* [List of Supported Dialects](doc/user-guide/dialects.md)
 * [Adapter Properties Reference](doc/user-guide/adapter_properties.md)
 * [SQL Client Specifics](doc/user-guide/sql_clients.md)
 * [Changelog](doc/changes/changelog.md)
