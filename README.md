@@ -26,7 +26,7 @@ Regardless of whether that source is a relational database like ours, or it's li
 
 This means an user familiar with SQL will immediately feel at home when accessing remote data through Virtual Schemas.
 
-Other databases vendors offer similar features and refer to them as `External Tables` or `Foreign Data Wrapper (FDW)`.
+Virtual Schemas can be also described in known terms as `External Tables` or `Foreign Data Wrapper (FDW)`.
 
 This repository contains Virtual Schema adapters for different external data sources.
 Each of these adapters translates between the Exasol SQL dialect and the SQL dialect of the external data source.
@@ -84,7 +84,7 @@ in all your `CREATE JAVA ADAPTER SCRIPT` statements. The old entry point was rem
 ## Limitations
 
 * Supports only read access to the external data
-* The Virtual Schema adapter takes about 1s for startup.
+* The Virtual Schema adapter takes about 1s to start.
 That means that queries that involve tables from Virtual Schema will take at least 1s. 
 
 ## Customer Support
