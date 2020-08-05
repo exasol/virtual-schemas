@@ -1,4 +1,4 @@
-# Adapter Properties
+# Virtual Schema's Properties
 
 The following properties can be used to control the behavior of the JDBC adapter. 
 As you see above, these properties can be defined in `CREATE VIRTUAL SCHEMA` or changed afterwards via `ALTER VIRTUAL SCHEMA SET`. 

@@ -31,8 +31,6 @@ Virtual Schemas can be also described in known terms as `External Tables` or `Fo
 This repository contains Virtual Schema adapters for different external data sources.
 Each of these adapters translates between the Exasol SQL dialect and the SQL dialect of the external data source.
 
-
-
 ## Version Requirements
 
 Virtual Schema  | Required Java Version | Lifecycle
@@ -95,11 +93,11 @@ This is an open source project which is officially supported by Exasol. For any 
 
 ## Information for Users
 
-* [Getting started with Virtual Schemas](https://docs.exasol.com/database_concepts/virtual_schemas.htm)
+* [Getting started with Virtual Schemas](doc/user-guide/user_guide.md)
 * [List of Supported Dialect](doc/user-guide/dialects.md)
 
 Additional resources:
-* [Adapter Properties Reference](doc/user-guide/adapter_properties.md)
+* [Virtual Schema's Properties Reference](doc/user-guide/virtual_schema_properties.md)
 * [SQL Client Specifics](doc/user-guide/sql_clients.md)
 * [Changelog](doc/changes/changelog.md)
 
