@@ -1,4 +1,4 @@
-#User Guide
+# User Guide
 
 
 The JDBC adapter for virtual schemas allows you to connect to JDBC data sources like Hive, Oracle, Teradata, Exasol or any other data source supporting JDBC.
@@ -23,13 +23,13 @@ This page contains common information applicable to all the dialects. You can al
 
 The steps for creating virtual schema are:
 
-* Deploying JDBC Driver Files
+* Deploy JDBC Driver Files
 * Install the adapter script
 * Define a named connection
 * Create Virtual Schema
 
 
-## Deploying JDBC Driver Files
+## Deploy JDBC Driver Files
 
 You have to upload the JDBC driver files of your remote database **twice** (except for the Exasol and BigQuery dialects):
 

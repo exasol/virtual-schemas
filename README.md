@@ -28,8 +28,6 @@ This means an user familiar with SQL will immediately feel at home when accessin
 
 Virtual Schemas can be also described in known terms as `External Tables` or `Foreign Data Wrapper (FDW)`.
 
-This repository contains Virtual Schema adapters for different external data sources.
-Each of these adapters translates between the Exasol SQL dialect and the SQL dialect of the external data source.
 
 ## Version Requirements
 
