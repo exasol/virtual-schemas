@@ -26,6 +26,13 @@ Regardless of whether that source is a relational database like ours, or it's li
 
 This means an user familiar with SQL will immediately feel at home when accessing remote data through Virtual Schemas.
 
+Other databases vendors offer similar features and refer to them as `External Tables` or `Foreign Data Wrapper (FDW)`.
+
+This repository contains Virtual Schema adapters for different external data sources.
+Each of these adapters translates between the Exasol SQL dialect and the SQL dialect of the external data source.
+
+
+
 ## Version Requirements
 
 Virtual Schema  | Required Java Version | Lifecycle
@@ -74,6 +81,12 @@ in all your `CREATE JAVA ADAPTER SCRIPT` statements. The old entry point was rem
 * Allows redirecting log output to a remote machine
 * Allows remote debugging with the Java Debugger
 
+## Limitations
+
+* Supports only read access to the external data
+* The Virtual Schema adapter takes about 1s for startup.
+That means that queries that involve tables from Virtual Schema will take at least 1s. 
+
 ## Customer Support
 
 This is an open source project which is officially supported by Exasol. For any question, you can contact our support team.
@@ -82,10 +95,13 @@ This is an open source project which is officially supported by Exasol. For any 
 
 ## Information for Users
 
-Virtual Schemas support 16 different SQL dialects, from OpenSource databases like PostgreSQL to commercial products like Oracle. 
-Please refer to the user-guide for a [full list of supported SQL dialects](doc/user-guide/user_guide.md#list-of-supported-dialects)
+* [User Guide](https://docs.exasol.com/database_concepts/virtual_schemas.htm)
 
-* [User Guide](doc/user-guide/user_guide.md)
+Additional resources:
+
+* [List of Supported Dialects](doc/user-guide/dialects.md)
+* [Adapter Properties Reference](doc/user-guide/adapter_properties.md)
+* [SQL Client Specifics](doc/user-guide/sql_clients.md)
 * [Changelog](doc/changes/changelog.md)
 
 ## Information for Developers 
