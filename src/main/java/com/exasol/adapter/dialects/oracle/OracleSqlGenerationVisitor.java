@@ -15,7 +15,6 @@ import com.exasol.adapter.sql.*;
  * This class generates SQL queries for the {@link OracleSqlGenerationVisitor}.
  */
 public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
-    public static final Logger LOGGER = Logger.getLogger(OracleSqlGenerationVisitor.class.getName());
     private boolean requiresSelectListAliasesForLimit = false;
     private static final String TIMESTAMP_FORMAT = "'YYYY-MM-DD HH24:MI:SS.FF3'";
     private static final List<String> TYPE_NAMES_REQUIRING_CAST = List.of("TIMESTAMP", "INTERVAL", "BINARY_FLOAT",
