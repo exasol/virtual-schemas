@@ -6,7 +6,7 @@
 * #354: Added datatypes mapping info to the postgres documentation. 
 * #355: Updated general deployment guide. 
 * #359: Replaced links to products with links to dialect in the README's feature list.
-* #367: Fixed Oracle dialect bug with invalid Decimal precision (DECIMAL(0,0)).
+* #364: Fixed Oracle dialect bug with invalid Decimal precision (DECIMAL(0,0)).
 
 ## Dependency updates
 
