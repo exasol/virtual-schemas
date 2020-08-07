@@ -3,8 +3,7 @@ package com.exasol.adapter.dialects.oracle;
 import static com.exasol.adapter.dialects.IntegrationTestConstants.*;
 import static com.exasol.dbbuilder.dialects.exasol.AdapterScript.Language.JAVA;
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -659,6 +658,23 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
             assertAll(() -> assertExpressionExecutionStringResult(query, expectedColumnValue),
                     () -> assertThat(getColumnTypesOfTable(qualifiedTableName, columnName),
                             equalTo(expectedColumnType)));
+        }
+
+        @ParameterizedTest
+        @CsvSource(value = { //
+                "VIRTUAL_SCHEMA_JDBC, C18, VARCHAR(2000000) UTF8, 0102030405060708090a0b0c0d0e0f", //
+                "VIRTUAL_SCHEMA_JDBC, C19, VARCHAR(2000000) UTF8, 0987asdlfkjq2222qawsf;lkja09ed8q2w;43lkrjasdf09uqaw43lkjra0-98sf[iqjw4,mfas[dpiuj[qa09w44", //
+                "VIRTUAL_SCHEMA_JDBC, C20, VARCHAR(2000000) UTF8, 0987asdlfkjq2222qawsf;lkja09ed8q2w;43lkrjasdf09uqaw43lkjra0-98sf[iqjw4,mfas[dpiuj[qa09w44", //
+                "VIRTUAL_SCHEMA_ORA, C18, VARCHAR(2000000) UTF8, 0102030405060708090a0b0c0d0e0f", //
+                "VIRTUAL_SCHEMA_ORA, C19, VARCHAR(2000000) UTF8, 0987asdlfkjq2222qawsf;lkja09ed8q2w;43lkrjasdf09uqaw43lkjra0-98sf[iqjw4,mfas[dpiuj[qa09w44", //
+                "VIRTUAL_SCHEMA_ORA, C20, VARCHAR(2000000) UTF8, 0987asdlfkjq2222qawsf;lkja09ed8q2w;43lkrjasdf09uqaw43lkjra0-98sf[iqjw4,mfas[dpiuj[qa09w44", //
+        })
+        void testBlobColumns(final String virtualSchemaName, final String columnName,
+                                   final String expectedColumnType, final String expectedColumnValue) {
+            final String qualifiedTableName = virtualSchemaName + "." + TABLE_ORACLE_ALL_DATA_TYPES;
+            final String query = "SELECT " + columnName + " FROM " + qualifiedTableName;
+            final SQLException exception = assertThrows(SQLException.class, () -> statementExasol.execute(query));
+            assertThat(exception.getMessage(), startsWith("object " + columnName + " not found"));
         }
 
         @ParameterizedTest

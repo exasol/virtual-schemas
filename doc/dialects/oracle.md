@@ -133,28 +133,46 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
     ORA_CONNECTION_NAME = 'ORA_CONNECTION';
 ```
 
-## Supported capabilities
+## Supported Capabilities
 
 The Oracle dialect does not support all capabilities. A complete list can be found in [OracleSqlDialect.getCapabilities()](../../src/main/java/com/exasol/adapter/dialects/oracle/OracleSqlDialect.java).
 
 ## Type Mappings and Limitations
 
-Oracle data types are mapped to their equivalents in Exasol. The following exceptions apply:
+| Orcale Data Type                                                                 | Supported | Converted Exasol Data Type | Comments                                                                                                                                      |
+| -------------------------------------------------------------------------------- | --------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| VARCHAR2(size)                                                                   | ✓         | VARCHAR                    |                                                                                                                                               |
+| NVARCHAR2(size)                                                                  | ✓         | VARCHAR                    |                                                                                                                                               |
+| NUMBER \[ (p \[, s\]) \]                                                         | ✓         | NUMBER or VARCHAR(2000000) | NUMBER with precision > 36 are casted to VARCHAR to prevent a loss of precision. [*](#Mapping-of-number-types)                                |
+| FLOAT \[(p)\]                                                                    | ✓         | DOUBLE                     |                                                                                                                                               |
+| LONG                                                                             | ✓         | VARCHAR(2000000)           | Casted to VARCHAR to prevent a loss of precision.                                                                                             |
+| DATE                                                                             | ✓         | TIMESTAMP                  | This data type is only supported for positive year values, i.e., years > 0001                                                                 |
+| BINARY\_FLOAT                                                                    | ✓         | VARCHAR(2000000)           |                                                                                                                                               |
+| BINARY\_DOUBLE                                                                   | ✓         | VARCHAR(2000000)           |                                                                                                                                               |
+| TIMESTAMP \[(fractional\_seconds\_precision)\]                                   | ✓         | TIMESTAMP                  |                                                                                                                                               |
+| TIMESTAMP \[(fractional\_seconds\_precision)\] WITH TIME ZONE                    | ✓         | TIMESTAMP                  |                                                                                                                                               |
+| INTERVAL YEAR \[(year\_precision)\] TO MONTH                                     | ✓         | VARCHAR(2000000)           |                                                                                                                                               |
+| INTERVAL DAY \[(day\_precision)\] TO SECOND \[(fractional\_seconds\_precision)\] | ✓         | VARCHAR(2000000)           |                                                                                                                                               |
+| CHAR \[(size \[BYTE | CHAR\])\]                                                  | ✓         | CHAR                       |                                                                                                                                               |
+| NCHAR\[(size)\]                                                                  | ✓         | CHAR                       |                                                                                                                                               |
+| RAW(size)                                                                        | ×         |                            |                                                                                                                                               |
+| LONG RAW                                                                         | ×         |                            |                                                                                                                                               |
+| ROWID                                                                            | ×         |                            |                                                                                                                                               |
+| UROWID \[(size)\]                                                                | ×         |                            |                                                                                                                                               |
+| CLOB                                                                             | ×         |                            | supported up to the maximum size of an Exasol [VARCHAR](https://docs.exasol.com/sql_references/data_types/datatypedetails.htm#StringDataType) |
+| NCLOB                                                                            | ×         |                            | supported up to the maximum size of an Exasol [VARCHAR](https://docs.exasol.com/sql_references/data_types/datatypedetails.htm#StringDataType) |
+| BLOB                                                                             | ×         |                            | supported up to the maximum size of an Exasol [VARCHAR](https://docs.exasol.com/sql_references/data_types/datatypedetails.htm#StringDataType) |
+| BFILE                                                                            | ×         |                            |                                                                                                                                               |
 
-- `NUMBER`, `NUMBER with precision > 36` and `LONG` are casted to `VARCHAR` to prevent a loss of precision. 
 
-    If you want to return a DECIMAL type for these types you can set the property ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE: 
+
+### Mapping of Number Types:
+
+`NUMBER`, `NUMBER with precision > 36` and `LONG` are casted to `VARCHAR` to prevent a loss of precision. 
+
+If you want to return a DECIMAL type for these types you can set the property ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE: 
     
-    `ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE='36,20'` 
+`ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE='36,20'` 
     
-    This will cast NUMBER with precision > 36, NUMBER without precision and LONG to DECIMAL(36,20).
-    Keep in mind that this will yield errors if the data in the Oracle database does not fit into the specified DECIMAL type.
-
-- `DATE` is casted to `TIMESTAMP`. This data type is only supported for positive year values, i.e., years > 0001.
-- `TIMESTAMP WITH [LOCAL] TIME ZONE` is casted to `TIMESTAMP`. 
-- `INTERVAL` is casted to `VARCHAR`.
-- `CLOB`, `BLOB`, and `NCLOB` values are supported up to the maximum size of an Exasol [`VARCHAR`](https://docs.exasol.com/sql_references/data_types/datatypedetails.htm#StringDataType).
-
-    By default an error will be thrown if you try to import a value that is larger. If you want to import from tables which contain bigger values, you need to truncate the values.
-    
-- `RAW` and `LONG RAW` are not supported.
+This will cast NUMBER with precision > 36, NUMBER without precision and LONG to DECIMAL(36,20).
+Keep in mind that this will yield errors if the data in the Oracle database does not fit into the specified DECIMAL type.

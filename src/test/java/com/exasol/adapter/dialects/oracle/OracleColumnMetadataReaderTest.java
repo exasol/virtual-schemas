@@ -45,21 +45,6 @@ class OracleColumnMetadataReaderTest {
     }
 
     @Test
-    void testMapBlobMappedToUnsupportedTypeByDefault() {
-        final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.BLOB, 0, 0, 0, null);
-        assertThat(this.columnMetadataReader.mapJdbcType(typeDescription), equalTo(DataType.createUnsupported()));
-    }
-
-    @Test
-    void testMapBlobMappedToMaximumSizeVarCharIfBase64EncodingEnabled() {
-        final Map<String, String> rawProperties = new HashMap<>();
-        rawProperties.put("BINARY_COLUMN_HANDLING", "ENCODE_BASE64");
-        final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.BLOB, 0, 0, 0, null);
-        assertThat(createParameterizedColumnMetadataReader(rawProperties).mapJdbcType(typeDescription),
-                equalTo(createMaximumSizeVarChar(ExaCharset.UTF8)));
-    }
-
-    @Test
     void testMapNumericColumnTypeWithMaximumDecimalPrecision() {
         final int precision = DataType.MAX_EXASOL_DECIMAL_PRECISION;
         final int scale = 0;
