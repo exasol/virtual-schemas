@@ -60,9 +60,11 @@ public class OracleColumnMetadataReader extends BaseColumnMetadataReader {
         if (decimalScale == ORACLE_MAGIC_NUMBER_SCALE) {
             return workAroundNumberWithoutScaleAndPrecision();
         }
-        final int decimalPrec = jdbcTypeDescription.getPrecisionOrSize();
-        if (decimalPrec <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
-            return DataType.createDecimal(decimalPrec, decimalScale);
+        final int decimalPrecision = jdbcTypeDescription.getPrecisionOrSize() == 0
+                ? DataType.MAX_EXASOL_DECIMAL_PRECISION
+                : jdbcTypeDescription.getPrecisionOrSize();
+        if (decimalPrecision <= DataType.MAX_EXASOL_DECIMAL_PRECISION) {
+            return DataType.createDecimal(decimalPrecision, decimalScale);
         } else {
             return workAroundNumberWithoutScaleAndPrecision();
         }

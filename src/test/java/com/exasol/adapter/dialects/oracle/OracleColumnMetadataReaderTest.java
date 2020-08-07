@@ -54,7 +54,16 @@ class OracleColumnMetadataReaderTest {
     }
 
     @Test
-    void testMapRowid() {
+    void testMapColumnTypeWithZeroPrecision() {
+        final int precision = 0;
+        final int scale = 0;
+        final JdbcTypeDescription typeDescription = createTypeDescriptionForNumeric(precision, scale);
+        assertThat(this.columnMetadataReader.mapJdbcType(typeDescription),
+                equalTo(DataType.createDecimal(DataType.MAX_EXASOL_DECIMAL_PRECISION, scale)));
+    }
+
+    @Test
+    void testMapRowId() {
         final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.ROWID, 0, 0, 0, null);
         assertThat(this.columnMetadataReader.mapJdbcType(typeDescription),
                 equalTo(createMaximumSizeVarChar(DataType.ExaCharset.UTF8)));

@@ -240,6 +240,15 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
         return exasolContainer.createConnection("");
     }
 
+    @Test
+    void testCountAll() throws SQLException {
+        final String qualifiedTableName = VIRTUAL_SCHEMA_JDBC + "." + TABLE_ORACLE_NUMBER_HANDLING;
+        final String query = "SELECT COUNT(*) FROM " + qualifiedTableName;
+        final ResultSet expected = getExpectedResultSet(List.of("x DECIMAL(36,0)"), //
+                List.of("1"));
+        assertThat(getActualResultSet(query), matchesResultSet(expected));
+    }
+
     @Nested
     @DisplayName("Number handling test")
     class numberHandlingTest {

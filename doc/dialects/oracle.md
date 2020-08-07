@@ -174,5 +174,13 @@ If you want to return a DECIMAL type for these types you can set the property OR
     
 `ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE='36,20'` 
     
-This will cast NUMBER with precision > 36, NUMBER without precision and LONG to DECIMAL(36,20).
-Keep in mind that this will yield errors if the data in the Oracle database does not fit into the specified DECIMAL type.
+- `RAW` and `LONG RAW` are not supported.
+
+## Testing information
+
+In the following matrix you find combinations of JDBC driver and dialect version that we tested.
+
+| Virtual Schema Version | Oracle Version     | Driver Name               | Driver Version |
+|------------------------|--------------------|---------------------------|----------------|
+| 4.0.3                  | Oracle XE 11g      | ojdbc                     | 8              |
+| 4.0.3                  | Oracle XE 11g      | instantclient-basic-linux | x64-12.1.0.2.0 |
