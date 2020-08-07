@@ -33,7 +33,10 @@ import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
-import com.exasol.dbbuilder.dialects.exasol.*;
+import com.exasol.dbbuilder.dialects.exasol.AdapterScript;
+import com.exasol.dbbuilder.dialects.exasol.ConnectionDefinition;
+import com.exasol.dbbuilder.dialects.exasol.ExasolObjectFactory;
+import com.exasol.dbbuilder.dialects.exasol.ExasolSchema;
 
 /**
  * How to run `OracleSqlDialectIT`: See the documentation <a
@@ -671,15 +674,14 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
 
         @ParameterizedTest
         @CsvSource(value = { //
-                "VIRTUAL_SCHEMA_JDBC, C18, VARCHAR(2000000) UTF8, 0102030405060708090a0b0c0d0e0f", //
-                "VIRTUAL_SCHEMA_JDBC, C19, VARCHAR(2000000) UTF8, 0987asdlfkjq2222qawsf;lkja09ed8q2w;43lkrjasdf09uqaw43lkjra0-98sf[iqjw4,mfas[dpiuj[qa09w44", //
-                "VIRTUAL_SCHEMA_JDBC, C20, VARCHAR(2000000) UTF8, 0987asdlfkjq2222qawsf;lkja09ed8q2w;43lkrjasdf09uqaw43lkjra0-98sf[iqjw4,mfas[dpiuj[qa09w44", //
-                "VIRTUAL_SCHEMA_ORA, C18, VARCHAR(2000000) UTF8, 0102030405060708090a0b0c0d0e0f", //
-                "VIRTUAL_SCHEMA_ORA, C19, VARCHAR(2000000) UTF8, 0987asdlfkjq2222qawsf;lkja09ed8q2w;43lkrjasdf09uqaw43lkjra0-98sf[iqjw4,mfas[dpiuj[qa09w44", //
-                "VIRTUAL_SCHEMA_ORA, C20, VARCHAR(2000000) UTF8, 0987asdlfkjq2222qawsf;lkja09ed8q2w;43lkrjasdf09uqaw43lkjra0-98sf[iqjw4,mfas[dpiuj[qa09w44", //
+                "VIRTUAL_SCHEMA_JDBC, C18", //
+                "VIRTUAL_SCHEMA_JDBC, C19", //
+                "VIRTUAL_SCHEMA_JDBC, C20", //
+                "VIRTUAL_SCHEMA_ORA, C18", //
+                "VIRTUAL_SCHEMA_ORA, C19", //
+                "VIRTUAL_SCHEMA_ORA, C20",//
         })
-        void testBlobColumns(final String virtualSchemaName, final String columnName,
-                                   final String expectedColumnType, final String expectedColumnValue) {
+        void testBlobColumns(final String virtualSchemaName, final String columnName) {
             final String qualifiedTableName = virtualSchemaName + "." + TABLE_ORACLE_ALL_DATA_TYPES;
             final String query = "SELECT " + columnName + " FROM " + qualifiedTableName;
             final SQLException exception = assertThrows(SQLException.class, () -> statementExasol.execute(query));
