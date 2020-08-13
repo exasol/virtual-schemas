@@ -12,7 +12,9 @@ import static utils.SqlNodesCreator.*;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -145,15 +147,6 @@ class OracleSqlGenerationVisitorTest {
                 DataType.createVarChar(50, DataType.ExaCharset.UTF8), "test_column");
         assertThat(this.visitor.visit(selectList), equalTo(
                 "TO_TIMESTAMP(TO_CHAR(\"test_column\", 'YYYY-MM-DD HH24:MI:SS.FF3'), 'YYYY-MM-DD HH24:MI:SS.FF3')"));
-    }
-
-    @CsvSource({ "ROWID", "UROWID" })
-    @ParameterizedTest
-    void testVisitSqlSelectListSelectStarNumberCastRowidToChar(final String dataType) throws AdapterException {
-        final SqlSelectList selectList = createSqlSelectStarListWithOneColumn(
-                "{\"jdbcDataType\":2, \"typeName\":\"" + dataType + "\"}",
-                DataType.createVarChar(50, DataType.ExaCharset.UTF8), "test_column");
-        assertThat(this.visitor.visit(selectList), equalTo("ROWIDTOCHAR(\"test_column\")"));
     }
 
     @Test

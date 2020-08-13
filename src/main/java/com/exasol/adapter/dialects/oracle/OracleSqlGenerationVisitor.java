@@ -4,11 +4,12 @@ import static com.exasol.adapter.sql.AggregateFunction.*;
 import static com.exasol.adapter.sql.ScalarFunction.*;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.*;
+import com.exasol.adapter.metadata.ColumnMetadata;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.sql.*;
 
 /**
@@ -18,7 +19,7 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
     private boolean requiresSelectListAliasesForLimit = false;
     private static final String TIMESTAMP_FORMAT = "'YYYY-MM-DD HH24:MI:SS.FF3'";
     private static final List<String> TYPE_NAMES_REQUIRING_CAST = List.of("TIMESTAMP", "INTERVAL", "BINARY_FLOAT",
-            "BINARY_DOUBLE", "ROWID", "UROWID", "BLOB");
+            "BINARY_DOUBLE", "BLOB");
     private final Set<AggregateFunction> aggregateFunctionsCast = EnumSet.noneOf(AggregateFunction.class);
     private final Set<ScalarFunction> scalarFunctionsCast = EnumSet.noneOf(ScalarFunction.class);
 
@@ -273,8 +274,6 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
                     + ")";
         } else if (typeName.equals("NUMBER")) {
             return getNumberProjectionString(column, projectionString, (OracleSqlDialect) dialect);
-        } else if (typeName.equals("ROWID") || typeName.equals("UROWID")) {
-            return "ROWIDTOCHAR(" + projectionString + ")";
         } else if (typeName.equals("BLOB")) {
             return "UTL_RAW.CAST_TO_VARCHAR2(UTL_ENCODE.BASE64_DECODE(" + projectionString + "))";
         } else {

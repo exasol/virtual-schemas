@@ -1,11 +1,10 @@
 package com.exasol.adapter.dialects.oracle;
 
 import static com.exasol.adapter.metadata.DataType.createMaximumSizeVarChar;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.sql.Types;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +14,6 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.jdbc.JdbcTypeDescription;
 import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.metadata.DataType.ExaCharset;
 
 class OracleColumnMetadataReaderTest {
     private OracleColumnMetadataReader columnMetadataReader;
@@ -60,13 +58,6 @@ class OracleColumnMetadataReaderTest {
         final JdbcTypeDescription typeDescription = createTypeDescriptionForNumeric(precision, scale);
         assertThat(this.columnMetadataReader.mapJdbcType(typeDescription),
                 equalTo(DataType.createDecimal(DataType.MAX_EXASOL_DECIMAL_PRECISION, scale)));
-    }
-
-    @Test
-    void testMapRowId() {
-        final JdbcTypeDescription typeDescription = new JdbcTypeDescription(Types.ROWID, 0, 0, 0, null);
-        assertThat(this.columnMetadataReader.mapJdbcType(typeDescription),
-                equalTo(createMaximumSizeVarChar(DataType.ExaCharset.UTF8)));
     }
 
     private OracleColumnMetadataReader createParameterizedColumnMetadataReader(
