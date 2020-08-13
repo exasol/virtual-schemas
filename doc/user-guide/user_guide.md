@@ -55,7 +55,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.JDBC_ADAPTER_SCRIPT AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/your-bucket-fs/your-bucket/virtual-schema-dist-5.0.3-bundle-4.0.3.jar;
+  %jar /buckets/your-bucket-fs/your-bucket/virtual-schema-dist-5.1.0-bundle-4.0.3.jar;
   %jar /buckets/your-bucket-fs/your-bucket/<JDBC driver>.jar;
 /
 ```

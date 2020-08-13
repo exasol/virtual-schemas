@@ -1,11 +1,10 @@
 package com.exasol.adapter.dialects.sqlserver;
 
-import static com.exasol.adapter.dialects.sqlserver.SqlServerSqlDialect.MAX_SQLSERVER_NVARCHAR_SIZE;
-import static com.exasol.adapter.dialects.sqlserver.SqlServerSqlDialect.MAX_SQLSERVER_VARCHAR_SIZE;
-
+import java.sql.Types;
 import java.util.*;
 
 import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.adapternotes.ColumnAdapterNotesJsonConverter;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.TableMetadata;
@@ -15,9 +14,9 @@ import com.exasol.adapter.sql.*;
  * This class generates SQL queries for the {@link SqlServerSqlDialect}.
  */
 public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
-    private static final List<String> TYPE_NAMES_REQUIRING_CAST = List.of("text", "date", "datetime2", "hierarchyid",
-            "geometry", "geography", "timestamp", "xml");
-    private static final List<String> TYPE_NAME_NOT_SUPPORTED = List.of("varbinary", "binary");
+    private static final int SQL_SERVER_DATETIME_OFFSET = -155;
+    private static final int MAX_SQLSERVER_VARCHAR_SIZE = 8000;
+    private static final List<Integer> REQUIRE_CAST = List.of(SQL_SERVER_DATETIME_OFFSET, Types.TIME);
 
     /**
      * Create a new instance of the {@link SqlServerSqlGenerationVisitor}.
@@ -29,36 +28,26 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
         super(dialect, context);
     }
 
-    protected List<String> getListOfTypeNamesRequiringCast() {
-        return TYPE_NAMES_REQUIRING_CAST;
+    @Override
+    public String visit(final SqlColumn column) throws AdapterException {
+        final String projectionString = super.visit(column);
+        return getColumnProjectionString(column, projectionString);
     }
 
-    protected List<String> getListOfTypeNamesNotSupported() {
-        return TYPE_NAME_NOT_SUPPORTED;
+    private String getColumnProjectionString(final SqlColumn column, final String projectionString) {
+        return super.isDirectlyInSelectList(column) //
+                ? buildColumnProjectionString(getJdbcDataType(column), projectionString) //
+                : projectionString;
     }
 
-    protected String buildColumnProjectionString(final String typeName, final String projectionString) {
-        final String castTypeNVarchar = "NVARCHAR(" + MAX_SQLSERVER_NVARCHAR_SIZE + ")";
-        if (typeName.startsWith("text")) {
-            return getCastAs(projectionString, castTypeNVarchar);
-        } else if (typeName.startsWith("date") || typeName.startsWith("datetime2")
-                || typeName.startsWith("timestamp")) {
-            return getCastAs(projectionString, "DateTime");
-        } else if (typeName.startsWith("hierarchyid")) {
-            return getCastAs(projectionString, castTypeNVarchar);
-        } else if (typeName.startsWith("geometry") || typeName.startsWith("geography")) {
-            return getCastAs(projectionString, "VARCHAR(" + MAX_SQLSERVER_VARCHAR_SIZE + ")");
-        } else if (typeName.startsWith("xml")) {
-            return getCastAs(projectionString, castTypeNVarchar);
-        } else if (TYPE_NAME_NOT_SUPPORTED.contains(typeName)) {
-            return "'" + typeName + " NOT SUPPORTED'";
+    private String buildColumnProjectionString(final int jdbcDataType, final String projectionString) {
+        if (jdbcDataType == Types.TIME) {
+            return "CAST(" + projectionString + " as VARCHAR(16))";
+        } else if (jdbcDataType == SQL_SERVER_DATETIME_OFFSET) {
+            return "CAST(" + projectionString + " as VARCHAR(34))";
         } else {
             return projectionString;
         }
-    }
-
-    private String getCastAs(final String projectionString, final String castType) {
-        return "CAST(" + projectionString + "  as " + castType + " )";
     }
 
     @Override
@@ -70,15 +59,12 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
     }
 
     private List<String> buildSelectStar(final SqlSelectList selectList) throws AdapterException {
-
-        if (SqlGenerationHelper.selectListRequiresCasts(selectList, this.nodeRequiresCast)) {
-            return buildSelectStarWithNodeCast(selectList);
-        } else {
-            return new ArrayList<>(Collections.singletonList("*"));
-        }
+        final Optional<List<String>> selectStartWithCastedColumns = buildSelectStarWithNodeCast(selectList);
+        return selectStartWithCastedColumns.orElseGet(() -> new ArrayList<>(Collections.singletonList("*")));
     }
 
-    private List<String> buildSelectStarWithNodeCast(final SqlSelectList selectList) throws AdapterException {
+    private Optional<List<String>> buildSelectStarWithNodeCast(final SqlSelectList selectList) throws AdapterException {
+        boolean requiresCast = false;
         final SqlStatementSelect select = (SqlStatementSelect) selectList.getParent();
         int columnId = 0;
         final List<TableMetadata> tableMetadata = new ArrayList<>();
@@ -86,45 +72,32 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
         final List<String> selectListElements = new ArrayList<>(tableMetadata.size());
         for (final TableMetadata tableMeta : tableMetadata) {
             for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
+                if (requiresCast(new SqlColumn(columnId, columnMeta))) {
+                    requiresCast = true;
+                }
                 final SqlColumn sqlColumn = new SqlColumn(columnId, columnMeta);
-                selectListElements.add(buildColumnProjectionString(sqlColumn, super.visit(sqlColumn)));
+                selectListElements.add(buildColumnProjectionString(getJdbcDataType(sqlColumn), super.visit(sqlColumn)));
                 ++columnId;
             }
         }
-        return selectListElements;
+        return requiresCast ? Optional.of(selectListElements) : Optional.empty();
     }
 
-    private String buildColumnProjectionString(final SqlColumn column, final String projectionString)
-            throws AdapterException {
-        return buildColumnProjectionString(getTypeNameFromColumn(column), projectionString);
+    private boolean requiresCast(final SqlColumn column) {
+        final int typeName = getJdbcDataType(column);
+        return REQUIRE_CAST.contains(typeName);
     }
 
-    private final java.util.function.Predicate<SqlNode> nodeRequiresCast = node -> {
+    protected int getJdbcDataType(final SqlColumn column) {
+        final ColumnAdapterNotesJsonConverter converter = ColumnAdapterNotesJsonConverter.getInstance();
         try {
-            if (node.getType() == SqlNodeType.COLUMN) {
-                final SqlColumn column = (SqlColumn) node;
-                final String typeName = getTypeNameFromColumn(column);
-                return getListOfTypeNamesRequiringCast().contains(typeName)
-                        || getListOfTypeNamesNotSupported().contains(typeName);
-            }
-            return false;
+            return converter
+                    .convertFromJsonToColumnAdapterNotes(column.getMetadata().getAdapterNotes(), column.getName())
+                    .getJdbcDataType();
         } catch (final AdapterException exception) {
-            throw new SqlGenerationVisitorException("Exception during deserialization of ColumnAdapterNotes. ",
-                    exception);
+            throw new SqlGenerationVisitorException(
+                    "Unable to get a JDBC data type for an sql column " + column.getId());
         }
-    };
-
-    @Override
-    public String visit(final SqlColumn column) throws AdapterException {
-        final String projectionString = super.visit(column);
-        return getColumnProjectionString(column, projectionString);
-    }
-
-    private String getColumnProjectionString(final SqlColumn column, final String projectionString)
-            throws AdapterException {
-        return super.isDirectlyInSelectList(column) //
-                ? buildColumnProjectionString(getTypeNameFromColumn(column), projectionString) //
-                : projectionString;
     }
 
     @Override
@@ -188,7 +161,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
         case YEARS_BETWEEN:
             return getDateTimeBetween(function, argumentsSql);
         case CURRENT_DATE:
-            return "CAST( GETDATE() AS DATE)";
+            return "CAST(GETDATE() AS DATE)";
         case CURRENT_TIMESTAMP:
             return "GETDATE()";
         case SYSDATE:

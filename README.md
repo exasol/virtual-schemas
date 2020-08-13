@@ -137,6 +137,7 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 | [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)                                  | Checking for conditions in code via matchers           | BSD License                      |
 | [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0       |
 | [Mockito](http://site.mockito.org/)                                                 | Mocking framework                                      | MIT License                      |
+| [Microsoft JDBC Driver for SQL Server][sql-server-jdbc-driver]                      | JDBC driver for SQL Server database                    | MIT License                      |
 | [MySQL JDBC Driver][mysql-jdbc-driver]                                              | JDBC driver for MySQL database                         | GNU GPL Version 2.0              |
 | [Oracle JDBC Driver][oracle-jdbc-driver]                                            | JDBC driver for Oracle database                        | Oracle Technology Network License|
 | [PostgreSQL JDBC Driver][postgresql-jdbc-driver]                                    | JDBC driver for PostgreSQL database                    | BSD-2-Clause License             |
@@ -166,6 +167,7 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [mysql-jdbc-driver]: https://dev.mysql.com/downloads/connector/j/
 [oracle-jdbc-driver]: https://www.oracle.com/database/technologies/appdev/jdbc.html
 [postgresql-jdbc-driver]: https://jdbc.postgresql.org/
+[sql-server-jdbc-driver]: https://github.com/microsoft/mssql-jdbc
 [sonatype-oss-index-maven-plugin]: https://sonatype.github.io/ossindex-maven/maven-plugin/
 [test-bd-builder]: https://github.com/exasol/test-db-builder-java
 [versions-maven-plugin]: https://www.mojohaus.org/versions-maven-plugin/

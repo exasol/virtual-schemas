@@ -49,32 +49,44 @@ public abstract class AbstractIntegrationTest {
 
     protected static void createTestTablesForJoinTests(final Connection connection, final String schemaName)
             throws SQLException {
-        final Statement statement = connection.createStatement();
-        statement.execute("CREATE TABLE " + schemaName + "." + TABLE_JOIN_1 + "(x INT, y VARCHAR(100))");
-        statement.execute("INSERT INTO " + schemaName + "." + TABLE_JOIN_1 + " VALUES (1,'aaa')");
-        statement.execute("INSERT INTO " + schemaName + "." + TABLE_JOIN_1 + " VALUES (2,'bbb')");
-        statement.execute("CREATE TABLE " + schemaName + "." + TABLE_JOIN_2 + "(x INT, y VARCHAR(100))");
-        statement.execute("INSERT INTO " + schemaName + "." + TABLE_JOIN_2 + " VALUES (2,'bbb')");
-        statement.execute("INSERT INTO " + schemaName + "." + TABLE_JOIN_2 + " VALUES (3,'ccc')");
+        try (final Statement statement = connection.createStatement()) {
+            statement.execute("CREATE TABLE " + schemaName + "." + TABLE_JOIN_1 + "(x INT, y VARCHAR(100))");
+            statement.execute("INSERT INTO " + schemaName + "." + TABLE_JOIN_1 + " VALUES (1,'aaa')");
+            statement.execute("INSERT INTO " + schemaName + "." + TABLE_JOIN_1 + " VALUES (2,'bbb')");
+            statement.execute("CREATE TABLE " + schemaName + "." + TABLE_JOIN_2 + "(x INT, y VARCHAR(100))");
+            statement.execute("INSERT INTO " + schemaName + "." + TABLE_JOIN_2 + " VALUES (2,'bbb')");
+            statement.execute("INSERT INTO " + schemaName + "." + TABLE_JOIN_2 + " VALUES (3,'ccc')");
+        }
     }
 
     protected ResultSet getExpectedResultSet(final List<String> expectedColumns, final List<String> expectedRows)
             throws SQLException {
         final Connection connection = getExasolConnection();
-        final Statement statement = connection.createStatement();
-        final String expectedValues = expectedRows.stream().map(row -> "(" + row + ")")
-                .collect(Collectors.joining(","));
-        final String qualifiedExpectedTableName = SCHEMA_EXASOL + ".EXPECTED";
-        statement.execute("CREATE OR REPLACE TABLE " + qualifiedExpectedTableName + "("
-                + String.join(", ", expectedColumns) + ")");
-        statement.execute("INSERT INTO " + qualifiedExpectedTableName + " VALUES" + expectedValues);
-        return statement.executeQuery("SELECT * FROM " + qualifiedExpectedTableName);
+        try (final Statement statement = connection.createStatement()) {
+            final String expectedValues = expectedRows.stream().map(row -> "(" + row + ")")
+                    .collect(Collectors.joining(","));
+            final String qualifiedExpectedTableName = SCHEMA_EXASOL + ".EXPECTED";
+            statement.execute("CREATE OR REPLACE TABLE " + qualifiedExpectedTableName + "("
+                    + String.join(", ", expectedColumns) + ")");
+            statement.execute("INSERT INTO " + qualifiedExpectedTableName + " VALUES" + expectedValues);
+            return statement.executeQuery("SELECT * FROM " + qualifiedExpectedTableName);
+        }
     }
 
     protected ResultSet getActualResultSet(final String query) throws SQLException {
         final Connection connection = getExasolConnection();
-        final Statement statement = connection.createStatement();
-        return statement.executeQuery(query);
+        try (final Statement statement = connection.createStatement()) {
+            return statement.executeQuery(query);
+        }
+    }
+
+    protected String getExplainVirtualString(final String query) throws SQLException {
+        final Connection connection = getExasolConnection();
+        try (final Statement statement = connection.createStatement()) {
+            final ResultSet explainVirtual = statement.executeQuery("EXPLAIN VIRTUAL " + query);
+            explainVirtual.next();
+            return explainVirtual.getString("PUSHDOWN_SQL");
+        }
     }
 
     protected abstract Connection getExasolConnection() throws SQLException;

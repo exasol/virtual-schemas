@@ -15,7 +15,7 @@ Now register the driver in EXAOperation:
 1. Select JDBC driver file
 1. Click "Upload"
 1. Click "Add"
-1. In dialog "Add EXACluster JDBC driver" configure the JDBC driver (see below)
+1. In a dialog "Add EXACluster JDBC driver" configure the JDBC driver (see below)
 
 You need to specify the following settings when adding the JDBC driver via EXAOperation.
 
@@ -51,7 +51,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_MYSQL AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-5.0.3-bundle-4.0.3.jar;
+    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-5.1.0-bundle-4.0.3.jar;
     %jar /buckets/<BFS service>/<bucket>/mysql-connector-java-<version>.jar;
 /
 ;
