@@ -150,15 +150,6 @@ class OracleSqlGenerationVisitorTest {
     }
 
     @Test
-    void testVisitSqlSelectListSelectStarNumberCastBlobToChar() throws AdapterException {
-        final SqlSelectList selectList = createSqlSelectStarListWithOneColumn(
-                "{\"jdbcDataType\":2, \"typeName\":\"BLOB\"}", DataType.createVarChar(50, DataType.ExaCharset.UTF8),
-                "test_column");
-        assertThat(this.visitor.visit(selectList),
-                equalTo("UTL_RAW.CAST_TO_VARCHAR2(UTL_ENCODE.BASE64_DECODE(\"test_column\"))"));
-    }
-
-    @Test
     void testVisitSqlSelectListSelectStarNumberCastToDecimal() throws AdapterException {
         final SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
         final List<ColumnMetadata> columns = new ArrayList<>();
