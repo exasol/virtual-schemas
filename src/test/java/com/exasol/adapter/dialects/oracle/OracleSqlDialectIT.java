@@ -3,8 +3,7 @@ package com.exasol.adapter.dialects.oracle;
 import static com.exasol.adapter.dialects.IntegrationTestConstants.*;
 import static com.exasol.dbbuilder.dialects.exasol.AdapterScript.Language.JAVA;
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -34,7 +33,10 @@ import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
-import com.exasol.dbbuilder.dialects.exasol.*;
+import com.exasol.dbbuilder.dialects.exasol.AdapterScript;
+import com.exasol.dbbuilder.dialects.exasol.ConnectionDefinition;
+import com.exasol.dbbuilder.dialects.exasol.ExasolObjectFactory;
+import com.exasol.dbbuilder.dialects.exasol.ExasolSchema;
 
 /**
  * How to run `OracleSqlDialectIT`: See the documentation <a
@@ -668,6 +670,22 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
             assertAll(() -> assertExpressionExecutionStringResult(query, expectedColumnValue),
                     () -> assertThat(getColumnTypesOfTable(qualifiedTableName, columnName),
                             equalTo(expectedColumnType)));
+        }
+
+        @ParameterizedTest
+        @CsvSource(value = { //
+                "VIRTUAL_SCHEMA_JDBC, C18", //
+                "VIRTUAL_SCHEMA_JDBC, C19", //
+                "VIRTUAL_SCHEMA_JDBC, C20", //
+                "VIRTUAL_SCHEMA_ORA, C18", //
+                "VIRTUAL_SCHEMA_ORA, C19", //
+                "VIRTUAL_SCHEMA_ORA, C20",//
+        })
+        void testBlobColumns(final String virtualSchemaName, final String columnName) {
+            final String qualifiedTableName = virtualSchemaName + "." + TABLE_ORACLE_ALL_DATA_TYPES;
+            final String query = "SELECT " + columnName + " FROM " + qualifiedTableName;
+            final SQLException exception = assertThrows(SQLException.class, () -> statementExasol.execute(query));
+            assertThat(exception.getMessage(), startsWith("object " + columnName + " not found"));
         }
 
         @ParameterizedTest
