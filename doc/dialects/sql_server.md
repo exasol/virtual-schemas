@@ -46,7 +46,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_SQLSERVER AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-5.1.0-bundle-4.0.3.jar;
+  %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-5.0.4-bundle-4.0.3.jar;
   %jar /buckets/<BFS service>/<bucket>/mssql-jdbc-<version>.jre8.jar;
 /
 ```
@@ -75,6 +75,13 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
     CATALOG_NAME   = '<database name>'
     SCHEMA_NAME = '<schema name>';
 ```
+
+
+Please, do not forget to specify the `SCHEMA_NAME` property.
+
+Provide the SQL server's database name using one of the suggested ways:
+1. Via the `CATALOG_NAME` property;
+1. Via connection string definition: 'jdbc:sqlserver://<server name>:<port>/<database name>';
 
 ## Data Types Conversion
 

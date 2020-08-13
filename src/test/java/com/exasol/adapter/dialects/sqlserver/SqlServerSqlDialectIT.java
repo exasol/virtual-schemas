@@ -43,7 +43,6 @@ class SqlServerSqlDialectIT extends AbstractIntegrationTest {
     private static final int MS_SQL_SERVER_PORT = 1433;
     private static final String JDBC_CONNECTION_NAME = "JDBC";
     private static final String VIRTUAL_SCHEMA_JDBC = "VIRTUAL_SCHEMA_JDBC";
-
     @Container
     private static final MSSQLServerContainer MS_SQL_SERVER_CONTAINER = new MSSQLServerContainer(
             MS_SQL_SERVER_CONTAINER_NAME);
@@ -185,9 +184,11 @@ class SqlServerSqlDialectIT extends AbstractIntegrationTest {
 
     @Test
     void testGetDate() throws SQLException {
-        final String query = "SELECT CURRENT_DATE FROM " + VIRTUAL_SCHEMA_JDBC + "." + TABLE_SQL_SERVER_SIMPLE;
-        final ResultSet expected = getExpectedResultSet(List.of("col1 DATE"), List.of(LocalDate.now().toString()));
-        final String expectedRewrittenQuery = "SELECT CAST(GETDATE() AS DATE) FROM";
+        final String query = "SELECT CURRENT_DATE FROM " + VIRTUAL_SCHEMA_JDBC + "." + TABLE_SQL_SERVER_SIMPLE
+                + " LIMIT 1";
+        final ResultSet expected = getExpectedResultSet(List.of("col1 DATE"),
+                List.of("'" + LocalDate.now().toString() + "'"));
+        final String expectedRewrittenQuery = "SELECT TOP 1 CAST(GETDATE() AS DATE) FROM";
         assertAll(() -> assertThat(getActualResultSet(query), matchesResultSet(expected)),
                 () -> assertThat(getExplainVirtualString(query), containsString(expectedRewrittenQuery)));
     }
