@@ -21,9 +21,6 @@ import com.exasol.adapter.sql.*;
  */
 public class SqlServerSqlDialect extends AbstractSqlDialect {
     static final String NAME = "SQLSERVER";
-    static final int MAX_SQLSERVER_VARCHAR_SIZE = 8000;
-    static final int MAX_SQLSERVER_NVARCHAR_SIZE = 4000;
-    static final int MAX_SQLSERVER_CLOB_SIZE = 2000000;
     private static final Capabilities CAPABILITIES = createCapabilityList();
 
     private static Capabilities createCapabilityList() {
@@ -94,6 +91,7 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
         aggregationAliases.put(AggregateFunction.STDDEV_POP, "STDEVP");
         aggregationAliases.put(AggregateFunction.VARIANCE, "VAR");
         aggregationAliases.put(AggregateFunction.VAR_POP, "VARP");
+        aggregationAliases.put(AggregateFunction.COUNT, "COUNT_BIG");
         return aggregationAliases;
     }
 

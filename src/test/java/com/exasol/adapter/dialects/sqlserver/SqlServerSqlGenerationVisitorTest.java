@@ -6,7 +6,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static utils.SqlNodesCreator.*;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.Mock;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
@@ -24,8 +22,6 @@ import com.exasol.adapter.sql.*;
 
 class SqlServerSqlGenerationVisitorTest {
     private SqlServerSqlGenerationVisitor visitor;
-    @Mock
-    private Connection connectionMock;
 
     @BeforeEach
     void beforeEach() {
@@ -47,43 +43,22 @@ class SqlServerSqlGenerationVisitorTest {
         assertSqlNodeConvertedToAsterisk(sqlSelectList, this.visitor);
     }
 
-    @CsvSource({ "text, NVARCHAR(4000)", //
-            "date, DateTime", //
-            "datetime2, DateTime", //
-            "hierarchyid, NVARCHAR(4000)", //
-            "geometry, VARCHAR(8000)", //
-            "geography, VARCHAR(8000)", //
-            "timestamp, DateTime", //
-            "xml, NVARCHAR(4000)" //
-    })
-    @ParameterizedTest
-    void testVisitSqlSelectListSelectStarRequiresCast(final String typeName, final String expectedCastType)
-            throws AdapterException {
+    @Test
+    void testVisitSqlSelectListSelectStarRequiresCast() throws AdapterException {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn(
-                "{\"jdbcDataType\":2009, \"typeName\":\"" + typeName + "\"}",
-                DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
-        assertThat(this.visitor.visit(sqlSelectList), equalTo("CAST([test_column]  as " + expectedCastType + " )"));
-    }
-
-    @CsvSource({ "varbinary", //
-            "binary" //
-    })
-    @ParameterizedTest
-    void testVisitSqlSelectListSelectStarUnsupportedType(final String typeName) throws AdapterException {
-        final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn(
-                "{\"jdbcDataType\":2009, \"typeName\":\"" + typeName + "\"}",
-                DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
-        assertThat(this.visitor.visit(sqlSelectList), equalTo("'" + typeName + " NOT SUPPORTED'"));
+                "{\"jdbcDataType\":-155, \"typeName\":\"datetimeoffset\"}",
+                DataType.createVarChar(36, DataType.ExaCharset.UTF8), "test_column");
+        assertThat(this.visitor.visit(sqlSelectList), equalTo("CAST([test_column] as VARCHAR(34))"));
     }
 
     @Test
     void testVisitSqlStatementSelect() throws AdapterException {
         final SqlStatementSelect select = (SqlStatementSelect) DialectTestData.getTestSqlNode();
         assertThat(this.visitor.visit(select), //
-                equalTo("SELECT TOP 10 [USER_ID], COUNT([URL])" //
+                equalTo("SELECT TOP 10 [USER_ID], COUNT_BIG([URL])" //
                         + " FROM [test_catalog].[test_schema].[CLICKS]" //
                         + " WHERE 1 < [USER_ID]" //
-                        + " GROUP BY [USER_ID] HAVING 1 < COUNT([URL])" //
+                        + " GROUP BY [USER_ID] HAVING 1 < COUNT_BIG([URL])" //
                         + " ORDER BY [USER_ID] NULLS LAST"));
     }
 
@@ -120,7 +95,7 @@ class SqlServerSqlGenerationVisitorTest {
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("DATEDIFF(" + expected + ",10,[test_column])"));
     }
 
-    @CsvSource({ "CURRENT_DATE, CAST( GETDATE() AS DATE)", //
+    @CsvSource({ "CURRENT_DATE, CAST(GETDATE() AS DATE)", //
             "CURRENT_TIMESTAMP,  GETDATE()", //
             "SYSDATE, CAST( SYSDATETIME() AS DATE)", //
             "SYSTIMESTAMP, SYSDATETIME()" })

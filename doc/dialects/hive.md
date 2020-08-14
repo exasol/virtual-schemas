@@ -47,7 +47,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/<BFS service>/<bucket>/jars/virtual-schema-dist-5.0.3-bundle-4.0.3.jar;
+  %jar /buckets/<BFS service>/<bucket>/jars/virtual-schema-dist-5.0.4-bundle-4.0.3.jar;
   %jar /buckets/<BFS service>/<bucket>/jars/HiveJDBC41.jar;
 /
 ```
@@ -297,7 +297,7 @@ In Virtual Schema adapter:
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
   %jvmoption -Dsun.security.krb5.disableReferrals=true;
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/<BFS service>/<bucket>/jars/virtual-schema-dist-5.0.3-bundle-4.0.3.jar;
+  %jar /buckets/<BFS service>/<bucket>/jars/virtual-schema-dist-5.0.4-bundle-4.0.3.jar;
   %jar /buckets/<BFS service>/<bucket>/jars/HiveJDBC41.jar;
 /
 ```

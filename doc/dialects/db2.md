@@ -56,7 +56,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-5.0.3-bundle-4.0.3.jar;
+  %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-5.0.4-bundle-4.0.3.jar;
   %jar /buckets/<BFS service>/<bucket>/db2jcc4.jar;
   %jar /buckets/<BFS service>/<bucket>/db2jcc_license_cu.jar;
 /
@@ -68,7 +68,7 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-5.0.3-bundle-4.0.3.jar;
+  %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-5.0.4-bundle-4.0.3.jar;
   %jar /buckets/<BFS service>/<bucket>/db2jcc4.jar;
   %jar /buckets/<BFS service>/<bucket>/db2jcc_license_cu.jar;
   %jar /buckets/<BFS service>/<bucket>/db2jcc_license_cisuz.jar;
