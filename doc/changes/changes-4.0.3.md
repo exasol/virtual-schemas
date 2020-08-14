@@ -1,16 +1,22 @@
-# Exasol Virtual Schemas 4.0.3, released 2020-08-??
+# Exasol Virtual Schemas 4.0.3, released 2020-08-14
+
+## Bugs
+
+* #321: Fixed SQL Server bug. Added a function COUNT_BIG instead of COUNT.
+* #364: Fixed Oracle dialect bug with invalid Decimal precision (DECIMAL(0,0)).
+
+## Refactoring
+
+* #283: Tested SQL Server with new JDBC driver. Added integration test, updated documentation.
+* #370: Cleaned up Oracle dialect.
 
 ## Documentation
 
-* #283: Testes SQL Server with new JDBC driver. Added integration test, updated documentation.
 * #317: Worked on reducing redundancy between user_guid.md and docs.exasol.com
-* #321: Fixed SQL Server bug. Added a function COUNT_BIG instead of COUNT.
 * #354: Added datatypes mapping info to the postgres documentation. 
 * #355: Updated general deployment guide. 
 * #359: Replaced links to products with links to dialect in the README's feature list.
-* #364: Fixed Oracle dialect bug with invalid Decimal precision (DECIMAL(0,0)).
 * #369: Added supported data types list to Oracle dialect.
-* #370: Cleaned up Oracle dialect.
 
 ## Dependency updates
 

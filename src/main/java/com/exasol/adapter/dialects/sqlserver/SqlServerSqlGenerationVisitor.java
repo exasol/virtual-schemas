@@ -88,7 +88,7 @@ public class SqlServerSqlGenerationVisitor extends SqlGenerationVisitor {
         return REQUIRE_CAST.contains(typeName);
     }
 
-    protected int getJdbcDataType(final SqlColumn column) {
+    private int getJdbcDataType(final SqlColumn column) {
         final ColumnAdapterNotesJsonConverter converter = ColumnAdapterNotesJsonConverter.getInstance();
         try {
             return converter
