@@ -47,7 +47,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/<BFS service>/<bucket>/jars/virtual-schema-dist-5.0.4-bundle-4.0.3.jar;
+  %jar /buckets/<BFS service>/<bucket>/jars/virtual-schema-dist-5.0.4-bundle-4.0.4.jar;
   %jar /buckets/<BFS service>/<bucket>/jars/HiveJDBC41.jar;
 /
 ```
@@ -297,7 +297,7 @@ In Virtual Schema adapter:
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
   %jvmoption -Dsun.security.krb5.disableReferrals=true;
   %scriptclass com.exasol.adapter.RequestDispatcher;
-  %jar /buckets/<BFS service>/<bucket>/jars/virtual-schema-dist-5.0.4-bundle-4.0.3.jar;
+  %jar /buckets/<BFS service>/<bucket>/jars/virtual-schema-dist-5.0.4-bundle-4.0.4.jar;
   %jar /buckets/<BFS service>/<bucket>/jars/HiveJDBC41.jar;
 /
 ```
@@ -317,18 +317,45 @@ More references about the Kerberos principal aliasing:
 - Introduction of the system property to disable the referrals:  https://bugs.openjdk.java.net/browse/JDK-8223172
 - Similar issues and suggestion: https://stackoverflow.com/questions/60041120/impersonation-issue-after-migrating-from-oracle-jdk-8-to-open-jdk-8-in-cloudera
 
-## Testing information
+## Data Types Conversion
 
-The dialect was tested with the Cloudera Hive JDBC driver available on the [Cloudera downloads page](http://www.cloudera.com/downloads). The driver is also available directly from [Simba technologies](http://www.simba.com/), who developed the driver.
-We tested with the JDBC 4.1.
+This table includes data types available for Hive versions < 3.0.0.
 
-## Type Mappings
+Hive Data Type     | Supported | Converted Exasol Data Type | Known limitations
+-------------------|-----------|----------------------------|-------------------
+ARRAY              |  ✓        | VARCHAR                    | 
+BIGINT             |  ✓        | DECIMAL(19,0)              | 
+BINARY             |  ✓        | VARCHAR(2000000)           | 
+BOOLEAN            |  ✓        | BOOLEAN                    | 
+CHAR               |  ✓        | CHAR                       | 
+DECIMAL            |  ✓        | DECIMAL, VARCHAR           | *`DECIMAL with precision > 36` is casted to `VARCHAR` to prevent a loss of precision.  
+DATE               |  ✓        | DATE                       |  
+DOUBLE             |  ✓        | DOUBLE PRECISION           | 
+FLOAT              |  ✓        | DOUBLE PRECISION           |  
+INT                |  ✓        | DECIMAL(10,0)              | 
+INTERVAL           |  ?        |                            | Not tested
+MAP                |  ✓        | VARCHAR                    | 
+SMALLINT           |  ✓        | DECIMAL(5,0)               | 
+STRING             |  ✓        | VARCHAR                    | 
+STRUCT             |  ✓        | VARCHAR                    | 
+TIMESTAMP          |  ✓        | TIMESTAMP                  | 
+TINYINT            |  ✓        | DECIMAL(3,0)               | 
+UNIONTYPE          |  ?        |                            | Not tested
+VARCHAR            |  ✓        | VARCHAR                    | 
 
--`DECIMAL with precision > 36` is casted to `VARCHAR` to prevent a loss of precision. 
-
-    If you want to return a DECIMAL type you can set the property HIVE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE: 
+* If you want to return a DECIMAL type instead of VARCHAR when the precision > 36, you can set the property HIVE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE: 
     
     `HIVE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE='36,20'` 
     
     This will cast DECIMAL with precision > 36, DECIMAL without precision to DECIMAL(36,20).
-    Keep in mind that this will yield errors if the data in the Hive database does not fit into the specified DECIMAL type.
+    Please keep in mind that this will yield errors if the data in the Hive database does not fit into the specified DECIMAL type.
+
+## Testing information
+
+In the following matrix you find combinations of JDBC driver and dialect version that we tested.
+The dialect was tested with the Cloudera Hive JDBC driver available on the [Cloudera downloads page](http://www.cloudera.com/downloads). 
+The driver is also available directly from [Simba technologies](http://www.simba.com/), who developed the driver.
+
+Virtual Schema Version| Hive Version | Driver Name | Driver Version 
+----------------------|--------------|-------------|-----------------
+ 4.0.3                | 2.3.2        | HiveJDBC    | 4.1
