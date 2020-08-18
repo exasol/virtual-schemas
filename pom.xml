@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>virtual-schema-jdbc-adapter</artifactId>
-    <version>4.0.3</version>
+    <version>4.0.4</version>
     <name>Virtual Schema JDBC Adapter</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
