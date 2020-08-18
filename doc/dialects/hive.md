@@ -321,27 +321,27 @@ More references about the Kerberos principal aliasing:
 
 This table includes data types available for Hive versions < 3.0.0.
 
-Hive Data Type     | Supported | Converted Exasol Data Type| Known limitations
--------------------|-----------|---------------------------|-------------------
-ARRAY              |  ✓        | VARCHAR                   | 
-BIGINT             |  ✓        | DECIMAL(19,0)             | 
-BINARY             |  ✓        | VARCHAR(2000000)          | 
-BOOLEAN            |  ✓        | BOOLEAN                   | 
-CHAR               |  ✓        | CHAR                      | 
-DECIMAL            |  ✓        | DECIMAL, VARCHAR          | *`DECIMAL with precision > 36` is casted to `VARCHAR` to prevent a loss of precision.  
-DATE               |  ✓        | DATE                      |  
-DOUBLE             |  ✓        | DOUBLE PRECISION          | 
-FLOAT              |  ✓        | DOUBLE PRECISION          |  
-INT                |  ✓        | DECIMAL(10,0)             | 
-INTERVAL           |  ?        |                           | Not tested
-MAP                |  ✓        | VARCHAR                   | 
-SMALLINT           |  ✓        | DECIMAL(5,0)              | 
-STRING             |  ✓        | VARCHAR                   | 
-STRUCT             |  ✓        | VARCHAR                   | 
-TIMESTAMP          |  ✓        | TIMESTAMP                 | 
-TINYINT            |  ✓        | DECIMAL(3,0)              | 
-UNIONTYPE          |  ?        |                           | Not tested
-VARCHAR            |  ✓        | VARCHAR                   | 
+Hive Data Type     | Supported | Converted Exasol Data Type | Known limitations
+-------------------|-----------|----------------------------|-------------------
+ARRAY              |  ✓        | VARCHAR                    | 
+BIGINT             |  ✓        | DECIMAL(19,0)              | 
+BINARY             |  ✓        | VARCHAR(2000000)           | 
+BOOLEAN            |  ✓        | BOOLEAN                    | 
+CHAR               |  ✓        | CHAR                       | 
+DECIMAL            |  ✓        | DECIMAL, VARCHAR           | *`DECIMAL with precision > 36` is casted to `VARCHAR` to prevent a loss of precision.  
+DATE               |  ✓        | DATE                       |  
+DOUBLE             |  ✓        | DOUBLE PRECISION           | 
+FLOAT              |  ✓        | DOUBLE PRECISION           |  
+INT                |  ✓        | DECIMAL(10,0)              | 
+INTERVAL           |  ?        |                            | Not tested
+MAP                |  ✓        | VARCHAR                    | 
+SMALLINT           |  ✓        | DECIMAL(5,0)               | 
+STRING             |  ✓        | VARCHAR                    | 
+STRUCT             |  ✓        | VARCHAR                    | 
+TIMESTAMP          |  ✓        | TIMESTAMP                  | 
+TINYINT            |  ✓        | DECIMAL(3,0)               | 
+UNIONTYPE          |  ?        |                            | Not tested
+VARCHAR            |  ✓        | VARCHAR                    | 
 
 * If you want to return a DECIMAL type instead of VARCHAR when the precision > 36, you can set the property HIVE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE: 
     

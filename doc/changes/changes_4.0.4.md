@@ -2,3 +2,4 @@
 
 ## Documentation
 
+#371: Documented data types conversion for Hive dialect.
