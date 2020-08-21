@@ -149,6 +149,6 @@ There are a few important things you need to know about those data types.
 
 See also:
 
-* [List of Supported Dialect](doc/user-guide/dialects.md)
-* [Virtual Schema's Properties Reference](doc/user-guide/virtual_schema_properties.md)
-* [SQL Client Specifics](doc/user-guide/sql_clients.md)
+* [List of Supported Dialect](dialects.md)
+* [Virtual Schema's Properties Reference](virtual_schema_properties.md)
+* [SQL Client Specifics](sql_clients.md)
