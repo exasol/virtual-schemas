@@ -59,7 +59,7 @@ verify () {
 prepare() {
     verify_current_directory "$root_dir"
     readonly vscjdbc_version=$(extract_vscjdbc_version "$master_pom")
-    log "Found virtual-schema-common-java version $dialects_version in master file \"$master_pom\""
+    log "Found virtual-schema-common-java version $vscjdbc_version in master file \"$master_pom\""
     readonly dialects_version=$(extract_product_version "$master_pom")
     log "Found project version $dialects_version in master file \"$master_pom\""
 }
