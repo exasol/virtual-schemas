@@ -60,7 +60,7 @@ CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.JDBC_ADAPTER_SCRIPT AS
 /
 ```
 
-## Define a Named Connection.
+## Define a Named Connection
 
 First we create a connection.
 
