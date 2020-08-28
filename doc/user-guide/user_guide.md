@@ -50,6 +50,8 @@ Create a schema to hold the adapter script.
 CREATE SCHEMA SCHEMA_FOR_VS_SCRIPT;
 ```
 
+See the [BucketFS documentation](https://docs.exasol.com/administration/on-premise/bucketfs/bucketfs.htm) on examples how to [upload files](https://docs.exasol.com/administration/on-premise/bucketfs/accessfiles.htm).
+
 The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
 
 ```sql
