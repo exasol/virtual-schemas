@@ -32,7 +32,7 @@ The steps for creating virtual schema are:
 You have to upload the JDBC driver files of your remote database **twice** (except for the Exasol and BigQuery dialects):
 
 * Upload all files of the JDBC driver into a bucket of your choice, so that they can be accessed from the adapter script.
-See [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm) and [Upload the driver to BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/accessfiles.htm) for details.
+See [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm), [Upload the driver to BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/accessfiles.htm), [BucketFS access with docker-db](https://github.com/exasol/docker-db#connecting-to-bucketfs) for details.
 
 * Upload all files of the JDBC driver as a JDBC driver in EXAOperation
   - In EXAOperation go to Software -> JDBC Drivers
@@ -50,7 +50,8 @@ Create a schema to hold the adapter script.
 CREATE SCHEMA SCHEMA_FOR_VS_SCRIPT;
 ```
 
-See the [BucketFS documentation](https://docs.exasol.com/administration/on-premise/bucketfs/bucketfs.htm) on examples how to [upload files](https://docs.exasol.com/administration/on-premise/bucketfs/accessfiles.htm).
+See the [BucketFS documentation](https://docs.exasol.com/administration/on-premise/bucketfs/bucketfs.htm) for examples how to [upload files](https://docs.exasol.com/administration/on-premise/bucketfs/accessfiles.htm).
+If you are using docker-db also check: [BucketFS credentials and port in docker-db](https://github.com/exasol/docker-db#connecting-to-bucketfs)
 
 The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
 
