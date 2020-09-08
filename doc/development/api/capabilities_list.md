@@ -115,6 +115,11 @@ Here you can find a list of capabilities supported by the Adapter.
 - FN_HASH_SHA256
 - FN_HASH_SHA512
 - FN_HASH_TIGER
+- FN_HASHTYPE_MD5
+- FN_HASHTYPE_SHA1
+- FN_HASHTYPE_SHA256
+- FN_HASHTYPE_SHA512
+- FN_HASHTYPE_TIGER
 - FN_HOURS_BETWEEN
 - FN_INSERT
 - FN_INSTR
@@ -162,6 +167,7 @@ Here you can find a list of capabilities supported by the Adapter.
 - FN_SECOND
 - FN_SECONDS_BETWEEN
 - FN_SESSIONTIMEZONE
+- FN_SESSION_PARAMETER
 - FN_SIGN
 - FN_SIN
 - FN_SINH
