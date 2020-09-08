@@ -188,4 +188,4 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [sql-server-dialect-doc]: doc/dialects/sql_server.md
 [sybase-dialect-doc]: doc/dialects/sybase.md
 [teradata-dialect-doc]: doc/dialects/teradata.md
-[artifact-reference-checker-plugin]: https://github.com/exasol/artifact-reference-checker-maven-pluginm
+[artifact-reference-checker-plugin]: https://github.com/exasol/artifact-reference-checker-maven-plugin
