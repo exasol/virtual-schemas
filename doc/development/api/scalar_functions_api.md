@@ -4,25 +4,25 @@ This page describes how Exasol scalar functions map to the Virtual Schemas push-
 
 ## Exasol Scalar Functions List
 
-### Functions with Common API
+### Functions With a Common API
 
-The most part of functions supported by Exasol database share a common API syntax depending on a number of arguments a function takes:
+The majority of functions supported by the Exasol database shares a common API syntax depending on the number of function arguments:
 
-* [Function without arguments](#function-with-a-single-argument);
-* [Function with a single argument](#function-with-a-single-argument);
-* [Function with two or more arguments](#function-with-two-or-more-arguments);
-* [Function with unspecified number of arguments](#function-with-unspecified-number-of-arguments).
-  Here belongs a few functions, some of them are treated as a function with unspecified number of arguments despite a fact that actually a number of arguments is limited:
+* [Functions without arguments](#functions-without-arguments);
+* [Functions with a single argument](#functions-with-a-single-argument);
+* [Functions with two or more arguments](#functions-with-two-or-more-arguments);
+* [Functions with a variable number of arguments](#functions-with-a-variable-number-of-arguments).
+  Here belong a few functions, some of them are treated as a function with variable number of arguments despite the fact that actually the number of arguments is limited:
   BIT_TO_NUM, CONCAT, DUMP, GREATEST, INSERT, INSTR, LEAST, LOCATE, REGEXP_INSTR, REGEXP_REPLACE, REGEXP_SUBSTR.
 
 Note that function names go to the `<function name>` placeholder of the API examples. 
 
-The functions that does not belong to this common group are describe in the following sections:
+The functions that do not belong to this common API group are described in the following sections:
 
-- [Functions with a special API](#functions-with-special-api)
-- [Functions not included into the API](#functions-not-included-into-api)
+- [Functions with a special API](#functions-with-a-special-api)
+- [Functions not included in the the API](#functions-not-included-in-the-api)
 
-### Functions with Special API
+### Functions With a Special API
 
 This section contains functions that have a special API mapping.
   
@@ -33,9 +33,9 @@ This section contains functions that have a special API mapping.
 | CAST              | [CAST function](#cast-function)       |
 | JSON_VALUE        | [JSON_VALUE function](#json_value-function)       |
      
-### Functions not Included into API     
+### Functions not Included in the API     
 
-This section contains Exasol function which do not appear in the API.
+This section contains Exasol functions which do not appear in the API.
 See [Additional Information](#additional-information) for an explanation why functions do not appear in the API.
 
 | Function Name     | Comment                                                                                        |
@@ -80,40 +80,43 @@ See [Additional Information](#additional-information) for an explanation why fun
 
 ## Scalar Functions API
 
-### Function Without Arguments
+### Functions Without Arguments
 
-A scalar function without arguments has a following JSON structure:
+A scalar function without arguments has the following JSON structure:
 
 ```json
 {
-  "arguments": [],
+  "type": "function_scalar",
   "name": "<function name>",
   "numArgs": 0,
-  "type": "function_scalar"
+  "arguments": []
 }
 ```
 
-### Function With a Single Argument
+### Functions With a Single Argument
 
-A scalar function with a single argument has a following JSON structure:
+A scalar function with a single argument has the following JSON structure:
 
 ```json
 {
+  "type": "function_scalar",
+  "name": "<function name>",
+  "numArgs": 1,
   "arguments": [
     {
       ...
     }
-  ],
-  "name": "<function name>",
-  "numArgs": 1,
-  "type": "function_scalar"
+  ]
 }
 ```
 
-For example, for a query `SELECT ABS(c5) FROM VIRTUAL_SCHEMA_EXASOL.ALL_EXASOL_TYPES` the scalar function part of the JSON request might look like this:
+For example, for the query `SELECT ABS(c5) FROM VIRTUAL_SCHEMA_EXASOL.ALL_EXASOL_TYPES` the scalar function part of the JSON request might look like this:
 
 ```json
 {
+  "type": "function_scalar",
+  "name": "ABS",
+  "numArgs": 1,
   "arguments": [
     {
       "columnNr": 4,
@@ -121,19 +124,19 @@ For example, for a query `SELECT ABS(c5) FROM VIRTUAL_SCHEMA_EXASOL.ALL_EXASOL_T
       "tableName": "ALL_EXASOL_TYPES",
       "type": "column"
     }
-  ],
-  "name": "ABS",
-  "numArgs": 1,
-  "type": "function_scalar"
+  ]
 }
 ```
 
-### Function With Two or More Arguments
+### Functions With Two or More Arguments
 
-A scalar function with two argument has a following JSON structure:
+A scalar function with two arguments has the following JSON structure:
 
 ```json
 {
+  "type": "function_scalar",
+  "name": "<function name>",
+  "numArgs": 2,
   "arguments": [
     {
       ...
@@ -141,20 +144,20 @@ A scalar function with two argument has a following JSON structure:
     {
       ...
     }
-  ],
-  "name": "<function name>",
-  "numArgs": 2,
-  "type": "function_scalar"
+  ]
 }
 ```
 
-If a function has more than two arguments, the `numArgs` field has a different value corresponding to a number of arguments.
+If a function has more than two arguments, the `numArgs` field has a different value corresponding to the number of arguments.
 Also, the `arguments` list has a corresponding amount of nested elements.
 
 Let us check an example of the API part containing the scalar function with two arguments for the following query `SELECT ATAN2(c5, c6) FROM VIRTUAL_SCHEMA_EXASOL.ALL_EXASOL_TYPES`:
 
 ```json
 {
+  "type": "function_scalar",
+  "name": "ATAN2",
+  "numArgs": 2,
   "arguments": [
     {
       "columnNr": 4,
@@ -168,32 +171,32 @@ Let us check an example of the API part containing the scalar function with two 
       "tableName": "ALL_EXASOL_TYPES",
       "type": "column"
     }
-  ],
-  "name": "ATAN2",
-  "numArgs": 2,
-  "type": "function_scalar"
+  ]
 }
 ```
 
-### Function With Unspecified Number of Arguments
+### Functions With a Variable Number of Arguments
 
-Some scalar functions do not have a defined number of arguments. A function with an undefined number of arguments has a following JSON structure:
+Some scalar functions do not have a constant number of arguments. A function with a variable number of arguments has the following JSON structure:
 
 ```json
 {
+  "type": "function_scalar",
+  "name": "<function name>",
+  "variableInputArgs" : true,
   "arguments": [
     ...
-  ],
-  "name": "<function name>",
-  "type": "function_scalar",
-  "variableInputArgs" : true
+  ]
 }
 ```
 
-For example, for a query `SSELECT CONCAT('prefix_', c2) VIRTUAL_SCHEMA_EXASOL.ALL_EXASOL_TYPES` the scalar function part of the JSON request might look like this:
+For example, for the query `SELECT CONCAT('prefix_', c2) VIRTUAL_SCHEMA_EXASOL.ALL_EXASOL_TYPES` the scalar function part of the JSON request might look like this:
 
 ```json
 {
+  "type": "function_scalar",
+  "name": "CONCAT",
+  "variableInputArgs": true,
   "arguments": [
     {
       "type": "literal_string",
@@ -205,10 +208,7 @@ For example, for a query `SSELECT CONCAT('prefix_', c2) VIRTUAL_SCHEMA_EXASOL.AL
       "tableName": "ALL_EXASOL_TYPES",
       "type": "column"
     }
-  ],
-  "name": "CONCAT",
-  "type": "function_scalar",
-  "variableInputArgs": true
+  ]
 }
 ```
 
@@ -216,18 +216,18 @@ For example, for a query `SSELECT CONCAT('prefix_', c2) VIRTUAL_SCHEMA_EXASOL.AL
 
 `EXTRACT(toExtract FROM exp1)` (requires scalar-function capability `EXTRACT`).
 
-EXTRACT function takes one argument and has a special field `toExtract`.
+The EXTRACT function takes one argument and has a special field `toExtract`.
 
 ```json
 {
+  "type": "function_scalar_extract",
+  "name": "EXTRACT",
+  "toExtract": "<YEAR/MONTH/DAY/HOUR/MINUTE/SECOND>",
   "arguments": [
     {
       ...
     }
-  ],
-  "name": "EXTRACT",
-  "toExtract": "<YEAR/MONTH/DAY/HOUR/MINUTE/SECOND>",
-  "type": "function_scalar_extract"
+  ]
 }
 ```
 
@@ -235,10 +235,12 @@ EXTRACT function takes one argument and has a special field `toExtract`.
 
 `CAST(exp1 AS dataType)` (requires scalar-function capability `CAST`).
 
-CAST function takes one argument and has a special field `dataType` describing a datatype to cast to.
+The CAST function takes one argument and has a special field `dataType` describing the datatype to cast to.
 
 ```json
 {
+  "type": "function_scalar_cast",
+  "name": "CAST",
   "arguments": [
     {
       ...
@@ -246,15 +248,15 @@ CAST function takes one argument and has a special field `dataType` describing a
   ],
   "dataType": {
     ...
-  },
-  "name": "CAST",
-  "type": "function_scalar_cast"
+  }
 }
 ```
-For example, for a query `SELECT CAST(c5 AS VARCHAR(10)) FROM VIRTUAL_SCHEMA_EXASOL.ALL_EXASOL_TYPES` the CAST function part of the JSON request will look like this:
+For example, for the query `SELECT CAST(c5 AS VARCHAR(10)) FROM VIRTUAL_SCHEMA_EXASOL.ALL_EXASOL_TYPES` the CAST function part of the JSON request will look like this:
 
 ```json
 {
+  "type": "function_scalar_cast",
+  "name": "CAST",
   "arguments": [
     {
       "columnNr": 4,
@@ -266,9 +268,7 @@ For example, for a query `SELECT CAST(c5 AS VARCHAR(10)) FROM VIRTUAL_SCHEMA_EXA
   "dataType": {
     "size": 10,
     "type": "VARCHAR"
-  },
-  "name": "CAST",
-  "type": "function_scalar_cast"
+  }
 }
 ```
 
@@ -285,17 +285,17 @@ CASE basis WHEN exp1 THEN result1
 
 ```json
 {
-  "arguments": [
-    ...
-  ],
+  "type": "function_scalar_case",
+  "name": "CASE",
   "basis": {
     ...
   },
-  "name": "CASE",
-  "results": [
+  "arguments": [
     ...
   ],
-  "type": "function_scalar_case"
+  "results": [
+    ...
+  ]
 }
 ```
 
@@ -303,18 +303,27 @@ Notes:
 * `arguments`: The different cases.
 * `results`: The different results in the same order as the arguments. If present, the ELSE result is the last entry in the `results` array.
 
-Here is an example of a query containing a CASE function and its JSON representation(only the function part): 
+Here is an example of a query containing a CASE function and its JSON representation (only the function part): 
 ```sql
 SELECT CASE grade
           WHEN 1 THEN 'GOOD'
           WHEN 2 THEN 'FAIR' 
           WHEN 3 THEN 'POOR'
           ELSE 'INVALID'
-          END FROM VIRTUAL_SCHEMA_EXASOL.ALL_EXASOL_TYPES;
+          END
+FROM VIRTUAL_SCHEMA_EXASOL.ALL_EXASOL_TYPES;
 ```
 
 ```json
 {
+  "type": "function_scalar_case",
+  "name": "CASE",
+  "basis": {
+    "columnNr": 4,
+    "name": "grade",
+    "tableName": "ALL_EXASOL_TYPES",
+    "type": "column"
+  },
   "arguments": [
     {
       "type": "literal_exactnumeric",
@@ -329,13 +338,6 @@ SELECT CASE grade
       "value": "3"
     }
   ],
-  "basis": {
-    "columnNr": 4,
-    "name": "grade",
-    "tableName": "ALL_EXASOL_TYPES",
-    "type": "column"
-  },
-  "name": "CASE",
   "results": [
     {
       "type": "literal_string",
@@ -353,8 +355,7 @@ SELECT CASE grade
       "type": "literal_string",
       "value": "INVALID"
     }
-  ],
-  "type": "function_scalar_case"
+  ]
 }
 ```
 
@@ -391,15 +392,15 @@ SELECT CASE grade
 
 Notes:
 
-- arguments: Contains two entries: The JSON item and the path specification.
-- emptyBehavior and errorBehavior: `type` is `"ERROR"`, `"NULL"`, or `"DEFAULT"`. Only for `"DEFAULT"` the member `expression` containing the default value exists.
+* `arguments`: Contains two entries: The JSON item and the path specification.
+* `emptyBehavior` and `errorBehavior`: `type` is `"ERROR"`, `"NULL"`, or `"DEFAULT"`. Only for `"DEFAULT"` the member `expression` containing the default value exists.
 
 
 ## Additional Information
 
-* A scalar function in a select list that does not contain any column reference executes before reaching Virtual Schemas.
-  That means the JSON request does not contain a scalar function, but a literal value representing a result.
-  For example, a query `SELECT ABS(-123), c5 FROM VIRTUAL_SCHEMA_EXASOL.ALL_EXASOL_TYPES` will have a following select list:
+A scalar function, that does not contain any column references, is executed before reaching Virtual Schemas.
+That means the JSON request does not contain the scalar function, but a literal value representing its result.
+For example, the query `SELECT ABS(-123), c5 FROM VIRTUAL_SCHEMA_EXASOL.ALL_EXASOL_TYPES` will have the following select list:
   
 ```json
 {
@@ -411,10 +412,10 @@ Notes:
       "value": "123"
     },
     {
-      "columnNr": 4,
-      "name": "C5",
+      "type": "column",
       "tableName": "ALL_EXASOL_TYPES",
-      "type": "column"
+      "columnNr": 4,
+      "name": "C5"
     }
   ],
   
