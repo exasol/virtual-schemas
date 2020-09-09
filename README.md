@@ -156,6 +156,7 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 | [Maven Surefire Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Unit testing                                           | Apache License 2.0               |
 | [Sonatype OSS Index Maven Plugin][sonatype-oss-index-maven-plugin]                  | Checking Dependencies Vulnerability                    | ASL2                             |
 | [Versions Maven Plugin][versions-maven-plugin]                                      | Checking if dependencies updates are available         | Apache License 2.0               |
+| [Artifact Reference Checker Plugin][artifact-reference-checker-plugin]              | Check if artifact is referenced with correct version   | MIT License                      |
 
 [maven-assembly-plugin]: https://maven.apache.org/plugins/maven-assembly-plugin/
 [apache-trift]: http://thrift.apache.org/
@@ -187,3 +188,4 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [sql-server-dialect-doc]: doc/dialects/sql_server.md
 [sybase-dialect-doc]: doc/dialects/sybase.md
 [teradata-dialect-doc]: doc/dialects/teradata.md
+[artifact-reference-checker-plugin]: https://github.com/exasol/artifact-reference-checker-maven-plugin
