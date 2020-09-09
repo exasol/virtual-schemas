@@ -17,4 +17,4 @@ Code name:
 ## Dependency updates
 
 * Updated `org.apache.hbase:hbase-server` from 2.3.0 to 2.3.1
-* Added com.exasol:artifact-reference-checker-maven-plugin:0.3.0
+* Added com.exasol:artifact-reference-checker-maven-plugin:0.3.1
