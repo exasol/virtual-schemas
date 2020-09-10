@@ -6,14 +6,14 @@ This page describes how Exasol scalar functions map to the Virtual Schemas push-
 
 ### Functions With a Common API
 
-The majority of functions supported by the Exasol database shares a common API syntax depending on the number of function arguments:
+The majority of the functions supported by the Exasol database shares a common API syntax depending on the number of function arguments:
 
 * [Functions without arguments](#functions-without-arguments);
 * [Functions with a single argument](#functions-with-a-single-argument);
 * [Functions with two or more arguments](#functions-with-two-or-more-arguments);
 * [Functions with a variable number of arguments](#functions-with-a-variable-number-of-arguments).
   Here belong a few functions, some of them are treated as a function with variable number of arguments despite the fact that actually the number of arguments is limited:
-  BIT_TO_NUM, CONCAT, DUMP, GREATEST, INSERT, INSTR, LEAST, LOCATE, REGEXP_INSTR, REGEXP_REPLACE, REGEXP_SUBSTR.
+  BIT_TO_NUM, CONCAT, DUMP, GREATEST, HASH_*, INSERT, INSTR, LEAST, LOCATE, REGEXP_INSTR, REGEXP_REPLACE, REGEXP_SUBSTR.
 
 Note that function names go to the `<function name>` placeholder of the API examples. 
 
@@ -26,55 +26,56 @@ The functions that do not belong to this common API group are described in the f
 
 This section contains functions that have a special API mapping.
   
-| Function Name     | API mapping link                      |
-|-------------------|---------------------------------------|
-| EXTRACT           | [EXTRACT function](#extract-function) |
-| CASE              | [CASE function](#case-function)       |
-| CAST              | [CAST function](#cast-function)       |
-| JSON_VALUE        | [JSON_VALUE function](#json_value-function)       |
+| Function Name     | API mapping link                            |
+|-------------------|---------------------------------------------|
+| EXTRACT           | [EXTRACT function](#extract-function)       |
+| CASE              | [CASE function](#case-function)             |
+| CAST              | [CAST function](#cast-function)             |
+| JSON_VALUE        | [JSON_VALUE function](#json_value-function) |
      
 ### Functions not Included in the API     
 
 This section contains Exasol functions which do not appear in the API.
-See [Additional Information](#additional-information) for an explanation why functions do not appear in the API.
+See [Additional Information](#additional-information) for an explanation why some functions do not appear in the API.
 
-| Function Name     | Comment                                                                                        |
-|-------------------|------------------------------------------------------------------------------------------------|
-| BIT_LROTATE       | Does not appear in the API.                                                                    |
-| BIT_LSHIFT        | Does not appear in the API.                                                                    |
-| BIT_RROTATE       | Does not appear in the API.                                                                    |
-| BIT_RSHIFT        | Does not appear in the API.                                                                    |
-| CEILING           | API uses the CEIL function.                                                                    |
-| CHAR              | API uses the CHR function.                                                                     |
-| CHARACTER_LENGTH  | API uses the LENGTH function.                                                                  |
-| COALESCE          | API uses the CASE function.                                                                  |
-| CONVERT           | API uses the CAST function.                                                                  |
-| CURDATE           | API uses the CURRENT_DATE function.                                                            |
-| DECODE            | API uses the CASE function.                                                            |
-| FROM_POSIX_TIME   | Does not appear in the API.                                                                    |
-| HOUR              | Does not appear in the API.                                                                    |
-| INITCAP           | Does not appear in the API.                                                                    |
-| IPROC             | Does not appear in the API.                                                                    |
-| LCASE             | API uses the LOWER function.                                                                   |
-| LEFT              | API uses the SUBSTR function. The `position argument` is always set to 1.                      |
-| LOG2              | API uses the LOG function, one argument is always a `literal_exactnumeric` with a value 2.     |
-| MID               | API uses the SUBSTR function.                                                                  |
-| NVL               | API uses the CASE function.                                                                  |
-| NVL2              | API uses the CASE function.                                                                  |
-| NOW               | API uses the CURRENT_TIMESTAMP function.                                                                  |
-| NPROC             | Does not appear in the API.                                                                    |
-| NULLIF            | API uses the CASE function.                                                                  |
-| PI                | Does not appear in the API.                                                                    |
-| POSITION          | API uses the INSTR function with arguments `string` and `search_string`.                       |
-| RANDOM            | API uses the RAND function.                                                                    |
-| ROWID             | Does not appear in the API.                                                                    |
-| ROWNUM            | Does not appear in the API.                                                                    |
-| SCOPE_USER        | Does not appear in the API.                                                                    |
-| SUBSTRING         | API uses the SUBSTR function.                                                                  |
-| TRUNCATE          | API uses the TRUNC function.                                                                   |
-| UCASE             | API uses the UPPER function.                                                                   |
-| USER              | API uses the CURRENT_USER function.                                                                   |
-| VALUE2PROC        | Does not appear in the API.                                                                  |
+| Function Name    | Comment                                                                                     |
+|------------------|---------------------------------------------------------------------------------------------|
+| BIT_LROTATE      | Does not appear in the API.                                                                 |
+| BIT_LSHIFT       | Does not appear in the API.                                                                 |
+| BIT_RROTATE      | Does not appear in the API.                                                                 |
+| BIT_RSHIFT       | Does not appear in the API.                                                                 |
+| CEILING          | API uses the CEIL function.                                                                 |
+| CHAR             | API uses the CHR function.                                                                  |
+| CHARACTER_LENGTH | API uses the LENGTH function.                                                               |
+| COALESCE         | API uses the CASE function.                                                                 |
+| CONVERT          | API uses the CAST function.                                                                 |
+| CURDATE          | API uses the CURRENT_DATE function.                                                         |
+| DECODE           | API uses the CASE function.                                                                 |
+| FROM_POSIX_TIME  | Does not appear in the API.                                                                 |
+| HOUR             | Does not appear in the API.                                                                 |
+| INITCAP          | Does not appear in the API.                                                                 |
+| IPROC            | Does not appear in the API.                                                                 |
+| LCASE            | API uses the LOWER function.                                                                |
+| LEFT             | API uses the SUBSTR function. The `position argument` is always set to 1.                   |
+| LOG10            | API uses the LOG function, one argument is always a `literal_exactnumeric` with a value 10. |
+| LOG2             | API uses the LOG function, one argument is always a `literal_exactnumeric` with a value 2.  |
+| MID              | API uses the SUBSTR function.                                                               |
+| NVL              | API uses the CASE function.                                                                 |
+| NVL2             | API uses the CASE function.                                                                 |
+| NOW              | API uses the CURRENT_TIMESTAMP function.                                                    |
+| NPROC            | Does not appear in the API.                                                                 |
+| NULLIF           | API uses the CASE function.                                                                 |
+| PI               | Does not appear in the API.                                                                 |
+| POSITION         | API uses the INSTR function with arguments `string` and `search_string`.                    |
+| RANDOM           | API uses the RAND function.                                                                 |
+| ROWID            | Does not appear in the API.                                                                 |
+| ROWNUM           | Does not appear in the API.                                                                 |
+| SCOPE_USER       | Does not appear in the API.                                                                 |
+| SUBSTRING        | API uses the SUBSTR function.                                                               |
+| TRUNCATE         | API uses the TRUNC function.                                                                |
+| UCASE            | API uses the UPPER function.                                                                |
+| USER             | API uses the CURRENT_USER function.                                                         |
+| VALUE2PROC       | Does not appear in the API.                                                                 |
 
 * Functions for hierarchical queries are not in the API.
 
@@ -190,7 +191,7 @@ Some scalar functions do not have a constant number of arguments. A function wit
 }
 ```
 
-For example, for the query `SELECT CONCAT('prefix_', c2) VIRTUAL_SCHEMA_EXASOL.ALL_EXASOL_TYPES` the scalar function part of the JSON request might look like this:
+For example, for the query `SELECT CONCAT('prefix_', c2) VIRTUAL_SCHEMA_EXASOL.ALL_EXASOL_TYPES` the scalar function part of the JSON request looks like this:
 
 ```json
 {
@@ -304,6 +305,7 @@ Notes:
 * `results`: The different results in the same order as the arguments. If present, the ELSE result is the last entry in the `results` array.
 
 Here is an example of a query containing a CASE function and its JSON representation (only the function part): 
+
 ```sql
 SELECT CASE grade
           WHEN 1 THEN 'GOOD'
