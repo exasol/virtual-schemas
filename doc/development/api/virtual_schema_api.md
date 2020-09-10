@@ -461,9 +461,9 @@ This document contains the most important metadata of the virtual schema and is 
 
 ### Schema Metadata
 
-This document is usually embedded in responses from the Adapter and informs the database about all metadata of the Virtual Schema, especially the contained Virtual Tables and it's columns.
+This document is usually embedded in responses from the Adapter and informs the database about all metadata of the Virtual Schema, especially the contained Virtual Tables and its columns.
 
-The Adapter can store so called `adapterNotes` on each level (schema, table, column), to remember information which might be relevant for the Adapter in future. Adapter note are simple strings. You can serialize objects into those strings of course, but keep in mind that the strings are embedded inside the Virtual Schemas JSON protocol, which makes quoting of conflicting characters necessary.
+The Adapter can optionally store so called `adapterNotes` on each level (schema, table, column), to remember information which might be relevant for the Adapter in future. Adapter notes are simple strings. You can serialize objects into those strings of course, but keep in mind that the strings are embedded inside the Virtual Schemas JSON protocol, which makes quoting of conflicting characters necessary.
 
 Some options to deal with the embedding issue:
 
@@ -473,7 +473,7 @@ Some options to deal with the embedding issue:
 
 Which variant you should choose depends on considerations like ammount of data to be transmitted, original data format and encoding overhead.
 
-In the example below, the Adapter remembers the table partitioning and the data type of a column which is not directly supported in EXASOL. The Adapter has these information during pushdown and can consider the table partitioning during pushdown or can add an appropriate cast for the column.
+In the example below, the Adapter remembers the table partitioning and the data type of a column which is not directly supported in Exasol. The Adapter has this information during push-down and can consider the table partitioning during push-down or can add an appropriate cast for the column.
 
 ```json
 {"schemaMetadata":{
