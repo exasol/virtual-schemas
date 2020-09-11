@@ -91,22 +91,22 @@ This is an open source project which is officially supported by Exasol. For any 
 
 ## Information for Users
 
-* [Getting started with Virtual Schemas](https://docs.exasol.com/database_concepts/virtual_schemas.htm)
 * [List of Supported Dialect](doc/user-guide/dialects.md)
-* [User Guide](doc/user-guide/user_guide.md)
+* [User Guide](https://docs.exasol.com/database_concepts/virtual_schemas.htm)
+* [Virtual Schema's Properties Reference](https://docs.exasol.com/database_concepts/virtual_schema/adapter_properties.htm)
+* [Remote Logging](https://docs.exasol.com/database_concepts/virtual_schema/logging.htm)
 
 Additional resources:
 
-* [Virtual Schema's Properties Reference](doc/user-guide/virtual_schema_properties.md)
-* [SQL Client Specifics](doc/user-guide/sql_clients.md)
+* [Unrecognized and Unsupported Data Types](doc/user-guide/unrecognized_and_unsupported_data_types.md)
 * [Changelog](doc/changes/changelog.md)
+* [Virtual Schema Privileges](https://docs.exasol.com/database_concepts/virtual_schema/virtual_schema_privilege.htm)
 
 ## Information for Developers 
 
 * [Virtual Schema API Documentation](doc/development/api/virtual_schema_api.md)
 * [Developing and Testing an SQL Dialect](doc/development/developing-sql-dialect/developing_a_dialect.md)
 * [Step-by-step guide to writing your own SQL dialect](doc/development/developing-sql-dialect/step_by_step_guide_to_writing_your_own_dialect.md)
-* [Remote Logging](doc/development/remote_logging.md)
 * [Remote Debugging](doc/development/remote_debugging.md)
 * [Troubleshooting](doc/development/troubleshooting.md)
 * [Versioning](doc/development/versioning.md)
