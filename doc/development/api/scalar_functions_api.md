@@ -40,10 +40,6 @@ See [Additional Information](#additional-information) for an explanation why som
 
 | Function Name    | Comment                                                                                     |
 |------------------|---------------------------------------------------------------------------------------------|
-| BIT_LROTATE      | Does not appear in the API.                                                                 |
-| BIT_LSHIFT       | Does not appear in the API.                                                                 |
-| BIT_RROTATE      | Does not appear in the API.                                                                 |
-| BIT_RSHIFT       | Does not appear in the API.                                                                 |
 | CEILING          | API uses the CEIL function.                                                                 |
 | CHAR             | API uses the CHR function.                                                                  |
 | CHARACTER_LENGTH | API uses the LENGTH function.                                                               |
@@ -51,9 +47,6 @@ See [Additional Information](#additional-information) for an explanation why som
 | CONVERT          | API uses the CAST function.                                                                 |
 | CURDATE          | API uses the CURRENT_DATE function.                                                         |
 | DECODE           | API uses the CASE function.                                                                 |
-| FROM_POSIX_TIME  | Does not appear in the API.                                                                 |
-| HOUR             | Does not appear in the API.                                                                 |
-| INITCAP          | Does not appear in the API.                                                                 |
 | IPROC            | Does not appear in the API.                                                                 |
 | LCASE            | API uses the LOWER function.                                                                |
 | LEFT             | API uses the SUBSTR function. The `position argument` is always set to 1.                   |
