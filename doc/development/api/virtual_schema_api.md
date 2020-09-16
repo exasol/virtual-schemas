@@ -447,8 +447,7 @@ This document contains the most important metadata of the virtual schema and is 
 ```json
 {"schemaMetadataInfo":{
     "name": "MY_HIVE_VSCHEMA",
-    "adapterNotes": "<serialized adapter state>"
-    },
+    "adapterNotes": "<serialized adapter state>",
     "properties": {
         "HIVE_SERVER": "my-hive-server",
         "HIVE_DB": "my-hive-db",
@@ -477,14 +476,12 @@ This example also demonstrates serialization in adapter notes via key-value enco
 
 ```json
 {"schemaMetadata":{
-    "adapterNotes": "lastRefreshed=2015-03-01 12:10:01;anotherKey=More custom schema state here"
-    },
+    "adapterNotes": "lastRefreshed=2015-03-01 12:10:01;anotherKey=More custom schema state here",
     "tables": [
     {
         "type": "table",
         "name": "EXASOL_CUSTOMERS",
-        "adapterNotes": "hivePartitionColumns=CREATED,COUNTRY_ISO"
-        },
+        "adapterNotes": "hivePartitionColumns=CREATED,COUNTRY_ISO",
         "columns": [
         {
             "name": "ID",
@@ -506,7 +503,6 @@ This example also demonstrates serialization in adapter notes via key-value enco
             "isNullable": false,
             "comment": "The official name of the company",
             "adapterNotes": "hiveDataType=List<String>"
-            }
         },
         {
             "name": "DISCOUNT_RATE",
