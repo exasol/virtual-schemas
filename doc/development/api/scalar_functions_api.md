@@ -390,6 +390,26 @@ Notes:
 * `arguments`: Contains two entries: The JSON item and the path specification.
 * `emptyBehavior` and `errorBehavior`: `type` is `"ERROR"`, `"NULL"`, or `"DEFAULT"`. Only for `"DEFAULT"` the member `expression` containing the default value exists.
 
+### ADD / SUB / MULT / FLOAT_DIV
+
+Arithmetic operators have following names: `ADD`, `SUB`, `MULT`, `FLOAT_DIV`. They are defined as infix (just a hint, not necessary).
+
+```json
+{
+    "type": "function_scalar",
+    "numArgs": 2,
+    "name": "ADD",
+    "infix": true,
+    "arguments": [
+    {
+        ...
+    },
+    {
+        ...
+    }
+    ]
+}
+```
 
 ## Additional Information
 
