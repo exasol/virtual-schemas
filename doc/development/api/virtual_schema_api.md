@@ -473,7 +473,7 @@ Which variant you should choose depends on considerations like amount of data to
 
 In the example below, the Adapter remembers the table partitioning and the data type of a column which is not directly supported in Exasol. The Adapter has this information during push-down and can consider the table partitioning during push-down or can add an appropriate cast for the column.
 
-This example also demonstrates serialization in adapter notes via key-value encoding. As mentioned above more sophisticated serializations are possible as long as you make sure adapter notes are a valid string inside the JSON format by encoding or quoting.
+This example also demonstrates serialization in adapter notes via key-value encoding. As mentioned above more sophisticated serializations are possible as long as you make sure adapter notes are a valid string in the JSON format by encoding or quoting.
 
 ```json
 {"schemaMetadata":{
