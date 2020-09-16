@@ -12,9 +12,6 @@ addons:
   sonarcloud:
     organization: exasol
 
-before_script:
-  - tools/version.sh verify
-
 install:
     - travis_retry mvn dependency:resolve
 

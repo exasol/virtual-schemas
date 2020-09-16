@@ -25,14 +25,14 @@
 
 There are the following request and response types:
 
-| Type                        | Called ...     |
-| :-------------------------- | :------------- |
-| **Create Virtual Schema**   | ... for each `CREATE VIRTUAL SCHEMA ...` statement |
-| **Refresh**                 | ... for each `ALTER VIRTUAL SCHEMA ... REFRESH ...` statement. |
-| **Set Properties**          | ... for each `ALTER VIRTUAL SCHEMA ... SET ...` statement. |
-| **Drop Virtual Schema**     | ... for each `DROP VIRTUAL SCHEMA ...` statement. |
-| **Get Capabilities**        | ... whenever a virtual table is queried in a `SELECT` statement. |
-| **Pushdown**                | ... whenever a virtual table is queried in a `SELECT` statement. |
+| Type                        | Called ...                                                            |
+| :-------------------------- | :-------------------------------------------------------------------- |
+| **Create Virtual Schema**   | &hellip; for each `CREATE VIRTUAL SCHEMA ...` statement               |
+| **Refresh**                 | &hellip; for each `ALTER VIRTUAL SCHEMA ... REFRESH ...` statement.   |
+| **Set Properties**          | &hellip; for each `ALTER VIRTUAL SCHEMA ... SET ...` statement.       |
+| **Drop Virtual Schema**     | &hellip; for each `DROP VIRTUAL SCHEMA ...` statement.                |
+| **Get Capabilities**        | &hellip; whenever a virtual table is queried in a `SELECT` statement. |
+| **Pushdown**                | &hellip; whenever a virtual table is queried in a `SELECT` statement. |
 
 We describe each of the types in the following sections.
 
@@ -447,10 +447,7 @@ This document contains the most important metadata of the virtual schema and is 
 ```json
 {"schemaMetadataInfo":{
     "name": "MY_HIVE_VSCHEMA",
-    "adapterNotes": {
-        "lastRefreshed": "2015-03-01 12:10:01",
-        "key": "Any custom schema state here"
-    },
+    "adapterNotes": "<serialized adapter state>",
     "properties": {
         "HIVE_SERVER": "my-hive-server",
         "HIVE_DB": "my-hive-db",
@@ -461,21 +458,30 @@ This document contains the most important metadata of the virtual schema and is 
 
 ### Schema Metadata
 
-This document is usually embedded in responses from the Adapter and informs the database about all metadata of the Virtual Schema, especially the contained Virtual Tables and it's columns. The Adapter can store so called `adapterNotes` on each level (schema, table, column), to remember information which might be relevant for the Adapter in future. In the example below, the Adapter remembers the table partitioning and the data type of a column which is not directly supported in EXASOL. The Adapter has these information during pushdown and can consider the table partitioning during pushdown or can add an appropriate cast for the column.
+This document is usually embedded in responses from the Adapter and informs the database about all metadata of the Virtual Schema, especially the contained Virtual Tables and its columns.
+
+The Adapter can optionally store so called `adapterNotes` on each level (schema, table, column), to remember information which might be relevant for the Adapter in future. Adapter notes are simple strings. You can serialize objects into those strings of course, but keep in mind that the strings are embedded inside the Virtual Schemas JSON protocol, which makes quoting of conflicting characters necessary.
+
+Some options to deal with the embedding issue:
+
+1. After serialization use Base64 encoding or
+1. Use a serialization that does not have conflicting characters like a simple CSV or key-value format or
+1. Quote conflicting characters
+
+Which variant you should choose depends on considerations like amount of data to be transmitted, original data format and encoding overhead.
+
+In the example below, the Adapter remembers the table partitioning and the data type of a column which is not directly supported in Exasol. The Adapter has this information during push-down and can consider the table partitioning during push-down or can add an appropriate cast for the column.
+
+This example also demonstrates serialization in adapter notes via key-value encoding. As mentioned above more sophisticated serializations are possible as long as you make sure adapter notes are a valid string in the JSON format by encoding or quoting.
 
 ```json
 {"schemaMetadata":{
-    "adapterNotes": {
-        "lastRefreshed": "2015-03-01 12:10:01",
-        "key": "Any custom schema state here"
-    },
+    "adapterNotes": "lastRefreshed=2015-03-01 12:10:01;anotherKey=More custom schema state here",
     "tables": [
     {
         "type": "table",
         "name": "EXASOL_CUSTOMERS",
-        "adapterNotes": {
-            "hivePartitionColumns": ["CREATED", "COUNTRY_ISO"]
-        },
+        "adapterNotes": "hivePartitionColumns=CREATED,COUNTRY_ISO",
         "columns": [
         {
             "name": "ID",
@@ -496,11 +502,7 @@ This document is usually embedded in responses from the Adapter and informs the 
             "default": "foo",
             "isNullable": false,
             "comment": "The official name of the company",
-            "adapterNotes": {
-                "hiveType": {
-                    "dataType": "List<String>"
-                }
-            }
+            "adapterNotes": "hiveDataType=List<String>"
         },
         {
             "name": "DISCOUNT_RATE",
@@ -534,9 +536,6 @@ This document is usually embedded in responses from the Adapter and informs the 
     ]
 }}
 ```
-
-Notes
-* `adapterNotes` is an optional field which can be attached to the schema, a table or a column. It can be an arbitrarily nested Json document.
 
 The following EXASOL data types are supported:
 
