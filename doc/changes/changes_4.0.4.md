@@ -7,6 +7,7 @@ Code name:
 * #371: Documented data types conversion for Hive dialect.
 * #377: Improved Scalar Functions API documentation.
 * #384: Turned embedded JSON into key-value encoding in Adapter Notes API examples.
+* #386: Remove the documentation that was moved to the portal, added links instead.
 
 ## Refactoring
 
