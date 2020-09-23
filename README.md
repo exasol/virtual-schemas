@@ -40,6 +40,7 @@ Virtual Schema  | Required Java Version | Lifecycle
 
 Exasol Version  | Java Version Installed by Default in Language Container
 ----------------|--------------------------------------------------------
+7.0             | 11
 6.2             | 11
 6.1             | 9
 6.0             | 8
