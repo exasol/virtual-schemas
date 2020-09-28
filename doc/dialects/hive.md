@@ -159,6 +159,11 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
 
 ## Troubleshooting
 
+### Virtual Schema and Hive 1.1.0
+
+It is not possible to create a Virtual Schema with Hive version 1.1.0, because the JDBC drivers for it do not support the method we use for retrieving the metadata.
+The unsupported driver we have tested with: `jdbc-driver hive-jdbc-1.1.0-cdh5.16.2-standalone.jar`
+
 ### VARCHAR Columns Size Fixed at 255 Characters
 
 Hive is operating on schemaless data. Virtual Schemas &mdash; as the name suggests &mdash; require a schema. In the case of string variables this creates the situation that the Hive JDBC driver cannot tell how long strings are when asked for schema data. To achieve this it would have to scan all data first, which is not an option.

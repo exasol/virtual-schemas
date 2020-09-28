@@ -8,6 +8,7 @@ Code name:
 * #377: Improved Scalar Functions API documentation.
 * #384: Turned embedded JSON into key-value encoding in Adapter Notes API examples.
 * #386: Remove the documentation that was moved to the portal, added links instead.
+* #394: Described 'No suitable driver found', added a note that Hive 1.1.0 has problems with its driver.
 
 ## Refactoring
 
