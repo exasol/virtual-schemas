@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects.sqlserver;
 
-import static com.exasol.adapter.AdapterProperties.*;
+import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -135,7 +136,9 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
         try {
             return new SqlServerMetadataReader(this.connectionFactory.getConnection(), this.properties);
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException("Unable to create SQL Server remote metadata reader.", exception);
+            throw new RemoteMetadataReaderException(
+                    "Unable to create SQL Server remote metadata reader. Caused by: " + exception.getMessage(),
+                    exception);
         }
     }
 

@@ -1,9 +1,10 @@
 package com.exasol.adapter.dialects.dummy;
 
-import static com.exasol.adapter.AdapterProperties.*;
+import static com.exasol.adapter.AdapterProperties.EXCEPTION_HANDLING_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Set;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
@@ -66,7 +67,9 @@ public final class DummySqlDialect extends AbstractSqlDialect {
         try {
             return new BaseRemoteMetadataReader(this.connectionFactory.getConnection(), this.properties);
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException("Unable to create remote metadata reader for the Dummy dialect.",
+            throw new RemoteMetadataReaderException(
+                    "Unable to create remote metadata reader for the Dummy dialect. Caused by: "
+                            + exception.getMessage(),
                     exception);
         }
     }

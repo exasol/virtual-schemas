@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects.athena;
 
-import static com.exasol.adapter.AdapterProperties.*;
+import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -8,7 +9,7 @@ import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Set;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
@@ -138,7 +139,8 @@ public class AthenaSqlDialect extends AbstractSqlDialect {
         try {
             return new AthenaMetadataReader(this.connectionFactory.getConnection(), this.properties);
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException("Unable to create Athena remote metadata reader.", exception);
+            throw new RemoteMetadataReaderException(
+                    "Unable to create Athena remote metadata reader. Caused by: " + exception.getMessage(), exception);
         }
     }
 
