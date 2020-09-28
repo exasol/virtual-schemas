@@ -12,7 +12,8 @@ Code name:
 ## Refactoring
 
 * #263: Removed SybaseMetadataReader class as it was not used by the dialect.
-* #381: Migrated from version.sh to artifact-reference-checker-maven-plugin
+* #381: Migrated from version.sh to artifact-reference-checker-maven-plugin.
+* #389: Improved connection error handling.
 
 ## Dependency updates
 

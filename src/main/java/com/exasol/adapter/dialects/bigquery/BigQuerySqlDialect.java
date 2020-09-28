@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects.bigquery;
 
-import static com.exasol.adapter.AdapterProperties.*;
+import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
@@ -45,7 +46,9 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
         try {
             return new BigQueryMetadataReader(this.connectionFactory.getConnection(), this.properties);
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException("Unable to create BigQuery remote metadata reader.", exception);
+            throw new RemoteMetadataReaderException(
+                    "Unable to create BigQuery remote metadata reader. Caused by: " + exception.getMessage(),
+                    exception);
         }
 
     }

@@ -75,7 +75,9 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         try {
             return new PostgreSQLMetadataReader(this.connectionFactory.getConnection(), this.properties);
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException("Unable to create PostgreSQL remote metadata reader.", exception);
+            throw new RemoteMetadataReaderException(
+                    "Unable to create PostgreSQL remote metadata reader. Caused by: " + exception.getMessage(),
+                    exception);
         }
     }
 

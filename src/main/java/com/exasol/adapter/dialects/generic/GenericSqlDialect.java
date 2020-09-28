@@ -1,9 +1,10 @@
 package com.exasol.adapter.dialects.generic;
 
-import static com.exasol.adapter.AdapterProperties.*;
+import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Set;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.adapternotes.SchemaAdapterNotes;
@@ -87,7 +88,9 @@ public class GenericSqlDialect extends AbstractSqlDialect {
             return new GenericMetadataReader(this.connectionFactory.getConnection(), this.properties);
         } catch (final SQLException exception) {
             throw new RemoteMetadataReaderException(
-                    "Unable to create remote metadata reader for the generic SQL dialect.", exception);
+                    "Unable to create remote metadata reader for the generic SQL dialect. Caused by: "
+                            + exception.getMessage(),
+                    exception);
         }
     }
 

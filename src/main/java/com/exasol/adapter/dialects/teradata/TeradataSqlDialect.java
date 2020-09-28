@@ -68,7 +68,9 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
         try {
             return new TeradataMetadataReader(this.connectionFactory.getConnection(), this.properties);
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException("Unable to create Teradata remote metadata reader.", exception);
+            throw new RemoteMetadataReaderException(
+                    "Unable to create Teradata remote metadata reader. Caused by: " + exception.getMessage(),
+                    exception);
         }
     }
 

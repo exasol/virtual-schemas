@@ -38,7 +38,8 @@ public class DB2SqlDialect extends AbstractSqlDialect {
         try {
             return new DB2MetadataReader(this.connectionFactory.getConnection(), this.properties);
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException("Unable to create DB2 remote metadata reader.", exception);
+            throw new RemoteMetadataReaderException(
+                    "Unable to create DB2 remote metadata reader. Caused by: " + exception.getMessage(), exception);
         }
     }
 
