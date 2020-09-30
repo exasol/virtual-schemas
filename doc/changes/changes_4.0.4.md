@@ -5,10 +5,10 @@ Code name:
 ## Documentation
 
 * #371: Documented data types conversion for Hive dialect.
-* #377:*proved Scalar*nctions A*documentation.
-* #384: Turned embedded J*into key-value encoding in Adapter*tes A*examples.
+* #377: Improved Scalar Functions API documentation.	
+* #384: Turned embedded JSON into key-value encoding in Adapter Notes API examples.	
 * #386: Remove the documentation that was moved to the portal, added links instead.
-* #394: Described * suitable driver found', added a note that Hive 1.1.0 has problems with its driver.
+* #394: Described 'No  suitable driver found', added a note that Hive 1.1.0 has problems with its driver.
 
 ## Refactoring
 
