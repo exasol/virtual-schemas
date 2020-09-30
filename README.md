@@ -99,7 +99,7 @@ This is an open source project which is officially supported by Exasol. For any 
 
 Additional resources:
 
-* [Unrecognized and Unsupported Data Types](doc/user-guide/unrecognized_and_unsupported_data_types.md)
+* [Troubleshooting](doc/user-guide/troubleshooting.md)
 * [Changelog](doc/changes/changelog.md)
 * [Virtual Schema Privileges](https://docs.exasol.com/database_concepts/virtual_schema/virtual_schema_privilege.htm)
 
