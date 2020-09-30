@@ -48,7 +48,7 @@ class SqlServerSqlDialectIT extends AbstractIntegrationTest {
             MS_SQL_SERVER_CONTAINER_NAME);
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> EXASOL_CONTAINER = new ExasolContainer<>(
-            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
+            EXASOL_DOCKER_IMAGE_REFERENCE) //
                     .withLogConsumer(new Slf4jLogConsumer(LOGGER));
 
     @Override

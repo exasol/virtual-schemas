@@ -247,7 +247,7 @@ class OracleSqlGenerationVisitorTest {
         arguments.add(new SqlLiteralString("ab "));
         arguments.add(new SqlLiteralString("ab cdef"));
         arguments.add(new SqlLiteralString("ab cdef rty"));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(LOCATE, arguments, true, false);
+        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(LOCATE, arguments);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("INSTR('ab cdef', 'ab ', 'ab cdef rty')"));
     }
 
@@ -255,7 +255,7 @@ class OracleSqlGenerationVisitorTest {
     void testVisitSqlFunctionScalarTrimOneArgument() throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralString("test"));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(TRIM, arguments, true, false);
+        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(TRIM, arguments);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("TRIM('test')"));
     }
 
@@ -289,7 +289,7 @@ class OracleSqlGenerationVisitorTest {
     @ParameterizedTest
     void testVisitSqlFunctionScalar1(final ScalarFunction scalarFunction, final String expected)
             throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, null, true, false);
+        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, null);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo(expected));
     }
 

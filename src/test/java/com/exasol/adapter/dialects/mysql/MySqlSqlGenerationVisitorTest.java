@@ -36,7 +36,7 @@ class MySqlSqlGenerationVisitorTest {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralDouble(10.5));
         arguments.add(new SqlLiteralDouble(10.10));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.DIV, arguments, true, false);
+        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.DIV, arguments);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("10.5 DIV 10.1"));
     }
 }

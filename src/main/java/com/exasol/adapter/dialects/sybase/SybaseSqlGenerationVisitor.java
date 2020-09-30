@@ -296,8 +296,6 @@ public class SybaseSqlGenerationVisitor extends SqlGenerationVisitor {
             return "CONVERT(Char, HASHBYTES('MD5'," + argumentsSql.get(0) + "), 2)";
         case HASH_SHA1:
             return "CONVERT(Char, HASHBYTES('SHA1'," + argumentsSql.get(0) + "), 2)";
-        case HASH_SHA:
-            return "CONVERT(Char, HASHBYTES('SHA'," + argumentsSql.get(0) + "), 2)";
         case ZEROIFNULL:
             return "ISNULL(" + argumentsSql.get(0) + ",0)";
         default:

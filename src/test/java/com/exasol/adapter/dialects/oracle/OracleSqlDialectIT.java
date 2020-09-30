@@ -61,7 +61,7 @@ class OracleSqlDialectIT extends AbstractIntegrationTest {
     private static final String VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL = "VIRTUAL_SCHEMA_ORA_NUMBER_TO_DECIMAL";
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>(
-            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
+            EXASOL_DOCKER_IMAGE_REFERENCE) //
                     .withLogConsumer(new Slf4jLogConsumer(LOGGER));
     @Container
     private static final OracleContainer oracleContainer = new OracleContainer(ORACLE_CONTAINER_NAME);
