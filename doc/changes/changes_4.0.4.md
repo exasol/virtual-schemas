@@ -1,4 +1,4 @@
-# Exasol Virtual Schemas 4.0.4, released 2020-??-??
+# Exasol Virtual Schemas 4.0.4, released 2020-10-??
 
 Code name:
 
@@ -9,6 +9,7 @@ Code name:
 * #384: Turned embedded JSON into key-value encoding in Adapter Notes API examples.	
 * #386: Remove the documentation that was moved to the portal, added links instead.
 * #394: Described 'No  suitable driver found', added a note that Hive 1.1.0 has problems with its driver.
+* #391: Removed the API documentation from this repository and added a link to it.
 
 ## Refactoring
 

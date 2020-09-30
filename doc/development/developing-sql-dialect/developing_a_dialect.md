@@ -127,7 +127,6 @@ Please also remember to [document the SQL dialect](../../dialects).
 ## See Also
 
 * [Step-by-step guide to writing your own SQL dialect](step_by_step_guide_to_writing_your_own_dialect.md)
-* [Virtual Schema API Documentation](../api/virtual_schema_api.md)
 * [Integration testing with containers](integration_testing_with_containers.md)
 * [Remote debugging](../remote_debugging.md)
 * [Versioning](../versioning.md)
