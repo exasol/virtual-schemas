@@ -105,7 +105,7 @@ Additional resources:
 
 ## Information for Developers 
 
-* [Virtual Schema API Documentation](doc/development/api/virtual_schema_api.md)
+* [Virtual Schema API Documentation][vs-api]
 * [Developing and Testing an SQL Dialect](doc/development/developing-sql-dialect/developing_a_dialect.md)
 * [Step-by-step guide to writing your own SQL dialect](doc/development/developing-sql-dialect/step_by_step_guide_to_writing_your_own_dialect.md)
 * [Remote Debugging](doc/development/remote_debugging.md)
@@ -159,6 +159,7 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 | [Versions Maven Plugin][versions-maven-plugin]                                      | Checking if dependencies updates are available         | Apache License 2.0               |
 | [Artifact Reference Checker Plugin][artifact-reference-checker-plugin]              | Check if artifact is referenced with correct version   | MIT License                      |
 
+[artifact-reference-checker-plugin]: https://github.com/exasol/artifact-reference-checker-maven-plugin
 [maven-assembly-plugin]: https://maven.apache.org/plugins/maven-assembly-plugin/
 [apache-trift]: http://thrift.apache.org/
 [exasol-jdbc-driver]: https://www.exasol.com/portal/display/DOWNLOAD/Exasol+Download+Section
@@ -189,4 +190,5 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [sql-server-dialect-doc]: doc/dialects/sql_server.md
 [sybase-dialect-doc]: doc/dialects/sybase.md
 [teradata-dialect-doc]: doc/dialects/teradata.md
-[artifact-reference-checker-plugin]: https://github.com/exasol/artifact-reference-checker-maven-plugin
+
+[vs-api]: https://github.com/exasol/virtual-schema-common-java/blob/master/doc/development/api/virtual_schema_api.md
