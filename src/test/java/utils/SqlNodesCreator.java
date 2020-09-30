@@ -60,7 +60,7 @@ public class SqlNodesCreator {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralString(argument1));
         arguments.add(new SqlLiteralString(argument2));
-        return new SqlFunctionScalar(scalarFunction, arguments, true, false);
+        return new SqlFunctionScalar(scalarFunction, arguments);
     }
 
     public static SqlFunctionScalar createSqlFunctionScalarForDateTest(final ScalarFunction scalarFunction,
@@ -71,7 +71,7 @@ public class SqlNodesCreator {
                         .adapterNotes("{\"jdbcDataType\":93, " + "\"typeName\":\"TIMESTAMP\"}")
                         .type(DataType.createChar(20, DataType.ExaCharset.UTF8)).build()));
         arguments.add(new SqlLiteralExactnumeric(new BigDecimal(numericValue)));
-        return new SqlFunctionScalar(scalarFunction, arguments, true, false);
+        return new SqlFunctionScalar(scalarFunction, arguments);
     }
 
     public static SqlSelectList createSqlSelectStarListWithOneColumn(final String adapterNotes, final DataType dataType,

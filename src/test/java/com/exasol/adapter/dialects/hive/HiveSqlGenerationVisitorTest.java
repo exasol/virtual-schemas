@@ -147,7 +147,7 @@ class HiveSqlGenerationVisitorTest {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralDouble(10.5));
         arguments.add(new SqlLiteralDouble(10.10));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, arguments, true, false);
+        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, arguments);
         assertThat(this.visitor.visit(sqlFunctionScalar),
                 equalTo("CAST(" + scalarFunction.name() + "(10.5,10.1) as string)"));
     }
@@ -163,7 +163,7 @@ class HiveSqlGenerationVisitorTest {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralDouble(10.5));
         arguments.add(new SqlLiteralDouble(10.10));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, arguments, true, false);
+        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, arguments);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("10.5 " + expectedString + " 10.1"));
     }
 
@@ -172,8 +172,7 @@ class HiveSqlGenerationVisitorTest {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralString("string"));
         arguments.add(new SqlLiteralDouble(1));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.SUBSTR, arguments, true,
-                false);
+        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.SUBSTR, arguments);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("SUBSTR('string', 1.0)"));
     }
 
@@ -186,8 +185,7 @@ class HiveSqlGenerationVisitorTest {
 
     @Test
     void testVisitSqlFunctionScalarCurrentDate() throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.CURRENT_DATE, null, true,
-                false);
+        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.CURRENT_DATE, null);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("CURRENT_DATE"));
     }
 
@@ -196,8 +194,7 @@ class HiveSqlGenerationVisitorTest {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralDate("2019-07-04"));
         arguments.add(new SqlLiteralString("MM"));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.DATE_TRUNC, arguments, true,
-                false);
+        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.DATE_TRUNC, arguments);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("TRUNC('MM',DATE '2019-07-04')"));
     }
 }

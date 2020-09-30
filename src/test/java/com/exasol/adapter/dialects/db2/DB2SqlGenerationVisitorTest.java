@@ -120,7 +120,7 @@ class DB2SqlGenerationVisitorTest {
     void testVisitSqlFunctionScalarTrimOneArgument() throws AdapterException {
         final List<SqlNode> arguments = new ArrayList<>();
         arguments.add(new SqlLiteralString("test"));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.TRIM, arguments, true, false);
+        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.TRIM, arguments);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("TRIM('test')"));
     }
 
@@ -155,7 +155,7 @@ class DB2SqlGenerationVisitorTest {
     @ParameterizedTest
     void testVisitSqlFunctionScalar1(final ScalarFunction scalarFunction, final String expected)
             throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, null, true, false);
+        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, null);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo(expected));
     }
 

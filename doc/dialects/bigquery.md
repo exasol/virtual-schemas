@@ -33,7 +33,7 @@ List all the JAR files from Magnitude Simba JDBC driver.
 ```sql
 CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_BIGQUERY AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-5.0.4-bundle-4.0.4.jar;
+    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-6.0.0-bundle-4.0.4.jar;
     %jar /buckets/<BFS service>/<bucket>/GoogleBigQueryJDBC42.jar;
     ...
     ...

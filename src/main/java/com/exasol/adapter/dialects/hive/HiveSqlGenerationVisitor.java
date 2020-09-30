@@ -192,7 +192,8 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
         for (final SqlNode node : arguments) {
             argumentsSql.add(node.accept(this));
         }
-        if (function.toSimpleSql().toUpperCase().contains("FROM")) {
+        final String sql = super.visit(function);
+        if (sql.toUpperCase().contains("FROM")) {
             final StringBuilder builder = new StringBuilder();
             builder.append("SUBSTRING(");
             builder.append(argumentsSql.get(0));
@@ -201,7 +202,7 @@ public class HiveSqlGenerationVisitor extends SqlGenerationVisitor {
             builder.append(")");
             return builder.toString();
         } else {
-            return super.visit(function);
+            return sql;
         }
     }
 

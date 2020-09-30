@@ -126,7 +126,7 @@ class SybaseSqlGenerationVisitorTest {
     @ParameterizedTest
     void testVisitSqlFunctionScalarWithoutArguments(final ScalarFunction scalarFunction, final String expected)
             throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, null, true, false);
+        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, null);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo(expected));
     }
 
@@ -141,7 +141,7 @@ class SybaseSqlGenerationVisitorTest {
         arguments.add(new SqlLiteralString("test"));
         arguments.add(new SqlLiteralString("test2"));
         arguments.add(new SqlLiteralString("test3"));
-        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, arguments, true, false);
+        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, arguments);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo(expected));
     }
 
@@ -188,7 +188,6 @@ class SybaseSqlGenerationVisitorTest {
             "BIT_NOT : ~ 'left'", //
             "HASH_MD5 : CONVERT(Char, HASHBYTES('MD5','left'), 2)", //
             "HASH_SHA1 : CONVERT(Char, HASHBYTES('SHA1','left'), 2)", //
-            "HASH_SHA : CONVERT(Char, HASHBYTES('SHA','left'), 2)", //
             "ZEROIFNULL : ISNULL('left',0)" //
     }, delimiter = ':')
     @ParameterizedTest

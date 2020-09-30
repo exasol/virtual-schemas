@@ -58,7 +58,7 @@ class PostgreSQLSqlDialectIT extends AbstractIntegrationTest {
             POSTGRES_CONTAINER_NAME);
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>(
-            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
+            EXASOL_DOCKER_IMAGE_REFERENCE) //
                     .withLogConsumer(new Slf4jLogConsumer(LOGGER));
     private static Statement statementExasol;
     private static ExasolObjectFactory exasolFactory;
