@@ -19,9 +19,9 @@ There are a few important things you need to know about those data types.
 If you see this error message, you should check the JDBC driver you register in the EXAoperation.
 If you are sure you have registered the driver correctly, but you still see the same error, check the driver:
 
-* Open the jar archive and make sure the file `META-INF/services/java.sql.Driver` exists. 
+* Open the JAR archive and make sure the file `META-INF/services/java.sql.Driver` exists. 
 
 *  If the file exists, open it and make sure it contains the driver's main class reference.
 
-* If the file does not exist or does not contain the correct main class reference, you can add it and re-upload the fixed jar.
-  You can also report the problem to the developers of the driver.
+* If the file does not exist or does not contain the correct main class reference, you can add it and re-upload the fixed JAR archive.
+  You should also report the problem to the developers of the driver.
