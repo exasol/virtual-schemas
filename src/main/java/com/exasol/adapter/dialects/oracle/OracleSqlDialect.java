@@ -114,8 +114,10 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    @SuppressWarnings("squid:S1185")
+    // https://docs.oracle.com/cd/B19306_01/server.102/b14200/sql_elements008.htm
     public String applyQuote(final String identifier) {
-        return "\"" + identifier.replace("\"", "\"\"") + "\"";
+        return super.applyQuote(identifier);
     }
 
     @Override

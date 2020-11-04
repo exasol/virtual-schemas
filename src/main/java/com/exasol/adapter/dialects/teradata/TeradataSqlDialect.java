@@ -95,8 +95,10 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    @SuppressWarnings("squid:S1185")
+    // https://docs.teradata.com/reader/3AkrVQlhjJMha4KRVJmm1w/G7jI6yuymIYaMNVKNlCSWQ
     public String applyQuote(final String identifier) {
-        return "\"" + identifier.replace("\"", "\"\"") + "\"";
+        return super.applyQuote(identifier);
     }
 
     @Override

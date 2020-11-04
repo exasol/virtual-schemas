@@ -21,11 +21,15 @@ You need to specify the following settings when adding the JDBC driver via EXAOp
 | Parameter | Value                                               |
 |-----------|-----------------------------------------------------|
 | Name      | `ATHENA`                                            |
-| Main      | `com.amazon.athena.jdbc.Driver`                     |
+| Main      | `com.simba.athena.jdbc.Driver`                     |
 | Prefix    | `jdbc:awsathena:`                                   |
 | Files     | `AthenaJDBC42_<JDBC driver version>.jar`            |
 
 Please refer to the [documentation on configuring JDBC connections to Athena](https://docs.aws.amazon.com/athena/latest/ug/connect-with-jdbc.html) for details.
+
+IMPORTANT: The latest Athena driver requires to **Disable Security Manager**.
+It is necessary because JDBC driver requires Java permissions which we do not grant by default.  
+Please keep in mind that it's not safe to disable the security manager.
 
 ## Uploading the JDBC Driver to EXAOperation
 
@@ -49,7 +53,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-6.0.0-bundle-4.0.4.jar;
+    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-6.1.0-bundle-4.0.4.jar;
     %jar /buckets/<BFS service>/<bucket>/AthenaJDBC42-<JDBC driver version>.jar;
 /
 ;

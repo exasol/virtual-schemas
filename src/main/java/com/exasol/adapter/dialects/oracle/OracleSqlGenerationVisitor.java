@@ -7,9 +7,7 @@ import java.util.*;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.metadata.TableMetadata;
+import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
 
 /**
@@ -327,30 +325,19 @@ public class OracleSqlGenerationVisitor extends SqlGenerationVisitor {
         final StringBuilder builder = new StringBuilder();
         builder.append("LISTAGG");
         builder.append("(");
-        if ((function.getArguments() != null) && (function.getArguments().size() == 1)
-                && (function.getArguments().get(0) != null)) {
-            final String expression = function.getArguments().get(0).accept(this);
-            builder.append(expression);
-            builder.append(", ");
-            String separator = ",";
-            if (function.getSeparator() != null) {
-                separator = function.getSeparator();
-            }
-            builder.append("'");
-            builder.append(separator);
-            builder.append("') ");
-            builder.append("WITHIN GROUP(ORDER BY ");
-            if (function.hasOrderBy()) {
-                builder.append(getOrderByString(function));
-            } else {
-                builder.append(expression);
-            }
-            builder.append(")");
-            return builder.toString();
+        final String expression = function.getArgument().accept(this);
+        builder.append(expression);
+        builder.append(", ");
+        final String separator = function.hasSeparator() ? function.getSeparator().accept(this) : "','";
+        builder.append(separator);
+        builder.append(") WITHIN GROUP(ORDER BY ");
+        if (function.hasOrderBy()) {
+            builder.append(getOrderByString(function));
         } else {
-            throw new SqlGenerationVisitorException(
-                    "List of arguments of SqlFunctionAggregateGroupConcat should have one argument.");
+            builder.append(expression);
         }
+        builder.append(")");
+        return builder.toString();
     }
 
     private String getOrderByString(final SqlFunctionAggregateGroupConcat function) throws AdapterException {

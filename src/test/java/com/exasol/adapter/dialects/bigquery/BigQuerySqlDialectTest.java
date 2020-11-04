@@ -6,6 +6,8 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_INTERSECTION;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_UNION;
 import static com.exasol.adapter.dialects.bigquery.BigQueryProperties.BIGQUERY_ENABLE_IMPORT_PROPERTY;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -18,9 +20,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
+import com.exasol.adapter.dialects.athena.AthenaIdentifier;
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -122,9 +129,23 @@ class BigQuerySqlDialectTest {
                         DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY, BIGQUERY_ENABLE_IMPORT_PROPERTY));
     }
 
-    @Test
-    void testApplyQuote() {
-        assertThat(this.dialect.applyQuote("tableName"), equalTo("`tableName`"));
+    @CsvSource({ "5Customers, `5Customers`", //
+            "_dataField1, `_dataField1`", //
+            "tableName, `tableName`", //
+            "\" table123 `, `\" table123 \\``" //
+    })
+    @ParameterizedTest
+    void testApplyQuote(final String unquoted, final String quoted) {
+        assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
+    }
+
+    @ValueSource(strings = { "ab:'ab'", "a'b:'a\\'b'", "a''b:'a\\'\\'b'", "'ab':'\\'ab\\''" })
+    @ParameterizedTest
+    void testGetLiteralString(final String definition) {
+        final int colonPosition = definition.indexOf(':');
+        final String original = definition.substring(0, colonPosition);
+        final String literal = definition.substring(colonPosition + 1);
+        assertThat(this.dialect.getStringLiteral(original), equalTo(literal));
     }
 
     @Test

@@ -11,7 +11,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>11</java.version>
         <surefire.and.failsafe.plugin.version>3.0.0-M4</surefire.and.failsafe.plugin.version>
-        <vscjdbc.version>6.0.0</vscjdbc.version>
+        <vscjdbc.version>6.1.0</vscjdbc.version>
         <org.testcontainers.version>1.14.3</org.testcontainers.version>
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
@@ -48,7 +48,18 @@
             <artifactId>virtual-schema-common-jdbc</artifactId>
             <version>${vscjdbc.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.exasol</groupId>
+            <artifactId>db-fundamentals-java</artifactId>
+            <version>0.1.1</version>
+        </dependency>
         <!--Unit test dependencies-->
+        <dependency>
+            <groupId>nl.jqno.equalsverifier</groupId>
+            <artifactId>equalsverifier</artifactId>
+            <version>3.5</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>virtual-schema-common-jdbc</artifactId>
@@ -71,20 +82,20 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>3.5.13</version>
+            <version>3.6.0</version>
             <scope>test</scope>
         </dependency>
         <!--Integration test dependencies-->
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-jdbc</artifactId>
-            <version>7.0.0</version>
+            <version>7.0.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-testcontainers</artifactId>
-            <version>3.1.0</version>
+            <version>3.2.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -102,7 +113,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.16</version>
+            <version>42.2.18</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -177,7 +188,7 @@
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-server</artifactId>
-            <version>2.3.2</version>
+            <version>2.3.3</version>
             <scope>test</scope>
             <!--Excluding transient dependencies with vulnerabilities-->
             <exclusions>
@@ -235,7 +246,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.21</version>
+            <version>8.0.22</version>
             <scope>test</scope>
         </dependency>
         <dependency>

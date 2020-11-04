@@ -7,6 +7,8 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_INTERSECTION;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_UNION;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -107,8 +109,10 @@ public class SapHanaSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // http://sap.optimieren.de/hana/hana/html/_bsql_introduction.html
+    @SuppressWarnings("squid:S1185")
     public String applyQuote(final String identifier) {
-        return "\"" + identifier + "\"";
+        return super.applyQuote(identifier);
     }
 
     @Override

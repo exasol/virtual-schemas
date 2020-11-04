@@ -99,8 +99,10 @@ public class DB2SqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    @SuppressWarnings("squid:S1185")
+    // https://www.ibm.com/support/knowledgecenter/SSEPEK_10.0.0/sqlref/src/tpc/db2z_sqlidentifiers.html
     public String applyQuote(final String identifier) {
-        return "\"" + identifier.replace("\"", "\"\"") + "\"";
+        return super.applyQuote(identifier);
     }
 
     @Override

@@ -118,12 +118,13 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://www.postgresql.org/docs/9.1/sql-syntax-lexical.html
     public String applyQuote(final String identifier) {
         String postgreSQLIdentifier = identifier;
         if (getIdentifierMapping() != PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE) {
             postgreSQLIdentifier = convertIdentifierToLowerCase(postgreSQLIdentifier);
         }
-        return "\"" + postgreSQLIdentifier.replace("\"", "\"\"") + "\"";
+        return super.applyQuote(postgreSQLIdentifier);
     }
 
     private String convertIdentifierToLowerCase(final String identifier) {

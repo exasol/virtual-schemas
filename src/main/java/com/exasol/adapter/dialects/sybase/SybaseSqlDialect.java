@@ -7,6 +7,8 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_INTERSECTION;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_UNION;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -113,8 +115,9 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // http://infocenter.sybase.com/help/index.jsp?topic=/com.sybase.infocenter.dc36271.1600/doc/html/san1393050529478.html
     public String applyQuote(final String identifier) {
-        return "[" + identifier + "]";
+        return SybaseIdentifier.of(identifier).quote();
     }
 
     @Override

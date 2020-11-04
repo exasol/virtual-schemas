@@ -16,8 +16,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +24,9 @@ import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -38,12 +39,10 @@ import com.exasol.adapter.jdbc.ConnectionFactory;
 @ExtendWith(MockitoExtension.class)
 class DB2SqlDialectTest {
     private SqlDialect dialect;
-    @Mock
-    private Connection connectionMock;
     private Map<String, String> rawProperties;
 
     @BeforeEach
-    void beforeEach(@Mock final ConnectionFactory connectionFactoryMock) throws SQLException {
+    void beforeEach(@Mock final ConnectionFactory connectionFactoryMock) {
         this.rawProperties = new HashMap<>();
         this.dialect = new DB2SqlDialect(connectionFactoryMock, AdapterProperties.emptyProperties());
     }
@@ -85,7 +84,7 @@ class DB2SqlDialectTest {
 
     @Test
     void testValidateCatalogProperty() {
-        setMandatoryProperties("DB2");
+        setMandatoryProperties();
         this.rawProperties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DB2SqlDialect(null, adapterProperties);
@@ -95,14 +94,14 @@ class DB2SqlDialectTest {
                 "The dialect DB2 does not support CATALOG_NAME property. Please, do not set the \"CATALOG_NAME\" property."));
     }
 
-    private void setMandatoryProperties(final String sqlDialectProperty) {
-        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
+    private void setMandatoryProperties() {
+        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, "DB2");
         this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN");
     }
 
     @Test
     void testValidateSchemaProperty() throws PropertyValidationException {
-        setMandatoryProperties("DB2");
+        setMandatoryProperties();
         this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new DB2SqlDialect(null, adapterProperties);
@@ -119,9 +118,21 @@ class DB2SqlDialectTest {
         assertThat(this.dialect.supportsJdbcSchemas(), equalTo(SqlDialect.StructureElementSupport.MULTIPLE));
     }
 
-    @Test
-    void testApplyQuote() {
-        assertThat(this.dialect.applyQuote("tableName"), equalTo("\"tableName\""));
+    @CsvSource({ "tableName, \"tableName\"", //
+            "\"tableName, \"\"\"tableName\"" //
+    })
+    @ParameterizedTest
+    void testApplyQuote(final String unquoted, final String quoted) {
+        assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
+    }
+
+    @ValueSource(strings = { "ab:'ab'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
+    @ParameterizedTest
+    void testGetLiteralString(final String definition) {
+        final int colonPosition = definition.indexOf(':');
+        final String original = definition.substring(0, colonPosition);
+        final String literal = definition.substring(colonPosition + 1);
+        assertThat(this.dialect.getStringLiteral(original), equalTo(literal));
     }
 
     @Test

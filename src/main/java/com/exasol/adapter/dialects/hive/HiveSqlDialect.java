@@ -85,8 +85,9 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL
     public String applyQuote(final String identifier) {
-        return "`" + identifier + "`";
+        return "`" + identifier.replace("`", "``") + "`";
     }
 
     @Override

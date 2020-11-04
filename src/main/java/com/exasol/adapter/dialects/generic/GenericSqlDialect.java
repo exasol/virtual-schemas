@@ -54,6 +54,10 @@ public class GenericSqlDialect extends AbstractSqlDialect {
     @Override
     public String applyQuote(final String identifier) {
         final String quoteString = this.remoteMetadataReader.getSchemaAdapterNotes().getIdentifierQuoteString();
+        if (identifier.contains(quoteString)) {
+            throw new IllegalArgumentException("An identifier '" + identifier + "' contains illegal substring: '"
+                    + quoteString + "'. Please remove it to use the generic dialect.");
+        }
         return quoteString + identifier + quoteString;
     }
 

@@ -7,6 +7,8 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_INTERSECTION;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_UNION;
 import static com.exasol.adapter.dialects.bigquery.BigQueryProperties.BIGQUERY_ENABLE_IMPORT_PROPERTY;
 
 import java.sql.SQLException;
@@ -125,7 +127,7 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuote(final String identifier) {
-        return "`" + identifier + "`";
+        return BigQueryIdentifier.of(identifier).quote();
     }
 
     @Override
@@ -147,5 +149,14 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
     public void validateProperties() throws PropertyValidationException {
         super.validateProperties();
         validateBooleanProperty(BIGQUERY_ENABLE_IMPORT_PROPERTY);
+    }
+
+    @Override
+    public String getStringLiteral(final String value) {
+        if (value == null) {
+            return "NULL";
+        } else {
+            return "'" + value.replace("'", "\\'") + "'";
+        }
     }
 }

@@ -25,6 +25,9 @@ import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.sql.ScalarFunction;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class ImpalaSqlDialectTest {
     private SqlDialect dialect;
@@ -100,7 +103,7 @@ class ImpalaSqlDialectTest {
 
     @Test
     void testValidateCatalogProperty() throws PropertyValidationException {
-        setMandatoryProperties("IMPALA");
+        setMandatoryProperties();
         this.rawProperties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new ImpalaSqlDialect(null, adapterProperties);
@@ -109,16 +112,28 @@ class ImpalaSqlDialectTest {
 
     @Test
     void testValidateSchemaProperty() throws PropertyValidationException {
-        setMandatoryProperties("IMPALA");
+        setMandatoryProperties();
         this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new ImpalaSqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
     }
 
-    @Test
-    void testApplyQuote() {
-        assertThat(this.dialect.applyQuote("tableName"), equalTo("`tableName`"));
+    @CsvSource({ "tableName, `tableName`", //
+            "`tableName, ```tableName`" //
+    })
+    @ParameterizedTest
+    void testApplyQuote(final String unquoted, final String quoted) {
+        assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
+    }
+
+    @ValueSource(strings = { "ab:'ab'", "a'b:'a\\'b'", "a''b:'a\\'\\'b'", "'ab':'\\'ab\\''" })
+    @ParameterizedTest
+    void testGetLiteralString(final String definition) {
+        final int colonPosition = definition.indexOf(':');
+        final String original = definition.substring(0, colonPosition);
+        final String literal = definition.substring(colonPosition + 1);
+        assertThat(this.dialect.getStringLiteral(original), Matchers.equalTo(literal));
     }
 
     @Test
@@ -141,8 +156,8 @@ class ImpalaSqlDialectTest {
         assertThat(this.dialect.getSqlGenerationVisitor(null), instanceOf(ImpalaSqlGenerationVisitor.class));
     }
 
-    private void setMandatoryProperties(final String sqlDialectProperty) {
-        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
+    private void setMandatoryProperties() {
+        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, "IMPALA");
         this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN");
     }
 }

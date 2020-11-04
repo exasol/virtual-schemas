@@ -20,6 +20,9 @@ import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -81,7 +84,7 @@ class RedshiftSqlDialectTest {
 
     @Test
     void testValidateCatalogProperty() throws PropertyValidationException {
-        setMandatoryProperties("REDSHIFT");
+        setMandatoryProperties();
         this.rawProperties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new RedshiftSqlDialect(null, adapterProperties);
@@ -90,15 +93,15 @@ class RedshiftSqlDialectTest {
 
     @Test
     void testValidateSchemaProperty() throws PropertyValidationException {
-        setMandatoryProperties("REDSHIFT");
+        setMandatoryProperties();
         this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new RedshiftSqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
     }
 
-    private void setMandatoryProperties(final String sqlDialectProperty) {
-        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
+    private void setMandatoryProperties() {
+        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, "REDSHIFT");
         this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN");
     }
 
@@ -113,9 +116,22 @@ class RedshiftSqlDialectTest {
         assertThat(this.dialect.getAggregateFunctionAliases(), aMapWithSize(0));
     }
 
-    @Test
-    void testApplyQuote() {
-        assertThat(this.dialect.applyQuote("Foo\"Bar"), equalTo("\"Foo\"\"Bar\""));
+    @CsvSource({ "ABC, \"ABC\"", //
+            "AbCde, \"AbCde\"", //
+            "\"tableName, \"\"\"tableName\"" //
+    })
+    @ParameterizedTest
+    void testApplyQuote(final String unquoted, final String quoted) {
+        assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
+    }
+
+    @ValueSource(strings = { "ab:'ab'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
+    @ParameterizedTest
+    void testGetLiteralString(final String definition) {
+        final int colonPosition = definition.indexOf(':');
+        final String original = definition.substring(0, colonPosition);
+        final String literal = definition.substring(colonPosition + 1);
+        assertThat(this.dialect.getStringLiteral(original), CoreMatchers.equalTo(literal));
     }
 
     @Test
@@ -131,11 +147,6 @@ class RedshiftSqlDialectTest {
     @Test
     void testGetDefaultNullSorting() {
         assertThat(this.dialect.getDefaultNullSorting(), equalTo(NullSorting.NULLS_SORTED_AT_END));
-    }
-
-    @Test
-    void testGetStringLiteral() {
-        assertThat(this.dialect.getStringLiteral("Foo'Bar"), equalTo("'Foo''Bar'"));
     }
 
     @Test

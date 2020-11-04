@@ -93,8 +93,10 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    @SuppressWarnings("squid:S1185")
+    // https://docs.aws.amazon.com/redshift/latest/dg/r_names.html
     public String applyQuote(final String identifier) {
-        return "\"" + identifier.replace("\"", "\"\"") + "\"";
+        return super.applyQuote(identifier);
     }
 
     @Override

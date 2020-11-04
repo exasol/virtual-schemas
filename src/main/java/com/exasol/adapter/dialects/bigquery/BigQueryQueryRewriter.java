@@ -229,9 +229,7 @@ public class BigQueryQueryRewriter extends BaseQueryRewriter {
         if (value == null) {
             builder.append("CAST (NULL AS VARCHAR(4))");
         } else {
-            builder.append("'");
-            builder.append(value);
-            builder.append("'");
+            builder.append(this.dialect.getStringLiteral(value));
         }
     }
 }

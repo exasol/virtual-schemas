@@ -108,25 +108,7 @@ public class AthenaSqlDialect extends AbstractSqlDialect {
 
     @Override
     public String applyQuote(final String identifier) {
-        if (identifier.startsWith("_")) {
-            return quoteWithBackticks(identifier);
-        } else {
-            return quoteWithDoubleQuotes(identifier);
-        }
-    }
-
-    private String quoteWithBackticks(final String identifier) {
-        final StringBuilder builder = new StringBuilder("`");
-        builder.append(identifier);
-        builder.append("`");
-        return builder.toString();
-    }
-
-    private String quoteWithDoubleQuotes(final String identifier) {
-        final StringBuilder builder = new StringBuilder("\"");
-        builder.append(identifier);
-        builder.append("\"");
-        return builder.toString();
+        return AthenaIdentifier.of(identifier).quote();
     }
 
     @Override

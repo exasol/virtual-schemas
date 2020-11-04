@@ -1,8 +1,8 @@
 package com.exasol.adapter.dialects.generic;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.sql.*;
@@ -17,11 +17,11 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.jdbc.ConnectionFactory;
 
 @ExtendWith(MockitoExtension.class)
-public class GenericSqlDialectFactoryTest {
+class GenericSqlDialectFactoryTest {
     private GenericSqlDialectFactory factory;
 
     @BeforeEach
-    void beforeEach() throws SQLException {
+    void beforeEach() {
         this.factory = new GenericSqlDialectFactory();
     }
 
