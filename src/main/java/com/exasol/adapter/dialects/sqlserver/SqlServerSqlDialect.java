@@ -135,6 +135,7 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://docs.microsoft.com/en-us/sql/t-sql/data-types/constants-transact-sql?view=sql-server-ver15
     public String getStringLiteral(final String value) {
         return super.quoteLiteralStringWithSingleQuote(value);
     }

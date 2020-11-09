@@ -153,6 +153,7 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://cloud.google.com/bigquery/docs/reference/standard-sql/lexical
     public String getStringLiteral(final String value) {
         if (value == null) {
             return "NULL";

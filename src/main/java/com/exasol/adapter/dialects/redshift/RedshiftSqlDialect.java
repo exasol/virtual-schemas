@@ -114,6 +114,7 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://docs.aws.amazon.com/redshift/latest/dg/r_Examples_with_character_types.html
     public String getStringLiteral(final String value) {
         return super.quoteLiteralStringWithSingleQuote(value);
     }

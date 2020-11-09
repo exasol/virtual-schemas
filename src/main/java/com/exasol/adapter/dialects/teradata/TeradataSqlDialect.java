@@ -116,6 +116,7 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://docs.teradata.com/reader/S0Fw2AVH8ff3MDA0wDOHlQ/74_UPfEbj2v5Yfny_Go8ig
     public String getStringLiteral(final String value) {
         return super.quoteLiteralStringWithSingleQuote(value);
     }

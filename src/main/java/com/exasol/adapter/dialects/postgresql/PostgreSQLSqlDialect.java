@@ -147,6 +147,7 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://www.postgresql.org/docs/9.2/sql-syntax-lexical.html
     public String getStringLiteral(final String value) {
         return super.quoteLiteralStringWithSingleQuote(value);
     }

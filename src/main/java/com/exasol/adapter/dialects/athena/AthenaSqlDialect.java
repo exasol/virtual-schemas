@@ -118,6 +118,7 @@ public class AthenaSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://docs.aws.amazon.com/athena/latest/ug/select.html
     public String getStringLiteral(final String value) {
         return super.quoteLiteralStringWithSingleQuote(value);
     }

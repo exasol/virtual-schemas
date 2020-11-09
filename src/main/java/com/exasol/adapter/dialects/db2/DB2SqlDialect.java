@@ -99,7 +99,7 @@ public class DB2SqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    // https://www.ibm.com/support/knowledgecenter/SSEPEK_10.0.0/sqlref/src/tpc/db2z_sqlidentifiers.html
+    // https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0000720.html
     public String applyQuote(final String identifier) {
         return super.quoteIdentifierWithDoubleQuotes(identifier);
     }
@@ -125,6 +125,7 @@ public class DB2SqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0008470.html
     public String getStringLiteral(final String value) {
         return super.quoteLiteralStringWithSingleQuote(value);
     }

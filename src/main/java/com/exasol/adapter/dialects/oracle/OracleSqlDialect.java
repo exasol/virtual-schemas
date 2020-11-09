@@ -135,6 +135,7 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://docs.oracle.com/cd/B19306_01/server.102/b14200/sql_elements003.htm
     public String getStringLiteral(final String value) {
         return super.quoteLiteralStringWithSingleQuote(value);
     }

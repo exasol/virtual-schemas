@@ -106,8 +106,13 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://docs.cloudera.com/documentation/enterprise/5-9-x/topics/impala_literals.html#string_literals
     public String getStringLiteral(final String value) {
-        return super.quoteLiteralStringWithSingleQuote(value);
+        if (value == null) {
+            return "NULL";
+        } else {
+            return "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'";
+        }
     }
 
     @Override
