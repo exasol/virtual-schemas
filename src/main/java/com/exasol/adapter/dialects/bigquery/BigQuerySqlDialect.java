@@ -126,8 +126,9 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://cloud.google.com/bigquery/docs/reference/standard-sql/lexical
     public String applyQuote(final String identifier) {
-        return BigQueryIdentifier.of(identifier).quote();
+        return "`" + identifier.replace("`", "\\`") + "`";
     }
 
     @Override
@@ -156,7 +157,7 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
         if (value == null) {
             return "NULL";
         } else {
-            return "'" + value.replace("'", "\\'") + "'";
+            return "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'";
         }
     }
 }

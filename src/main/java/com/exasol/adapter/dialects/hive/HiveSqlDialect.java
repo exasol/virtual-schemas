@@ -106,6 +106,11 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    public String getStringLiteral(final String value) {
+        return super.quoteLiteralStringWithSingleQuote(value);
+    }
+
+    @Override
     public SqlNodeVisitor<String> getSqlGenerationVisitor(final SqlGenerationContext context) {
         return new HiveSqlGenerationVisitor(this, context);
     }

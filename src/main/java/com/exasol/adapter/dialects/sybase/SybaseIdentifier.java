@@ -36,7 +36,7 @@ public class SybaseIdentifier implements Identifier {
         if (validate(id)) {
             return new SybaseIdentifier(id);
         } else {
-            throw new AssertionError("E-ID-3: Unable to create identifier \"" + id //
+            throw new AssertionError("E-ID-5: Unable to create identifier \"" + id //
                     + "\" because it contains illegal characters." //
                     + " For information about valid identifiers, please refer to" //
                     + " http://infocenter.sybase.com/help/index.jsp?topic=/com.sybase.infocenter.dc36271.1600/doc/html/san1393050529478.html");
@@ -61,10 +61,12 @@ public class SybaseIdentifier implements Identifier {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (!(o instanceof SybaseIdentifier)) {
             return false;
+        }
         final SybaseIdentifier that = (SybaseIdentifier) o;
         return Objects.equals(this.id, that.id);
     }

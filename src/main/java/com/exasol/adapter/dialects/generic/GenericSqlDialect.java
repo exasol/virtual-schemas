@@ -87,6 +87,11 @@ public class GenericSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    public String getStringLiteral(final String value) {
+        return this.quoteLiteralStringWithSingleQuote(value);
+    }
+
+    @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
         try {
             return new GenericMetadataReader(this.connectionFactory.getConnection(), this.properties);

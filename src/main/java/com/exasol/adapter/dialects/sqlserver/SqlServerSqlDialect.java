@@ -114,6 +114,7 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://docs.microsoft.com/de-de/sql/t-sql/statements/set-quoted-identifier-transact-sql?view=sql-server-ver15
     public String applyQuote(final String identifier) {
         return SqlServerIdentifier.of(identifier).quote();
     }
@@ -131,6 +132,11 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_AT_START;
+    }
+
+    @Override
+    public String getStringLiteral(final String value) {
+        return super.quoteLiteralStringWithSingleQuote(value);
     }
 
     @Override

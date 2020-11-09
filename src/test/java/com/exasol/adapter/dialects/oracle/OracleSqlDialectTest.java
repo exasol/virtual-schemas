@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Map;
 
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -128,19 +127,23 @@ class OracleSqlDialectTest {
     }
 
     @CsvSource({ "tableName, \"tableName\"", //
-            "\"tableName, \"\"\"tableName\"" //
+            "table 'Name, \"table 'Name\"" //
     })
     @ParameterizedTest
-    void testApplyQuote(final String unquoted, final String quoted) {
-        assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
+    void testApplyQuote(final String identifier, final String expected) {
+        assertThat(this.dialect.applyQuote(identifier), equalTo(expected));
+    }
+
+    @CsvSource({ "\"tableName\"", "table\"Name", "table name\"" })
+    @ParameterizedTest
+    void testApplyQuoteThrowsException(final String identifier) {
+        assertThrows(AssertionError.class, () -> this.dialect.applyQuote(identifier));
     }
 
     @ValueSource(strings = { "ab:'ab'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
     @ParameterizedTest
     void testGetLiteralString(final String definition) {
-        final int colonPosition = definition.indexOf(':');
-        final String original = definition.substring(0, colonPosition);
-        final String literal = definition.substring(colonPosition + 1);
-        assertThat(this.dialect.getStringLiteral(original), CoreMatchers.equalTo(literal));
+        assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),
+                equalTo(definition.substring(definition.indexOf(':') + 1)));
     }
 }

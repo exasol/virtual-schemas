@@ -12,6 +12,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -120,20 +121,26 @@ class ImpalaSqlDialectTest {
     }
 
     @CsvSource({ "tableName, `tableName`", //
-            "`tableName, ```tableName`" //
+            "table ' Name, `table ' Name`", //
+            "table \" Name, `table \" Name`" //
     })
     @ParameterizedTest
     void testApplyQuote(final String unquoted, final String quoted) {
         assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
     }
 
-    @ValueSource(strings = { "ab:'ab'", "a'b:'a\\'b'", "a''b:'a\\'\\'b'", "'ab':'\\'ab\\''" })
+    @CsvSource({ "`tableName`", "table`Name", "table name`" })
+    @ParameterizedTest
+    void testApplyQuoteThrowsException(final String identifier) {
+        assertThrows(AssertionError.class, () -> this.dialect.applyQuote(identifier));
+    }
+
+    @ValueSource(strings = { "ab:'ab'", "a'b:'a\\'b'", "a''b:'a\\'\\'b'", "'ab':'\\'ab\\''", "a\\b:'a\\\\b'",
+            "a\\\\b:'a\\\\\\\\b'", "a\\'b:'a\\\\\\'b'" })
     @ParameterizedTest
     void testGetLiteralString(final String definition) {
-        final int colonPosition = definition.indexOf(':');
-        final String original = definition.substring(0, colonPosition);
-        final String literal = definition.substring(colonPosition + 1);
-        assertThat(this.dialect.getStringLiteral(original), Matchers.equalTo(literal));
+        assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),
+                equalTo(definition.substring(definition.indexOf(':') + 1)));
     }
 
     @Test

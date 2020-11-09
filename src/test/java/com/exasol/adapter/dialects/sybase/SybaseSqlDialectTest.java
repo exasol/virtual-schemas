@@ -30,6 +30,7 @@ import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class SybaseSqlDialectTest {
@@ -138,18 +139,17 @@ class SybaseSqlDialectTest {
         assertThat(this.dialect.applyQuote("tableName"), equalTo("[tableName]"));
     }
 
-    @Test
-    void testApplyQuoteThrowsException() {
-        assertThrows(AssertionError.class, () -> this.dialect.applyQuote("[tableName]"));
+    @CsvSource({ "[tableName]", "[table name", "table name]", "table[name", "table]name", "table \"name" })
+    @ParameterizedTest
+    void testApplyQuoteThrowsException(final String identifier) {
+        assertThrows(AssertionError.class, () -> this.dialect.applyQuote(identifier));
     }
 
     @ValueSource(strings = { "ab:'ab'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
     @ParameterizedTest
     void testGetLiteralString(final String definition) {
-        final int colonPosition = definition.indexOf(':');
-        final String original = definition.substring(0, colonPosition);
-        final String literal = definition.substring(colonPosition + 1);
-        assertThat(this.dialect.getStringLiteral(original), CoreMatchers.equalTo(literal));
+        assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),
+                equalTo(definition.substring(definition.indexOf(':') + 1)));
     }
 
     @Test

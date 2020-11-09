@@ -34,4 +34,9 @@ Code name:
 * Updated com.exasol:test-db-builder-java:1.0.1 to 1.1.0
 * Updated com.exasol:hamcrest-resultset-matcher:1.1.1 to 1.2.1
 * Updated nl.jqno.equalsverifier:equalsverifier:3.4.3 to 3.5
-* Updated  mysql:mysql-connector-java:8.0.21 to 8.0.22
+* Updated mysql:mysql-connector-java:8.0.21 to 8.0.22
+* Updated org.testcontainers:junit-jupiter:1.14.3 to 1.15.0
+* Updated org.testcontainers:mssqlserver:1.14.3 to 1.15.0
+* Updated org.testcontainers:mysql:1.14.3 to 1.15.0
+* Updated org.testcontainers:oracle-xe:1.14.3 to 1.15.0
+* Updated org.testcontainers:postgresql:1.14.3 to 1.15.0

@@ -1,8 +1,8 @@
 package com.exasol.adapter.dialects.athena;
 
-import com.exasol.db.Identifier;
-
 import java.util.Objects;
+
+import com.exasol.db.Identifier;
 
 /**
  * Represents an identifier in the Athena database.
@@ -71,8 +71,12 @@ public class AthenaIdentifier implements Identifier {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AthenaIdentifier)) {
+            return false;
+        }
         final AthenaIdentifier that = (AthenaIdentifier) o;
         return Objects.equals(this.id, that.id);
     }

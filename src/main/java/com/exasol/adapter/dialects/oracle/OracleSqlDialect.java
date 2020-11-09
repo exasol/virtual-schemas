@@ -114,10 +114,9 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    @SuppressWarnings("squid:S1185")
     // https://docs.oracle.com/cd/B19306_01/server.102/b14200/sql_elements008.htm
     public String applyQuote(final String identifier) {
-        return super.applyQuote(identifier);
+        return OracleIdentifier.of(identifier).quote();
     }
 
     @Override
@@ -133,6 +132,11 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_HIGH;
+    }
+
+    @Override
+    public String getStringLiteral(final String value) {
+        return super.quoteLiteralStringWithSingleQuote(value);
     }
 
     /**

@@ -95,10 +95,9 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    @SuppressWarnings("squid:S1185")
-    // https://docs.teradata.com/reader/3AkrVQlhjJMha4KRVJmm1w/G7jI6yuymIYaMNVKNlCSWQ
+    // https://docs.teradata.com/reader/37meaKdwvl0jrhzrc6FoEw/F5dFR63LmiAnvhOd3C9f8w
     public String applyQuote(final String identifier) {
-        return super.applyQuote(identifier);
+        return super.quoteIdentifierWithDoubleQuotes(identifier);
     }
 
     @Override
@@ -114,5 +113,10 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_HIGH;
+    }
+
+    @Override
+    public String getStringLiteral(final String value) {
+        return super.quoteLiteralStringWithSingleQuote(value);
     }
 }

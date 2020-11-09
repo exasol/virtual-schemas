@@ -110,14 +110,18 @@ public class SapHanaSqlDialect extends AbstractSqlDialect {
 
     @Override
     // http://sap.optimieren.de/hana/hana/html/_bsql_introduction.html
-    @SuppressWarnings("squid:S1185")
     public String applyQuote(final String identifier) {
-        return super.applyQuote(identifier);
+        return super.quoteIdentifierWithDoubleQuotes(identifier);
     }
 
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_AT_START;
+    }
+
+    @Override
+    public String getStringLiteral(final String value) {
+        return super.quoteLiteralStringWithSingleQuote(value);
     }
 
     @Override

@@ -124,7 +124,7 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         if (getIdentifierMapping() != PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE) {
             postgreSQLIdentifier = convertIdentifierToLowerCase(postgreSQLIdentifier);
         }
-        return super.applyQuote(postgreSQLIdentifier);
+        return super.quoteIdentifierWithDoubleQuotes(postgreSQLIdentifier);
     }
 
     private String convertIdentifierToLowerCase(final String identifier) {
@@ -144,6 +144,11 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_AT_END;
+    }
+
+    @Override
+    public String getStringLiteral(final String value) {
+        return super.quoteLiteralStringWithSingleQuote(value);
     }
 
     @Override

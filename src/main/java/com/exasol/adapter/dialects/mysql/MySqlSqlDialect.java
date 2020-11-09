@@ -83,11 +83,8 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
         return StructureElementSupport.NONE;
     }
 
-    /**
-     * @see <a href="http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_ansi_quotes">ANSI quotes (MySQL
-     *      reference manual)</a>
-     */
     @Override
+    // https://dev.mysql.com/doc/refman/8.0/en/identifiers.html
     public String applyQuote(final String identifier) {
         return "`" + identifier.replace("`", "``") + "`";
     }
@@ -105,6 +102,11 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_AT_END;
+    }
+
+    @Override
+    public String getStringLiteral(final String value) {
+        return super.quoteLiteralStringWithSingleQuote(value);
     }
 
     @Override

@@ -110,6 +110,7 @@ class AthenaSqlDialectTest {
     @CsvSource({ "tableName, \"tableName\"", //
             "table123, \"table123\"", //
             "_table, `_table`", //
+            "123table, \"123table\"", //
             "table_name, \"table_name\"" })
     @ParameterizedTest
     void testApplyQuote(final String unquoted, final String quoted) {
@@ -119,10 +120,8 @@ class AthenaSqlDialectTest {
     @ValueSource(strings = { "ab:'ab'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
     @ParameterizedTest
     void testGetLiteralString(final String definition) {
-        final int colonPosition = definition.indexOf(':');
-        final String original = definition.substring(0, colonPosition);
-        final String literal = definition.substring(colonPosition + 1);
-        assertThat(this.dialect.getStringLiteral(original), equalTo(literal));
+        assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),
+                equalTo(definition.substring(definition.indexOf(':') + 1)));
     }
 
     @Test

@@ -95,7 +95,7 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
     @Override
     // https://docs.cloudera.com/documentation/enterprise/latest/topics/impala_identifiers.html
     public String applyQuote(final String identifier) {
-        return "`" + identifier.replace("`", "``") + "`";
+        return ImpalaIdentifier.of(identifier).quote();
     }
 
     @Override
@@ -139,7 +139,7 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
         if (value == null) {
             return "NULL";
         } else {
-            return "'" + value.replace("'", "\\'") + "'";
+            return "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'";
         }
     }
 }

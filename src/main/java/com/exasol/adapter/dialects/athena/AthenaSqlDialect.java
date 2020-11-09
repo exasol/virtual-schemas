@@ -107,6 +107,7 @@ public class AthenaSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://docs.aws.amazon.com/athena/latest/ug/tables-databases-columns-names.html
     public String applyQuote(final String identifier) {
         return AthenaIdentifier.of(identifier).quote();
     }
@@ -114,6 +115,11 @@ public class AthenaSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_AT_END;
+    }
+
+    @Override
+    public String getStringLiteral(final String value) {
+        return super.quoteLiteralStringWithSingleQuote(value);
     }
 
     @Override

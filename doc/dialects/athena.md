@@ -28,8 +28,7 @@ You need to specify the following settings when adding the JDBC driver via EXAOp
 Please refer to the [documentation on configuring JDBC connections to Athena](https://docs.aws.amazon.com/athena/latest/ug/connect-with-jdbc.html) for details.
 
 IMPORTANT: The latest Athena driver requires to **Disable Security Manager**.
-It is necessary because JDBC driver requires Java permissions which we do not grant by default.  
-Please keep in mind that it's not safe to disable the security manager.
+It is necessary because JDBC driver requires Java permissions which we do not grant by default.
 
 ## Uploading the JDBC Driver to EXAOperation
 
