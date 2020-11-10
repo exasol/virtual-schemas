@@ -37,7 +37,7 @@ public class ImpalaIdentifier implements Identifier {
             throw new AssertionError("E-ID-6: Unable to create identifier \"" + id //
                     + "\" because it contains illegal characters." //
                     + " For information about valid identifiers, please refer to" //
-                    + "  https://docs.cloudera.com/documentation/enterprise/latest/topics/impala_identifiers.html");
+                    + " https://docs.cloudera.com/documentation/enterprise/latest/topics/impala_identifiers.html");
         }
     }
 

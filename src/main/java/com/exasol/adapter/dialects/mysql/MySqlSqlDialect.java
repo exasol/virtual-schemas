@@ -107,7 +107,7 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
     @Override
     // https://dev.mysql.com/doc/refman/8.0/en/string-literals.html
     public String getStringLiteral(final String value) {
-        return super.quoteLiteralStringWithSingleQuote(value);
+        return super.quoteLiteralStringWithSingleQuote(value.replace("\\", "\\\\"));
     }
 
     @Override
