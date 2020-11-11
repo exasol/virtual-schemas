@@ -152,6 +152,12 @@ class SybaseSqlDialectTest {
                 equalTo(definition.substring(definition.indexOf(':') + 1)));
     }
 
+    @ValueSource(strings = { "a\nb", "a\rb", "\r\n" })
+    @ParameterizedTest
+    void testGetLiteralStringWithIllegalChars(final String value) {
+        assertThrows(IllegalArgumentException.class, () -> this.dialect.getStringLiteral(value));
+    }
+
     @Test
     void testRequiresCatalogQualifiedTableNames() {
         assertThat(this.dialect.requiresCatalogQualifiedTableNames(null), equalTo(true));

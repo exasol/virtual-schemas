@@ -40,6 +40,6 @@ class RedshiftSqlGenerationVisitorTest {
         final SqlFunctionAggregateGroupConcat aggregateGroupConcat = SqlFunctionAggregateGroupConcat.builder(argument)
                 .separator(new SqlLiteralString("'")).orderBy(orderBy).distinct(true).build();
         assertThat(this.visitor.visit(aggregateGroupConcat), equalTo(
-                "LISTAGG('value \\''', '\\''') WITHIN GROUP(ORDER BY \"\"\"test_column\" DESC NULLS FIRST, \"test_column2\"\"\")"));
+                "LISTAGG('value \\'', '\\'') WITHIN GROUP(ORDER BY \"\"\"test_column\" DESC NULLS FIRST, \"test_column2\"\"\")"));
     }
 }
