@@ -120,7 +120,7 @@ public class SapHanaSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    // https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.04/en-US/885b059cc20340979c8927c9301ceb63.html
+    // https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/LATEST/en-US/209f5020751910148fd8fe88aa4d79d9.html
     public String getStringLiteral(final String value) {
         return super.quoteLiteralStringWithSingleQuote(value);
     }

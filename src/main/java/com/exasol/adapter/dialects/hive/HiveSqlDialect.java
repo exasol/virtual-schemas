@@ -106,7 +106,8 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    // https://docs.cloudera.com/documentation/enterprise/5-9-x/topics/impala_literals.html#string_literals
+    // https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Types#LanguageManualTypes-StringsstringStrings
+    // https://cwiki.apache.org/confluence/display/Hive/CAST...FORMAT+with+SQL%3A2016+datetime+formats
     public String getStringLiteral(final String value) {
         if (value == null) {
             return "NULL";

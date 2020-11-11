@@ -118,7 +118,7 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    // https://www.postgresql.org/docs/9.1/sql-syntax-lexical.html
+    // https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
     public String applyQuote(final String identifier) {
         String postgreSQLIdentifier = identifier;
         if (getIdentifierMapping() != PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE) {
@@ -147,9 +147,13 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    // https://www.postgresql.org/docs/9.2/sql-syntax-lexical.html
+    // https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-CONSTANTS
     public String getStringLiteral(final String value) {
-        return super.quoteLiteralStringWithSingleQuote(value);
+        if (value == null) {
+            return "NULL";
+        } else {
+            return "E'" + value.replace("\\", "\\\\").replace("'", "''") + "'";
+        }
     }
 
     @Override

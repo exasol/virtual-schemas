@@ -125,7 +125,7 @@ public class DB2SqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    // https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0008470.html
+    // https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0000731.html
     public String getStringLiteral(final String value) {
         return super.quoteLiteralStringWithSingleQuote(value);
     }
