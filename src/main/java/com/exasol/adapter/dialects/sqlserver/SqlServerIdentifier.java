@@ -37,7 +37,7 @@ public class SqlServerIdentifier implements Identifier {
             throw new AssertionError("E-ID-4: Unable to create identifier \"" + id //
                     + "\" because it contains illegal characters." //
                     + " For information about valid identifiers, please refer to" //
-                    + " https://docs.microsoft.com/de-de/sql/t-sql/statements/set-quoted-identifier-transact-sql?view=sql-server-ver15");
+                    + "  https://docs.microsoft.com/sql/relational-databases/databases/database-identifiers?view=sql-server-ver15");
         }
     }
 

@@ -114,7 +114,7 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    // https://docs.microsoft.com/de-de/sql/t-sql/statements/set-quoted-identifier-transact-sql?view=sql-server-ver15
+    //  https://docs.microsoft.com/de-de/sql/relational-databases/databases/database-identifiers?view=sql-server-ver15
     public String applyQuote(final String identifier) {
         return SqlServerIdentifier.of(identifier).quote();
     }

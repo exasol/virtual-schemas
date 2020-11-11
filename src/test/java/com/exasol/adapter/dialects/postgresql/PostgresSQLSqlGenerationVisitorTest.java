@@ -194,6 +194,6 @@ class PostgresSQLSqlGenerationVisitorTest {
         final SqlOrderBy orderBy = new SqlOrderBy(orderByArguments, List.of(false, true), List.of(false, true));
         final SqlFunctionAggregateGroupConcat sqlFunctionAggregateGroupConcat = SqlFunctionAggregateGroupConcat
                 .builder(argument).separator(new SqlLiteralString("'")).orderBy(orderBy).build();
-        assertThat(this.visitor.visit(sqlFunctionAggregateGroupConcat), equalTo("STRING_AGG('test', '''') "));
+        assertThat(this.visitor.visit(sqlFunctionAggregateGroupConcat), equalTo("STRING_AGG(E'test', E'''') "));
     }
 }

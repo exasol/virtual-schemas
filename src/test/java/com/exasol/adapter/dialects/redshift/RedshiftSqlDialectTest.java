@@ -125,7 +125,8 @@ class RedshiftSqlDialectTest {
         assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
     }
 
-    @ValueSource(strings = { "ab:'ab'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
+    @ValueSource(strings = { "ab:'ab'", "a'b:'a\\'b'", "a''b:'a\\'\\'b'", "'ab':'\\'ab\\''", "a\\b:'a\\\\b'",
+            "a\\\\b:'a\\\\\\\\b'", "a\\'b:'a\\\\\\'b'" })
     @ParameterizedTest
     void testGetLiteralString(final String definition) {
         assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),

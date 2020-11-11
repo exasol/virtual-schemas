@@ -138,7 +138,7 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
     @Override
     // http://infocenter.sybase.com/help/index.jsp?topic=/com.sybase.infocenter.dc01031.0400/doc/html/asc1252677176370.html
     public String getStringLiteral(final String value) {
-        return super.quoteLiteralStringWithSingleQuote(value);
+        return SybaseIdentifier.of(value).quote();
     }
 
     @Override

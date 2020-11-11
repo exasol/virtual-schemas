@@ -96,7 +96,8 @@ class PostgreSQLSqlDialectTest {
         assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
     }
 
-    @ValueSource(strings = { "ab:'ab'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
+    @ValueSource(strings = { "ab:E'ab'", "a'b:E'a''b'", "a''b:E'a''''b'", "'ab':E'''ab'''", "a\\\\b:E'a\\\\\\\\b'",
+            "a\\'b:E'a\\\\''b'" })
     @ParameterizedTest
     void testGetLiteralString(final String definition) {
         assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),
