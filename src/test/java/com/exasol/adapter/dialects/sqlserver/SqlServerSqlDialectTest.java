@@ -146,7 +146,7 @@ class SqlServerSqlDialectTest {
         assertThat(this.dialect.applyQuote(identifier), equalTo(expected));
     }
 
-    @CsvSource({ "[tableName]", "[table name", "table name]", "table[name", "table]name" })
+    @CsvSource({ "[tableName]", "[table name", "table name]", "table[name", "table]name", "table\\name" })
     @ParameterizedTest
     void testApplyQuoteThrowsException(final String identifier) {
         assertThrows(AssertionError.class, () -> this.dialect.applyQuote(identifier));
@@ -157,6 +157,11 @@ class SqlServerSqlDialectTest {
     void testGetLiteralString(final String definition) {
         assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),
                 equalTo(definition.substring(definition.indexOf(':') + 1)));
+    }
+
+    @Test
+    void testGetLiteralStringNull() {
+        assertThat(this.dialect.getStringLiteral(null), CoreMatchers.equalTo("NULL"));
     }
 
     @Test

@@ -105,6 +105,11 @@ class PostgreSQLSqlDialectTest {
     }
 
     @Test
+    void testGetLiteralStringNull() {
+        assertThat(this.dialect.getStringLiteral(null), CoreMatchers.equalTo("NULL"));
+    }
+
+    @Test
     void testMetadataReaderClass() {
         assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),
                 instanceOf(PostgreSQLMetadataReader.class));

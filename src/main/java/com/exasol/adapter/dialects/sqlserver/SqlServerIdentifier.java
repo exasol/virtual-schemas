@@ -42,7 +42,7 @@ public class SqlServerIdentifier implements Identifier {
     }
 
     private static boolean validate(final String id) {
-        return !id.contains("[") && !id.contains("]");
+        return !id.contains("[") && !id.contains("]") && !id.contains("\\");
     }
 
     @Override

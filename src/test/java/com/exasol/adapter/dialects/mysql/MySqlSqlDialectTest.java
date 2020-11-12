@@ -121,11 +121,17 @@ class MySqlSqlDialectTest {
         assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
     }
 
-    @ValueSource(strings = { "ab:'ab'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''", "a\\b:'a\\\\b'", "a\\\\b:'a\\\\\\\\b'", "a\\'b:'a\\\\''b'" })
+    @ValueSource(strings = { "ab:'ab'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''", "a\\b:'a\\\\b'",
+            "a\\\\b:'a\\\\\\\\b'", "a\\'b:'a\\\\''b'" })
     @ParameterizedTest
     void testGetLiteralString(final String definition) {
         assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),
                 Matchers.equalTo(definition.substring(definition.indexOf(':') + 1)));
+    }
+
+    @Test
+    void testGetLiteralStringNull() {
+        assertThat(this.dialect.getStringLiteral(null), equalTo("NULL"));
     }
 
     @Test

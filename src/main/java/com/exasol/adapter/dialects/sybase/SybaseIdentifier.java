@@ -9,7 +9,7 @@ import com.exasol.db.Identifier;
  * Represents an identifier in the Sybase database.
  */
 public class SybaseIdentifier implements Identifier {
-    private static final Set<Character> ALLOWED_CHARS = Set.of(' ', '_', '@', '#', '$');
+    private static final Set<Character> ALLOWED_CHARS = Set.of('_', '@', '#', '$', '¥', '£');
     private final String id;
 
     private SybaseIdentifier(final String id) {
@@ -23,7 +23,7 @@ public class SybaseIdentifier implements Identifier {
      */
     @Override
     public String quote() {
-        return "[" + this.id + "]";
+        return this.id;
     }
 
     /**
@@ -56,7 +56,8 @@ public class SybaseIdentifier implements Identifier {
     }
 
     private static boolean validateCharacter(final char ch) {
-        return ALLOWED_CHARS.contains(ch) || Character.isLetter(ch) || Character.isDigit(ch);
+        return ALLOWED_CHARS.contains(ch) || Character.isDigit(ch) || (ch >= 'a' && ch <= 'z')
+                || (ch >= 'A' && ch <= 'Z');
     }
 
     @Override

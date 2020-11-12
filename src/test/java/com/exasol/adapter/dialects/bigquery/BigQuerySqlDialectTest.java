@@ -22,6 +22,7 @@ import java.util.Map;
 
 import com.exasol.adapter.dialects.athena.AthenaIdentifier;
 import nl.jqno.equalsverifier.EqualsVerifier;
+import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -145,6 +146,11 @@ class BigQuerySqlDialectTest {
     void testGetLiteralString(final String definition) {
         assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),
                 equalTo(definition.substring(definition.indexOf(':') + 1)));
+    }
+
+    @Test
+    void testGetLiteralStringNull() {
+        assertThat(this.dialect.getStringLiteral(null), CoreMatchers.equalTo("NULL"));
     }
 
     @Test

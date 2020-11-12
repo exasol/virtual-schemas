@@ -55,17 +55,17 @@ class SybaseSqlGenerationVisitorTest {
     void testVisitSqlStatementSelect() throws AdapterException {
         final SqlStatementSelect select = (SqlStatementSelect) DialectTestData.getTestSqlNode();
         assertThat(this.visitor.visit(select), //
-                equalTo("SELECT TOP 10 [USER_ID], COUNT([URL])" //
-                        + " FROM [test_catalog].[test_schema].[CLICKS]" //
-                        + " WHERE 1 < [USER_ID]" //
-                        + " GROUP BY [USER_ID] HAVING 1 < COUNT([URL])" //
-                        + " ORDER BY (CASE WHEN [USER_ID] IS NULL THEN 1 ELSE 0 END), [USER_ID]"));
+                equalTo("SELECT TOP 10 USER_ID, COUNT(URL)" //
+                        + " FROM test_catalog.test_schema.CLICKS" //
+                        + " WHERE 1 < USER_ID" //
+                        + " GROUP BY USER_ID HAVING 1 < COUNT(URL)" //
+                        + " ORDER BY (CASE WHEN USER_ID IS NULL THEN 1 ELSE 0 END), USER_ID"));
     }
 
-    @CsvSource(value = { "text : CAST([test_column]  as NVARCHAR(4000) )", //
-            "time : CONVERT(VARCHAR(12), [test_column], 137)", //
-            "bigtime : CONVERT(VARCHAR(16), [test_column], 137)", //
-            "xml : CAST([test_column]  as NVARCHAR(4000) )" //
+    @CsvSource(value = { "text : CAST(test_column  as NVARCHAR(4000) )", //
+            "time : CONVERT(VARCHAR(12), test_column, 137)", //
+            "bigtime : CONVERT(VARCHAR(16), test_column, 137)", //
+            "xml : CAST(test_column  as NVARCHAR(4000) )" //
     }, delimiter = ':')
     @ParameterizedTest
     void testVisitSqlSelectListSelectStarRequiresCast(final String typeName, final String expected)
@@ -120,7 +120,7 @@ class SybaseSqlGenerationVisitorTest {
     void testVisitSqlFunctionScalarAddDate(final ScalarFunction scalarFunction, final String expected)
             throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarForDateTest(scalarFunction, 10);
-        assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("DATEADD(" + expected + ",10,[test_column])"));
+        assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("DATEADD(" + expected + ",10,test_column)"));
     }
 
     private SqlFunctionScalar createSqlFunctionScalarForDateTest(final ScalarFunction scalarFunction,
@@ -144,7 +144,7 @@ class SybaseSqlGenerationVisitorTest {
     void testVisitSqlFunctionScalarTimeBetween(final ScalarFunction scalarFunction, final String expected)
             throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarForDateTest(scalarFunction, 10);
-        assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("DATEDIFF(" + expected + ",10,[test_column])"));
+        assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("DATEDIFF(" + expected + ",10,test_column)"));
     }
 
     @CsvSource({ "CURRENT_DATE, CAST( GETDATE() AS DATE)", //

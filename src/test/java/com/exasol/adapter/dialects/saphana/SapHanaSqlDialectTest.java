@@ -137,6 +137,11 @@ class SapHanaSqlDialectTest {
     }
 
     @Test
+    void testGetLiteralStringNull() {
+        assertThat(this.dialect.getStringLiteral(null), equalTo("NULL"));
+    }
+
+    @Test
     void testMetadataReaderClass(@Mock final Connection connectionMock) throws SQLException {
         when(this.connectionFactoryMock.getConnection()).thenReturn(connectionMock);
         assertThat(getMethodReturnViaReflection(this.dialect, "createRemoteMetadataReader"),

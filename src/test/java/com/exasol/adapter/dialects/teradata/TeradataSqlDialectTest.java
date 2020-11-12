@@ -121,6 +121,11 @@ class TeradataSqlDialectTest {
     }
 
     @Test
+    void testGetLiteralStringNull() {
+        assertThat(this.dialect.getStringLiteral(null), CoreMatchers.equalTo("NULL"));
+    }
+
+    @Test
     void testRequiresCatalogQualifiedTableNames() {
         assertThat(this.dialect.requiresCatalogQualifiedTableNames(null), equalTo(false));
     }

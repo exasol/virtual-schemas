@@ -29,7 +29,7 @@ class RedshiftSqlGenerationVisitorTest {
 
     @Test
     void visitSqlFunctionAggregateGroupConcat() throws AdapterException {
-        final SqlLiteralString argument = new SqlLiteralString("value '");
+        final SqlLiteralString argument = new SqlLiteralString("value");
         final ColumnMetadata columnMetadata = ColumnMetadata.builder().name("\"test_column").type(DataType.createBool())
                 .build();
         final ColumnMetadata columnMetadata2 = ColumnMetadata.builder().name("test_column2\"")
@@ -38,8 +38,8 @@ class RedshiftSqlGenerationVisitorTest {
                 new SqlColumn(2, columnMetadata2));
         final SqlOrderBy orderBy = new SqlOrderBy(orderByArguments, List.of(false, true), List.of(false, true));
         final SqlFunctionAggregateGroupConcat aggregateGroupConcat = SqlFunctionAggregateGroupConcat.builder(argument)
-                .separator(new SqlLiteralString("'")).orderBy(orderBy).distinct(true).build();
+                .separator(new SqlLiteralString("|")).orderBy(orderBy).distinct(true).build();
         assertThat(this.visitor.visit(aggregateGroupConcat), equalTo(
-                "LISTAGG('value \\'', '\\'') WITHIN GROUP(ORDER BY \"\"\"test_column\" DESC NULLS FIRST, \"test_column2\"\"\")"));
+                "LISTAGG('value', '|') WITHIN GROUP(ORDER BY \"\"\"test_column\" DESC NULLS FIRST, \"test_column2\"\"\")"));
     }
 }

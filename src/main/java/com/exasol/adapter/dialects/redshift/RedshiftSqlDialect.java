@@ -119,7 +119,10 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
         if (value == null) {
             return "NULL";
         } else {
-            return "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'";
+            if (value.contains("'") || value.contains("\\")) {
+                throw new IllegalArgumentException("Redshift string literal contains illegal characters: ' or \\.");
+            }
+            return "'" + value + "'";
         }
     }
 

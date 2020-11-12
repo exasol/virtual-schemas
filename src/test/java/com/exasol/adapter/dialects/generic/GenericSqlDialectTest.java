@@ -1,6 +1,8 @@
 package com.exasol.adapter.dialects.generic;
 
 import static com.exasol.adapter.AdapterProperties.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.sql.*;

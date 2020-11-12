@@ -138,10 +138,13 @@ public class SybaseSqlDialect extends AbstractSqlDialect {
     @Override
     // http://infocenter.sybase.com/help/index.jsp?topic=/com.sybase.infocenter.dc01031.0400/doc/html/asc1252677176370.html
     public String getStringLiteral(final String value) {
-        if (value.contains("\n") || value.contains("\r")) {
-            throw new IllegalArgumentException("Sybase string literal contains illegal characters.");
+        if (value == null) {
+            return "NULL";
+        } else if (value.contains("\n") || value.contains("\r") || value.contains("\\")) {
+            throw new IllegalArgumentException("Sybase string literal contains illegal characters: \\n or \\r or \\.");
+        } else {
+            return "'" + value.replace("'", "''") + "'";
         }
-        return super.quoteLiteralStringWithSingleQuote(value);
     }
 
     @Override

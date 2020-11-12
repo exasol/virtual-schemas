@@ -136,7 +136,7 @@ class SybaseSqlDialectTest {
 
     @Test
     void testApplyQuote() {
-        assertThat(this.dialect.applyQuote("tableName"), equalTo("[tableName]"));
+        assertThat(this.dialect.applyQuote("tableName"), equalTo("tableName"));
     }
 
     @CsvSource({ "[tableName]", "[table name", "table name]", "table[name", "table]name", "table \"name" })
@@ -152,10 +152,15 @@ class SybaseSqlDialectTest {
                 equalTo(definition.substring(definition.indexOf(':') + 1)));
     }
 
-    @ValueSource(strings = { "a\nb", "a\rb", "\r\n" })
+    @ValueSource(strings = { "a\nb", "a\rb", "\r\n", "a\\'" })
     @ParameterizedTest
     void testGetLiteralStringWithIllegalChars(final String value) {
         assertThrows(IllegalArgumentException.class, () -> this.dialect.getStringLiteral(value));
+    }
+
+    @Test
+    void testGetLiteralStringNull() {
+        assertThat(this.dialect.getStringLiteral(null), CoreMatchers.equalTo("NULL"));
     }
 
     @Test
