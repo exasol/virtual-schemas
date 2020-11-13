@@ -20,7 +20,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
-import com.exasol.adapter.dialects.athena.AthenaIdentifier;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;

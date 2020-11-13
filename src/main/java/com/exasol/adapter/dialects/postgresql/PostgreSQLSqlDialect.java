@@ -152,6 +152,8 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
         if (value == null) {
             return "NULL";
         } else {
+            // We use an escape string constant to be independent of the parameter standard_conforming_strings.
+            // We use '' instead of \' to be independent of the parameter backslash_quote.
             return "E'" + value.replace("\\", "\\\\").replace("'", "''") + "'";
         }
     }

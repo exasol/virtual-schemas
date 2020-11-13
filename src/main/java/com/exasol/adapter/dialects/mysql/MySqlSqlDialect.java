@@ -110,6 +110,7 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
         if (value == null) {
             return "NULL";
         } else {
+            // We replace \ with \\ because we expect that the mode NO_BACKSLASH_ESCAPES is not used.
             return "'" + value.replace("\\", "\\\\").replace("'", "''") + "'";
         }
     }
