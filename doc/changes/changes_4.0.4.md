@@ -31,7 +31,7 @@ In this release we fixed a few bugs, including a security issue. Please update y
 * Updated org.junit.jupiter:junit-jupiter:5.6.2 to 5.7.0
 * Updated org.mockito:mockito-junit-jupiter:3.4.6 to 3.6.0
 * Updated com.exasol:exasol-jdbc:6.2.5 to 7.0.3
-* Updated com.exasol:exasol-testcontainers:2.1.0 to 3.2.0
+* Updated com.exasol:exasol-testcontainers:2.1.0 to 3.3.0
 * Updated org.postgresql:postgresql:42.2.14 to 42.2.18
 * Updated org.apache.hbase:hbase-server:2.3.1 to 2.3.2
 * Updated com.microsoft.sqlserver:mssql-jdbc:8.4.0.jre11 to 8.4.1.jre11
