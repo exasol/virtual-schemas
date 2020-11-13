@@ -1,6 +1,10 @@
-# Exasol Virtual Schemas 4.0.4, released 2020-11-??
+# Exasol Virtual Schemas 4.0.4, released 2020-11-13
 
-Code name:
+Code name: Important bugfixes
+
+## Summary
+
+In this release we fixed a few bugs, including a security issue. Please update your adapters as soon as possible.
 
 ## Documentation
 
@@ -8,7 +12,7 @@ Code name:
 * #377: Improved Scalar Functions API documentation.	
 * #384: Turned embedded JSON into key-value encoding in Adapter Notes API examples.	
 * #386: Remove the documentation that was moved to the portal, added links instead.
-* #394: Described 'No  suitable driver found', added a note that Hive 1.1.0 has problems with its driver.
+* #394: Described 'No suitable driver found', added a note that Hive 1.1.0 has problems with its driver.
 * #391: Removed the API documentation from this repository and added a link to it.
 
 ## Refactoring
@@ -17,12 +21,12 @@ Code name:
 * #381: Migrated from version.sh to artifact-reference-checker-maven-plugin.
 * #389: Improved connection error handling.
 * #396: Updated to the `virtual-schema-common-jdbc:6.0.0`
-* #401: Updated to the `virtual-schema-common-jdbc:6.1.0`
+* #401: Updated to the `virtual-schema-common-jdbc:7.0.0`
 
 ## Dependency updates
 
 * Added com.exasol:artifact-reference-checker-maven-plugin:0.3.1
-* Updated com.exasol:virtual-schema-common-jdbc:5.0.4 to 6.1.0
+* Updated com.exasol:virtual-schema-common-jdbc:5.0.4 to 7.0.0
 * Updated org.apache.hbase:hbase-server:2.3.0 to 2.3.3
 * Updated org.junit.jupiter:junit-jupiter:5.6.2 to 5.7.0
 * Updated org.mockito:mockito-junit-jupiter:3.4.6 to 3.6.0

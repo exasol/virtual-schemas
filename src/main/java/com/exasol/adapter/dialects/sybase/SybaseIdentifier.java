@@ -23,7 +23,7 @@ public class SybaseIdentifier implements Identifier {
      */
     @Override
     public String quote() {
-        return this.id;
+        return "[" + this.id + "]";
     }
 
     /**

@@ -136,7 +136,7 @@ class SybaseSqlDialectTest {
 
     @Test
     void testApplyQuote() {
-        assertThat(this.dialect.applyQuote("tableName"), equalTo("tableName"));
+        assertThat(this.dialect.applyQuote("tableName"), equalTo("[tableName]"));
     }
 
     @CsvSource({ "[tableName]", "[table name", "table name]", "table[name", "table]name", "table \"name" })
