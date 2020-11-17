@@ -1,10 +1,29 @@
-# Exasol Virtual Schemas 4.0.4, released 2020-11-13
+# Exasol Virtual Schemas 4.0.4, released 2020-11-17
 
-Code name: Important bugfixes
+Code name: Security Update
 
 ## Summary
 
-In this release we fixed a few bugs, including a security issue. Please update your adapters as soon as possible.
+Classification: High
+Please update your adapters as soon as possible!
+This release fixes several SQL injection vulnerabilities on the remote database of the virtual schema. 
+The local Exasol database defining the virtual schema is not affected.
+
+All dialects except for Teradata are affected:
+* Amazon AWS Athena
+* Amazon AWS Aurora
+* Amazon AWS Redshift
+* Apache Hive
+* Apache Impala
+* Generic JDBC-capable RDBMS
+* Google BigQuery
+* IBM DB2
+* Microsoft SQL Server
+* MySQL
+* Oracle
+* PostgreSQL
+* SAP HANA
+* Sybase
 
 ## Documentation
 
@@ -26,12 +45,13 @@ In this release we fixed a few bugs, including a security issue. Please update y
 ## Dependency updates
 
 * Added com.exasol:artifact-reference-checker-maven-plugin:0.3.1
+* Added junit:junit:4.13.1 to fix CVE-2020-15250
 * Updated com.exasol:virtual-schema-common-jdbc:5.0.4 to 7.0.0
 * Updated org.apache.hbase:hbase-server:2.3.0 to 2.3.3
 * Updated org.junit.jupiter:junit-jupiter:5.6.2 to 5.7.0
 * Updated org.mockito:mockito-junit-jupiter:3.4.6 to 3.6.0
 * Updated com.exasol:exasol-jdbc:6.2.5 to 7.0.3
-* Updated com.exasol:exasol-testcontainers:2.1.0 to 3.3.0
+* Updated com.exasol:exasol-testcontainers:2.1.0 to 3.3.1
 * Updated org.postgresql:postgresql:42.2.14 to 42.2.18
 * Updated org.apache.hbase:hbase-server:2.3.1 to 2.3.2
 * Updated com.microsoft.sqlserver:mssql-jdbc:8.4.0.jre11 to 8.4.1.jre11
