@@ -274,18 +274,13 @@ public class PostgresSQLSqlGenerationVisitor extends SqlGenerationVisitor {
         final StringBuilder builder = new StringBuilder();
         builder.append("STRING_AGG");
         builder.append("(");
-        if ((function.getArguments() != null) && (function.getArguments().size() == 1)
-                && (function.getArguments().get(0) != null)) {
-            final String expression = function.getArguments().get(0).accept(this);
+        if (function.getArgument() != null) {
+            final String expression = function.getArgument().accept(this);
             builder.append(expression);
             builder.append(", ");
-            String separator = ",";
-            if (function.getSeparator() != null) {
-                separator = function.getSeparator();
-            }
-            builder.append("'");
+            final String separator = function.hasSeparator() ? function.getSeparator().accept(this) : "','";
             builder.append(separator);
-            builder.append("') ");
+            builder.append(") ");
             return builder.toString();
         } else {
             throw new SqlGenerationVisitorException(

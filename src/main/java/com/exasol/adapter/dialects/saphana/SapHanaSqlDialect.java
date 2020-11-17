@@ -7,6 +7,8 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_INTERSECTION;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_UNION;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -107,13 +109,20 @@ public class SapHanaSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // http://sap.optimieren.de/hana/hana/html/_bsql_introduction.html
     public String applyQuote(final String identifier) {
-        return "\"" + identifier + "\"";
+        return super.quoteIdentifierWithDoubleQuotes(identifier);
     }
 
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_AT_START;
+    }
+
+    @Override
+    // https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/LATEST/en-US/209f5020751910148fd8fe88aa4d79d9.html
+    public String getStringLiteral(final String value) {
+        return super.quoteLiteralStringWithSingleQuote(value);
     }
 
     @Override

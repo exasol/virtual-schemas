@@ -95,8 +95,9 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://docs.teradata.com/reader/37meaKdwvl0jrhzrc6FoEw/F5dFR63LmiAnvhOd3C9f8w
     public String applyQuote(final String identifier) {
-        return "\"" + identifier.replace("\"", "\"\"") + "\"";
+        return super.quoteIdentifierWithDoubleQuotes(identifier);
     }
 
     @Override
@@ -112,5 +113,11 @@ public class TeradataSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_HIGH;
+    }
+
+    @Override
+    // https://docs.teradata.com/reader/S0Fw2AVH8ff3MDA0wDOHlQ/74_UPfEbj2v5Yfny_Go8ig
+    public String getStringLiteral(final String value) {
+        return super.quoteLiteralStringWithSingleQuote(value);
     }
 }

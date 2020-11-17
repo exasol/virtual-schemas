@@ -7,10 +7,13 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_INTERSECTION;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_UNION;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +29,9 @@ import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class SybaseSqlDialectTest {
     private SqlDialect dialect;
@@ -73,7 +79,7 @@ class SybaseSqlDialectTest {
 
     @Test
     void testValidateCatalogProperty() throws PropertyValidationException {
-        setMandatoryProperties("SYBASE");
+        setMandatoryProperties();
         this.rawProperties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new SybaseSqlDialect(null, adapterProperties);
@@ -82,15 +88,15 @@ class SybaseSqlDialectTest {
 
     @Test
     void testValidateSchemaProperty() throws PropertyValidationException {
-        setMandatoryProperties("SYBASE");
+        setMandatoryProperties();
         this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new SybaseSqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
     }
 
-    private void setMandatoryProperties(final String sqlDialectProperty) {
-        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
+    private void setMandatoryProperties() {
+        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, "SYBASE");
         this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN");
     }
 
@@ -131,6 +137,30 @@ class SybaseSqlDialectTest {
     @Test
     void testApplyQuote() {
         assertThat(this.dialect.applyQuote("tableName"), equalTo("[tableName]"));
+    }
+
+    @CsvSource({ "[tableName]", "[table name", "table name]", "table[name", "table]name", "table \"name" })
+    @ParameterizedTest
+    void testApplyQuoteThrowsException(final String identifier) {
+        assertThrows(AssertionError.class, () -> this.dialect.applyQuote(identifier));
+    }
+
+    @ValueSource(strings = { "ab:'ab'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
+    @ParameterizedTest
+    void testGetLiteralString(final String definition) {
+        assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),
+                equalTo(definition.substring(definition.indexOf(':') + 1)));
+    }
+
+    @ValueSource(strings = { "a\nb", "a\rb", "\r\n", "a\\'" })
+    @ParameterizedTest
+    void testGetLiteralStringWithIllegalChars(final String value) {
+        assertThrows(IllegalArgumentException.class, () -> this.dialect.getStringLiteral(value));
+    }
+
+    @Test
+    void testGetLiteralStringNull() {
+        assertThat(this.dialect.getStringLiteral(null), CoreMatchers.equalTo("NULL"));
     }
 
     @Test

@@ -63,6 +63,11 @@ public final class DummySqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    public String getStringLiteral(final String value) {
+        return super.quoteLiteralStringWithSingleQuote(value);
+    }
+
+    @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
         try {
             return new BaseRemoteMetadataReader(this.connectionFactory.getConnection(), this.properties);

@@ -5,10 +5,10 @@ import static com.exasol.adapter.dialects.VisitorAssertions.assertSqlNodeConvert
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static utils.SqlNodesCreator.*;
 
 import java.util.*;
 
+import com.exasol.adapter.metadata.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,11 +21,7 @@ import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionFactory;
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.*;
-
-import utils.SqlNodesCreator;
 
 @ExtendWith(MockitoExtension.class)
 class HiveSqlGenerationVisitorTest {
@@ -42,7 +38,12 @@ class HiveSqlGenerationVisitorTest {
 
     @Test
     void testVisitSqlSelectListSelectStar() throws AdapterException {
-        final SqlSelectList sqlSelectList = createSqlSelectStarListWithoutColumns();
+        final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
+        final TableMetadata tableMetadata = new TableMetadata("", "", Collections.emptyList(), "");
+        final SqlTable fromClause = new SqlTable("test_table", tableMetadata);
+        final SqlNode sqlStatementSelect = SqlStatementSelect.builder().selectList(sqlSelectList).fromClause(fromClause)
+                .build();
+        sqlSelectList.setParent(sqlStatementSelect);
         assertSqlNodeConvertedToAsterisk(sqlSelectList, this.visitor);
     }
 
@@ -53,7 +54,9 @@ class HiveSqlGenerationVisitorTest {
         columns.add(ColumnMetadata.builder().name("test_column")
                 .adapterNotes("{\"jdbcDataType\":-2, \"typeName\":\"BINARY\"}")
                 .type(DataType.createVarChar(10, DataType.ExaCharset.UTF8)).build());
-        final SqlNode select = SqlNodesCreator.createSqlStatementSelect(sqlSelectList, columns, "");
+        final TableMetadata tableMetadata = new TableMetadata("", "", columns, "");
+        final SqlTable fromClause = new SqlTable("", tableMetadata);
+        final SqlNode select = SqlStatementSelect.builder().selectList(sqlSelectList).fromClause(fromClause).build();
         sqlSelectList.setParent(select);
         assertThat(this.visitor.visit(sqlSelectList), equalTo("base64(`test_column`)"));
     }
@@ -66,7 +69,8 @@ class HiveSqlGenerationVisitorTest {
 
     @Test
     void testVisitSqlSelectListSelectRegularList() throws AdapterException {
-        final SqlSelectList sqlSelectList = SqlNodesCreator.createRegularSqlSelectListWithTwoColumns();
+        final SqlSelectList sqlSelectList = SqlSelectList
+                .createRegularSelectList(Arrays.asList(new SqlLiteralBool(true), new SqlLiteralString("string")));
         assertThat(this.visitor.visit(sqlSelectList), equalTo("true, 'string'"));
     }
 
@@ -88,6 +92,19 @@ class HiveSqlGenerationVisitorTest {
                 DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
         SqlSelectList.createSelectStarSelectList();
         assertThrows(SqlGenerationVisitorException.class, () -> this.visitor.visit(sqlSelectList));
+    }
+
+    private SqlSelectList createSqlSelectStarListWithOneColumn(final String adapterNotes, final DataType dataType,
+            final String columnName) {
+        final SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
+        final List<ColumnMetadata> columns = new ArrayList<>();
+        columns.add(ColumnMetadata.builder().name(columnName).adapterNotes(adapterNotes).type(dataType).build());
+        final TableMetadata tableMetadata = new TableMetadata("", "", columns, "");
+        final SqlTable fromClause = new SqlTable("", tableMetadata);
+        final SqlNode sqlStatementSelect = SqlStatementSelect.builder().selectList(selectList).fromClause(fromClause)
+                .build();
+        selectList.setParent(sqlStatementSelect);
+        return selectList;
     }
 
     @Test
@@ -178,8 +195,10 @@ class HiveSqlGenerationVisitorTest {
 
     @Test
     void testVisitSqlFunctionScalarSubstringWithFrom() throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarWithTwoStringArguments(ScalarFunction.SUBSTR,
-                "string", "FROM 4 FOR 2");
+        final List<SqlNode> arguments = new ArrayList<>();
+        arguments.add(new SqlLiteralString("string"));
+        arguments.add(new SqlLiteralString("FROM 4 FOR 2"));
+        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(ScalarFunction.SUBSTR, arguments);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("SUBSTRING('string','FROM 4 FOR 2')"));
     }
 

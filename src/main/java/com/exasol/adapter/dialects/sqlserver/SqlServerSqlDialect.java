@@ -7,6 +7,8 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_INTERSECTION;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_UNION;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -112,8 +114,9 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://docs.microsoft.com/sql/relational-databases/databases/database-identifiers?view=sql-server-ver15
     public String applyQuote(final String identifier) {
-        return "[" + identifier + "]";
+        return SqlServerIdentifier.of(identifier).quote();
     }
 
     @Override
@@ -129,6 +132,12 @@ public class SqlServerSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_AT_START;
+    }
+
+    @Override
+    // https://docs.microsoft.com/en-us/sql/t-sql/data-types/constants-transact-sql?view=sql-server-ver15
+    public String getStringLiteral(final String value) {
+        return super.quoteLiteralStringWithSingleQuote(value);
     }
 
     @Override

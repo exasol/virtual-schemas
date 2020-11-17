@@ -4,10 +4,9 @@ import static com.exasol.adapter.dialects.VisitorAssertions.assertSqlNodeConvert
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static utils.SqlNodesCreator.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,7 @@ import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionFactory;
-import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,7 +42,12 @@ class SybaseSqlGenerationVisitorTest {
 
     @Test
     void testVisitSqlSelectListSelectStar() throws AdapterException {
-        final SqlSelectList sqlSelectList = createSqlSelectStarListWithoutColumns();
+        final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
+        final TableMetadata tableMetadata = new TableMetadata("", "", Collections.emptyList(), "");
+        final SqlTable fromClause = new SqlTable("test_table", tableMetadata);
+        final SqlNode sqlStatementSelect = SqlStatementSelect.builder().selectList(sqlSelectList).fromClause(fromClause)
+                .build();
+        sqlSelectList.setParent(sqlStatementSelect);
         assertSqlNodeConvertedToAsterisk(sqlSelectList, this.visitor);
     }
 
@@ -85,6 +89,19 @@ class SybaseSqlGenerationVisitorTest {
         assertThat(this.visitor.visit(sqlSelectList), equalTo("'" + typeName + " NOT SUPPORTED'"));
     }
 
+    private SqlSelectList createSqlSelectStarListWithOneColumn(final String adapterNotes, final DataType dataType,
+            final String columnName) {
+        final SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
+        final List<ColumnMetadata> columns = new ArrayList<>();
+        columns.add(ColumnMetadata.builder().name(columnName).adapterNotes(adapterNotes).type(dataType).build());
+        final TableMetadata tableMetadata = new TableMetadata("", "", columns, "");
+        final SqlTable fromClause = new SqlTable("", tableMetadata);
+        final SqlNode sqlStatementSelect = SqlStatementSelect.builder().selectList(selectList).fromClause(fromClause)
+                .build();
+        selectList.setParent(sqlStatementSelect);
+        return selectList;
+    }
+
     @Test
     void testVisitSqlSelectListSelectStarThrowsException() {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn("",
@@ -104,6 +121,17 @@ class SybaseSqlGenerationVisitorTest {
             throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarForDateTest(scalarFunction, 10);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("DATEADD(" + expected + ",10,[test_column])"));
+    }
+
+    private SqlFunctionScalar createSqlFunctionScalarForDateTest(final ScalarFunction scalarFunction,
+            final int numericValue) {
+        final List<SqlNode> arguments = new ArrayList<>();
+        arguments.add(new SqlColumn(1,
+                ColumnMetadata.builder().name("test_column")
+                        .adapterNotes("{\"jdbcDataType\":93, " + "\"typeName\":\"TIMESTAMP\"}")
+                        .type(DataType.createChar(20, DataType.ExaCharset.UTF8)).build()));
+        arguments.add(new SqlLiteralExactnumeric(new BigDecimal(numericValue)));
+        return new SqlFunctionScalar(scalarFunction, arguments);
     }
 
     @CsvSource({ "SECONDS_BETWEEN, SECOND", //
@@ -193,8 +221,10 @@ class SybaseSqlGenerationVisitorTest {
     @ParameterizedTest
     void testVisitSqlFunctionScalarWithTwoArguments(final ScalarFunction scalarFunction, final String expected)
             throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarWithTwoStringArguments(scalarFunction,
-                "left", "right");
+        final List<SqlNode> arguments = new ArrayList<>();
+        arguments.add(new SqlLiteralString("left"));
+        arguments.add(new SqlLiteralString("right"));
+        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, arguments);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo(expected));
     }
 }

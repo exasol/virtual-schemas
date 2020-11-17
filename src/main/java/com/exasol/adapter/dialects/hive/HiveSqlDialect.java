@@ -85,8 +85,9 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL
     public String applyQuote(final String identifier) {
-        return "`" + identifier + "`";
+        return "`" + identifier.replace("`", "``") + "`";
     }
 
     @Override
@@ -102,6 +103,17 @@ public class HiveSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_LOW;
+    }
+
+    @Override
+    // https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Types#LanguageManualTypes-StringsstringStrings
+    // https://cwiki.apache.org/confluence/display/Hive/CAST...FORMAT+with+SQL%3A2016+datetime+formats
+    public String getStringLiteral(final String value) {
+        if (value == null) {
+            return "NULL";
+        } else {
+            return "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'";
+        }
     }
 
     @Override

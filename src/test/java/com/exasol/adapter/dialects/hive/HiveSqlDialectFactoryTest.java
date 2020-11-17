@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterProperties;
 
-public class HiveSqlDialectFactoryTest {
+class HiveSqlDialectFactoryTest {
     private HiveSqlDialectFactory factory;
 
     @BeforeEach

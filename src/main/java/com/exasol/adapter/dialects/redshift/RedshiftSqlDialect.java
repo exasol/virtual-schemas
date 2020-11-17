@@ -93,8 +93,9 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://docs.aws.amazon.com/redshift/latest/dg/r_names.html
     public String applyQuote(final String identifier) {
-        return "\"" + identifier.replace("\"", "\"\"") + "\"";
+        return super.quoteIdentifierWithDoubleQuotes(identifier);
     }
 
     @Override
@@ -110,6 +111,19 @@ public class RedshiftSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_AT_END;
+    }
+
+    @Override
+    // https://docs.aws.amazon.com/redshift/latest/dg/r_Examples_with_character_types.html
+    public String getStringLiteral(final String value) {
+        if (value == null) {
+            return "NULL";
+        } else {
+            if (value.contains("'") || value.contains("\\")) {
+                throw new IllegalArgumentException("Redshift string literal contains illegal characters: ' or \\.");
+            }
+            return "'" + value + "'";
+        }
     }
 
     @Override

@@ -6,6 +6,8 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_INTERSECTION;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_UNION;
 
 import java.sql.SQLException;
 import java.util.Set;
@@ -81,13 +83,10 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
         return StructureElementSupport.NONE;
     }
 
-    /**
-     * @see <a href="http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_ansi_quotes">ANSI quotes (MySQL
-     *      reference manual)</a>
-     */
     @Override
+    // https://dev.mysql.com/doc/refman/8.0/en/identifiers.html
     public String applyQuote(final String identifier) {
-        return "`" + identifier + "`";
+        return "`" + identifier.replace("`", "``") + "`";
     }
 
     @Override
@@ -103,6 +102,17 @@ public class MySqlSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_AT_END;
+    }
+
+    @Override
+    // https://dev.mysql.com/doc/refman/8.0/en/string-literals.html
+    public String getStringLiteral(final String value) {
+        if (value == null) {
+            return "NULL";
+        } else {
+            // We replace \ with \\ because we expect that the mode NO_BACKSLASH_ESCAPES is not used.
+            return "'" + value.replace("\\", "\\\\").replace("'", "''") + "'";
+        }
     }
 
     @Override

@@ -7,6 +7,8 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_INTERSECTION;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_UNION;
 import static com.exasol.adapter.dialects.bigquery.BigQueryProperties.BIGQUERY_ENABLE_IMPORT_PROPERTY;
 
 import java.sql.SQLException;
@@ -124,8 +126,9 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://cloud.google.com/bigquery/docs/reference/standard-sql/lexical
     public String applyQuote(final String identifier) {
-        return "`" + identifier + "`";
+        return "`" + identifier.replace("`", "\\`") + "`";
     }
 
     @Override
@@ -147,5 +150,15 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
     public void validateProperties() throws PropertyValidationException {
         super.validateProperties();
         validateBooleanProperty(BIGQUERY_ENABLE_IMPORT_PROPERTY);
+    }
+
+    @Override
+    // https://cloud.google.com/bigquery/docs/reference/standard-sql/lexical
+    public String getStringLiteral(final String value) {
+        if (value == null) {
+            return "NULL";
+        } else {
+            return "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'";
+        }
     }
 }

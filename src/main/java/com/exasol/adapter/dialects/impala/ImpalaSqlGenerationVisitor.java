@@ -35,17 +35,14 @@ public class ImpalaSqlGenerationVisitor extends SqlGenerationVisitor {
         final StringBuilder builder = new StringBuilder();
         builder.append(function.getFunctionName());
         builder.append("(");
-        // To use it group_concat with numeric values we would need to sync group_concat(cast(x as string)). Since we cannot compute the type, we always cast
+        // To use it group_concat with numeric values we would need to sync group_concat(cast(x as string)). Since we
+        // cannot compute the type, we always cast
         builder.append("CAST(");
-        assert(function.getArguments() != null);
-        assert(function.getArguments().size() == 1 && function.getArguments().get(0) != null);
-        builder.append(function.getArguments().get(0).accept(this));
+        builder.append(function.getArgument().accept(this));
         builder.append(" AS STRING)");
-        if (function.getSeparator() != null) {
+        if (function.hasSeparator()) {
             builder.append(", ");
-            builder.append("'");
-            builder.append(function.getSeparator());
-            builder.append("'");
+            builder.append(function.getSeparator().accept(this));
         }
         builder.append(")");
         return builder.toString();
@@ -53,7 +50,8 @@ public class ImpalaSqlGenerationVisitor extends SqlGenerationVisitor {
 
     @Override
     public String visit(final SqlFunctionAggregate function) throws AdapterException {
-        final boolean isDirectlyInSelectList = (function.hasParent() && function.getParent().getType() == SqlNodeType.SELECT_LIST);
+        final boolean isDirectlyInSelectList = (function.hasParent()
+                && function.getParent().getType() == SqlNodeType.SELECT_LIST);
         if (function.getFunction() != AggregateFunction.SUM || !isDirectlyInSelectList) {
             return super.visit(function);
         } else {
@@ -70,8 +68,8 @@ public class ImpalaSqlGenerationVisitor extends SqlGenerationVisitor {
                 distinctSql = "DISTINCT ";
             }
             String functionNameInSourceSystem = function.getFunctionName();
-            if (dialect.getAggregateFunctionAliases().containsKey(function.getFunction())) {
-                functionNameInSourceSystem = dialect.getAggregateFunctionAliases().get(function.getFunction());
+            if (this.dialect.getAggregateFunctionAliases().containsKey(function.getFunction())) {
+                functionNameInSourceSystem = this.dialect.getAggregateFunctionAliases().get(function.getFunction());
             }
             return "CAST(" + functionNameInSourceSystem + "(" + distinctSql + String.join(", ", argumentsSql)
                     + ") AS DOUBLE)";

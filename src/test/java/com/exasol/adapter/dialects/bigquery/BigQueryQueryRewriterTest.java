@@ -90,7 +90,7 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
     }
 
     @CsvSource({ "string_col, 12, hello, hello", //
-            "string_col, 12, i'm, i''m", //
+            "string_col, 12, i'm, i\\'m", //
             "time_col, 92, 12:10:09.000, 12:10:09.000", //
             "numeric_col, 2, 22222.2222, 22222.2222", //
             "numeric_col, 2, 11.5, 11.5", //

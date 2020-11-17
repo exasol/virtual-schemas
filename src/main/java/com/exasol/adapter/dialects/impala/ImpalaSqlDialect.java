@@ -93,8 +93,9 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://docs.cloudera.com/documentation/enterprise/latest/topics/impala_identifiers.html
     public String applyQuote(final String identifier) {
-        return "`" + identifier + "`";
+        return ImpalaIdentifier.of(identifier).quote();
     }
 
     @Override
@@ -130,5 +131,15 @@ public class ImpalaSqlDialect extends AbstractSqlDialect {
     @Override
     protected QueryRewriter createQueryRewriter() {
         return new BaseQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
+    }
+
+    @Override
+    // https://docs.cloudera.com/documentation/enterprise/5-9-x/topics/impala_literals.html#string_literals
+    public String getStringLiteral(final String value) {
+        if (value == null) {
+            return "NULL";
+        } else {
+            return "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'";
+        }
     }
 }

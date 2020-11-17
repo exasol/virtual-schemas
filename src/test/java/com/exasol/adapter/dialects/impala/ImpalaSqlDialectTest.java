@@ -12,10 +12,12 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +27,9 @@ import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.sql.ScalarFunction;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class ImpalaSqlDialectTest {
     private SqlDialect dialect;
@@ -100,7 +105,7 @@ class ImpalaSqlDialectTest {
 
     @Test
     void testValidateCatalogProperty() throws PropertyValidationException {
-        setMandatoryProperties("IMPALA");
+        setMandatoryProperties();
         this.rawProperties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new ImpalaSqlDialect(null, adapterProperties);
@@ -109,16 +114,39 @@ class ImpalaSqlDialectTest {
 
     @Test
     void testValidateSchemaProperty() throws PropertyValidationException {
-        setMandatoryProperties("IMPALA");
+        setMandatoryProperties();
         this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new ImpalaSqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
     }
 
+    @CsvSource({ "tableName, `tableName`", //
+            "table ' Name, `table ' Name`", //
+            "table \" Name, `table \" Name`" //
+    })
+    @ParameterizedTest
+    void testApplyQuote(final String unquoted, final String quoted) {
+        assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
+    }
+
+    @CsvSource({ "`tableName`", "table`Name", "table name`" })
+    @ParameterizedTest
+    void testApplyQuoteThrowsException(final String identifier) {
+        assertThrows(AssertionError.class, () -> this.dialect.applyQuote(identifier));
+    }
+
+    @ValueSource(strings = { "ab:'ab'", "a'b:'a\\'b'", "a''b:'a\\'\\'b'", "'ab':'\\'ab\\''", "a\\b:'a\\\\b'",
+            "a\\\\b:'a\\\\\\\\b'", "a\\'b:'a\\\\\\'b'" })
+    @ParameterizedTest
+    void testGetLiteralString(final String definition) {
+        assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),
+                equalTo(definition.substring(definition.indexOf(':') + 1)));
+    }
+
     @Test
-    void testApplyQuote() {
-        assertThat(this.dialect.applyQuote("tableName"), equalTo("`tableName`"));
+    void testGetLiteralStringNull() {
+        assertThat(this.dialect.getStringLiteral(null), CoreMatchers.equalTo("NULL"));
     }
 
     @Test
@@ -141,8 +169,8 @@ class ImpalaSqlDialectTest {
         assertThat(this.dialect.getSqlGenerationVisitor(null), instanceOf(ImpalaSqlGenerationVisitor.class));
     }
 
-    private void setMandatoryProperties(final String sqlDialectProperty) {
-        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
+    private void setMandatoryProperties() {
+        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, "IMPALA");
         this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN");
     }
 }

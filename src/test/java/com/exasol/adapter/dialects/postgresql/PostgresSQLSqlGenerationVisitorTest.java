@@ -6,10 +6,9 @@ import static com.exasol.adapter.sql.ScalarFunction.POSIX_TIME;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static utils.SqlNodesCreator.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,12 +22,12 @@ import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionFactory;
-import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
 
 @ExtendWith(MockitoExtension.class)
 class PostgresSQLSqlGenerationVisitorTest {
-    private SqlNodeVisitor<String> visitor;
+    private SqlGenerationVisitor visitor;
 
     @BeforeEach
     void beforeEach(@Mock final ConnectionFactory connectionFactoryMock) {
@@ -48,6 +47,17 @@ class PostgresSQLSqlGenerationVisitorTest {
             throws AdapterException {
         final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarForDateTest(scalarFunction, 10);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("\"test_column\" +  interval '10 " + expected + "'"));
+    }
+
+    private SqlFunctionScalar createSqlFunctionScalarForDateTest(final ScalarFunction scalarFunction,
+            final int numericValue) {
+        final List<SqlNode> arguments = new ArrayList<>();
+        arguments.add(new SqlColumn(1,
+                ColumnMetadata.builder().name("test_column")
+                        .adapterNotes("{\"jdbcDataType\":93, " + "\"typeName\":\"TIMESTAMP\"}")
+                        .type(DataType.createChar(20, DataType.ExaCharset.UTF8)).build()));
+        arguments.add(new SqlLiteralExactnumeric(new BigDecimal(numericValue)));
+        return new SqlFunctionScalar(scalarFunction, arguments);
     }
 
     @CsvSource({ "SECONDS_BETWEEN, SECOND", //
@@ -91,7 +101,12 @@ class PostgresSQLSqlGenerationVisitorTest {
 
     @Test
     void testVisitSqlSelectListSelectStar() throws AdapterException {
-        final SqlSelectList sqlSelectList = createSqlSelectStarListWithoutColumns();
+        final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
+        final TableMetadata tableMetadata = new TableMetadata("", "", Collections.emptyList(), "");
+        final SqlTable fromClause = new SqlTable("test_table", tableMetadata);
+        final SqlNode sqlStatementSelect = SqlStatementSelect.builder().selectList(sqlSelectList).fromClause(fromClause)
+                .build();
+        sqlSelectList.setParent(sqlStatementSelect);
         assertSqlNodeConvertedToAsterisk(sqlSelectList, this.visitor);
     }
 
@@ -123,15 +138,15 @@ class PostgresSQLSqlGenerationVisitorTest {
             throws AdapterException {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn(
                 "{\"jdbcDataType\":2009, \"typeName\":\"" + typeName + "\"}",
-                DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
+                DataType.createVarChar(10, DataType.ExaCharset.UTF8));
         assertThat(this.visitor.visit(sqlSelectList), equalTo("CAST(\"test_column\"  as " + expectedCastType + " )"));
     }
 
     @Test
     void testVisitSqlSelectListSelectStarUnsupportedType() throws AdapterException {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn(
-                "{\"jdbcDataType\":2009, \"typeName\":\"bytea\"}", DataType.createVarChar(10, DataType.ExaCharset.UTF8),
-                "test_column");
+                "{\"jdbcDataType\":2009, \"typeName\":\"bytea\"}",
+                DataType.createVarChar(10, DataType.ExaCharset.UTF8));
         assertThat(this.visitor.visit(sqlSelectList),
                 equalTo("cast('bytea NOT SUPPORTED' as varchar) as not_supported"));
     }
@@ -151,17 +166,34 @@ class PostgresSQLSqlGenerationVisitorTest {
     @Test
     void testVisitSqlSelectListSelectStarThrowsException() {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn("",
-                DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
+                DataType.createVarChar(10, DataType.ExaCharset.UTF8));
         assertThrows(SqlGenerationVisitorException.class, () -> this.visitor.visit(sqlSelectList));
+    }
+
+    private SqlSelectList createSqlSelectStarListWithOneColumn(final String adapterNotes, final DataType dataType) {
+        final SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
+        final List<ColumnMetadata> columns = new ArrayList<>();
+        columns.add(ColumnMetadata.builder().name("test_column").adapterNotes(adapterNotes).type(dataType).build());
+        final TableMetadata tableMetadata = new TableMetadata("", "", columns, "");
+        final SqlTable fromClause = new SqlTable("", tableMetadata);
+        final SqlNode sqlStatementSelect = SqlStatementSelect.builder().selectList(selectList).fromClause(fromClause)
+                .build();
+        selectList.setParent(sqlStatementSelect);
+        return selectList;
     }
 
     @Test
     void testVisitSqlFunctionAggregateGroupConcat() throws AdapterException {
-        final List<SqlNode> arguments = new ArrayList<>();
-        arguments.add(new SqlLiteralString("test"));
-        final SqlOrderBy orderBy = createSqlOrderByDescNullsFirst("test_column", "test_column2");
-        final SqlFunctionAggregateGroupConcat sqlFunctionAggregateGroupConcat = new SqlFunctionAggregateGroupConcat(
-                AggregateFunction.AVG, arguments, orderBy, false, "'");
-        assertThat(this.visitor.visit(sqlFunctionAggregateGroupConcat), equalTo("STRING_AGG('test', ''') "));
+        final SqlLiteralString argument = new SqlLiteralString("test");
+        final ColumnMetadata columnMetadata = ColumnMetadata.builder().name("test_column").type(DataType.createBool())
+                .build();
+        final ColumnMetadata columnMetadata2 = ColumnMetadata.builder().name("test_column2")
+                .type(DataType.createDouble()).build();
+        final List<SqlNode> orderByArguments = List.of(new SqlColumn(1, columnMetadata),
+                new SqlColumn(2, columnMetadata2));
+        final SqlOrderBy orderBy = new SqlOrderBy(orderByArguments, List.of(false, true), List.of(false, true));
+        final SqlFunctionAggregateGroupConcat sqlFunctionAggregateGroupConcat = SqlFunctionAggregateGroupConcat
+                .builder(argument).separator(new SqlLiteralString("'")).orderBy(orderBy).build();
+        assertThat(this.visitor.visit(sqlFunctionAggregateGroupConcat), equalTo("STRING_AGG(E'test', E'''') "));
     }
 }

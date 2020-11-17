@@ -7,6 +7,7 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
@@ -16,9 +17,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Map;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -82,14 +87,26 @@ class PostgreSQLSqlDialectTest {
                                 DATE_TRUNC, EXTRACT, LOCALTIMESTAMP, POSIX_TIME, TO_CHAR, CASE, HASH_MD5)));
     }
 
-    @Test
-    void testApplyQuoteOnUpperCase() {
-        assertEquals("\"abc\"", this.dialect.applyQuote("ABC"));
+    @CsvSource({ "ABC, \"abc\"", //
+            "AbCde, \"abcde\"", //
+            "\"tableName, \"\"\"tablename\"" //
+    })
+    @ParameterizedTest
+    void testApplyQuote(final String unquoted, final String quoted) {
+        assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
+    }
+
+    @ValueSource(strings = { "ab:E'ab'", "a'b:E'a''b'", "a''b:E'a''''b'", "'ab':E'''ab'''", "a\\\\b:E'a\\\\\\\\b'",
+            "a\\'b:E'a\\\\''b'" })
+    @ParameterizedTest
+    void testGetLiteralString(final String definition) {
+        assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),
+                equalTo(definition.substring(definition.indexOf(':') + 1)));
     }
 
     @Test
-    void testApplyQuoteOnMixedCase() {
-        assertEquals("\"abcde\"", this.dialect.applyQuote("AbCde"));
+    void testGetLiteralStringNull() {
+        assertThat(this.dialect.getStringLiteral(null), CoreMatchers.equalTo("NULL"));
     }
 
     @Test

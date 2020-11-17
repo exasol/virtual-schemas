@@ -7,6 +7,7 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -14,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,6 +23,9 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.PropertyValidationException;
 import com.exasol.adapter.dialects.SqlDialect;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class HiveSqlDialectTest {
     private SqlDialect dialect;
@@ -61,7 +66,7 @@ class HiveSqlDialectTest {
 
     @Test
     void testValidateCatalogProperty() throws PropertyValidationException {
-        setMandatoryProperties("HIVE");
+        setMandatoryProperties();
         this.rawProperties.put(CATALOG_NAME_PROPERTY, "MY_CATALOG");
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new HiveSqlDialect(null, adapterProperties);
@@ -70,15 +75,36 @@ class HiveSqlDialectTest {
 
     @Test
     void testValidateSchemaProperty() throws PropertyValidationException {
-        setMandatoryProperties("HIVE");
+        setMandatoryProperties();
         this.rawProperties.put(SCHEMA_NAME_PROPERTY, "MY_SCHEMA");
         final AdapterProperties adapterProperties = new AdapterProperties(this.rawProperties);
         final SqlDialect sqlDialect = new HiveSqlDialect(null, adapterProperties);
         sqlDialect.validateProperties();
     }
 
-    private void setMandatoryProperties(final String sqlDialectProperty) {
-        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, sqlDialectProperty);
+    @CsvSource({ "tableName, `tableName`", //
+            "`tableName, ```tableName`" //
+    })
+    @ParameterizedTest
+    void testApplyQuote(final String unquoted, final String quoted) {
+        assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
+    }
+
+    @ValueSource(strings = { "ab:'ab'", "a'b:'a\\'b'", "a''b:'a\\'\\'b'", "'ab':'\\'ab\\''", "a\\b:'a\\\\b'",
+            "a\\\\b:'a\\\\\\\\b'", "a\\'b:'a\\\\\\'b'" })
+    @ParameterizedTest
+    void testGetLiteralString(final String definition) {
+        assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),
+                equalTo(definition.substring(definition.indexOf(':') + 1)));
+    }
+
+    @Test
+    void testGetLiteralStringNull() {
+        assertThat(this.dialect.getStringLiteral(null), CoreMatchers.equalTo("NULL"));
+    }
+
+    private void setMandatoryProperties() {
+        this.rawProperties.put(AdapterProperties.SQL_DIALECT_PROPERTY, "HIVE");
         this.rawProperties.put(AdapterProperties.CONNECTION_NAME_PROPERTY, "MY_CONN");
     }
 }

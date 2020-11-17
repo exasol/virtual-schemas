@@ -6,6 +6,8 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_INTERSECTION;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_UNION;
 import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -17,10 +19,14 @@ import static org.mockito.Mockito.when;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -115,10 +121,24 @@ class SapHanaSqlDialectTest {
                 Matchers.equalTo(SqlDialect.NullSorting.NULLS_SORTED_AT_START));
     }
 
-    @Test
-    void testApplyQuote() {
-        assertThat(this.dialect.applyQuote("tableName"), Matchers.equalTo("\"tableName\""));
+    @CsvSource({ "tableName, \"tableName\"", //
+            "\"tableName, \"\"\"tableName\"" //
+    })
+    @ParameterizedTest
+    void testApplyQuote(final String unquoted, final String quoted) {
+        assertThat(this.dialect.applyQuote(unquoted), Matchers.equalTo(quoted));
+    }
 
+    @ValueSource(strings = { "ab:'ab'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
+    @ParameterizedTest
+    void testGetLiteralString(final String definition) {
+        assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),
+                Matchers.equalTo(definition.substring(definition.indexOf(':') + 1)));
+    }
+
+    @Test
+    void testGetLiteralStringNull() {
+        assertThat(this.dialect.getStringLiteral(null), equalTo("NULL"));
     }
 
     @Test

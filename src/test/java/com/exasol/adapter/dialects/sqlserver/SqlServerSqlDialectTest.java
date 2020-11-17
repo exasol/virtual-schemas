@@ -6,12 +6,15 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_INTERSECTION;
+import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_UNION;
 import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Map;
 
@@ -20,6 +23,9 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -134,9 +140,28 @@ class SqlServerSqlDialectTest {
                         Matchers.equalTo("VARP")));
     }
 
+    @CsvSource({ "tableName, [tableName]", "table \"name, [table \"name]" })
+    @ParameterizedTest
+    void testApplyQuote(final String identifier, final String expected) {
+        assertThat(this.dialect.applyQuote(identifier), equalTo(expected));
+    }
+
+    @CsvSource({ "[tableName]", "[table name", "table name]", "table[name", "table]name", "table\\name" })
+    @ParameterizedTest
+    void testApplyQuoteThrowsException(final String identifier) {
+        assertThrows(AssertionError.class, () -> this.dialect.applyQuote(identifier));
+    }
+
+    @ValueSource(strings = { "ab:'ab'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
+    @ParameterizedTest
+    void testGetLiteralString(final String definition) {
+        assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),
+                equalTo(definition.substring(definition.indexOf(':') + 1)));
+    }
+
     @Test
-    void testApplyQuote() {
-        assertThat(this.dialect.applyQuote("tableName"), equalTo("[tableName]"));
+    void testGetLiteralStringNull() {
+        assertThat(this.dialect.getStringLiteral(null), CoreMatchers.equalTo("NULL"));
     }
 
     @Test

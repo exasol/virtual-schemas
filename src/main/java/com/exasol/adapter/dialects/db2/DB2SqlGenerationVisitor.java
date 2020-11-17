@@ -319,8 +319,7 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
         final StringBuilder builder = new StringBuilder();
         builder.append("LISTAGG");
         builder.append("(");
-        if ((function.getArguments() != null) && (function.getArguments().size() == 1)
-                && (function.getArguments().get(0) != null)) {
+        if (function.getArgument() != null) {
             return getGroupConcat(function, builder);
         } else {
             throw new SqlGenerationVisitorException(
@@ -330,16 +329,12 @@ public class DB2SqlGenerationVisitor extends SqlGenerationVisitor {
 
     private String getGroupConcat(final SqlFunctionAggregateGroupConcat function, final StringBuilder builder)
             throws AdapterException {
-        final String expression = function.getArguments().get(0).accept(this);
+        final String expression = function.getArgument().accept(this);
         builder.append(expression);
         builder.append(", ");
-        String separator = ",";
-        if (function.getSeparator() != null) {
-            separator = function.getSeparator();
-        }
-        builder.append("'");
+        final String separator = function.getSeparator() == null ? "','" : function.getSeparator().accept(this);
         builder.append(separator);
-        builder.append("') ");
+        builder.append(") ");
         builder.append("WITHIN GROUP(ORDER BY ");
         if (function.hasOrderBy()) {
             getOrderBy(function, builder);

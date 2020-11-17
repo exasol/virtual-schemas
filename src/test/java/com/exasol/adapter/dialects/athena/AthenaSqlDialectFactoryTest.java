@@ -1,15 +1,15 @@
 package com.exasol.adapter.dialects.athena;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterProperties;
 
-public class AthenaSqlDialectFactoryTest {
+class AthenaSqlDialectFactoryTest {
     private AthenaSqlDialectFactory factory;
 
     @BeforeEach

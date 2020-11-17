@@ -4,11 +4,11 @@ import static com.exasol.adapter.dialects.VisitorAssertions.assertSqlNodeConvert
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static utils.SqlNodesCreator.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
 
+import com.exasol.adapter.metadata.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,7 +17,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.*;
 
 class SqlServerSqlGenerationVisitorTest {
@@ -39,7 +38,12 @@ class SqlServerSqlGenerationVisitorTest {
 
     @Test
     void testVisitSqlSelectListSelectStar() throws AdapterException {
-        final SqlSelectList sqlSelectList = createSqlSelectStarListWithoutColumns();
+        final SqlSelectList sqlSelectList = SqlSelectList.createSelectStarSelectList();
+        final TableMetadata tableMetadata = new TableMetadata("", "", Collections.emptyList(), "");
+        final SqlTable fromClause = new SqlTable("test_table", tableMetadata);
+        final SqlNode sqlStatementSelect = SqlStatementSelect.builder().selectList(sqlSelectList).fromClause(fromClause)
+                .build();
+        sqlSelectList.setParent(sqlStatementSelect);
         assertSqlNodeConvertedToAsterisk(sqlSelectList, this.visitor);
     }
 
@@ -47,7 +51,7 @@ class SqlServerSqlGenerationVisitorTest {
     void testVisitSqlSelectListSelectStarRequiresCast() throws AdapterException {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn(
                 "{\"jdbcDataType\":-155, \"typeName\":\"datetimeoffset\"}",
-                DataType.createVarChar(36, DataType.ExaCharset.UTF8), "test_column");
+                DataType.createVarChar(36, DataType.ExaCharset.UTF8));
         assertThat(this.visitor.visit(sqlSelectList), equalTo("CAST([test_column] as VARCHAR(34))"));
     }
 
@@ -65,8 +69,20 @@ class SqlServerSqlGenerationVisitorTest {
     @Test
     void testVisitSqlSelectListSelectStarThrowsException() {
         final SqlSelectList sqlSelectList = createSqlSelectStarListWithOneColumn("",
-                DataType.createVarChar(10, DataType.ExaCharset.UTF8), "test_column");
+                DataType.createVarChar(10, DataType.ExaCharset.UTF8));
         assertThrows(SqlGenerationVisitorException.class, () -> this.visitor.visit(sqlSelectList));
+    }
+
+    private SqlSelectList createSqlSelectStarListWithOneColumn(final String adapterNotes, final DataType dataType) {
+        final SqlSelectList selectList = SqlSelectList.createSelectStarSelectList();
+        final List<ColumnMetadata> columns = new ArrayList<>();
+        columns.add(ColumnMetadata.builder().name("test_column").adapterNotes(adapterNotes).type(dataType).build());
+        final TableMetadata tableMetadata = new TableMetadata("", "", columns, "");
+        final SqlTable fromClause = new SqlTable("", tableMetadata);
+        final SqlNode sqlStatementSelect = SqlStatementSelect.builder().selectList(selectList).fromClause(fromClause)
+                .build();
+        selectList.setParent(sqlStatementSelect);
+        return selectList;
     }
 
     @CsvSource({ "ADD_DAYS, DAY", //
@@ -78,8 +94,18 @@ class SqlServerSqlGenerationVisitorTest {
     @ParameterizedTest
     void testVisitSqlFunctionScalarAddDate(final ScalarFunction scalarFunction, final String expected)
             throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarForDateTest(scalarFunction, 10);
+        final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarForDateTest(scalarFunction);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("DATEADD(" + expected + ",10,[test_column])"));
+    }
+
+    private SqlFunctionScalar createSqlFunctionScalarForDateTest(final ScalarFunction scalarFunction) {
+        final List<SqlNode> arguments = new ArrayList<>();
+        arguments.add(new SqlColumn(1,
+                ColumnMetadata.builder().name("test_column")
+                        .adapterNotes("{\"jdbcDataType\":93, " + "\"typeName\":\"TIMESTAMP\"}")
+                        .type(DataType.createChar(20, DataType.ExaCharset.UTF8)).build()));
+        arguments.add(new SqlLiteralExactnumeric(new BigDecimal(10)));
+        return new SqlFunctionScalar(scalarFunction, arguments);
     }
 
     @CsvSource({ "SECONDS_BETWEEN, SECOND", //
@@ -91,7 +117,7 @@ class SqlServerSqlGenerationVisitorTest {
     @ParameterizedTest
     void testVisitSqlFunctionScalarTimeBetween(final ScalarFunction scalarFunction, final String expected)
             throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarForDateTest(scalarFunction, 10);
+        final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarForDateTest(scalarFunction);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("DATEDIFF(" + expected + ",10,[test_column])"));
     }
 
@@ -169,8 +195,8 @@ class SqlServerSqlGenerationVisitorTest {
     @ParameterizedTest
     void testVisitSqlFunctionScalarWithTwoArguments(final ScalarFunction scalarFunction, final String expected)
             throws AdapterException {
-        final SqlFunctionScalar sqlFunctionScalar = createSqlFunctionScalarWithTwoStringArguments(scalarFunction,
-                "left", "right");
+        final List<SqlNode> arguments = List.of(new SqlLiteralString("left"), new SqlLiteralString("right"));
+        final SqlFunctionScalar sqlFunctionScalar = new SqlFunctionScalar(scalarFunction, arguments);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo(expected));
     }
 }

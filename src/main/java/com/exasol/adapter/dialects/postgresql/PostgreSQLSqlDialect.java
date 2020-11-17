@@ -118,12 +118,13 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    // https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
     public String applyQuote(final String identifier) {
         String postgreSQLIdentifier = identifier;
         if (getIdentifierMapping() != PostgreSQLIdentifierMapping.PRESERVE_ORIGINAL_CASE) {
             postgreSQLIdentifier = convertIdentifierToLowerCase(postgreSQLIdentifier);
         }
-        return "\"" + postgreSQLIdentifier.replace("\"", "\"\"") + "\"";
+        return super.quoteIdentifierWithDoubleQuotes(postgreSQLIdentifier);
     }
 
     private String convertIdentifierToLowerCase(final String identifier) {
@@ -143,6 +144,18 @@ public class PostgreSQLSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_AT_END;
+    }
+
+    @Override
+    // https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-CONSTANTS
+    public String getStringLiteral(final String value) {
+        if (value == null) {
+            return "NULL";
+        } else {
+            // We use an escape string constant to be independent of the parameter standard_conforming_strings.
+            // We use '' instead of \' to be independent of the parameter backslash_quote.
+            return "E'" + value.replace("\\", "\\\\").replace("'", "''") + "'";
+        }
     }
 
     @Override

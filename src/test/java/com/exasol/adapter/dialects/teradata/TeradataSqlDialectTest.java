@@ -21,9 +21,13 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -61,7 +65,6 @@ class TeradataSqlDialectTest {
                         containsInAnyOrder(COUNT, COUNT_STAR, COUNT_DISTINCT, SUM, SUM_DISTINCT, MIN, MAX, AVG,
                                 AVG_DISTINCT, MEDIAN, FIRST_VALUE, LAST_VALUE, STDDEV_POP, STDDEV_SAMP, VAR_POP,
                                 VAR_SAMP)),
-                //
                 () -> assertThat(capabilities.getScalarFunctionCapabilities(),
                         containsInAnyOrder(CEIL, DIV, FLOOR, SIGN, ADD, SUB, MULT, FLOAT_DIV, NEG, ABS, ACOS, ASIN,
                                 ATAN, ATAN2, COS, COSH, COT, DEGREES, EXP, GREATEST, LEAST, LN, LOG, MOD, POWER,
@@ -102,9 +105,24 @@ class TeradataSqlDialectTest {
         sqlDialect.validateProperties();
     }
 
+    @CsvSource({ "tableName, \"tableName\"", //
+            "\"tableName, \"\"\"tableName\"" //
+    })
+    @ParameterizedTest
+    void testApplyQuote(final String unquoted, final String quoted) {
+        assertThat(this.dialect.applyQuote(unquoted), Matchers.equalTo(quoted));
+    }
+
+    @ValueSource(strings = { "ab:'ab'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
+    @ParameterizedTest
+    void testGetLiteralString(final String definition) {
+        assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),
+                equalTo(definition.substring(definition.indexOf(':') + 1)));
+    }
+
     @Test
-    void testApplyQuote() {
-        assertThat(this.dialect.applyQuote("tableName"), equalTo("\"tableName\""));
+    void testGetLiteralStringNull() {
+        assertThat(this.dialect.getStringLiteral(null), CoreMatchers.equalTo("NULL"));
     }
 
     @Test

@@ -7,8 +7,10 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
@@ -19,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -105,11 +108,26 @@ class AthenaSqlDialectTest {
         assertThat(this.dialect.getDefaultNullSorting(), equalTo(NullSorting.NULLS_SORTED_AT_END));
     }
 
-    @CsvSource({ "tableName, \"tableName\"", "table123, \"table123\"", "_table, `_table`",
+    @CsvSource({ "tableName, \"tableName\"", //
+            "table123, \"table123\"", //
+            "_table, `_table`", //
+            "123table, \"123table\"", //
             "table_name, \"table_name\"" })
     @ParameterizedTest
     void testApplyQuote(final String unquoted, final String quoted) {
         assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
+    }
+
+    @Test
+    void testGetLiteralStringNull() {
+        assertThat(this.dialect.getStringLiteral(null), equalTo("NULL"));
+    }
+
+    @ValueSource(strings = { "ab:'ab'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
+    @ParameterizedTest
+    void testGetLiteralString(final String definition) {
+        assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),
+                equalTo(definition.substring(definition.indexOf(':') + 1)));
     }
 
     @Test

@@ -11,7 +11,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.IdentifierCaseHandling;
 import com.exasol.adapter.dialects.IdentifierConverter;
 
-public class HiveMetadataReaderTest {
+class HiveMetadataReaderTest {
     private HiveMetadataReader hiveMetadataReader;
 
     @BeforeEach

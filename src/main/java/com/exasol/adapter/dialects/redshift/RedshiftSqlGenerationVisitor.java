@@ -18,25 +18,18 @@ public class RedshiftSqlGenerationVisitor extends SqlGenerationVisitor {
     public RedshiftSqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         super(dialect, context);
     }
- 
+
     @Override
     public String visit(final SqlFunctionAggregateGroupConcat function) throws AdapterException {
         final StringBuilder builder = new StringBuilder();
         builder.append("LISTAGG");
         builder.append("(");
-        assert(function.getArguments() != null);
-        assert(function.getArguments().size() == 1 && function.getArguments().get(0) != null);
-        final String expression = function.getArguments().get(0).accept(this);
+        final String expression = function.getArgument().accept(this);
         builder.append(expression);
         builder.append(", ");
-        String separator = ",";
-        if (function.getSeparator() != null) {
-            separator = function.getSeparator();
-        }
-        builder.append("'");
+        final String separator = function.hasSeparator() ? function.getSeparator().accept(this) : "','";
         builder.append(separator);
-        builder.append("') ");
-        builder.append("WITHIN GROUP(ORDER BY ");
+        builder.append(") WITHIN GROUP(ORDER BY ");
         if (function.hasOrderBy()) {
             for (int i = 0; i < function.getOrderBy().getExpressions().size(); i++) {
                 if (i > 0) {
