@@ -15,4 +15,4 @@
 ## Dependency updates
 
 * Removed org.postgresql:postgresql:42.2.18
-* Removed org.testcontainers:postgresql:1.14.3
+* Removed org.testcontainers:postgresql:1.15.0
