@@ -178,7 +178,7 @@ There are differences in how precise the remote data source can encode integer, 
 The best way to find out how good the default mapping works for your source &mdash; run a manual [integration test](integration_testing.md) with [remote logging](../remote_logging.md) accessing a table with all data types available in the source.
 If you assume that you don't need to change data type conversion &mdash; go to the next checkpoint: [Implementing Query Rewriting](#implementing-query-rewriting)
 
-Let's look at a HIVE dialect example. We only want to change mapping for one data type: DECIMAL.
+Let's look at a HIVE dialect example. We only want to change mapping for two data type: DECIMAL and BINARY.
 
 1. **Create `<Your dialect name>ColumnMetadataReader.java`** class that extends `BaseColumnMetadataReader.java`.
 
@@ -198,8 +198,11 @@ Let's look at a HIVE dialect example. We only want to change mapping for one dat
     
         @Override
         public DataType mapJdbcType(final JdbcTypeDescription jdbcTypeDescription) {
-            if (jdbcTypeDescription.getJdbcType() == Types.DECIMAL) {
+            final int jdbcType = jdbcTypeDescription.getJdbcType();
+            if (jdbcType == Types.DECIMAL) {
                 return mapDecimal(jdbcTypeDescription);
+            } else if (jdbcType == Types.BINARY) {
+                return DataType.createMaximumSizeVarChar(DataType.ExaCharset.UTF8);
             } else {
                 return super.mapJdbcType(jdbcTypeDescription);
             }
@@ -323,7 +326,12 @@ For each of them a base implementation exists which works fine with a number of 
     ```java
         @Override
         protected RemoteMetadataReader createRemoteMetadataReader() {
-            return new AthenaMetadataReader(this.connection, this.properties);
+            try {
+                return new AthenaMetadataReader(this.connectionFactory.getConnection(), this.properties);
+            } catch (final SQLException exception) {
+                throw new RemoteMetadataReaderException(
+                        "Unable to create Athena remote metadata reader. Caused by: " + exception.getMessage(), exception);
+            }
         }
     ```
    

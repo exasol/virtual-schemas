@@ -25,25 +25,25 @@ As an example, PostgreSQL handles some of the data types subtly different from E
 Below you can see a layer model of the Virtual Schemas when implemented with the JDBC adapter.
  The layers in the middle &mdash; i.e. everything that deals with translating between the source and Exasol &mdash; are provided in this repository.
 
-    .-----------------------------------------.
-    |  Exasol    |          Exasol            |
-    |   core     |----------------------------|
-    |            |//// Virtual Schema API ////|
-    |------------|----------------------------|
-    |            |       JDBC  Adapter        |   Common JDBC functions
-    |  In this   |----------------------------|
-    | repository |///// SQL Dialect API //////|
-    |            |----------------------------|
-    |            |    SQL Dialect Adapter     |   Even out specifics of the source database
-    |------------|----------------------------|
-    |            |///////// JDBC API /////////|
-    |            |----------------------------|
-    |            |  PostgresSQL JDBC Driver   |   JDBC compliant access to payload and metadata
-    |  External  |----------------------------|
-    |            |// PostgresSQL Native API //|
-    |            |----------------------------|
-    |            |         PostgreSQL         |   External data source
-    '-----------------------------------------'
+    .-------------------------------------------------.
+    |  Exasol            |          Exasol            |
+    |   core             |----------------------------|
+    |                    |//// Virtual Schema API ////|
+    |--------------------|----------------------------|
+    | In vs-common-jdbc  |       JDBC  Adapter        |   Common JDBC functions
+    |   repository       |----------------------------|
+    |                    |///// SQL Dialect API //////|
+    |                    |----------------------------|
+    | In this repository |    SQL Dialect Adapter     |   Even out specifics of the source database
+    |--------------------|----------------------------|
+    |                    |///////// JDBC API /////////|
+    |                    |----------------------------|
+    |                    |  PostgresSQL JDBC Driver   |   JDBC compliant access to payload and metadata
+    |  External          |----------------------------|
+    |                    |// PostgresSQL Native API //|
+    |                    |----------------------------|
+    |                    |         PostgreSQL         |   External data source
+    '-------------------------------------------------'
 
 For more information about the structure of the Virtual Schemas check the UML diagrams provided in the directory [model/diagrams](../../../model/diagrams). You either need [PlantUML](http://plantuml.com/) to render them or an editor that has PlamtUML preview built in.
 
@@ -89,7 +89,7 @@ The Java package structure of the `virtualschema-jdbc-adapter` reflects the sepa
       |     |
       |     '-- ...
       |
-      '-- jdbc                                 Base implementation for getting metadata from JDBC
+      '-- jdbc                                 Base implementation for getting metadata from JDBC (based in virtual-schema-common-jdbc repository) 
 
 ### Interfaces
 

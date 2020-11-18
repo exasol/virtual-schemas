@@ -66,9 +66,9 @@ Another way to run integration tests:
 
 List of enabled integration tests:
 
-* ExasolSqlDialectIT
+* ExasolSqlDialectIT (in exasol-virtual-schema repository)
 * PostgreSQLSqlDialectIT
-
+* SqlServerSqlDialectIT
 
 ## Executing Disabled Integration Tests
 

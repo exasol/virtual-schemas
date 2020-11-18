@@ -274,18 +274,16 @@ And we also need two corresponding test classes:
 
     Another thing we need to implement in the dialect class is quoting of string literals.
     
-    Athena expects string literals to be wrapped in single quotes and single qoutes inside the literal to be escaped by duplicating each.
+    Athena expects string literals to be wrapped in single quotes and single quotes inside the literal to be escaped by duplicating each.
 
 1. **Create the `testGetLiteralString()` test** method: 
    
     ```java
-    @ValueSource(strings = { "ab:\'ab\'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
+    @ValueSource(strings = { "ab:'ab'", "a'b:'a''b'", "a''b:'a''''b'", "'ab':'''ab'''" })
     @ParameterizedTest
     void testGetLiteralString(final String definition) {
-        final int colonPosition = definition.indexOf(':');
-        final String original = definition.substring(0, colonPosition);
-        final String literal = definition.substring(colonPosition + 1);
-        assertThat(this.dialect.getStringLiteral(original), equalTo(literal));
+        assertThat(this.dialect.getStringLiteral(definition.substring(0, definition.indexOf(':'))),
+                equalTo(definition.substring(definition.indexOf(':') + 1)));
     }
     ```
     
@@ -297,22 +295,29 @@ And we also need two corresponding test classes:
     ```java
     @Override
     public String getStringLiteral(final String value) {
-        final StringBuilder builder = new StringBuilder("'");
-        builder.append(value.replaceAll("'", "''"));
-        builder.append("'");
-        return builder.toString();
+         if (value == null) {
+             return "NULL";
+         } else {
+             return "'" + value.replace("'", "''") + "'";
+         }
     }
     ```
 
     ### Implement the Applying of Quotes
     
 1. The next method to **implement: `applyQuote()`**. It applies quotes to table and schema names.
-    In case of Aurora it's a little bit complicated, so let's see a more generic example:
+    In case of Aurora there are two different ways to apply the quotes: "" and ``.
+    If an identifier starts with an underscore, we use the backticks. Otherwise, we use double quotes.  
    
     ```java
-    @Test
-    void testApplyQuote() {
-        assertThat(this.dialect.applyQuote("tableName"), Matchers.equalTo("\"tableName\""));
+    @CsvSource({ "tableName, \"tableName\"", //
+            "table123, \"table123\"", //
+            "_table, `_table`", //
+            "123table, \"123table\"", //
+            "table_name, \"table_name\"" })
+    @ParameterizedTest
+    void testApplyQuote(final String unquoted, final String quoted) {
+        assertThat(this.dialect.applyQuote(unquoted), equalTo(quoted));
     }
     ```
     And implementation:
@@ -320,8 +325,20 @@ And we also need two corresponding test classes:
     ```java
     @Override
     public String applyQuote(final String identifier) {
-            return "\"" + identifier + "\"";
-        }   
+       if (this.id.startsWith("_")) {
+            return quoteWithBackticks(this.id);
+        } else {
+            return quoteWithDoubleQuotes(this.id);
+        }
+    }
+
+    private String quoteWithBackticks(final String identifier) {
+        return "`" + identifier + "`";
+    }
+
+    private String quoteWithDoubleQuotes(final String identifier) {
+        return "\"" + identifier + "\"";
+    }   
     ```
     
 1. You have **two unimplemented methods** left: `createQueryRewriter()` and `createRemoteMetadataReader()`.
@@ -329,17 +346,18 @@ And we also need two corresponding test classes:
     
     ```java
     @Override
-    protected RemoteMetadataReader createRemoteMetadataReader() {  
+    protected RemoteMetadataReader createRemoteMetadataReader() {
         try {
             return new AthenaMetadataReader(this.connectionFactory.getConnection(), this.properties);
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException("Unable to create Athena remote metadata reader.", exception);
+            throw new RemoteMetadataReaderException(
+                    "Unable to create Athena remote metadata reader. Caused by: " + exception.getMessage(), exception);
         }
     }
 
     @Override
     protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connectionFactory);
+        return new BaseQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
     }
     ```
     
