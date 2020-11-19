@@ -11,7 +11,7 @@ Dialect name                        | Repository                                
 [Impala][impala-dialect-doc]        |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
 [MySQL][mysql-dialect-doc]          |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
 [Oracle][oracle-dialect-doc]        |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
-[PostgreSQL][postgresql-dialect-doc]|  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+[PostgreSQL][postgresql-dialect-doc]|  [PostgreSQL Virtual Schema][pg-virtual-schema-repository] | [Latest release][pg-virtual-schema-releases]     |          
 [Redshift][redshift-dialect-doc]    |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
 [SAP HANA][sap-hana-dialect-doc]    |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
 [SQL Server][sql-server-dialect-doc]|  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
@@ -31,10 +31,10 @@ You can also [develop a custom dialect](../development/developing-sql-dialect/de
 [impala-dialect-doc]: ../dialects/impala.md
 [mysql-dialect-doc]: ../dialects/mysql.md
 [oracle-dialect-doc]: ../dialects/oracle.md
-[postgresql-dialect-doc]: ../dialects/postgresql.md
+[postgresql-dialect-doc]: https://github.com/exasol/postgresql-virtual-schema/blob/main/doc/dialects/postgresql.md
 [redshift-dialect-doc]: ../dialects/redshift.md
 [sap-hana-dialect-doc]: ../dialects/saphana.md
-[sql-server-dialect-doc]:../dialects/sql_server.md
+[sql-server-dialect-doc]: ../dialects/sql_server.md
 [sybase-dialect-doc]: ../dialects/sybase.md
 [teradata-dialect-doc]: ../dialects/teradata.md
 
@@ -42,3 +42,5 @@ You can also [develop a custom dialect](../development/developing-sql-dialect/de
 [virtual-schemas-releases]: https://github.com/exasol/virtual-schemas/releases
 [exasol-virtual-schema-repository]: https://github.com/exasol/exasol-virtual-schema
 [exasol-virtual-schema-releases]: https://github.com/exasol/exasol-virtual-schema/releases
+[pg-virtual-schema-repository]: https://github.com/exasol/postgresql-virtual-schema
+[pg-virtual-schema-releases]: https://github.com/exasol/postgresql-virtual-schema/releases
