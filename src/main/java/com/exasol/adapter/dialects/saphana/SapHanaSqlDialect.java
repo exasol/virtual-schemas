@@ -1,14 +1,11 @@
 package com.exasol.adapter.dialects.saphana;
 
-import static com.exasol.adapter.AdapterProperties.CATALOG_NAME_PROPERTY;
-import static com.exasol.adapter.AdapterProperties.SCHEMA_NAME_PROPERTY;
+import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
-import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_INTERSECTION;
-import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_UNION;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -18,6 +15,7 @@ import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.sql.ScalarFunction;
+import com.exasol.adapter.sql.SqlNodeVisitor;
 
 /**
  * This class implements the SAP HANA SQL dialect.
@@ -109,9 +107,8 @@ public class SapHanaSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    // http://sap.optimieren.de/hana/hana/html/_bsql_introduction.html
     public String applyQuote(final String identifier) {
-        return super.quoteIdentifierWithDoubleQuotes(identifier);
+        return "\"" + identifier + "\"";
     }
 
     @Override
@@ -120,23 +117,21 @@ public class SapHanaSqlDialect extends AbstractSqlDialect {
     }
 
     @Override
-    // https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/LATEST/en-US/209f5020751910148fd8fe88aa4d79d9.html
-    public String getStringLiteral(final String value) {
-        return super.quoteLiteralStringWithSingleQuote(value);
-    }
-
-    @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
         try {
             return new SapHanaMetadataReader(this.connectionFactory.getConnection(), this.properties);
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException(
-                    "Unable to create HANA remote metadata reader. Caused by: " + exception.getMessage(), exception);
+            throw new RemoteMetadataReaderException("Unable to create HANA remote metadata reader.", exception);
         }
     }
 
     @Override
     protected QueryRewriter createQueryRewriter() {
         return new BaseQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
+    }
+    
+    @Override
+    public SqlNodeVisitor<String> getSqlGenerationVisitor(final SqlGenerationContext context) {
+        return new SapHanaSqlGenerationVisitor(this, context);
     }
 }
