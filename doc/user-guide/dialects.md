@@ -33,7 +33,7 @@ You can also [develop a custom dialect](../development/developing-sql-dialect/de
 [oracle-dialect-doc]: ../dialects/oracle.md
 [postgresql-dialect-doc]: https://github.com/exasol/postgresql-virtual-schema/blob/main/doc/dialects/postgresql.md
 [redshift-dialect-doc]: ../dialects/redshift.md
-[sap-hana-dialect-doc]: ../dialects/saphana.md
+[sap-hana-dialect-doc]: https://github.com/exasol/hana-virtual-schema/blob/main/doc/user_guide/user_guide.md
 [sql-server-dialect-doc]: ../dialects/sql_server.md
 [sybase-dialect-doc]: ../dialects/sybase.md
 [teradata-dialect-doc]: ../dialects/teradata.md

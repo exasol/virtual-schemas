@@ -12,6 +12,7 @@
 ## Refactoring
 
 * #408: Removed PostgreSQL dialect implementation as it has been migrated to https://github.com/exasol/postgresql-virtual-schema.
+* #418: Moved Hana dialect to https://github.com/exasol/hana-virtual-schema
 
 ## Dependency updates
 
