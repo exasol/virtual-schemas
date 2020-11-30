@@ -173,7 +173,21 @@ The Oracle dialect does not support all capabilities. A complete list can be fou
 If you want to return a DECIMAL type for these types you can set the property `ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE` to `<scale>,<precision>`.
 This will cast values of such types to `DECIMAL(<scale>,<precision>)`.
 
-Keep in mind that this will yield errors if the data in the Oracle database does not fit into the specified DECIMAL type. 
+For example:
+
+```java
+CREATE VIRTUAL SCHEMA <virtual schema name>
+    USING ADAPTER.JDBC_ADAPTER
+    WITH
+    SQL_DIALECT     = 'ORACLE'
+    CONNECTION_NAME = 'ORACLE_JDBC_CONNECTION'
+    SCHEMA_NAME     = '<schema name>'
+    IMPORT_FROM_ORA = 'true'
+    ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE = '2,18'
+    ORA_CONNECTION_NAME = 'ORA_CONNECTION';
+```
+ 
+Keep in mind that this will yield errors if the data in the Oracle database does not fit into the specified DECIMAL type.
 
 ## Testing information
 
