@@ -170,8 +170,9 @@ The Oracle dialect does not support all capabilities. A complete list can be fou
 
 `NUMBER`, `NUMBER with precision > 36` and `LONG` are casted to `VARCHAR` to prevent a loss of precision. 
 
-If you want to return a DECIMAL type for these types you can set the property ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE:
-This will cast NUMBER with precision > 36, NUMBER without precision and LONG to DECIMAL(36,20).
+If you want to return a DECIMAL type for these types you can set the property `ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE` to `<scale>,<precision>`.
+This will cast values of such types to `DECIMAL(<scale>,<precision>)`.
+
 Keep in mind that this will yield errors if the data in the Oracle database does not fit into the specified DECIMAL type. 
 
 ## Testing information
