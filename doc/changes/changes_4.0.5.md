@@ -11,7 +11,7 @@ Code name:
 ## Refactoring
 
 * #408: Removed PostgreSQL dialect implementation as it has been migrated to https://github.com/exasol/postgresql-virtual-schema.
-* #422: Refactor `OracleQueryRewriter` according for more clarity.
+* #422: Refactor `OracleQueryRewriter` for more clarity.
 
 ## Dependency updates
 
