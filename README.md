@@ -141,7 +141,6 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 | [Microsoft JDBC Driver for SQL Server][sql-server-jdbc-driver]                      | JDBC driver for SQL Server database                    | MIT License                      |
 | [MySQL JDBC Driver][mysql-jdbc-driver]                                              | JDBC driver for MySQL database                         | GNU GPL Version 2.0              |
 | [Oracle JDBC Driver][oracle-jdbc-driver]                                            | JDBC driver for Oracle database                        | Oracle Technology Network License|
-| [PostgreSQL JDBC Driver][postgresql-jdbc-driver]                                    | JDBC driver for PostgreSQL database                    | BSD-2-Clause License             |
 | [Testcontainers](https://www.testcontainers.org/)                                   | Container-based integration tests                      | MIT License                      |
 | [Test Database Builder][test-bd-builder]                                            | Fluent database interfaces for testing                 | MIT License                      |
 
@@ -169,7 +168,6 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [maven-enforcer-plugin]: http://maven.apache.org/enforcer/maven-enforcer-plugin/
 [mysql-jdbc-driver]: https://dev.mysql.com/downloads/connector/j/
 [oracle-jdbc-driver]: https://www.oracle.com/database/technologies/appdev/jdbc.html
-[postgresql-jdbc-driver]: https://jdbc.postgresql.org/
 [sql-server-jdbc-driver]: https://github.com/microsoft/mssql-jdbc
 [sonatype-oss-index-maven-plugin]: https://sonatype.github.io/ossindex-maven/maven-plugin/
 [test-bd-builder]: https://github.com/exasol/test-db-builder-java
@@ -184,7 +182,7 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [impala-dialect-doc]: doc/dialects/impala.md
 [mysql-dialect-doc]: doc/dialects/mysql.md
 [oracle-dialect-doc]: doc/dialects/oracle.md
-[postgresql-dialect-doc]: doc/dialects/postgresql.md
+[postgresql-dialect-doc]: https://github.com/exasol/postgresql-virtual-schema/blob/main/doc/dialects/postgresql.md
 [redshift-dialect-doc]: doc/dialects/redshift.md
 [sap-hana-dialect-doc]: doc/dialects/saphana.md
 [sql-server-dialect-doc]: doc/dialects/sql_server.md
