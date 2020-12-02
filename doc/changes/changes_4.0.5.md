@@ -11,7 +11,6 @@ Code name:
 ## Refactoring
 
 * #408: Removed PostgreSQL dialect implementation as it has been migrated to https://github.com/exasol/postgresql-virtual-schema.
-* #420: Updated `com.exasol:virtual-schema-common-jdbc:7.0.0` to `8.0.0`.
 
 ## Dependency updates
 
