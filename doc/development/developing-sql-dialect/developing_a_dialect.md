@@ -30,10 +30,10 @@ The layers in the middle &mdash; i.e. everything that deals with translating bet
     |   core                  |----------------------------|
     |                         |//// Virtual Schema API ////|
     |-------------------------|----------------------------|
-    | In vs-common-java       |    Base for all adapters   |   Foundation of an adapter development
-    |   repository            |----------------------------|
-    | In vs-common-jdbc       |       JDBC  Adapter        |   Common JDBC functions
-    |   repository            |----------------------------|
+    | In Virtual Schema       |    Base for all adapters   |   Foundation of an adapter development
+    | Common Java repository  |----------------------------|
+    | In Virtual Schema       |       JDBC  Adapter        |   Common JDBC functions
+    | Common JDBC repository  |----------------------------|
     |                         |///// SQL Dialect API //////|
     |                         |----------------------------|
     | In dialect repositories |    SQL Dialect Adapter     |   Even out specifics of the source database
@@ -94,7 +94,7 @@ The Java package structure of the `virtualschema-jdbc-adapter` reflects the sepa
       |     |
       |     '-- ...
       |
-      '-- jdbc                                 Base implementation for getting metadata from JDBC (based in virtual-schema-common-jdbc repository) 
+      '-- jdbc                                 Base implementation for getting metadata from JDBC (based in Virtual Schema Common JDBC repository) 
 
 ### Interfaces
 
