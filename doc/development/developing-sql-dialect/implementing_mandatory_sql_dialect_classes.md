@@ -306,7 +306,7 @@ And we also need two corresponding test classes:
     ### Implement the Applying of Quotes
     
 1. The next method to **implement: `applyQuote()`**. It applies quotes to table and schema names.
-    In case of Aurora there are two different ways to apply the quotes: "" and ``.
+    In case of Athena there are two different ways to apply the quotes: "" and ``.
     If an identifier starts with an underscore, we use the backticks. Otherwise, we use double quotes.  
    
     ```java
