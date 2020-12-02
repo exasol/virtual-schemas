@@ -7,7 +7,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
@@ -15,14 +14,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionFactory;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.TestSqlStatementFactory;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,22 +27,6 @@ public class OracleQueryRewriterTest extends AbstractQueryRewriterTestBase {
     @BeforeEach
     void beforeEach() {
         this.statement = TestSqlStatementFactory.createSelectOneFromDual();
-    }
-
-    @Test
-    void testRewriteWithJdbcConnection(@Mock final ConnectionFactory connectionFactoryMock)
-            throws AdapterException, SQLException {
-        final Connection connectionMock = mockConnection();
-        Mockito.when(connectionFactoryMock.getConnection()).thenReturn(connectionMock);
-        final AdapterProperties properties = new AdapterProperties(Map.of("CONNECTION_NAME", CONNECTION_NAME));
-        final SqlDialectFactory dialectFactory = new OracleSqlDialectFactory();
-        final SqlDialect dialect = dialectFactory.createSqlDialect(connectionFactoryMock, properties);
-        final RemoteMetadataReader metadataReader = new OracleMetadataReader(connectionMock,
-                AdapterProperties.emptyProperties());
-        final QueryRewriter queryRewriter = new OracleQueryRewriter(dialect, metadataReader, connectionFactoryMock);
-        assertThat(queryRewriter.rewrite(this.statement, EXA_METADATA, properties),
-                equalTo("IMPORT INTO (c1 DECIMAL(18, 0)) FROM JDBC AT " + CONNECTION_NAME
-                        + " STATEMENT 'SELECT TO_CHAR(1) FROM \"DUAL\"'"));
     }
 
     @Test
