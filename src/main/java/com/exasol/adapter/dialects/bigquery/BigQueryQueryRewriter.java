@@ -18,7 +18,7 @@ import com.exasol.adapter.sql.SqlStatement;
 /**
  * This class implements a BigQuery-specific query rewriter.
  */
-public class BigQueryQueryRewriter extends BaseQueryRewriter {
+public class BigQueryQueryRewriter extends ImportIntoQueryRewriter{
     private static final Logger LOGGER = Logger.getLogger(BigQueryQueryRewriter.class.getName());
     private static final double[] TEN_POWERS = { 10d, 100d, 1000d, 10000d, 100000d, 1000000d };
     @SuppressWarnings("squid:S4784") // this pattern is secure

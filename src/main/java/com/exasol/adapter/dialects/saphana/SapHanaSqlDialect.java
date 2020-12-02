@@ -137,6 +137,6 @@ public class SapHanaSqlDialect extends AbstractSqlDialect {
 
     @Override
     protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
+        return new ImportIntoQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
     }
 }
