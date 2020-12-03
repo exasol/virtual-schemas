@@ -14,7 +14,7 @@ import com.exasol.adapter.sql.SqlStatement;
 /**
  * This class implements an Oracle-specific query rewriter.
  */
-public class OracleQueryRewriter extends BaseQueryRewriter {
+public class OracleQueryRewriter extends ImportIntoQueryRewriter {
     /**
      * Create a new instance of the {@link OracleQueryRewriter}.
      *

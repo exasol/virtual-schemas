@@ -105,6 +105,6 @@ public class GenericSqlDialect extends AbstractSqlDialect {
 
     @Override
     protected QueryRewriter createQueryRewriter() {
-        return new BaseQueryRewriter(this, this.remoteMetadataReader, this.connectionFactory);
+        return new ImportIntoQueryRewriter(this, this.remoteMetadataReader, this.connectionFactory);
     }
 }

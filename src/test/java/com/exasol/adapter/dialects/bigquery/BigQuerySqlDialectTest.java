@@ -20,7 +20,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
-import nl.jqno.equalsverifier.EqualsVerifier;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -174,7 +173,7 @@ class BigQuerySqlDialectTest {
         final AdapterProperties adapterProperties = new AdapterProperties(
                 Map.of(BIGQUERY_ENABLE_IMPORT_PROPERTY, "TRUE"));
         final BigQuerySqlDialect dialect = new BigQuerySqlDialect(connectionFactory, adapterProperties);
-        assertThat(dialect.createQueryRewriter(), instanceOf(BaseQueryRewriter.class));
+        assertThat(dialect.createQueryRewriter(), instanceOf(ImportIntoQueryRewriter.class));
     }
 
     @Test

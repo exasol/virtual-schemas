@@ -2,8 +2,6 @@
 
 Code name: 
 
-## Summary
-
 ## Documentation
 
 * #408: Removed PostgreSQL dialect documentation as it has been migrated to https://github.com/exasol/postgresql-virtual-schema.
@@ -18,3 +16,4 @@ Code name:
 
 * Removed org.postgresql:postgresql:42.2.18
 * Removed org.testcontainers:postgresql:1.15.0
+* Updated `com.exasol:virtual-schema-common-jdbc:7.0.0` to `8.0.0`
