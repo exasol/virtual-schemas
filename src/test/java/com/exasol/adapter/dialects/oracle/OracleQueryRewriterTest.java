@@ -37,7 +37,7 @@ public class OracleQueryRewriterTest extends AbstractQueryRewriterTestBase {
                 ORACLE_CONNECTION_NAME_PROPERTY, "ora_connection"));
         final SqlDialectFactory dialectFactory = new OracleSqlDialectFactory();
         final SqlDialect dialect = dialectFactory.createSqlDialect(connectionFactoryMock, properties);
-        final QueryRewriter queryRewriter = new OracleQueryRewriter(dialect, null, null);
+        final QueryRewriter queryRewriter = new OracleQueryRewriter(dialect, null);
         assertThat(queryRewriter.rewrite(this.statement, EXA_METADATA, properties),
                 equalTo("IMPORT FROM ORA AT ora_connection STATEMENT 'SELECT TO_CHAR(1) FROM \"DUAL\"'"));
     }
@@ -45,7 +45,7 @@ public class OracleQueryRewriterTest extends AbstractQueryRewriterTestBase {
     @Test
     void testConnectionDefinitionBuilderClass() {
         final SqlDialect dialect = new OracleSqlDialect(null, AdapterProperties.emptyProperties());
-        final QueryRewriter queryRewriter = new OracleQueryRewriter(dialect, null, null);
+        final QueryRewriter queryRewriter = new OracleQueryRewriter(dialect, null);
         assertThat(getMethodReturnViaReflection(queryRewriter, "createConnectionDefinitionBuilder"),
                 instanceOf(OracleConnectionDefinitionBuilder.class));
     }

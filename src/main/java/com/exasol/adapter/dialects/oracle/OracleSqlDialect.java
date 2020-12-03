@@ -168,7 +168,7 @@ public class OracleSqlDialect extends AbstractSqlDialect {
     @Override
     protected QueryRewriter createQueryRewriter() {
         if (this.isImportFromOraEnabled()) {
-            return new OracleQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
+            return new OracleQueryRewriter(this, createRemoteMetadataReader());
         }
         return new ImportIntoQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
     }
