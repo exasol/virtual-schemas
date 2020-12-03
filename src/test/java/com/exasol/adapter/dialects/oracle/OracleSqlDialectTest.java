@@ -7,7 +7,6 @@ import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.adapter.dialects.oracle.OracleProperties.ORACLE_IMPORT_PROPERTY;
-import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -16,6 +15,7 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.hamcrest.CoreMatchers;
@@ -31,13 +31,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
-import com.exasol.adapter.dialects.PropertyValidationException;
-import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionFactory;
 
 @ExtendWith(MockitoExtension.class)
 class OracleSqlDialectTest {
-    private SqlDialect dialect;
+    private OracleSqlDialect dialect;
     @Mock
     private ConnectionFactory connectionFactoryMock;
 
@@ -122,9 +121,21 @@ class OracleSqlDialectTest {
     }
 
     @Test
-    void testQueryRewriterClass() {
-        assertThat(getMethodReturnViaReflection(this.dialect, "createQueryRewriter"),
-                instanceOf(OracleQueryRewriter.class));
+    void testQueryRewriterClassWithImportFromOra() {
+        this.dialect = new OracleSqlDialect(this.connectionFactoryMock,
+                this.getAdapaterPropertiesWithImportFromOracle());
+        assertThat(this.dialect.createQueryRewriter(), instanceOf(OracleQueryRewriter.class));
+    }
+
+    private AdapterProperties getAdapaterPropertiesWithImportFromOracle() {
+        final Map<String, String> properties = new HashMap<>();
+        properties.put(OracleProperties.ORACLE_IMPORT_PROPERTY, Boolean.TRUE.toString());
+        return new AdapterProperties(properties);
+    }
+
+    @Test
+    void testQueryRewriterClassWhitImportInto() {
+        assertThat(this.dialect.createQueryRewriter(), instanceOf(ImportIntoQueryRewriter.class));
     }
 
     @CsvSource({ "tableName, \"tableName\"", //
