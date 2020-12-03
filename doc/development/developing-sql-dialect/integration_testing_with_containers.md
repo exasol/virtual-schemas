@@ -37,7 +37,7 @@ Add a new class that has to:
 * Create the test schema in the source database
 * Create the virtual schema
 * Execute the tests on the virtual schema
-See [PostgreSQLDialectIT](../../../src/test/java/com/exasol/adapter/dialects/postgresql/PostgreSQLSqlDialectIT.java) for an example.
+See [PostgreSQLDialectIT](https://github.com/exasol/postgresql-virtual-schema/blob/main/src/test/java/com/exasol/adapter/dialects/postgresql/PostgreSQLSqlDialectIT.java) for an example.
 
 ## Security Considerations
 
