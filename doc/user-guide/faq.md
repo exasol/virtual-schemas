@@ -1,17 +1,22 @@
 # Virtual Schemas FAQ
 
-This FAQ covers general questions and problems that users can encounter in any dialect.
-For a dialect specific FAQs please check dialects repositories.
+This FAQ covers general questions and problems that users can encounter in any dialect. For a dialect specific FAQs please check dialects pages.
 
 ## Setting up Virtual Schemas
 
+### Multiple JDBC Drivers in EXAoperation with the Same Name and the Same Prefix
+
+**Question**: What happens if I upload two different JDBC drivers with the same name and the same prefix, but the driver's versions are different?
+
+**Answer**: The database uses the first suitable driver detected in the driver's list going through the list top-down. The driver that is higher in the list of JDBC Drivers will be used in this situation.
+
 ## Creating Virtual Schemas
 
-This chapter describes the problems that occurs on the creating VS step.
+This chapter describes the problems that occur on the creating VS step.
 
 ### The Dialect Does Not Support Property
 
-**Problem**: a virtual schema does not recognise a property.
+**Problem**: A virtual schema does not recognise a property.
 
 ```
 VM error:
@@ -40,16 +45,51 @@ java.sql.SQLException: No suitable driver found for ...
 - If the file exists, open it and make sure it contains the driver's main class reference you specified in the EXAoperation.
 - If the file does not exist or does not contain the correct main class reference, you can add it and re-upload the fixed JAR archive. You should also report the problem to the developers of the driver.
 
+### End of %scriptclass Statement Not Found
+
+**Problem**:
+
+```
+VM error: End of %scriptclass statement not found
+```
+
+**Solutions**:
+
+- If you are using DbVisualizer, add an empty comment `--/` before the create adapter script statement:
+
+```
+--/
+CREATE OR REPLACE JAVA ADAPTER SCRIPT ...
+```
+
 ### Create Virtual Schema Query Runs Endlessly
 
-**Problem**: you have started a `CREATE VIRTUAL SCHEMA` statement, but it is running endlessly without giving you any output or an error.
+**Problem**: You have started a `CREATE VIRTUAL SCHEMA` statement, but it is running endlessly without giving you any output or an error.
 
 **Solutions**:
 
 - Check if you specified a property `SCHEMA_NAME`. If you do not add this property, the virtual schema will try to read metadata of all tables existing in a source database. It can take very long time.
 - Check how many tables do exist in the schema you have specified. If there are more than a few hundreds of tables, creation of a virtual schema can also take time.
 
+### Exclude Multiple Tables From Virtual Schema
+
+**Question**: Can I exclude multiple tables from a virtual schema?
+
+**Answer**: Yes, you can use TABLE_FILTER = 'TABLE1','TABLE2',...
+
 ## Selecting From Virtual Schemas
+
+### JDBC Driver Access Denied
+
+**Problem**: The virtual schema was created successfully, but when you try to run a SELECT query, you get an `access denied` error with some permission name. For example:
+
+``` 
+JDBC-Client-Error: Failed loading driver 'com.mysql.jdbc.Driver': null, access denied ("java.lang.RuntimePermission" "setContextClassLoader") (Session: 1685600036204795036)
+```
+
+**Solution**:
+
+- This happens because the JDBC driver requires more permissions that we provide by default. You can disable a security manager of the corresponding driver in EXAoperation to solve this problem.
 
 [dialects]: dialects.md
 
