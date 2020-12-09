@@ -2,6 +2,10 @@
 
 Code name: 
 
+## Bug Fixes
+
+* #427: Excluded transitive `org.apache.httpcomponents:httpclient` dependency to avoid CVE-2020-13956.
+
 ## Documentation
 
 * #408: Removed PostgreSQL dialect documentation as it has been migrated to https://github.com/exasol/postgresql-virtual-schema.
@@ -16,6 +20,7 @@ Code name:
 
 ## Dependency updates
 
-* Removed org.postgresql:postgresql:42.2.18
-* Removed org.testcontainers:postgresql:1.15.0
 * Updated `com.exasol:virtual-schema-common-jdbc:7.0.0` to `8.0.0`
+* Removed `org.postgresql:postgresql:42.2.18`
+* Removed `org.testcontainers:postgresql:1.15.0`
+* Removed `org.apache.httpcomponents:httpclient`
