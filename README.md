@@ -96,6 +96,7 @@ This is an open source project which is officially supported by Exasol. For any 
 * [User Guide](https://docs.exasol.com/database_concepts/virtual_schemas.htm)
 * [Virtual Schema's Properties Reference](https://docs.exasol.com/database_concepts/virtual_schema/adapter_properties.htm)
 * [Remote Logging](https://docs.exasol.com/database_concepts/virtual_schema/logging.htm)
+* [FAQ](doc/user-guide/faq.md)
 
 Additional resources:
 
