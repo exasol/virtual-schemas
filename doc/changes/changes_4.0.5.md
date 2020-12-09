@@ -2,7 +2,7 @@
 
 Code name: 
 
-## Bugs
+## Bug Fixes
 
 * #427: Excluded transitive `org.apache.httpcomponents:httpclient` dependency to avoid CVE-2020-13956.
 
