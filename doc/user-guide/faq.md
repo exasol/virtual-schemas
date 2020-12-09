@@ -4,9 +4,7 @@ This FAQ covers general questions and problems that users can encounter in any d
 
 ## Setting up Virtual Schemas
 
-### Multiple JDBC Drivers in EXAoperation with the Same Name and the Same Prefix
-
-**Question**: What happens if I upload two different JDBC drivers with the same name and the same prefix, but the driver's versions are different?
+### What happens if I upload two different JDBC drivers with the same name and the same prefix, but the driver's versions are different?
 
 **Answer**: The database uses the first suitable driver detected in the driver's list going through the list top-down. The driver that is higher in the list of JDBC Drivers will be used in this situation.
 
@@ -14,9 +12,7 @@ This FAQ covers general questions and problems that users can encounter in any d
 
 This chapter describes the problems that occur on the creating VS step.
 
-### The Dialect Does Not Support Property
-
-**Problem**: A virtual schema does not recognise a property.
+### A virtual schema does not recognise a property and throws the dialect does not support property exception.
 
 ```
 VM error:
@@ -29,13 +25,7 @@ com.exasol.adapter.dialects.PropertyValidationException: The dialect <DIALECT_NA
 - Check that you use a Virtual Schema version that supports the specified property. Check the release logs on the [GitHub][dialects] to find out in which version we added the property you need.
 - Check that you don't have typos in the specified property.
 
-### No Suitable Driver Found
-
-**Problem**:
-
-```
-java.sql.SQLException: No suitable driver found for ...
-```
+### SQLException: No suitable driver found...
 
 **Solutions**:
 
@@ -45,13 +35,7 @@ java.sql.SQLException: No suitable driver found for ...
 - If the file exists, open it and make sure it contains the driver's main class reference you specified in the EXAoperation.
 - If the file does not exist or does not contain the correct main class reference, you can add it and re-upload the fixed JAR archive. You should also report the problem to the developers of the driver.
 
-### End of %scriptclass Statement Not Found
-
-**Problem**:
-
-```
-VM error: End of %scriptclass statement not found
-```
+### VM error: End of %scriptclass statement not found
 
 **Solutions**:
 
@@ -62,29 +46,25 @@ VM error: End of %scriptclass statement not found
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ...
 ```
 
-### Create Virtual Schema Query Runs Endlessly
-
-**Problem**: You have started a `CREATE VIRTUAL SCHEMA` statement, but it is running endlessly without giving you any output or an error.
+### I have started a `CREATE VIRTUAL SCHEMA` statement, but it is running endlessly without giving any output or an error.
 
 **Solutions**:
 
 - Check if you specified a property `SCHEMA_NAME`. If you do not add this property, the virtual schema will try to read metadata of all tables existing in a source database. It can take very long time.
 - Check how many tables do exist in the schema you have specified. If there are more than a few hundreds of tables, creation of a virtual schema can also take time.
 
-### Exclude Multiple Tables From Virtual Schema
-
-**Question**: Can I exclude multiple tables from a virtual schema?
+### Can I exclude multiple tables from a virtual schema?
 
 **Answer**: Yes, you can use TABLE_FILTER = 'TABLE1','TABLE2',...
 
 ## Selecting From Virtual Schemas
 
-### JDBC Driver Access Denied
+### The virtual schema was created successfully, but when you try to run a SELECT query, you get an `access denied` error with some permission name.
 
-**Problem**: The virtual schema was created successfully, but when you try to run a SELECT query, you get an `access denied` error with some permission name. For example:
+For example:
 
 ``` 
-JDBC-Client-Error: Failed loading driver 'com.mysql.jdbc.Driver': null, access denied ("java.lang.RuntimePermission" "setContextClassLoader") (Session: 1685600036204795036)
+JDBC-Client-Error: Failed loading driver 'com.mysql.jdbc.Driver': null, access denied ("java.lang.RuntimePermission" "setContextClassLoader")
 ```
 
 **Solution**:
