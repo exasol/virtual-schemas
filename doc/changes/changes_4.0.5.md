@@ -11,7 +11,7 @@ Code name:
 * #408: Removed PostgreSQL dialect documentation as it has been migrated to https://github.com/exasol/postgresql-virtual-schema.
 * #413: Improved documentation on `ORACLE_CAST_NUMBER_TO_DECIMAL_WITH_PRECISION_AND_SCALE`
 * #402: Updated the documentation about implementing a new dialect.
-* #126: Started FAQ documentation for Virtual Schemas.
+* #426: Started FAQ documentation for Virtual Schemas.
 
 ## Refactoring
 
