@@ -12,7 +12,7 @@ This FAQ covers general questions and problems that users can encounter in any d
 
 This chapter describes the problems that occur on the creating VS step.
 
-### A virtual schema does not recognise a property and throws the dialect does not support property exception.
+### A virtual schema does not recognise a property and throws the dialect-does-not-support-property exception.
 
 ```
 VM error:
@@ -69,7 +69,7 @@ JDBC-Client-Error: Failed loading driver 'com.mysql.jdbc.Driver': null, access d
 
 **Solution**:
 
-- This happens because the JDBC driver requires more permissions that we provide by default. You can disable a security manager of the corresponding driver in EXAoperation to solve this problem.
+- This happens because the JDBC driver requires more permissions than we provide by default. You can disable a security manager of the corresponding driver in EXAoperation to solve this problem.
 
 [dialects]: dialects.md
 
