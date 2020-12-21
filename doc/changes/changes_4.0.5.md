@@ -2,6 +2,10 @@
 
 Code name: 
 
+## Features
+
+* #433: Enabled `JOIN` capabilities in `MySQL` dialect adapter.
+
 ## Bug Fixes
 
 * #427: Excluded transitive `org.apache.httpcomponents:httpclient` dependency to avoid CVE-2020-13956.
@@ -16,8 +20,8 @@ Code name:
 ## Refactoring
 
 * #408: Removed PostgreSQL dialect implementation as it has been migrated to https://github.com/exasol/postgresql-virtual-schema.
-* #422: Refactor `OracleQueryRewriter` for more clarity.
-* #424: Remove `PostgreSQL` dialect leftovers.
+* #422: Refactored `OracleQueryRewriter` for more clarity.
+* #424: Removed `PostgreSQL` dialect leftovers.
 
 ## Dependency updates
 
