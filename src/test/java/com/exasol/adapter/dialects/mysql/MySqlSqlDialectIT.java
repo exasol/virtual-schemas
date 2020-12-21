@@ -400,8 +400,8 @@ class MySqlSqlDialectIT extends AbstractIntegrationTest {
                     + VIRTUAL_SCHEMA_JDBC + "." + TABLE_JOIN_2 + " b ON a.\"x\"=b.\"x\" ORDER BY a.\"x\"";
             final ResultSet expected = getExpectedResultSet(
                     List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
-                    List.of("2, 'bbb', 2, 'bbb'", //
-                            "null, null, 3, 'ccc'"));
+                    List.of("null, null, 3, 'ccc'", //
+                            "2, 'bbb', 2, 'bbb'"));
             assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
@@ -424,8 +424,8 @@ class MySqlSqlDialectIT extends AbstractIntegrationTest {
                     + " b ON a.\"x\"||a.\"y\"=b.\"x\"||b.\"y\" ORDER BY a.\"x\"";
             final ResultSet expected = getExpectedResultSet(
                     List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
-                    List.of("2, 'bbb', 2, 'bbb'", //
-                            "null, null, 3, 'ccc'"));
+                    List.of("null, null, 3, 'ccc'", //
+                            "2, 'bbb', 2, 'bbb'"));
             assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
