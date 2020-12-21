@@ -20,7 +20,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.exasol.adapter.dialects.AbstractIntegrationTest;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
-import com.exasol.containers.ExasolContainerConstants;
 import com.exasol.dbbuilder.dialects.Schema;
 import com.exasol.dbbuilder.dialects.Table;
 import com.exasol.dbbuilder.dialects.exasol.*;
