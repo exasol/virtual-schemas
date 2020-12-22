@@ -1,6 +1,6 @@
-# Exasol Virtual Schemas 4.0.5, released 2020-??-??
+# Exasol Virtual Schemas 4.0.5, released 2020-12-22
 
-Code name: 
+Code name: Enabled `JOIN` capabilities in `MySQL` dialect adapter.
 
 ## Features
 
