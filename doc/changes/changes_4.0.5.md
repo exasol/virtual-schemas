@@ -1,6 +1,13 @@
-# Exasol Virtual Schemas 4.0.5, released 2020-??-??
+# Exasol Virtual Schemas 4.0.5, released 2020-12-22
 
-Code name: 
+Code name: Migrated PostgreSQL dialect implementation to its own repository.
+
+## Summary
+
+Please we aware you can not create PostgreSQL Virtual Schemas using this JAR anymore.
+PostgreSQL dialect implementation has been migrated to https://github.com/exasol/postgresql-virtual-schema.
+
+We also enabled `JOIN` capabilities in `MySQL` dialect adapter, and started a FAQ documentation page.
 
 ## Features
 
