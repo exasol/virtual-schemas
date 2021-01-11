@@ -9,7 +9,7 @@ Dialect name                        | Repository                                
 [Exasol][exasol-dialect-doc]        |  [Exasol Virtual Schema][exasol-virtual-schema-repository] | [Latest release][exasol-virtual-schema-releases] |                
 [Hive][hive-dialect-doc]            |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
 [Impala][impala-dialect-doc]        |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
-[MySQL][mysql-dialect-doc]          |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+[MySQL][mysql-dialect-doc]          |  [MySQL Virtual Schema][mysql-virtual-schema-repository]   | [Latest release][mysql-virtual-schema-releases]  |          
 [Oracle][oracle-dialect-doc]        |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
 [PostgreSQL][postgresql-dialect-doc]|  [PostgreSQL Virtual Schema][pg-virtual-schema-repository] | [Latest release][pg-virtual-schema-releases]     |          
 [Redshift][redshift-dialect-doc]    |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
@@ -29,7 +29,7 @@ You can also [develop a custom dialect](../development/developing-sql-dialect/de
 [exasol-dialect-doc]: https://github.com/exasol/exasol-virtual-schema/blob/master/doc/dialects/exasol.md
 [hive-dialect-doc]: ../dialects/hive.md
 [impala-dialect-doc]: ../dialects/impala.md
-[mysql-dialect-doc]: ../dialects/mysql.md
+[mysql-dialect-doc]: https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/mysql_user_guide.md
 [oracle-dialect-doc]: ../dialects/oracle.md
 [postgresql-dialect-doc]: https://github.com/exasol/postgresql-virtual-schema/blob/main/doc/dialects/postgresql.md
 [redshift-dialect-doc]: ../dialects/redshift.md
@@ -42,5 +42,7 @@ You can also [develop a custom dialect](../development/developing-sql-dialect/de
 [virtual-schemas-releases]: https://github.com/exasol/virtual-schemas/releases
 [exasol-virtual-schema-repository]: https://github.com/exasol/exasol-virtual-schema
 [exasol-virtual-schema-releases]: https://github.com/exasol/exasol-virtual-schema/releases
+[mysql-virtual-schema-repository]: https://github.com/exasol/mysql-virtual-schema
+[mysql-virtual-schema-releases]: https://github.com/exasol/mysql-virtual-schema/releases
 [pg-virtual-schema-repository]: https://github.com/exasol/postgresql-virtual-schema
 [pg-virtual-schema-releases]: https://github.com/exasol/postgresql-virtual-schema/releases

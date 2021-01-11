@@ -15,7 +15,6 @@ dependency-reduced-pom.xml
 
 # Integration tests
 src/test/resources/integration/driver/hive/*.jar
-src/test/resources/integration/driver/mysql/*.jar
 src/test/resources/integration/driver/oracle/*.jar
 src/test/resources/integration/driver/oracle/*.zip
 

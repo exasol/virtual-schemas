@@ -4,7 +4,6 @@ com.exasol.adapter.dialects.db2.DB2SqlDialectFactory
 com.exasol.adapter.dialects.generic.GenericSqlDialectFactory
 com.exasol.adapter.dialects.hive.HiveSqlDialectFactory
 com.exasol.adapter.dialects.impala.ImpalaSqlDialectFactory
-com.exasol.adapter.dialects.mysql.MySqlSqlDialectFactory
 com.exasol.adapter.dialects.oracle.OracleSqlDialectFactory
 com.exasol.adapter.dialects.redshift.RedshiftSqlDialectFactory
 com.exasol.adapter.dialects.saphana.SapHanaSqlDialectFactory
