@@ -5,7 +5,7 @@ Dialect name                        | Repository                                
 [Athena][athena-dialect-doc]        |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
 [Aurora][aurora-dialect-doc]        |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
 [Big Query][big-query-dialect-doc]  |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
-[DB2][db2-dialect-doc]              |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+[DB2][db2-dialect-doc]              |  [DB2 Virtual Schemas][db2-virtual-schema-repository]      | [Latest release][db2-virtual-schema-releases]    |          
 [Exasol][exasol-dialect-doc]        |  [Exasol Virtual Schema][exasol-virtual-schema-repository] | [Latest release][exasol-virtual-schema-releases] |                
 [Hive][hive-dialect-doc]            |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
 [Impala][impala-dialect-doc]        |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
@@ -25,7 +25,7 @@ You can also [develop a custom dialect](../development/developing-sql-dialect/de
 [athena-dialect-doc]: ../dialects/athena.md
 [aurora-dialect-doc]: ../dialects/aurora.md
 [big-query-dialect-doc]: ../dialects/bigquery.md
-[db2-dialect-doc]: ../dialects/db2.md
+[db2-dialect-doc]: https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/db2_user_guide.md
 [exasol-dialect-doc]: https://github.com/exasol/exasol-virtual-schema/blob/master/doc/dialects/exasol.md
 [hive-dialect-doc]: ../dialects/hive.md
 [impala-dialect-doc]: ../dialects/impala.md
@@ -40,6 +40,8 @@ You can also [develop a custom dialect](../development/developing-sql-dialect/de
 
 [virtual-schemas-repository]: https://github.com/exasol/virtual-schemas
 [virtual-schemas-releases]: https://github.com/exasol/virtual-schemas/releases
+[db2-virtual-schema-repository]: https://github.com/exasol/db2-virtual-schema
+[db2-virtual-schema-releases]: https://github.com/exasol/db2-virtual-schema/releases
 [exasol-virtual-schema-repository]: https://github.com/exasol/exasol-virtual-schema
 [exasol-virtual-schema-releases]: https://github.com/exasol/exasol-virtual-schema/releases
 [mysql-virtual-schema-repository]: https://github.com/exasol/mysql-virtual-schema
