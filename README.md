@@ -173,7 +173,7 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [athena-dialect-doc]: doc/dialects/athena.md
 [aurora-dialect-doc]: doc/dialects/aurora.md
 [big-query-dialect-doc]: doc/dialects/bigquery.md
-[db2-dialect-doc]: doc/dialects/db2.md
+[db2-dialect-doc]: https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/db2_user_guide.md
 [exasol-dialect-doc]: https://github.com/exasol/exasol-virtual-schema/blob/master/doc/dialects/exasol.md
 [hive-dialect-doc]: doc/dialects/hive.md
 [impala-dialect-doc]: doc/dialects/impala.md
