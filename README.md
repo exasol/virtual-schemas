@@ -140,7 +140,6 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 | [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0       |
 | [Mockito](http://site.mockito.org/)                                                 | Mocking framework                                      | MIT License                      |
 | [Microsoft JDBC Driver for SQL Server][sql-server-jdbc-driver]                      | JDBC driver for SQL Server database                    | MIT License                      |
-| [Oracle JDBC Driver][oracle-jdbc-driver]                                            | JDBC driver for Oracle database                        | Oracle Technology Network License|
 | [Testcontainers](https://www.testcontainers.org/)                                   | Container-based integration tests                      | MIT License                      |
 | [Test Database Builder][test-bd-builder]                                            | Fluent database interfaces for testing                 | MIT License                      |
 
@@ -166,7 +165,6 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [hbase-server]: http://hbase.apache.org/
 [hive-jdbc-driver]: https://github.com/apache/hive/tree/master/jdbc/src/java/org/apache/hive/jdbc
 [maven-enforcer-plugin]: http://maven.apache.org/enforcer/maven-enforcer-plugin/
-[oracle-jdbc-driver]: https://www.oracle.com/database/technologies/appdev/jdbc.html
 [sql-server-jdbc-driver]: https://github.com/microsoft/mssql-jdbc
 [sonatype-oss-index-maven-plugin]: https://sonatype.github.io/ossindex-maven/maven-plugin/
 [test-bd-builder]: https://github.com/exasol/test-db-builder-java
@@ -180,7 +178,7 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [hive-dialect-doc]: doc/dialects/hive.md
 [impala-dialect-doc]: doc/dialects/impala.md
 [mysql-dialect-doc]: https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/mysql_user_guide.md
-[oracle-dialect-doc]: doc/dialects/oracle.md
+[oracle-dialect-doc]: https://github.com/exasol/oracle-virtual-schema/blob/main/doc/user_guide/oracle_user_guide.md
 [postgresql-dialect-doc]: https://github.com/exasol/postgresql-virtual-schema/blob/main/doc/dialects/postgresql.md
 [redshift-dialect-doc]: doc/dialects/redshift.md
 [sap-hana-dialect-doc]: doc/dialects/saphana.md
