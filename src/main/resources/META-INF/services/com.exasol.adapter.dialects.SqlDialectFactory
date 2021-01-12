@@ -5,6 +5,5 @@ com.exasol.adapter.dialects.hive.HiveSqlDialectFactory
 com.exasol.adapter.dialects.impala.ImpalaSqlDialectFactory
 com.exasol.adapter.dialects.redshift.RedshiftSqlDialectFactory
 com.exasol.adapter.dialects.saphana.SapHanaSqlDialectFactory
-com.exasol.adapter.dialects.sqlserver.SqlServerSqlDialectFactory
 com.exasol.adapter.dialects.sybase.SybaseSqlDialectFactory
 com.exasol.adapter.dialects.teradata.TeradataSqlDialectFactory
