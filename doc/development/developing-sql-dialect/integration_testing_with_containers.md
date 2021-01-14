@@ -68,7 +68,6 @@ List of enabled integration tests:
 
 * ExasolSqlDialectIT (in [exasol-virtual-schema](https://github.com/exasol/exasol-virtual-schema) repository)
 * PostgreSQLSqlDialectIT (in [postgresql-virtual-schema](https://github.com/exasol/postgresql-virtual-schema) repository)
-* SqlServerSqlDialectIT
 
 ## Executing Disabled Integration Tests
 

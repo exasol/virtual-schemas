@@ -226,17 +226,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>mssql-jdbc</artifactId>
-            <version>8.4.1.jre11</version>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>mssqlserver</artifactId>
-            <version>${org.testcontainers.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>test-db-builder-java</artifactId>
             <version>1.1.0</version>
@@ -332,9 +321,9 @@
                     <!-- Set the highest log level for coverage testing, so that we have a chance to reach branches
                       <property>	                      in the logging lambdas too. -->
                     <argLine>-Djava.util.logging.config.file=src/test/resources/logging.properties ${argLine}</argLine>
-                    <includes>
-                        <include>SqlServerSqlDialectIT.java</include>
-                    </includes>
+                    <excludes>
+                        <include>HiveSqlDialectIT.java</include>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>

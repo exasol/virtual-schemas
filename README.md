@@ -139,7 +139,6 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 | [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)                                  | Checking for conditions in code via matchers           | BSD License                      |
 | [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0       |
 | [Mockito](http://site.mockito.org/)                                                 | Mocking framework                                      | MIT License                      |
-| [Microsoft JDBC Driver for SQL Server][sql-server-jdbc-driver]                      | JDBC driver for SQL Server database                    | MIT License                      |
 | [Testcontainers](https://www.testcontainers.org/)                                   | Container-based integration tests                      | MIT License                      |
 | [Test Database Builder][test-bd-builder]                                            | Fluent database interfaces for testing                 | MIT License                      |
 
@@ -165,7 +164,6 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [hbase-server]: http://hbase.apache.org/
 [hive-jdbc-driver]: https://github.com/apache/hive/tree/master/jdbc/src/java/org/apache/hive/jdbc
 [maven-enforcer-plugin]: http://maven.apache.org/enforcer/maven-enforcer-plugin/
-[sql-server-jdbc-driver]: https://github.com/microsoft/mssql-jdbc
 [sonatype-oss-index-maven-plugin]: https://sonatype.github.io/ossindex-maven/maven-plugin/
 [test-bd-builder]: https://github.com/exasol/test-db-builder-java
 [versions-maven-plugin]: https://www.mojohaus.org/versions-maven-plugin/
@@ -182,7 +180,7 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [postgresql-dialect-doc]: https://github.com/exasol/postgresql-virtual-schema/blob/main/doc/dialects/postgresql.md
 [redshift-dialect-doc]: doc/dialects/redshift.md
 [sap-hana-dialect-doc]: doc/dialects/saphana.md
-[sql-server-dialect-doc]: doc/dialects/sql_server.md
+[sql-server-dialect-doc]: https://github.com/exasol/sqlserver-virtual-schema/blob/main/doc/user_guide/sqlserver_user_guide.md
 [sybase-dialect-doc]: doc/dialects/sybase.md
 [teradata-dialect-doc]: doc/dialects/teradata.md
 
