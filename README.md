@@ -168,7 +168,7 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [test-bd-builder]: https://github.com/exasol/test-db-builder-java
 [versions-maven-plugin]: https://www.mojohaus.org/versions-maven-plugin/
 
-[athena-dialect-doc]: doc/dialects/athena.md
+[athena-dialect-doc]: https://github.com/exasol/athena-virtual-schema/blob/main/doc/user_guide/athena_user_guide.md
 [aurora-dialect-doc]: doc/dialects/aurora.md
 [big-query-dialect-doc]: doc/dialects/bigquery.md
 [db2-dialect-doc]: https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/db2_user_guide.md

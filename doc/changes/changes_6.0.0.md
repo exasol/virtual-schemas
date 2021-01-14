@@ -1,6 +1,6 @@
 # Exasol Virtual Schemas 6.0.0, released 2021-XX-XX
 
-Code name: Migrated Oracle, DB2 and SQL Server dialect implementations to their own repository.
+Code name: Migrated Oracle, DB2, SQL Server and Athena dialect implementations to their own repositories.
 
 ## Summary
 
@@ -8,12 +8,14 @@ Please we aware you can not create Oracle, DB2 nor SQL Server Virtual Schemas us
 - Oracle dialect implementation has been migrated to https://github.com/exasol/oracle-virtual-schema.
 - DB2 dialect implementation has been migrated to https://github.com/exasol/db2-virtual-schema.
 - SQL Server dialect implementation has been migrated to https://github.com/exasol/sqlserver-virtual-schema.
+- Athena dialect implementation has been migrated to https://github.com/exasol/athena-virtual-schema.
 
 ## Refactoring
 
 * #438: Removed Oracle dialect implementation as it has been migrated to https://github.com/exasol/mysql-virtual-schema.
 * #440: Removed DB2 dialect implementation as it has been migrated to https://github.com/exasol/db2-virtual-schema.
 * #442: Removed SQL Server dialect implementation as it has been migrated to https://github.com/exasol/sqlserver-virtual-schema.
+* #444: Removed Athena dialect implementation as it has been migrated to https://github.com/exasol/athena-virtual-schema.
 
 ## Dependency updates
 
