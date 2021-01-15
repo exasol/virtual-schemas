@@ -166,9 +166,6 @@
                     <!-- Set the highest log level for coverage testing, so that we have a chance to reach branches
                       <property>	                      in the logging lambdas too. -->
                     <argLine>-Djava.util.logging.config.file=src/test/resources/logging.properties ${argLine}</argLine>
-                    <excludes>
-                        <include>HiveSqlDialectIT.java</include>
-                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
