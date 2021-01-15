@@ -43,7 +43,7 @@ See [PostgreSQLDialectIT](https://github.com/exasol/postgresql-virtual-schema/bl
 
 In order not to create security issues make sure the data in the source database is not confidential (demo data only).
 
-## Executing Enabled Integration Tests
+## Executing Integration Tests
 
 We use following [Maven life cycle phases](https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html) for our integration tests:
 
@@ -63,30 +63,6 @@ This will run all tests included in the `maven-failsafe-plugin` integration test
 Another way to run integration tests:
 
 * Create a package of Virtual Schemas using `mvn package` command and run integration tests inside your IDE in the same way as unit tests.
-
-List of enabled integration tests:
-
-* ExasolSqlDialectIT (in [exasol-virtual-schema](https://github.com/exasol/exasol-virtual-schema) repository)
-* PostgreSQLSqlDialectIT (in [postgresql-virtual-schema](https://github.com/exasol/postgresql-virtual-schema) repository)
-
-## Executing Disabled Integration Tests
-
-Some integration tests are not running automatically, but it is possible to execute them locally. 
-The reason for the tests being disabled is we can only deliver drivers where the license allows redistribution.
-Therefore we cannot include some jdbc drivers to the projects and you need to download them manually for local integration testing.
-
-List of disabled integration tests:
-
-* HiveSqlDialectIT
-
-### Starting Disabled Integration Test Locally
-
-1. Download the [Hive JDBC driver `HiveJDBC41.jar`](https://www.cloudera.com/downloads/connectors/hive/jdbc/2-5-4.html)
-2. Temporarily put the driver into `src/test/resources/integration/driver/hive` directory.
-
-3. If the files' names are different (you renamed the file, or it has a different version number, for example) from the mentioned above, edit `src/test/resources/integration/driver/hive/hive.properties` and `settings.cfg` files.
-4. Run the tests from an IDE or temporarily add the integration test name into the `maven-failsafe-plugin`'s includes a section and execute `mvn verify` command.
-5. Remove the driver after the test and **do not upload it to the GitHub repository**.
 
 ## See also
 

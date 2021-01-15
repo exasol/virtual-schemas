@@ -170,7 +170,7 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 
 [athena-dialect-doc]: https://github.com/exasol/athena-virtual-schema/blob/main/doc/user_guide/athena_user_guide.md
 [aurora-dialect-doc]: doc/dialects/aurora.md
-[big-query-dialect-doc]: doc/dialects/bigquery.md
+[big-query-dialect-doc]: https://github.com/exasol/bigquery-virtual-schema/blob/main/doc/user_guide/bigquery_user_guide.md
 [db2-dialect-doc]: https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/db2_user_guide.md
 [exasol-dialect-doc]: https://github.com/exasol/exasol-virtual-schema/blob/main/doc/dialects/exasol.md
 [hive-dialect-doc]: https://github.com/exasol/hive-virtual-schema/blob/main/doc/user_guide/hive_user_guide.md
@@ -181,7 +181,7 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [redshift-dialect-doc]: doc/dialects/redshift.md
 [sap-hana-dialect-doc]: https://github.com/exasol/hana-virtual-schema/blob/main/doc/user_guide/user_guide.md
 [sql-server-dialect-doc]: https://github.com/exasol/sqlserver-virtual-schema/blob/main/doc/user_guide/sqlserver_user_guide.md
-[sybase-dialect-doc]: doc/dialects/sybase.md
+[sybase-dialect-doc]: https://github.com/exasol/sybase-virtual-schema/blob/main/doc/user_guide/sybase_user_guide.md
 [teradata-dialect-doc]: https://github.com/exasol/teradata-virtual-schema/blob/main/doc/dialects/teradata.md
 
 [vs-api]: https://github.com/exasol/virtual-schema-common-java/blob/master/doc/development/api/virtual_schema_api.md
