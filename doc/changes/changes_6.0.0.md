@@ -1,6 +1,6 @@
 # Exasol Virtual Schemas 6.0.0, released 2021-XX-XX
 
-Code name: Dialect implementations migration.
+Code name: Dialects migration.
 
 ## Summary
 
@@ -15,18 +15,19 @@ The following dialect implementations have been migrate to their own repositorie
 - Hana, moved to https://github.com/exasol/hana-virtual-schema.
 - Big Query, moved to https://github.com/exasol/bigquery-virtual-schema.
 - Sybase, moved to https://github.com/exasol/sybase-virtual-schema.
+- Redshift, moved to https://github.com/exasol/redshift-virtual-schema.
+- Impala, moved to https://github.com/exasol/impala-virtual-schema.
 
 Please we aware you can not create Virtual Schemas of the mentioned above dialects using this JAR anymore.
 
 ## Refactoring
 
 * #428: Removed Teradata, Hive and Hana dialects.
-* #438: Removed Oracle dialect implementation as it has been migrated to https://github.com/exasol/mysql-virtual-schema.
-* #440: Removed DB2 dialect implementation as it has been migrated to https://github.com/exasol/db2-virtual-schema.
-* #442: Removed SQL Server dialect implementation as it has been migrated to https://github.com/exasol/sqlserver-virtual-schema.
-* #444: Removed Athena dialect implementation as it has been migrated to https://github.com/exasol/athena-virtual-schema.
-* #446: Removed Big Query dialect implementation as it has been migrated to https://github.com/exasol/bigquery-virtual-schema.
-* #447: Removed Sybase dialect implementation as it has been migrated to https://github.com/exasol/sybase-virtual-schema.
+* #438: Removed Oracle dialect.
+* #440: Removed DB2 dialect.
+* #442: Removed SQL Server dialect.
+* #444: Removed Athena dialect.
+* #446: Removed Big Query, Sybase, Impala and Redshift dialects.
 
 ## Dependency updates
 
@@ -34,3 +35,13 @@ Please we aware you can not create Virtual Schemas of the mentioned above dialec
 * Removed `com.oracle.ojdbc:ojdbc8:19.3.0.0`
 * Removed `org.testcontainers:mssqlserver:1.15.0`
 * Removed `com.microsoft.sqlserver:mssql-jdbc:8.4.1.jre11`
+* Removed `com.exasol:db-fundamentals-java:0.1.1`
+* Removed `nl.jqno.equalsverifier:equalsverifier:3.5`
+* Removed `com.exasol:exasol-jdbc:7.0.3`
+* Removed `com.exasol:exasol-testcontainers:3.3.1`
+* Removed `org.testcontainers:junit-jupiter:1.15.0`
+* Removed `org.apache.hive:hive-jdbc:3.1.2`
+* Removed `org.apache.thrift:libthrift:0.13.0`
+* Removed `org.apache.hbase:hbase-server:2.3.3`
+* Removed `com.exasol:test-db-builder-java:1.1.0`
+* Removed `com.exasol:hamcrest-resultset-matcher:1.2.1`

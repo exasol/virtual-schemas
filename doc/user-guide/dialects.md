@@ -8,11 +8,11 @@ Dialect name                        | Repository                                
 [DB2][db2-dialect-doc]              |  [DB2 Virtual Schemas][db2-virtual-schema-repository]             | [Latest release][db2-virtual-schema-releases]       |          
 [Exasol][exasol-dialect-doc]        |  [Exasol Virtual Schema][exasol-virtual-schema-repository]        | [Latest release][exasol-virtual-schema-releases]    |                
 [Hive][hive-dialect-doc]            |  [Hive Virtual Schemas][hive-virtual-schema-repository]           | [Latest release][hive-virtual-schema-releases]      |          
-[Impala][impala-dialect-doc]        |  [Virtual Schemas][virtual-schemas-repository]                    | [Latest release][virtual-schemas-releases]          |          
+[Impala][impala-dialect-doc]        |  [Impala Virtual Schema][impala-virtual-schema-repository]        | [Latest release][impala-virtual-schema-releases]    |          
 [MySQL][mysql-dialect-doc]          |  [MySQL Virtual Schema][mysql-virtual-schema-repository]          | [Latest release][mysql-virtual-schema-releases]     |          
 [Oracle][oracle-dialect-doc]        |  [Oracle Virtual Schema][oracle-virtual-schema-repository]        | [Latest release][oracle-virtual-schema-releases]    |          
 [PostgreSQL][postgresql-dialect-doc]|  [PostgreSQL Virtual Schema][pg-virtual-schema-repository]        | [Latest release][pg-virtual-schema-releases]        |          
-[Redshift][redshift-dialect-doc]    |  [Virtual Schemas][virtual-schemas-repository]                    | [Latest release][virtual-schemas-releases]          |          
+[Redshift][redshift-dialect-doc]    |  [Redshift Virtual Schema][redshift-virtual-schema-repository]    | [Latest release][redshift-virtual-schema-releases]  |          
 [SAP HANA][sap-hana-dialect-doc]    |  [Hana Virtual Schemas][hana-virtual-schema-repository]           | [Latest release][hana-virtual-schema-releases]      |          
 [SQL Server][sql-server-dialect-doc]|  [SQL Server Virtual Schema][sqlserver-virtual-schema-repository] | [Latest release][sqlserver-virtual-schema-releases] |          
 [Sybase ASE][sybase-dialect-doc]    |  [Sybase Virtual Schema][sybase-virtual-schema-repository]        | [Latest release][sybase-virtual-schema-releases]    |          
@@ -28,11 +28,11 @@ You can also [develop a custom dialect](../development/developing-sql-dialect/de
 [db2-dialect-doc]: https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/db2_user_guide.md
 [exasol-dialect-doc]: https://github.com/exasol/exasol-virtual-schema/blob/master/doc/dialects/exasol.md
 [hive-dialect-doc]: https://github.com/exasol/hive-virtual-schema/blob/main/doc/user_guide/hive_user_guide.md
-[impala-dialect-doc]: ../dialects/impala.md
+[impala-dialect-doc]: https://github.com/exasol/impala-virtual-schema/blob/main/doc/user_guide/impala_user_guide.md
 [mysql-dialect-doc]: https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/mysql_user_guide.md
 [oracle-dialect-doc]: https://github.com/exasol/oracle-virtual-schema/blob/main/doc/user_guide/oracle_user_guide.md
 [postgresql-dialect-doc]: https://github.com/exasol/postgresql-virtual-schema/blob/main/doc/dialects/postgresql.md
-[redshift-dialect-doc]: ../dialects/redshift.md
+[redshift-dialect-doc]: https://github.com/exasol/redshift-virtual-schema/blob/main/doc/user_guide/redshift_user_guide.md
 [sap-hana-dialect-doc]:  https://github.com/exasol/hana-virtual-schema/blob/main/doc/user_guide/user_guide.md
 [sql-server-dialect-doc]: https://github.com/exasol/sqlserver-virtual-schema/blob/main/doc/user_guide/sqlserver_user_guide.md
 [sybase-dialect-doc]: https://github.com/exasol/sybase-virtual-schema/blob/main/doc/user_guide/sybase_user_guide.md
@@ -56,11 +56,15 @@ You can also [develop a custom dialect](../development/developing-sql-dialect/de
 [sybase-virtual-schema-releases]: https://github.com/exasol/sybase-virtual-schema/releases
 [hive-virtual-schema-repository]: https://github.com/exasol/hive-virtual-schema
 [hive-virtual-schema-releases]: https://github.com/exasol/hive-virtual-schema/releases
+[impala-virtual-schema-repository]: https://github.com/exasol/impala-virtual-schema
+[impala-virtual-schema-releases]: https://github.com/exasol/impala-virtual-schema/releases
 [mysql-virtual-schema-repository]: https://github.com/exasol/mysql-virtual-schema
 [mysql-virtual-schema-releases]: https://github.com/exasol/mysql-virtual-schema/releases
 [oracle-virtual-schema-repository]: https://github.com/exasol/oracle-virtual-schema
 [oracle-virtual-schema-releases]: https://github.com/exasol/oracle-virtual-schema/releases
 [pg-virtual-schema-repository]: https://github.com/exasol/postgresql-virtual-schema
 [pg-virtual-schema-releases]: https://github.com/exasol/postgresql-virtual-schema/releases
+[redshift-virtual-schema-repository]: https://github.com/exasol/redshift-virtual-schema
+[redshift-virtual-schema-releases]: https://github.com/exasol/redshift-virtual-schema/releases
 [teradata-virtual-schema-repository]: https://github.com/exasol/teradata-virtual-schema
 [teradata-virtual-schema-releases]: https://github.com/exasol/teradata-virtual-schema/releases

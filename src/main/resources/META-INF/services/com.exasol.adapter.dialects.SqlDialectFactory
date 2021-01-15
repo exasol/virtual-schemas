@@ -1,3 +1,1 @@
 com.exasol.adapter.dialects.generic.GenericSqlDialectFactory
-com.exasol.adapter.dialects.impala.ImpalaSqlDialectFactory
-com.exasol.adapter.dialects.redshift.RedshiftSqlDialectFactory
