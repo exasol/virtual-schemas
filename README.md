@@ -133,9 +133,7 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 | [Apache Maven](https://maven.apache.org/)                                           | Build tool                                             | Apache License 2.0               |
 | [Apache Trift][apache-trift]                                                        | Need for Hive integration test                         | Apache License 2.0               |
 | [Exasol JDBC Driver][exasol-jdbc-driver]                                            | JDBC driver for Exasol database                        | MIT License                      |
-| [Exasol Testcontainers][exasol-testcontainers]                                      | Exasol extension for the Testcontainers framework      | MIT License                      |
 | [HBase server][hbase-server]                                                        | The Hadoop database                                    | Apache License 2.0               |
-| [Hive JDBC Driver][hive-jdbc-driver]                                                | JDBC driver for Hive database                          | Apache License 2.0               |
 | [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)                                  | Checking for conditions in code via matchers           | BSD License                      |
 | [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0       |
 | [Mockito](http://site.mockito.org/)                                                 | Mocking framework                                      | MIT License                      |
@@ -170,18 +168,18 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 
 [athena-dialect-doc]: https://github.com/exasol/athena-virtual-schema/blob/main/doc/user_guide/athena_user_guide.md
 [aurora-dialect-doc]: doc/dialects/aurora.md
-[big-query-dialect-doc]: doc/dialects/bigquery.md
+[big-query-dialect-doc]: https://github.com/exasol/bigquery-virtual-schema/blob/main/doc/user_guide/bigquery_user_guide.md
 [db2-dialect-doc]: https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/db2_user_guide.md
 [exasol-dialect-doc]: https://github.com/exasol/exasol-virtual-schema/blob/main/doc/dialects/exasol.md
 [hive-dialect-doc]: https://github.com/exasol/hive-virtual-schema/blob/main/doc/user_guide/hive_user_guide.md
-[impala-dialect-doc]: doc/dialects/impala.md
+[impala-dialect-doc]: https://github.com/exasol/impala-virtual-schema/blob/main/doc/dialects/impala_user_guide.md
 [mysql-dialect-doc]: https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/mysql_user_guide.md
 [oracle-dialect-doc]: https://github.com/exasol/oracle-virtual-schema/blob/main/doc/user_guide/oracle_user_guide.md
 [postgresql-dialect-doc]: https://github.com/exasol/postgresql-virtual-schema/blob/main/doc/dialects/postgresql.md
-[redshift-dialect-doc]: doc/dialects/redshift.md
+[redshift-dialect-doc]: https://github.com/exasol/redshift-virtual-schema/blob/main/doc/dialects/redshift_user_guide.md
 [sap-hana-dialect-doc]: https://github.com/exasol/hana-virtual-schema/blob/main/doc/user_guide/user_guide.md
 [sql-server-dialect-doc]: https://github.com/exasol/sqlserver-virtual-schema/blob/main/doc/user_guide/sqlserver_user_guide.md
-[sybase-dialect-doc]: doc/dialects/sybase.md
+[sybase-dialect-doc]: https://github.com/exasol/sybase-virtual-schema/blob/main/doc/user_guide/sybase_user_guide.md
 [teradata-dialect-doc]: https://github.com/exasol/teradata-virtual-schema/blob/main/doc/dialects/teradata.md
 
 [vs-api]: https://github.com/exasol/virtual-schema-common-java/blob/master/doc/development/api/virtual_schema_api.md

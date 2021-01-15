@@ -13,9 +13,6 @@ dependency-reduced-pom.xml
 # Intellij recommends to share iml files, however, better don't share files which might be outdated
 *.iml
 
-# Integration tests
-src/test/resources/integration/driver/hive/*.jar
-
 # Others
 .DS_Store
 *.swp
