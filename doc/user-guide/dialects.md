@@ -2,7 +2,7 @@
 
 Dialect name                        | Repository                                                 | Latest release
 ------------------------------------|------------------------------------------------------------|--------------------------------------------------|
-[Athena][athena-dialect-doc]        |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
+[Athena][athena-dialect-doc]        |  [Athena Virtual Schema][athena-virtual-schema-repository] | [Latest release][athena-virtual-schema-releases] |          
 [Aurora][aurora-dialect-doc]        |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
 [Big Query][big-query-dialect-doc]  |  [Virtual Schemas][virtual-schemas-repository]             | [Latest release][virtual-schemas-releases]       |          
 [DB2][db2-dialect-doc]              |  [DB2 Virtual Schemas][db2-virtual-schema-repository]      | [Latest release][db2-virtual-schema-releases]    |          
@@ -22,7 +22,7 @@ Generic                             |  [Virtual Schemas][virtual-schemas-reposit
 If your database is not part of that list but provides a JDBC driver, try to use the Generic driver.
 You can also [develop a custom dialect](../development/developing-sql-dialect/developing_a_dialect.md).  
 
-[athena-dialect-doc]: ../dialects/athena.md
+[athena-dialect-doc]: https://github.com/exasol/athena-virtual-schema/blob/main/doc/user_guide/athena_user_guide.md
 [aurora-dialect-doc]: ../dialects/aurora.md
 [big-query-dialect-doc]: ../dialects/bigquery.md
 [db2-dialect-doc]: https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/db2_user_guide.md
@@ -40,6 +40,8 @@ You can also [develop a custom dialect](../development/developing-sql-dialect/de
 
 [virtual-schemas-repository]: https://github.com/exasol/virtual-schemas
 [virtual-schemas-releases]: https://github.com/exasol/virtual-schemas/releases
+[athena-virtual-schema-repository]: https://github.com/exasol/athena-virtual-schema
+[athena-virtual-schema-releases]: https://github.com/exasol/athena-virtual-schema/releases
 [db2-virtual-schema-repository]: https://github.com/exasol/db2-virtual-schema
 [db2-virtual-schema-releases]: https://github.com/exasol/db2-virtual-schema/releases
 [exasol-virtual-schema-repository]: https://github.com/exasol/exasol-virtual-schema

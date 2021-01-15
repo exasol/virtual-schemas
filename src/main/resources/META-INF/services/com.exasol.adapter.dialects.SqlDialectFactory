@@ -1,4 +1,3 @@
-com.exasol.adapter.dialects.athena.AthenaSqlDialectFactory
 com.exasol.adapter.dialects.bigquery.BigQuerySqlDialectFactory
 com.exasol.adapter.dialects.generic.GenericSqlDialectFactory
 com.exasol.adapter.dialects.hive.HiveSqlDialectFactory
