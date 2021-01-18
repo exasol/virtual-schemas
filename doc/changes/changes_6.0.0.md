@@ -52,3 +52,12 @@ Please we aware you can not create Virtual Schemas of the mentioned above dialec
 * Removed `org.junit.jupiter:junit-jupiter:5.7.0`
 * Removed `org.mockito:mockito-junit-jupiter:3.6.0`
 * Removed `junit:junit:4.13.1`
+* Removed `org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M4`
+* Removed `org.jacoco:jacoco-maven-plugin:0.8.5`
+* Removed `org.apache.maven.plugins:maven-compiler-plugin:3.8.1`
+* Removed `org.apache.maven.plugins:maven-assembly-plugin:3.3.0`
+* Removed `org.apache.maven.plugins:maven-failsafe-plugin:3.0.0-M4`
+* Removed `org.codehaus.mojo:versions-maven-plugin:2.8.1`
+* Removed `org.sonatype.ossindex.maven:ossindex-maven-plugin:3.1.0`
+* Removed `org.apache.maven.plugins:maven-enforcer-plugin:3.0.0-M3`
+* Removed `com.exasol:artifact-reference-checker-maven-plugin:0.3.1`
