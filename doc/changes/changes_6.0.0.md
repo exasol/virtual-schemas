@@ -17,6 +17,7 @@ The following dialect implementations have been migrate to their own repositorie
 - Sybase, moved to https://github.com/exasol/sybase-virtual-schema.
 - Redshift, moved to https://github.com/exasol/redshift-virtual-schema.
 - Impala, moved to https://github.com/exasol/impala-virtual-schema.
+- Generic, moved to https://github.com/exasol/generic-virtual-schema.
 
 Please we aware you can not create Virtual Schemas of the mentioned above dialects using this JAR anymore.
 
@@ -28,6 +29,7 @@ Please we aware you can not create Virtual Schemas of the mentioned above dialec
 * #442: Removed SQL Server dialect.
 * #444: Removed Athena dialect.
 * #446: Removed Big Query, Sybase, Impala and Redshift dialects.
+* #451: Removed Generic dialect.
 
 ## Dependency updates
 
@@ -45,3 +47,17 @@ Please we aware you can not create Virtual Schemas of the mentioned above dialec
 * Removed `org.apache.hbase:hbase-server:2.3.3`
 * Removed `com.exasol:test-db-builder-java:1.1.0`
 * Removed `com.exasol:hamcrest-resultset-matcher:1.2.1`
+* Removed `com.exasol:virtual-schema-common-jdbc:8.0.0`
+* Removed `org.hamcrest:hamcrest:2.2`
+* Removed `org.junit.jupiter:junit-jupiter:5.7.0`
+* Removed `org.mockito:mockito-junit-jupiter:3.6.0`
+* Removed `junit:junit:4.13.1`
+* Removed `org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M4`
+* Removed `org.jacoco:jacoco-maven-plugin:0.8.5`
+* Removed `org.apache.maven.plugins:maven-compiler-plugin:3.8.1`
+* Removed `org.apache.maven.plugins:maven-assembly-plugin:3.3.0`
+* Removed `org.apache.maven.plugins:maven-failsafe-plugin:3.0.0-M4`
+* Removed `org.codehaus.mojo:versions-maven-plugin:2.8.1`
+* Removed `org.sonatype.ossindex.maven:ossindex-maven-plugin:3.1.0`
+* Removed `org.apache.maven.plugins:maven-enforcer-plugin:3.0.0-M3`
+* Removed `com.exasol:artifact-reference-checker-maven-plugin:0.3.1`
