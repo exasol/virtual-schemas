@@ -11,8 +11,6 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>11</java.version>
         <surefire.and.failsafe.plugin.version>3.0.0-M4</surefire.and.failsafe.plugin.version>
-        <vscjdbc.version>8.0.0</vscjdbc.version>
-        <org.testcontainers.version>1.15.0</org.testcontainers.version>
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
@@ -43,45 +41,6 @@
         </repository>
     </repositories>
     <dependencies>
-        <dependency>
-            <groupId>com.exasol</groupId>
-            <artifactId>virtual-schema-common-jdbc</artifactId>
-            <version>${vscjdbc.version}</version>
-        </dependency>
-        <!--Unit test dependencies-->
-        <dependency>
-            <groupId>com.exasol</groupId>
-            <artifactId>virtual-schema-common-jdbc</artifactId>
-            <version>${vscjdbc.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest</artifactId>
-            <version>2.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.7.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <version>3.6.0</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- Overrides Junit 4.12 which is used in test containers but contains a security issue:
-        https://ossindex.sonatype.org/vuln/7ea56ad4-8a8b-4e51-8ed9-5aad83d8efb1 -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.1</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -145,7 +104,7 @@
                     <descriptors>
                         <descriptor>assembly/all-dependencies.xml</descriptor>
                     </descriptors>
-                    <finalName>virtual-schema-dist-${vscjdbc.version}-bundle-${project.version}</finalName>
+                    <finalName>virtual-schemas-${project.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>

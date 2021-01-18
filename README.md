@@ -68,6 +68,7 @@ in all your `CREATE JAVA ADAPTER SCRIPT` statements. The old entry point was rem
  [Amazon AWS Redshift][redshift-dialect-doc], [SAP HANA][sap-hana-dialect-doc], [Microsoft SQLServer][sql-server-dialect-doc],
  [Sybase][sybase-dialect-doc], [Teradata][teradata-dialect-doc].
 * Supports [Apache Impala][impala-dialect-doc] (Hadoop-based analytical database) as a source
+* Supports [ElasticSearch][elasticsearch-dialect-doc] as a source
 * Supports [Apache Hive][hive-dialect-doc] (Hadoop-based data warehouse) as source
 * Supports access to file-based columnar storage (e.g. [Apache Parquet files](https://parquet.apache.org/documentation/latest/))
   via [Amazon AWS Redshift Spectrum](https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html), 
@@ -77,6 +78,30 @@ in all your `CREATE JAVA ADAPTER SCRIPT` statements. The old entry point was rem
 * Allows limiting metadata mapping to selected catalogs and / or schemas
 * Allows redirecting log output to a remote machine
 * Allows remote debugging with the Java Debugger
+
+## Supported Data Sources
+
+| Data Source                                       |
+|---------------------------------------------------|
+| [IBM DB2][db2-dialect-doc]                        |
+| [Exasol][exasol-dialect-doc]                      |
+| [Generic JDBC-capable RDBMS][generic-dialect-doc] |
+| [MySQL][mysql-dialect-doc]                        |
+| [Oracle][oracle-dialect-doc]                      |
+| [PostgreSQL][postgresql-dialect-doc]              |
+| [Amazon AWS Redshift][redshift-dialect-doc]       |
+| [Amazon AWS Redshift Spectrum][redshift-spectrum] |
+| [SAP HANA][sap-hana-dialect-doc]                  |
+| [Microsoft SQLServer][sql-server-dialect-doc]     |
+| [Sybase][sybase-dialect-doc]                      |
+| [Teradata][teradata-dialect-doc]                  |
+| [Google Big Query][big-query-dialect-doc]         |
+| [AWS Aurora][aurora-dialect-doc]                  |
+| [Amazon AWS Athena][athena-dialect-doc]           |
+| [ElasticSearch][elasticsearch-dialect-doc]        |
+| [Apache Impala][impala-dialect-doc]               |
+| [Apache Hive][hive-dialect-doc]                   |
+| [Apache Parquet files][apache-parquet]            |
 
 ## Limitations
 
@@ -117,28 +142,9 @@ Additional resources:
 
 ### Run Time Dependencies
 
-Running the Virtual Schema requires a Java Runtime version 9 or later.
+Running any Virtual Schema requires a Java Runtime version 9 or later.
 
-| Dependency                                                                          | Purpose                                                | License                          |
-|-------------------------------------------------------------------------------------|--------------------------------------------------------|----------------------------------|
-| [JSON-P](https://javaee.github.io/jsonp/)                                           | JSON Processing                                        | CDDL-1.0                         |
-| [Exasol Script API](https://docs.exasol.com/database_concepts/udf_scripts.htm)      | Accessing Exasol features                              | MIT License                      |
-| [Exasol Virtual Schema JDBC](https://github.com/exasol/virtual-schema-common-jdbc)  | Common JDBC functions for Virtual Schemas adapters     | MIT License                      |
-| JDBC driver(s), depending on data source                                            | Connecting to the data source                          | Check driver documentation       |
-
-### Test Dependencies
-
-| Dependency                                                                          | Purpose                                                | License                          |
-|-------------------------------------------------------------------------------------|--------------------------------------------------------|----------------------------------|
-| [Apache Maven](https://maven.apache.org/)                                           | Build tool                                             | Apache License 2.0               |
-| [Apache Trift][apache-trift]                                                        | Need for Hive integration test                         | Apache License 2.0               |
-| [Exasol JDBC Driver][exasol-jdbc-driver]                                            | JDBC driver for Exasol database                        | MIT License                      |
-| [HBase server][hbase-server]                                                        | The Hadoop database                                    | Apache License 2.0               |
-| [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)                                  | Checking for conditions in code via matchers           | BSD License                      |
-| [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0       |
-| [Mockito](http://site.mockito.org/)                                                 | Mocking framework                                      | MIT License                      |
-| [Testcontainers](https://www.testcontainers.org/)                                   | Container-based integration tests                      | MIT License                      |
-| [Test Database Builder][test-bd-builder]                                            | Fluent database interfaces for testing                 | MIT License                      |
+The runtime dependencies are specified for each dialect in their own repository.
 
 ### Maven Plug-ins
 
@@ -147,7 +153,6 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 | [Maven Assembly Plugin][maven-assembly-plugin]                                      | Creating JAR                                           | Apache License 2.0               |
 | [Maven Compiler Plugin](https://maven.apache.org/plugins/maven-compiler-plugin/)    | Setting required Java version                          | Apache License 2.0               |
 | [Maven Enforcer Plugin][maven-enforcer-plugin]                                      | Controlling environment constants                      | Apache License 2.0               |
-| [Maven Failsafe Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Integration testing                                    | Apache License 2.0               |
 | [Maven Jacoco Plugin](https://www.eclemma.org/jacoco/trunk/doc/maven.html)          | Code coverage metering                                 | Eclipse Public License 2.0       |
 | [Maven Surefire Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Unit testing                                           | Apache License 2.0               |
 | [Sonatype OSS Index Maven Plugin][sonatype-oss-index-maven-plugin]                  | Checking Dependencies Vulnerability                    | ASL2                             |
@@ -156,14 +161,8 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 
 [artifact-reference-checker-plugin]: https://github.com/exasol/artifact-reference-checker-maven-plugin
 [maven-assembly-plugin]: https://maven.apache.org/plugins/maven-assembly-plugin/
-[apache-trift]: http://thrift.apache.org/
-[exasol-jdbc-driver]: https://www.exasol.com/portal/display/DOWNLOAD/Exasol+Download+Section
-[exasol-testcontainers]: https://github.com/exasol/exasol-testcontainers
-[hbase-server]: http://hbase.apache.org/
-[hive-jdbc-driver]: https://github.com/apache/hive/tree/master/jdbc/src/java/org/apache/hive/jdbc
 [maven-enforcer-plugin]: http://maven.apache.org/enforcer/maven-enforcer-plugin/
 [sonatype-oss-index-maven-plugin]: https://sonatype.github.io/ossindex-maven/maven-plugin/
-[test-bd-builder]: https://github.com/exasol/test-db-builder-java
 [versions-maven-plugin]: https://www.mojohaus.org/versions-maven-plugin/
 
 [athena-dialect-doc]: https://github.com/exasol/athena-virtual-schema/blob/main/doc/user_guide/athena_user_guide.md
@@ -181,5 +180,9 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 [sql-server-dialect-doc]: https://github.com/exasol/sqlserver-virtual-schema/blob/main/doc/user_guide/sqlserver_user_guide.md
 [sybase-dialect-doc]: https://github.com/exasol/sybase-virtual-schema/blob/main/doc/user_guide/sybase_user_guide.md
 [teradata-dialect-doc]: https://github.com/exasol/teradata-virtual-schema/blob/main/doc/dialects/teradata.md
+[elasticsearch-dialect-doc]: https://github.com/exasol/elasticsearch-virtual-schema/blob/main/doc/dialects/elasticsearch_sql_user_guide.md
+[redshift-spectrum]: https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html
+[apache-parquet]: https://parquet.apache.org/documentation/latest/
+[generic-dialect-doc]: https://github.com/exasol/generic-virtual-schema/blob/main/doc/user_guide/generic_user_guide.md
 
 [vs-api]: https://github.com/exasol/virtual-schema-common-java/blob/master/doc/development/api/virtual_schema_api.md
