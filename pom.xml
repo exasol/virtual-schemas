@@ -10,6 +10,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>11</java.version>
+        <vscjdbc.version>8.0.0</vscjdbc.version>
         <surefire.and.failsafe.plugin.version>3.0.0-M4</surefire.and.failsafe.plugin.version>
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
@@ -104,7 +105,7 @@
                     <descriptors>
                         <descriptor>assembly/all-dependencies.xml</descriptor>
                     </descriptors>
-                    <finalName>virtual-schemas-${project.version}</finalName>
+                    <finalName>virtual-schema-dist-${vscjdbc.version}-bundle-${project.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>
