@@ -88,6 +88,8 @@ That means that queries that involve tables from Virtual Schema will take at lea
 
 This is an open source project which is officially supported by Exasol. For any question, you can contact our support team.
 
+**NOTE: For reporting an issue for a specific dialect, please do it in the dialect repository (see the Supported Data Sources above)**
+
 # Table of Contents
 
 ## Information for Users
