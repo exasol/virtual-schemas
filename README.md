@@ -121,7 +121,7 @@ Additional resources:
 [db2-dialect-doc]: https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/db2_user_guide.md
 [exasol-dialect-doc]: https://github.com/exasol/exasol-virtual-schema/blob/main/doc/dialects/exasol.md
 [hive-dialect-doc]: https://github.com/exasol/hive-virtual-schema/blob/main/doc/user_guide/hive_user_guide.md
-[impala-dialect-doc]: https://giI think We should remove all dependencies from here and from the pom, but leave the pom be till some next pull requestthub.com/exasol/impala-virtual-schema/blob/main/doc/dialects/impala_user_guide.md
+[impala-dialect-doc]: https://github.com/exasol/impala-virtual-schema/blob/main/doc/dialects/impala_user_guide.md
 [mysql-dialect-doc]: https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/mysql_user_guide.md
 [oracle-dialect-doc]: https://github.com/exasol/oracle-virtual-schema/blob/main/doc/user_guide/oracle_user_guide.md
 [postgresql-dialect-doc]: https://github.com/exasol/postgresql-virtual-schema/blob/main/doc/dialects/postgresql.md
