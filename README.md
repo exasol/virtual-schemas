@@ -2,22 +2,6 @@
 
 <img alt="virtual-schemas logo" src="doc/images/virtual-schemas_128x128.png" style="float:left; padding:0px 10px 10px 10px;"/>
 
-[![Build Status](https://travis-ci.com/exasol/virtual-schemas.svg?branch=master)](https://travis-ci.com/exasol/virtual-schemas)
-
-SonarCloud results:
-
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtual-schema-jdbc-adapter&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtual-schema-jdbc-adapter)
-
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtual-schema-jdbc-adapter&metric=security_rating)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtual-schema-jdbc-adapter)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtual-schema-jdbc-adapter&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtual-schema-jdbc-adapter)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtual-schema-jdbc-adapter&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtual-schema-jdbc-adapter)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtual-schema-jdbc-adapter&metric=sqale_index)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtual-schema-jdbc-adapter)
-
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtual-schema-jdbc-adapter&metric=code_smells)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtual-schema-jdbc-adapter)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtual-schema-jdbc-adapter&metric=coverage)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtual-schema-jdbc-adapter)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtual-schema-jdbc-adapter&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtual-schema-jdbc-adapter)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Avirtual-schema-jdbc-adapter&metric=ncloc)](https://sonarcloud.io/dashboard?id=com.exasol%3Avirtual-schema-jdbc-adapter)
-
 # Overview
 
 Exasol **Virtual Schemas** are an abstraction layer that makes external data sources accessible in our data analytics platform through regular SQL commands. The contents of the external data sources are mapped to virtual tables which look like and can be queried as any regular Exasol table.
@@ -51,6 +35,8 @@ Please do not try to install language containers with lower Java versions on new
 
 Please contact the [Exasol Support Team](https://www.exasol.com/portal/display/EXA/Support+Dashboard) if you need help upgrading the language container.
 
+The runtime dependencies are specified for each dialect in their own repository.
+
 ## Deprecation Warning
 
 Please use the entry point
@@ -61,18 +47,8 @@ in all your `CREATE JAVA ADAPTER SCRIPT` statements. The old entry point was rem
 
 ## Features
 
-* Read access to data on remote data sources
+* Read only access to data on remote data sources (see the Supported Data Sources below)
 * Data in those sources appears as tables inside Exasol and can be queried using regular SQL statements.
-* Supports the following relational databases as sources: [IBM DB2][db2-dialect-doc], [Exasol][exasol-dialect-doc], 
- Generic JDBC-capable RDBMS, [MySQL][mysql-dialect-doc], [Oracle][oracle-dialect-doc], [PostgreSQL][postgresql-dialect-doc], 
- [Amazon AWS Redshift][redshift-dialect-doc], [SAP HANA][sap-hana-dialect-doc], [Microsoft SQLServer][sql-server-dialect-doc],
- [Sybase][sybase-dialect-doc], [Teradata][teradata-dialect-doc].
-* Supports [Apache Impala][impala-dialect-doc] (Hadoop-based analytical database) as a source
-* Supports [ElasticSearch][elasticsearch-dialect-doc] as a source
-* Supports [Apache Hive][hive-dialect-doc] (Hadoop-based data warehouse) as source
-* Supports access to file-based columnar storage (e.g. [Apache Parquet files](https://parquet.apache.org/documentation/latest/))
-  via [Amazon AWS Redshift Spectrum](https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html), 
-  [Amazon AWS Athena][athena-dialect-doc], [AWS Aurora][aurora-dialect-doc] and [Google Big Query][big-query-dialect-doc].
 * Pushes down queries to the remote source (some sources)
 * Supports sources with no / one / multiple catalogs or schemas
 * Allows limiting metadata mapping to selected catalogs and / or schemas
@@ -105,7 +81,6 @@ in all your `CREATE JAVA ADAPTER SCRIPT` statements. The old entry point was rem
 
 ## Limitations
 
-* Supports only read access to the external data
 * The Virtual Schema adapter takes about 1s to start.
 That means that queries that involve tables from Virtual Schema will take at least 1s. 
 
@@ -138,40 +113,13 @@ Additional resources:
 * [Troubleshooting](doc/development/troubleshooting.md)
 * [Versioning](doc/development/versioning.md)
 
-## Dependencies
-
-### Run Time Dependencies
-
-Running any Virtual Schema requires a Java Runtime version 9 or later.
-
-The runtime dependencies are specified for each dialect in their own repository.
-
-### Maven Plug-ins
-
-| Plug-in                                                                             | Purpose                                                | License                          |
-|-------------------------------------------------------------------------------------|--------------------------------------------------------|----------------------------------|
-| [Maven Assembly Plugin][maven-assembly-plugin]                                      | Creating JAR                                           | Apache License 2.0               |
-| [Maven Compiler Plugin](https://maven.apache.org/plugins/maven-compiler-plugin/)    | Setting required Java version                          | Apache License 2.0               |
-| [Maven Enforcer Plugin][maven-enforcer-plugin]                                      | Controlling environment constants                      | Apache License 2.0               |
-| [Maven Jacoco Plugin](https://www.eclemma.org/jacoco/trunk/doc/maven.html)          | Code coverage metering                                 | Eclipse Public License 2.0       |
-| [Maven Surefire Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Unit testing                                           | Apache License 2.0               |
-| [Sonatype OSS Index Maven Plugin][sonatype-oss-index-maven-plugin]                  | Checking Dependencies Vulnerability                    | ASL2                             |
-| [Versions Maven Plugin][versions-maven-plugin]                                      | Checking if dependencies updates are available         | Apache License 2.0               |
-| [Artifact Reference Checker Plugin][artifact-reference-checker-plugin]              | Check if artifact is referenced with correct version   | MIT License                      |
-
-[artifact-reference-checker-plugin]: https://github.com/exasol/artifact-reference-checker-maven-plugin
-[maven-assembly-plugin]: https://maven.apache.org/plugins/maven-assembly-plugin/
-[maven-enforcer-plugin]: http://maven.apache.org/enforcer/maven-enforcer-plugin/
-[sonatype-oss-index-maven-plugin]: https://sonatype.github.io/ossindex-maven/maven-plugin/
-[versions-maven-plugin]: https://www.mojohaus.org/versions-maven-plugin/
-
 [athena-dialect-doc]: https://github.com/exasol/athena-virtual-schema/blob/main/doc/user_guide/athena_user_guide.md
 [aurora-dialect-doc]: doc/dialects/aurora.md
 [big-query-dialect-doc]: https://github.com/exasol/bigquery-virtual-schema/blob/main/doc/user_guide/bigquery_user_guide.md
 [db2-dialect-doc]: https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/db2_user_guide.md
 [exasol-dialect-doc]: https://github.com/exasol/exasol-virtual-schema/blob/main/doc/dialects/exasol.md
 [hive-dialect-doc]: https://github.com/exasol/hive-virtual-schema/blob/main/doc/user_guide/hive_user_guide.md
-[impala-dialect-doc]: https://github.com/exasol/impala-virtual-schema/blob/main/doc/dialects/impala_user_guide.md
+[impala-dialect-doc]: https://giI think We should remove all dependencies from here and from the pom, but leave the pom be till some next pull requestthub.com/exasol/impala-virtual-schema/blob/main/doc/dialects/impala_user_guide.md
 [mysql-dialect-doc]: https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/mysql_user_guide.md
 [oracle-dialect-doc]: https://github.com/exasol/oracle-virtual-schema/blob/main/doc/user_guide/oracle_user_guide.md
 [postgresql-dialect-doc]: https://github.com/exasol/postgresql-virtual-schema/blob/main/doc/dialects/postgresql.md
