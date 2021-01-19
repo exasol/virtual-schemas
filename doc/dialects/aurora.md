@@ -49,7 +49,7 @@ This step is necessary since the UDF container the adapter runs in has no access
 
 ### Installing the Adapter Script
 
-Upload the latest available release of [Virtual Schema JDBC Adapter](https://github.com/exasol/virtual-schemas/releases) to Bucket FS.
+Upload the latest available release of [PostgreSQL Virtual Schema](https://github.com/exasol/postgresql-virtual-schema/releases) to Bucket FS.
 
 Then create a schema to hold the adapter script.
 
@@ -62,7 +62,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-8.0.0-bundle-6.0.0.jar;
+    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-8.0.0-posgresql-1.0.0.jar;
     %jar /buckets/<BFS service>/<bucket>/postgresql-<JDBC driver version>.jar;
 /
 ```
