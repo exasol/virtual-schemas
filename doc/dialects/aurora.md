@@ -125,4 +125,4 @@ The default schema is called `public`.
 
 ### PostgreSQL-specifics
 
-Since this method of connecting uses the PostgreSQL database driver and SQL dialect, please check the [documentation of the PostgreSQL SQL dialect](postgresql.md) for details on type conversion and other PostgreSQL-specifics.
+Since this method of connecting uses the PostgreSQL database driver and SQL dialect, please check the [documentation of the PostgreSQL SQL dialect](https://github.com/exasol/postgresql-virtual-schema/blob/main/doc/dialects/postgresql.md) for details on type conversion and other PostgreSQL-specifics.
