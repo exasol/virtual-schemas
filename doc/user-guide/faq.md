@@ -58,9 +58,9 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT ...
 - Check how many tables do exist in the schema you have specified. If there are more than a few hundreds of tables, creation of a virtual schema can also take time.
 - Check the [remote log][remote-log] to see whether the VS is stuck trying to establish a connection to the remote source. If so, try to reach that source directly from the same network to rule out network setup issues.
 
-### Can I exclude multiple tables from a virtual schema?
+### Can I exclude tables from a virtual schema?
 
-**Answer**: Yes, you can use TABLE_FILTER = 'TABLE1','TABLE2',...
+**Answer**: Yes, you can use TABLE_FILTER = 'TABLE1','TABLE2',... . Only these tables will be available as virtual tables, all other tables are excluded.
 
 ## Selecting From Virtual Schemas
 
@@ -96,6 +96,27 @@ One of the reasons for this is issue might be the Kerberos service principal (hi
 You can confirm this by using `ping` or `dig` commands from one of the Exasol nodes.
 
 To update the [DNS settings][exasol-network] for the Exasol cluster, go to ExaSolution &rarr; Configuration &rarr; Network. And update internal DNS server addresses and search domains entries.
+
+## Other questions
+
+### How can I check what's going on inside Virtual Schemas?
+
+**Answer**:
+
+- Start the [remote logging][remote-log] to see the logs from Virtual Schemas.
+- Try to use `EXPLAIN VIRTUAL` command to see a query that Virtual Schemas generate. For example:
+
+```sql
+EXPLAIN VIRTUAL SELECT * FROM MY_VIRTUAL_SCHEMA.MY_TABLE;
+```
+
+### How many tables can contain a source schema?
+
+**Answer**: We have restricted an amount of mapped tables to 1000. Please, use a TABLE_FILTER property to specify the tables you need if your schema contains more than 1000 tables.
+
+### Does Virtual Schema process views and tables differently?
+
+**Answer**: Views are the same as tables for Virtual Schemas.
 
 [dialects]: dialects.md
 [github-releases]: https://github.com/exasol/virtual-schemas/releases
