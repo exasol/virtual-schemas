@@ -76,7 +76,29 @@ JDBC-Client-Error: Failed loading driver 'com.mysql.jdbc.Driver': null, access d
 
 - This happens because the JDBC driver requires more permissions than we provide by default. You can disable a security manager of the corresponding driver in [EXAoperation][exaoperation-drivers] to solve this problem.
 
+## Domain Name (DNS) Resolution Issues
+
+### Kerberos connection is unable to create remote metadata reader
+
+When using Kerberos connection with Hive or Impala dialects, you may get the following exception:
+
+```
+com.exasol.adapter.jdbc.RemoteMetadataReaderException: Unable to create Impala remote metadata reader. Caused by: [Cloudera]ImpalaJDBCDriver Error creating login context using ticket cache: Unable to obtain Principal Name for authentication .
+com.exasol.adapter.dialects.impala.ImpalaSqlDialect.createRemoteMetadataReader(ImpalaSqlDialect.java:127)
+com.exasol.adapter.dialects.AbstractSqlDialect.readSchemaMetadata(AbstractSqlDialect.java:138)
+com.exasol.adapter.jdbc.JdbcAdapter.readMetadata(JdbcAdapter.java:56)
+```
+
+**Solution**:
+
+One of the reasons for this is issue might be the Kerberos service principal (hive or impala) domain name resolution. That is, even though the Kerberos realm is reachable from the Exasol node, the service domains may not be reachable due to the internal DNS settings.
+
+You can confirm this by using `ping` or `dig` commands from one of the Exasol nodes.
+
+To update the [DNS settings][exasol-network] for the Exasol cluster, go to ExaSolution &rarr; Configuration &rarr; Network. And update internal DNS server addresses and search domains entries.
+
 [dialects]: dialects.md
 [github-releases]: https://github.com/exasol/virtual-schemas/releases
 [exaoperation-drivers]: https://docs.exasol.com/6.1/administration/on-premise/manage_software/manage_jdbc.htm
 [remote-log]: https://docs.exasol.com/database_concepts/virtual_schema/logging.htm
+[exasol-network]: https://docs.exasol.com/administration/on-premise/manage_network/configure_network_access.htm
