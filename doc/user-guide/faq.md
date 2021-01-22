@@ -118,8 +118,45 @@ EXPLAIN VIRTUAL SELECT * FROM MY_VIRTUAL_SCHEMA.MY_TABLE;
 
 **Answer**: Views are the same as tables for Virtual Schemas.
 
+### How can I fix low performance due to the log output?
+
+**Solution**: If you use [remote logging][remove-logging], a number of factors can slow down the execution of a Virtual Schema.
+
+Those are the things you can do to improve performance:
+
+* Make sure there is a fast network connection between the cluster nodes running the virtual schema and the machine receiving the log;
+* Lower the `DEBUG_LEVEL` to `INFO` or `WARNING`;
+* Disable remote logging;
+
+### Hoe can I fix low performance caused by slow randomness source?
+
+**Solution**: Depending on which JDK version Exasol uses to execute Java user-defined functions, a blocking random-number source may be used by default.
+
+Especially cryptographic operations do not complete until the operating system has collected a sufficient amount of entropy (read "real random values").
+
+This problem mostly occurs when Exasol is run in an isolated environment, typically a virtual machine or a container.
+
+#### Option a) Run a Process in Parallel That Generates Entropy
+
+Operating systems use various sources of random data input, like keystroke timing, disk seeks and network timing. You can increase entropy by running processes in parallel that feed the entropy collection. Which ones those are depends on the OS.
+
+#### Option b) Install Drivers That get Entropy From the Host's Hardware
+
+Especially server machines often have dedicated hardware entropy sources. Still commodity hardware parts like sound adapters can be repurposed to create randomness, e.g. form random noise of an analog input.
+In order to utilize those in virtual machines you usually need drivers and / or guest extensions that allow reading random data from the host.
+
+#### Option c) Dangerous: Using a Pseudo-random Source
+
+Since randomness is usually used for security measures like cryptography, using pseudo-random data is dangerous! Pseudo-random is another word for "guessable" and that is not what you want for cryptography.
+
+If you intend to use this option, then do it **only for integration tests with non-confidential data**
+
+* Log in to EXAOperation and shutdown the database.
+* Append `-etlJdbcJavaEnv -Djava.security.egd=/dev/urandom` to the "Extra Database Parameters" input field and power the database on again.
+
 [dialects]: dialects.md
 [github-releases]: https://github.com/exasol/virtual-schemas/releases
 [exaoperation-drivers]: https://docs.exasol.com/6.1/administration/on-premise/manage_software/manage_jdbc.htm
 [remote-log]: https://docs.exasol.com/database_concepts/virtual_schema/logging.htm
 [exasol-network]: https://docs.exasol.com/administration/on-premise/manage_network/configure_network_access.htm
+[remove-logging]: https://github.com/exasol/virtual-schema-common-jdbc/blob/main/doc/development/remote_logging.md

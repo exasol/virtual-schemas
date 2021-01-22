@@ -20,7 +20,7 @@ Dialect name                        | Repository                                
 Generic                             |  [Virtual Schemas][virtual-schemas-repository]                    | [Latest release][virtual-schemas-releases]          |
 
 If your database is not part of that list but provides a JDBC driver, try to use the Generic driver.
-You can also [develop a custom dialect](../development/developing-sql-dialect/developing_a_dialect.md).  
+You can also [develop a custom dialect][developing-dialect].  
 
 [athena-dialect-doc]: https://github.com/exasol/athena-virtual-schema/blob/main/doc/user_guide/athena_user_guide.md
 [aurora-dialect-doc]: ../dialects/aurora.md
@@ -68,3 +68,5 @@ You can also [develop a custom dialect](../development/developing-sql-dialect/de
 [redshift-virtual-schema-releases]: https://github.com/exasol/redshift-virtual-schema/releases
 [teradata-virtual-schema-repository]: https://github.com/exasol/teradata-virtual-schema
 [teradata-virtual-schema-releases]: https://github.com/exasol/teradata-virtual-schema/releases
+
+[developing-dialect]: https://github.com/exasol/virtual-schema-common-jdbc/blob/main/doc/development/developing_a_dialect.md
