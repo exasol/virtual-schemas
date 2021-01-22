@@ -58,9 +58,9 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT ...
 - Check how many tables do exist in the schema you have specified. If there are more than a few hundreds of tables, creation of a virtual schema can also take time.
 - Check the [remote log][remote-log] to see whether the VS is stuck trying to establish a connection to the remote source. If so, try to reach that source directly from the same network to rule out network setup issues.
 
-### Can I exclude multiple tables from a virtual schema?
+### Can I exclude tables from a virtual schema?
 
-**Answer**: Yes, you can use TABLE_FILTER = 'TABLE1','TABLE2',...
+**Answer**: Yes, you can use TABLE_FILTER = 'TABLE1','TABLE2',... . Only these tables will be available as virtual tables, all other tables are excluded.
 
 ## Selecting From Virtual Schemas
 
@@ -76,7 +76,50 @@ JDBC-Client-Error: Failed loading driver 'com.mysql.jdbc.Driver': null, access d
 
 - This happens because the JDBC driver requires more permissions than we provide by default. You can disable a security manager of the corresponding driver in [EXAoperation][exaoperation-drivers] to solve this problem.
 
+## Domain Name (DNS) Resolution Issues
+
+### Kerberos connection is unable to create remote metadata reader
+
+When using Kerberos connection with Hive or Impala dialects, you may get the following exception:
+
+```
+com.exasol.adapter.jdbc.RemoteMetadataReaderException: Unable to create Impala remote metadata reader. Caused by: [Cloudera]ImpalaJDBCDriver Error creating login context using ticket cache: Unable to obtain Principal Name for authentication .
+com.exasol.adapter.dialects.impala.ImpalaSqlDialect.createRemoteMetadataReader(ImpalaSqlDialect.java:127)
+com.exasol.adapter.dialects.AbstractSqlDialect.readSchemaMetadata(AbstractSqlDialect.java:138)
+com.exasol.adapter.jdbc.JdbcAdapter.readMetadata(JdbcAdapter.java:56)
+```
+
+**Solution**:
+
+One of the reasons for this is issue might be the Kerberos service principal (hive or impala) domain name resolution. That is, even though the Kerberos realm is reachable from the Exasol node, the service domains may not be reachable due to the internal DNS settings.
+
+You can confirm this by using `ping` or `dig` commands from one of the Exasol nodes.
+
+To update the [DNS settings][exasol-network] for the Exasol cluster, go to ExaSolution &rarr; Configuration &rarr; Network. And update internal DNS server addresses and search domains entries.
+
+## Other questions
+
+### How can I check what's going on inside Virtual Schemas?
+
+**Answer**:
+
+- Start the [remote logging][remote-log] to see the logs from Virtual Schemas.
+- Try to use `EXPLAIN VIRTUAL` command to see a query that Virtual Schemas generate. For example:
+
+```sql
+EXPLAIN VIRTUAL SELECT * FROM MY_VIRTUAL_SCHEMA.MY_TABLE;
+```
+
+### How many tables can contain a source schema?
+
+**Answer**: We have restricted an amount of mapped tables to 1000. Please, use a TABLE_FILTER property to specify the tables you need if your schema contains more than 1000 tables.
+
+### Does Virtual Schema process views and tables differently?
+
+**Answer**: Views are the same as tables for Virtual Schemas.
+
 [dialects]: dialects.md
 [github-releases]: https://github.com/exasol/virtual-schemas/releases
 [exaoperation-drivers]: https://docs.exasol.com/6.1/administration/on-premise/manage_software/manage_jdbc.htm
 [remote-log]: https://docs.exasol.com/database_concepts/virtual_schema/logging.htm
+[exasol-network]: https://docs.exasol.com/administration/on-premise/manage_network/configure_network_access.htm
