@@ -1,8 +1,0 @@
-!define ELEMENT_BASE_PATH ../..
-!define ACTOR(name) ELEMENT_BASE_PATH/actors/name.plantuml
-!define ARTIFACT(name) ELEMENT_BASE_PATH/artifacts/name.plantuml
-!define CLASS(name) ELEMENT_BASE_PATH/classes/name.plantuml
-!define COMPONENT(name) ELEMENT_BASE_PATH/components/name.plantuml
-!define DATABASE(name) ELEMENT_BASE_PATH/databases/name.plantuml
-!define INTERFACE(name) ELEMENT_BASE_PATH/interfaces/name.plantuml
-!define NODE(name) ELEMENT_BASE_PATH/nodes/name.plantuml

@@ -108,12 +108,7 @@ Additional resources:
 
 ## Information for Developers 
 
-* [Virtual Schema API Documentation][vs-api]
-* [Developing and Testing an SQL Dialect](doc/development/developing-sql-dialect/developing_a_dialect.md)
-* [Step-by-step guide to writing your own SQL dialect](doc/development/developing-sql-dialect/step_by_step_guide_to_writing_your_own_dialect.md)
-* [Remote Debugging](doc/development/remote_debugging.md)
-* [Troubleshooting](doc/development/troubleshooting.md)
-* [Versioning](doc/development/versioning.md)
+* Find all developers information in [Virtual Schema Common JDBC repository][developers-information].
 
 [athena-dialect-doc]: https://github.com/exasol/athena-virtual-schema/blob/main/doc/user_guide/athena_user_guide.md
 [aurora-dialect-doc]: doc/dialects/aurora.md
@@ -135,4 +130,4 @@ Additional resources:
 [apache-parquet]: https://parquet.apache.org/documentation/latest/
 [generic-dialect-doc]: https://github.com/exasol/generic-virtual-schema
 
-[vs-api]: https://github.com/exasol/virtual-schema-common-java/blob/master/doc/development/api/virtual_schema_api.md
+[developers-information]: https://github.com/exasol/virtual-schema-common-jdbc#information-for-developers
