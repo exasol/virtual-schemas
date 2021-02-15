@@ -62,6 +62,17 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT ...
 
 **Answer**: Yes, you can use TABLE_FILTER = 'TABLE1','TABLE2',... . Only these tables will be available as virtual tables, all other tables are excluded.
 
+### I created an Exasol-Exasol Virtual Schema on a view of an Exasol database, but the view does not exist in the Virtual Schema.
+
+In that case the view was probably outdated, when you created the Virtual Schema.
+
+This can happen if you create the view using `CREATE FORCE VIEW` or you updated a table that is part of the view after the view but did not refresh the view (Exasol refreshes views for example when they are queried).
+
+**Solution:**
+
+1. Refresh the view on the source (for example using `DESCRIBE MY_VIEW`). 
+1. Refresh the Virtual Schema (using `ALTER VIRTUAL SCHEMA MY_SCHEMA REFRESH`) 
+
 ## Selecting From Virtual Schemas
 
 ### The virtual schema was created successfully, but when you try to run a SELECT query, you get an `access denied` error with some permission name.

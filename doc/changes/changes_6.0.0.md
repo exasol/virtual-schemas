@@ -31,6 +31,11 @@ Please we aware you can not create Virtual Schemas of the mentioned above dialec
 * #446: Removed Big Query, Sybase, Impala and Redshift dialects.
 * #451: Removed Generic dialect.
 
+
+## Documentation
+
+* #458: Added FAQ entry for outdated views
+
 ## Dependency updates
 
 * Removed `org.testcontainers:oracle-xe:1.15.0`
