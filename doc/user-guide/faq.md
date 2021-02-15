@@ -62,9 +62,7 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT ...
 
 **Answer**: Yes, you can use TABLE_FILTER = 'TABLE1','TABLE2',... . Only these tables will be available as virtual tables, all other tables are excluded.
 
-### I created a Virtual Schema on a view of an Exasol database, but the view does not exist in the Virtual Schema.
-
-You created an Exasol-Exasol Virtual Schema on a schema that contains a view, but the Virtual Schema does not contain the view.
+### I created an Exasol-Exasol Virtual Schema on a view of an Exasol database, but the view does not exist in the Virtual Schema.
 
 In that case the view was probably outdated, when you created the Virtual Schema.
 
