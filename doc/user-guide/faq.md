@@ -70,9 +70,9 @@ In that case the view was probably outdated, when you created the Virtual Schema
 
 This can happen if you create the view using `CREATE FORCE VIEW` or you updated a table that is part of the view after the view but did not refresh the view (Exasol refreshes views for example when they are queried).
 
-**Answer:**
+**Solution:**
 
-1. Refresh the view on the external Exasol database (for example using `DESCRIBE MY_VIEW`). 
+1. Refresh the view on the source (for example using `DESCRIBE MY_VIEW`). 
 1. Refresh the Virtual Schema (using `ALTER VIRTUAL SCHEMA MY_SCHEMA REFRESH`) 
 
 ## Selecting From Virtual Schemas
