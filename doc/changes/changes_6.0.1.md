@@ -1,4 +1,4 @@
-# Exasol Virtual Schemas 6.0.0, released 2021-03-??
+# Exasol Virtual Schemas 6.0.1, released 2021-03-??
 
 Code name: ??
 
