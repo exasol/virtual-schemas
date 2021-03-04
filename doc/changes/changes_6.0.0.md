@@ -1,4 +1,4 @@
-# Exasol Virtual Schemas 6.0.0, released 2021-XX-XX
+# Exasol Virtual Schemas 6.0.0, released 2021-01-18
 
 Code name: Dialects migration.
 

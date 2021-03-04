@@ -70,7 +70,6 @@ in all your `CREATE JAVA ADAPTER SCRIPT` statements. The old entry point was rem
 | [SAP HANA][sap-hana-dialect-doc]                  |
 | [Microsoft SQLServer][sql-server-dialect-doc]     |
 | [Sybase][sybase-dialect-doc]                      |
-| [Teradata][teradata-dialect-doc]                  |
 | [Google Big Query][big-query-dialect-doc]         |
 | [AWS Aurora][aurora-dialect-doc]                  |
 | [Amazon AWS Athena][athena-dialect-doc]           |
@@ -124,7 +123,6 @@ Additional resources:
 [sap-hana-dialect-doc]: https://github.com/exasol/hana-virtual-schema/blob/main/doc/user_guide/user_guide.md
 [sql-server-dialect-doc]: https://github.com/exasol/sqlserver-virtual-schema/blob/main/doc/user_guide/sqlserver_user_guide.md
 [sybase-dialect-doc]: https://github.com/exasol/sybase-virtual-schema/blob/main/doc/user_guide/sybase_user_guide.md
-[teradata-dialect-doc]: https://github.com/exasol/teradata-virtual-schema/blob/main/doc/dialects/teradata.md
 [elasticsearch-dialect-doc]: https://github.com/exasol/elasticsearch-virtual-schema/blob/main/doc/dialects/elasticsearch_sql_user_guide.md
 [redshift-spectrum]: https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html
 [apache-parquet]: https://parquet.apache.org/documentation/latest/
