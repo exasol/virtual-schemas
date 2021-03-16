@@ -17,7 +17,7 @@ Virtual Schemas can be also described in known terms as `External Tables` or `Fo
 
 The version of a Virtual Schema consists of two parts. The first part is the version of the [Virtual Schema JDBC](https://github.com/exasol/virtual-schema-common-jdbc/releases) in which the actual Virtual Schema is based on, and the second part is the version of the Virtual Schema itself.
 
-Thus the jar file name of a Virtual Schema release complies to the following format: `virtual-schema-dist-<Virtual Schema JDBC Version>-<Virtual  Schema Name>-<Virtual Schema Version>.jar`.
+Thus the jar filename of a Virtual Schema release complies to the following format: `virtual-schema-dist-<Virtual Schema JDBC Version>-<Virtual  Schema Name>-<Virtual Schema Version>.jar`.
 
 For example, the jar filename of the [Oracle Virtual Schema 2.0.0 release](https://github.com/exasol/oracle-virtual-schema/releases/tag/2.0.0), which is based on the [9.0.1 version of Virtual Schema JDBC](https://github.com/exasol/virtual-schema-common-jdbc/releases/tag/9.0.1), is `virtual-schema-dist-9.0.1-oracle-2.0.0.jar`.
 
