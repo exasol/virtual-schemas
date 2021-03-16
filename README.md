@@ -21,6 +21,7 @@ Thus the jar filename of a Virtual Schema release complies to the following form
 
 For example, the jar filename of the [Oracle Virtual Schema 2.0.0 release](https://github.com/exasol/oracle-virtual-schema/releases/tag/2.0.0), which is based on the [9.0.1 version of Virtual Schema JDBC](https://github.com/exasol/virtual-schema-common-jdbc/releases/tag/9.0.1), is `virtual-schema-dist-9.0.1-oracle-2.0.0.jar`.
 
+The the version of the Virtual Schema JDBC in which a Virtual Schema is based on also tells us whether it is in supported or discontinued, as shown in the following table:
 
 Virtual Schema JDBC Version | Required Java Version | Lifecycle
 ----------------------------|-----------------------|--------------------------------
