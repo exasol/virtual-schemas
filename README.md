@@ -19,9 +19,11 @@ The version of a Virtual Schema consists of two parts. The first part is the ver
 
 Thus the JAR filename of a Virtual Schema release complies with the following format:
 
-    `virtual-schema-dist-<Virtual Schema JDBC Version>-<Virtual  Schema Name>-<Virtual Schema Version>.jar`
+    virtual-schema-dist-<Virtual Schema JDBC Version>-<Virtual  Schema Name>-<Virtual Schema Version>.jar
 
-For example, the JAR filename of the [Oracle Virtual Schema 2.0.0 release](https://github.com/exasol/oracle-virtual-schema/releases/tag/2.0.0), which is based on the [9.0.1 version of Virtual Schema JDBC](https://github.com/exasol/virtual-schema-common-jdbc/releases/tag/9.0.1), is `virtual-schema-dist-9.0.1-oracle-2.0.0.jar`.
+For example, the JAR filename of the [Oracle Virtual Schema 2.0.0 release](https://github.com/exasol/oracle-virtual-schema/releases/tag/2.0.0), which is based on the [9.0.1 version of Virtual Schema JDBC](https://github.com/exasol/virtual-schema-common-jdbc/releases/tag/9.0.1), is:
+
+    virtual-schema-dist-9.0.1-oracle-2.0.0.jar
 
 The version of the Virtual Schema JDBC on which a Virtual Schema is based also tells you whether it is in supported or discontinued, as shown in the following table:
 
