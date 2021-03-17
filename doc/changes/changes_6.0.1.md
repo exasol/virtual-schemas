@@ -8,3 +8,4 @@ Code name: ??
 ## Documentation
 
 * #460: Removed Teradata
+* #462: Updated supported/active-development versions table
