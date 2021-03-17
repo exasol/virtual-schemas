@@ -15,13 +15,16 @@ Virtual Schemas can be also described in known terms as `External Tables` or `Fo
 
 ## Version Requirements
 
-The version of a Virtual Schema consists of two parts. The first part is the version of the [Virtual Schema JDBC](https://github.com/exasol/virtual-schema-common-jdbc/releases) in which the actual Virtual Schema is based on, and the second part is the version of the Virtual Schema itself.
+The version of a Virtual Schema consists of two parts. The first part is the version of the [Virtual Schema JDBC](https://github.com/exasol/virtual-schema-common-jdbc/releases), the common basis that all JDBC-based Virtual Schemas share. Whereas the second part is the version of the Virtual Schema itself.
 
-Thus the jar filename of a Virtual Schema release complies to the following format: `virtual-schema-dist-<Virtual Schema JDBC Version>-<Virtual  Schema Name>-<Virtual Schema Version>.jar`.
+Thus the JAR filename of a Virtual Schema release complies with the following format:
 
-For example, the jar filename of the [Oracle Virtual Schema 2.0.0 release](https://github.com/exasol/oracle-virtual-schema/releases/tag/2.0.0), which is based on the [9.0.1 version of Virtual Schema JDBC](https://github.com/exasol/virtual-schema-common-jdbc/releases/tag/9.0.1), is `virtual-schema-dist-9.0.1-oracle-2.0.0.jar`.
+    `virtual-schema-dist-<Virtual Schema JDBC Version>-<Virtual  Schema Name>-<Virtual Schema Version>.jar`
 
-The the version of the Virtual Schema JDBC in which a Virtual Schema is based on also tells us whether it is in supported or discontinued, as shown in the following table:
+
+For example, the JAR filename of the [Oracle Virtual Schema 2.0.0 release](https://github.com/exasol/oracle-virtual-schema/releases/tag/2.0.0), which is based on the [9.0.1 version of Virtual Schema JDBC](https://github.com/exasol/virtual-schema-common-jdbc/releases/tag/9.0.1), is `virtual-schema-dist-9.0.1-oracle-2.0.0.jar`.
+
+The version of the Virtual Schema JDBC on which a Virtual Schema is based also tells you whether it is in supported or discontinued, as shown in the following table:
 
 Virtual Schema JDBC Version | Required Java Version | Lifecycle
 ----------------------------|-----------------------|--------------------------------
