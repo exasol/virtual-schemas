@@ -2,6 +2,34 @@
 
 This FAQ covers general questions and problems that users can encounter in any dialect. For a dialect specific FAQs please check dialects pages.
 
+## Uploading Files to BucketFS
+
+### How can I check that the files ended up in the right bucket?
+
+**Answer**: You can create a User Defined Function and query your bucket to check if the files are in the right place. 
+Please check the [exa-toolbox repository](https://github.com/exasol/exa-toolbox/blob/master/utilities/README.md#bucketfs_ls) to find out how to query a bucket.
+
+There are also other ways to access the bucket: curl command or BucketFS Explorer.
+You can read more about them in the [official documentation](https://docs.exasol.com/database_concepts/bucketfs/access_control.htm).
+
+## Establishing Connection to the Datasource
+
+### How can I check that the connection to the source is established correctly?
+
+**Answer**: We recommend checking the connection without Virtual Schemas and start creating Virtual Schemas after you are sure that the connection was established.
+
+To check the connection, you need to create a connection object. You will also need this connection object to create a Virtual Schema.
+Create a connection according to the dialect's user guide. A quick option to test the connection is to run an `IMPORT FROM JDBC` query with it.
+
+For example:
+
+```sql
+IMPORT FROM JDBC AT <your_connection_name>
+  STATEMENT 'SELECT 1 FROM <source schema>.<source table>';
+```
+
+If the statement was executed successfully, the connection is established correctly, and you can create a Virtual Schema using this connection.
+
 ## Setting up Virtual Schemas
 
 ### What happens if I upload two different JDBC drivers with the same name and the same prefix, but the driver's versions are different?
