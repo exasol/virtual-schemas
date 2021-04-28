@@ -9,7 +9,7 @@ This FAQ covers general questions and problems that users can encounter in any d
 **Answer**: You can create a User Defined Function and query your bucket to check if the files are in the right place. 
 Please check the [exa-toolbox repository](https://github.com/exasol/exa-toolbox/blob/master/utilities/README.md#bucketfs_ls) to find out how to query a bucket.
 
-There are also other ways to access the bucket: curl command or BucketFS Explorer.
+There are also other ways to access the bucket: `curl` command or `BucketFS Explorer`.
 You can read more about them in the [official documentation](https://docs.exasol.com/database_concepts/bucketfs/access_control.htm).
 
 ## Establishing Connection to the Datasource
