@@ -11,41 +11,16 @@ Please note that you need to decide, which compatibility you prefer at the point
 
 ## Using the PostgreSQL SQL Dialect to Connect to Aurora
 
-In this section we are discussing how to used the PostgreSQL dialect of the Virtual Schemas to connect to an Aurora service.
+In this section we are discussing how to use the PostgreSQL dialect of the Virtual Schemas to connect to an Aurora service.
 
-### Registering the JDBC Driver in EXAOperation
+### Uploading the JDBC Driver to BucketFS
 
 First download the [Postgres JDBC driver](https://jdbc.postgresql.org/download.html).
 
-Now register the driver in EXAOperation:
-
-1. Click "Software"
-1. Switch to tab "JDBC Drivers"
-1. Click "Browse..."
-1. Select JDBC driver file
-1. Click "Upload"
-1. Click "Add"
-1. In dialog "Add EXACluster JDBC driver" configure the JDBC driver (see below)
-
-You need to specify the following settings when adding the JDBC driver via EXAOperation.
-
-| Parameter | Value                                               |
-|-----------|-----------------------------------------------------|
-| Name      | `POSTGRESQL`                                        |
-| Main      | `org.postgresql.Driver`                             |
-| Prefix    | `jdbc:postgresql:`                                  |
-| Files     | `postgresql-<JDBC driver version>.jar`              |
-
-Please refer to the [documentation on configuring JDBC connections to Aurora (PostgreSQL)](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Connecting.html#Aurora.Connecting.AuroraPostgreSQL) for details.
-
 For TLS secured connections use the JDBC driver version **42.2.6 or later**.
-
-### Uploading the JDBC Driver to EXAOperation
 
 1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm)
 1. Upload the driver to BucketFS
-
-This step is necessary since the UDF container the adapter runs in has no access to the JDBC drivers installed via EXAOperation but it can access BucketFS.
 
 ### Installing the Adapter Script
 
@@ -61,9 +36,9 @@ The SQL statement below creates the adapter script, defines the Java class that 
 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
-    %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-<version>-posgresql-<version>.jar;
-    %jar /buckets/<BFS service>/<bucket>/postgresql-<JDBC driver version>.jar;
+  %scriptclass com.exasol.adapter.RequestDispatcher;
+  %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-<version>-postgresql-<version>.jar;
+  %jar /buckets/<BFS service>/<bucket>/postgresql-<postgresql-driver-version>.jar;
 /
 ```
 
@@ -112,17 +87,20 @@ If your cluster does not have an Internet connection, you have to download the c
 Below you see the SQL statement that creates a Virtual Schema in order to connect to the remote data source. 
 
 ```sql
-CREATE VIRTUAL SCHEMA AURORA
-    USING ADAPTER.JDBC_ADAPTER 
-    WITH
-    SQL_DIALECT = 'POSTGRESQL'
-    SCHEMA_NAME = '<schema>'
-    CONNECTION_NAME = 'AURORA_CONNECTION'
-    ;
+CREATE VIRTUAL SCHEMA <virtual schema name>
+	USING ADAPTER.JDBC_ADAPTER 
+	WITH
+	SCHEMA_NAME = '<schema name>'
+	CONNECTION_NAME = 'POSTGRESQL_CONNECTION'
+	;
 ```
 
 The default schema is called `public`.
 
 ### PostgreSQL-specifics
 
-Since this method of connecting uses the PostgreSQL database driver and SQL dialect, please check the [documentation of the PostgreSQL SQL dialect](https://github.com/exasol/postgresql-virtual-schema/blob/main/doc/dialects/postgresql.md) for details on type conversion and other PostgreSQL-specifics.
+Since this method of connecting uses the PostgreSQL database driver and SQL dialect, please check the [documentation of the PostgreSQL SQL dialect](hhttps://raw.githubusercontent.com/exasol/postgresql-virtual-schema/main/doc/user_guide/postgresql_user_guide.md) for details on type conversion and other PostgreSQL-specifics.
+
+### MySQL-specifics
+
+If you decided to use MySQL-compatible Aurora, please refer to the MySQL dialect [documentation](https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/mysql_user_guide.md).
