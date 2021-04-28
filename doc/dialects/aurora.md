@@ -103,4 +103,4 @@ Since this method of connecting uses the PostgreSQL database driver and SQL dial
 
 ### MySQL-specifics
 
-If you decided to you MySQL-compatible Aurora, please refer to the MySQL dialect [documentation](https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/mysql_user_guide.md).
+If you decided to use MySQL-compatible Aurora, please refer to the MySQL dialect [documentation](https://github.com/exasol/mysql-virtual-schema/blob/main/doc/user_guide/mysql_user_guide.md).
