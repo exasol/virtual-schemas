@@ -94,7 +94,6 @@ in all your `CREATE JAVA ADAPTER SCRIPT` statements. The old entry point was rem
 | [ElasticSearch][elasticsearch-dialect-doc]        |
 | [Apache Impala][impala-dialect-doc]               |
 | [Apache Hive][hive-dialect-doc]                   |
-| [Apache Parquet files][apache-parquet]            |
 
 ## Limitations
 
@@ -143,7 +142,6 @@ Additional resources:
 [sybase-dialect-doc]: https://github.com/exasol/sybase-virtual-schema/blob/main/doc/user_guide/sybase_user_guide.md
 [elasticsearch-dialect-doc]: https://github.com/exasol/elasticsearch-virtual-schema/blob/main/doc/dialects/elasticsearch_sql_user_guide.md
 [redshift-spectrum]: https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html
-[apache-parquet]: https://parquet.apache.org/documentation/latest/
 [generic-dialect-doc]: https://github.com/exasol/generic-virtual-schema
 
 [developers-information]: https://github.com/exasol/virtual-schema-common-jdbc#information-for-developers
