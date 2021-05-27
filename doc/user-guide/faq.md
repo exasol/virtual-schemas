@@ -136,6 +136,99 @@ You can confirm this by using `ping` or `dig` commands from one of the Exasol no
 
 To update the [DNS settings][exasol-network] for the Exasol cluster, go to ExaSolution &rarr; Configuration &rarr; Network. And update internal DNS server addresses and search domains entries.
 
+## Kerberos Connection Issues
+
+### Kerberos Configuration File Domain Realm
+
+Ensure that the Kerberos, `krb5.conf`, file is correct.
+
+Check that the domain realms are correct after the assignment (`=`) sign. They should be specified in all capital letters. They should not include starting dot (`.`) character after the assignment.
+
+Wrong configuration file example:
+
+```ini
+...
+
+[domain_realm]
+.zone1.example.net = zone1.example.net
+zone1.example.net = zone1.example.net
+.example.net = .EXAMPLE.net
+example.net = EXAMPLE.net
+.exampl-dev.net = .EXAMPLE-DEV.NET
+exampl-dev.net = EXAMPLE-DEV.NET
+```
+
+Correct configuration file example:
+
+```ini
+...
+
+[domain_realm]
+.zone1.example.net = ZONE1.EXAMPLE.NET
+zone1.example.net = ZONE1.EXAMPLE.NET
+.example.net = EXAMPLE.net
+example.net = EXAMPLE.net
+.example-dev.net = EXAMPLE-DEV.NET
+example-dev.net = EXAMPLE-DEV.NET
+```
+
+### Kerberos Configuration File Included Directories
+
+Ensure that Kerberos configuration file, `krb5.conf` does not contain any included directories with additional settings. All Kerberos settings should be available in the `krb5.conf` configuration file.
+
+This can cause problems when using Virtual Schema together with Kerberos connection, because included directories does not exist in the UDF container.
+
+Wrong configuration file example:
+
+```ini
+includedir /etc/krb5.conf.d/
+
+[logging]
+default = FILE:/var/log/krb5libs.log
+kdc = FILE:/var/log/krb5kdc.log
+admin_server = FILE:/var/log/kadmind.log
+
+[libdefaults]
+default_realm = ZONE1.EXAMPLE.NET
+dns_lookup_kdc = false
+dns_lookup_realm = false
+
+...
+```
+
+The includedir folder contains a file with a setting, `udp_preference_limit = 1`. Add such settings into the `libdefaults` section in `krb5.conf` file.
+
+Correct configuration file example:
+
+```ini
+[logging]
+default = FILE:/var/log/krb5libs.log
+kdc = FILE:/var/log/krb5kdc.log
+admin_server = FILE:/var/log/kadmind.log
+
+[libdefaults]
+default_realm = ZONE1.EXAMPLE.NET
+dns_lookup_kdc = false
+dns_lookup_realm = false
+udp_preference_limit = 1
+
+...
+```
+
+And then create a connection object using the modified Kerberos configuration file.
+
+### Kerberos with Zookeeper
+
+In Virtual Schema Kerberos connections, users can also use Zookeeper as service discovery for Hive or Impala servers. Zookeeper balances the connections or avoids single point of failure for Hive or Impala servers.
+
+In this cases, set the `KrbHostFQDN` property to `_HOST` value. This removes hardcoded server address and uses connection addresses provided from Zookeeper.
+
+Example:
+
+```
+jdbc:hive2://zk=zookeeper001.dev.example.com:2181/hiveserver2,zk=zookeeper002.dev.example.com:2181/hiveserver2,zk=zookeeper003.dev.example.com:2181/hiveserver2;AuthMech=1;KrbHostFQDN=_HOST;KrbRealm=ZONE1.EXAMPLE.NET;KrbAuthType=1;KrbServiceName=hive;transportMode=http;httpPath=cliservice
+```
+
 ## Other questions
 
 ### How can I check what's going on inside Virtual Schemas?
