@@ -176,7 +176,7 @@ example-dev.net = EXAMPLE-DEV.NET
 
 Ensure that Kerberos configuration file, `krb5.conf` does not contain any included directories with additional settings. All Kerberos settings should be available in the `krb5.conf` configuration file.
 
-This can cause problems when using Virtual Schema together with Kerberos connection, because included directories does not exist in the UDF container.
+This can cause problems when using Virtual Schema together with Kerberos connection, because included directories do not exist in the UDF container.
 
 Wrong configuration file example:
 
@@ -196,7 +196,7 @@ dns_lookup_realm = false
 ...
 ```
 
-The includedir folder contains a file with a setting, `udp_preference_limit = 1`. Add such settings into the `libdefaults` section in `krb5.conf` file.
+The `includedir` folder contains a file with a setting, `udp_preference_limit = 1`. Add such settings into the `libdefaults` section in `krb5.conf` file.
 
 Correct configuration file example:
 
@@ -221,7 +221,7 @@ And then create a connection object using the modified Kerberos configuration fi
 
 In Virtual Schema Kerberos connections, users can also use Zookeeper as service discovery for Hive or Impala servers. Zookeeper balances the connections or avoids single point of failure for Hive or Impala servers.
 
-In this cases, set the `KrbHostFQDN` property to `_HOST` value. This removes hardcoded server address and uses connection addresses provided from Zookeeper.
+In this cases, set the `KrbHostFQDN` property to `_HOST` value. This removes hardcoded server addresses and uses connection addresses provided by Zookeeper.
 
 Example:
 
