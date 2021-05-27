@@ -110,7 +110,7 @@ This is an open source project which is officially supported by Exasol. For any 
 
 ## Information for Users
 
-* [List of Supported Dialect](doc/user-guide/dialects.md)
+* [List of Supported Dialects](doc/user-guide/dialects.md)
 * [User Guide](https://docs.exasol.com/database_concepts/virtual_schemas.htm)
 * [Virtual Schema's Properties Reference](https://docs.exasol.com/database_concepts/virtual_schema/adapter_properties.htm)
 * [Remote Logging](https://docs.exasol.com/database_concepts/virtual_schema/logging.htm)
