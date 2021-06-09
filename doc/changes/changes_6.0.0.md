@@ -10,7 +10,6 @@ The following dialect implementations have been migrate to their own repositorie
 - DB2, moved to https://github.com/exasol/db2-virtual-schema.
 - SQL Server, moved to https://github.com/exasol/sqlserver-virtual-schema.
 - Athena, moved to https://github.com/exasol/athena-virtual-schema.
-- Teradata, moved to https://github.com/exasol/teradata-virtual-schema.
 - Hive, moved to https://github.com/exasol/hive-virtual-schema.
 - Hana, moved to https://github.com/exasol/hana-virtual-schema.
 - Big Query, moved to https://github.com/exasol/bigquery-virtual-schema.
