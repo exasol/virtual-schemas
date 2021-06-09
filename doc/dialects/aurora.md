@@ -44,18 +44,16 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT ADAPTER.JDBC_ADAPTER AS
 
 ### Defining a Named Connection
 
-Define the connection to the Aurora cluster as shown below. We recommend using TLS to secure the connection.
+Define the connection to the Aurora cluster as shown below. We recommend using [TLS](#creating-tls-connection) to secure the connection.
 
 ```sql
 CREATE OR REPLACE CONNECTION AURORA_CONNECTION
-TO 'jdbc:postgresql://<cluster>.<region>.rds.amazonaws.com/<database>?ssl=true&sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory'
+TO 'jdbc:postgresql://<cluster>.<region>.rds.amazonaws.com/<database>'
 USER '<user>'
 IDENTIFIED BY '<password>';
 ```
 
 The parameters `user` and `password` are regular database credentials.
-
-You need to set the property `ssl=true` to switch SSL on, including full certificate chain checking. To use the default Java certificate store, set the property `sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory`. Both settings are essential if you want to successfully establish the secured connection in a way that also works with Virtual Schemas.
 
 You can find out the connection URL including the `cluster` and `region` part in the RDS console.
 
@@ -64,23 +62,20 @@ You can find out the connection URL including the `cluster` and `region` part in
 1. Switch to the tab "Connectivity & security"
 1. Copy the hostname under "Endpoint"
 
-### Installing the RDS Certificate Bundle
+### Creating TLS Connection
 
-In order to successfully establish a TLS connection to Aurora, you also need to install the RDS certificates bundle on each data node in the cluster.
+You need to set the property `ssl=true` to switch SSL on, including full certificate chain checking.
+To use the default Java certificate store, set the property `sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory`.
+Both settings are essential if you want to successfully establish the secured connection in a way that also works with Virtual Schemas.
 
-The following script installs that bundle on an Exasol node. You need log into the node as `root` via SSH to execute it.
-
-```bash
-#!/bin/bash
-cd /tmp
-wget https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
-openssl x509 -outform der -in rds-combined-ca-bundle.pem -out rds-combined-ca-bundle.der
-keytool -keystore /etc/pki/ca-trust/extracted/java/cacerts -import -file rds-combined-ca-bundle.der -alias awsrds
+```sql
+CREATE OR REPLACE CONNECTION AURORA_CONNECTION
+TO 'jdbc:postgresql://<cluster>.<region>.rds.amazonaws.com/<database>?ssl=true&sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory'
+USER '<user>'
+IDENTIFIED BY '<password>';
 ```
 
-The script first switches to the `/tmp` directory, then downloads the drivers from the Internet. After that it converts the certificates from `PEM` to `DER` format in order to be able to install them into the Java truststore.
-
-If your cluster does not have an Internet connection, you have to download the certificate bundle to your machine, upload it to the cluster node via SSH and then install it in the truststore.
+Please refer to our [tutorial](https://community.exasol.com/t5/tech-blog/aurora-virtualis-using-aws-aurora-with-exasol-s-virtual-schema/ba-p/321) to install Virtual Schema with TLS connection.
 
 ### Creating a Virtual Schema
 
@@ -95,11 +90,9 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
 	;
 ```
 
-The default schema is called `public`.
-
 ### PostgreSQL-specifics
 
-Since this method of connecting uses the PostgreSQL database driver and SQL dialect, please check the [documentation of the PostgreSQL SQL dialect](hhttps://raw.githubusercontent.com/exasol/postgresql-virtual-schema/main/doc/user_guide/postgresql_user_guide.md) for details on type conversion and other PostgreSQL-specifics.
+Since this method of connecting uses the PostgreSQL database driver and SQL dialect, please check the [documentation of the PostgreSQL SQL dialect](https://github.com/exasol/postgresql-virtual-schema/blob/main/doc/user_guide/postgresql_user_guide.md) for details on type conversion and other PostgreSQL-specifics.
 
 ### MySQL-specifics
 
