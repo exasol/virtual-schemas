@@ -260,7 +260,7 @@ Those are the things you can do to improve performance:
 * Lower the `DEBUG_LEVEL` to `INFO` or `WARNING`;
 * Disable remote logging;
 
-### Hoe can I fix low performance caused by slow randomness source?
+### How can I fix low performance caused by slow randomness source?
 
 **Solution**: Depending on which JDK version Exasol uses to execute Java user-defined functions, a blocking random-number source may be used by default.
 
@@ -288,7 +288,7 @@ If you intend to use this option, then do it **only for integration tests with n
 
 [dialects]: dialects.md
 [github-releases]: https://github.com/exasol/virtual-schemas/releases
-[exaoperation-drivers]: https://docs.exasol.com/6.1/administration/on-premise/manage_software/manage_jdbc.htm
+[exaoperation-drivers]: https://docs.exasol.com/db/latest/administration/on-premise/manage_software/manage_jdbc.htm
 [remote-log]: https://docs.exasol.com/database_concepts/virtual_schema/logging.htm
 [exasol-network]: https://docs.exasol.com/administration/on-premise/manage_network/configure_network_access.htm
 [remove-logging]: https://github.com/exasol/virtual-schema-common-jdbc/blob/main/doc/development/remote_logging.md
