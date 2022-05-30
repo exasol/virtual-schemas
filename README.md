@@ -25,7 +25,7 @@ For example, the JAR filename of the [Oracle Virtual Schema 2.0.0 release](https
 
     virtual-schema-dist-9.0.1-oracle-2.0.0.jar
 
-The version of the Virtual Schema JDBC on which a Virtual Schema is based also tells you whether it is in supported or discontinued, as shown in the following table:
+The version of the Virtual Schema JDBC on which a Virtual Schema is based also tells you whether it is supported or discontinued, as shown in the following table:
 
 Virtual Schema JDBC Version | Required Java Version | Lifecycle
 ----------------------------|-----------------------|--------------------------------
@@ -38,7 +38,7 @@ Virtual Schema JDBC Version | Required Java Version | Lifecycle
 2.x.x                       |                     9 | discontinued
 1.x.x                       |                     8 | discontinued
 
-Please update your Virtual Schema to a supported version before writing tickets or contacting the Exasol Support.
+Please update your Virtual Schema to a supported version before writing tickets or contacting Exasol Support.
 
 Exasol Version  | Java Version Installed by Default in Language Container
 ----------------|--------------------------------------------------------
@@ -47,7 +47,7 @@ Exasol Version  | Java Version Installed by Default in Language Container
 6.1             | 9
 6.0             | 8
 
-Note that you can update Exasol 6.0.x and 6.1.x with script language containers version 2019-11-26 or newer in order to get Java 11 support. We recommend the updating Exasol installation to at least 6.2.3 or newer for best results.
+Note that you can update Exasol 6.0.x and 6.1.x with script language containers version 2019-11-26 or newer in order to get Java 11 support. We recommend updating the Exasol installation to at least 6.2.3 or newer for best results.
 
 Please do not try to install language containers with lower Java versions on newer Exasol installations. This is untested.
 
@@ -94,6 +94,7 @@ in all your `CREATE JAVA ADAPTER SCRIPT` statements. The old entry point was rem
 | [ElasticSearch][elasticsearch-dialect-doc]        |
 | [Apache Impala][impala-dialect-doc]               |
 | [Apache Hive][hive-dialect-doc]                   |
+| [Document Files][virtual-schema-common-document-files] |
 
 ## Limitations
 
@@ -102,9 +103,9 @@ That means that queries that involve tables from Virtual Schema will take at lea
 
 ## Customer Support
 
-This is an open source project which is officially supported by Exasol. For any question, you can contact our support team.
+This is an open source project officially supported by Exasol. Please contact our support team if you have any questions.
 
-**NOTE: For reporting an issue for a specific dialect, please do it in the dialect repository (see the Supported Data Sources above)**
+**NOTE: Please report dialect specific issues in the corresponding dialect repository (see the Supported Data Sources above)**
 
 # Table of Contents
 
