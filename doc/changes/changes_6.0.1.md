@@ -9,3 +9,4 @@ Code name: ??
 
 * #460: Removed Teradata
 * #462: Updated supported/active-development versions table
+* #477: Fixed broken links
