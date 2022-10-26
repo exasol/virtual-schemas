@@ -1,4 +1,9 @@
 #!/bin/bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
 readonly BUCKET_URL='http://w:jars@localhost:2580/jars/'
 readonly VS_JAR_SOURCE_PATH="$1"
 readonly JAR_FILE=$(basename "$VS_JAR_SOURCE_PATH")

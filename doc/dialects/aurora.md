@@ -15,7 +15,7 @@ In this section we are discussing how to use the PostgreSQL dialect of the Virtu
 
 ### Uploading the JDBC Driver to BucketFS
 
-First download the [Postgres JDBC driver](https://jdbc.postgresql.org/download.html).
+First download the [Postgres JDBC driver](https://jdbc.postgresql.org/download/).
 
 For TLS secured connections use the JDBC driver version **42.2.6 or later**.
 
