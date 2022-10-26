@@ -21,16 +21,17 @@ Thus the JAR filename of a Virtual Schema release complies with the following fo
 
     virtual-schema-dist-<Virtual Schema JDBC Version>-<Virtual  Schema Name>-<Virtual Schema Version>.jar
 
-For example, the JAR filename of the [Oracle Virtual Schema 2.0.0 release](https://github.com/exasol/oracle-virtual-schema/releases/tag/2.0.0), which is based on the [9.0.1 version of Virtual Schema JDBC](https://github.com/exasol/virtual-schema-common-jdbc/releases/tag/9.0.1), is:
+For example, the JAR filename of the [Oracle Virtual Schema 2.3.0 release](https://github.com/exasol/oracle-virtual-schema/releases/tag/2.3.0), which is based on the [10.0.1 version of Virtual Schema JDBC](https://github.com/exasol/virtual-schema-common-jdbc/releases/tag/10.0.1), is:
 
-    virtual-schema-dist-9.0.1-oracle-2.0.0.jar
+    virtual-schema-dist-10.0.1-oracle-2.3.0.jar
 
 The version of the Virtual Schema JDBC on which a Virtual Schema is based also tells you whether it is supported or discontinued, as shown in the following table:
 
 Virtual Schema JDBC Version | Required Java Version | Lifecycle
 ----------------------------|-----------------------|--------------------------------
-9.x.x                       |                    11 | supported, active development
-8.x.x                       |                    11 | supported
+10.x.x                      |                    11 | supported, active development
+9.x.x                       |                    11 | supported
+8.x.x                       |                    11 | discontinued
 7.x.x                       |                    11 | discontinued
 6.x.x                       |                    11 | discontinued
 5.x.x                       |                    11 | discontinued
@@ -42,12 +43,13 @@ Please update your Virtual Schema to a supported version before writing tickets 
 
 Exasol Version  | Java Version Installed by Default in Language Container
 ----------------|--------------------------------------------------------
+7.1             | 11
 7.0             | 11
 6.2             | 11
 6.1             | 9
 6.0             | 8
 
-Note that you can update Exasol 6.0.x and 6.1.x with script language containers version 2019-11-26 or newer in order to get Java 11 support. We recommend updating the Exasol installation to at least 6.2.3 or newer for best results.
+We recommend updating the Exasol installation to at least 7.1.10 or newer for best results.
 
 Please do not try to install language containers with lower Java versions on newer Exasol installations. This is untested.
 
