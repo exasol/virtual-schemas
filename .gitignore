@@ -20,3 +20,13 @@ local
 Scripts
 .dbeaver*
 **/*.log
+.directory
+venv/
+pom.xml.versionsBackup
+~*
+*.lock
+*.bak
+*.orig
+*.old
+*.md.html
+*.flattened-pom.xml

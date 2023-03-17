@@ -1,31 +1,36 @@
 # Supported Dialects
 
-Dialect name                              | OEM       | Type 	  | Repository                                                        | Latest release                                     |
-------------------------------------------|-----------|-----------|-------------------------------------------------------------------|----------------------------------------------------|
-[Athena][athena-dialect-doc]              | AWS       | document  | [Athena Virtual Schema][athena-vs-repository]			 | [Latest release][athena-vs-releases]    |
-[Aurora][aurora-dialect-doc]              | AWS       | JDBC      | [Virtual Schemas][virtual-schemas-repository]                    | [Latest release][virtual-schemas-releases]          |
-[Azure Blob Storage document files][azure-blob-storage-vs-doc] | Microsoft | document | [Azure Blob Storage document files Virtual Schema][azure-blob-storage-vs-repository] | [Latest release][azure-blob-storage-vs-releases] |
-[Azure Data Lake Storage Gen2 document files][azure-data-lake-storage-gen2-vs-doc] | Microsoft | document | [Azure Data Lake Storage Gen2 document files Virtual Schema][azure-data-lake-storage-gen2-vs-repository] | [Latest release][azure-data-lake-storage-gen2-vs-releases] |
-[BucketFS document files][bucketfs-vs-doc] | Exasol | document | [BucketFS document files Virtual Schema][bucketfs-vs-repository] | [Latest release][bucketfs-vs-releases] |
-[DB2][db2-dialect-doc]                    | IBM       | JDBC      | [DB2 Virtual Schemas][db2-virtual-schema-repository]             | [Latest release][db2-virtual-schema-releases]       |
-[Dynamo DB][dynamodb-vs-doc] | AWS | document | [Dynamo DB Virtual Schema][dynamodb-vs-repository] | [Latest release][dynamodb-vs-releases] |
-[ElasticSearch][elasticsearch-dialect-doc] |          | JDBC      | [ElasticSearch][elasticsearch-repository]                     | [Latest release][elasticsearch-releases]         |
-[Exasol][exasol-dialect-doc]              | Exasol    | JDBC      | [Exasol Virtual Schema][exasol-vs-repository]        		 | [Latest release][exasol-vs-releases]    |
-[Google Big Query][bigquery-dialect-doc]  | Google    | JDBC      | [Big Query Virtual Schema][bigquery-virtual-schema-repository]   | [Latest release][bigquery-virtual-schema-releases]  |
-[Google Cloud Storage document files][google-cloud-storage-vs-doc] | Google | document | [Google Cloud Storage document files Virtual Schema][google-cloud-storage-vs-repository] | [Latest release][google-cloud-storage-vs-releases] |
-[HANA][hana-dialect-doc]                  | SAP       | JDBC      | [Hana Virtual Schemas][hana-vs-repository]                       | [Latest release][hana-vs-releases]      |
-[Hive][hive-dialect-doc]                  | Apache    | JDBC      | [Hive Virtual Schemas][hive-vs-repository]                       | [Latest release][hive-vs-releases]      |
-[Impala][impala-dialect-doc]              | Apache    | JDBC      | [Impala Virtual Schema][impala-vs-repository]        		 | [Latest release][impala-vs-releases]    |
-[MySQL][mysql-dialect-doc]                |           | JDBC      | [MySQL Virtual Schema][mysql-vs-repository]          		 | [Latest release][mysql-vs-releases]     |
-[Oracle][oracle-dialect-doc]              | Oracle    | JDBC      | [Oracle Virtual Schema][oracle-vs-repository]        		 | [Latest release][oracle-vs-releases]    |
-[PostgreSQL][pg-dialect-doc]              |           | JDBC      | [PostgreSQL Virtual Schema][pg-vs-repository]        		 | [Latest release][pg-vs-releases]        |
-[Redshift][redshift-dialect-doc]          | AWS       | JDBC      | [Redshift Virtual Schema][redshift-vs-repository]    		 | [Latest release][redshift-vs-releases]  |
-[S3 document files][s3-vs-doc] | AWS | document | [S3 document files Virtual Schema][s3-vs-repository] | [Latest release][s3-vs-releases] |
-[SQL Server][sql-server-dialect-doc]      | Microsoft | JDBC      | [SQL Server Virtual Schema][sqlserver-vs-repository] 		 | [Latest release][sqlserver-vs-releases] |
-[Sybase ASE][sybase-dialect-doc]          | Sybase    | JDBC      | [Sybase Virtual Schema][sybase-vs-repository]        		 | [Latest release][sybase-vs-releases]    |
-Generic                                   | Exasol    | (generic) | [Virtual Schemas][virtual-schemas-repository]                    | [Latest release][virtual-schemas-releases]          |
-Generic JDBC-capable RDBMS                | Exasol    | JDBC      | [Generic JDBC-capable RDBMS][jdbc-vs-repository]              	 | [Latest release][jdbc-vs-releases]                                  |
-[Generic Document Files][document-vs-doc] | Exasol    | document  | [Generic Document Files][document-vs-repository] 	      	 | [Latest release][document-vs-releases] 				       |
+| Dialect name                                                                       | OEM       | Type      | Repository                                                                                               | Latest release                                             |
+|------------------------------------------------------------------------------------|-----------|-----------|----------------------------------------------------------------------------------------------------------|------------------------------------------------------------|
+| [Athena][athena-dialect-doc]                                                       | AWS       | document  | [Athena Virtual Schema][athena-vs-repository]                                                            | [Latest release][athena-vs-releases]                       |
+| [Aurora][aurora-dialect-doc]                                                       | AWS       | JDBC      | [Virtual Schemas][virtual-schemas-repository]                                                            | [Latest release][virtual-schemas-releases]                 |
+| [Azure Blob Storage document files][azure-blob-storage-vs-doc]                     | Microsoft | document  | [Azure Blob Storage document files Virtual Schema][azure-blob-storage-vs-repository]                     | [Latest release][azure-blob-storage-vs-releases]           |
+| [Azure Data Lake Storage Gen2 document files][azure-data-lake-storage-gen2-vs-doc] | Microsoft | document  | [Azure Data Lake Storage Gen2 document files Virtual Schema][azure-data-lake-storage-gen2-vs-repository] | [Latest release][azure-data-lake-storage-gen2-vs-releases] |
+| [BucketFS document files][bucketfs-vs-doc]                                         | Exasol    | document  | [BucketFS document files Virtual Schema][bucketfs-vs-repository]                                         | [Latest release][bucketfs-vs-releases]                     |
+| [DB2][db2-dialect-doc]                                                             | IBM       | JDBC      | [DB2 Virtual Schemas][db2-virtual-schema-repository]                                                     | [Latest release][db2-virtual-schema-releases]              |
+| [Dynamo DB][dynamodb-vs-doc]                                                       | AWS       | document  | [Dynamo DB Virtual Schema][dynamodb-vs-repository]                                                       | [Latest release][dynamodb-vs-releases]                     |
+| [ElasticSearch][elasticsearch-dialect-doc]                                         |           | JDBC      | [ElasticSearch][elasticsearch-repository]                                                                | [Latest release][elasticsearch-releases]                   |
+| [Exasol][exasol-dialect-doc]                                                       | Exasol    | JDBC *)   | [Exasol Virtual Schema][exasol-vs-repository]                                                            | [Latest release][exasol-vs-releases]                       |
+| [Google Big Query][bigquery-dialect-doc]                                           | Google    | JDBC      | [Big Query Virtual Schema][bigquery-virtual-schema-repository]                                           | [Latest release][bigquery-virtual-schema-releases]         |
+| [Google Cloud Storage document files][google-cloud-storage-vs-doc]                 | Google    | document  | [Google Cloud Storage document files Virtual Schema][google-cloud-storage-vs-repository]                 | [Latest release][google-cloud-storage-vs-releases]         |
+| [HANA][hana-dialect-doc]                                                           | SAP       | JDBC      | [Hana Virtual Schemas][hana-vs-repository]                                                               | [Latest release][hana-vs-releases]                         |
+| [Hive][hive-dialect-doc]                                                           | Apache    | JDBC      | [Hive Virtual Schemas][hive-vs-repository]                                                               | [Latest release][hive-vs-releases]                         |
+| [Impala][impala-dialect-doc]                                                       | Apache    | JDBC      | [Impala Virtual Schema][impala-vs-repository]                                                            | [Latest release][impala-vs-releases]                       |
+| [MySQL][mysql-dialect-doc]                                                         |           | JDBC      | [MySQL Virtual Schema][mysql-vs-repository]                                                              | [Latest release][mysql-vs-releases]                        |
+| [Oracle][oracle-dialect-doc]                                                       | Oracle    | JDBC      | [Oracle Virtual Schema][oracle-vs-repository]                                                            | [Latest release][oracle-vs-releases]                       |
+| [PostgreSQL][pg-dialect-doc]                                                       |           | JDBC      | [PostgreSQL Virtual Schema][pg-vs-repository]                                                            | [Latest release][pg-vs-releases]                           |
+| [Redshift][redshift-dialect-doc]                                                   | AWS       | JDBC      | [Redshift Virtual Schema][redshift-vs-repository]                                                        | [Latest release][redshift-vs-releases]                     |
+| [S3 document files][s3-vs-doc]                                                     | AWS       | document  | [S3 document files Virtual Schema][s3-vs-repository]                                                     | [Latest release][s3-vs-releases]                           |
+| [SQL Server][sql-server-dialect-doc]                                               | Microsoft | JDBC      | [SQL Server Virtual Schema][sqlserver-vs-repository]                                                     | [Latest release][sqlserver-vs-releases]                    |
+| [Sybase ASE][sybase-dialect-doc]                                                   | Sybase    | JDBC      | [Sybase Virtual Schema][sybase-vs-repository]                                                            | [Latest release][sybase-vs-releases]                       |
+| Generic                                                                            | Exasol    | (generic) | [Virtual Schemas][virtual-schemas-repository]                                                            | [Latest release][virtual-schemas-releases]                 |
+| Generic JDBC-capable RDBMS                                                         | Exasol    | JDBC      | [Generic JDBC-capable RDBMS][jdbc-vs-repository]                                                         | [Latest release][jdbc-vs-releases]                         |
+| [Generic Document Files][document-vs-doc]                                          | Exasol    | document  | [Generic Document Files][document-vs-repository]                                                         | [Latest release][document-vs-releases]                     |
+
+\*) The Virtual Schema for Exasol databases supports three connection variants in total:
+* Import from JDBC
+* Using EXA Import
+* Using `IS_LOCAL`
 
 If your database is not part of that list but provides a JDBC driver, try to use the Generic driver. You can also [develop a custom dialect][developing-dialect].
 

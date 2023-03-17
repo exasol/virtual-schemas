@@ -1,0 +1,8 @@
+version: 6.0.2
+linkReplacements:
+excludes:
+  - "E-PK-CORE-18: Outdated content: '.github/workflows/project-keeper-verify.yml'"
+  - regex: "(?s)E-PK-CORE-62: The project's README.md does not contain a valid badges block.*"
+  - "E-PK-CORE-61: The project's README.md does not reference the dependencies.md file.' Please add a link like '[Dependencies](dependencies.md)' to the README.md."
+  - "E-PK-CORE-50: This project does not have a dependencies.md file."
+
