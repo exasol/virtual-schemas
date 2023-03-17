@@ -1,0 +1,59 @@
+name: Project Keeper Verify
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  project-keeper-verify:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: 11
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+
+      - name: Set up NPM
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: "npm"
+          cache-dependency-path: "**/package-lock.json"
+
+      - name: Cache Project Keeper
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-pk-${{ hashFiles('.github/workflows/project-keeper.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-pk-
+
+      - name: Cache go-licenses
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-licenses-${{ hashFiles('.github/workflows/project-keeper-verify.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-go-licenses-${{ hashFiles('.github/workflows/project-keeper-verify.yml') }}
+            ${{ runner.os }}-go-licenses-
+
+      - name: Project Keeper Verify
+        run: ./.github/workflows/project-keeper.sh

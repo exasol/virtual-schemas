@@ -1,0 +1,8 @@
+version: 6.0.2
+linkReplacements:
+excludes:
+  - "W-PK-CORE-91: For this project structure project keeper does not know how to configure ci-build. Please create the re quired actions on your own."
+  - regex: "(?s)E-PK-CORE-62: The project's README.md does not contain a valid badges block.*"
+  - "E-PK-CORE-61: The project's README.md does not reference the dependencies.md file.' Please add a link like '[Dependencies](dependencies.md)' to the README.md."
+  - "E-PK-CORE-50: This project does not have a dependencies.md file."
+
