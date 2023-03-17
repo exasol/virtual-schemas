@@ -1,4 +1,4 @@
-# Exasol Virtual Schemas 6.0.1, released 2022-03-17
+# Exasol Virtual Schemas 6.0.1, released 2023-03-17
 
 Code name: Documentation Update
 
