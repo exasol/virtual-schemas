@@ -29,8 +29,9 @@ The version of the Virtual Schema JDBC on which a Virtual Schema is based also t
 
 Virtual Schema JDBC Version | Required Java Version | Lifecycle
 ----------------------------|-----------------------|--------------------------------
-10.x.x                      |                    11 | supported, active development
-9.x.x                       |                    11 | supported
+11.x.x                      |                    11 | supported, active development
+10.x.x                      |                    11 | supported
+9.x.x                       |                    11 | discontinued
 8.x.x                       |                    11 | discontinued
 7.x.x                       |                    11 | discontinued
 6.x.x                       |                    11 | discontinued
@@ -43,17 +44,18 @@ Please update your Virtual Schema to a supported version before writing tickets 
 
 Exasol Version  | Java Version Installed by Default in Language Container
 ----------------|--------------------------------------------------------
+8               | 11
 7.1             | 11
 7.0             | 11
 6.2             | 11
 6.1             | 9
 6.0             | 8
 
-We recommend updating the Exasol installation to at least 7.1.10 or newer for best results.
+We recommend updating the Exasol installation to at least 7.1.21 or newer for best results.
 
 Please do not try to install language containers with lower Java versions on newer Exasol installations. This is untested.
 
-Please contact the [Exasol Support Team](https://www.exasol.com/portal/display/EXA/Support+Dashboard) if you need help upgrading the language container.
+Please contact the [Exasol Support Team](https://exasol-support.force.com/s/create-new-case) if you need help upgrading the language container.
 
 The runtime dependencies are specified for each dialect in their own repository.
 
@@ -81,8 +83,7 @@ See [List of Supported Dialects](doc/user-guide/dialects.md).
 
 ## Limitations
 
-* The Virtual Schema adapter takes about 1s to start.
-That means that queries that involve tables from Virtual Schema will take at least 1s.
+* The Virtual Schema adapter takes about 1s to start. That means that queries that involve tables from Virtual Schema will take at least 1s.
 
 ## Customer Support
 
