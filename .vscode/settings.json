@@ -1,0 +1,8 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true,
+    "source.generate.finalModifiers": true,
+    "source.fixAll": true
+  }
+}
