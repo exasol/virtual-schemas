@@ -23,7 +23,7 @@
 | [S3 document files][s3-vs-doc]                                                     | AWS       | document  | [S3 document files Virtual Schema][s3-vs-repository]                                                     | [Latest release][s3-vs-releases]                           |
 | [SQL Server][sql-server-dialect-doc]                                               | Microsoft | JDBC      | [SQL Server Virtual Schema][sqlserver-vs-repository]                                                     | [Latest release][sqlserver-vs-releases]                    |
 | [Sybase ASE][sybase-dialect-doc]                                                   | Sybase    | JDBC      | [Sybase Virtual Schema][sybase-vs-repository]                                                            | [Latest release][sybase-vs-releases]                       |
-| [Generic JDBC](generic-jdbc-doc] **)                                               | any JDBC  | JDBC      | [Generic Virtual Schema][generic-vs-repository]                                                          | [Latest_release][generic-vs-releases]                      |
+| [Generic JDBC](generic-jdbc-doc **)                                                | any JDBC  | JDBC      | [Generic Virtual Schema][generic-vs-repository]                                                          | [Latest_release][generic-vs-releases]                      |
 
 \*) The Virtual Schema for Exasol databases supports three connection variants in total:
 * Import from JDBC
