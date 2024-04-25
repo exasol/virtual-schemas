@@ -1,13 +1,13 @@
 # Supported Dialects
 
-| Dialect name                                                                       | OEM       | Type      | Repository                                                                                               | Latest release                                             |
+| Dialect name                                                                       | Source    | Type      | Repository                                                                                               | Latest release                                             |
 |------------------------------------------------------------------------------------|-----------|-----------|----------------------------------------------------------------------------------------------------------|------------------------------------------------------------|
 | [Athena][athena-dialect-doc]                                                       | AWS       | JDBC      | [Athena Virtual Schema][athena-vs-repository]                                                            | [Latest release][athena-vs-releases]                       |
 | [Aurora][aurora-dialect-doc]                                                       | AWS       | JDBC      | [Virtual Schemas][virtual-schemas-repository]                                                            | [Latest release][virtual-schemas-releases]                 |
 | [Azure Blob Storage document files][azure-blob-storage-vs-doc]                     | Microsoft | document  | [Azure Blob Storage document files Virtual Schema][azure-blob-storage-vs-repository]                     | [Latest release][azure-blob-storage-vs-releases]           |
 | [Azure Data Lake Storage Gen2 document files][azure-data-lake-storage-gen2-vs-doc] | Microsoft | document  | [Azure Data Lake Storage Gen2 document files Virtual Schema][azure-data-lake-storage-gen2-vs-repository] | [Latest release][azure-data-lake-storage-gen2-vs-releases] |
 | [BucketFS document files][bucketfs-vs-doc]                                         | Exasol    | document  | [BucketFS document files Virtual Schema][bucketfs-vs-repository]                                         | [Latest release][bucketfs-vs-releases]                     |
-| [DB2][db2-dialect-doc]                                                             | IBM       | JDBC      | [DB2 Virtual Schema][db2-virtual-schema-repository]                                                     | [Latest release][db2-virtual-schema-releases]              |
+| [DB2][db2-dialect-doc]                                                             | IBM       | JDBC      | [DB2 Virtual Schema][db2-virtual-schema-repository]                                                      | [Latest release][db2-virtual-schema-releases]              |
 | [Dynamo DB][dynamodb-vs-doc]                                                       | AWS       | document  | [Dynamo DB Virtual Schema][dynamodb-vs-repository]                                                       | [Latest release][dynamodb-vs-releases]                     |
 | [ElasticSearch][elasticsearch-dialect-doc]                                         |           | JDBC      | [ElasticSearch][elasticsearch-repository]                                                                | [Latest release][elasticsearch-releases]                   |
 | [Exasol][exasol-dialect-doc]                                                       | Exasol    | JDBC *)   | [Exasol Virtual Schema][exasol-vs-repository]                                                            | [Latest release][exasol-vs-releases]                       |
@@ -23,16 +23,16 @@
 | [S3 document files][s3-vs-doc]                                                     | AWS       | document  | [S3 document files Virtual Schema][s3-vs-repository]                                                     | [Latest release][s3-vs-releases]                           |
 | [SQL Server][sql-server-dialect-doc]                                               | Microsoft | JDBC      | [SQL Server Virtual Schema][sqlserver-vs-repository]                                                     | [Latest release][sqlserver-vs-releases]                    |
 | [Sybase ASE][sybase-dialect-doc]                                                   | Sybase    | JDBC      | [Sybase Virtual Schema][sybase-vs-repository]                                                            | [Latest release][sybase-vs-releases]                       |
-| Generic                                                                            | Exasol    | (generic) | [Virtual Schemas][virtual-schemas-repository]                                                            | [Latest release][virtual-schemas-releases]                 |
-| Generic JDBC-capable RDBMS                                                         | Exasol    | JDBC      | [Generic JDBC-capable RDBMS][jdbc-vs-repository]                                                         | [Latest release][jdbc-vs-releases]                         |
-| [Generic Document Files][document-vs-doc]                                          | Exasol    | document  | [Generic Document Files][document-vs-repository]                                                         | [Latest release][document-vs-releases]                     |
+| [Generic JDBC](generic-jdbc-doc] **)                                               | any JDBC  | JDBC      | [Generic Virtual Schema][generic-vs-repository]                                                          | [Latest_release][generic-vs-releases]                      |
 
 \*) The Virtual Schema for Exasol databases supports three connection variants in total:
 * Import from JDBC
 * Using EXA Import
 * Using `IS_LOCAL`
 
-If your database is not part of that list but provides a JDBC driver, try to use the Generic driver. You can also [develop a custom dialect][developing-dialect].
+\**) The generic JDBC Virtual Schema is a fallback solution. It does not support any other push-down capabilities than accessing table contents.
+
+If your database is not part of that list but provides a JDBC driver, try to use the Generic driver. You can also [develop a custom dialect](https://github.com/exasol/virtual-schema-common-jdbc/blob/main/doc/development/developing_a_dialect.md).
 
 [aurora-dialect-doc]: https://github.com/exasol/virtual-schemas/blob/main/doc/dialects/aurora.md
 
@@ -116,21 +116,7 @@ If your database is not part of that list but provides a JDBC driver, try to use
 [bucketfs-vs-releases]: https://github.com/exasol/bucketfs-document-files-virtual-schema/releases
 [bucketfs-vs-repository]: https://github.com/exasol/bucketfs-document-files-virtual-schema
 
-<!-- no [virtual-schemas-dialect-doc] -->
-[virtual-schemas-releases]: https://github.com/exasol/virtual-schemas/releases
-[virtual-schemas-repository]: https://github.com/exasol/virtual-schemas
-
-<!-- no [jdbc-dialect-doc], no user guide -->
-[jdbc-vs-releases]: https://github.com/exasol/virtual-schema-common-jdbc/releases
-[jdbc-vs-repository]: https://github.com/exasol/virtual-schema-common-jdbc
-
-<!-- no [jdbc-dialect-doc], no user guide -->
-[jdbc-vs-releases]: https://github.com/exasol/virtual-schema-common-jdbc/releases
-[jdbc-vs-repository]: https://github.com/exasol/virtual-schema-common-jdbc
-
-[document-vs-doc]: https://github.com/exasol/virtual-schema-common-document-files/blob/main/doc/user_guide/user_guide.md
-[document-vs-releases]: https://github.com/exasol/virtual-schema-common-document-files/releases
-[document-vs-repository]: https://github.com/exasol/virtual-schema-common-document-files
-
-[developing-dialect]: https://github.com/exasol/virtual-schema-common-jdbc/blob/main/doc/development/developing_a_dialect.md
-
+<!-- The catch-all generic JDBC VS -->
+[generic-vs-doc]: https://github.com/exasol/generic-virtual-schema/blob/main/doc/user_guide/user_guide.md
+[generic-vs-releases]: https://github.com/exasol/generic-virtual-schema/releases
+[generic-vs-repository]: https://github.com/exasol/generic-virtual-schema
