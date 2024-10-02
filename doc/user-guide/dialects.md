@@ -21,6 +21,7 @@
 | [PostgreSQL][pg-dialect-doc]                                                       |           | JDBC      | [PostgreSQL Virtual Schema][pg-vs-repository]                                                            | [Latest release][pg-vs-releases]                           |
 | [Redshift][redshift-dialect-doc]                                                   | AWS       | JDBC      | [Redshift Virtual Schema][redshift-vs-repository]                                                        | [Latest release][redshift-vs-releases]                     |
 | [S3 document files][s3-vs-doc]                                                     | AWS       | document  | [S3 document files Virtual Schema][s3-vs-repository]                                                     | [Latest release][s3-vs-releases]                           |
+| [Snowflake][snowflake-vs-doc]                                                     | Snowflake       | JDBC  | [Snowflake Virtual Schema][snowflake-vs-repository]                                                     | [Latest release][snowflake-vs-releases]                           |
 | [SQL Server][sql-server-dialect-doc]                                               | Microsoft | JDBC      | [SQL Server Virtual Schema][sqlserver-vs-repository]                                                     | [Latest release][sqlserver-vs-releases]                    |
 | [Sybase ASE][sybase-dialect-doc]                                                   | Sybase    | JDBC      | [Sybase Virtual Schema][sybase-vs-repository]                                                            | [Latest release][sybase-vs-releases]                       |
 | [Generic JDBC **)](generic-jdbc-doc)                                               | any JDBC  | JDBC      | [Generic Virtual Schema][generic-vs-repository]                                                          | [Latest_release][generic-vs-releases]                      |
@@ -111,6 +112,10 @@ If your database is not part of that list but provides a JDBC driver, try to use
 [s3-vs-doc]: https://github.com/exasol/s3-document-files-virtual-schema/blob/main/doc/user_guide/user_guide.md
 [s3-vs-releases]: https://github.com/exasol/s3-document-files-virtual-schema/releases
 [s3-vs-repository]: https://github.com/exasol/s3-document-files-virtual-schema
+
+[snowflake-vs-doc]: https://github.com/exasol/snowflake-virtual-schema/blob/main/doc/user_guide/snowflake_user_guide.md
+[snowflake-vs-releases]: https://github.com/exasol/snowflake-virtual-schema/releases
+[snowflake-vs-repository]: https://github.com/exasol/snowflake-virtual-schema
 
 [bucketfs-vs-doc]: https://github.com/exasol/bucketfs-document-files-virtual-schema/blob/main/doc/user_guide/user_guide.md
 [bucketfs-vs-releases]: https://github.com/exasol/bucketfs-document-files-virtual-schema/releases
