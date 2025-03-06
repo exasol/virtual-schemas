@@ -7,13 +7,19 @@
 3. Python
 4. R
 
+## Where do the Language Limitations Come From?
+
+The language limitation lies in the [availability of so called script language containers (SLCs)](https://github.com/exasol/script-languages-release/releases). Except for Lua, all Virtual schemas are backed by the [User Defined Function (UDF) framework](https://docs.exasol.com/saas/database_concepts/udf_scripts.htm). UDFs run in a special Linux container. You can think of a script language container as a stripped-down Linux distribution without its own kernel. Each container has the runtime and base libraries for a certain programming language.
+
+Exasol maintains SLCs for Java, Python and R.
+
 ## Which Programming Language Should I Choose for my Virtual Schema?
 
 If you need low-latency, favor Lua, since the Lua interpreter is built directly into the Exasol engine and thus has minimal overhead.
 
 If you can afford a second or so startup delay, first find out in which language the best libraries and APIs exists for your data source. Then, write the virtual schema adapter on top of those APIs.
 
-API existence is also the main limiting factor for Lua implementations. While in the Python and Java world, you have libraries for nearly every imaginable data source, trying to find one for Lua often is a dead end.
+API existence is also the main limiting factor for Lua implementations. While in the Python and Java world you have libraries for nearly every imaginable data source, trying to find one for Lua often is a dead end.
 
 In case of HTTP services you can of course use an HTTP client, but that means that you have to write the access layer in Lua yourself. 
 
@@ -42,7 +48,7 @@ Map the source's structure to tables and columns so that Exasol can treat them a
 
 Find equivalents for the source datatypes. When there is no exact match, pick the closest one and be prepared to convert data in the push-down request.
 
-## What Kind of Activity can I Build Into the `REFRESH` Request Implementations?
+## What Kind of Activity can I Build Into the `REFRESH` Request Implementation?
 
 Generally, the steps are very similar to a [`CREATE`](#what-kind-of-activity-can-i-build-into-the-create-request-implementations) request.
 
@@ -65,11 +71,13 @@ In the context of the Virtual Schemas that is relevant for an Exasol-to-Exasol v
 
 But, if you write a virtual schema that connects to Exasol, you should always use snapshot mode when accessing system tables.
 
-Use a hint comment to tell Exasol that you want to run your query in snapshot mode:
+Use an SQL hint — a special kind of comment — to tell Exasol that you want to run your query in snapshot mode:
 
 ```sql
 /*snapshot execution*/ SELECT …
 ```
+
+Since these hints are interpreted by the Exasol engine and not the client, they are independent of the programming language you are using 
 
 ## How and When can I Access Exasol System Tables?
 

@@ -26,7 +26,7 @@ See [List of Supported Dialects](doc/user_guide/dialects.md).
 
 ## Limitations
 
-* A Virtual Schema adapter written in Python or Java takes about 1s to start. That means that queries that involve tables from Virtual Schema will take at least 1s.
+* A Virtual Schema adapter written in Python or Java takes about 1 second to start. That means that queries that involve tables from Virtual Schema will take at least 1 second.
 
 ## Customer Support
 
@@ -51,8 +51,8 @@ Additional resources:
 
 ## Information for Developers
 
-* [Frequently Asked Questions (FAQ) for Virtual Schema Developers](developer_guide/faq.md)
+* [Frequently Asked Questions (FAQ) for Virtual Schema Developers](doc/developer_guide/faq.md)
 
 ### Java-specific Developer Information
 
-* Find all developers information in [Virtual Schema Common JDBC repository](https://github.com/exasol/virtual-schema-common-jdbc#information-for-developers)
+* Find all information for developers in [Virtual Schema Common JDBC repository](https://github.com/exasol/virtual-schema-common-jdbc#information-for-developers)
