@@ -1,4 +1,4 @@
-# Virtual Schemas 6.0.3, released 2025-03-06
+# Virtual Schemas 6.0.3, released 2025-03-07
 
 Code name: Developer FAQ
 
