@@ -88,18 +88,34 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT ...
 
 ### Can I exclude tables from a virtual schema?
 
-**Answer**: Yes, you can use TABLE_FILTER = 'TABLE1','TABLE2',... . Only these tables will be available as virtual tables, all other tables are excluded.
+**Answer**: Yes, you can use `TABLE_FILTER = 'TABLE1','TABLE2', …`. Only these tables will be available as virtual tables, all other tables are excluded.
 
 ### I created an Exasol-Exasol Virtual Schema on a view of an Exasol database, but the view does not exist in the Virtual Schema.
 
-In that case the view was probably outdated, when you created the Virtual Schema.
+In that case the view was outdated when you created the Virtual Schema.
 
-This can happen if you create the view using `CREATE FORCE VIEW` or you updated a table that is part of the view after the view but did not refresh the view (Exasol refreshes views for example when they are queried).
+This can happen if you created the view using `CREATE FORCE VIEW`, or if you modified a table used by the view after the view creation, without refreshing the view (Exasol refreshes views only when they are queried).
 
-**Solution:**
+As long as a view is not compiled in the remote schema, it remains invisible to the virtual schema accessing this remote schema. It needs to be compiled _first_ before the virtual schema can see it.
 
-1. Refresh the view on the source (for example using `DESCRIBE MY_VIEW`). 
-1. Refresh the Virtual Schema (using `ALTER VIRTUAL SCHEMA MY_SCHEMA REFRESH`) 
+**Solution**:
+
+1. Refresh the view on the source (for example, using `DESCRIBE MY_VIEW`). 
+2. Refresh the Virtual Schema (using `ALTER VIRTUAL SCHEMA MY_SCHEMA REFRESH`) 
+
+**Pro Tip**:
+
+Views must be compiled to be accessible. Creating a view with the option `FORCE` explicitly skips the compilation step.  While this allows quickly creating a large number of views, even if you don't know their interdependencies, it comes at the cost of half-finished database objects.
+
+Worse yet, you only discover whether a view definition is valid when you actually access the object. In other words, `FORCE` decouples making a mistake from realizing that it was made.
+
+For this reason, it is much safer to compile views intentionally after they were bulk created. This way, any errors are caught immediately by the creator, not by the end user, allowing the creator to fix broken definitions before they cause problems. The creator of the view can repair broken definitions. The user cannot.
+
+Exasol's support team can provide you with a script that mass-compiles views in parallel to speed up the process.
+
+**See Also*::
+
+Please refer to the section ["CREATE VIEW"](https://docs.exasol.com/db/latest/sql/create_view.htm) in the Exasol handbook for more details on creating and compiling views.
 
 ## Selecting From Virtual Schemas
 
@@ -292,3 +308,4 @@ If you intend to use this option, then do it **only for integration tests with n
 [remote-log]: https://docs.exasol.com/database_concepts/virtual_schema/logging.htm
 [exasol-network]: https://docs.exasol.com/administration/on-premise/manage_network/configure_network_access.htm
 [remove-logging]: https://github.com/exasol/virtual-schema-common-jdbc/blob/main/doc/development/remote_logging.md
+

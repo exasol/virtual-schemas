@@ -6,7 +6,7 @@ Exasol **Virtual Schemas** are an abstraction layer that makes external data sou
 
 Regardless of whether that source is a relational database like ours, or it's like the structure of GitHub repositories, the interface that users see is always the same.
 
-This means a user familiar with SQL will immediately feel at home when accessing remote data through Virtual Schemas.
+This means that users familiar with SQL will immediately feel at home when accessing remote data via Virtual Schemas.
 
 Virtual Schemas can be also described in known terms as `External Tables` or `Foreign Data Wrapper (FDW)`.
 
@@ -26,7 +26,7 @@ See [List of Supported Dialects](doc/user_guide/dialects.md).
 
 ## Limitations
 
-* A Virtual Schema adapter written in Python or Java takes about 1 second to start. That means that queries that involve tables from Virtual Schema will take at least 1 second.
+* A Virtual Schema adapter written in Python or Java takes about 1 second to start. This means that queries involving Virtual Schema tables will take at least 1 second.
 
 ## Customer Support
 
