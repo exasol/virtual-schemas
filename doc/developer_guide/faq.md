@@ -17,13 +17,13 @@ Exasol maintains SLCs for Java, Python and R.
 
 If you need low-latency, favor Lua, since the Lua interpreter is built directly into the Exasol engine and thus has minimal overhead.
 
-If you can afford a second or so startup delay, first find out in which language the best libraries and APIs exists for your data source. Then, write the virtual schema adapter on top of those APIs.
+If you can afford a startup delay of about a second, first determine which language has the best libraries and APIs for your data source. Then, implement the virtual schema adapter using those APIs.
 
-API existence is also the main limiting factor for Lua implementations. While in the Python and Java world you have libraries for nearly every imaginable data source, trying to find one for Lua often is a dead end.
+The availability of APIs is also the main limiting factor for Lua implementations. While the Python and Java ecosystems offer libraries for nearly every imaginable data source, finding equivalent libraries for Lua is often a dead end.
 
-In case of HTTP services you can of course use an HTTP client, but that means that you have to write the access layer in Lua yourself. 
+In the case of HTTP services, you can of course use an HTTP client, but that means you'll need to implement the access layer in Lua yourself.
 
-You might also want to factor in who will maintain the implementation later. If you have a pool of Java developers, Python might not be the ideal choice (and vice versa).
+You might also want to consider who will maintain the implementation. If your team consists mainly of Java developers, Python might not be the ideal choice (and vice versa)
 
 ## Can a Virtual Schema Write on the Remote Data Source?
 
