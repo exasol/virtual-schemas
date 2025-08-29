@@ -131,6 +131,25 @@ JDBC-Client-Error: Failed loading driver 'com.mysql.jdbc.Driver': null, access d
 
 - This happens because the JDBC driver requires more permissions than we provide by default. You can disable a security manager of the corresponding driver in [EXAoperation][exaoperation-drivers] to solve this problem.
 
+### I try to filter (e.g, with "LIKE") by a column in a document-based Virtual Schema but get an error message
+
+Document-based virtual schemas like the S3 virtual schema support filtering only on the object reference (think of that like a path in a file system). The reason is that this reduces the actuall network traffic. If you pick fewer objects (files), less data needs to be transmitted.
+
+Filtering on a column that is inside a document on the other hand means that Exasol needs to load the file from the source before it can apply the filter. So pushing down that filter is pointless.
+
+Since disabling virtual schema capabilities is an all-or-nothing decision there is no way to selectively say "this adapter can filter the object reference only". As a consequence, we enable the filtering capability (`LIKE`) but check in the adapter if the filter is applied to the object reference only. If not, we need to raise an error.
+
+**Solution:**
+
+If you need to filter for a column that is inside a document in a document VS, then write an inner query that either has no filter or filters for the object reference and wrap that in an outer `SELECT` where you apply the remaining filters.
+
+```sql
+SELECT FROM (
+   SELECT FROM my_virtual_schema ...
+)
+WHERE column1 LIKE `%foobar%`
+```
+
 ## Domain Name (DNS) Resolution Issues
 
 ### Kerberos connection is unable to create remote metadata reader
