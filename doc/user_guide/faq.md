@@ -133,7 +133,7 @@ JDBC-Client-Error: Failed loading driver 'com.mysql.jdbc.Driver': null, access d
 
 ### I try to filter (e.g, with "LIKE") by a column in a document-based Virtual Schema but get an error message
 
-Document-based virtual schemas like the S3 virtual schema support filtering only on the object reference (think of that like a path in a file system). The reason is that this reduces the actuall network traffic. If you pick fewer objects (files), less data needs to be transmitted.
+Document-based virtual schemas like the S3 virtual schema support filtering only on the object reference (think of that like a path in a file system). The reason is that this reduces the actual network traffic. If you pick fewer objects (files), less data needs to be transmitted.
 
 Filtering on a column that is inside a document on the other hand means that Exasol needs to load the file from the source before it can apply the filter. So pushing down that filter is pointless.
 
