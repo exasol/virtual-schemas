@@ -147,8 +147,10 @@ If you need to filter for a column that is inside a document in a document VS, t
 SELECT FROM (
    SELECT FROM my_virtual_schema ...
 )
-WHERE column1 LIKE '%foobar%'
+WHERE column1 LIKE '%foobar%' LIMIT 9E10
 ```
+
+Note that the only purpose of the `LIMIT 9E10` is **preventing the query optimizer from moving the filter criteria to the inner `SELECT`**. When you use this `LIMIT` trick, please make sure that the limit is bigger than the size of the biggest resultset you expect. Otherwise, there is the chance that you truncate your result accidentally.
 
 ## Domain Name (DNS) Resolution Issues
 
