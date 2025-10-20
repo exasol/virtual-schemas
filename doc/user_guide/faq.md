@@ -323,10 +323,36 @@ If you intend to use this option, then do it **only for integration tests with n
 * Log in to EXAOperation and shutdown the database.
 * Append `-etlJdbcJavaEnv -Djava.security.egd=/dev/urandom` to the "Extra Database Parameters" input field and power the database on again.
 
+### How do Virtual Schemas Import Data Into Exasol?
+
+Unless the virtual schema points to the same database, it uses the ExaLoader (also sometimes called the "importer") to get mass data into the database.
+
+The virtual schema adapter receives an SQL [`SELECT`](https://docs.exasol.com/db/latest/sql/select.htm) statements from the core database and translates it into an [`IMPORT`](https://docs.exasol.com/db/latest/sql/import.htm) command that the ExaLoader executes.
+
+If the data source is a relational database, the Loader imports data via JDBC.
+
+```sql
+IMPORT INTO <table>
+    FROM JDBC AT…
+```
+
+If the data source is a collection of documents like JSON or Parquet, the virtual schema adapter generates an import statement, that imports data from a UDF script.
+
+```sql
+IMPORT INTO <table>
+    FROM SCRIPT <script>
+```
+
+The script takes care of things like reading the source format and converting the data and / or structure.
+
+You can make the import commands that the virtual schema adapter produces visible by prefixing your `SELECT` on the virtual schema with `EXPLAIN VIRTUAL`.
+
+> [!Important]
+> Exasol's virtual schema adapter does not use the ExaLoader's capabilities for [importing file formats](https://docs.exasol.com/db/latest/loading_data/other_file_formats.htm) directly. This would not allow format and structure conversion.
+
 [dialects]: dialects.md
 [github-releases]: https://github.com/exasol/virtual-schemas/releases
 [exaoperation-drivers]: https://docs.exasol.com/db/latest/administration/on-premise/manage_software/manage_jdbc.htm
 [remote-log]: https://docs.exasol.com/database_concepts/virtual_schema/logging.htm
 [exasol-network]: https://docs.exasol.com/administration/on-premise/manage_network/configure_network_access.htm
 [remove-logging]: https://github.com/exasol/virtual-schema-common-jdbc/blob/main/doc/development/remote_logging.md
-
