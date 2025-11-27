@@ -7,6 +7,7 @@
 | [Azure Blob Storage document files][azure-blob-storage-vs-doc]                     | Microsoft | document  | [Azure Blob Storage document files Virtual Schema][azure-blob-storage-vs-repository]                     | [Latest release][azure-blob-storage-vs-releases]           |
 | [Azure Data Lake Storage Gen2 document files][azure-data-lake-storage-gen2-vs-doc] | Microsoft | document  | [Azure Data Lake Storage Gen2 document files Virtual Schema][azure-data-lake-storage-gen2-vs-repository] | [Latest release][azure-data-lake-storage-gen2-vs-releases] |
 | [BucketFS document files][bucketfs-vs-doc]                                         | Exasol    | document  | [BucketFS document files Virtual Schema][bucketfs-vs-repository]                                         | [Latest release][bucketfs-vs-releases]                     |
+| [Databricks][databricks-vs-doc]                                                    | Databricks| JDBC      | [Databricks virtual Schema][databricks-vs-repository]                                                    | [Latest release][databricks-vs-releases]                   |
 | [DB2][db2-dialect-doc]                                                             | IBM       | JDBC      | [DB2 Virtual Schema][db2-virtual-schema-repository]                                                      | [Latest release][db2-virtual-schema-releases]              |
 | [Dynamo DB][dynamodb-vs-doc]                                                       | AWS       | document  | [Dynamo DB Virtual Schema][dynamodb-vs-repository]                                                       | [Latest release][dynamodb-vs-releases]                     |
 | [ElasticSearch][elasticsearch-dialect-doc]                                         |           | JDBC      | [ElasticSearch][elasticsearch-repository]                                                                | [Latest release][elasticsearch-releases]                   |
@@ -21,7 +22,7 @@
 | [PostgreSQL][pg-dialect-doc]                                                       |           | JDBC      | [PostgreSQL Virtual Schema][pg-vs-repository]                                                            | [Latest release][pg-vs-releases]                           |
 | [Redshift][redshift-dialect-doc]                                                   | AWS       | JDBC      | [Redshift Virtual Schema][redshift-vs-repository]                                                        | [Latest release][redshift-vs-releases]                     |
 | [S3 document files][s3-vs-doc]                                                     | AWS       | document  | [S3 document files Virtual Schema][s3-vs-repository]                                                     | [Latest release][s3-vs-releases]                           |
-| [Snowflake][snowflake-vs-doc]                                                     | Snowflake       | JDBC  | [Snowflake Virtual Schema][snowflake-vs-repository]                                                     | [Latest release][snowflake-vs-releases]                           |
+| [Snowflake][snowflake-vs-doc]                                                      | Snowflake | JDBC      | [Snowflake Virtual Schema][snowflake-vs-repository]                                                      | [Latest release][snowflake-vs-releases]                    |
 | [SQL Server][sql-server-dialect-doc]                                               | Microsoft | JDBC      | [SQL Server Virtual Schema][sqlserver-vs-repository]                                                     | [Latest release][sqlserver-vs-releases]                    |
 | [Sybase ASE][sybase-dialect-doc]                                                   | Sybase    | JDBC      | [Sybase Virtual Schema][sybase-vs-repository]                                                            | [Latest release][sybase-vs-releases]                       |
 | [Generic JDBC **)](generic-jdbc-doc)                                               | any JDBC  | JDBC      | [Generic Virtual Schema][generic-vs-repository]                                                          | [Latest_release][generic-vs-releases]                      |
@@ -48,6 +49,10 @@ If your database is not part of that list but provides a JDBC driver, try to use
 [db2-dialect-doc]: https://github.com/exasol/db2-virtual-schema/blob/main/doc/user_guide/db2_user_guide.md
 [db2-virtual-schema-releases]: https://github.com/exasol/db2-virtual-schema/releases
 [db2-virtual-schema-repository]: https://github.com/exasol/db2-virtual-schema
+
+[databricks-vs-doc]: https://github.com/exasol/databricks-virtual-schema/blob/main/doc/user_guide/user_guide.md
+[databricks-vs-releases]: https://github.com/exasol/databricks-virtual-schema/releases
+[databricks-vs-repository]: https://github.com/exasol/databricks-virtual-schema
 
 [elasticsearch-dialect-doc]: https://github.com/exasol/elasticsearch-virtual-schema/blob/main/doc/user_guide/elasticsearch_sql_user_guide.md
 [elasticsearch-releases]: https://github.com/exasol/elasticsearch-virtual-schema/releases
