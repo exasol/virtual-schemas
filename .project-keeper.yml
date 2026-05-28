@@ -6,3 +6,6 @@ excludes:
   - "E-PK-CORE-50: This project does not have a dependencies.md file."
   # Release is done via release droid
   - "E-PK-CORE-26: 'release_config.yml' exists but must not exist. Reason: Release-droid configuration is replaced by release.yml"
+  # Broken links checker must also run for pull requests
+  - "E-PK-CORE-18: Outdated content: '.github/workflows/broken_links_checker.yml'"
+
