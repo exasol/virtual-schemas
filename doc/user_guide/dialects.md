@@ -25,16 +25,13 @@
 | [Snowflake][snowflake-vs-doc]                                                      | Snowflake | JDBC      | [Snowflake Virtual Schema][snowflake-vs-repository]                                                      | [Latest release][snowflake-vs-releases]                    |
 | [SQL Server][sql-server-dialect-doc]                                               | Microsoft | JDBC      | [SQL Server Virtual Schema][sqlserver-vs-repository]                                                     | [Latest release][sqlserver-vs-releases]                    |
 | [Sybase ASE][sybase-dialect-doc]                                                   | Sybase    | JDBC      | [Sybase Virtual Schema][sybase-vs-repository]                                                            | [Latest release][sybase-vs-releases]                       |
-| [Generic JDBC **)](generic-jdbc-doc)                                               | any JDBC  | JDBC      | [Generic Virtual Schema][generic-vs-repository]                                                          | [Latest_release][generic-vs-releases]                      |
 
 \*) The Virtual Schema for Exasol databases supports three connection variants in total:
 * Import from JDBC
 * Using EXA Import
 * Using `IS_LOCAL`
 
-\**) The generic JDBC Virtual Schema is a fallback solution. It does not support any other push-down capabilities than accessing table contents.
-
-If your database is not part of that list but provides a JDBC driver, try to use the Generic driver. You can also [develop a custom dialect](https://github.com/exasol/virtual-schema-common-jdbc/blob/main/doc/development/developing_a_dialect.md).
+If your database is not part of that list but provides a JDBC driver, you can  [develop a custom dialect](https://github.com/exasol/virtual-schema-common-jdbc/blob/main/doc/development/developing_a_dialect.md).
 
 [aurora-dialect-doc]: https://github.com/exasol/virtual-schemas/blob/main/doc/dialects/aurora.md
 
@@ -125,8 +122,3 @@ If your database is not part of that list but provides a JDBC driver, try to use
 [bucketfs-vs-doc]: https://github.com/exasol/bucketfs-document-files-virtual-schema/blob/main/doc/user_guide/user_guide.md
 [bucketfs-vs-releases]: https://github.com/exasol/bucketfs-document-files-virtual-schema/releases
 [bucketfs-vs-repository]: https://github.com/exasol/bucketfs-document-files-virtual-schema
-
-<!-- The catch-all generic JDBC VS -->
-[generic-vs-doc]: https://github.com/exasol/generic-virtual-schema/blob/main/doc/user_guide/user_guide.md
-[generic-vs-releases]: https://github.com/exasol/generic-virtual-schema/releases
-[generic-vs-repository]: https://github.com/exasol/generic-virtual-schema
