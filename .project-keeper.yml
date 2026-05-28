@@ -4,3 +4,5 @@ excludes:
   - regex: "(?s)E-PK-CORE-62: The project's README.md does not contain a valid badges block.*"
   - "E-PK-CORE-61: The project's README.md does not reference the dependencies.md file.' Please add a link like '[Dependencies](dependencies.md)' to the README.md."
   - "E-PK-CORE-50: This project does not have a dependencies.md file."
+  # Release is done via release droid
+  - "E-PK-CORE-26: 'release_config.yml' exists but must not exist. Reason: Release-droid configuration is replaced by release.yml"

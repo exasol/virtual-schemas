@@ -3,3 +3,6 @@ doc/changes/changelog.md                                         linguist-genera
 .github/workflows/broken_links_checker.yml                       linguist-generated=true
 .github/workflows/project-keeper.sh                              linguist-generated=true
 .github/workflows/project-keeper-verify.yml                      linguist-generated=true
+.github/workflows/lint-github-actions.yml                        linguist-generated=true
+.github/zizmor.yml                                               linguist-generated=true
+SECURITY.md                                                      linguist-generated=true
