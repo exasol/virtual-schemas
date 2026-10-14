@@ -140,8 +140,8 @@ To understand the background of this limitation, please read ["Filtering Documen
 If you need to filter for a column that is inside a document in a document VS, then write an inner query that either has no filter or filters for the object reference and wrap that in an outer `SELECT` where you apply the remaining filters.
 
 ```sql
-SELECT FROM (
-   SELECT FROM my_virtual_schema ...
+SELECT * FROM (
+   SELECT * FROM my_virtual_schema ...
 )
 WHERE column1 LIKE '%foobar%' LIMIT 9E10
 ```

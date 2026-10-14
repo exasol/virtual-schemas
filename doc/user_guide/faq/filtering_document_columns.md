@@ -6,25 +6,49 @@ This article explains how filtering in document-based Virtual Schemas work and w
 
 Before we discuss how you can filter document columns, we first need to establish why a document-storage-based Virtual Schema is fundamentally different from one that accesses an external database.
 
-A database has an index and in interface that lets you use that interface, for example SQL or a REST API. Indexes make searching and random access to data fast. Below you see a typical chain of events in case a filter is covered by an index.
+Here is how a database-to-database Virtual Schema works:
 
-    define filter
-        ↓
-    query source database
-        ↓
-    source database uses index
-        ↓
-    source database returns only the data you need
+```mermaid
+architecture-beta
+    service exasol(database)[Exasol]
+    service mariadb(database)[MariaDB]
+    
+    exasol:R -- L:mariadb
+```
+
+A database has an index and an interface that lets you use that interface, for example SQL or a REST API. Indexes make searching and random access to data fast. Below you see a typical chain of events in case a filter is covered by an index.
+
+```mermaid
+sequenceDiagram
+    Exasol ->> Exasol : define filter
+    Exasol ->> MariaDB : query source
+    MariaDB ->> MariaDB : use index
+    MariaDB -->> Exasol : return only required data
+```
 
 The secret to why this is efficient is that it offloads the filtering to the source system. This is called "push-down".
 
+
+
 When you have your source data in files on a _filesystem_ or _object storage_, you don't know what is inside that file until you read it.
 
-    define filter
-        ↓
-    download complete files from remote storage
-        ↓
-    apply filter by throwing away already read data that is not needed
+```mermaid
+architecture-beta
+    service exasol(database)[Exasol]
+    service s3(disk)[S3]
+    
+    exasol:R -- L:s3
+```
+
+In this case Exasol has to first download the whole file and tehn apply the filter by throwing away what is not needed.
+
+```mermaid
+sequenceDiagram
+    Exasol ->> Exasol : define filter
+    Exasol ->> S3 : download complete files from remote storage
+    S3 -->> Exasol : files
+    Exasol ->> Exasol : throw away data that is not needed
+```
 
 This is a hard limitation when it comes to the efficiency of a document-based Virtual Schema.
 
@@ -64,8 +88,8 @@ If you need to filter for a column that is inside a document, then write an inne
 Then, wrap that in an outer `SELECT` where you apply the remaining filters. This is applied on Exasol.
 
 ```sql
-SELECT FROM (
-   SELECT FROM my_virtual_schema ...
+SELECT * FROM (
+   SELECT * FROM my_virtual_schema ...
 )
 WHERE column1 LIKE '%foobar%' LIMIT 9E10
 ```
