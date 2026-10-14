@@ -94,3 +94,14 @@ Most asynchronous request have a mechanism for delayed success notification. You
 There are very few use cases where this would be acceptable.
 
 One possible use case might involve _optional_ telemetry. If it is really optional, you would send the telemetry in the hope it finds its way to the collecting service and accept if it does not.
+
+## How do I Update the Version or Project Keeper in This Project?
+
+This project uses [Project Keeper](https://github.com/exasol/project-keeper) but does not have a Maven POM.
+
+To update the version of the project itself or Project Keeper, run 
+
+```shell
+git pull --tags
+.github/workflows/project-keeper.sh fix
+```

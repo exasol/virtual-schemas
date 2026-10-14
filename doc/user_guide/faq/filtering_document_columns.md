@@ -83,7 +83,7 @@ But, disabling Virtual Schema capabilities is an all-or-nothing decision. There 
 
 ### Workaround
 
-If you need to filter for a column that is inside a document, then write an inner query that either has no filter or selectively filters for the object reference. This is pushed down by the VS.
+If you need to filter for a column that is inside a document, then write an inner query that either has no filter or selectively filters for the object reference. This is pushed down by the Virtual Schema.
 
 Then, wrap that in an outer `SELECT` where you apply the remaining filters. This is applied on Exasol.
 
