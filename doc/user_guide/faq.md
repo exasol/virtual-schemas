@@ -113,7 +113,7 @@ For this reason, it is much safer to compile views intentionally after they were
 
 Exasol's support team can provide you with a script that mass-compiles views in parallel to speed up the process.
 
-**See Also*::
+**See Also**:
 
 Please refer to the section ["CREATE VIEW"](https://docs.exasol.com/db/latest/sql/create_view.htm) in the Exasol handbook for more details on creating and compiling views.
 
@@ -129,28 +129,24 @@ JDBC-Client-Error: Failed loading driver 'com.mysql.jdbc.Driver': null, access d
 
 **Solution**:
 
-- This happens because the JDBC driver requires more permissions than we provide by default. You can disable a security manager of the corresponding driver in [EXAoperation][exaoperation-drivers] to solve this problem.
+This happens because the JDBC driver requires more permissions than we provide by default. You can disable a security manager of the corresponding driver in [EXAoperation][exaoperation-drivers] to solve this problem.
 
 ### I try to filter (e.g, with "LIKE") by a column in a document-based Virtual Schema but get the error "F-VSD-5: For efficiency reasons virtual schemas support operators LIKE and NOT LIKE only for column SOURCE_REFERENCE."
 
-Document-based virtual schemas like the S3 virtual schema support filtering only on the source reference (think of that like a path in a file system). The reason is that this reduces the actual network traffic. If you pick fewer objects (files) from the source, less data needs to be transmitted.
-
-Filtering on a column that is inside a document on the other hand means that Exasol needs to load the file from the source before it can apply the filter. So pushing down that filter is pointless.
-
-Since disabling virtual schema capabilities is an all-or-nothing decision there is no way to selectively say "this adapter can filter the object reference only". As a consequence, we enable the filtering capability (`LIKE`) but check in the adapter if the filter is applied to the source reference only. If not, we raise an error.
+To understand the background of this limitation, please read ["Filtering Document Columns"](faq/filtering_document_columns.md).
 
 **Solution:**
 
 If you need to filter for a column that is inside a document in a document VS, then write an inner query that either has no filter or filters for the object reference and wrap that in an outer `SELECT` where you apply the remaining filters.
 
 ```sql
-SELECT FROM (
-   SELECT FROM my_virtual_schema ...
+SELECT * FROM (
+   SELECT * FROM my_virtual_schema ...
 )
 WHERE column1 LIKE '%foobar%' LIMIT 9E10
 ```
 
-Note that the only purpose of the `LIMIT 9E10` is **preventing the query optimizer from moving the filter criteria to the inner `SELECT`**. When you use this `LIMIT` trick, please make sure that the limit is bigger than the size of the biggest resultset you expect. Otherwise, there is the chance that you truncate your result accidentally.
+`LIMIT 9E10` **prevents the query optimizer from moving the filter criteria to the inner `SELECT`**. When you use this `LIMIT` trick, please make sure that the limit is bigger than the size of the biggest resultset you expect. Otherwise, there is the chance that you truncate your result accidentally.
 
 ## Domain Name (DNS) Resolution Issues
 
