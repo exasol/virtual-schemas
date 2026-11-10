@@ -31,6 +31,22 @@ No. Exasol only supports push-down of `SELECT` statements.
 
 This design choice keeps the VS engine straightforward and highlights the absence of transaction management between Exasol and the data source.
 
+## Does Exasol Preserve the Order of a Pushed-Down `ORDER BY`?
+
+No. If your adapter advertises `ORDER_BY_COLUMN` or `ORDER_BY_EXPRESSION`, Exasol pushes the `ORDER BY` (and any `LIMIT`) down and drops it from the enclosing query. It embeds the push-down SQL as a subselect and does not preserve the subselect's order. Results above a few thousand rows show order breaks. Small results usually look ordered, which hides the problem.
+
+This applies to every adapter that advertises `ORDER BY`, with or without `IMPORT`.
+
+* Advertise `ORDER_BY_*` to push down top-N queries (`ORDER BY` with `LIMIT`) and reduce transferred rows, but do not rely on the final row order.
+* If exact order matters more, do not advertise `ORDER_BY_*`. Exasol then sorts the push-down result itself.
+* Test ordering with results of many thousands of rows.
+
+Users can prevent the push-down and sort on top:
+
+```sql
+SELECT * FROM (<virtual-schema-query> ORDER BY FALSE) ORDER BY <criteria>
+```
+
 ## What Kind of Activity can I Build Into the `CREATE` Request Implementations?
 
 Start with validating the input. Virtual Schemas are configured via properties. A typical property would be the name of the [connection database object](https://docs.exasol.com/saas/sql/create_connection.htm) which holds all the information required to find the data source and connect to it.
