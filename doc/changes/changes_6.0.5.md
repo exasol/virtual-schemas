@@ -4,8 +4,12 @@ Code name: Improved source filter documentation
 
 ## Summary
 
-This release explains how to filter data in document-based Virtual Schemas, including how source reference filters reduce downloads and how to filter columns inside documents in Exasol.
+This release explains how to filter data in document-based Virtual Schemas, including how source reference filters reduce downloads and how to filter columns inside documents in Exasol. It also explains in the developer FAQ that Exasol does not preserve the order of a pushed-down `ORDER BY`.
 
 ## Features
 
 * Improve explanation of source filter (PR# 509)
+
+## Documentation
+
+* Added developer FAQ entry on `ORDER BY` push-down order
