@@ -12,4 +12,4 @@ This release explains how to filter data in document-based Virtual Schemas, incl
 
 ## Documentation
 
-* Added developer FAQ entry on `ORDER BY` push-down order
+* Added developer FAQ entry on `ORDER BY` push-down order (PR# 510)
